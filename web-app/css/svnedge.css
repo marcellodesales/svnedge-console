@@ -1,0 +1,40 @@
+
+/* For svnedge wizard left description boxen. */
+.leftDescription {
+  padding-right: 5px;
+  margin-right: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  white-space: normal;
+  width: 200px;
+  max-width: 200px;
+  min-width: 200px;
+}
+
+/* For toggles on job details page */
+.triggerRunning {
+  color: green;
+  font-weight: bold;
+}
+
+.triggerPaused {
+  color: red;
+  font-weight: bold;
+}
+
+/* For svnedge statistics menu */
+.category {
+  margin-left: 20px;
+  padding-left: 20px;
+
+}
+.group {
+  margin-left: 10px;
+  padding-left: 10px;
+}
+
+.graph {
+  margin-left: 10px;
+  padding-left: 10px;
+}
+

@@ -1,0 +1,124 @@
+/*
+ * CollabNet Subversion Edge
+ * Copyright (C) 2010, CollabNet Inc. All rights reserved.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+import org.mortbay.jetty.webapp.WebAppContext
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
+// This will fire when starting jetty via run-app
+eventConfigureJetty = { server ->
+    println "eventConfigureJetty"
+    def appHome = ConfigurationHolder.config.svnedge.appHome
+    def ctfWebapp = new File(appHome,
+        "appserver/webapps/integration.war")
+    if (ctfWebapp.exists() && ctfWebapp.canRead()) {
+        println "Deploying the CTF integration webapp"
+        WebAppContext resourceContext = 
+            new WebAppContext(ctfWebapp.absolutePath, "/integration")
+        server.addHandler(resourceContext)
+        println "Finished deploying the CTF integration webapp at context " +
+                 "'/integration'"
+    }
+}
+
+eventCleanEnd = {
+    Ant.condition(property:"windowsPrepare") {
+        and() {
+            os(family:"windows")
+        }
+    }
+    Ant.condition(property:"linuxPrepare") {
+        and() {
+            os(family:"unix")
+        }
+    }
+    Ant.condition(property:"macPrepare") {
+        and() {
+            os(family:"mac")
+        }
+    }
+    Ant.condition(property:"x64") {
+        or() {
+            os(arch: "x86_64")
+            os(arch: "amd64")
+        }
+    }
+
+    if (Ant.project.properties."macPrepare") {
+        osName = "mac";
+    }
+    if (Ant.project.properties."windowsPrepare") {
+        osName = "windows"
+    }
+    if (Ant.project.properties."linuxPrepare") {
+        osName = "linux"
+    }
+
+    Ant.echo(message: "Deleting the CSVN development artifacts on ${osName}.")
+
+    Ant.echo(message: "Deleting from all the components")
+
+    csvnbinDir = "${basedir}/svn-server"
+
+    dataDir = csvnbinDir + "/data"
+    confDir = dataDir + "/conf"
+    repoDir = dataDir + "/repositories"
+    libDir = csvnbinDir + "/lib"
+
+    Ant.echo(message: "Deleting the configuration artifacts")
+    Ant.delete(file: "${confDir}/httpd.conf")
+    Ant.delete(file: "${confDir}/viewvc_httpd.conf")
+    Ant.delete(file: "${confDir}/svn_httpd.conf")
+
+    Ant.echo(message: "Deleting the conversion artifacts")
+    Ant.delete(dir: "${dataDir}/teamforgeHome")
+    Ant.delete(dir: "${dataDir}/teamforge")
+    Ant.delete(file: "${confDir}/teamforge.properties")
+
+    Ant.echo(message: "Deleting created repositories")
+    Ant.delete(includeEmptyDirs: "true") {
+        fileset(dir: "${dataDir}/repositories",
+                includes: "**/*")
+    }
+
+    Ant.echo(message: "Deleting the teamforge vcauth files")
+    Ant.delete(includeEmptyDirs: "true", quiet: "true") {
+        fileset(dir: "${libDir}/viewvc/vcauth/teamforge", includes: "**/*")
+    }
+    Ant.delete(dir: "${libDir}/viewvc/vcauth" +
+            "/teamforge", quiet: "true")
+
+    Ant.echo(message: "Deleting the deleted repositories")
+    Ant.delete(includeEmptyDirs: "true", quiet: "true") {
+        fileset(dir: "${dataDir}/deleted-repos",
+                includes: "**/*")
+    }
+    Ant.delete(dir: "${dataDir}/deleted-repos", quiet: "true")
+
+    event("StatusFinal", ["CSVN Development environment cleaned!"])
+}
+
+eventTestSuiteEnd = { String type ->
+    if (type == "integration") {
+/*  TODO CTF REPLICA
+        def ctfProxyServerService = appCtx?.getBean("ctfProxyServerService")
+        if (ctfProxyServerService) {
+            println "Stopping CEE proxy Server"
+            ctfProxyServerService.stopServer()
+        }
+*/
+    }
+}

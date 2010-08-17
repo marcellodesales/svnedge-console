@@ -1,0 +1,505 @@
+/*
+ * CollabNet Subversion Edge
+ * Copyright (C) 2010, CollabNet Inc. All rights reserved.
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package com.collabnet.svnedge.console.services
+
+import grails.util.GrailsUtil;
+
+import com.collabnet.svnedge.console.ConfigUtil
+import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.console.CantBindPortException
+import com.collabnet.svnedge.teamforge.CtfServer;
+
+enum Command {START, STOP, GRACEFUL}
+
+class LifecycleService {
+
+    boolean transactional = true
+    def commandLineService
+    def serverConfService
+    def networkingService
+
+    int MAX_SERVER_WAIT_TIME = 60
+    def appHome
+    def svnPath
+    def svnadminPath
+    def opensslPath
+    def httpdBindPath
+    def exeHttpdBindPath
+    def libHttpdBindPath
+    def httpdPidPath
+    def httpdPath
+    def htpasswdPath
+    def confDirPath
+    def viewvcScriptDirPath
+    def viewvcTemplateDirPath
+    def dataDirPath
+    def winServiceName
+    
+    // these variables cache the result of the corresponding system checks
+    // call "clearCachedResults" to enable re-checking
+    private Boolean isSudoCache
+    private Boolean isHttpdBindSuidCache
+
+    def bootStrap = { config ->
+
+        log.debug("Bootstrapping lifecycleService")
+
+        appHome = ConfigUtil.appHome(config)
+
+        def mkdirs = {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+        log.debug("CSVN_HOME will be " + appHome)
+        svnPath = ConfigUtil.svnPath(config)
+        svnadminPath = ConfigUtil.svnadminPath(config)
+        opensslPath = ConfigUtil.opensslPath(config)
+        httpdPath = ConfigUtil.httpdPath(config)
+        htpasswdPath = ConfigUtil.htpasswdPath(config)
+
+        httpdBindPath = ConfigUtil.httpdBindPath(config)
+        exeHttpdBindPath = ConfigUtil.exeHttpdBindPath(config)
+        libHttpdBindPath = ConfigUtil.libHttpdBindPath(config)
+
+        confDirPath = ConfigUtil.confDirPath(config)
+        viewvcScriptDirPath = ConfigUtil.viewvcScriptDir(config)
+        viewvcTemplateDirPath = ConfigUtil.viewvcTemplateDir(config)
+
+        // serviceName should only be set for windows
+        def serviceName = ConfigUtil.serviceName(config)
+        if (null != serviceName) {
+            winServiceName = serviceName
+        }
+
+        dataDirPath = ConfigUtil.dataDirPath(config)
+        // make run and logs directories if not existing
+        mkdirs(new File(dataDirPath, "logs"))
+        File runFile = new File(dataDirPath, "run")
+        mkdirs(runFile)
+        httpdPidPath = new File(runFile, "httpd.pid").absolutePath
+    }
+
+    private boolean isWindows() {
+        return null != winServiceName
+    }
+
+    def bootstrapServer(config) {
+
+        ConsoleLogLevel logLevel
+        def server = Server.getServer()
+        if (server) {
+            logLevel = server.consoleLogLevel
+
+        } else {
+            def bootstrapParam = this.getServerLifecycleBootstrapParams()
+            int port = config.svnedge.defaultHighPort
+
+            File repoParentFile = new File(
+                config.svnedge.svn.repositoriesParentPath)
+            def repoParentDir = repoParentFile.absolutePath
+            server = new Server(
+                hostname: bootstrapParam.hostname,
+                port: port,
+                repoParentDir: repoParentDir,
+                netInterface: bootstrapParam.ifName,
+                ipAddress: bootstrapParam.ipAddress,
+                adminName: "Nobody",
+                adminEmail: "devnull@collab.net",
+                allowAnonymousReadAccess: false,
+                ldapServerHost: "",
+                ldapServerPort: 389,
+                ldapAuthBasedn: "",
+                ldapAuthBinddn: "",
+                ldapAuthBindPassword: "",
+                fileLoginEnabled: true,
+                ldapEnabled: false,
+                ldapLoginAttribute: "",
+                ldapSearchScope: "sub",
+                ldapFilter: "",
+                ldapSecurityLevel: "NONE",
+                pruneLogsOlderThan: 0,
+                ldapServerCertVerificationNeeded: true,
+                hasSoftwareUpdates: false)
+
+            if (!server.validate()) {
+                server.errors.allErrors.each { log.error(it) }
+            }
+
+            if (bootstrapParam.isDefaultPortAllowed) {
+                server.port = 80
+            }
+
+            server.save()
+        }
+
+        if (GrailsUtil.environment == "test") {
+            new CtfServer(
+                baseUrl: config.svnedge.ctfMaster.ssl ? "https://" : 
+                    "http://" + config.svnedge.ctfMaster.domainName,
+                mySystemId: config.svnedge.ctfMaster.systemId).save(flush: true)
+        }
+
+        return [server: server, logLevel: logLevel]
+    }
+
+    /**
+     * Confirms whether the svn server is running.
+     */
+    boolean isStarted() {
+        File f = new File(httpdPidPath);
+        log.debug("Checking isStarted  Path=" + f.getPath() + 
+                  " exists? " + f.exists())
+        // TODO we could do extra check like "ps -p httpdPid()" and/or 
+        // "new File("/proc/" + httpdPid()).exists()
+        // we also need to figure out what to do if the pid files exists, but 
+        // the process has ended
+        return f.exists()
+    }
+
+     /**
+      * gracefully restart the svn server
+      */
+    def gracefulRestartServer() {
+        if (!isStarted()) {
+            return -1
+        }
+        return startOrStopServer(Command.GRACEFUL)
+    }
+    
+
+    /**
+     * Starts the svn server
+     */
+    def startServer() throws CantBindPortException {
+        if (isStarted()) {
+            return -1
+        }
+        Server server = getServer()
+        if (server.useSsl) 
+            createSSLServerCert()
+        return startOrStopServer(Command.START)
+    }
+    
+    private def createSSLServerCert() {
+        Server server = getServer()
+        File f1 = new File(confDirPath, "server.key")
+        def keyFilePath = f1.getAbsolutePath()
+        def exitStatus
+        boolean newkey = false
+        if (!f1.exists()) {
+            def cmd1 = [opensslPath, "genrsa", "-out", keyFilePath, "1024"]
+            exitStatus = commandLineService.executeWithStatus(
+                cmd1.toArray(new String[0]), null)
+            if (exitStatus != 0) {
+                log.warn("openssl genrsa key creation failed with code=" + exitStatus)
+            }
+            newkey = true 
+        }
+        File f2 = new File(confDirPath, "server.crt")
+        if (!f2.exists() || newkey) {
+            def certreqinput = """--
+SomeState
+SomeCity
+SomeOrganization
+SomeOrganizationalUnit
+${server.hostname}
+root@${server.hostname}
+"""
+            File certFile = new File(confDirPath, "server.crt")
+            def certFilePath = certFile.getAbsolutePath()
+            def opensslcnfPath = new File(appHome, "data/certs/openssl.cnf").absolutePath
+
+            def cmd2 = [opensslPath, "req", "-new", "-key", keyFilePath,
+                        "-config", opensslcnfPath, "-x509", "-days", "365",
+                        "-out", certFilePath]
+            exitStatus = commandLineService.executeWithStatus(
+                              cmd2.toArray(new String[0]), null, certreqinput)
+            if (exitStatus != 0)
+                log.warn("openssl req failed with code=" + exitStatus)
+        }
+    }
+
+
+    private Map<String, String> createHttpdEnv() {
+        Map<String, String> env = new HashMap<String, String>(3)
+        if (!isWindows()) {
+    	    //Windows installation drops the mod_python.viewvc inside
+	        //$PYTHONHOME/lib/site-packages so locating the
+	        //mod_python.apache is easy as long as $PYTHONHOME is set.
+    	    //In linux we do *not* ship python and do not install
+	        //anything persistent in host's PYTHONHOME, so we set
+	        //PYTHONPATH to locate mod_python.apache
+            String modPythonLibDir = new File(appHome, "lib").absolutePath
+            modPythonLibDir = modPythonLibDir
+            env.put("PYTHONPATH", modPythonLibDir)
+        }
+
+        if (!isWindows() && isHttpdBindSuid()) {
+            env.put("LD_PRELOAD", libHttpdBindPath)
+            String path = System.getenv("PATH")
+            if (null != path && path.length() > 0) {
+                env.put("PATH", httpdBindPath + ':' + path)
+            } else {
+                env.put("PATH", httpdBindPath)
+            }
+        }
+        env
+    }
+
+    private def createHttpdCmd() {
+        def cmd = [httpdPath,
+                   "-f", confDirPath + File.separator + "httpd.conf"]
+        if (isWindows()) {
+            cmd.addAll(["-n", winServiceName])
+        }
+        cmd
+    }
+
+    private def startOrStopServer(Command command) throws CantBindPortException{
+        boolean isStart = false
+        String startOrStop = "stop"
+        if (command == Command.START) {
+            startOrStop = "start"
+            isStart = true
+            serverConfService.writeConfigFiles()
+        } else if (command == Command.GRACEFUL) {
+            if (isWindows()) {
+                startOrStop = "restart"
+            } else {
+                startOrStop = "graceful"
+            }
+            serverConfService.writeConfigFiles()
+            isStart = true
+        }
+
+        def cmd = createHttpdCmd()
+        if (getServer().port < 1024 && !isWindows() && !isHttpdBindSuid() && isSudo()) {
+            cmd.add(0, "sudo")
+            cmd.add(1, "-S")
+        }
+        cmd.addAll([ "-k", startOrStop])
+        def commandResponse = commandLineService.execute(cmd.toArray(
+                new String[0]), createHttpdEnv())
+        def exitStatus = Integer.parseInt(commandResponse[0])
+        def output = commandResponse[1]
+        def error = commandResponse[2]
+
+        // PID is old and needs to be removed.
+        if (output?.startsWith("httpd") && output?.contains("pid") && 
+                output?.contains("not running")) {
+
+            new File(this.httpdPidPath).delete()
+
+            commandResponse = commandLineService.execute(cmd.toArray(
+                new String[0]), createHttpdEnv())
+            exitStatus = Integer.parseInt(commandResponse[0])
+            output = commandResponse[1]
+            error = commandResponse[2]
+        }
+
+        if (exitStatus == 1 && error?.contains("could not bind")) {
+                throw new CantBindPortException(cmd.toArray(
+                    new String[0]).toString(), error.toString())
+
+        } else if (exitStatus == 0) {
+            int count = 0
+            while (count < MAX_SERVER_WAIT_TIME && (isStart != isStarted())) {
+                Thread.sleep(1000)
+                count++
+            }
+            if (count >= MAX_SERVER_WAIT_TIME) {
+                log.warn("Server " + startOrStop + " attempt failed. " +
+                         "Process returned " +
+                         "but httpd.pid file did not appear within " +
+                         MAX_SERVER_WAIT_TIME + " seconds.")
+            } else {
+                log.debug("Server " + startOrStop + " attempt successful" +
+                          " using " + httpdPath)
+            }
+        } else {
+            log.warn("Server " + startOrStop + 
+                     " attempt failed with code=" + exitStatus)
+            log.warn("Output: " + commandResponse[1])
+        }
+        return exitStatus
+    }
+    
+    /**
+     * Stops the svn server
+     */
+    def stopServer() {
+        if (!isStarted()) {
+            return -1
+        }
+        startOrStopServer(Command.STOP)
+    }
+
+    
+    /**
+     * Adds user to htpasswd with given password;
+     */
+    def setSvnAuth(User user, password) {
+        def exitStatus
+        exitStatus = writeHtpasswd(user.username, password)
+        return exitStatus
+    }
+
+    /**
+     * Removes user from htpasswd
+     */
+    def removeSvnAuth(User user) {
+        def exitStatus
+        File authFile = new File(confDirPath, "svn_auth_file")
+        exitStatus = commandLineService.executeWithStatus(htpasswdPath, '-D',
+            authFile.absolutePath, user.username)
+        return exitStatus
+    }
+    
+    private def writeHtpasswd(String username, String password) {
+        File authFile = new File(confDirPath, "svn_auth_file")
+        def options = authFile.exists() ? "-b" : "-cb"
+        def exitStatus = commandLineService.executeWithStatus(htpasswdPath, 
+            options, authFile.absolutePath, username, password)
+        return exitStatus
+    }
+    
+    /**
+     * Retrieves the single instance of Server
+     */
+    Server getServer() {
+        Server server = Server.getServer()
+        if (!server)
+            return server
+        File repoParentFile = new File(server.repoParentDir)
+        def repoParentDir = repoParentFile.absolutePath
+        def mkdirs = {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+        mkdirs(repoParentFile)
+        return server
+    }
+
+    /**
+     * Checks whether the management console will be able to start
+     * the httpd server on a privileged port.
+     */
+    boolean isDefaultPortAllowed() {
+        boolean result = isWindows()
+        if (!result) {
+            result = isHttpdBindSuid()
+            if (!result) {
+                result = isSudo()
+            }
+        }
+        return result
+    }
+    
+    private boolean isSudo() {
+        
+        if (isSudoCache == null) {
+            isSudoCache = checkSudo()
+        }
+        return isSudoCache.booleanValue()
+    }
+    
+        
+    private boolean isHttpdBindSuid() {
+        
+        if (isHttpdBindSuidCache == null) {
+            isHttpdBindSuidCache = checkHttpdBindSuid()
+        }
+        return isHttpdBindSuidCache.booleanValue() 
+    }
+    
+    
+    public void clearCachedResults() {
+        
+        isSudoCache = null
+        isHttpdBindSuidCache = null
+        
+    }
+
+    private boolean checkSudo() {
+        if (isWindows()) {
+            return false;
+        }
+
+        // validate sudo NOPASSWD is available for executing httpd
+        try {
+            def cmd = createHttpdCmd()
+            // Checks config file, which if corrupt could lead
+            // to false negative, but httpd won't start anyway, so
+            // there will be worse problems
+            cmd.add("-t")
+            cmd.add(0, "sudo")
+            cmd.add(1, "-S")
+            return !commandLineService.testForPassword(
+                    cmd.toArray(new String[0]), createHttpdEnv())
+        }
+        catch (Exception e) {
+            log.warn "Unable to execute sudo (not installed?): ${e.getMessage()}"
+            return false
+        }
+    }
+    
+    private boolean checkHttpdBindSuid() {
+        if (isWindows()) {
+            return false;
+        }
+        boolean result = false
+        if (new File(httpdBindPath).exists()) {
+            String[] fileProps = commandLineService.executeWithOutput(
+                "ls", "-l", exeHttpdBindPath).replaceAll(" +", " ").split(" ")
+            if (fileProps && fileProps.length > 2) {
+                String owner = fileProps[2]
+                result = (owner == "root")
+                if (result) {
+                    String perms = fileProps[0]
+                    result = (perms.charAt(3) == 's')
+                }
+            }
+        } else {
+            log.debug(httpdBindPath + " does not exist") 
+        }
+        result
+    }
+
+    /**
+     * @return the map with the values for the bootstrap.
+     */
+    def getServerLifecycleBootstrapParams() {
+        return [hostname: networkingService.hostname,
+            ifName: networkingService.selectedInterface.name,
+            ipAddress: networkingService.ipAddress.hostAddress,
+            isDefaultPortAllowed: this.isDefaultPortAllowed()]
+    }
+
+    private def httpdPid() {
+        def pid = 0
+        File f = new File(httpdPidPath)
+        if (f.exists()) {
+            f.eachLine { line -> pid = line }
+        }
+        return pid
+    }
+}

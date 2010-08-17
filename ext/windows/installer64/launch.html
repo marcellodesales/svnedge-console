@@ -1,0 +1,106 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>CollabNet Subversion Edge</title>
+    <script type="text/javascript">
+
+        var pingUrl = "http://localhost:3343/csvn/images/project/project-homeicon.gif";
+        var timeoutId = window.setTimeout("consolePing()", 5000);
+
+        function consolePing() {
+            var image = new Image();
+            var uniqueUrl = pingUrl + "?s=" + Math.random();
+
+            // if we load image, set status ok and stop  pinging
+            image.onload = function() {
+
+                if (this.height > 0)  {
+                    setStatusOk();
+                    window.clearTimeout(timeoutId)
+                }
+                else {
+                    // if we fail to load image, try again in 5 seconds
+                    timeoutId = window.setTimeout('consolePing()', 5000)
+                }
+            }
+            // if we fail to load image, try again in 5 seconds
+            image.onerror = function() {
+
+                timeoutId = window.setTimeout('consolePing()', 5000)
+            }
+            image.src = uniqueUrl;
+       }
+
+        // set the link active
+        function setStatusOk() {
+
+            var linkElement = document.getElementById("consoleLink");
+            linkElement.style.textDecoration = 'underline';
+            linkElement.style.color = 'green';
+            linkElement.innerHTML = 'Ready';
+        }
+
+    </script>
+    <style>
+h1, h2, h3, p, td {
+	font-family: Arial, Helvetica, sans-serif
+}
+
+h1 {
+	color: #0066CC
+}
+
+.body {
+	margin-left: 2em;
+	margin-top: 2em;
+	width:  800px;
+}
+
+#loginTable {
+	width:200px;
+	background-color:silver;
+	margin-top:1em;
+}
+    
+    </style>
+</head>
+<body>
+<div class="body">
+    <h1>CollabNet Subversion Edge</h1>
+
+    <p>Console Status:
+    <span id="consoleIndicator">
+        <a id="consoleLink" href="http://localhost:3343/csvn" style="text-decoration:none; color:red;">Not Ready</a>
+    </span>
+    </p>
+
+    <p>
+        Welcome to CollabNet Subversion Edge. The link above will indicate when the management console is ready 
+		to use. At that time, follow the link to the login page (<a href="http://localhost:3343/csvn">http://localhost:3343/csvn</a>).
+    </p>
+    <p>
+        When first installed, Subversion Edge can be managed with the default administrator account. Use this login to
+        sign in, but be sure to change the password.
+    </p>
+    <p>
+     <table id="loginTable">
+        <tr>
+            <td>User name:</td>
+            <td><b>admin</b></td>
+        </tr>
+        <tr>
+            <td>Password:</td>
+            <td><b>admin</b></td>
+        </tr>
+        </table>
+     </p>
+     
+     <p>Edit your password by clicking the "Logged in as" username that appears in the uppper right corner of the
+     console screen. You'll also see a help icon there that always links to contextually
+	 relevant documentation.</p>
+	 
+	<p>Thank you for installing CollabNet Subversion Edge.</p>
+</div>
+</body>
+</html>

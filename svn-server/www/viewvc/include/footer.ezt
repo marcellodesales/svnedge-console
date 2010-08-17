@@ -1,0 +1,27 @@
+
+
+<div id="footer">
+  <br />
+  <br />
+  
+  [is servermode "MANAGED"]
+   <!-- no administrator info in managed mode -->
+  [else]
+  <div id="vc_footer">
+    [if-any cfg.general.address]Administered by <address><a href="mailto:[cfg.general.address]">[cfg.general.address]</a></address><br/>[end]
+    <a href="http://viewvc.tigris.org/">ViewVC [vsn]</a>
+    [if-any rss_href]<br/><a href="[rss_href]" title="RSS 2.0 feed"><img src="[docroot]/images/feed-icon-16x16.jpg" class="vc_icon" alt="RSS 2.0 feed" /></a>[else]&nbsp;[end]
+  </div>
+  [end]
+ 
+  <div id="poweredbylogo" style="float: left;"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
+    <img width="102" height="31" alt="Powered by CollabNet" border="0"
+         src="[docroot]/images/branding/poweredbylogo.gif"/></a>
+  </div>
+  &copy; 2010 CollabNet. CollabNet is a registered trademark of CollabNet, Inc.
+</div>
+
+</div> <!-- vc_view_main -->
+
+</body>
+</html>
