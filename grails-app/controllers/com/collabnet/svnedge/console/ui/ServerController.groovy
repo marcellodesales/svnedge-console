@@ -133,10 +133,13 @@ class ServerController {
         }
         // copy form params to the entity
         server.properties = params
-        // canonicalize repo parent dir (esp to remove trailing "/" or "\"
-        // that server.validate would allow)
-        String repoParent = new File(params.repoParentDir).canonicalPath
-        server.repoParentDir = repoParent
+        //In editAuthentication UI repoParentDir does not exist in Params.
+        if (params.repoParentDir != null) {
+          // canonicalize repo parent dir (esp to remove trailing "/" or "\"
+          // that server.validate would allow)
+          String repoParent = new File(params.repoParentDir).canonicalPath
+          server.repoParentDir = repoParent
+        }
 
         server.validate()
         if (server.port < 1024 ) {
