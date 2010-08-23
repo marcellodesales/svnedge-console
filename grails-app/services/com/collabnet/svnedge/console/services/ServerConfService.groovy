@@ -421,7 +421,7 @@ LoadModule rewrite_module lib/modules/mod_rewrite.so
 RewriteEngine on
 RewriteRule ^/viewcvs(.*)\$ /viewvc\$1 [R,L]
 """ : """
-ScriptAlias /viewvc "${modPythonDirPath}/viewvc.py
+ScriptAlias /viewvc "${modPythonDirPath}/viewvc.py"
 """
         conf += """
 <Location /viewvc>
@@ -641,8 +641,9 @@ ${extraconf}
     private def getViewVCHttpdConf(server) {
         def conf = """
   PythonPath "[r'"""
-        conf += new File(appHome, "lib").absolutePath + "', r'" +
-            modPythonDirPath + "', r'" + viewvcLibDirPath
+        conf += escapePath(new File(appHome, "lib").absolutePath) + "', r'" +
+            escapePath(modPythonDirPath) + "', r'" + 
+            escapePath(viewvcLibDirPath)
         conf += """']+sys.path"
   PythonHandler handler
 """
