@@ -674,7 +674,7 @@ waitforjavastartup() {
 }
 
 trywebserver() {
-    wget --no-proxy -T 5 -o /dev/null -O /dev/null $WAIT_FOR_WEBSERVER_URL
+    wget --no-proxy -T 5 -o /dev/null -O /dev/null $WAIT_FOR_WEBSERVER_URL 1> /dev/null 2>&1
     return $? 
 }
 
@@ -707,24 +707,33 @@ startwait() {
     fi
     if [ $WAIT_FOR_WEBSERVER = true ];
     then 
-        echo $ECHOOPT"Waiting for application to initialize (this may take a minute)"
-        webserverstatus=1
-        i=0
-        while [ $webserverstatus != 0 -a $i -lt $WAIT_FOR_WEBSERVER_TIMEOUT ] 
-        do
-	        echo $ECHOOPT"."
-	        sleep 1
-	        trywebserver 
-	        webserverstatus=$?
-            i=`expr $i + 1`
-        done 
-        
-        echo
-        if [ $webserverstatus = 0 ] ;
-        then 
-            echo "$APP_LONG_NAME is ready at $WAIT_FOR_WEBSERVER_URL"
+        # don't loop/wait if 'wget' is unavailable for testing console
+        trywebserver
+        if [ $? = 127 ];
+        then
+            echo "Initializing $APP_LONG_NAME at $WAIT_FOR_WEBSERVER_URL. Please wait a moment for server to become available."
         else
-            echo "WARNING: $APP_LONG_NAME timed-out waiting for $WAIT_FOR_WEBSERVER_URL"
+            # wait for HTTP 200 at the console url
+            echo $ECHOOPT"Waiting for application to initialize (this may take a minute)"
+            webserverstatus=1
+            i=0
+            while [ $webserverstatus != 0 -a $i -lt $WAIT_FOR_WEBSERVER_TIMEOUT ]
+            do
+	            echo $ECHOOPT"."
+	            sleep 1
+	            trywebserver
+	            webserverstatus=$?
+                i=`expr $i + 1`
+            done 
+
+            echo
+            if [ $webserverstatus = 0 ] ;
+            then
+                echo "$APP_LONG_NAME is ready at $WAIT_FOR_WEBSERVER_URL"
+            else
+                echo "WARNING: $APP_LONG_NAME timed-out waiting for $WAIT_FOR_WEBSERVER_URL"
+            fi
+
         fi
     fi
 
