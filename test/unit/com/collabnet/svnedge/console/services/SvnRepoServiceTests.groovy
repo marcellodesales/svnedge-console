@@ -20,6 +20,8 @@ package com.collabnet.svnedge.console.services
 import grails.test.*
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.statistics.Statistic
 
 class SvnRepoServiceTests extends GrailsUnitTestCase {
 
@@ -46,9 +48,14 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
                 repoParentDir: repoParentDir.absolutePath
         )
         def repoTest = new Repository( name: "existingRepo")
+        def stat = new Statistic()
+        def statValue = new StatValue(repo:repoTest, statistic: stat)
+        
+
         mockDomain (Server, [testServer])
         mockDomain (Repository, [repoTest])
-
+        mockDomain (StatValue, [statValue])
+        mockDomain (Statistic, [stat])
 
         // mock the service and its dependencies
         mockLogging (SvnRepoService, true)

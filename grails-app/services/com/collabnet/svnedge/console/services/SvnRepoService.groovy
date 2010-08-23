@@ -23,6 +23,8 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.ServerMode
 
 import org.springframework.transaction.annotation.Transactional
+import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.statistics.Statistic
 
 class SvnRepoService {
 
@@ -104,6 +106,27 @@ class SvnRepoService {
                 repoArchiveLocation.getAbsolutePath()
     }
 
+   /**
+    * Removes a Repository from the DB (no SVN or filesystem action is taken) by
+    * properly handling constraints that prevent direct delete
+    * @param r
+    */
+    def removeRepository(Repository repo) {
+
+        // delete FK'd stats first
+        def stats = StatValue.findAllByRepo(repo)
+        stats.each() {
+
+            Statistic stat = it.statistic
+            stat.removeFromStatValues(it)
+            repo.removeFromStatValues(it)
+            it.delete()
+        }
+
+        // delete the repo
+        repo.delete()
+     }
+
     /**
      * Syncs the Repository table with the contents of the svn server 
      * repositories directory
@@ -143,8 +166,10 @@ class SvnRepoService {
                 reposToDelete << repo.name
             }
         }
-        reposToDelete.each { it -> Repository.findByName(it).delete() }
-
+        
+        reposToDelete.each { it ->
+           removeRepository(Repository.findByName(it))
+        }
 
     }
 

@@ -28,6 +28,7 @@ class Statistic {
     String title
     StatisticType type
     static belongsTo = [ group: StatGroup ]
+    static hasMany = [ statValues: StatValue ]
 
     static constraints = {
         name(blank:false, unique:true)

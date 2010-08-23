@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
+import com.collabnet.svnedge.statistics.StatValue
+
 /**
  * Repository domain class.
  */
@@ -31,6 +33,11 @@ class Repository {
      * PermissionsOk -- flag to indicate need for permissions fix-up
      */
     Boolean permissionsOk = true
+
+    /**
+     * Repo statistics are FK'd, so this is used for cascade delete 
+     */
+    static hasMany = [ statValues: StatValue ]
 
     /**
      * In the web UI we try to guide users to create CTF-compatible
