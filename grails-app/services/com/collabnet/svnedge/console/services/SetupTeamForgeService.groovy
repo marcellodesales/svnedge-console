@@ -97,6 +97,19 @@ class SetupTeamForgeService {
        System.properties[APP_HOME_VAR] = appHome
        log.debug("Setting system property '${APP_HOME_VAR}'='" +
                  "${System.properties[APP_HOME_VAR]}'")
+
+        def server = Server.getServer()
+        // In ctf mode, confirm that the integration scripts are up-to-date
+        if (server && server.mode == ServerMode.MANAGED) {
+            File libDir = new File(appHome, "lib")
+            File zipFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
+            File integrationDir = new File(libDir, "integration")
+            if (zipFile.exists() && (!integrationDir.exists() || 
+                zipFile.lastModified() > integrationDir.lastModified())) {
+                log.info("Updating CTF integration scripts.")
+                unpackIntegrationScripts()
+            }
+        }
    }
 
    private String getWebSessionId(conversionData) {
@@ -897,21 +910,25 @@ class SetupTeamForgeService {
     protected unpackIntegrationScripts() {
         def libDir = new File(lifecycleService.appHome, "lib")
         def archiveFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
+        def integrationDir = new File(libDir, "integration")
+        if (integrationDir.exists() && !integrationDir.deleteDir()) {
+            log.warn("Unable to remove integration directory before " + 
+                "unpacking up-to-date integration scripts.")
+        }
         unpackZipFile(archiveFile, libDir, {a, b -> })
         File oldViewvcFile = new File(libDir, 
             "integration/viewvc/lib/vcauth/teamforge")
         File newViewvcFile = 
             new File(libDir, "viewvc/vcauth/teamforge")
+        if (newViewvcFile.exists() && !newViewvcFile.delete()) {
+            log.warn("Unable to delete existing ViewVC teamforge " + 
+                "authorizer: " + newViewvcFile.absolutePath)
+        }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
-            if (newViewvcFile.exists()) {
-                log.warn("ViewVC teamforge authorizer already exists.")
-            } else {
-                throw new Exception("Rename did not work; unable to " + 
-                    "setup vcauth.")
-            }
+            throw new Exception("Rename did not work; unable to " + 
+                "setup vcauth.")
         } else {
-            oldViewvcFile.parentFile.delete()
-            oldViewvcFile.parentFile.parentFile.delete()
+            oldViewvcFile.parentFile.parentFile.deleteDir()
         }
 
         oldViewvcFile = new File(libDir, 
@@ -921,17 +938,15 @@ class SetupTeamForgeService {
         }
         newViewvcFile = new File(lifecycleService.appHome, 
                                  "bin/mod_python/viewvc_ctf_handler.py")
+        if (newViewvcFile.exists() && !newViewvcFile.delete()) {
+            log.warn("Unable to delete existing ViewVC teamforge " + 
+                "handler: " + newViewvcFile.absolutePath)
+        }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
-            if (newViewvcFile.exists()) {
-                log.warn("ViewVC teamforge handler already exists.")
-            } else {
-                throw new Exception("Rename did not work; unable to " + 
-                    "setup viewvc python handler at " + newViewvcFile)
-            }
+            throw new Exception("Rename did not work; unable to " + 
+                "setup viewvc python handler at " + newViewvcFile)
         } else {
-            oldViewvcFile.parentFile.delete()
-            oldViewvcFile.parentFile.parentFile.delete()
-            oldViewvcFile.parentFile.parentFile.parentFile.delete()
+            oldViewvcFile.parentFile.parentFile.parentFile.deleteDir()
         }
     }
 
