@@ -20,6 +20,8 @@ package com.collabnet.svnedge.console.ui
 import grails.test.*
 
 class StatisticsControllerTests extends ControllerUnitTestCase {
+    
+    def operatingSystemService
     def userCacheStatisticsService
     def networkStatisticsService
     def fileSystemStatisticsService
@@ -28,6 +30,7 @@ class StatisticsControllerTests extends ControllerUnitTestCase {
 
     protected void setUp() {
         super.setUp()
+        controller.operatingSystemService = operatingSystemService
         controller.userCacheStatisticsService = userCacheStatisticsService
         controller.networkStatisticsService = networkStatisticsService
         controller.fileSystemStatisticsService = fileSystemStatisticsService
