@@ -1,6 +1,6 @@
 CollabNet Subversion Edge - Linux 32/64-bit
-Version 1.1.0
-Release Date: August 9, 2010
+Version 1.3.0
+Release Date: unknown
 
 Contents
 
