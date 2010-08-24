@@ -596,7 +596,6 @@ ${extraconf}
     private def getSVNHttpdConf(server) {
         def conf = """  AuthzSVNAccessFile "${confDirPath}/svn_access_file"
   SVNListParentPath On
-  SVNPathAuthz short_circuit
 """
         conf += getAuthBasic(server)
         if (server.allowAnonymousReadAccess) {
