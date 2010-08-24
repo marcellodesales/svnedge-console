@@ -43,6 +43,7 @@ class StatisticsController {
     private static int NUM_XLABELS = 10
     private static int NUM_YLABELS = 10
 
+    def operatingSystemService
     def userCacheStatisticsService
     def networkStatisticsService
     def latencyStatisticsService
@@ -76,6 +77,11 @@ class StatisticsController {
 
     @Secured(['ROLE_USER'])
     def index = {
+        if (!operatingSystemService.isReady()) {
+            flash.warn = "This Windows system needs to be restarted in " +
+                "order to load the CollabNet Subversion Edge server " +
+                "statistics correctly."
+        }
         def statGroups = StatGroup.list(sort: "name")
         def statGroupNames = statGroups.collect{ it.getTitle() }
         def isReplica = Server.getServer().replica

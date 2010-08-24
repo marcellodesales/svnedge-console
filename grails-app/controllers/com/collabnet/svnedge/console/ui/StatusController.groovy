@@ -119,6 +119,11 @@ class StatusController {
                    "updates: " + e.getMessage()
        }
 
+        if (!operatingSystemService.isReady()) {
+            flash.warn = "This Windows system needs to be restarted in " +
+                "order to load the CollabNet Subversion Edge server " +
+                "status correctly."
+        }
        return [isStarted: isStarted,
                isDefaultPortAllowed: lifecycleService.isDefaultPortAllowed(),
                sampleRepo: sampleRepo,
@@ -141,18 +146,20 @@ class StatusController {
                svnRepoService.formatRepoStatus(realTimeStatisticsService
                                                ?.getReposStatus())]
        }
-       model << [label:"Throughput on primary interface", value:
-           networkingService.formatThroughput(realTimeStatisticsService
-                                              ?.getThroughput())]
-       model << [label:"Used space on root volume", value:
-           operatingSystemService.formatBytes(realTimeStatisticsService
-                                              ?.getSystemUsedDiskspace())]
-       model << [label:"Used space by repositories", value:
-           operatingSystemService.formatBytes(realTimeStatisticsService
-                                              ?.getRepoUsedDiskspace())]
-       model << [label:"Free space on repository volume", value:
-           operatingSystemService.formatBytes(realTimeStatisticsService
-                                              ?.getRepoAvailableDiskspace())]
+        if (operatingSystemService.isReady()) {
+            model << [label:"Throughput on primary interface", value:
+                networkingService.formatThroughput(realTimeStatisticsService
+                                                    ?.getThroughput())]
+             model << [label:"Used space on root volume", value:
+                operatingSystemService.formatBytes(realTimeStatisticsService
+                                                    ?.getSystemUsedDiskspace())]
+             model << [label:"Used space by repositories", value:
+                operatingSystemService.formatBytes(realTimeStatisticsService
+                                                    ?.getRepoUsedDiskspace())]
+             model << [label:"Free space on repository volume", value:
+                operatingSystemService.formatBytes(realTimeStatisticsService
+                                                 ?.getRepoAvailableDiskspace())]
+        }
         if (server.replica) {
             model << [label:"Latency from master", value: 
                 operatingSystemService.truncate(

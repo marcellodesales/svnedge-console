@@ -50,6 +50,10 @@ class OperatingSystemService {
      * The root path of the volume where the OS is running from.
      */
     def String sysRootVolumePath
+    /**
+     * Defines if the service has loaded the SIGAR libraries correctly.
+     */
+    def boolean loadedLibraries
 
     /**
      * @param appHomePath is the home directory of the installation.
@@ -69,7 +73,17 @@ class OperatingSystemService {
             this.appRootVolumePath = "/"
             this.sysRootVolumePath = "/"
         }
+        loadedLibraries = true
         this.printProperties()
+    }
+
+    /**
+     * @return whether the service is ready to be used. That means, if all
+     * needed libraries were loaded. For this service, the SIGAR framework
+     * libraries.
+     */
+    def boolean isReady() {
+        return loadedLibraries
     }
 
     def printProperties() {
@@ -96,9 +110,11 @@ class OperatingSystemService {
      * documented in the method call Sigar.close().
      */
     def void destroy() {
-        sigarInstance.close()
+        if (this.isReady()) {
+            sigarInstance.close()
+        }
     }
-    
+
     /**
      * Adds the SIGAR libraries into the java.library.path while running the
      * application in development or testing environments.
@@ -153,7 +169,15 @@ class OperatingSystemService {
      * Framework.
      */
     def getOs() {
-        return OperatingSystem.getInstance()
+        try {
+            if (this.isReady()) {
+                return OperatingSystem.getInstance()
+            }
+        } catch (Error e) {
+            log.error("The system could not load the SIGAR framework libraries")
+            loadedLibraries = false
+            return null
+        }
     }
 
     /**
@@ -171,7 +195,7 @@ class OperatingSystemService {
      * <li>Version: 2.6.32-23-generic</li>
      */
     def getProperties() {
-        return this.os.toMap()
+        return this?.os?.toMap() ?: [:]
     }
 
     /**
@@ -185,6 +209,9 @@ class OperatingSystemService {
      * @return the single implementation of the sigar.
      */
     def getSigar() {
+        if (!this.isReady()) {
+            throw new IllegalStateException("The SIGAR library was not loaded.")
+        }
         if (!this.sigarInstance) {
             this.sigarInstance = new Sigar()
         }

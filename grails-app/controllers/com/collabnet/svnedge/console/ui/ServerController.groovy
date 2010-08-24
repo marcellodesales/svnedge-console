@@ -38,6 +38,7 @@ class CtfCredentialCommand {
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class ServerController {
 
+    def operatingSystemService
     def lifecycleService
     def networkingService
     def serverConfService
@@ -49,7 +50,11 @@ class ServerController {
     static allowedMethods = [update:'POST', revert: 'POST']
 
     def revert = { CtfCredentialCommand ctfCredentials ->
-
+        if (!operatingSystemService.isReady()) {
+            flash.warn = "This Windows system needs to be restarted in " +
+                "order to load the CollabNet Subversion Edge server " +
+                "settings correctly."
+        }
         ctfCredentials.validate()
         def ctfServer = CtfServer.getServer()
         if (ctfCredentials.hasErrors()) {
@@ -99,12 +104,22 @@ class ServerController {
     }
 
     def edit = {
+        if (!operatingSystemService.isReady()) {
+            flash.warn = "This Windows system needs to be restarted in " +
+                "order to load the CollabNet Subversion Edge server " +
+                "correctly."
+        }
         def server = Server.getServer()
         prepareServerViewModel(server)
 
     }
 
     def editAuthentication = {
+        if (!operatingSystemService.isReady()) {
+            flash.warn = "This Windows system needs to be restarted in " +
+                "order to load the CollabNet Subversion Edge server " +
+                "correctly."
+        }
         def server = Server.getServer()
         return [server: server,
                 csvnConf: serverConfService.confDirPath,
