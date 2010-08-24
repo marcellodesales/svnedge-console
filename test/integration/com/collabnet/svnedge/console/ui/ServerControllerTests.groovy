@@ -23,6 +23,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import java.io.File;
 
 class ServerControllerTests extends ControllerUnitTestCase {
+
+    def operatingSystemService
     def lifecycleService
     def networkingService
     def serverConfService
@@ -30,6 +32,7 @@ class ServerControllerTests extends ControllerUnitTestCase {
     
     protected void setUp() {
         super.setUp()
+        controller.operatingSystemService = operatingSystemService
         controller.lifecycleService = lifecycleService 
         controller.networkingService = networkingService 
         controller.serverConfService = serverConfService
