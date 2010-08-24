@@ -119,11 +119,6 @@ class StatusController {
                    "updates: " + e.getMessage()
        }
 
-        if (!operatingSystemService.isReady()) {
-            flash.warn = "This Windows system needs to be restarted in " +
-                "order to load the CollabNet Subversion Edge server " +
-                "status correctly."
-        }
        return [isStarted: isStarted,
                isDefaultPortAllowed: lifecycleService.isDefaultPortAllowed(),
                sampleRepo: sampleRepo,

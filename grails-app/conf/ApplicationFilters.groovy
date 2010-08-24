@@ -23,11 +23,32 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ApplicationFilters {
 
+    def operatingSystemService
     def authenticateService
     def lifecycleService
     def config = ConfigurationHolder.config
 
     def filters = {
+
+        /**
+         * Filtering when the server has not loaded the libraries correctly.
+         */
+        verifyOperatingSystemLibraries(controller: '*', action: '*') {
+            after = {
+                if (!operatingSystemService.isReady()) {
+                    def args = null
+                    switch (controllerName) {
+                    case "status":
+                    case "statistics":
+                    case "server":
+                        flash.error = applicationContext.getMessage(
+                            "server.failed.loading.libraries", args, 
+                            Locale.getDefault())
+                        break;
+                    }
+                }
+            }
+        }
 
         /**
          * this filter defines the "features" available to the user 
