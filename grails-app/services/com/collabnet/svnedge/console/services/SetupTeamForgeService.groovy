@@ -920,7 +920,7 @@ class SetupTeamForgeService {
             "integration/viewvc/lib/vcauth/teamforge")
         File newViewvcFile = 
             new File(libDir, "viewvc/vcauth/teamforge")
-        if (newViewvcFile.exists() && !newViewvcFile.delete()) {
+        if (newViewvcFile.exists() && !newViewvcFile.deleteDir()) {
             log.warn("Unable to delete existing ViewVC teamforge " + 
                 "authorizer: " + newViewvcFile.absolutePath)
         }
