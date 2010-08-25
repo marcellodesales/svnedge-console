@@ -42,6 +42,8 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
                repoOnDisk.mkdir()
         File repoOnDiskMarkerFile = new File(repoOnDisk, "format")
         repoOnDiskMarkerFile.createNewFile()
+        repoOnDiskMarkerFile = new File(repoOnDisk, "db")
+        repoOnDiskMarkerFile.mkdir()
 
         repoOnDiskMarkerFile = new File(repoOnDisk, "db")
         repoOnDiskMarkerFile.mkdir()
@@ -89,7 +91,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         super.tearDown()
 
         repoOnDisk.delete()
-        repoParentDir.delete()
+        repoParentDir.deleteDir()
     }
 
 
@@ -102,7 +104,9 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoOnDisk1.mkdir()
         File repoOnDiskMarkerFile = new File(repoOnDisk1, "format")
         repoOnDiskMarkerFile.createNewFile()
-
+        File repoOnDiskMarkerDir = new File(repoOnDisk1, "db")
+        repoOnDiskMarkerDir.mkdir()
+        
         repoOnDiskMarkerFile = new File(repoOnDisk1, "db")
         repoOnDiskMarkerFile.mkdir()
       
@@ -111,8 +115,8 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         assertEquals ("Two repositories expected after sync", 2, Repository.count())
 
         repoOnDiskMarkerFile.delete()
+        repoOnDiskMarkerDir.deleteDir()
         repoOnDisk1.delete()
-
     }
 
     void testSyncRepositoriesDelete() {
