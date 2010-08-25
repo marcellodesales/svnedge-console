@@ -92,9 +92,6 @@ class CantBindPortException extends Exception {
      * @param portNumber is the port number in use in the OS.
      */
     public CantBindPortException(int portNumber) {
-        super("The server could not bind to port '${portNumber}'; Check " +
-            "permission to use the port and that another process is not " +
-            "using the port.")
         this.portNumber = portNumber
     }
 

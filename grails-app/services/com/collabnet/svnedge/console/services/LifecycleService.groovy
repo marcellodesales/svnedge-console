@@ -315,9 +315,9 @@ root@${server.hostname}
             error = commandResponse[2]
         }
 
+        // Look for port-bind issue
         if (exitStatus == 1 && error?.contains("could not bind")) {
-                throw new CantBindPortException(cmd.toArray(
-                    new String[0]).toString(), error.toString())
+                throw new CantBindPortException(server.port)
 
         } else if (exitStatus == 0) {
             int count = 0
