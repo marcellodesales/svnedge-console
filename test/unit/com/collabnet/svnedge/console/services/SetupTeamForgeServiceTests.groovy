@@ -54,30 +54,30 @@ class SetupTeamForgeServiceTests extends GrailsUnitTestCase {
         dir.mkdir()
         testDir = dir
     }
-
-    void testArchiveCurrentHooks() {
-        createTestDir()
-        File f1 = new File(testDir, "test1.txt")
-        def f1Contents = "Some random text to have compressed."
+    
+    private def setupFiles(String f1Name, String f2Name) {
+        File f1 = new File(testDir, f1Name)
+        def f1Contents = "Some random text to have compressed: " + f1Name
         f1.write(f1Contents)
-        File f2 = new File(testDir, "test2.txt")
-        def f2Contents = 
-"""Actually, trunk can now be used for 1.1 development, 
-so new features can go there.   In fact, if John/Jeremy feel like merging 
+        File f2 = new File(testDir, f2Name)
+        def f2Contents = f2Name +
+"""Actually, trunk can now be used for 1.1 development,
+so new features can go there.   In fact, if John/Jeremy feel like merging
 CTF_MODE to trunk, that'd be fine."""
         f2.write(f2Contents)
-        assertEquals "Only the created files should be present", 2, 
-            testDir.listFiles().length
         assertTrue "${f1.name} wasn't created", f1.exists()
         assertTrue "${f2.name} wasn't created", f2.exists()
         f2.setExecutable(true)
-        
-        setupTeamForgeService.archiveCurrentHooks(testDir)
-        File archive = new File(testDir, "pre-ctf-hooks.zip")
-        assertTrue "Hookscript archive ${archive.absolutePath} is missing",
-            archive.exists()
-        assertEquals "Only archive file should be present", 1, 
+        return [f1, f1Contents, f2, f2Contents]
+    }
+
+    void testArchiveCurrentHooks() {
+        createTestDir()
+        def (f1, f1Contents, f2, f2Contents) = setupFiles("test1.txt", "test2.txt")
+        assertEquals "Only the created files should be present", 2,
             testDir.listFiles().length
+        setupTeamForgeService.archiveCurrentHooks(testDir)
+        archiveAssertions()
 
         // check that contents can be restored
         setupTeamForgeService.restoreNonCtfHooks(testDir)
@@ -92,4 +92,59 @@ CTF_MODE to trunk, that'd be fine."""
         }
         assertTrue "${f2.name} should be executable", f2.canExecute()
     }
+
+    private void archiveAssertions() {
+        File archive = new File(testDir, "pre-ctf-hooks.zip")
+        assertTrue "Hookscript archive ${archive.absolutePath} is missing",
+            archive.exists()
+        assertEquals "Only archive file should be present", 1,
+            testDir.listFiles().length
+    }
+
+    void testRestoreHooksWithAddedFiles() {
+        createTestDir()
+        def (f1, f1Contents, f2, f2Contents) = setupFiles("test1.txt", "test2.txt")
+        assertEquals "Only the created files should be present", 2,
+            testDir.listFiles().length
+        setupTeamForgeService.archiveCurrentHooks(testDir)
+        archiveAssertions()
+
+        def (f1New, f1NewContent, f2New, f2NewContent) = 
+            setupFiles("new-test1.txt", "new-test2.txt")
+        assertEquals "Only the created files plus archive should be present", 3,
+        testDir.listFiles().length
+
+        // check that contents can be restored
+        setupTeamForgeService.restoreNonCtfHooks(testDir)
+        assertEquals "Only the original files plus archive should be present", 3,
+            testDir.listFiles().length
+        assertTrue "${f1.name} doesn't exist", f1.exists()
+        assertTrue "${f2.name} doesn't exist", f2.exists()
+        File ctfArchive = new File(testDir, "ctf-hook-scripts.zip")
+        assertTrue "${ctfArchive.name} doesn't exist", ctfArchive.exists()
+        
+        // A second time through the cycle, one extra archive is expected
+        setupTeamForgeService.archiveCurrentHooks(testDir)
+        (f1New, f1NewContent, f2New, f2NewContent) = 
+            setupFiles("new2-test1.txt", "new2-test2.txt")
+        assertEquals "Only the created files plus archives should be present", 4,
+            testDir.listFiles().length
+        File archive = new File(testDir, "pre-ctf-hooks.zip")
+        assertTrue "Hookscript archive ${archive.absolutePath} is missing",
+            archive.exists()
+        assertTrue "${f1New.name} doesn't exist", f1New.exists()
+        assertTrue "${f2New.name} doesn't exist", f2New.exists()
+        assertTrue "${ctfArchive.name} doesn't exist", ctfArchive.exists()
+
+        setupTeamForgeService.restoreNonCtfHooks(testDir)
+        assertEquals "Only the original files plus archives should be present", 4,
+            testDir.listFiles().length
+        assertTrue "${f1.name} doesn't exist", f1.exists()
+        assertTrue "${f2.name} doesn't exist", f2.exists()
+        assertTrue "${ctfArchive.name} doesn't exist", ctfArchive.exists()
+        File oldCtfArchive = new File(testDir, "old-ctf-hook-scripts.zip")
+        assertTrue "${oldCtfArchive.name} doesn't exist", oldCtfArchive.exists()
+    }
+
+    
 }

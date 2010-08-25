@@ -179,11 +179,15 @@ class SvnRepoService {
     boolean isRepository(File f) {
 
         boolean isDirectory = f.exists() && f.isDirectory()
-        boolean hasExpectedChildren = (f.listFiles(
-            {file -> file.name == "format" }  as FileFilter))
-
-        return isDirectory && hasExpectedChildren
-
+        boolean hasFormat = false
+        boolean hasDb = false
+        if (isDirectory) {
+            f.eachFile {file -> 
+                hasFormat |= (file.isFile() && file.name == "format") 
+                hasDb |= (file.isDirectory() && file.name == "db") 
+            }
+        }
+        return hasFormat && hasDb
     }
 
 

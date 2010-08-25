@@ -25,6 +25,7 @@ import java.net.NoRouteToHostException
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
 import grails.util.GrailsUtil
 
 import com.collabnet.ce.soap50.webservices.ClientSoapStubFactory
@@ -55,6 +56,7 @@ class SetupTeamForgeService {
     def ctfAuthenticationProvider
     def ctfRemoteClientService
     def securityService
+    def svnRepoService
     def daoAuthenticationProvider
     def anonymousAuthenticationProvider
 
@@ -838,6 +840,8 @@ class SetupTeamForgeService {
         if (ctfServer?.baseUrl) {
             def sessionIds = this.loginCtfWebapp(ctfServer.baseUrl, ctfUsername,
                 ctfPassword)
+            // bring our repository data up-to-date
+            svnRepoService.syncRepositories()
             doRevertFromCtfMode(ctfServer.baseUrl, ctfServer.mySystemId,
                 sessionIds?.jsessionid, server, ctfServer, errors)
         }
@@ -866,22 +870,31 @@ class SetupTeamForgeService {
     private static final String NON_CTF_HOOKS_ARCHIVE = "pre-ctf-hooks.zip"
 
     protected void archiveCurrentHooks(File hooksDir) {
-        File zipFile = new File(hooksDir, NON_CTF_HOOKS_ARCHIVE)
+        archiveFiles(NON_CTF_HOOKS_ARCHIVE, hooksDir, 
+                     [CTF_HOOKS_ARCHIVE, OLD_CTF_HOOKS_ARCHIVE])
+    }
+
+    protected void archiveFiles(String zipFileName, File directory, 
+        List<String> excludedFiles=null) {
+        log.debug("Archiving files in " + directory.name + 
+                  " into " + zipFileName)
+        File zipFile = new File(directory, zipFileName)
         boolean filesExist = false
-        hooksDir.eachFile { f ->
-            if (f.isFile() && !f.equals(zipFile)) {
+        directory.eachFile { f ->
+            if (isFileToBeArchived(f, zipFile, excludedFiles)) {
                 filesExist = true
             }
         }
         if (!filesExist) {
+            log.debug("No files to archive")
             return
         }
-
+        
         ZipOutputStream zos = null
         try {
             zos = new ZipOutputStream(zipFile.newOutputStream())
-            hooksDir.eachFile { f ->
-                if (f.isFile() && !f.equals(zipFile)) {
+            directory.eachFile { f ->
+                if (isFileToBeArchived(f, zipFile, excludedFiles)) {
                     ZipEntry ze = new ZipEntry(f.name)
                     if (f.canExecute()) {
                         ze.extra = [1] as byte[]
@@ -897,13 +910,19 @@ class SetupTeamForgeService {
             }
         }
 
-        hooksDir.eachFile { f ->
-            if (f.isFile() && !f.equals(zipFile)) {
+        directory.eachFile { f ->
+            if (isFileToBeArchived(f, zipFile, excludedFiles)) {
+                log.debug("Deleting file: " + f.name)
                 f.delete()
             }
         }
     }
 
+    private boolean isFileToBeArchived(File f, File zipFile, List<String> excludedFiles) {
+        return f.isFile() && !f.equals(zipFile) && 
+            (!excludedFiles || !excludedFiles.contains(f.name))
+    }
+    
     private static final String INTEGRATION_SCRIPTS_ZIP =
         "integration-scripts.zip"
 
@@ -984,14 +1003,29 @@ class SetupTeamForgeService {
         }
     }
 
+    private static final String CTF_HOOKS_ARCHIVE = "ctf-hook-scripts.zip"
+    private static final String OLD_CTF_HOOKS_ARCHIVE = 
+        "old-ctf-hook-scripts.zip"
+    
     protected void restoreNonCtfHooks(File hooksDir) {
+        log.debug("Archiving CTF hook scripts and restoring pre-ctf " + 
+                  "scripts for " + hooksDir.name)
+        File ctfHooksZip = new File(hooksDir, CTF_HOOKS_ARCHIVE)
+        if (ctfHooksZip.exists()) {
+            File oldCtfHooksZip = new File(hooksDir, OLD_CTF_HOOKS_ARCHIVE)
+            if (!oldCtfHooksZip.exists() || oldCtfHooksZip.delete()) {
+                log.debug("Previous CTF archive is being moved.")
+                ctfHooksZip.renameTo oldCtfHooksZip
+            }
+        }
+
+        log.debug("Archiving CTF hook scripts")
+        archiveFiles(CTF_HOOKS_ARCHIVE, hooksDir, 
+                     [NON_CTF_HOOKS_ARCHIVE, OLD_CTF_HOOKS_ARCHIVE])
+
         File archiveFile = new File(hooksDir, NON_CTF_HOOKS_ARCHIVE)
         if (archiveFile.exists()) {
-            hooksDir.eachFile { f ->
-                if (f.isFile() && !f.equals(archiveFile)) {
-                    f.delete()
-                }
-            }
+            log.debug("Restoring pre-ctf hook scripts")
             unpackZipFile(archiveFile, hooksDir, {entry, destFile -> 
                 byte[] extra = entry.extra
                 if (extra && extra.length == 1 && extra[0] == 1) {
