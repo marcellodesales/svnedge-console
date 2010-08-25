@@ -45,9 +45,6 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoOnDiskMarkerFile = new File(repoOnDisk, "db")
         repoOnDiskMarkerFile.mkdir()
 
-        repoOnDiskMarkerFile = new File(repoOnDisk, "db")
-        repoOnDiskMarkerFile.mkdir()
-
         // mock domain objects
         def testServer = new Server(
                 repoParentDir: repoParentDir.absolutePath
@@ -107,9 +104,6 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         File repoOnDiskMarkerDir = new File(repoOnDisk1, "db")
         repoOnDiskMarkerDir.mkdir()
         
-        repoOnDiskMarkerFile = new File(repoOnDisk1, "db")
-        repoOnDiskMarkerFile.mkdir()
-      
         // run the sync method
         svc.syncRepositories()
         assertEquals ("Two repositories expected after sync", 2, Repository.count())
