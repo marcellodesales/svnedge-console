@@ -49,16 +49,16 @@ abstract class AbstractConversionFunctionalTests extends
         // conversion
         this.setupTestCsvnImage()
 
-        // remove any repository created
+        // convert if necessary
+        this.convertToStandaloneMode()
+
+                // remove any repository created
         this.cleanRepositories()
 
         //running on a machine that does not have a name does not work.
         if (server.hostname == "localhost" || server.hostname == "127.0.0.1") {
             return
         }
-
-        // convert if necessary
-        this.convertToStandaloneMode()
     }
 
     @Override
