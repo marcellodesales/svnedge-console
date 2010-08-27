@@ -543,7 +543,6 @@ LDAPVerifyServerCert Off
 
     private def getCtfSvnHttpdConf(server) {
         def ctfServer = CtfServer.getServer()
-        def appServerPort = System.getProperty("jetty.port", "8080")
         def conf = """AuthType Basic
    AuthName "Authorization Realm"
    AuthBasicAuthoritative Off

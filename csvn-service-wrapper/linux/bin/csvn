@@ -674,7 +674,7 @@ waitforjavastartup() {
 }
 
 trywebserver() {
-    wget --no-proxy -T 5 -o /dev/null -O /dev/null $WAIT_FOR_WEBSERVER_URL 1> /dev/null 2>&1
+    wget --no-proxy --no-check-certificate -T 5 -o /dev/null -O /dev/null $WAIT_FOR_WEBSERVER_URL 1> /dev/null 2>&1
     return $? 
 }
 

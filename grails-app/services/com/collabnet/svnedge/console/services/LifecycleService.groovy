@@ -50,6 +50,7 @@ class LifecycleService {
     def viewvcScriptDirPath
     def viewvcTemplateDirPath
     def dataDirPath
+    def certDirPath
     def winServiceName
     
     // these variables cache the result of the corresponding system checks
@@ -90,6 +91,8 @@ class LifecycleService {
         }
 
         dataDirPath = ConfigUtil.dataDirPath(config)
+        certDirPath = new File(dataDirPath, "certs").absolutePath
+        
         // make run and logs directories if not existing
         mkdirs(new File(dataDirPath, "logs"))
         File runFile = new File(dataDirPath, "run")
@@ -201,9 +204,18 @@ class LifecycleService {
     private def createSSLServerCert() {
         Server server = getServer()
         File f1 = new File(confDirPath, "server.key")
+        File f2 = new File(confDirPath, "server.crt")
         def keyFilePath = f1.getAbsolutePath()
         def exitStatus
         boolean newkey = false
+
+        // if no cert/key yet exist, copy the shipped cert and
+        // key to the apache location
+        if (!f2.exists()) {
+            copyShippedCerts(f1, f2)
+        }
+
+        // if they still don't exist, generate
         if (!f1.exists()) {
             def cmd1 = [opensslPath, "genrsa", "-out", keyFilePath, "1024"]
             exitStatus = commandLineService.executeWithStatus(
@@ -213,7 +225,7 @@ class LifecycleService {
             }
             newkey = true 
         }
-        File f2 = new File(confDirPath, "server.crt")
+
         if (!f2.exists() || newkey) {
             def certreqinput = """--
 SomeState
@@ -237,6 +249,25 @@ root@${server.hostname}
         }
     }
 
+
+    /**
+     * Copies shipped cert and key from data/certs to the given target Files
+     * @param certTarget the File to which we are copying "svnedge.crt"
+     * @param keyTarget the File to which we are copying "svnedge.key"
+     */
+    private void copyShippedCerts(File certTarget, File keyTarget) {
+
+        File cert = new File(certDirPath, "svnedge.crt")
+        File key  = new File(certDirPath, "svnedge.key")
+
+        if (cert.exists() && !certTarget.exists()) {
+            certTarget << cert.text
+        }
+
+        if (key.exists() && !keyTarget.exists()) {
+            keyTarget << key.text
+        }
+    }
 
     private Map<String, String> createHttpdEnv() {
         Map<String, String> env = new HashMap<String, String>(3)

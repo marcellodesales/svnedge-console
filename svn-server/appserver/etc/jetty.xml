@@ -37,7 +37,7 @@
             <Set name="maxIdleTime">300000</Set>
             <Set name="Acceptors">2</Set>
             <Set name="statsOn">false</Set>
-            <Set name="confidentialPort">8443</Set>
+            <Set name="confidentialPort"><SystemProperty name="jetty.ssl.port" default="4434"/></Set>
 	    <Set name="lowResourcesConnections">20000</Set>
 	    <Set name="lowResourcesMaxIdleTime">5000</Set>
           </New>

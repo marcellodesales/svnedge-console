@@ -4,4 +4,21 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
   <Set name="contextPath">/csvn</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/csvn.war</Set>
+  <Get name="securityHandler">
+    <Set name="constraintMappings">
+      <Array type="org.eclipse.jetty.security.ConstraintMapping">
+        <Item>
+          <New class="org.eclipse.jetty.security.ConstraintMapping">
+            <Set name="constraint">
+              <New class="org.eclipse.jetty.http.security.Constraint">
+                <Set name="authenticate">false</Set>
+                <Set name="dataConstraint">2</Set>
+              </New>
+            </Set>
+            <Set name="pathSpec">/*</Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+  </Get>
 </Configure>
