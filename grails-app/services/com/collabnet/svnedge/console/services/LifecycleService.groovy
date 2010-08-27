@@ -212,7 +212,7 @@ class LifecycleService {
         // if no cert/key yet exist, copy the shipped cert and
         // key to the apache location
         if (!f2.exists()) {
-            copyShippedCerts(f1, f2)
+            copyShippedCerts(f2, f1)
         }
 
         // if they still don't exist, generate
@@ -260,11 +260,14 @@ root@${server.hostname}
         File cert = new File(certDirPath, "svnedge.crt")
         File key  = new File(certDirPath, "svnedge.key")
 
-        if (cert.exists() && !certTarget.exists()) {
-            certTarget << cert.text
+        // we need both source files
+        if (!cert.exists() || !key.exists()) {
+            return
         }
 
-        if (key.exists() && !keyTarget.exists()) {
+        // only copy if neither target is in the way
+        if (!certTarget.exists() && !keyTarget.exists()) {
+            certTarget << cert.text
             keyTarget << key.text
         }
     }
