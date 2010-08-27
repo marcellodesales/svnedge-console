@@ -759,8 +759,9 @@ class SetupTeamForgeService {
     }
 
     private void undoLocalRepositoriesDependencies(Server server, errors) {
+        File repoParent = new File(server.repoParentDir)
         try {
-            File idFile = new File(server.repoParentDir, ".scm.properties")
+            File idFile = new File(repoParent, ".scm.properties")
             if (idFile.exists() && !idFile.delete()) {
                 def msg = "While recovering from failed conversion, the " +
                      "external system property file was not deleted."
@@ -773,10 +774,11 @@ class SetupTeamForgeService {
         }
 
         try {
-            for (def repo in Repository.list()) { 
-                File repoDir = new File(server.repoParentDir, repo.name)
-                File hooksDir = new File(repoDir, "hooks")
-                restoreNonCtfHooks(hooksDir)
+            repoParent.eachFile {
+                File hooksDir = new File(it, "hooks")
+                if (hooksDir.exists()) {
+                    restoreNonCtfHooks(hooksDir)
+                }
             }
         } catch (Exception e) {
             def msg = "Recovery from failed CTF mode conversion " +
@@ -840,8 +842,6 @@ class SetupTeamForgeService {
         if (ctfServer?.baseUrl) {
             def sessionIds = this.loginCtfWebapp(ctfServer.baseUrl, ctfUsername,
                 ctfPassword)
-            // bring our repository data up-to-date
-            svnRepoService.syncRepositories()
             doRevertFromCtfMode(ctfServer.baseUrl, ctfServer.mySystemId,
                 sessionIds?.jsessionid, server, ctfServer, errors)
         }
