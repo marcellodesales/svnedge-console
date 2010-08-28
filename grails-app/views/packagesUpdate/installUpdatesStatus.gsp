@@ -120,6 +120,8 @@
                 handle: function(error, ioargs) {
                     switch (ioargs.xhr.status) {
                     case 200:
+                    case 301:
+                    case 302:
                         window.location = "/csvn"
                         break;
                     }
