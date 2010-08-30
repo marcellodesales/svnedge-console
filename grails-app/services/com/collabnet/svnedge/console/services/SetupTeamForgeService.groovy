@@ -455,7 +455,7 @@ class SetupTeamForgeService {
         def port = useSsl ? 
             ((server.port == 443) ? "" : ":" + server.port) :
             ((server.port == 80) ? "" : ":" + server.port)
-        (useSsl == "true" ? "https" : "http") +
+        (useSsl ? "https" : "http") +
                 "://" + server.hostname + port
     }
     
