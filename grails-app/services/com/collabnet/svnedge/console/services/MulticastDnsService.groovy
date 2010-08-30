@@ -17,12 +17,20 @@
  */
 package com.collabnet.svnedge.console.services
 
-import java.net.InetAddress;
-import javax.jmdns.*;
+import com.collabnet.svnedge.discovery.SvnEdgeBonjourRegister
+import com.collabnet.svnedge.discovery.mdns.SvnEdgeCsvnServiceKey
+import com.collabnet.svnedge.discovery.mdns.SvnEdgeHttpServiceKey
+import com.collabnet.svnedge.discovery.mdns.SvnEdgeServiceType
+
+import java.net.InetAddress
 
 /**
+ * The discovery service uses the SvnEdge Discovery API to publish Bonjour 
+ * services types.
  * The MulticastDnsService registers "collabnetsvn" service advertising
- * host:port/path (service type is _csvn._tcp).
+ * host:port/path (service type is _csvn._tcp). More information on those
+ * services at http://developer.apple.com/mac/library/documentation/Darwin/
+ * Reference/ManPages/man1/mDNS.1.html
  */
 class MulticastDnsService {
 
@@ -30,18 +38,15 @@ class MulticastDnsService {
 
     def networkingService
 
-    private static final String SERVICE_TYPE__CSVN = "_csvn._tcp.local."
-    private static final String SERVICE_TYPE__HTTP = "_http._tcp.local."
-    private static final int DEFAULT_PORT = 8080;
-    private static final String PROPERTY_PATH = "path"
-    private static final String PROPERTY_TFPATH = "tfpath"
-    public static final String SERVICE_NAME = "collabnetsvn"
-
-    def jmdns
+    /**
+     * The instance of the SvnEdge register client.
+     */
+    def SvnEdgeBonjourRegister register
 
     def bootStrap = { config ->
 
         def serviceName = config.svnedge.mdns.serviceName
+        serviceName = serviceName as String
         def hostAddr = networkingService.ipAddress
         def port = config.svnedge.mdns.port
         def path = config.grails.app.context
@@ -50,31 +55,22 @@ class MulticastDnsService {
         log.info("Bootstrapping Multi-cast DNS service...")
 
         try {
-            jmdns = JmDNS.create(hostAddr as InetAddress)
-            java.util.Map<String, ?> params = new java.util.HashMap<String, String>()
-            params.put(PROPERTY_TFPATH, (path == null || tfPath == null) ? "" : tfPath)
-            params.put(PROPERTY_PATH, path == null ? "" : path)
+            register = SvnEdgeBonjourRegister.getInstance(
+                hostAddr as InetAddress)
 
-            ServiceInfo infoCsvn = ServiceInfo.create(
-                              SERVICE_TYPE__CSVN,
-                              serviceName instanceof String ? (serviceName as String): SERVICE_NAME,
-                              port,
-                              0,
-                              0,
-                              params
-                              )
-            //register _csvn._tcp.local
-            jmdns.registerService(infoCsvn)
+            def params = [:]
+            params[SvnEdgeCsvnServiceKey.TEAMFORGE_PATH] = tfPath
+            params[SvnEdgeCsvnServiceKey.CONTEXT_PATH] = path
 
-            ServiceInfo infoHttp = ServiceInfo.create(SERVICE_TYPE__HTTP,
-                    serviceName instanceof String ? (serviceName as String) : SERVICE_NAME, 
-                    port, 
-                    PROPERTY_PATH + "=" + (path == null ? "" : path)
-            )
+            register.registerService(port, SvnEdgeServiceType.CSVN, params);
 
-            //register _http._tcp.local
-            jmdns.registerService(infoHttp)
+            params = [:]
+            params[SvnEdgeHttpServiceKey.PATH] = path ?: "/"
+
+            register.registerService(port, SvnEdgeServiceType.HTTP, params);
+
         } catch (Exception e) {
+            e.printStackTrace()
             log.error(e)
         }
     }
@@ -84,7 +80,7 @@ class MulticastDnsService {
      * unregister all the services 
      */
     def close = {
-        jmdns?.close();	
+        csvnServiceRegister.unregisterServices()
     }
 
     /**
@@ -93,9 +89,9 @@ class MulticastDnsService {
      * creates a new responder with updated config
      * TODO not called yet
      */
-    def serverUpdated = {serviceName, hostAddr, port, path, tfPath ->
-        jmdns?.close()
-        bootstrap(serviceName, hostAddr, port, path, tfPath)
+    def serverUpdated = { config ->
+        csvnServiceRegister.unregisterServices()
+        bootStrap(config)
     }
 }
 
