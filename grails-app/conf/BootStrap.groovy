@@ -48,7 +48,7 @@ class BootStrap {
     def svnRepoService
     def commandLineService
     def packagesUpdateService
-    def multicastDnsService
+    def discoveryService
 
     // Management console services
     def authenticateService
@@ -76,9 +76,6 @@ class BootStrap {
 
         operatingSystemService.bootstrap(appHome)
         networkingService.bootStrap()
-
-        log.info("Bootstrapping multicastDnsService...")
-        multicastDnsService.bootStrap(config)
 
         log.info("Bootstrapping Statistics services...")
         networkStatisticsService.bootStrap()
@@ -129,6 +126,9 @@ class BootStrap {
             replicationBootstrapService.bootstrap(config, servletContext, 
                 server)
         }
+
+        log.info("Bootstrapping discoveryService...")
+        discoveryService.bootStrap(config)
     }
 
     /**
@@ -138,8 +138,8 @@ class BootStrap {
      * in grails interactive mode
      */
     def destroy = {
-        log.info("Releasing resources from the mDNS service.")
-        multicastDnsService.close()
+        log.info("Releasing resources from the discovery service.")
+        discoveryService.close()
 
         log.info("Releasing resources from the Operating System service.")
         operatingSystemService.destroy()

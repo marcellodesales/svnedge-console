@@ -32,7 +32,7 @@ import java.net.InetAddress
  * services at http://developer.apple.com/mac/library/documentation/Darwin/
  * Reference/ManPages/man1/mDNS.1.html
  */
-class MulticastDnsService {
+class DiscoveryService {
 
     boolean transactional = false
 
@@ -52,7 +52,7 @@ class MulticastDnsService {
         def path = config.grails.app.context
         def tfPath = config.svnedge.mdns.teamForgeRegistrationPath
 
-        log.info("Bootstrapping Multi-cast DNS service...")
+        log.info("Bootstrapping the Discovery service...")
 
         try {
             register = SvnEdgeBonjourRegister.getInstance(
@@ -80,7 +80,7 @@ class MulticastDnsService {
      * unregister all the services 
      */
     def close = {
-        csvnServiceRegister.unregisterServices()
+        register.unregisterServices()
     }
 
     /**
@@ -90,7 +90,7 @@ class MulticastDnsService {
      * TODO not called yet
      */
     def serverUpdated = { config ->
-        csvnServiceRegister.unregisterServices()
+        register.unregisterServices()
         bootStrap(config)
     }
 }
