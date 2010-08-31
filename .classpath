@@ -156,5 +156,6 @@
 			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/svnedge-discovery-api-1.0.0.jar"/>
 	<classpathentry kind="output" path="eclipse-bin"/>
 </classpath>
