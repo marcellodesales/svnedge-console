@@ -26,8 +26,11 @@ import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLeve
  * We expect there to be only one Server defined.
  */
 class Server {
-    
+
+    // this property represents the apache SSL state
     boolean useSsl = false;
+    // this property represents the console SSL state
+    Boolean useSslConsole = false;
     /**
      * When server is used as a replica, hostname uniquely identifies the 
      * Replica to the Master.  Care should be take when changing this value.

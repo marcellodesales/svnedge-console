@@ -1,5 +1,6 @@
 <html>
   <head>
+    <g:sslRedirect/>
     <title><g:layoutTitle default="CollabNet Subversion Edge" /></title>
     <link rel="stylesheet" href="${resource(dir:'css',file:'styles_new.css')}"
           type="text/css"/>

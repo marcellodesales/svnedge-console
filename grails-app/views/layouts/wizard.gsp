@@ -1,5 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <g:sslRedirect/>
     <title><g:layoutTitle default="CollabNet Subversion Edge Setup Wizard" /></title>
     <link rel="stylesheet" href="${resource(dir:'css',file:'styles_new.css')}"
           type="text/css"/>

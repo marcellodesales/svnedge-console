@@ -35,6 +35,7 @@ class CtfConversionBean {
     boolean assignMembership = true
     boolean requiresServerKey = false
     boolean consoleSsl = false
+    int consolePort
     String serverKey
     boolean lowercaseRepos
     String repoPrefix

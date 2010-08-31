@@ -441,7 +441,7 @@ class SetupTeamForgeService {
         def server = Server.getServer()
 
         def adapterType = "Subversion"
-		def appServerPort = getAppServerPort()
+		def appServerPort = conversionData.consolePort
         def title = "CollabNet Subversion Edge (${server.hostname}:" +
                 "${appServerPort})"
         def description = "This is a CollabNet Subversion Edge " +
@@ -1066,15 +1066,6 @@ class SetupTeamForgeService {
         File pythonScriptDir = new File(sourceforgeHome, "integration")
         sfPrefix + "python " + 
             new File(pythonScriptDir, script).canonicalPath
-    }
-
-    /**
-     * returns environment prop jetty.ssl.port, or jetty.port, or 8080
-     */
-    private String getAppServerPort() {
-        def port = System.getProperty("jetty.ssl.port") ?:
-            System.getProperty("jetty.port", "8080")
-        return port 
     }
 
     def installIntegrationServer(conversionData) {

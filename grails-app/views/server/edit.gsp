@@ -26,6 +26,7 @@
     pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'adminEmail')}"
     pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'adminAltContact')}"
     pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'useSsl')}"
+    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'useSslConsole')}"
     pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'defaultStart')}"
 
         function updateInterface(addrSelect) {
@@ -92,6 +93,7 @@
             userFieldValues = userFieldValues + ":" + document.forms[0].adminEmail.value
             userFieldValues = userFieldValues + ":" + document.forms[0].adminAltContact.value
             userFieldValues = userFieldValues + ":" + document.forms[0].useSsl.checked
+            userFieldValues = userFieldValues + ":" + document.forms[0].useSslConsole.checked
             userFieldValues = userFieldValues + ":" + document.forms[0].defaultStart.checked
 
             if (userFieldValues == pristineFieldValues) {
@@ -361,7 +363,16 @@ users access to ports less than 1024.</p>
           <g:checkBox name="useSsl" value="${server.useSsl}"/>
           Subversion Server should serve via https
         </td>
-      </tr> 
+      </tr>
+      <tr>
+         <td class="ItemDetailName">
+          <label for="name">Console Encryption:</label>
+         </td>
+        <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSslConsole','errors')}" colspan="2">
+          <g:checkBox name="useSslConsole" value="${server.useSslConsole}"/>
+          Subversion Edge Management Console should require https
+        </td>
+      </tr>
       <tr>
         <td class="ItemDetailName">
           <label for="defaultStart">Startup Setting:</label>

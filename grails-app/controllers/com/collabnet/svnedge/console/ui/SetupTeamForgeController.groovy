@@ -385,9 +385,10 @@ class SetupTeamForgeController {
             con.serverKey = params.serverKey
         }
 
-        // provide console/Jetty SSL status in the conversion data
+        // provide console/Jetty SSL status and port number in the conversion data
         // for "/integration" urls
         con.consoleSsl = request.isSecure()
+        con.consolePort = request.serverPort
 
         def model = [wizardBean: con]
         def result = null
