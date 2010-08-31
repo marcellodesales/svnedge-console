@@ -153,12 +153,19 @@ class ServerConfService {
                 } else {
                     //skip if it's a directory, but rename the file.
                     if (!fileOnTemp.isDirectory()) {
-                        int numberOfNewFiles = 0
-                        //gets the name of the next "new" artifact n
-                        while((new File(fileOnTemp.canonicalPath + ".new-"  + 
-                                (++numberOfNewFiles))).exists());
-                        fileOnTemp.renameTo(new File(fileOnTemp.canonicalPath + 
-                                ".new-" + numberOfNewFiles))
+                        def bpkFileOnData = new File(fileOnDataDir, ".bkp")
+                        if (!bpkFileOnData.exists()) {
+                            fileOnDataDir.renameTo(bpkFileOnData)
+                        } else {
+                            int numberOfNewFile = 1
+                            //gets the name of the next "new" artifact n
+                            def nextBkpFile = null;
+                            while((nextBkpFile = new File(fileOnDataDir, 
+                                ".bkp" + (++numberOfNewFile))).exists());
+                            fileOnDataDir.renameTo(nextBkpFile)
+                        }
+                        // move the file from the temp dir and the data dir.
+                        fileOnTemp.renameTo(fileOnDataDir)
                     }
                 }
             }
