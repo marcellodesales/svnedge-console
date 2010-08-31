@@ -100,20 +100,45 @@ class SetupTeamForgeService {
        log.debug("Setting system property '${APP_HOME_VAR}'='" +
                  "${System.properties[APP_HOME_VAR]}'")
 
-        def server = Server.getServer()
-        // In ctf mode, confirm that the integration scripts are up-to-date
-        if (server && server.mode == ServerMode.MANAGED) {
-            File libDir = new File(appHome, "lib")
-            File zipFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
-            File integrationDir = new File(libDir, "integration")
-            if (zipFile.exists() && (!integrationDir.exists() || 
-                zipFile.lastModified() > integrationDir.lastModified())) {
-                log.info("Updating CTF integration scripts.")
-                unpackIntegrationScripts()
-            }
-        }
+        updateIntegrationScripts(appHome)
+        updateTeamForgeProperties(appHome)
+   }
+   
+   private void updateIntegrationScripts(appHome) {
+       def server = Server.getServer()
+       // In ctf mode, confirm that the integration scripts are up-to-date
+       if (server && server.mode == ServerMode.MANAGED) {
+           File libDir = new File(appHome, "lib")
+           File zipFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
+           File integrationDir = new File(libDir, "integration")
+           if (zipFile.exists() && (!integrationDir.exists() ||
+               zipFile.lastModified() > integrationDir.lastModified())) {
+               log.info("Updating CTF integration scripts.")
+               unpackIntegrationScripts()
+           }
+       }
    }
 
+   private void updateTeamForgeProperties(appHome) {
+       File confDir = new File(appHome, "data/conf")
+       File tfProps = new File(confDir, "teamforge.properties.dist")
+       if (tfProps.exists()) {
+           String text = tfProps.text
+           if (text.indexOf("sfmain.integration.executables.python") < 0) {
+               int pos = text.indexOf("# Integration listener keys")
+               if (pos > 0) {
+                   text = text.substring(0, pos) + 
+                       "\nsfmain.integration.executables.python=python\n" +
+                       text.substring(pos)
+               } else {
+                   text += "\nsfmain.integration.executables.python=python\n"
+               }
+               tfProps.write(text)
+               serverConfService.writeConfigFiles()
+           }
+       }
+   }
+   
    private String getWebSessionId(conversionData) {
         if (!conversionData.webSessionId) {
             def ids = loginCtfWebapp(conversionData)
