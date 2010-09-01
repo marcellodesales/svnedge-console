@@ -24,6 +24,8 @@ import com.collabnet.svnedge.discovery.mdns.SvnEdgeServiceType
 
 import java.net.InetAddress
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 /**
  * The discovery service uses the SvnEdge Discovery API to publish Bonjour 
  * services types.
