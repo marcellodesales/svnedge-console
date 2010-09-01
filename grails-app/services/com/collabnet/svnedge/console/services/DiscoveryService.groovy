@@ -58,6 +58,27 @@ class DiscoveryService {
             register = SvnEdgeBonjourRegister.getInstance(
                 hostAddr as InetAddress)
 
+            registerServices(config)
+
+        } catch (Exception e) {
+            e.printStackTrace()
+            log.error(e)
+        }
+    }
+    
+    def registerServices = { config ->
+    
+        if (register) {
+            def serviceName = config.svnedge.mdns.serviceName
+            serviceName = serviceName as String
+            def port = config.svnedge.mdns.port
+            def path = config.grails.app.context
+            def tfPath = config.svnedge.mdns.teamForgeRegistrationPath
+            def server = Server.getServer()
+            if (server.managedByCtf()) {
+                tfPath = "" // clients interpret as managed
+            }
+
             def params = [:]
             params[SvnEdgeCsvnServiceKey.TEAMFORGE_PATH] = tfPath
             params[SvnEdgeCsvnServiceKey.CONTEXT_PATH] = path
@@ -68,10 +89,6 @@ class DiscoveryService {
             params[SvnEdgeHttpServiceKey.PATH] = path ?: "/"
 
             register.registerService(port, SvnEdgeServiceType.HTTP, params);
-
-        } catch (Exception e) {
-            e.printStackTrace()
-            log.error(e)
         }
     }
 
@@ -80,7 +97,7 @@ class DiscoveryService {
      * unregister all the services 
      */
     def close = {
-        register.unregisterServices()
+        register.close()
     }
 
     /**
@@ -89,9 +106,17 @@ class DiscoveryService {
      * creates a new responder with updated config
      * TODO not called yet
      */
-    def serverUpdated = { config ->
-        register.unregisterServices()
-        bootStrap(config)
+    def serverUpdated = { 
+        log.info("Updating discovery service information...")
+        def currentConfig = ConfigurationHolder.config;
+
+        try {
+            register.unregisterServices()
+            registerServices(currentConfig)
+
+        } catch (Exception e) {
+            e.printStackTrace()
+            log.error(e)
+        }
     }
 }
-
