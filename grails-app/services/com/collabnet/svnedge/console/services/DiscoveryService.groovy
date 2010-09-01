@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console.services
 
+import com.collabnet.svnedge.console.Server
+
 import com.collabnet.svnedge.discovery.SvnEdgeBonjourRegister
 import com.collabnet.svnedge.discovery.mdns.SvnEdgeCsvnServiceKey
 import com.collabnet.svnedge.discovery.mdns.SvnEdgeHttpServiceKey
@@ -68,7 +70,7 @@ class DiscoveryService {
         }
     }
     
-    def registerServices = { config ->
+    private def registerServices = { config ->
     
         if (register) {
             def serviceName = config.svnedge.mdns.serviceName
@@ -106,7 +108,6 @@ class DiscoveryService {
      * Handles the server update
      * closes current responder
      * creates a new responder with updated config
-     * TODO not called yet
      */
     def serverUpdated = { 
         log.info("Updating discovery service information...")

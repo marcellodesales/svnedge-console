@@ -59,6 +59,7 @@ class SetupTeamForgeService {
     def svnRepoService
     def daoAuthenticationProvider
     def anonymousAuthenticationProvider
+    def discoveryService
 
     /**
      * The integration properties file.
@@ -1134,6 +1135,8 @@ class SetupTeamForgeService {
         } else {
             return lifecycleService.startServer()
         }
+
+        discoveryService.serverUpdated()
     }
 
     private void copyFiles(fromDir, toDir) {
