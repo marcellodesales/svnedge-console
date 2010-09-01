@@ -131,7 +131,7 @@ class ServerConfService {
      * discussed on artf62798
      * @param config is the configuration properties
      */
-    private def bootstrapDataDirectory(appHome) {
+    def bootstrapDataDirectory(appHome) {
         def tempDataDir = new File(appHome, "temp-data")
         if (tempDataDir.exists()) {
             log.info("Bootstrapping the temporary data directory...")
@@ -153,19 +153,26 @@ class ServerConfService {
                 } else {
                     //skip if it's a directory, but rename the file.
                     if (!fileOnTemp.isDirectory()) {
-                        def bpkFileOnData = new File(fileOnDataDir, ".bkp")
+                        def bpkFileOnData = new File(fileOnDataDir.canonicalPath
+                            + ".bkp")
                         if (!bpkFileOnData.exists()) {
                             fileOnDataDir.renameTo(bpkFileOnData)
+                            log.info("Backing up \"${fileOnDataDir}\" as " + 
+                                "\"${bpkFileOnData}\".")
                         } else {
                             int numberOfNewFile = 1
                             //gets the name of the next "new" artifact n
                             def nextBkpFile = null;
-                            while((nextBkpFile = new File(fileOnDataDir, 
-                                ".bkp" + (++numberOfNewFile))).exists());
+                            while((nextBkpFile = new File(
+                                fileOnDataDir.canonicalPath + ".bkp" + 
+                                (++numberOfNewFile))).exists())
                             fileOnDataDir.renameTo(nextBkpFile)
+                            log.info("Backing up \"${fileOnDataDir}\" as " + 
+                                "\"${nextBkpFile}\"")
                         }
                         // move the file from the temp dir and the data dir.
                         fileOnTemp.renameTo(fileOnDataDir)
+                        log.info("Updating the file \"${fileOnDataDir}\"")
                     }
                 }
             }
