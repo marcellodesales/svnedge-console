@@ -95,13 +95,10 @@
             </div>
                        </td>
                     </tr>
-                    </tbody>
-                    
-                </table>
             </div>
-            
         </div>
     </g:if>
+
     <g:else>
       <g:if test="${isReplica}">
         <p>There are no repositories yet. Replication is initiated from the master.</p>  
@@ -111,5 +108,8 @@
         using the navigation link.</p>  
       </g:else>
     </g:else>
+
+       </tbody>
+      </table>
     </body>
 </html>
