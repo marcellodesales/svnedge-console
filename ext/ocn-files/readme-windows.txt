@@ -69,7 +69,7 @@ Contents
    PYTHONHOME environment variable.
 
    The installer will add rules to the Windows Firewall to allow access to the 
-   Apache binary and to open up port 3343.
+   Apache binary and to open up ports 3343 and 4434.
 
    The installer will add two Windows services set to start automatically when
    the system starts.
@@ -94,6 +94,15 @@ Contents
    The installer provides the option to start the application at the end of 
    the install.  This will open your browser to a local page that will detect
    when the server has finished starting.
+   
+   Subversion Edge also starts an SSL-protected version using a self-signed SSL
+   certificate.  You can access the SSL version on this URL:
+   
+   Address: https://localhost:4434/csvn
+ 
+   You can force users to use SSL from the Server configuration.  This will cause
+   attempts to access the site via plain HTTP on port 3343 to be redirected to the
+   secure port on 4434.
 
 5. Updates
 

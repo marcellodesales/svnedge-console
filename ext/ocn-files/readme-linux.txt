@@ -128,6 +128,15 @@ Contents
    Address: http://localhost:3343/csvn
    Username: admin
    Password: admin
+   
+   Subversion Edge also starts an SSL-protected version using a self-signed SSL
+   certificate.  You can access the SSL version on this URL:
+   
+   Address: https://localhost:4434/csvn
+ 
+   You can force users to use SSL from the Server configuration.  This will cause
+   attempts to access the site via plain HTTP on port 3343 to be redirected to the
+   secure port on 4434.
 
 5. Updates
 
