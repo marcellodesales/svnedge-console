@@ -4256,6 +4256,7 @@
   <COMPONENT cid="caphyon.advinst.msicomp.FirewallExceptionComponent">
     <ROW FirewallException="Apache_2.2" DisplayName="Apache 2.2" Enabled="1" Scope="*" Condition="((?httpd.exe=2) AND ($httpd.exe=3))" AppPath="[#httpd.exe]"/>
     <ROW FirewallException="CollabNet_Subversion_Edge_Console" DisplayName="CollabNet Subversion Edge Console" Enabled="1" Scope="*" Condition="1" Port="3343" Protocol="TCP"/>
+    <ROW FirewallException="CollabNet_Subversion_Edge_SSL" DisplayName="CollabNet Subversion Edge SSL" Enabled="1" Scope="*" Condition="1" Port="4434" Protocol="TCP"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.FragmentComponent">
     <ROW Fragment="CommonUI.aip" Path="&lt;AI_FRAGS&gt;CommonUI.aip"/>
