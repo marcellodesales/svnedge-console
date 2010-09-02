@@ -102,7 +102,7 @@ class SecurityFunctionalTests extends functionaltestplugin.FunctionalTestCase {
 
         get('/server/edit')
         assertStatus 200
-        assertContentContains 'Subversion Server Settings'
+        assertContentContains 'Server Settings'
     }
 
       void testAdminReposAuthority() {
