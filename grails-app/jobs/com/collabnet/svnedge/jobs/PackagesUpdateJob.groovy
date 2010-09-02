@@ -19,6 +19,7 @@ package com.collabnet.svnedge.jobs
 
 
 import java.net.NoRouteToHostException;
+import org.quartz.CronTrigger
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.collabnet.svnedge.console.services.JobsAdminService
@@ -40,9 +41,21 @@ class PackagesUpdateJob {
     static def group = "Maintenance"
 
     static triggers = { 
-        cron name: jobName + "Trigger", group: group + "_Triggers", \
-        startDelay: 0, \
-        cronExpression: "0 15 12 ? * *"
+    // artf4934, some OS's don't compile the quartz plugin correctly, so
+    // this method of scheduling doesn't work.  Using a service bootstrap
+    // method as workaround
+    //  
+    //    cron name: jobName + "Trigger", group: group + "_Triggers", \
+    //    startDelay: 0, \
+    //    cronExpression: "0 15 12 ? * *"
+    }
+
+    /** 
+     * Schedule a daily 12:15 pm repeating trigger
+     */
+    static void start() {
+        schedule(new CronTrigger(jobName + "Trigger", 
+            group + "_Triggers", jobName, group, "0 15 12 ? * *"))
     }
 
     def execute() {

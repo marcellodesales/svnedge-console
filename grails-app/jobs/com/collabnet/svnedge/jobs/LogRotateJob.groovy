@@ -20,6 +20,7 @@ package com.collabnet.svnedge.jobs
 import java.util.Date
 import java.util.Calendar
 import com.collabnet.svnedge.console.Server
+import org.quartz.CronTrigger
 
 class LogRotateJob {
 
@@ -29,9 +30,21 @@ class LogRotateJob {
     static def group = "Maintenance"
 
     static triggers = { 
-        cron name: "LogRotateTrigger", group: group + "_Triggers", \
-        startDelay: 60000, \
-        cronExpression: "0 5 0 * * ?"
+    // artf4934, some OS's don't compile the quartz plugin correctly, so
+    // this method of scheduling doesn't work.  Using a service bootstrap
+    // method as workaround
+    //  
+    //    cron name: "LogRotateTrigger", group: group + "_Triggers", \
+    //    startDelay: 60000, \
+    //    cronExpression: "0 5 0 * * ?"
+    }
+
+    /** 
+     * Schedule daily 12:05 am repeating trigger
+     */
+    static void start() {
+        schedule(new CronTrigger("LogRotateTrigger", 
+            group + "_Triggers", name, group, "0 5 0 * * ?"))
     }
 
     def pruneLog(olderThanToday) {

@@ -41,6 +41,7 @@ import java.util.HashSet
 import org.springframework.beans.factory.InitializingBean
 import org.cometd.Client
 import org.mortbay.cometd.ChannelImpl
+import com.collabnet.svnedge.jobs.PackagesUpdateJob
 
 /**
  * The Packages Update service is responsible for managing the updates of the
@@ -218,6 +219,7 @@ public final class PackagesUpdateService implements InitializingBean {
             log.error("Packages Update not initialized: " 
                 + directoryNotFound.message)
         }
+        PackagesUpdateJob.start()
     }
 
     // just like @PostConstruct
