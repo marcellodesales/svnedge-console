@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.ui
 
 import java.io.FileNotFoundException;
+import java.text.SimpleDateFormat
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
@@ -27,7 +28,8 @@ import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLeve
  * Command class for 'saveConfiguration' action. Provides validation rules.
  */
 class LogConfigurationCommand {
-    
+
+    def operatingSystemService
     ConsoleLogLevel consoleLevel
     ApacheLogLevel apacheLevel
     Integer pruneLogsOlderThan
@@ -47,7 +49,10 @@ class LogConfigurationCommand {
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class LogController {
 
+    def operatingSystemService
     def logManagementService
+    
+    def static final dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z")
 
     static allowedMethods = [saveConfiguration : 'POST']
 
@@ -119,8 +124,14 @@ class LogController {
 
             def view = (params.rawView) ? "showRaw" : "show"
             def contentType = (params.rawView) ? "text/plain" : "text/html"
-            render(view: view, contentType: contentType, 
-                model: [ file: logFile])
+
+            def logSize = operatingSystemService.formatBytes(logFile.length())
+            def modifiedTime = new Date(logFile.lastModified())
+            def logModifiedTime = dateFormatter.format(modifiedTime);
+
+            render(view: view, contentType: contentType,
+                model: [ file: logFile, fileSize: logSize,
+                    fileModification: logModifiedTime])
 
         } catch (FileNotFoundException logDoesNotExist) {
             flash.error = logDoesNotExist.getMessage()

@@ -18,7 +18,7 @@
  <table class="Container">
   <tbody>
     <tr class="ContainerHeader">
-      <td>Server Logs: ${params.fileName}</td>    
+      <td>Log: ${params.fileName} &nbsp;Size: ${fileSize} &nbsp;Last Modification: ${fileModification}</td>
     </tr>
     <g:if test="${file}">  
     <tr>
