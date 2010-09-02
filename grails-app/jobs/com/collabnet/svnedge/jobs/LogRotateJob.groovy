@@ -28,6 +28,7 @@ class LogRotateJob {
     def serverConfService
     static def name = "com.collabnet.svnedge.jobs.LogRotateJob"
     static def group = "Maintenance"
+    private static boolean isStarted = false
 
     static triggers = { 
     // artf4934, some OS's don't compile the quartz plugin correctly, so
@@ -43,8 +44,11 @@ class LogRotateJob {
      * Schedule daily 12:05 am repeating trigger
      */
     static void start() {
-        schedule(new CronTrigger("LogRotateTrigger", 
-            group + "_Triggers", name, group, "0 5 0 * * ?"))
+        if (!isStarted) {
+            schedule(new CronTrigger("LogRotateTrigger", 
+                group + "_Triggers", name, group, "0 5 0 * * ?"))
+            isStarted = true
+        }
     }
 
     def pruneLog(olderThanToday) {

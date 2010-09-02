@@ -39,6 +39,7 @@ class PackagesUpdateJob {
 
     static def jobName = "PackagesUpdateJob"
     static def group = "Maintenance"
+    private static boolean isStarted = false
 
     static triggers = { 
     // artf4934, some OS's don't compile the quartz plugin correctly, so
@@ -54,8 +55,11 @@ class PackagesUpdateJob {
      * Schedule a daily 12:15 pm repeating trigger
      */
     static void start() {
-        schedule(new CronTrigger(jobName + "Trigger", 
-            group + "_Triggers", jobName, group, "0 15 12 ? * *"))
+        if (!isStarted) {
+            schedule(new CronTrigger(jobName + "Trigger", 
+                group + "_Triggers", jobName, group, "0 15 12 ? * *"))
+            isStarted = true
+        }
     }
 
     def execute() {
