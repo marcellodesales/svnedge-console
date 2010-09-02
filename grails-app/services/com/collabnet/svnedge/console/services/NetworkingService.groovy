@@ -263,7 +263,7 @@ public class NetworkingService {
                "/s OUT"
             if (timeOut) {
                 throughPutTxt += " (over about " + 
-                    OperatingSystemService.formatBytes(timeOut) + " minutes)"
+                    OperatingSystemService.formatMinutes(timeOut) + " minutes)"
             }
         }
         return throughPutTxt
