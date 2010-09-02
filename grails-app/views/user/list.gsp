@@ -34,7 +34,6 @@
                 <td colspan="5">User List</td>
               </tr>
                <tr class="ItemListHeader">
-                    <g:sortableColumn property="id" title="Id" />
                     <g:sortableColumn property="username" title="Login Name" />
                     <g:sortableColumn property="realUserName" title="Full Name" />
                     <g:sortableColumn property="description" title="Description" />
@@ -43,7 +42,6 @@
             <tbody>
             <g:each in="${userInstanceList}" status="i" var="person">
                 <tr class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
-                    <td>${person.id}</td>
                     <td><g:link action="edit" id="${person.id}">${person.username?.encodeAsHTML()}</g:link></td>
                     <td>${person.realUserName?.encodeAsHTML()}</td>
                     <td>${person.description?.encodeAsHTML()}</td>

@@ -34,18 +34,15 @@
         <td colspan="3">Role List</td>
       </tr>
       <tr class="ItemListHeader">
-
-        <g:sortableColumn property="id" title="${message(code: 'role.id.label', default: 'Id')}"/>
         <g:sortableColumn property="authority" title="${message(code: 'role.authority.label', default: 'Authority')}"/>
+
         <g:sortableColumn property="description" title="${message(code: 'role.description.label', default: 'Description')}"/>
       </tr>
       <tbody>
       <g:each in="${roleList}" status="i" var="roleInstance">
         <tr class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
 
-          <td>${fieldValue(bean: roleInstance, field: "id")}</td>
-
-          <td><g:ifAnyGranted role="ROLE_ADMIN,${roleInstance.authority}"><g:link action="edit" id="${roleInstance.id}">${fieldValue(bean: roleInstance, field: "authority")}</g:link></g:ifAnyGranted></td>
+          <td width="20%"><g:ifAnyGranted role="ROLE_ADMIN,${roleInstance.authority}"><g:link action="edit" id="${roleInstance.id}">${fieldValue(bean: roleInstance, field: "authority")}</g:link></g:ifAnyGranted></td>
 
           <td>${fieldValue(bean: roleInstance, field: "description")}</td>
         </tr>
