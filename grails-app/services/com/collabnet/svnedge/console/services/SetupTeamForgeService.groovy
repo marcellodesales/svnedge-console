@@ -124,16 +124,46 @@ class SetupTeamForgeService {
        File confDir = new File(appHome, "data/conf")
        File tfProps = new File(confDir, "teamforge.properties.dist")
        if (tfProps.exists()) {
+           boolean isChanged = false
            String text = tfProps.text
-           if (text.indexOf("sfmain.integration.executables.python") < 0) {
+           String prop = "sfmain.integration.executables.python"
+           if (text.indexOf(prop) < 0) {
                int pos = text.indexOf("# Integration listener keys")
                if (pos > 0) {
                    text = text.substring(0, pos) + 
-                       "\nsfmain.integration.executables.python=python\n" +
+                       "\n" + prop + "=python\n" +
                        text.substring(pos)
                } else {
-                   text += "\nsfmain.integration.executables.python=python\n"
+                   text += "\n" + prop + "=python\n"
                }
+               isChanged = true
+           }
+
+           prop = "scm.python.path"
+           String propAndNewValue = prop + "=\${python.path}"
+           if (text.indexOf(prop) < 0) {
+               int pos = text.indexOf("# Integration server constants")
+               if (pos >= 0) {
+                   text = text.substring(0, pos) + 
+                       "\n" + propAndNewValue + "\n" +
+                       text.substring(pos)
+               } else {
+                   text += "\n" + propAndNewValue + "\n"
+               }
+               isChanged = true
+
+           } else {
+               String propAndOldValue = prop + 
+                   "=\${lib.dir}:\${lib.dir}/svn-python" 
+               int pos = text.indexOf(propAndOldValue)
+               if (pos >= 0) {
+                   text = text.substring(0, pos) + propAndNewValue +
+                       text.substring(pos + propAndOldValue.length())
+                   isChanged = true
+               }
+           }
+
+           if (isChanged) {
                tfProps.write(text)
                serverConfService.writeConfigFiles()
            }
