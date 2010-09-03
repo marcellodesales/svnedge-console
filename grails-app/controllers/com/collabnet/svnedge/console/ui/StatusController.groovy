@@ -111,7 +111,6 @@ class StatusController {
                flash.error = message(
                    code: 'packagesUpdate.error.server.noConnection')
            }
-           packagesUpdate.error.general
        } catch (Exception e) {
            e.printStackTrace()
            flash.error = message(code: 'packagesUpdate.error.general') + ": " +
