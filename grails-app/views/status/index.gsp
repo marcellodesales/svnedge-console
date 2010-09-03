@@ -7,7 +7,7 @@
   <body>
 
     <content tag="title">
-      Status
+      <g:message code="status.page.header.title" />
     </content>
     
     <!-- Following content goes in the left nav area -->
@@ -16,45 +16,45 @@
   <div>
     <g:if test="${ctfUrl}">
       <div class="ImageListParent">
-        <strong>TeamForge Base URL:</strong> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a>
+        <strong><g:message code="status.page.url.teamforge" />:</strong> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a>
       </div>
     </g:if>
     <g:if test="${isStarted}">
       <div class="ImageListParent">
-        <strong>Hostname: </strong> ${server.hostname}
+        <strong><g:message code="status.page.hostname" />: </strong> ${server.hostname}
       </div>
       <div class="ImageListParent">
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
           <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit class="stop" value="Stop"/></span>
+            <span class="button"><g:actionSubmit class="stop" value="${message(code:'status.page.subversion.stop')}"/></span>
           </div>
         </g:ifAnyGranted>
-        <strong>Subversion status: </strong>
+        <strong><g:message code="status.page.subversion" />: </strong>
         <img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
-                         hspace="4" alt="Up"/>Up
+                         hspace="4" alt="<g:message code='status.page.subversion.on' />"/><g:message code="status.page.subversion.on" />
       </div>
      <g:if test="${!ctfUrl && server.viewvcURL()}">
       <div class="ImageListParent">
-        <strong>Repository parent:</strong> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a>
+        <strong><g:message code="status.page.url.repository" />:</strong> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a>
       </div>
-      <div class="ImageListParent"><strong>Browse repositories:</strong>
+      <div class="ImageListParent"><strong><g:message code="status.page.url.repository.browse" />:</strong>
         <a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a>
       </div>
      </g:if>
    </g:if>
    <g:else>
       <div class="ImageListParent">
-        <strong>Hostname: </strong> ${server.hostname}
+        <strong><g:message code="status.page.hostname" />: </strong> ${server.hostname}
       </div>
       <div class="ImageListParent">
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
           <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit value="Start"/></span>
+            <span class="button"><g:actionSubmit value="${message(code:'status.page.subversion.start')}"/></span>
           </div>
         </g:ifAnyGranted>
-        <strong>Subversion status: </strong>
+        <strong><g:message code="status.page.subversion" />: </strong>
         <img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
-                         hspace="4" alt="Down"/>Down
+                         hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" />
       </div>
     </g:else>
   <img src="${resource(dir:'images/misc', file:'pixel.gif')}" width="280" height="1" alt=""/>
@@ -63,20 +63,22 @@
 
     <g:if test="${server.replica}">
       <div class="ImageListParent">
-        <strong>Replica Name: </strong> ${currentReplica.getName()}
+        <strong><g:message code="status.page.replica.name" />: </strong> ${currentReplica.getName()}
       </div>
       <div class="ImageListParent">
-        <strong>Replica Location:</strong> ${currentReplica.getLocationName()}
+        <strong><g:message code="status.page.replica.location" />:</strong> ${currentReplica.getLocationName()}
       </div>
       <div class="ImageListParent">
-        <strong>Mirroring:</strong> X Repositories from Y Projects
-      </div>      
-      <div class="ImageListParent">
-        <strong>Master Host:</strong> ${defaultMaster.hostName}
+        <strong><g:message code="status.page.replica.master_hostname" />:</strong> ${defaultMaster.hostName}
       </div>
       <div class="ImageListParent">
-        <strong>Master on SSL:</strong>
-        ${defaultMaster.sslEnabled ? 'Yes' : 'No'}
+        <strong><g:message code="status.page.replica.master_ssl" />:</strong> 
+        <g:if test="${defaultMaster.sslEnabled}">
+            <g:message code="status.page.replica.master_ssl.yes" />
+        </g:if>
+        <g:else>
+            <g:message code="status.page.replica.master_ssl.no" />
+        </g:else>
       </div>
     </g:if>
     </content>
@@ -88,17 +90,17 @@
             <table class="ItemDetailContainer">
               <tbody>
                 <tr class="ContainerHeader">
-                  <td colspan="2">Server Status</td>
+                  <td colspan="2"><g:message code="status.page.header.server" /></td>
                 </tr>
             <g:if test="${softwareVersion}">
                 <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong>Software version</strong></td>
+                  <td class="ItemDetailName"><strong><g:message code="status.page.status.version.software" /></strong></td>
                   <td class="ItemDetailValue">${softwareVersion}</td>
                 </tr>
             </g:if>
             <g:if test="${svnVersion}">
                 <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong>Subversion version</strong></td>
+                  <td class="ItemDetailName"><strong><g:message code="status.page.status.version.subversion" /></strong></td>
                   <td class="ItemDetailValue">${svnVersion}</td>
                 </tr>
             </g:if>

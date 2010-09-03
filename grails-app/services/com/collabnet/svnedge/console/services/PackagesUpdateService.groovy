@@ -857,8 +857,10 @@ public final class PackagesUpdateService implements InitializingBean {
      */
     def getUpgradeAvailableMessage() {
         if (this.areThereUpdates) {
-            return "There are new updates available for " +
-                    "<a href='/csvn/packagesUpdate/available'>download</a>."
+            def msg = message(code: 'packagesUpdate.status.updates.available')
+            def download = message(code: 'packagesUpdate.status.updates.forDownload')
+            return msg.replace(download,
+                "<a href='/csvn/packagesUpdate/available'>${download}</a>")
         } else {
             return null
         }
@@ -948,7 +950,7 @@ public final class PackagesUpdateService implements InitializingBean {
      *  installed.
      */
     def getSystemNeedsRestartMessage() {
-        return "The system needs to be restarted in order to apply new updates."
+        return message(code: 'packagesUpdate.status.updates.requiresRestart')
     }
 
     /**

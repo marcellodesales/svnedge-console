@@ -53,19 +53,16 @@ class StatusController {
            }
 
            if(!currentReplica) {
-               flash.error = "Replica not bootstraped!"
+               flash.error = message(code: 'replica.error.notStarted')
            }
            if (currentReplica.getState() == ApprovalState.PENDING) {
-               flash.message = "The Replica has not yet been approved by the " \
-               + "Master." 
+               flash.message = message(code: 'replica.error.notApproved')
            } else if (currentReplica.getState() == ApprovalState.DENIED) {
-               flash.error = "The Replica has been denied access to this " \
-               + "Master.  Please change the master or consult with the administrator of the master."
+               flash.error = message(code: 'replica.error.denied')
            } else if (currentReplica.getState() == ApprovalState.NOT_FOUND 
                       || currentReplica.getState() == ApprovalState
                       .REGISTRATION_FAILED) {
-               flash.error = "The Replica cannot be registered to the Master." +
-                   " Please change the master or consult with the administrator of the master."
+               flash.error = message(code: 'replica.error.cantRegister')
            }
         }
         def ctfUrl
@@ -99,24 +96,26 @@ class StatusController {
                if (this.packagesUpdateService.hasTheSystemBeenUpdated() || 
                        this.packagesUpdateService.hasTheSvnServerBeenUpdated()){
                    this.packagesUpdateService.setTheSystemToNotBeenUpdated()
-                   flash.message = "Software updates installed successfully!"
+                   flash.message = message(
+                       code: 'packagesUpdate.success.installed.updates')
                } else
                if (this.packagesUpdateService.hasNewPackagesBeenInstalled()) {
                    this.packagesUpdateService.setTheSystemToNotBeenUpdated()
-                   flash.message = "New packages installed successfully!"
+                   flash.message = message(
+                       code: 'packagesUpdate.success.installed.newPackages')
                }
            }
 
        } catch (NoRouteToHostException nrth) {
            if (!flash.error) {
-               flash.error = "There's no network connection to the packages " +
-                   "repository server."
+               flash.error = message(
+                   code: 'packagesUpdate.error.server.noConnection')
            }
-
+           packagesUpdate.error.general
        } catch (Exception e) {
            e.printStackTrace()
-           flash.error = "An error occurred while checking for software " +
-                   "updates: " + e.getMessage()
+           flash.error = message(code: 'packagesUpdate.error.general') + ": " +
+               e.getMessage()
        }
 
        return [isStarted: isStarted,
@@ -134,38 +133,44 @@ class StatusController {
 
    def getPerfStats(currentConfig, server) {
        def model = [
-           [label:"Running since", 
+           [label: message(code: 'status.page.status.running_since'), 
             value: quartzScheduler.getMetaData().runningSince]]
        if (!server.managedByCtf()) {
-           model << [label:"Repo health", value: 
-               svnRepoService.formatRepoStatus(realTimeStatisticsService
+           model << [label: message(code: 'status.page.status.repo_health'), 
+               value: svnRepoService.formatRepoStatus(realTimeStatisticsService
                                                ?.getReposStatus())]
        }
         if (operatingSystemService.isReady()) {
-            model << [label:"Throughput on primary interface", value:
-                networkingService.formatThroughput(realTimeStatisticsService
-                                                    ?.getThroughput())]
-             model << [label:"Used space on root volume", value:
-                operatingSystemService.formatBytes(realTimeStatisticsService
-                                                    ?.getSystemUsedDiskspace())]
-             model << [label:"Used space by repositories", value:
-                operatingSystemService.formatBytes(realTimeStatisticsService
-                                                    ?.getRepoUsedDiskspace())]
-             model << [label:"Free space on repository volume", value:
-                operatingSystemService.formatBytes(realTimeStatisticsService
-                                                 ?.getRepoAvailableDiskspace())]
+            model << [label: message(code: 'status.page.status.throughput'), 
+                value: networkingService.formatThroughput(
+                    realTimeStatisticsService?.getThroughput())]
+             model << [label: message(code: 'status.page.status.space.system'),
+                 value: operatingSystemService.formatBytes(
+                     realTimeStatisticsService?.getSystemUsedDiskspace())]
+             model << [label: message(code: 'status.page.status.space.repos'),
+                 value: operatingSystemService.formatBytes(
+                     realTimeStatisticsService?.getRepoUsedDiskspace())]
+             model << [label: message(code: 'status.page.status.space.avail'),
+                 value: operatingSystemService.formatBytes(
+                     realTimeStatisticsService?.getRepoAvailableDiskspace())]
         }
         if (server.replica) {
-            model << [label:"Latency from master", value: 
-                operatingSystemService.truncate(
-                    realTimeStatisticsService?.getLatency(), 2) + " ms"]
-            model << [label:"Users in local cache", value: 
-                realTimeStatisticsService?.getNumUsersCached()]
-            model << [label:"User cache timeout", value: 
-                currentConfig.positiveExpirationRate + " minutes"]
-            model << [label:"User cache hit %", value: 
-                operatingSystemService.truncate(realTimeStatisticsService
-                         ?.getUserCachePercentageHit() * 100, 2) + " %"]
+            model << [label: message(code: 'status.page.status.master_latency'),
+                value:  operatingSystemService.truncate(
+                    realTimeStatisticsService?.getLatency(), 2) + " " +
+                    message(code: 'general.measurement.milliseconds.short')]
+            model << [label: message(
+                code: 'status.page.status.users_cache.number'),
+                value: realTimeStatisticsService?.getNumUsersCached()]
+            model << [label: message(
+                code: 'status.page.status.users_cache.timeout'),
+                value: currentConfig.positiveExpirationRate + " " + 
+                    message(code: 'general.measurement.minutes')]
+            model << [label: message(
+                code: 'status.page.status.users_cache.percent'),
+                value: operatingSystemService.truncate(
+                    realTimeStatisticsService?.getUserCachePercentageHit() *
+                        100, 2) + " %"]
         }
         return model
    }
@@ -174,7 +179,7 @@ class StatusController {
     def start = {
         def server = lifecycleService.getServer()
         if (!server) {
-            flash.error = "Server data not found."
+            flash.error = message(code: 'server.error.general')
             redirect action: 'index', id: params.id
             return
         }
@@ -184,19 +189,18 @@ class StatusController {
             try {
                 def result = lifecycleService.startServer()
                 if (result < 0) {
-                    flash.warn = "Subversion server was already running."
+                    flash.warn = message(code: 'server.status.alreadyRunning')
                 } else if (result == 0) {
-                    flash.message = "Subversion server is running."
+                    flash.message = message(code: 'server.status.isRunning')
                 } else {
-                    flash.error = "There was a problem starting the " +
-                        "Subversion server!"
+                    flash.error = message(code: 'server.status.errorStarting')
                 }
             } catch (CantBindPortException startServiceException) {
                 flash.error = startServiceException.getMessage()
             }
 
         } else {
-            flash.error = "Invalid Subversion server settings!"
+            flash.error = message(code: 'server.status.invalidSettings')
         }
 
         redirect(action:'index')
@@ -205,7 +209,7 @@ class StatusController {
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
     def stop = {
         lifecycleService.stopServer()
-        flash.message = "The Subversion server has been stopped."
+        flash.message = message(code: 'server.status.stopped')
         redirect(action:'index')
     }
 }

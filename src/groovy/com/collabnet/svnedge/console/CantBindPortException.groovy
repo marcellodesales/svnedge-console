@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder;
+
 /**
  * This exception is used to capture the error exceptions of starting the
  * Subversion server while another OS process is running on a given
@@ -26,6 +28,8 @@ package com.collabnet.svnedge.console
  *
  */
 class CantBindPortException extends Exception {
+    
+    def appHolder = ApplicationHolder.application
 
     /**
      * The port number that was attempted to be used. 
@@ -97,8 +101,9 @@ class CantBindPortException extends Exception {
 
     @Override
     public String getMessage() {
-        return "The server could not bind to port '${this.portNumber}'; " +
-            "check permission to use the port and that another process is " +
-            "not using the port."
+        def key = 'server.error.cantBindPort'
+        def args = [this.portNumber] as String[]
+        def appCtx = appHolder.getMainContext()
+        return appCtx.getMessage(key, args, Locale.getDefault())
     }
 }
