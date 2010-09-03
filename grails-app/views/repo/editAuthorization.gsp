@@ -2,12 +2,12 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title>Repository Access Rules</title>
+    <title><g:message code="repository.page.editAuthorization.title" /></title>
 </head>
 
 
 <content tag="title">
-    Repositories
+    <g:message code="repository.page.leftnav.title" />
 </content>
 
 <g:render template="leftNav"/>
@@ -21,7 +21,7 @@
 
 <table class="Container">
 <tr class="ContainerHeader">
-    <td colspan="2">Repository Access Rules</td>
+    <td colspan="2"><g:message code="repository.page.editAuthorization.header" /></td>
 </tr>
 
 
@@ -37,7 +37,7 @@
     <tr class="ContainerFooter">
         <td colspan="2">
             <div class="AlignRight">
-                <input class="Button save" type="submit" value="Save"/>
+                <input class="Button save" type="submit" value="${message(code:'repository.page.editAuthorization.button.save')}"/>
             </div>
 
         </td>

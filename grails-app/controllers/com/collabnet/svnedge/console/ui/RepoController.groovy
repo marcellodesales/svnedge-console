@@ -27,21 +27,19 @@ import com.collabnet.svnedge.console.Server
  */
 class AuthzRulesCommand {
    String accessRules
+   def errors
    static constraints = {
-           accessRules(blank:false)
+       accessRules(blank:false)
    }
 }
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
 class RepoController {
-    
+
     def svnRepoService
     def serverConfService
     def fileSystemStatisticsService
-    
-    
-    
-    
+
     @Secured(['ROLE_USER'])
     def index = { redirect(action:list,params:params) }
 
@@ -76,15 +74,12 @@ class RepoController {
 
         try {
             svnRepoService.syncRepositories();
-            flash.message = "Subversion repositories are now synchronized. " +
-                    "Imported repositories may need file permissions update " +
-                    "(indicated in the Status field)."
+            flash.message = message(code: 'repository.action.discover.success')
 
         }
         catch (Exception e) {
             log.error("Unable to discover repositories", e)
-            flash.error = "There was a problem reading the repository parent " +
-                    "location. Please check file permissions."
+            flash.error = message(code: 'repository.action.discover.failure')
         }
         redirect(action:list,params:params)
     }
@@ -94,7 +89,8 @@ class RepoController {
         def repo = Repository.get( params.id )
 
         if(!repo) {
-            flash.error = "Repository not found with id ${params.id}"
+            flash.error = message(code: 'repository.action.not.found',
+                [params.id] as String[])
             redirect(action:list)
 
         } else {
@@ -129,12 +125,14 @@ class RepoController {
                 redirect(action:list)
             }
             catch(org.springframework.dao.DataIntegrityViolationException e) {
-                flash.error = "Repository ${params.id} could not be deleted"
+                flash.error = message(code:'repository.action.cant.delete',
+                    [params.id] as String[])
                 redirect(action:show,id:params.id)
             }
         }
         else {
-            flash.error = "Repository not found with id ${params.id}"
+            flash.error = message(code: 'repository.action.not.found',
+                [params.id] as String[])
             redirect(action:list)
         }
     }
@@ -147,11 +145,11 @@ class RepoController {
         if (repo && svnRepoService.validateRepositoryPermissions(repo)) {
             repo.setPermissionsOk (true)
             repo.save(validate:false, flush:true)
-            flash.message = "Permissions are correct, marking OK"
+            flash.message = message(code:'repository.action.permissions.set.ok')
             redirect(action:show,id:params.id)
         }
         else {
-            flash.error = "Repository permissions do not appear to be correct"
+            flash.error =message(code: 'repository.action.permissions.set.notOk')
             redirect(action:show,id:params.id)
         }
     }
@@ -173,17 +171,16 @@ class RepoController {
             def result = svnRepoService
                 .createRepository(repo, params.isTemplate == 'true')
             if (result == 0) {
-                flash.message = "Successfully created repository."
+                flash.message = message(code:'repository.action.save.success')
                 repo.save()
                 redirect(action:show, id:repo.id)
                 success = true
             } else {
-                repo.errors.reject("error.repository.create", "There was a " +
-                    "problem creating repository.")
+                repo.errors.reject('repository.action.save.failure')
             }
         }
         if (!success) {
-            flash.error = "${message(code: 'default.errors.summary')}"
+            flash.error = message(code: 'default.errors.summary')
             render(view:'create', model:[repo:repo])
         }
     }
@@ -202,10 +199,12 @@ class RepoController {
 
         if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
                 cmd.accessRules)) {
-            flash.message = "Successfully saved access permissions."
+            flash.message = message(
+                code: 'repository.action.saveAuthorization.success')
         }
         else {
-            flash.error = "There was a problem saving the access permissions"
+            flash.error = message(
+                code: 'repository.action.saveAuthorization.failure')
         }
         render(view : 'editAuthorization', model : [authRulesCommand : cmd])
 

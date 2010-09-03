@@ -2,13 +2,13 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title>CollabNet Subversion Edge Repositories</title>
+        <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
     </head>
 
 <g:render template="leftNav" />
 
 <content tag="title">
-        Repositories
+   <g:message code="repository.page.leftnav.title" />
 </content>
     
     <body>
@@ -17,27 +17,25 @@
 
     <g:if test="${repositoryInstanceList.size() > 0}">
         <tr class="ContainerHeader">
-          <td colspan="4">Repository List</td>
+          <td colspan="4"><g:message code="repository.page.list.list" /></td>
         </tr>
-        <tr class="ItemListHeader"> 
-    
-                               <g:sortableColumn property="name" title="Name" />
+        <tr class="ItemListHeader">
+           <g:sortableColumn property="name" title="Name" />
 
       <g:if test="${isReplica}">
-              <g:sortableColumn property="lastSyncTime" title="Last Sync Time" />
-              <g:sortableColumn property="lastSyncRev" title="Last Sync Revision" />
-              <g:sortableColumn property="enabled" title="Enabled" />
-              <g:sortableColumn property="status" title="Status" />
+              <g:sortableColumn property="lastSyncTime" title="${message(code:'repository.page.list.replica.lastSyncTime')}" />
+              <g:sortableColumn property="lastSyncRev" title="${message(code:'repository.page.list.replica.lastSyncRevision')}" />
+              <g:sortableColumn property="enabled" title="${message(code:'repository.page.list.replica.enabled')}" />
+              <g:sortableColumn property="status" title="${message(code:'repository.page.list.replica.status')}" />
       </g:if> 
-                               <th>Checkout command</th>
+                               <th><g:message code="repository.page.list.checkout_command" /></th>
       <g:if test="${!isReplica}">
-              <g:sortableColumn property="permissionsOk" title="Status" />
+              <g:sortableColumn property="permissionsOk" title="${message(code:'repository.page.list.status')}" />
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-              <th>Edit</th>
+              <th><g:message code="repository.page.list.edit" /></th>
         </g:ifAnyGranted>
       </g:if>
                         </tr>
-                    </thead>
                     <tbody>
                     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
 <g:if test="${isReplica}">
@@ -58,10 +56,10 @@
       <g:if test="${isReplica}">
                 <g:if test="${repositoryInstance.lastSyncTime > 0}">
                   <td><g:formatDate date="${new Date(repositoryInstance.lastSyncTime)}"
-                                    format="yyyy-MM-dd HH:mm"/></td>
+                                    format="yyyy-MM-dd HH:mm:ss z"/></td>
                 </g:if>
                 <g:else>
-                  <td>Not yet updated.</td>
+                  <td><g:message code="repository.page.list.replica.notUdated" /></td>
                 </g:else>
                 <td>${fieldValue(bean:repositoryInstance, field:'lastSyncRev')}</td>
                 <td>${fieldValue(bean:repositoryInstance, field:'enabled')}</td>
@@ -74,16 +72,16 @@
       <g:if test="${!isReplica}">
                   <td>
                     <g:if test="${repositoryInstance.permissionsOk}">
-                      <span style="color:green">OK</span>
+                      <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
                     </g:if>
                     <g:else>
-                      <span style="color:red">May Need Permissions Fix</span>
+                      <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
                     </g:else>
 
                   </td>
 
       <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-                            <td><g:link action="show" id="${repositoryInstance.id}">Edit</g:link></td>
+                            <td><g:link action="show" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.edit" /></g:link></td>
       </g:ifAnyGranted>
       </g:if> 
                         </tr>
@@ -101,11 +99,10 @@
 
     <g:else>
       <g:if test="${isReplica}">
-        <p>There are no repositories yet. Replication is initiated from the master.</p>  
+        <p><g:message code="repository.page.list.replica.noRepos" /></p>
       </g:if>
       <g:else>
-        <p>There are no repositories yet.  You may create a new repository
-        using the navigation link.</p>  
+        <p><g:message code="repository.page.list.noRepos" /></p>
       </g:else>
     </g:else>
 
