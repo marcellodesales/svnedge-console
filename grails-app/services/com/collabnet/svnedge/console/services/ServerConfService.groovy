@@ -600,6 +600,7 @@ SSLRandomSeed connect builtin
 SSLEngine on
 SSLCertificateFile    "${confDirPath}/server.crt"
 SSLCertificateKeyFile "${confDirPath}/server.key"
+SSLSessionCache       "shmcb:${dataDirPath}/run/ssl_scache(512000)"
 ${extraconf}
 """
         }
