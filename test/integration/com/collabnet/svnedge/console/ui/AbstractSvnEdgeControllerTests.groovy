@@ -7,7 +7,7 @@ import java.util.Properties;
 import grails.test.ControllerUnitTestCase;
 import groovy.lang.MetaClass;
 
-public class SvnEdgeAbstractControllerTests extends ControllerUnitTestCase {
+public abstract class AbstractSvnEdgeControllerTests extends ControllerUnitTestCase {
 
     def props
 
