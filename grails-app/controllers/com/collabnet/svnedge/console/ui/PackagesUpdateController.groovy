@@ -66,8 +66,8 @@ class PackagesUpdateController {
                 flash.warn = "New Updates Available!"
             }
             if (this.packagesUpdateService.systemNeedsRestart()) {
-                flash.warn = this.packagesUpdateService.
-                        getSystemNeedsRestartMessage()
+                flash.warn = message(code:
+                    'packagesUpdate.status.updates.requiresRestart')
             }
         }
 
@@ -88,15 +88,22 @@ class PackagesUpdateController {
         ]
     }
 
+    def getUpdateMessage() {
+        def msg = message(code: 'packagesUpdate.status.updates.available')
+        def download = message(code:'packagesUpdate.status.updates.forDownload')
+        return msg.replace(download,
+            "<a href='/csvn/packagesUpdate/available'>${download}</a>")
+    }
+
     def addOns = {
         if (!flash.error) {
             if (this.packagesUpdateService.areThereUpdatesAvailable()) {
-                flash.warn = this.packagesUpdateService.
-                        getUpgradeAvailableMessage()
+
+                flash.warn = getUpdateMessage()
             }
             if (this.packagesUpdateService.systemNeedsRestart()) {
-                flash.warn = this.packagesUpdateService.
-                        getSystemNeedsRestartMessage()
+                flash.warn = message(
+                    code: 'packagesUpdate.status.updates.requiresRestart')
             }
         }
 
@@ -120,12 +127,11 @@ class PackagesUpdateController {
     def installed = {
         if (!flash.error) {
             if (this.packagesUpdateService.areThereUpdatesAvailable()) {
-                flash.warn = this.packagesUpdateService.
-                        getUpgradeAvailableMessage()
+                flash.warn = getUpdateMessage()
             }
             if (this.packagesUpdateService.systemNeedsRestart()) {
-                flash.warn = this.packagesUpdateService.
-                        getSystemNeedsRestartMessage()
+                flash.warn = message(
+                    code: 'packagesUpdate.status.updates.requiresRestart')
             }
         }
 

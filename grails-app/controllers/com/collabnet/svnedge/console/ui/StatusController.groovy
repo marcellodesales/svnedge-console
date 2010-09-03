@@ -43,6 +43,13 @@ class StatusController {
     // start and stop actions use POST requests
     static allowedMethods = [start:'POST', stop:'POST']
 
+    def getUpdateMessage() {
+        def msg = message(code: 'packagesUpdate.status.updates.available')
+        def download = message(code:'packagesUpdate.status.updates.forDownload')
+        return msg.replace(download,
+            "<a href='/csvn/packagesUpdate/available'>${download}</a>")
+    }
+
     def index = {
        def server = Server.getServer()
        def defaultMaster = Master.getDefaultMaster()
@@ -83,14 +90,13 @@ class StatusController {
            if (this.packagesUpdateService.hasBeenBootstraped()) {
                if (this.packagesUpdateService.areThereUpdatesAvailable()) {
                    if (!flash.error) {
-                       flash.warn = this.packagesUpdateService.
-                           getUpgradeAvailableMessage()
+                       flash.warn = getUpdateMessage()
                    }
                }
                //system restart has priority over the updates
                if (this.packagesUpdateService.systemNeedsRestart()) {
-                   flash.warn = this.packagesUpdateService.
-                           getSystemNeedsRestartMessage()
+                   flash.warn = message(
+                       code: 'packagesUpdate.status.updates.requiresRestart')
                }
                //if the system has recently been updated
                if (this.packagesUpdateService.hasTheSystemBeenUpdated() || 

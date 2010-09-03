@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.NoRouteToHostException;
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import com.collabnet.svnedge.console.services.PackagesUpdateService;
 import com.collabnet.svnedge.console.util.FileDownloaderCategory;
@@ -39,7 +39,8 @@ import grails.test.*
 
 class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
 
-    def config = ConfigurationHolder.config
+    def grailsApplication
+    def config
     def packagesUpdateService
     def validImageFileDir
     def invalidImagePath
@@ -47,6 +48,8 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
     def currentVersion
 
     protected void setUp() {
+        super.setUp()
+        this.config = grailsApplication.config
         String imageDir = config.svnedge.softwareupdates.imagepath
         this.currentVersion = config.svnedge.softwareupdates.currentVersion
         this.validImageFileDir = new File(imageDir)
@@ -59,7 +62,7 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
         this.packagesUpdateService = new PackagesUpdateService()
 
         try {
-            this.packagesUpdateService.bootstrap(config)
+            this.packagesUpdateService.bootstrap(this.config)
 
         } catch (Exception otherError) {
             otherError.printStackTrace()
@@ -318,12 +321,7 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
             System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             System.out.println("Upgradable")
             this.printPackagesInfoPropeties(pkgsInf)
-            
-            if (pkgsInf.length > 0) {
-                assertNotNull "The upgrade available message must not be " +
-                        "null when there are updates", 
-                        this.packagesUpdateService.getUpgradeAvailableMessage()
-            }
+
         } catch (NoRouteToHostException nrthe) {
             fail(nrthe.getMessage())
         } catch (Exception e) {
@@ -337,22 +335,6 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
             System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             System.out.println("New Add-ons")
             this.printPackagesInfoPropeties(pkgssInfo)
-
-        } catch (NoRouteToHostException nrthe) {
-            fail(nrthe.getMessage())
-        } catch (Exception e) {
-            fail(e.getMessage())
-        }
-    }
-
-    void testGetUpgradableVersionAndMessage() {
-        try {
-            if (this.packagesUpdateService.areThereUpdatesAvailable()) {
-                def uM = this.packagesUpdateService.getUpgradeAvailableMessage()
-                assertNotNull "The upgrade message must not be null when " +
-                        "there there are updates available", uM
-                System.out.println("Upgrade message: ${uM}")
-            }
 
         } catch (NoRouteToHostException nrthe) {
             fail(nrthe.getMessage())

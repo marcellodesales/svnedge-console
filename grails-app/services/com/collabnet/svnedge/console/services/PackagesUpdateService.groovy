@@ -853,20 +853,6 @@ public final class PackagesUpdateService implements InitializingBean {
     }
 
     /**
-     * @return The upgrade message for the web UI
-     */
-    def getUpgradeAvailableMessage() {
-        if (this.areThereUpdates) {
-            def msg = message(code: 'packagesUpdate.status.updates.available')
-            def download = message(code: 'packagesUpdate.status.updates.forDownload')
-            return msg.replace(download,
-                "<a href='/csvn/packagesUpdate/available'>${download}</a>")
-        } else {
-            return null
-        }
-    }
-
-    /**
      * Performs the software installation
      * @param packagesToInstall is the collection of package names to be 
      * installed. Those packages are on the state of updatable.
@@ -943,14 +929,6 @@ public final class PackagesUpdateService implements InitializingBean {
      */
     def systemNeedsRestart() {
         return this.systemNeedsRestart
-    }
-
-    /**
-     * @return the message to display the user when new updates have been
-     *  installed.
-     */
-    def getSystemNeedsRestartMessage() {
-        return message(code: 'packagesUpdate.status.updates.requiresRestart')
     }
 
     /**
