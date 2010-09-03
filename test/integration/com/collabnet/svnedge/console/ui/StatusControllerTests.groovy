@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console.ui
 
 import grails.test.*
 
-class StatusControllerTests extends ControllerUnitTestCase {
+class StatusControllerTests extends SvnEdgeAbstractControllerTests {
 
     def quartzScheduler
     def realTimeStatisticsService
@@ -45,7 +45,7 @@ class StatusControllerTests extends ControllerUnitTestCase {
     }
 
     void testIndex() {
-//        controller.index()
+        controller.index()
     }
 
 }
