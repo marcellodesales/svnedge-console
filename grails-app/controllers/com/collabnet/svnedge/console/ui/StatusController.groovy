@@ -119,8 +119,8 @@ class StatusController {
            }
        } catch (Exception e) {
            e.printStackTrace()
-           flash.error = message(code: 'packagesUpdate.error.general') + ": " +
-               e.getMessage()
+           def msg = message(code: 'packagesUpdate.error.general')
+           flash.error = msg + ":" + e.getMessage()
        }
 
        return [isStarted: isStarted,
