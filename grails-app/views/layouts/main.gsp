@@ -103,7 +103,6 @@
 
         --%>
 
-        <%-- TODO: read names from l10n props --%>
         <g:set var="controllerButtonMap"
                value="${[status: 'status',
                       repo: 'repo',
@@ -120,12 +119,12 @@
                       ]}" />
 
         <g:set var="buttonNameMap"
-               value="${[status: 'Status',
-                      repo: 'Repositories',
-                      user: 'Users',
-                      userCache: 'User Cache',
-                      statistics: 'Statistics',
-                      admin: 'Administration',
+               value="${[status: message(code:'status.main.icon'),
+                      repo: message(code:'repository.main.icon'),
+                      user: message(code:'user.main.icon'),
+                      userCache: message(code:'userCache.main.icon'),
+                      statistics: message(code:'statistics.main.icon'),
+                      admin: message(code:'server.main.icon'),
                       ocn: 'openCollabNet'
                       ]}" />
 
