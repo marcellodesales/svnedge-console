@@ -25,7 +25,7 @@
             <tr class="sitelogo">
               <td><g:link controller="status"><img 
                  src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
-                 border="0" alt="${message(code:'user.page.login.home') }"/></g:link></td>
+                 border="0" alt="${message(code:'layout.page.home') }"/></g:link></td>
             </tr>
           </table>
         </td>
@@ -35,11 +35,11 @@
               <tr class="mastHeadLink" valign="top">
                 <td valign="middle">
                 <g:isNotLoggedIn>
-                    <g:link controller="login"><g:message code="user.page.login" />
+                    <g:link controller="login"><g:message code="layout.page.login" />
                     </g:link>
                 </g:isNotLoggedIn>
                 <g:isLoggedIn>
-                    <g:message code="user.page.login.loggedAs" />:&nbsp;
+                    <g:message code="layout.page.loggedAs" />:&nbsp;
                     <g:link controller="user" action="showSelf">
                     <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
                     </g:link>
@@ -51,7 +51,7 @@
                 </td>
                 <td valign="middle">
                     <g:link controller="logout">
-                        <g:message code="user.page.login.logout" />
+                        <g:message code="layout.page.logout" />
                     </g:link>
                 </g:isLoggedIn>
                 </td>
@@ -248,8 +248,8 @@
       <div id="footer">
         <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
         <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
-        width="102" height="31" alt="${message(code:'layout.page.main.poweredBy') }" border="0"/></a></div>
-        &#169; 2010 CollabNet. CollabNet <g:message code="layout.page.main.trademark" /> CollabNet, Inc.
+        width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
+        &#169; 2010 CollabNet. CollabNet <g:message code="layout.page.trademark" /> CollabNet, Inc.
       </div>
     </div>
     <!-- TeamForge content-area end -->
