@@ -83,17 +83,18 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         get('/login/auth')
         assertStatus(200)
 
-        if (this.response.contentAsString.contains("LOGOUT")) {
+        if (this.response.contentAsString.contains(
+                getMessage("layout.page.login"))) {
             this.logout()
         }
-
+        def login = getMessage("layout.page.login")
         form('loginForm') {
             j_username = 'admin'
             j_password = 'admin'
-            click 'Login'
+            click login
         }
-        
-        assertContentContains()
+
+        assertContentContains(getMessage("layout.page.loggedAs"))
     }
 
     /**
@@ -104,8 +105,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
      * using the default locale.
      */
     protected def getMessage(String key) {
-            def appCtx = app.getMainContext()
-            return appCtx.getMessage(key, null, Locale.getDefault())
+        return this.getMessage(key, null)
     }
 
     /**
@@ -125,8 +125,9 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
      * Performs the logout by clicking on the link.
      */
     protected void logout() {
-        if (this.response.contentAsString.contains("LOGOUT")) {
-            click 'LOGOUT'
+        def logout = getMessage("layout.page.logout")
+        if (this.response.contentAsString.contains(logout)) {
+            click logout
         }
         
     }

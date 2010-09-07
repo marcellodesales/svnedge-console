@@ -15,26 +15,53 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.auth
+package com.collabnet.svnedge.console.ui
+
+import org.codehaus.groovy.grails.commons.ApplicationHolder;
 
 class LoginFunctionalTests extends functionaltestplugin.FunctionalTestCase {
+
+    /**
+     * The default grails application instance.
+     * The same as adding the autowire of the grails application bean.
+     * def grailsApplication
+     */
+    private app = ApplicationHolder.application
+
+    /**
+     * Gets an i18n message from the messages.properties file without providing
+     * parameters using the default locale.
+     * @param key is the key in the messages.properties file.
+     * @return the message related to the key in the messages.properties file
+     * using the default locale.
+     */
+    public String getMessage(String key, params) {
+        def appCtx = app.getMainContext()
+        return appCtx.getMessage(key, params, Locale.getDefault())
+    }
+
+    public String getMessage(String key) {
+        return this.getMessage(key, null)
+    }
+
     void testRootLogin() {
         get('/login/auth')
         assertStatus 200
 
+        def login = getMessage("layout.page.login")
         form('loginForm') {
             j_username = 'admin'
             j_password = 'admin'
-            click 'Login'
+            click login
         }
 
         assertStatus 200
-        assertContentContains 'Logged in as:' 
+        assertContentContains getMessage("layout.page.loggedAs")
         assertContentContains 'Administrator&nbsp;(admin)'
 
-        click 'LOGOUT'
+        click getMessage("layout.page.logout")
         assertStatus 200
-        assertContentContains 'Login'
+        assertContentContains login
     }
 
 /* Will we have non-admin logins?
@@ -61,13 +88,15 @@ class LoginFunctionalTests extends functionaltestplugin.FunctionalTestCase {
     void testFailLogin() {
         get('/login/auth')
         assertStatus 200
-        
+
+        def login = getMessage("layout.page.login")
         form('loginForm') {
             j_username = 'marcello'
             j_password = 'xyzt'
-            click 'Login'
+            click login
         }
 
-        assertContentContains 'wrong username/password'
+        assertContentContains getMessage("user.credential.incorrect", 
+            ["marcello"] as String[])
     }
 }
