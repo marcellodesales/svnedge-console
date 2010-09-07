@@ -112,7 +112,7 @@ class UserController {
             log.info("User created: " + userInstance.username)
             lifecycleService.setSvnAuth(userInstance, params.passwd)
             flash.message = message(code: "default.created.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                            userInstance.username])
             redirect(action: "show", id: userInstance.id)
         }
@@ -136,13 +136,13 @@ class UserController {
         def userInstance = User.get(params.id)
         if (!userInstance) {
             flash.error = message(code: "default.not.found.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                     params.id])
             redirect(action: "list")
         }
         else if (!canEdit(params.id)) {
             flash.error= message(code: "default.not.authorized.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                            params.id])
             redirect(action: "list")
         }
@@ -155,13 +155,13 @@ class UserController {
         def userInstance = User.get(params.id)
         if (!userInstance) {
             flash.message = message(code: "default.not.found.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                            params.id])
             redirect(action: "list")
         }
         else if (!canEdit(params.id)) {
             flash.error= message(code: "default.not.authorized.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                            params.id])
             redirect(action: "list")
         }
@@ -188,9 +188,8 @@ class UserController {
 
                     userInstance.errors.rejectValue("version", 
                             "default.optimistic.locking.failure", 
-                            [message(code: 'user.label', default: 'User')] as 
-                                Object[], "Another user has updated this " +
-                                "User while you were editing")
+                            [message(code: 'user.label')] as
+                                Object[], message(code: 'default.optimistic.locking.failure'))
                     render(view: "edit", model: [userInstance: userInstance])
                     return
                 }
@@ -201,8 +200,7 @@ class UserController {
             if(!canEdit(params.id)) {
 
                 userInstance.errors.rejectValue("version", 
-                        "user.authorities.auth", "You do not have the " +
-                        "authority to make this change")
+                        "user.authorities.auth", message(code: 'default.not.authorized.message'))
                 render(view: "edit", model: [userInstance: userInstance])
                 return
             }
@@ -317,7 +315,7 @@ class UserController {
             if (success) {
                 log.info("User updated: " + userInstance.username)
                 flash.message = message(code: "default.updated.message", 
-                        args: [message(code: "user.label", default: "User"), 
+                        args: [message(code: "user.label"),
                                userInstance.username])
                 redirect(action: "show", id: userInstance.id)
             }
@@ -339,7 +337,7 @@ class UserController {
         }
         else {
             flash.error = message(code: "default.not.found.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"),
                            params.id])
             redirect(action: "list")
         }
@@ -369,20 +367,20 @@ class UserController {
                 }
 
                 flash.message = message(code: "default.deleted.message", 
-                        args: [message(code: "user.label", default: "User"), 
+                        args: [message(code: "user.label"),
                                userInstance.username])
                 redirect(action: "list")
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
                 flash.error = message(code: "default.not.deleted.message", 
-                        args: [message(code: "user.label", default: "User"), 
+                        args: [message(code: "user.label"),
                                userInstance.username])
                 redirect(action: "show", id: params.id)
             }
         }
         else {
             flash.error = message(code: "default.not.found.message", 
-                    args: [message(code: "user.label", default: "User"), 
+                    args: [message(code: "user.label"), 
                            params.id])
             redirect(action: "list")
         }

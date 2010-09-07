@@ -7,26 +7,7 @@
     Users
 </content>
 
-<g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-<content tag="leftMenu">
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="list">User List</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="create">New User</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="role" action="list">Role List</g:link>
-  </div>
-
-</content>
-</g:ifAnyGranted>
+<g:render template="leftNav" />
 
 <body>
 

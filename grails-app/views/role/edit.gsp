@@ -3,30 +3,14 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <g:set var="entityName" value="${message(code: 'role.label', default: 'Role')}"/>
-  <title><g:message code="default.edit.label" args="[entityName]"/></title>
+  <title><g:message code="role.page.edit.title"/></title>
 </head>
 <content tag="title">
-  Roles
+  <g:message code="role.page.header"/>
 </content>
-<content tag="leftMenu">
 
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir: '/images/icons', file: 'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="user" action="list">User List</g:link>
-  </div>
+<g:render template="../user/leftNav" />
 
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir: '/images/icons', file: 'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="user" action="create">New User</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir: '/images/icons', file: 'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="role" action="list">Role List</g:link>
-  </div>
-
-</content>
 <body>
 <g:hasErrors bean="${roleInstance}">
     <div class="errors">
@@ -35,14 +19,14 @@
   </g:hasErrors>
     <table class="Container"> 
         <tr class="ContainerHeader">
-            <td colspan="2"><g:message code="default.edit.label" args="[entityName]" default="Edit Role"/></td>        
+            <td colspan="2"><g:message code="role.page.edit.title"/></td>
         </tr> 
   <g:form method="post">
     <g:hiddenField name="id" value="${roleInstance?.id}"/>
     <g:hiddenField name="version" value="${roleInstance?.version}"/>
         <tr class="prop">
           <td valign="top" class="name">
-            <label><g:message code="role.authority.label" default="Authority"/>:</label>
+            <label><g:message code="role.authority.label"/>:</label>
           </td>
           <td width="100%" valign="top" class="value ${hasErrors(bean: roleInstance, field: 'authority', 'errors')}">
             ${fieldValue(bean: roleInstance, field: "authority")}
@@ -51,7 +35,7 @@
 
         <tr class="prop">
           <td valign="top" class="name">
-            <label for="description"><g:message code="role.description.label" default="Description"/>:</label>
+            <label for="description"><g:message code="role.description.label"/>:</label>
           </td>
           <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'description', 'errors')}">
             <g:textArea name="description" value="${roleInstance?.description}" />
@@ -60,17 +44,17 @@
 
         <tr class="prop">
           <td valign="top" class="name" style="white-space: nowrap;">
-            <label for="people"><g:message code="role.people.label" default="Users Having Role"/>:</label>
+            <label for="people"><g:message code="role.people.label"/>:</label>
           </td>
           <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'people', 'errors')}">
             <g:select name="people" from="${userList}" multiple="yes" optionKey="id" optionValue="username" size="5" value="${roleInstance?.people}"/>
-            <i><strong>Note:</strong> You cannot add or remove yourself from a Role so the logged-in account is not shown.</i> 
+            <i><g:message code="role.page.edit.warning.selfedit"/></i> 
           </td>
         </tr>
         <tr class="ContainerFooter">
           <td colspan="2">
              <div class="AlignRight">
-               <g:actionSubmit class="Button save" action="update" value="${message(code: 'default.button.update.label', default: 'Update')}"/>
+               <g:actionSubmit class="Button save" action="update" value="${message(code: 'default.button.update.label')}"/>
              </div>
           </td>
         </tr>

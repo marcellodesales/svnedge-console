@@ -1,42 +1,25 @@
 <head>
     <meta name="layout" content="main" />
-    <title>CollabNet Subversion Edge Users</title>
+    <title><g:message code="user.page.list.title"/></title>
 </head>
 
 
 <content tag="title">
-    Users
+  <g:message code="user.page.header"/>
 </content>
-<content tag="leftMenu">
 
-
-  <div class="ImageListParentSelectedNoTop">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="list">User List</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="create">New User</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="role" action="list">Role List</g:link>
-  </div>
-
-</content>
+<g:render template="leftNav" />
 
 <body>
             <table class="Container">
               <tbody>
               <tr class="ContainerHeader">
-                <td colspan="5">User List</td>
+                <td colspan="5"><g:message code="user.page.list.header"/></td>
               </tr>
                <tr class="ItemListHeader">
-                    <g:sortableColumn property="username" title="Login Name" />
-                    <g:sortableColumn property="realUserName" title="Full Name" />
-                    <g:sortableColumn property="description" title="Description" />
+                    <g:sortableColumn property="username" title="${message(code: 'user.username.label')}" />
+                    <g:sortableColumn property="realUserName" title="${message(code: 'user.realUserName.label')}" />
+                    <g:sortableColumn property="description" title="${message(code: 'user.description.label')}" />
               </tr>
             </thead>
             <tbody>

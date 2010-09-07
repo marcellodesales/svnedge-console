@@ -1,40 +1,23 @@
 <head>
     <meta name="layout" content="main" />
-    <title>Create User</title>
+    <title><g:message code="user.page.create.title"/></title>
 </head>
 
 
 <content tag="title">
-    Users
+  <g:message code="user.page.header"/>
 </content>
-<content tag="leftMenu">
 
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="list">User List</g:link>
-  </div>
-
-  <div class="ImageListParentSelectedNoTop">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link action="create">New User</g:link>
-  </div>
-
-  <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="role" action="list">Role List</g:link>
-  </div>
-
-</content>
+<g:render template="leftNav" />
 
 <body>
     <table class="Container"> 
         <tr class="ContainerHeader">
-            <td colspan="2">Create User</td>        
+            <td colspan="2"><g:message code="user.page.create.title"/></td>
         </tr>  
         <g:form action="save">
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="username">Login Name:</label></td>
+                        <td valign="top" class="name"><label for="username"><g:message code="user.username.label"/>:</label></td>
                         <td width="100%" valign="top" class="value errors">
                             <input type="text" id="username" name="username" value="${userInstance.username?.encodeAsHTML()}"/>
                           <g:hasErrors bean="${userInstance}" field="username">
@@ -46,7 +29,7 @@
                     </tr>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="realUserName">Full Name:</label></td>
+                        <td valign="top" class="name"><label for="realUserName"><g:message code="user.realUserName.label"/>:</label></td>
                         <td valign="top" class="value errors">
                             <input type="text" id="realUserName" name="realUserName" value="${userInstance.realUserName?.encodeAsHTML()}"/>
                           <g:hasErrors bean="${userInstance}" field="realUserName">
@@ -58,7 +41,7 @@
                     </tr>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="passwd">Password:</label></td>
+                        <td valign="top" class="name"><label for="passwd"><g:message code="user.passwd.label"/>:</label></td>
                         <td valign="top" class="value ${hasErrors(bean:userInstance,field:'passwd','errors')}">
                             <input type="password" id="passwd" name="passwd" value="${userInstance.passwd?.encodeAsHTML()}"/>
                           <g:hasErrors bean="${userInstance}" field="passwd">
@@ -70,14 +53,14 @@
                     </tr>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="description">Description:</label></td>
+                        <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/>:</label></td>
                         <td valign="top" class="value ${hasErrors(bean:userInstance,field:'description','errors')}">
                             <input type="text" id="description" name="description" value="${userInstance.description?.encodeAsHTML()}"/>
                         </td>
                     </tr>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="email">Email:</label></td>
+                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/>:</label></td>
                         <td valign="top" class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
                             <input type="text" id="email" name="email" value="${userInstance.email?.encodeAsHTML()}"/>
                             <g:hasErrors bean="${userInstance}" field="email">
@@ -90,7 +73,7 @@
 
                     <tr class="prop">
                         <td valign="top" class="name" style="white-space: nowrap;">
-                          <label for="authorities"><g:message code="user.authorities.label" default="Roles Granted" />:</label>
+                          <label for="authorities"><g:message code="user.authorities.label" />:</label>
                         </td>
                         <td valign="top" class="value ${hasErrors(bean: userInstance, field: 'authorities', 'errors')}">
                           <g:each in="${roleList}" var="role">
@@ -104,7 +87,7 @@
                                         <tr class="ContainerFooter">
                      <td colspan="2">
 				          <div class="AlignRight">
-				              <input class="Button save" type="submit" value="Create" />
+				              <input class="Button save" type="submit" value="${message(code: 'default.button.create.label')}" />
 				            </div>
           
         </td>
