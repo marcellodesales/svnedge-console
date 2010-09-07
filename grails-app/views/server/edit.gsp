@@ -138,23 +138,6 @@
     Only one or the other is necessary and both require root privileges to setup. 
 </p>
 <ul>
-<li>Start httpd under sudo. <a id="toggleSudo" href="#" 
-  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;">Show commands</a>
-<div id="sudoInstructions" style="border: 1px;">
-<p>
-The svn server can be started with root privileges allowing it to bind to the port, after which the 
-server will reduce its privileges.  To use this method and allow starting and stopping the server from 
-the management console, setup sudo for the httpd binary to work without a password.
-</p>
-<ul>
-<li><code>/usr/sbin/visudo</code></li>
-<li>Add the following line to the end of the file:<br/><br/>
-<code>${console_user}    ALL=(ALL) NOPASSWD: ${csvnHome}/bin/httpd</code>
-<br/>
-</li>
-</ul>
-</div>
-</li>
 <li>Use bind helper application. <a id="toggleBind" href="#" 
   onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;">Show commands</a>
 <div id="bindInstructions" style="border: 1px;">
@@ -169,6 +152,22 @@ commands below.  <em>These must be executed as root or sudo.</em>
 <br/>
 chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
 </blockquote>
+</div>
+</li>
+<li>Start httpd under sudo. <a id="toggleSudo" href="#" 
+  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;">Show commands</a>
+<div id="sudoInstructions" style="border: 1px;">
+<p>
+The svn server can be started with root privileges allowing it to bind to the port, after which the 
+server will reduce its privileges.  To use this method and allow starting and stopping the server from 
+the management console, setup sudo for the httpd binary to work without a password.
+</p>
+<ul>
+<li>Use <code>/usr/sbin/visudo</code> to add the following two lines to the end of the sudoers file:<br/><br/>
+<code>Defaults env_keep += "PYTHONPATH"<br/>
+${console_user}    ALL=(ALL) NOPASSWD: ${csvnHome}/bin/httpd</code>
+</li>
+</ul>
 </div>
 </li>
 </ul>

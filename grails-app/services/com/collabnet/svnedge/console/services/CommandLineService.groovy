@@ -85,7 +85,7 @@ class CommandLineService {
     private static final Collection<String> INTERESTING_ENVVARS = 
         new HashSet(["JAVA_HOME", "LD_PRELOAD", "PWD", "HOSTNAME", 
         "SSH_TTY", "LOGNAME", "LD_LIBRARY_PATH", "SSH_CONNECTION", 
-        "SHELL", "PATH", "USER", "HOME"]) 
+        "SHELL", "PATH", "USER", "HOME", "PYTHONPATH"]) 
 
     private Process startProcess(String... command, Map<String, String> addEnv) {
         ProcessBuilder pb = new ProcessBuilder(command)
