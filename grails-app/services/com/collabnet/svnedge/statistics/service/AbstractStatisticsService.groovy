@@ -43,7 +43,7 @@ abstract class AbstractStatisticsService {
      * @return the message related to the key in the messages.properties file
      * using the default locale.
      */
-    private def getMessage(String key) {
+    protected def getMessage(String key) {
         def appCtx = app.getMainContext()
         return appCtx.getMessage(key, null, Locale.getDefault())
     }

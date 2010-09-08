@@ -36,8 +36,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
 
     def operatingSystemService
 
-    public String CATEGORY_NAME = 
-        getMessage("statistics.graph.leftNav.category.system")
+    private String CATEGORY_NAME = "FIXME! file stats category name"
+        //getMessage("statistics.graph.leftNav.category.system")
     public static String STATGROUP_NAME = "FileSystem"
     public static String SYSUSED_NAME = "sysUsed"
     public static String REPOFREE_NAME = "repoFree"
