@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console.ui
 
 import grails.test.*
 
-class StatisticsControllerTests extends ControllerUnitTestCase {
+class StatisticsControllerTests extends AbstractSvnEdgeControllerTests {
     
     def operatingSystemService
     def userCacheStatisticsService
