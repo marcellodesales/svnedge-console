@@ -106,9 +106,7 @@ class ServerController {
 
     def editAuthentication = {
         def server = Server.getServer()
-        def msg = message(code: "server.page.edit.authentication.confirm")
         return [server: server,
-                editAuthConfirmMessage: msg,
                 csvnConf: serverConfService.confDirPath,
                 isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
@@ -200,11 +198,9 @@ class ServerController {
         def showPortInstructions = Integer.parseInt(portValue) < 1024 &&
             !lifecycleService.isDefaultPortAllowed()
         def config = ConfigurationHolder.config
-        
-        def msg = message(code:"server.page.edit.authentication.confirm")
+
         return [
             server : server,
-            editAuthConfirmMessage: msg,
             isStarted: lifecycleService.isStarted(),
             networkInterfaces: networkInterfaces,
             ipv4Addresses: networkingService.getIPv4Addresses(),

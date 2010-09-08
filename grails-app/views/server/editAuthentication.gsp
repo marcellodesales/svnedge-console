@@ -4,6 +4,8 @@
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
 
+    <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
+
     <g:javascript>
 
   var pristineFieldValues = "${server.allowAnonymousReadAccess}"
