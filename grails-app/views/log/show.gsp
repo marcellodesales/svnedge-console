@@ -2,11 +2,11 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>Log File View</title>
+  <title>CollabNet Subversion Edge <g:message code="logs.page.show.title" args="${[params.fileName]}"/></title>
 </head>
 
 <content tag="title">
-    Administration
+   <g:message code="server.page.edit.header" />
 </content>
 
 <g:render template="/server/leftNav" />
@@ -18,7 +18,7 @@
  <table class="Container">
   <tbody>
     <tr class="ContainerHeader">
-      <td>Log: ${params.fileName} &nbsp;Size: ${fileSize} &nbsp;Last Modification: ${fileModification}</td>
+      <td><g:message code="logs.page.show.header.fileName" />: ${params.fileName} &nbsp;<g:message code="logs.page.show.header.size" />: ${fileSize} &nbsp;<g:message code="logs.page.show.header.lastModification" />: ${fileModification}</td>
     </tr>
     <g:if test="${file}">  
     <tr>
@@ -35,7 +35,7 @@
     </g:if>
   <g:else>
     <tr class="ItemListNoData">
-        <td colspan="3">No results found.</td>
+        <td colspan="3"><g:message code="logs.page.show.header.fileNotFound" args="${[params.fileName]}"/></td>
       </tr>
   </g:else>
    
@@ -43,13 +43,12 @@
         <td >
           <div class="AlignRight">
               <div class="Button"><div class="Middle">                
-                <g:link target="_blank" action="show" params="[fileName : file.name, rawView : true]" class="Button">View Raw Log File&#133;</g:link>
+                <g:link target="_blank" action="show" params="[fileName : file.name, rawView : true]" class="Button"><g:message code="logs.page.show.button.viewRaw" /> &#133;</g:link>
               </div></div>
               <div class="Button"><div class="Middle">
-                <g:link action="list" class="Button">Return</g:link>
+                <g:link action="list" class="Button"><g:message code="logs.page.show.button.return" /></g:link>
               </div></div>
             </div>
-          </div>
         </td>
       </tr>
    </tbody>  

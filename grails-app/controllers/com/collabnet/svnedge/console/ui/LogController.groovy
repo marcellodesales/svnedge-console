@@ -51,8 +51,9 @@ class LogController {
 
     def operatingSystemService
     def logManagementService
-    
-    def static final dateFormatter = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z")
+
+    def static final dateFormatter = 
+        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z")
 
     static allowedMethods = [saveConfiguration : 'POST']
 
@@ -85,26 +86,26 @@ class LogController {
             logManagementService.updateLogConfiguration(cmd.consoleLevel,
                     cmd.apacheLevel, 
                     cmd.pruneLogsOlderThan)
-            flash.message = "Logging configuration was saved."
+            flash.message = message(code: 
+                'logs.action.saveConfiguration.success')
             redirect(action: 'configure')
         }
         else {
 
-            flash.error =  "${message(code: 'default.errors.summary')}"
+            flash.error = message(code: 'default.errors.summary')
             render(view: 'configure', model : [ logConfigurationCommand : cmd,
                     consoleLevels : ConsoleLogLevel.values(),
                     apacheLevels : ApacheLogLevel.values()
                     ])
         }
-
-
     }
 
     def configure = {
 
-        def cmd = new LogConfigurationCommand(consoleLevel : logManagementService.consoleLevel, 
-                apacheLevel : logManagementService.apacheLevel, 
-                pruneLogsOlderThan : logManagementService.logDaysToKeep)
+        def cmd = new LogConfigurationCommand(
+            consoleLevel : logManagementService.consoleLevel,
+            apacheLevel : logManagementService.apacheLevel,
+            pruneLogsOlderThan : logManagementService.logDaysToKeep)
 
         render(view: "configure", model: [ logConfigurationCommand : cmd,
                 consoleLevels : ConsoleLogLevel.values(),
@@ -115,7 +116,7 @@ class LogController {
     def show = {
         def logName = params.fileName
         if (!logName || logName.trim().equals("")) {
-            flash.error = "The name of the log file must be provided."
+            flash.error = message(code: 'logs.action.show.fileName.empty')
             redirect(action: "list")
             return
         }

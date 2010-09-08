@@ -2,11 +2,11 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>CollabNet Subversion Edge Logs</title>
+  <title>CollabNet Subversion Edge <g:message code="logs.page.list.title" /></title>
 </head>
 
 <content tag="title">
-    Administration
+    <g:message code="server.page.edit.header" />
 </content>
 
 %{--
@@ -16,19 +16,17 @@
 
 <body>
 
-  <g:render template="/common/tabs"
-      model="[tabs:[
-        [action:'list', label:'Available Files', active: true],
-        [action:'configure', label:'Configure', active: false]
-        ]]" />
+  <g:set var="tabArray" value="${[[active: true, label: message(code:'logs.page.tabs.available')]]}" />
+  <g:set var="tabArray" value="${tabArray << [action:'configure', label: message(code:'logs.page.tabs.settings')]}" />
+  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
   <table class="Container">
     <tbody>
     <tr class="ItemListHeader">
       
-      <g:sortableColumn property="name" title="File Name"/>
-      <g:sortableColumn property="date" title="Date"/>
-      <g:sortableColumn property="size" title="Size"/>
+      <g:sortableColumn property="name" title="${message(code:'logs.page.list.column.name')}"/>
+      <g:sortableColumn property="date" title="${message(code:'logs.page.list.column.date')}"/>
+      <g:sortableColumn property="size" title="${message(code:'logs.page.list.column.size')}"/>
     </tr>
 
     <g:if test="${files.size() > 0}">
@@ -47,7 +45,7 @@
     </g:if>
     <g:else>
       <tr class="ItemListNoData">
-        <td colspan="3">No results found.</td>
+        <td colspan="3"><g:message code="logs.page.list.noFilesFound" />.</td>
       </tr>
     </g:else>
 
