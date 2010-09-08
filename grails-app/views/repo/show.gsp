@@ -8,7 +8,7 @@
 <g:render template="leftNav" />
 
 <content tag="title">
-     <g:message code="repository.page.leftnav.title=Repositories" />
+     <g:message code="repository.page.leftnav.title" />
 </content>
 
     <body>

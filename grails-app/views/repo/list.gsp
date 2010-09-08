@@ -17,7 +17,7 @@
 
     <g:if test="${repositoryInstanceList.size() > 0}">
         <tr class="ContainerHeader">
-          <td colspan="4"><g:message code="repository.page.list.list" /></td>
+          <td colspan="4"><g:message code="repository.page.list.header" /></td>
         </tr>
         <tr class="ItemListHeader">
            <g:sortableColumn property="name" title="Name" />
