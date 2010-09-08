@@ -19,6 +19,7 @@ package com.collabnet.svnedge.statistics.service
 
 import com.collabnet.svnedge.replica.event.ReplicaEvent
 import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.console.util.StatisticsTime
 import com.collabnet.svnedge.jobs.ConsolidateStatJob
 import com.collabnet.svnedge.jobs.DeleteStatJob
 import com.collabnet.svnedge.statistics.Interval
@@ -26,36 +27,26 @@ import com.collabnet.svnedge.statistics.StatAction
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder;
 import org.quartz.SchedulerException
 
 abstract class AbstractStatisticsService {
-    public static int MAX_DISPLAY_POINTS = 500
-    def FIVE_MINUTES = "Five Minutes"
-    def FIVE_MINUTES_SECONDS = 300
-    def HOUR = "One Hour"
-    def HOUR_SECONDS = 3600 
-    def DAY = "One Day"
-    def DAY_SECONDS = 86400
-    def WEEK = "One Week"
-    def WEEK_SECONDS = 604800
-    def THIRTY_DAYS = "30 Days"
-    def THIRTY_DAYS_SECONDS = 2592000    
-    
-    
-    static def timespans = [[index: 0, title: "Last Hour", seconds: 60*60, 
-                      pattern: "HH:mm"],
-                     [index: 1, title: "Last Day", seconds: 60*60*24,
-                      pattern: "HH:mm"],
-                     [index: 2, title: "Last Week", seconds: 60*60*24*7,
-                      pattern: "MM/dd HH:mm"],
-                     [index: 3, title: "Last Month", seconds: 60*60*24*30,
-                      pattern: "MM/dd"]]    
 
-    
-    def getTimespans() {
-        timespans
+    public static int MAX_DISPLAY_POINTS = 500
+
+    private app = ApplicationHolder.application
+
+    /**
+     * Gets an i18n message from the messages.properties file without providing
+     * parameters using the default locale.
+     * @param key is the key in the messages.properties file.
+     * @return the message related to the key in the messages.properties file
+     * using the default locale.
+     */
+    private def getMessage(String key) {
+        def appCtx = app.getMainContext()
+        return appCtx.getMessage(key, null, Locale.getDefault())
     }
-    
 
     /**
      * Checks if a domain object can be created successfully.  Useful
@@ -73,38 +64,42 @@ abstract class AbstractStatisticsService {
      * Add default collect/delete intervals to the StatGroup.
      */
     def addDefaultActions = { statGroup ->
-        Interval five_min = Interval.findByName(FIVE_MINUTES)
+        Interval five_min = Interval.findByName(
+            StatisticsTime.FIVE_MINUTES.toString())
         if (!five_min) {
-            five_min = new Interval(name:FIVE_MINUTES, 
-                                    seconds:FIVE_MINUTES_SECONDS)
+            five_min = new Interval(
+                name: StatisticsTime.FIVE_MINUTES.toString(),
+                seconds: StatisticsTime.FIVE_MINUTES.getSeconds())
             check(five_min)
             five_min.save()
         }
-        Interval hour = Interval.findByName(HOUR)
+        Interval hour = Interval.findByName(StatisticsTime.HOUR.toString())
         if (!hour) {
-            hour = new Interval(name:HOUR, 
-                               seconds:HOUR_SECONDS)
+            hour = new Interval(name:StatisticsTime.HOUR.toString(),
+                               seconds:StatisticsTime.HOUR.getSeconds())
             check(hour)
             hour.save()
         }
-        Interval day = Interval.findByName(DAY)
+        Interval day = Interval.findByName(StatisticsTime.DAY.toString())
         if (!day) {
-            day = new Interval(name:DAY, 
-                               seconds:DAY_SECONDS)
+            day = new Interval(name: StatisticsTime.DAY.toString(),
+                               seconds: StatisticsTime.DAY.getSeconds())
             check(day)
             day.save()
         }
-        Interval week = Interval.findByName(WEEK)
+        Interval week = Interval.findByName(StatisticsTime.WEEK.toString())
         if (!week) {
-            week = new Interval(name:WEEK, 
-                                seconds:WEEK_SECONDS)
+            week = new Interval(name: StatisticsTime.WEEK.toString(),
+                                seconds: StatisticsTime.WEEK.getSeconds())
             check(week)
             week.save()
         }
-        Interval thirty_days = Interval.findByName(THIRTY_DAYS)
+        Interval thirty_days = Interval.findByName(
+            StatisticsTime.THIRTY_DAYS.toString())
         if (!thirty_days) {
-            thirty_days = new Interval(name:THIRTY_DAYS, 
-                                       seconds:THIRTY_DAYS_SECONDS)
+            thirty_days = new Interval(
+                name: StatisticsTime.THIRTY_DAYS.toString(),
+                seconds: StatisticsTime.THIRTY_DAYS.getSeconds())
             check(thirty_days)
             thirty_days.save()
         }

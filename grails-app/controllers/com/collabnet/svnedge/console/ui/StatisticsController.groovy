@@ -52,7 +52,17 @@ class StatisticsController {
 
     def colors = ["#3333FF", "#FF0033", "#33CC33", "#CC99FF"]
 
-    
+    def getTimespans() {
+        return [[index: 0, 
+                title: message(code: "statistics.graph.timespan.lastHour"),
+                seconds: 60*60, pattern: "HH:mm"],
+        [index: 1, title: message(code: "statistics.graph.timespan.lastDay"),
+            seconds: 60*60*24, pattern: "HH:mm"],
+        [index: 2, title: message(code: "statistics.graph.timespan.lastWeek"),
+            seconds: 60*60*24*7, pattern: "MM/dd HH:mm"],
+        [index: 3, title: message(code: "statistics.graph.timespan.lastMonth"),
+            seconds: 60*60*24*30, pattern: "MM/dd"]]
+    }
 
     def graphList = [
         [statgroup: "UserCache", 
@@ -100,8 +110,7 @@ class StatisticsController {
             [category: category.getName(), statgroups: statgroups]
         }
 
-        
-        def timespanSelect = fileSystemStatisticsService.getTimespans().inject([:]) { map, ts ->
+        def timespanSelect = this.getTimespans().inject([:]) { map, ts ->
             map[ts.index] = ts.title 
             map
         }
@@ -116,7 +125,8 @@ class StatisticsController {
         if (params && params['timespan']) {
             index = Integer.parseInt(params['timespan'])
         }
-        fileSystemStatisticsService.getTimespans()[index]
+        def timespans = this.getTimespans()
+        timespans[index]
     }
 
     def USER_CACHE_PIE_CHART = {
@@ -139,13 +149,14 @@ class StatisticsController {
                                                         UserCacheEvent.MISS)}
             .sum()
         PieChart pc = new PieChart().setAnimate(true).setStartAngle(35)
-                         .setBorder(2)
-                         .addSlice(totalHits, "Total Cache Hits")
-                         .addSlice(totalMisses, "Total Cache Misses")
-                         .setTooltip("#val# of #total#<br>#percent#")
+            .setBorder(2).addSlice(totalHits, 
+                message(code: "statistics.graph.usersCache.slice.hits"))
+            .addSlice(totalMisses, 
+                message(code: "statistics.graph.usersCache.slice.misses"))
+            .setTooltip("#val# of #total#<br>#percent#")
         pc.setGradientFill(true)
-        Chart c = new Chart("User Cache for " 
-                            + ts.title)
+        Chart c = new Chart(message(code: "statistics.graph.userCache.title") +
+            " " + ts.title)
             .addElements(pc)
         c.setBackgroundColour("#FFFFFF")
         c
@@ -197,8 +208,9 @@ class StatisticsController {
         def maxValue = 100
 
         if (!timeValues) {
-            c = new Chart("User Cache for " + ts.title
-                               + " : No data yet")
+            c = new Chart(message(code: "statistics.graph.userCache.title") +
+                " " + ts.title + " : " + message(
+                    code: "statistics.graph.noDataYet"))
         } else {
 
             def lineCharts = []
@@ -210,8 +222,8 @@ class StatisticsController {
                 lc.setText(lines[index].title)
                 lineCharts << lc
             }
-            c = new Chart("User Cache Hit Percentage for " 
-                          + ts.title)
+            c = new Chart(message(code: "statistics.graph.userCache.hit.title")
+                + " " + ts.title)
             .addElements(lineCharts)
 
             addXAxis(c, timeValues, ts.pattern)
@@ -238,14 +250,17 @@ class StatisticsController {
         def now = new Date()
 
         def lines = [[type: networkStatisticsService.getThroughputInRateName(),
-                color: colors[0], title: "Byte Rate In"],
+                color: colors[0], 
+                title: message(code: "statistics.graph.throughput.in")],
             [type: networkStatisticsService.getThroughputOutRateName(), 
-                color: colors[1], title: "Byte Rate Out"]]
+                color: colors[1], 
+                title: message(code: "statistics.graph.throughput.out")]]
 
         def rates = networkStatisticsService.getThroughputRates(start, now)
         if (!rates) {
-            c = new Chart("Throughput Byte Rates for " + ts.title
-                          + " : No data yet")
+            c = new Chart(message(code: "statistics.graph.throughput.title") +
+                " " + ts.title + " : " + 
+                message(code: "statistics.graph.noDataYet"))
         } else {
             def minValue = 0
             def maxValue = 0
@@ -279,13 +294,14 @@ class StatisticsController {
                 lineChart.setColour(line.color)
                 lineChart.setDotSize(3)
                 lineChart.setTooltip(line.title + "<br>#x_label#<br>#val# " +
-                                         unitPrefix + "B/s")
+                    unitPrefix + message(code:
+                        "general.measurement.bytesPerSecond.short"))
                 lineChart.setText(line.title)
                 lineCharts << lineChart
             } 
 
-            c = new Chart("Throughput Byte Rates for " + ts.title)
-                .addElements(lineCharts)
+            c = new Chart(message(code: "statistics.graph.throughput.title") +
+                " " + ts.title).addElements(lineCharts)
             
             addXAxis(c, rates.keySet(), ts.pattern)
             
@@ -311,15 +327,17 @@ class StatisticsController {
         def now = new Date()
  
         def line = [type: "Latency", color: colors[0], 
-            title: "Latency"]
+            title: message(code: "statistics.graph.latency.title")]
         def chartData = latencyStatisticsService
             .getChartValues(start.getTime(), now.getTime())
 
         if (!chartData) {
-            c = new Chart("Latency Between Master and Replica for " + ts.title
-                          + " : No data yet")
+            c = new Chart(message(code:"statistics.graph.latency.replica.title")
+                + " " + ts.title + " : " + message(
+                    code: "statistics.graph.noDataYet"))
         } else {
-            c = new Chart("Latency Between Master and Replica for " + ts.title)
+            c = new Chart(message(code:"statistics.graph.latency.replica.title")
+                + " " + ts.title)
             def minValue = 0
             def maxValue = 0
             def latValues = chartData.keySet().collect {
@@ -330,7 +348,8 @@ class StatisticsController {
             def lc = new LineChart().addValues(latValues)
             lc.setColour(line.color)
             lc.setDotSize(3)
-            lc.setTooltip(line.title + "<br>#x_label#<br>#val# ms")
+            lc.setTooltip(line.title + "<br>#x_label#<br>#val# " + 
+                message(code:"general.measurement.milliseconds.short"))
             lc.setText(line.title)
             c.addElements(lc)
 
@@ -363,17 +382,19 @@ class StatisticsController {
         def chartTitle
         if (!repo) {
             lines = [[type: "sysUsed", color: colors[0],
-                    title: "Used space on root volume"],
+                    title: message(code: "statistics.graph.space.root.title")],
                     [type: "repoUsed", color: colors[1],
-                    title: "Used space by repositories"],
+                    title: message(code: "statistics.graph.space.repos.title")],
                     [type: "repoFree", color: colors[2],
-                    title: "Free space on repository volume"]]
-            chartTitle = "Diskspace for " + ts.title
+                    title: message(
+                        code: "statistics.graph.space.vol.title")]]
+            chartTitle = message(code: "statistics.graph.space.title") + " " +
+                ts.title
         }
         else {
             lines = [[type: "repoUsed", color: colors[0],
-                    title: "Repository size"]]
-            chartTitle = "Repository Size over " + ts.title
+                    title: message(code: "statistics.graph.repo.size")]]
+            chartTitle = message(code: "statistics.graph.repo.over") + ts.title
         }
         
         def chartValues = (repo) ?
@@ -381,8 +402,8 @@ class StatisticsController {
                 fileSystemStatisticsService.getChartValues(start.getTime(), now.getTime())
         
         if (!chartValues) {
-            c = new Chart(chartTitle
-                          + " : No data yet")
+            c = new Chart(chartTitle + " : " +
+                message(code: "statistics.graph.noDataYet"))
         } else {
             def minValue = 0
             def maxValue = 0
@@ -458,10 +479,11 @@ class StatisticsController {
         
 
         if (!chartData) {
-            c = new Chart("SVN hits by Repository for " + ts.title
-                          + " : No data yet")
+            c = new Chart(message(code: "statistics.graph.space.repos") + " " +
+                ts.title + " : " + message(code: "statistics.graph.noDataYet"))
         } else {
-            c = new Chart("SVN hits by Repository for " + ts.title)
+            c = new Chart(message(code: "statistics.graph.space.repos") +
+                ts.title)
             def minValue = 0
             def maxValue = 0
 

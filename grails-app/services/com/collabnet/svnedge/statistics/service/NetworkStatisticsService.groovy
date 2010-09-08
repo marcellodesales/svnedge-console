@@ -25,6 +25,7 @@ import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.StatisticType
 import com.collabnet.svnedge.statistics.Unit
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.quartz.SchedulerException
 
 class NetworkStatisticsService extends AbstractStatisticsService {
@@ -37,7 +38,8 @@ class NetworkStatisticsService extends AbstractStatisticsService {
     protected static String RECEIVED_STAT_NAME = "BytesIn"
     protected static String SENT_STAT_NAME = "BytesOut"
 
-    public static String CATEGORY_NAME = "Network"
+    public String CATEGORY_NAME = 
+        getMessage("statistics.graph.leftNav.category.network")
     public static String STATGROUP_NAME = "NetworkThroughput"
     public static String TRIGGER_NAME = "networkTrigger"
     public static String BPS_UNIT_NAME = "Bytes per Second"
@@ -150,9 +152,9 @@ class NetworkStatisticsService extends AbstractStatisticsService {
         def netIf = networkingService.selectedInterface.name
         def statGroup = StatGroup.findByName(STATGROUP_NAME)
         if (!statGroup) {
-            statGroup = new StatGroup(name: STATGROUP_NAME,
-                                      title: "Network Throughput (${netIf})",
-                                      unit: unit, category: category)
+            statGroup = new StatGroup(name: STATGROUP_NAME, 
+                title: getMessage("statistics.graph.leftNav.throughput") +
+                    " (${netIf})", unit: unit, category: category)
             check(statGroup)
             category.addToGroups(statGroup).save()
             // save the statGroup so that we can get id info
@@ -163,9 +165,9 @@ class NetworkStatisticsService extends AbstractStatisticsService {
         log.debug("StatGroupId: " + statGroupId)
         def bytesIn = Statistic.findByName(RECEIVED_STAT_NAME)
         if (!bytesIn) {
-            bytesIn = new Statistic(name: RECEIVED_STAT_NAME, 
-                                    title: "Rate of Data Received (${netIf})",
-                                    type: StatisticType.GAUGE, group: statGroup)
+            bytesIn = new Statistic(name: RECEIVED_STAT_NAME, title:
+                getMessage("statistics.graph.leftNav.rate.receivedData") +
+                    " (${netIf})", type: StatisticType.GAUGE, group: statGroup)
             check(bytesIn)
             statGroup.addToStatistics(bytesIn)
             // save the bytesIn so that we can get id info
@@ -174,10 +176,9 @@ class NetworkStatisticsService extends AbstractStatisticsService {
         bytesInId = bytesIn.getId()
         def bytesOut = Statistic.findByName(SENT_STAT_NAME)
         if (!bytesOut) {
-            bytesOut = new Statistic(name: SENT_STAT_NAME,
-                                     title: "Rate of Data Transmitted " + 
-                                     "(${netIf})", type: StatisticType.GAUGE,
-                                     group: statGroup)
+            bytesOut = new Statistic(name: SENT_STAT_NAME, title: 
+                getMessage("statistics.graph.leftNav.rate.transmittedData") +
+                    "(${netIf})", type: StatisticType.GAUGE, group: statGroup)
             check(bytesOut)
             statGroup.addToStatistics(bytesOut).save()
             // save the bytes out so that we can get id info

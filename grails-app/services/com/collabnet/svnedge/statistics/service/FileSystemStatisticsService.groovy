@@ -36,7 +36,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
 
     def operatingSystemService
 
-    public static String CATEGORY_NAME = "System"
+    public String CATEGORY_NAME = 
+        getMessage("statistics.graph.leftNav.category.system")
     public static String STATGROUP_NAME = "FileSystem"
     public static String SYSUSED_NAME = "sysUsed"
     public static String REPOFREE_NAME = "repoFree"
@@ -315,9 +316,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def statGroup = getStatGroup()
         if (!statGroup) {
             statGroup = new StatGroup(name: STATGROUP_NAME, 
-                                      title: "Disk space on the Filesystem",
-                                      unit: diskspaceUnit, 
-                                      category: category)
+                title: getMessage("statistics.graph.leftNav.diskSpace"),
+                unit: diskspaceUnit, category: category)
             check(statGroup)
             category.addToGroups(statGroup).save()
             statGroup.save()
@@ -328,9 +328,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def sysUsedStat = Statistic.findByName(SYSUSED_NAME)
         if (!sysUsedStat) {
             sysUsedStat = new Statistic(name: SYSUSED_NAME,
-                                        title: "Used space on root volume",
-                                        type: StatisticType.GAUGE,
-                                        group: statGroup)
+                title: getMessage("statistics.graph.space.root.title"),
+                type: StatisticType.GAUGE, group: statGroup)
             check(sysUsedStat)
             statGroup.addToStatistics(sysUsedStat).save()
             sysUsedStat.save()
@@ -340,9 +339,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def repoFreeStat = Statistic.findByName(REPOFREE_NAME)
         if (!repoFreeStat) {
             repoFreeStat = new Statistic(name: REPOFREE_NAME,
-                                        title: "Free space on the repository volume",
-                                        type: StatisticType.GAUGE,
-                                        group: statGroup)
+                title: getMessage("statistics.graph.space.vol.title"),
+                type: StatisticType.GAUGE, group: statGroup)
             check(repoFreeStat)
             statGroup.addToStatistics(repoFreeStat).save()
             repoFreeStat.save()
@@ -352,10 +350,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def repoUsedStat = Statistic.findByName(REPOUSED_NAME)
         if (!repoUsedStat) {
             repoUsedStat = new Statistic(name: REPOUSED_NAME,
-                                         title: "Diskspace Used by the " +
-                                         "Repositories",
-                                         type: StatisticType.GAUGE,
-                                         group: statGroup)
+                title: getMessage("statistics.graph.space.used.repos.title"),
+                type: StatisticType.GAUGE, group: statGroup)
             check(repoUsedStat)
             statGroup.addToStatistics(repoUsedStat).save()
             repoUsedStat.save()

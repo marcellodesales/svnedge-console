@@ -2,12 +2,12 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main" />
-    <title>CollabNet Subversion Edge Statistics</title>
+    <title>CollabNet Subversion Edge <g:message code="statistics.page.index.title" /></title>
     </head>
     
 
       <content tag="title">
-        Statistics 
+        <g:message code="statistics.page.title" /> 
       </content>
     
       <!-- Following content goes in the left nav area -->
