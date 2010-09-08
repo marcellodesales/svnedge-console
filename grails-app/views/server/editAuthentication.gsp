@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge Authentication</title>
+    <title>CollabNet Subversion Edge <g:message code="server.page.editAuthentication.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
 
@@ -76,7 +76,7 @@
             document.location.href = "edit";
             return true
         }
-        var r=confirm("Your changes may not have been saved. Press Cancel if you want to remain in this page, Press OK to ignore this changes.");
+        var r=confirm("${editAuthConfirmMessage}");
         if (r==true) {
             document.location.href = "edit";
         } else {
@@ -88,7 +88,7 @@
     
   </head>
   <content tag="title">
-    Administration
+    <g:message code="server.page.edit.header" />
   </content>
   
   <g:render template="leftNav" />
@@ -99,8 +99,7 @@
     <div class="message">${result}</div>
     <g:if test="${!isConfigurable}">
     <div class="instructionText">
-    <p>httpd.conf is missing directives which are needed for the management console to support configuration
-    of the svn server.  Please add the following Include directives:
+    <p><g:message code="server.page.edit.missingDirectives" />:
     <blockquote>
     <code>
       Include "${csvnConf}/csvn_main_httpd.conf"<br/>
@@ -111,12 +110,12 @@
     </div>
     </g:if>
 
-  <g:set var="events">onclick="warnForUnSavedData()"</g:set>
-  <g:render template="/common/tabs" 
-      model="[tabs:[
-      	[action:'edit', href:'#', events:events, label:'General'], 
-      	[action:'editAuthentication', href:'#', label:'Authentication', active: true]
-      	]]" />
+  <g:set var="events" value="onclick='warnForUnSavedData()'" />
+  <g:set var="tabArray" value="${[[action:'edit', href:'#', events:events, label: message(code:'server.page.edit.tabs.general')]]}" />
+  <g:if test="${!isManagedMode}">
+    <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', active: true, label: message(code:'server.page.edit.tabs.authentication')]}" />
+  </g:if>
+  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
   <g:form method="post">
       <g:hiddenField name="view" value="editAuthentication"/>
 
@@ -128,12 +127,12 @@
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="allowAnonymousReadAccess">Anonymous Access:</label>
+          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label" />:</label>
         </td>
         <td valign="top" colspan="2"
             class="ItemDetailValue ${hasErrors(bean:server,field:'allowAnonymousReadAccess','errors')}">
           <g:checkBox name="allowAnonymousReadAccess" value="${server.allowAnonymousReadAccess}"/>
-          <label for="allowAnonymousReadAccess">Allow read access to anonymous users</label>
+          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label.tip" /></label>
         </td>
       </tr>
    <g:hasErrors bean="${server}" field="ldapEnabled">
@@ -148,11 +147,11 @@
    </g:hasErrors>
       <tr>
         <td class="ItemDetailName">
-          <label>Authentication Methods:</label>
+          <label><g:message code="server.authenticationMethods.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'fileLoginEnabled','errors')}">
           <g:checkBox name="fileLoginEnabled" value="${server.fileLoginEnabled}"/>
-          <label for="fileLoginEnabled">Local authentication against an htpasswd file along with other providers</label>
+          <label for="fileLoginEnabled"><g:message code="server.fileLoginEnabled.label" /></label>
         </td>
       </tr>
       <tr>
@@ -160,7 +159,7 @@
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapEnabled','errors')}">
           <g:checkBox name="ldapEnabled" value="${server.ldapEnabled}" onClick="javascript:showHideLdapOptions();"/>
-         <label for="ldapEnabled">LDAP authentication against an LDAP server</label>
+         <label for="ldapEnabled"><g:message code="server.ldapEnabled.label" /></label>
         </td>
       </tr>
       </table>
@@ -168,7 +167,7 @@
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Security Level</label>
+          <label for="name"><g:message code="server.ldapSecurityLevel.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapSecurityLevel','errors')}">
           <g:select from="${['NONE', 'SSL', 'TLS', 'STARTTLS']}" value="${fieldValue(bean:server,field:'ldapSecurityLevel')}" name="ldapSecurityLevel"></g:select>
@@ -176,7 +175,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Server Host:</label>
+          <label for="name"><g:message code="server.ldapServerHost.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerHost','errors')}">
           <input size="30" type="text" id="ldapServerHost" name="ldapServerHost" value="${fieldValue(bean:server,field:'ldapServerHost')}"/>
@@ -189,7 +188,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Server Port:</label>
+          <label for="name"><g:message code="server.ldapServerPort.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerPort','errors')}">
           <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" value="${fieldValue(bean:server,field:'ldapServerPort')}"/>
@@ -203,7 +202,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Base DN:</label>
+          <label for="name"><g:message code="server.ldapAuthBasedn.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapAuthBasedn','errors')}">
           <input size="30" type="text" id="ldapAuthBasedn" name="ldapAuthBasedn" value="${fieldValue(bean:server,field:'ldapAuthBasedn')}"/>
@@ -211,40 +210,40 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Bind DN:</label>
+          <label for="name"><g:message code="server.ldapAuthBinddn.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapAuthBinddn','errors')}">
           <input size="30" type="text" id="ldapAuthBinddn" name="ldapAuthBinddn" value="${fieldValue(bean:server,field:'ldapAuthBinddn')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><strong>Warning: </strong>Use this only if anonymous binds are not allowed</i>        
+          <i><strong><g:message code="general.warning" /></strong>: <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Bind Password:</label>
+          <label for="name"><g:message code="server.ldapAuthBindPassword.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapAuthBindPassword','errors')}">
           <input size="30" type="password" id="ldapAuthBindPassword" name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><strong>Warning: </strong>Use this only if anonymous binds are not allowed</i>        
+          <i><strong><g:message code="general.warning" /></strong>: <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" />.</i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Login Attribute:</label>
+          <label for="name"><g:message code="server.ldapLoginAttribute.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapLoginAttribute','errors')}">
           <input size="30" type="text" id="ldapLoginAttribute" name="ldapLoginAttribute" value="${fieldValue(bean:server,field:'ldapLoginAttribute')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i>The subversion server will match the given username with this attribute, Otherwise 'uid' attribute is matched</i>
+          <i><g:message code="server.ldapLoginAttribute.label.tip" />.</i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Search Scope:</label>
+          <label for="name"><g:message code="server.ldapSearchScope.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:select from="${['sub', 'one']}" value="${fieldValue(bean:server,field:'ldapSearchScope')}" name="ldapSearchScope"></g:select>
@@ -252,22 +251,22 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Filter:</label>
+          <label for="name"><g:message code="server.ldapFilter.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapFilter','errors')}">
           <input size="30" maxlength=8000 type="text" id="ldapFilter" name="ldapFilter" value="${fieldValue(bean:server,field:'ldapFilter')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i>The subversion server will apply this filter in the login search process</i>        
+          <i><g:message code="server.ldapFilter.label.tip" />.</i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name">LDAP Server Certificate<br> Verification:</label>
+          <label for="name"><g:message code="server.ldapServerCertVerificationNeeded.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerCertVerificationNeeded','errors')}">
           <g:checkBox name="ldapServerCertVerificationNeeded" value="${server.ldapServerCertVerificationNeeded}"/>
-          Verify the certificate of the LDAP server
+          <g:message code="server.ldapServerCertVerificationNeeded.label.tip" />
         </td>
       </tr>
       </table>
@@ -277,9 +276,8 @@
       <tr class="ContainerFooter">
         <td >
           <div class="AlignRight">
-                <g:actionSubmit action="update" value="Save" class="Button"/>
+                <g:actionSubmit action="update" value="${message(code:'server.page.editAuthentication.button.save')}" class="Button"/>
             </div>
-          </div>
         </td>
       </tr>
       </table>

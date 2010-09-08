@@ -106,7 +106,9 @@ class ServerController {
 
     def editAuthentication = {
         def server = Server.getServer()
+        def msg = message(code: "server.page.edit.authentication.confirm")
         return [server: server,
+                editAuthConfirmMessage: msg,
                 csvnConf: serverConfService.confDirPath,
                 isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
@@ -124,9 +126,7 @@ class ServerController {
             def version = params.version.toLong()
             if (server.version > version) {
                 server.errors.rejectValue("version",
-                    "server.optimistic.locking.failure", 
-                    "Another user has updated the server while you " +
-                    "were editing.")
+                    "server.optimistic.locking.failure")
                     render(view:'edit', model:[server:server])
                     return
             }
@@ -146,8 +146,7 @@ class ServerController {
            lifecycleService.clearCachedResults() 
            if (!lifecycleService.isDefaultPortAllowed()) {
             server.errors.rejectValue("port",
-                "default.rejected",
-                "Standard port requires extra configuration.")
+                "server.port.defaultValue.rejected")
            }
         }
 
@@ -158,31 +157,31 @@ class ServerController {
                     if (result <= 0) {
                         result = lifecycleService.startServer()
                         if (result < 0) {
-                            flash.message = "Server was running; changes may" +
-                                " not have been applied."
+                            flash.message = message(code:
+                         "server.action.update.changesMightNotHaveBeenApplied")
                         } else if (result == 0) {
-                            flash.message = "Changes were saved. Subversion " +
-                                "server is running."
+                            flash.message = message(code:
+                                "server.action.update.svnRunning")
                         } else {
-                            flash.error =
-                                "There was a problem starting the server!"
+                            flash.error = message(code:
+                                "server.action.update.generalError")
                         }
                     } else {
                         serverConfService.writeConfigFiles()
-                        flash.error =
-                            "Was unable to restart server to apply changes."
+                        flash.error = message(code:
+                                "server.action.update.cantRestartServer")
                     }
                 } catch (CantBindPortException cantStopRunningServer) {
                     flash.error = cantStopRunningServer.getMessage()
                 }
             } else {
                 serverConfService.writeConfigFiles()
-                flash.message = "Changes were saved."
+                flash.message = message(code:"server.action.update.changesMade")
             }
             render(view: params.view, model : prepareServerViewModel(server))
 
         } else {
-            flash.error = "Invalid server settings!"
+            flash.error = message(code:"server.action.update.invalidSettings")
             // discard entity changes and redisplay the edit screen
             server.discard()
             render(view: params.view, model : prepareServerViewModel(server))
@@ -201,9 +200,11 @@ class ServerController {
         def showPortInstructions = Integer.parseInt(portValue) < 1024 &&
             !lifecycleService.isDefaultPortAllowed()
         def config = ConfigurationHolder.config
-
+        
+        def msg = message(code:"server.page.edit.authentication.confirm")
         return [
             server : server,
+            editAuthConfirmMessage: msg,
             isStarted: lifecycleService.isStarted(),
             networkInterfaces: networkInterfaces,
             ipv4Addresses: networkingService.getIPv4Addresses(),

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge Configuration</title>
+    <title>CollabNet Subversion Edge <g:message code="server.page.edit.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
 
@@ -100,7 +100,7 @@
                 document.location.href = "editAuthentication";
                 return true
             }
-            var r=confirm("Your changes may not have been saved. Press Cancel if you want to remain in this page, Press OK to ignore this changes.");
+            var r=confirm("${editAuthConfirmMessage}");
             if (r==true) {
                 document.location.href = "editAuthentication";
             } else {
@@ -111,7 +111,7 @@
     
   </head>
   <content tag="title">
-    Administration 
+    <g:message code="server.page.edit.header" />
   </content>
 
   <g:render template="leftNav" />
@@ -120,8 +120,7 @@
     <div class="message">${result}</div>
 <g:if test="${!isConfigurable}">
 <div class="instructionText">
-    <p>httpd.conf is missing directives which are needed for the management console to support configuration
-    of the svn server.  Please add the following Include directives:
+    <p><g:message code="server.page.edit.missingDirectives" />:
     <blockquote>
     <code>
     Include "${csvnConf}/csvn_main_httpd.conf"<br/>
@@ -133,19 +132,20 @@
 </g:if>
 <g:if test="${standardPortInstructions}">
 <div class="instructionText">
-    <i>Standard ports require additional setup.</i>
-    <p>Two options exist to allow use of port 80 or 443.  
-    Only one or the other is necessary and both require root privileges to setup. 
+    <i><g:message code="server.page.edit.standardPorts.header" /></i>
+    <p><g:message code="server.page.edit.standardPorts.instructions" />.</p>
+<ul>
+<li><g:message code="server.page.edit.httpdSudo" />.<a id="toggleSudo" href="#" 
+  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+<div id="sudoInstructions" style="border: 1px;">
+<p>
+<g:message code="server.page.edit.httpdSudo.instructions" />.
 </p>
 <ul>
-<li>Use bind helper application. <a id="toggleBind" href="#" 
-  onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;">Show commands</a>
+<li><g:message code="server.page.edit.httpdBind" />. <a id="toggleBind" href="#" 
+  onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="bindInstructions" style="border: 1px;">
-<p>httpd_bind is a small application included with 
-CollabNet Subversion Edge to allow the server access to the standard ports 
-without the server itself running with elevated privileges.  In order for 
-it to work, httpd_bind must be owned by root and have its suid bit set such as shown by the 
-commands below.  <em>These must be executed as root or sudo.</em>
+<p><g:message code="server.page.edit.httpdBind.instructions" />.<em><g:message code="server.page.edit.httpdBind.asRoot" />.</em>
 </p>
 <blockquote>
 <code>chown root:${httpd_group} ${csvnHome}/lib/httpd_bind/httpd_bind
@@ -187,12 +187,12 @@ users access to ports less than 1024.</p>
     </div>
 </g:if>
   
-  <g:set var="events">onclick="warnForUnSavedData()"</g:set>
-  <g:set var="tabArray" value="${[[action:'edit', href:'#', label:'General', active: true]]}" />
+  <g:set var="events" value="onclick='warnForUnSavedData()'" />
+  <g:set var="tabArray" value="${[[action:'edit', href:'#', label: message(code:'server.page.edit.tabs.general'), active: true]]}" />
   <g:if test="${!isManagedMode}">
-    <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', events:events, label:'Authentication']}" />
-  </g:if>  
-    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
+    <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', events:events, label: message(code:'server.page.edit.tabs.authentication')]}" />
+  </g:if>
+  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
   <g:form method="post" onSubmit="javascript:check();">
       <g:hiddenField name="view" value="edit"/>
   
@@ -203,13 +203,13 @@ users access to ports less than 1024.</p>
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="hostname">Hostname:</label>
+          <label for="hostname"><g:message code="server.hostname.label" />:</label>
         </td>
         <td valign="top" class="value ${hasErrors(bean:server,field:'hostname','errors')}">
           <input size="30" type="text" id="hostname" name="hostname" 
               value="${fieldValue(bean:server,field:'hostname')}"/>
         </td>
-        <td class="ItemDetailValue"><i>The fully qualified hostname including domain.</i></td>
+        <td class="ItemDetailValue"><i><g:message code="server.hostname.label.tip" />.</i></td>
       </tr>
     <g:hasErrors bean="${server}" field="hostname">
       <tr>
@@ -224,7 +224,7 @@ users access to ports less than 1024.</p>
 
       <tr>
         <td class="ItemDetailName">
-          <label for="port">Port:</label>
+          <label for="port"><g:message code="server.port.label.tip" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'port','errors')}">
           <input size="6" type="text" id="port" name="port" 
@@ -232,11 +232,11 @@ users access to ports less than 1024.</p>
         </td>
         <td class="ItemDetailValue">
             <g:if test="${standardPortInstructions}">
-                <i>Standard ports require additional setup.</i>
+                <i><g:message code="server.port.label.tip" />.</i>
             </g:if>
             <g:else>
             <g:if test="${(server.useSsl && server.port != 443) || server.port != 80}">
-                <i>Standard ports may require additional setup.</i>
+                <i><g:message code="server.port.label.tip.standardPorts" />.</i>
             </g:if>
             </g:else>
          </td>
@@ -254,13 +254,13 @@ users access to ports less than 1024.</p>
     
       <tr>
         <td class="ItemDetailName">
-          <label for="repoParentDir">Repository Parent Directory:</label>
+          <label for="repoParentDir"><g:message code="server.repoParentDir.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'repoParentDir','errors')}">
           <input size="30" type="text" id="repoParentDir" name="repoParentDir" 
               value="${fieldValue(bean:server,field:'repoParentDir')}"/>
         </td>
-        <td class="ItemDetailValue"><i>Parent directory that includes all repositories.</i></td>
+        <td class="ItemDetailValue"><i><g:message code="server.repoParentDir.label.tip" />.</i></td>
       </tr> 
     <g:hasErrors bean="${server}" field="repoParentDir">
       <tr>
@@ -275,7 +275,7 @@ users access to ports less than 1024.</p>
       
       <tr>
       	  <td class="ItemDetailName">
-              <label for="ipAddress">IP Address:</label>
+              <label for="ipAddress"><g:message code="server.ipAddress.label" />:</label>
           </td>
           <td valign="top" class="value">
               <select name="ipAddress" id="ipAddress" onchange="updateInterface(this)">
@@ -302,7 +302,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
           <td class="ItemDetailName">
-              <label for="interface">Network Interface:</label>
+              <label for="interface"><g:message code="server.netInterface.label" />:</label>
           </td>
           <td class="value">
              <g:select name="netInterface" from="${networkInterfaces}" 
@@ -312,7 +312,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
         <td class="ItemDetailName">
-              <label for="adminName">Administrator:</label>
+              <label for="adminName"><g:message code="server.adminName.label" />:</label>
           </td>
           <td colspan="2" class="ItemDetailValue">
               <!-- Widget should eventually change to person picker (See TeamForge) -->
@@ -328,7 +328,7 @@ users access to ports less than 1024.</p>
       <!-- The following 2 table rows should be removed after updating UI to person picker -->
       <tr>
           <td class="ItemDetailName">
-              <label for="adminEmail">Administrator Email:</label>
+              <label for="adminEmail"><g:message code="server.adminEmail.label" />:</label>
           </td>
           <td class="value errors" colspan="2">
               <input name="adminEmail" type="text" 
@@ -342,7 +342,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
           <td class="ItemDetailName">
-              <label for="adminAltContact">Administrator Alternative Contact:</label>
+              <label for="adminAltContact"><g:message code="server.adminAltContact.label" />:</label>
           </td>
           <td valign="top" class="ItemDetailValue" colspan="2">
               <input name="adminAltContact" type="text" 
@@ -356,29 +356,29 @@ users access to ports less than 1024.</p>
       </tr>      
       <tr>
          <td class="ItemDetailName">
-          <label for="name">Apache Encryption:</label>
+          <label for="name"><g:message code="server.useSsl.label" />:</label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSsl','errors')}" colspan="2">
           <g:checkBox name="useSsl" value="${server.useSsl}"/>
-          Subversion Server should serve via https
+          <g:message code="server.useSsl.label.tip" />.
         </td>
       </tr>
       <tr>
          <td class="ItemDetailName">
-          <label for="name">Console Encryption:</label>
+          <label for="name"><g:message code="server.useSslConsole.label" />:</label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSslConsole','errors')}" colspan="2">
           <g:checkBox name="useSslConsole" value="${server.useSslConsole}"/>
-          Subversion Edge Management Console should require https
+          <g:message code="server.useSslConsole.label.tip" />.
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="defaultStart">Startup Setting:</label>
+          <label for="defaultStart"><g:message code="server.defaultStart.label" />:</label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'defaultStart','errors')}">
           <g:checkBox name="defaultStart" value="${server.defaultStart}"/>
-          Start Subversion server when the management console is started 
+          <g:message code="server.defaultStart.label.tip" />
         </td>
       </tr>
      
@@ -388,9 +388,8 @@ users access to ports less than 1024.</p>
       <tr class="ContainerFooter">
         <td >
           <div class="AlignRight">
-                <g:actionSubmit action="update" value="Save" class="Button"/>
+                <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
             </div>
-          </div>
         </td>
       </tr>
       </table>
