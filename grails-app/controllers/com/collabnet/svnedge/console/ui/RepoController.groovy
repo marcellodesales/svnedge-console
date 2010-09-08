@@ -38,7 +38,6 @@ class RepoController {
 
     def svnRepoService
     def serverConfService
-    def fileSystemStatisticsService
 
     @Secured(['ROLE_USER'])
     def index = { redirect(action:list,params:params) }
@@ -99,8 +98,21 @@ class RepoController {
             def repoPath = new File(repoParentDir, repo.name).absolutePath
             def username = serverConfService.httpdUser
             def group = serverConfService.httpdGroup
-            
-            def timespanSelect = fileSystemStatisticsService.timespans.inject([:]) { map, ts ->
+
+            def timespans = [[index: 0, 
+                title: message(code: "statistics.graph.timespan.lastHour"),
+                        seconds: 60*60, pattern: "HH:mm"],
+                [index: 1, 
+                    title: message(code: "statistics.graph.timespan.lastDay"),
+                    seconds: 60*60*24, pattern: "HH:mm"],
+                [index: 2, 
+                    title: message(code: "statistics.graph.timespan.lastWeek"),
+                    seconds: 60*60*24*7, pattern: "MM/dd HH:mm"],
+                [index: 3, 
+                    title: message(code: "statistics.graph.timespan.lastMonth"),
+                    seconds: 60*60*24*30, pattern: "MM/dd"]]
+
+            def timespanSelect = timespans.inject([:]) { map, ts ->
                 map[ts.index] = ts.title 
                 map
             }
