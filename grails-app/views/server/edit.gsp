@@ -154,16 +154,14 @@ chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
 </blockquote>
 </div>
 </li>
-<li>Start httpd under sudo. <a id="toggleSudo" href="#" 
-  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;">Show commands</a>
+<li><g:message code="server.page.edit.httpd.asSudo" />. <a id="toggleSudo" href="#" 
+  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="sudoInstructions" style="border: 1px;">
 <p>
-The svn server can be started with root privileges allowing it to bind to the port, after which the 
-server will reduce its privileges.  To use this method and allow starting and stopping the server from 
-the management console, setup sudo for the httpd binary to work without a password.
+<g:message code="server.page.edit.httpd.asSudo.instruction" />.
 </p>
 <ul>
-<li>Use <code>/usr/sbin/visudo</code> to add the following two lines to the end of the sudoers file:<br/><br/>
+<li><g:message code="server.page.edit.httpd.asSudo.command" args="${['<code>/usr/sbin/visudo</code>']}" />:<br/><br/>
 <code>Defaults env_keep += "PYTHONPATH"<br/>
 ${console_user}    ALL=(ALL) NOPASSWD: ${csvnHome}/bin/httpd</code>
 </li>
