@@ -1160,13 +1160,15 @@ class SetupTeamForgeService {
     }
 
     private def restartServer() {
+        def result = -1;
         if (lifecycleService.isStarted()) {
-            return lifecycleService.gracefulRestartServer()
+            result = lifecycleService.gracefulRestartServer()
         } else {
-            return lifecycleService.startServer()
+            result = lifecycleService.startServer()
         }
 
         discoveryService.serverUpdated()
+        return result
     }
 
     private void copyFiles(fromDir, toDir) {
