@@ -30,41 +30,15 @@ import com.sun.pkg.client.Image.FmriState
  */
 
 includeTargets << grailsScript("_GrailsWar")
+includeTargets << new File("scripts", "_CommonTargets.groovy")
 
 target(build: 'Builds the distribution file structure') {
     depends(war)
 
-    Ant.condition(property:"windowsPrepare") {
-        and() {
-            os(family:"windows")
-        }
-    }
-    Ant.condition(property:"linuxPrepare") {
-        and() {
-            os(family:"unix")
-        }
-    }
-    Ant.condition(property:"macPrepare") {
-        and() {
-            os(family:"mac")
-        }
-    }
-    Ant.condition(property:"x64") {
-        or() {
-            os(arch: "x86_64")
-            os(arch: "amd64")
-        }
-    }
-
-    if (Ant.project.properties."macPrepare") {
-        osName = "mac";
-    }
-    if (Ant.project.properties."windowsPrepare") {
-        osName = "windows"
-    }
-    if (Ant.project.properties."linuxPrepare") {
-        osName = "linux"
-    }
+    distDir = "${basedir}/dist"
+    Ant.property(name: "distDir", value: distDir)
+    prepare()
+    osName = Ant.project.properties.'osName'
 
     Ant.echo(message: "Building the distribution system for $osName")
     def version = metadata.getApplicationVersion()
@@ -79,12 +53,10 @@ target(build: 'Builds the distribution file structure') {
 target(createDistributionStructure: 'Creates the distribution structure') {
     Ant.echo(message: "Creating a fresh distribution structure")
 
-    distDir = "${basedir}/dist"
     Ant.delete(dir: distDir)
     Ant.mkdir(dir: distDir)
 
     libDir = distDir + "/lib"
-    webAppsDir = distDir + "/appserver/webapps"
 
     tmpDir = distDir + "/tmp"
     Ant.mkdir(dir: tmpDir )
@@ -99,66 +71,28 @@ target(createDistributionStructure: 'Creates the distribution structure') {
         Ant.mkdir(dir: updatesBinDir)
         updatesWebAppsDir = updatesDir + "/appserver/webapps"
     }
+    webAppsDir = distDir + "/appserver/webapps"
+    Ant.mkdir(dir: webAppsDir)
+    Ant.mkdir(dir: distDir + "/lib")
 
     downloadArtifacts()
-}
-
-target(downloadArtifacts: 'Downloads needed artifacts') {
-    Ant.echo(message: "Downloading the needed artifacts")
-    //Uploading the necessary contents to the Cubit's PBL with the user's
-    // personal key API to the public directory
-    //pbl.py upload -k e3554e80-1463-1374-81cc-6fc24548303a -u mdesales -l 
-    // https://mgr.cubit.sp.collab.net/cubit_api/1 -p svnedge -t pub -r 
-    // /3rdPartyPkgs -d "CHANGE_THIS_DESCRIPTION" -v ~/local-3rdparty-packages/*
-
-    //Generating the truststore files for downloading
-    //echo | openssl s_client -connect mgr.cubit.sp.collab.net:443 | 
-    //  openssl x509 -inform PEM -outform DER -trustout -out outfile.crt
-    //keytool -import -storepass together -file outfile.crt -keystore 
-    //  trust.keystore -alias mgrcubitsp
-    //keytool -keystore trust.keystore -list >> enter password "together"
-    def trustStore = "${basedir}/scripts/" +
-            "cubit.keystore"
-    Ant.echo(message: "Truststore File: " + trustStore)
-    System.setProperty( 'javax.net.ssl.trustStore', trustStore )
-    System.setProperty( 'javax.net.ssl.keyStorePassword', "together" )
-
-    //downloading from the Cubit Project Build Library... "guest" access...
-    if (osName == "linux") {
-        if (Ant.project.properties."x64") {
-            Ant.get(dest: "${distDir}/svn-apache-viewvc-latest.tar.gz",
-                src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-                    "3rdPartyPkgs/linux/" +
-                    "CollabNet_Subversion-Linux-x86_64-latest.tar.gz")
-        } else {
-            Ant.get(dest: "${distDir}/svn-apache-viewvc-latest.tar.gz",
-                    src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/" +
-                    "pub/3rdPartyPkgs/linux/" +
-                    "CollabNet_Subversion-Linux-x86_32-latest.tar.gz")
-        }
-    } else
-    if (osName == "windows") {
-        Ant.get(dest: "${distDir}/svn-apache-viewvc-windows-latest.zip",
-                src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-                    "3rdPartyPkgs/windows/" +
-                    "CollabNet_Subversion-Win32-latest.zip")
-    } else
-    if (osName == "mac") {
-        System.err.println("Feature not implemented for Mac")
-        System.exit(1)
-    }
     rearrangingArtifacts()
 }
 
 target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
     Ant.echo(message: "Building the distribution system for ${osName}")
 
-    if (osName == "linux") {
+    if (osName == "linux" || osName == "solaris") {
+        Ant.exec(dir:"${distDir}", executable: "gunzip") {
+            arg(line: archiveFile)
+        }
+        // remove the .gz
+        archiveFile = archiveFile.substring(0, archiveFile.length() - 3)
         Ant.exec(dir: "${distDir}", executable: "tar") {
             arg(line: "-xpf")
-            arg(line: "${distDir}/svn-apache-viewvc-latest.tar.gz")
+            arg(line: archiveFile)
         }
-        Ant.delete(file: "${distDir}/svn-apache-viewvc-latest.tar.gz")
+        Ant.delete(file: archiveFile)
 
          //Copying the service wrapper artifacts
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
@@ -206,11 +140,8 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
     } else
     if (osName == "windows") {
         // On Windows, put all files in updates directory
-        Ant.unzip(src: "${distDir}/" +
-                    "svn-apache-viewvc-windows-latest.zip",
-                dest:"${updatesDir}")
-        Ant.delete(file: "${distDir}/" +
-                "svn-apache-viewvc-windows-latest.zip")
+        Ant.unzip(src: archiveFile, dest: updatesDir)
+        Ant.delete(file: archiveFile)
 
         //copying the service wrapper artifacts
         Ant.copy(todir: "${updatesBinDir}") {
@@ -257,12 +188,11 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         Ant.move(file: updatesDir + "/data", tofile:
                 distDir + "/temp-data" )
 
-        Ant.get(dest: "${updatesWebAppsDir}/integration.war",
-                src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-                    "3rdPartyPkgs/CTF/integration-latest.war")
-        Ant.get(dest: "${updatesLibDir}/integration-scripts.zip",
-            src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-            "3rdPartyPkgs/CTF/integration-scripts-latest.zip")
+        Ant.move(file: "${webAppsDir}/integration.war",
+                 tofile: "${updatesWebAppsDir}/integration.war")
+
+        Ant.move(file: "${distDir}/lib/integration-scripts.zip",
+                 tofile: "${updatesLibDir}/integration-scripts.zip")
     
     } else {
         //move the console war file to the library dir
@@ -278,14 +208,6 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         //The bootstrap process must move this directory back to data
         Ant.move(file: distDir + "/data", tofile:
             distDir + "/temp-data" )
-
-        Ant.get(dest: "${webAppsDir}/integration.war",
-                src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-                    "3rdPartyPkgs/CTF/integration-latest.war")
-        Ant.get(dest: "${distDir}/lib" +
-            "/integration-scripts.zip",
-            src: "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/" +
-            "3rdPartyPkgs/CTF/integration-scripts-latest.zip")
 
         Ant.chmod(file: distDir + "/bin/collabnetsvn-config", perm: "+x")
         Ant.chmod(file: distDir + "/bin/svndbadmin", perm: "+x")
