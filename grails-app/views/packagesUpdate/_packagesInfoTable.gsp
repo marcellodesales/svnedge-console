@@ -6,19 +6,18 @@
 
     <table class="Container">
       <tbody>
-        <tr><td colspan="5"><strong>Packages repository:</strong>
-            ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong> through
-                the proxy server </strong>${proxyToOriginURL}
+        <tr><td colspan="5"><strong><g:message code="packagesUpdate.page.table.repository" />:</strong>
+            ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong> <g:message code="packagesUpdate.page.table.throughProxy" /> </strong>${proxyToOriginURL}
                </g:if></td></tr>
 
     <g:if test="${(!anyConnectionProblem && packagesInfo && packagesInfo.size() > 0) || 
                   (actionName == 'installed' && packagesInfo && packagesInfo.size() > 0)}">
         <tr class="ItemListHeader">
-          <g:sortableColumn property="summary" title="Name"/>
-          <g:sortableColumn property="publishedDate" title="Published Date"/>
-          <g:sortableColumn property="release" title="Release"/>
-          <g:sortableColumn property="branch" title="Build"/>
-          <g:sortableColumn property="size" title="Size"/>
+          <g:sortableColumn property="summary" title="${message(code:'packagesUpdate.page.table.column.summary')}"/>
+          <g:sortableColumn property="publishedDate" title="${message(code:'packagesUpdate.page.table.column.publishedDate')}"/>
+          <g:sortableColumn property="release" title="${message(code:'packagesUpdate.page.table.column.release')}"/>
+          <g:sortableColumn property="branch" title="${message(code:'packagesUpdate.page.table.column.branch')}"/>
+          <g:sortableColumn property="size" title="${message(code:'packagesUpdate.page.table.column.size')}"/>
         </tr>
       <g:each var="packageInfo" in="${packagesInfo}" status="rowNumber">
 
@@ -40,14 +39,14 @@
       <tr class="ItemListNoData">
         <td colspan="3">
             <g:if test="${actionName == 'available'}"> 
-                No Software Updates Available.
+                <g:message code="packagesUpdate.page.table.noUpdatesAvilable" />.
             </g:if>
             <g:else>
                 <g:if test="${actionName == 'addOns'}"> 
-                    No New Packages Available.
+                    <g:message code="packagesUpdate.page.table.noNewPackagesAvilable" />.
                 </g:if>
                 <g:else>
-                    Installed packages list not available!
+                    <g:message code="packagesUpdate.page.table.noPackagesInstalled" />.
                 </g:else>
             </g:else>
         </td>

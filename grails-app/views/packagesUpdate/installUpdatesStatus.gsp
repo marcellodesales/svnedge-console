@@ -1,12 +1,17 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge - Software Updates</title>
+    <title>CollabNet Subversion Edge <g:message code="packagesUpdate.page.installUpdatesStatus.title" /></title>
 
       <meta name="layout" content="pkgupdates" />
       <g:javascript library="prototype" />
       <g:javascript src="jsProgressBarHandler.js" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
                 djconfig="parseOnLoad: true, isDebug: false"></script>
+
+    <g:set var="restartServer" value="${message(code:'packagesUpdate.page.installUpdatesStatus.restartServer')}" />
+    <g:set var="installFinished" value="${message(code:'packagesUpdate.page.installUpdatesStatus.finished')}" />
+    <g:set var="serverRestarting" value="${message(code:'packagesUpdate.page.installUpdatesStatus.serverIsRestarting')}" />
+    <g:set var="serverRestartingTip" value="${message(code:'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip')}" />
 
     <script type="text/javascript">
         /**
@@ -87,8 +92,8 @@
                         hasFinished = true
                         dojo.byId('restartButton').disabled = false;
                         dojo.byId('roller').style.display = 'none';
-                        dojo.byId('restartServer').innerHTML = "Restart the server to apply the updates.";
-                        dojo.byId('progressStatus_phase').innerHTML = "Installation finished!"
+                        dojo.byId('restartServer').innerHTML = "${restartServer}";
+                        dojo.byId('progressStatus_phase').innerHTML = "${installFinished}"
                         destroy()
                     }
 
@@ -162,11 +167,11 @@
          */
         function startBackgroundListener() {
             dojo.byId('roller').style.display = '';
-            dojo.byId('progressStatus_phase').innerHTML = "Server is restarting...";
+            dojo.byId('progressStatus_phase').innerHTML = "${serverRestarting}...";
             dojo.byId('progressStatus_statusMessage').value = '';
             dojo.byId('progressStatus_statusMessage').style.display = 'none';
             dojo.byId('progressStatus_overallPercentage').style.display = 'none';
-            dojo.byId('restartServer').innerHTML = "When the server has restarted<BR> you will be directed to the login page.";
+            dojo.byId('restartServer').innerHTML = "${serverRestartingTip}.";
             dojo.byId('restartButton').disabled = true;
             requestServerRestart();
             if (!timerIsOn) {
@@ -187,10 +192,10 @@
   </head>
 
     <g:if test="${session.install.equals('addOns')}">
-        <g:set var="processType" value="Installing new packages" />
+        <g:set var="processType" value="${message(code:'packagesUpdate.page.installUpdatesStatus.installing')}" />
     </g:if>
     <g:else>
-        <g:set var="processType" value="Upgrading existing packages" />
+        <g:set var="processType" value="${message(code:'packagesUpdate.page.installUpdatesStatus.upgrading')}" />
     </g:else>
 
   <content tag="title">
@@ -201,14 +206,16 @@
 
     <div style="position: absolute; top: -9999px; opacity: 0; left: 478px; visibility: hidden;" 
          dojoType="dijit.Dialog" id="updateProcessDialog" widgetid="updateProcessDialog" 
-         title="CollabNet Subversion Edge Software Updates" role="dialog" tabindex="-1"
+         title="${message(code:'packagesUpdate.page.installUpdatesStatus.header')}" role="dialog" tabindex="-1"
          class="dijitDialog dijitContentPane" wairole="dialog"
          waistate="labelledby-updateProcessDialog_title">
       <table>
         <tr>
           <td valign="middle">
             <img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle">
-            <font size="3"><strong><span id="progressStatus_phase">Initial Phase...</span></strong></font>
+            <font size="3"><strong><span id="progressStatus_phase">
+               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />...</span></strong>
+            </font>
           </td>
         </tr>
         <tr>
@@ -242,7 +249,7 @@
         <tr>
           <td>
             <div class="AlignRight">
-              <input id="restartButton" type="button" value="Restart Server"
+              <input id="restartButton" type="button" value="${message(code:'packagesUpdate.page.installUpdatesStatus.button.restart')}"
                  class="Button" onClick="javascript:startBackgroundListener();" />
             </div>
           </td>

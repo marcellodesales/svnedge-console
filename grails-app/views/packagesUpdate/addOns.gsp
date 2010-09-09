@@ -1,7 +1,7 @@
 <html>
   <head>
       <title>
-        CollabNet Subversion Edge
+        CollabNet Subversion Edge <g:message code="packagesUpdate.page.addOns.title" />
       </title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
@@ -24,7 +24,7 @@
 
   </head>
   <content tag="title">
-    Software Updates
+    <g:message code="packagesUpdate.page.leftNav.header" />
   </content>
 
   <g:render template="/server/leftNav" />
@@ -41,14 +41,13 @@
             <td>
               <div class="AlignRight">
                   <g:actionSubmit id="reloadButton" action="reloadAddOns" 
-                                  value="Reload New Packages"
+                                  value="${message(code:'packagesUpdate.page.addOns.button.reload')}" 
                                   class="Button"/>
+                  <g:set var="confirmMsg" value="${message(code:'packagesUpdate.addons.install.confirmation')}" />
                   <g:actionSubmit id="installButton" action="installAddOns" 
-                                  value="Install New Packages"
+                                  value="${message(code:'packagesUpdate.page.addOns.button.install')}" 
                                   class="Button"
-                                  onclick="return confirm('The console needs ' +
-                                   'to be restarted after installing new ' +
-                                   'packages. Continue?')"
+                                  onclick="return confirm('${confirmMsg}')"
                                />
               </div>
             </td>

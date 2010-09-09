@@ -63,7 +63,8 @@ class PackagesUpdateController {
     def available = {
         if (!flash.error) {
             if (this.packagesUpdateService.areThereUpdatesAvailable()) {
-                flash.warn = "New Updates Available!"
+                flash.warn = message(code:
+                    'packagesUpdate.action.available.message')
             }
             if (this.packagesUpdateService.systemNeedsRestart()) {
                 flash.warn = message(code:
@@ -156,27 +157,30 @@ class PackagesUpdateController {
     }
 
     private String getNoConnectionErrorMessage(packagesType) {
-        def action = ""
+        def msg = message(code: 'packagesUpdate.status.reloadCheckNetwork')
+        def action = ". "
         if (packagesType == "reloadInstalled") {
-            action = " <a href='/csvn/packagesUpdate/reloadInstalled'>" +
-                    "Reload</a> after checking the network connectivity."
+            def reload = message(code:'packagesUpdate.status.reloadReplace')
+            action += msg.replace(reload,
+                "<a href='/csvn/packagesUpdate/reloadInstalled'>${reload}</a>.")
         } else {
-            action = " Reload after checking the network connectivity."
+            action += msg + "."
         }
         def server = this.packagesUpdateService.getImageOriginUrl() ?: ""
+        def noConMsg = message(code: 'packagesUpdate.error.server.noConnection')
         server = (server != "") ? " '${server}'" : ""
-        return "There's no network connection with the packages repository " +
-                "server${server}.${action}"
+        return noConMsg + server + action
     }
 
     private String getNoRouteErrorMessage(packagesType) {
+        def msg = message(code: 'packagesUpdate.error.server.unreachable',
+            args:[this.packagesUpdateService.getImageOriginUrl()])
+        def prxServ = message(code: 'packagesUpdate.error.server.proxyReplace')
         def helpUrl = config.svnedge.helpUrl
         def helpPath = "/topic/csvn/action/upgradecsvn_proxy.html"
-        def helpLink = "<a href='${helpUrl}${helpPath}' target='csvnHelp'>"
-        return "The packages repository server '" + 
-                this.packagesUpdateService.getImageOriginUrl() + "' is " +
-                "unreachable. This usually happens behind a ${helpLink}" +
-                "network proxy server</a>."
+        def helpLink = "<a href='${helpUrl}${helpPath}' target='csvnHelp'>" +
+            prxServ + "</a>."
+        return msg.replace(prxServ, helpLink)
     }
 
     def reloadInstalled = {
@@ -201,8 +205,9 @@ class PackagesUpdateController {
 
         } catch (Exception e) {
             session["connectionProblems"] = "installed"
-            flash.error = "An error occurred while loading installed " +
-                    "packages: " + e.getMessage()
+            def loadErr = message(code: 
+                'packagesUpdate.error.general.loading.installed')
+            flash.error = loadErr + ": " + e.getMessage()
             log.error(flash.error, e)
         }
         redirect(action:"installed")
@@ -230,8 +235,9 @@ class PackagesUpdateController {
 
         } catch (Exception e) {
             session["connectionProblems"] = "updates"
-            flash.error = "An error occurred while loading software updates: " +
-                    e.getMessage()
+            def loadErr = message(code: 
+                'packagesUpdate.error.general.loading.updates')
+            flash.error = loadErr + ": " + e.getMessage()
             log.error(flash.error, e)
         }
         redirect(action:"available")
@@ -259,8 +265,9 @@ class PackagesUpdateController {
 
         } catch (Exception e) {
             session["connectionProblems"] = "addOns"
-            flash.error = "An error occurred while loading new packages: " +
-                    e.getMessage()
+            def loadErr = message(code: 
+                'packagesUpdate.error.general.loading.addOns')
+            flash.error = loadErr + ": " + e.getMessage()
             log.error(flash.error, e)
         }
         redirect(action:"addOns")
