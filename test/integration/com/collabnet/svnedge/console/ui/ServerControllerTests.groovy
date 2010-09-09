@@ -28,15 +28,22 @@ class ServerControllerTests extends ControllerUnitTestCase {
     def lifecycleService
     def networkingService
     def serverConfService
-    def config = ConfigurationHolder.config
-    
+    def grailsApplication
+    def config
+
     protected void setUp() {
         super.setUp()
-        controller.operatingSystemService = operatingSystemService
-        controller.lifecycleService = lifecycleService 
-        controller.networkingService = networkingService 
+
+        // mock the i18n "message" map available to controller
+        controller.metaClass.messageSource = [getMessage: { errors, locale ->
+            return "message" }]
+        controller.metaClass.message = { it -> return "message" }
+
+        this.config = grailsApplication.config
+        controller.lifecycleService = lifecycleService
+        controller.networkingService = networkingService
         controller.serverConfService = serverConfService
-        ConfigurationHolder.config = config 
+        ConfigurationHolder.config = grailsApplication.config
     }
 
     protected void tearDown() {
