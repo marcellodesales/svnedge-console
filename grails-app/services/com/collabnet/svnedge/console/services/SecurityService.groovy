@@ -37,7 +37,7 @@ class SecurityService {
         StringBuilder sb = new StringBuilder(passLength)
         for (int i = 0; i < passLength; i++) {
             // printable ascii characters (or those between '!' and '~')
-            sb.append((char) ((int)'!' + randomNumGen.nextInt(93)))
+            sb.append((char) (((int)'!') + randomNumGen.nextInt(93)))
         }
         sb.toString()
     }

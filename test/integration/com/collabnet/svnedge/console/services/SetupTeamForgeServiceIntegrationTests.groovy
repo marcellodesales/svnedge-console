@@ -28,13 +28,16 @@ import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.teamforge.CtfConversionBean;
 
 class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
+
+    def grailsApplication
     def ctfRemoteClientService
     def setupTeamForgeService
     def svnRepoService    
-    def config = ConfigurationHolder.config
+    def config
 
     protected void setUp() {
         super.setUp()
+        this.config = grailsApplication.config
     }
 
     protected void tearDown() {

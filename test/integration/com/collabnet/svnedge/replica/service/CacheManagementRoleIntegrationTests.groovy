@@ -26,9 +26,11 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 class CacheManagementRoleIntegrationTests extends GrailsUnitTestCase {
 
     def cacheManagementService
-    def config = ConfigurationHolder.config
+    def grailsApplication
+    def config
 
     protected void setUp() {
+        this.config = grailsApplication.config
         cacheManagementService.flushAllCache()
     }
 

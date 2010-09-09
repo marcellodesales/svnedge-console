@@ -33,13 +33,15 @@ class AuthenticationIntegrationTests extends GrailsUnitTestCase {
     def anonymousAuthenticationProvider
     def Server server
     def ctfRemoteClientService
-    def config = ConfigurationHolder.config
+    def grailsApplication
+    def config
 
     def TEST_USERNAME = "marcello"
     def TEST_PASSWORD = "12345"
 
     protected void setUp() {
         super.setUp()
+        this.config = grailsApplication.config
         server = Server.getServer()
         authenticationManager.providers = [ctfAuthenticationProvider]
     }

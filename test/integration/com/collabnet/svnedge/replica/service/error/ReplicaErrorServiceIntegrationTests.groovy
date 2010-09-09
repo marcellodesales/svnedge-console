@@ -24,12 +24,13 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ReplicaErrorServiceIntegrationTests extends GrailsUnitTestCase {
 
-    def config = ConfigurationHolder.config
+    def grailsApplication
+    def config
 
     protected void setUp() {
         super.setUp()
+        this.config = grailsApplication.config
         config.svnedge.replica.error.minLevel = Level.WARN.toInt()
-        ConfigurationHolder.config = config
     }
 
     protected void tearDown() {

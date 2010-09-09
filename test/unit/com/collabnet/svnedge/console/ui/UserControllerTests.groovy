@@ -46,8 +46,8 @@ class UserControllerTests extends ControllerUnitTestCase {
                 new Role(authority: "ROLE_USER", id: 2),
                 new Role(authority: "ROLE_ADMIN_USERS", id: 3)
         ])
-        testUser = new User(username: "testUser", id: 1, version: 2, passwd: "encodedPasswd")
-        testAdmin = new User(username: "testAdmin", id: 2, version: 1, passwd: "encodedPasswd")
+        testUser = new User(username: "testUser", version: 2, passwd: "encodedPasswd")
+        testAdmin = new User(username: "testAdmin", version: 1, passwd: "encodedPasswd")
         testUser.authorities = [Role.findByAuthority("ROLE_USER")]
         testAdmin.authorities = [Role.findByAuthority("ROLE_ADMIN")]
         mockDomain (User, [testUser, testAdmin])
@@ -130,7 +130,6 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.authenticateService = authenticateService.createMock();
 
         // test some params for a save
-        controller.params.id = 3
         controller.params.username = "testUser2"
         controller.params.realUserName = "test User 2"
         controller.params.email = "test@test.com"
@@ -164,18 +163,17 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.lifecycleService = lifecycleService.createMock();
  
         // test some params for a save
-        controller.params.id = 3
         controller.params.username = "testUser2"
         controller.params.realUserName = "test User 2"
         controller.params.email = "test@test.com"
         controller.params.passwd = "clearPassword"
         controller.params.authorities = "2"
 
-
         model = controller.save()
 
         assertEquals("Expected redirect to show when SUCCEEDING", "show",
             controller.redirectArgs["action"])
+
         assertEquals("Expected new user id in model", 3, redirectArgs["id"])
         assertNotNull("Expected new user in the domain", User.get(3))
         

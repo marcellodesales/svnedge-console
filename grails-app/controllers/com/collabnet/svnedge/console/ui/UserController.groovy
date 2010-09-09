@@ -102,9 +102,7 @@ class UserController {
                     params.passwd)
         }
 
-        if (!userInstance.hasErrors()) {
-
-            userInstance.save(flush: true)
+        if (!userInstance.hasErrors() && userInstance.save()) {
 
             // add to default security group if not already
             userInstance.addToAuthorities (Role.findByAuthority("ROLE_USER"))
@@ -400,7 +398,7 @@ class UserController {
         // 2) ROLE_ADMIN can edit anyone
         def uname = authenticateService.principal().getUsername();
         def sessionUser = User.findByUsername(uname)
-        if (sessionUser?.id?.toString() == params.id || 
+        if (sessionUser?.id?.toString() == id || 
                 authenticateService.ifAllGranted("ROLE_ADMIN")) return true
 
         // 3) ROLE_ADMIN_USERS can edit anyone having same or lower auth grants

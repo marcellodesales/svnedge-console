@@ -26,10 +26,12 @@ class WizardControllerTests extends ControllerUnitTestCase {
     def uploadErrorsService
     def registrationService
     def lifecycleService
-    def config = ConfigurationHolder.config    
+    def grailsApplication
+    def config
 
     protected void setUp() {
         super.setUp()
+        this.config = grailsApplication.config
         controller.svnNotificationService = svnNotificationService
         controller.uploadErrorsService = uploadErrorsService
         controller.registrationService = registrationService
