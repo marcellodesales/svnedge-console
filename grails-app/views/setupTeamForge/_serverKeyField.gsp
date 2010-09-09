@@ -1,6 +1,6 @@
       <tr>
         <td class="ItemDetailName">
-          <label for="serverKey">Integration API Key:</label>
+          <label for="serverKey"><g:message code="ctfConversionBean.serverKey.label" />:</label>
         </td>
         <td valign="top" class="value ${hasErrors(bean:con,field:'serverKey','errors')}">
           <input size="60" type="text" id="serverKey" name="serverKey" 
@@ -10,7 +10,7 @@
                   <li><g:message error="${it}"/></li>
               </g:eachError>
           </g:hasErrors>
-          <div class="errorMessage">Additional required field</div>
+          <div class="errorMessage"><g:message code="setupTeamForge.page.error.additional" /></div>
         </td>
-        <td class="ItemDetailValue"><em>Shared secret for TeamForge/Subversion Edge communication.</em></td>
+        <td class="ItemDetailValue"><em><g:message code="ctfConversionBean.serverKey.error.missing" />.</em></td>
       </tr> 

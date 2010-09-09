@@ -1,34 +1,28 @@
 <html>
   <head>
-    <title>CollabNet TeamForge Integration</title>
+    <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.index.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
   </head>
   <content tag="title">
-    CollabNet TeamForge Integration
+    <g:message code="setupTeamForge.page.leftNav.header" />
   </content>
 
   <g:render template="/server/leftNav" />
 
   <body>
 
+    <g:set var="tabArray" value="${[[active:true, label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}" />
     <g:if test="${isFreshInstall}">
-      <g:render template="/common/tabs"
-          model="[tabs:[
-            [active:true, label:'1. Introduction'],
-            [action:'ctfInfo', label:'2. Convert to TeamForge mode']
-            ]]" />
+      <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupTeamForge.page.tabs.confirm', args:[2])]}" />
     </g:if>
     <g:else>
-      <g:render template="/common/tabs"
-          model="[tabs:[
-            [active:true, label:'1. Introduction'],
-            [action:'ctfInfo', label:'2. TeamForge Credentials'],
-            [label:'3. TeamForge Project'],
-            [label:'4. TeamForge Users'],
-            [label:'5. Convert to TeamForge mode']
-            ]]" />
+      <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupTeamForge.page.tabs.ctfInfo', args:[2])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.ctfProject', args:[3])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.ctfUsers', args:[4])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.confirm', args:[5])]}" />
     </g:else>
+    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
  <table class="ItemDetailContainer">
   <tr>
@@ -40,39 +34,31 @@
     </a>
     <br/><br/>
     <p>
-    <strong>Agile ALM for Distributed Development</strong>
+    <strong><g:message code="setupTeamForge.page.index.almTitle" /></strong>
     </p>
     <br/>
     <p>
-    <a href="http://www.open.collab.net/products/ctf/">CollabNet TeamForge</a> is an 
-    Application Lifecycle Management platform designed for distributed software 
-    development teams. It's optimized around Subversion for source code management and covers the full 
-    development lifecycle from requirements through release.
+    <a href="http://www.open.collab.net/products/ctf/">CollabNet TeamForge</a> 
+       <g:message code="setupTeamForge.page.index.p1" />.
     </p>
-    <p>CollabNet Subversion Edge can be setup to function as an SCM integration server for CollabNet TeamForge.
-    In this mode, the svn server administration will be entirely controlled by TeamForge.
+    <p>CollabNet Subversion Edge <g:message code="setupTeamForge.page.index.p2" />.
     </p>
-
-    <g:if test="${isFreshInstall}">
-        <p>As this CollabNet Subversion Edge installation does not yet have any repositories in use, there will be
-       nothing to import into CollabNet TeamForge.  You will just need to supply the URL to the TeamForge 
-       server along with administrator credentials.
-       </p>
-    </g:if>
-    <g:else>
-        <p>
-        As part of the conversion to using TeamForge to administer the repositories and users, this process
-        will register the repositories with one or more TeamForge projects.  Users will also be imported.  
-        Please follow the short wizard to complete the conversion process.
-        </p>
-    </g:else>
+    <p>
+      <g:if test="${isFreshInstall}">
+        <g:message code="setupTeamForge.page.index.p3.freshConversion" />.
+      </g:if>
+      <g:else>
+        <g:message code="setupTeamForge.page.index.p3.complete" />.
+      </g:else>
+    </p>
    </td>
    </tr>
      <tr class="ContainerFooter">
        <td >
          <g:form method="post">
          <div class="AlignRight">
-           <g:actionSubmit action="ctfInfo" value="Continue" class="Button"/>
+           <g:actionSubmit action="ctfInfo" class="Button"
+               value="${message(code:'setupTeamForge.page.index.button.continue')}" />
          </div>
          </g:form>
        </td>

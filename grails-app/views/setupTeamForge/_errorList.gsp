@@ -1,6 +1,5 @@
 <div class="errorMessage">
-There were errors during the attempt to register this server with CollabNet
-TeamForge.
+<g:message code="setupTeamForge.page.error.general" />
     <ul>
     <g:each in="${flash.errors}">
     <li>${it}</li>
