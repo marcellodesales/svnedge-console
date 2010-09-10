@@ -154,10 +154,9 @@ abstract class AbstractConversionFunctionalTests extends
         get('/server/editIntegration')
         assertStatus 200
 
-        assertContentContains("By submitting this form with the " +
-            "administrator's credentials, this Subversion Edge server can " +
-            "be converted back to Standalone mode...")
-        assertContentContains("TeamForge server URL")
+        assertContentContains(getMessage("server.action.revert.warn"))
+        assertContentContains(getMessage(
+            "server.page.editIntegration.ctfUrl.label"))
         assertContentContains(this.getTestCtfUrl())
 
         def username = config.svnedge.ctfMaster.username
@@ -169,8 +168,13 @@ abstract class AbstractConversionFunctionalTests extends
             click button
         }
         assertStatus 200
-        assertContentContains("This Subversion Edge server has been reverted " +
-            "successfully from Managed to Standalone mode.")
+        assertContentDoesNotContain(getMessage(
+            "server.action.revert.error.credentials"))
+        assertContentDoesNotContain(getMessage(
+            "server.action.revert.error.general"))
+        assertContentDoesNotContain(getMessage(
+            "server.action.revert.error.connection"))
+        assertContentContains(getMessage("server.action.revert.success"))
 
         // Step 2: Verify that the revert process is persistent.
         assertRevertSucceeed(ctfSystemId)
@@ -279,6 +283,7 @@ abstract class AbstractConversionFunctionalTests extends
     * earlier.
     */
     private void loginToCtfServerIfNecessary() {
+        //NOTE: NO I18N HERE SINCE TEAMFORGE IS NOT I18N READY
         if (!this.response.contentAsString.contains("Logged in as")) {
             assertStatus 200
             def ctfUsername = config.svnedge.ctfMaster.username
@@ -298,6 +303,7 @@ abstract class AbstractConversionFunctionalTests extends
      * Verifies that the CTF server lists the current ctf server system ID.
      */
     protected void assertConversionSucceededOnCtfServer() {
+        // NOTE: NO I18N HERE SINCE TEAMFORGE IS NOT I18N READY
         this.goToCtfListIntegrationsPage()
         assertContentContains(CtfServer.getServer().mySystemId)
 
@@ -305,6 +311,8 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentContains("SCM Integrations")
         def appServerPort = System.getProperty("jetty.port", "8080")
         def csvnHostAndPort = server.hostname + ":" + appServerPort
+
+        // TeamForge removes any double-quotes (") submitted via the SOAP API.
         assertContentContains("This is a CollabNet Subversion Edge server in " +
             "managed mode from ${csvnHostAndPort}.")
     }

@@ -53,8 +53,8 @@ class ServerController {
         ctfCredentials.validate()
         def ctfServer = CtfServer.getServer()
         if (ctfCredentials.hasErrors()) {
-            def formError = "You need to provide credentials with " +
-                "permission to convert this server."
+            def formError = message(code: 
+                "server.action.revert.error.credentials")
             render(view: 'editIntegration',
                     model: [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
                         ctfCredentials: ctfCredentials, formError: formError])
@@ -65,21 +65,21 @@ class ServerController {
                     ctfCredentials.ctfUsername, ctfCredentials.ctfPassword,
                         errors)
                 if (errors) {
-                    def formError = "Errors occurred while converting to " +
-                        "Standalone Mode."
+                    def formError = 
+                        message(code: "server.action.revert.error.general")
                     render(view: 'editIntegration',
                         model: [ctfServerBaseUrl: ctfServer.baseUrl,
                             ctfCredentials: ctfCredentials,
                             formError: formError, errorCause: errors])
                 } else {
-                    flash.message = "This Subversion Edge server has been " +
-                        "reverted successfully from Managed to Standalone mode."
+                    flash.message = message(code: 
+                        "server.action.revert.success")
                     redirect(controller: "status", action: "index")
                 }
             } catch (CtfAuthenticationException wrongCredentials) {
                 def ctfBaseUrl = ctfServer.baseUrl
-                def formError = "An error occurred while trying to contact " +
-                    "the given TeamForge server '${ctfBaseUrl}'"
+                def formError = message(code:
+                    "server.action.revert.error.connection", [ctfBaseUrl])
                 render(view: 'editIntegration',
                         model: [ctfServerBaseUrl: ctfBaseUrl,
                             ctfCredentials: ctfCredentials,
@@ -90,9 +90,7 @@ class ServerController {
     }
 
     def editIntegration = {
-        flash.warn = "By submitting this form with the administrator's " +
-            "credentials, this Subversion Edge server can be " +
-            "converted back to Standalone mode..."
+        flash.warn = message(code: "server.action.revert.warn")
         def ctfCredentialsCmd = new CtfCredentialCommand()
         return [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
                 ctfCredentials: ctfCredentialsCmd]

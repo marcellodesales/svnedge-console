@@ -1,36 +1,35 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge Configuration</title>
+    <title>CollabNet Subversion Edge <g:message code="server.page.editIntegration.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
 
   </head>
   <content tag="title">
-    Integration Administration
+    <g:message code="server.page.editIntegration.leftNav.header" />
   </content>
 
   <g:render template="leftNav" />
 
   <body>
 
-      <g:render template="/common/tabs"
-          model="[tabs:[
-            [active:true, label:'Convert to Standalone mode']]]" />
+   <g:set var="tabArray" value="${[[active:true, label: message(code:'server.page.editIntegration.tab.convert')]]}" />
+   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
       <table class="ItemDetailContainer">
       <tr>
         <td class="ContainerBodyWithPaddedBorder">
 
-           <p>This Subversion Edge server is currently being managed by the TeamForge server 
-           <strong><i>${ctfServerBaseUrl}</i></strong>, and therefore:</p>
+           <p><g:message code="server.page.editIntegration.p1" /> 
+           <strong><i>${ctfServerBaseUrl}</i></strong>, <g:message code="server.page.editIntegration.p2" />:</p>
             <ul>
-                <li>All users' credentials, roles and access permissions are managed by TeamForge;</li>
-                <li>All repositories are managed from TeamForge, although they reside on this server.
+                <li><g:message code="server.page.editIntegration.bullet1" />;</li>
+                <li><g:message code="server.page.editIntegration.bullet2" />.
             </ul>
 
-            <p>After reverting to Standalone mode:</p>
+            <p><g:message code="server.page.editIntegration.p3" />:</p>
             <ul>
-               <li>Local user authentication is used.</li>
+               <li><g:message code="server.page.editIntegration.bullet3" />.</li>
             </ul>
       </td></tr>
       <tr>
@@ -53,20 +52,20 @@
       <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfURL">TeamForge server URL:</label>
+          <label for="ctfURL"><g:message code="server.page.editIntegration.ctfUrl.label" />:</label>
         </td>
         <td valign="top" class="value" colspan="2">${ctfServerBaseUrl}</td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfUsername">TeamForge administrator username:</label>
+          <label for="ctfUsername"><g:message code="server.page.editIntegration.ctfUsername.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfUsername','errors')}">
           <input size="20" type="text" id="ctfUsername" name="ctfUsername" 
               value="${fieldValue(bean:ctfCredentials,field:'ctfUsername').replace(',','')}"/>
         </td>
         <td class="ItemDetailValue">
-          <em>Account must have permission to remove integration servers</em>
+          <em><g:message code="server.page.editIntegration.ctfUsername.label.tip" /></em>
          </td>
       </tr>
    <g:hasErrors bean="${ctfCredentials}" field="ctfUsername">
@@ -81,7 +80,7 @@
    </g:hasErrors>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfPassword">TeamForge administrator password:</label>
+          <label for="ctfPassword"><g:message code="server.page.editIntegration.ctfPassword.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfPassword','errors')}">
           <input size="20" type="password" id="ctfPassword" name="ctfPassword" 
@@ -103,7 +102,7 @@
       <tr class="ContainerFooter">
         <td colspan="3">
           <div class="AlignRight">
-                <g:actionSubmit action="revert" value="Convert" class="Button"/>
+                <g:actionSubmit action="revert" value="${message(code:'server.page.editIntegration.button.convert')}" class="Button"/>
           </div>
         </td>
       </tr>
