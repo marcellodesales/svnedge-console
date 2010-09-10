@@ -135,19 +135,13 @@
 <g:if test="${standardPortInstructions}">
 <div class="instructionText">
     <i><g:message code="server.page.edit.standardPorts.header" /></i>
-    <p><g:message code="server.page.edit.standardPorts.instructions" />.</p>
-<ul>
-<li><g:message code="server.page.edit.httpdSudo" />.<a id="toggleSudo" href="#" 
-  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
-<div id="sudoInstructions" style="border: 1px;">
-<p>
-<g:message code="server.page.edit.httpdSudo.instructions" />.
+    <p><g:message code="server.page.edit.standardPorts.instructions" />.
 </p>
 <ul>
 <li><g:message code="server.page.edit.httpdBind" />. <a id="toggleBind" href="#" 
   onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="bindInstructions" style="border: 1px;">
-<p><g:message code="server.page.edit.httpdBind.instructions" />.<em><g:message code="server.page.edit.httpdBind.asRoot" />.</em>
+<p><g:message code="server.page.edit.httpdBind.instructions" />. <em><g:message code="server.page.edit.httpdBind.asRoot" />.</em>
 </p>
 <blockquote>
 <code>chown root:${httpd_group} ${csvnHome}/lib/httpd_bind/httpd_bind
@@ -390,6 +384,7 @@ users access to ports less than 1024.</p>
           <div class="AlignRight">
                 <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
             </div>
+          </div>
         </td>
       </tr>
       </table>
