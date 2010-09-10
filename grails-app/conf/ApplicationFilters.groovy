@@ -61,7 +61,7 @@ class ApplicationFilters {
                 if (ServerMode.STANDALONE == Server.getServer().mode && 
                     "server" == controllerName && (
                         "editIntegration" == actionName || "revert" == actionName)) {
-                    flash.warn = app.getMainContext().getMessage(
+                    flash.error = app.getMainContext().getMessage(
                         "filter.probihited.mode.standalone", null,
                             Locale.getDefault())
                     redirect(controller: "status")
@@ -70,7 +70,7 @@ class ApplicationFilters {
                 if (ServerMode.MANAGED == Server.getServer().mode &&
                 (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
                 ("server" == controllerName && "editAuthentication" == actionName))) {
-                    flash.warn = app.getMainContext().getMessage(
+                    flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.managed", null,
                             Locale.getDefault())
                     redirect(controller: "status")
