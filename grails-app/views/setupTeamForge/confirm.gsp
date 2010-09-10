@@ -17,6 +17,7 @@
    <g:set var="tabArray" value="${tabArray << [action:'ctfProject', label: message(code:'setupTeamForge.page.tabs.ctfProject', args:[3])]}" />
    <g:set var="tabArray" value="${tabArray << [action:'ctfUsers', label: message(code:'setupTeamForge.page.tabs.ctfUsers', args:[4])]}" />
    <g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupTeamForge.page.tabs.confirm', args:[5])]}" />
+   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
    <g:form method="post">
    <table class="ItemDetailContainer">
