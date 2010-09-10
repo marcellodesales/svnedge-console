@@ -59,6 +59,9 @@ abstract class AbstractConversionFunctionalTests extends
 
         // convert if necessary
         this.convertToStandaloneMode()
+
+        // verify that the links to teamForge mode are prohibited.
+        this.assertProhibitedAccessToTeamForgeModeLinksWorks()
     }
 
     @Override
@@ -132,13 +135,63 @@ abstract class AbstractConversionFunctionalTests extends
            getMessage("status.page.url.teamforge"))
    }
 
-   /**
-    * @return if the status page DOES NOT contain the link to a TeamForge 
-    * server.
-    */
-   protected boolean isServerOnStandaloneMode() {
-       return !this.isServerOnTeamForgeMode()
-   }
+    /**
+     * @return if the status page DOES NOT contain the link to a TeamForge 
+     * server.
+     */
+    protected boolean isServerOnStandaloneMode() {
+        return !this.isServerOnTeamForgeMode()
+    }
+
+    /**
+     * Verifies the probihited access of the teamforge mode links
+     * when the server is on standalone mode.
+     */
+    protected void assertProhibitedAccessToTeamForgeModeLinksWorks() {
+        if (!this.isServerOnStandaloneMode()) {
+            return
+        }
+        get('/server/editIntegration')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.standalone"))
+    }
+
+    /**
+     * Verifies the probihited access of the standalone conversion links
+     * when the server is on teamforge mode.
+     */
+    protected void assertProhibitedAccessToStandaloneModeLinksWorks() {
+        if (this.isServerOnStandaloneMode()) {
+            return
+        }
+        get('/setupTeamForge/index')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/ctfInfo')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/ctfProject')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/ctfUsers')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/ctfUsers')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/convert')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+
+        get('/setupTeamForge/confirm')
+        assertStatus 200
+        assertContentContains(getMessage("filter.probihited.mode.managed"))
+    }
 
     /**
      * Performs the revert process. That is, the conversion process from the
@@ -207,6 +260,9 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentDoesNotContain(
             getMessage("server.page.leftNav.toStandalone"))
 
+        // verify that prohibited links are working
+        assertProhibitedAccessToTeamForgeModeLinksWorks()
+
         // Step 2: verify that the CTF server DOES NOT list the system ID
         assertRevertSucceededOnCtfServer(ctfSystemId)
     }
@@ -235,6 +291,9 @@ abstract class AbstractConversionFunctionalTests extends
         assertStatus 200
         assertContentContains(getMessage("server.page.leftNav.toStandalone"))
 
+        // verify that prohibited links work
+        assertProhibitedAccessToStandaloneModeLinksWorks()
+
         // Step 2: verify that the CTF server DOES list the system ID
         assertConversionSucceededOnCtfServer()
     }
@@ -256,6 +315,9 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentContains(getMessage("status.page.status.version.software"))
         assertContentContains(
             getMessage("status.page.status.version.subversion"))
+
+        // verify that the prohibited links work.
+        assertProhibitedAccessToTeamForgeModeLinksWorks()
     }
 
     /**

@@ -19,6 +19,7 @@ import grails.util.GrailsUtil
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class ApplicationFilters {
@@ -27,6 +28,7 @@ class ApplicationFilters {
     def authenticateService
     def lifecycleService
     def config = ConfigurationHolder.config
+    def app = ApplicationHolder.application
 
     def filters = {
 
@@ -36,13 +38,12 @@ class ApplicationFilters {
         verifyOperatingSystemLibraries(controller: '*', action: '*') {
             after = {
                 if (!operatingSystemService.isReady()) {
-                    def args = null
                     switch (controllerName) {
                     case "status":
                     case "statistics":
                     case "server":
-                        flash.error = applicationContext.getMessage(
-                            "server.failed.loading.libraries", args, 
+                        flash.error = app.getMainContext().getMessage(
+                            "server.failed.loading.libraries", [] as String,
                             Locale.getDefault())
                         break;
                     }
@@ -60,15 +61,18 @@ class ApplicationFilters {
                 if (ServerMode.STANDALONE == Server.getServer().mode && 
                     "server" == controllerName && (
                         "editIntegration" == actionName || "revert" == actionName)) {
-                    flash.warn = "Attempted to access a functionality " +
-                        "from the managed mode in standalone mode."
+                    flash.warn = app.getMainContext().getMessage(
+                        "filter.probihited.mode.standalone", null,
+                            Locale.getDefault())
                     redirect(controller: "status")
                     return false
                 }
                 if (ServerMode.MANAGED == Server.getServer().mode &&
                 (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
                 ("server" == controllerName && "editAuthentication" == actionName))) {
-                    flash.warn = "Attempted to access standalone functionality in managed mode."
+                    flash.warn = app.getMainContext().getMessage(
+                            "filter.probihited.mode.managed", null,
+                            Locale.getDefault())
                     redirect(controller: "status")
                     return false
                 }
@@ -161,8 +165,9 @@ class ApplicationFilters {
                          authenticateService.ifAnyGranted("ROLE_ADMIN"))) {
                     return true
                 } else {
-                    flash.error = "You don't have sufficient credentials to " +
-                            "access this application"
+                    flash.error = app.getMainContext().getMessage(
+                            "filter.probihited.credentials", null,
+                            Locale.getDefault())
                     redirect(uri:'/')
                     return false
                 }
