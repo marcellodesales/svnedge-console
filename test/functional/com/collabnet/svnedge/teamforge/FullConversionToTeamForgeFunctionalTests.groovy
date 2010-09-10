@@ -56,13 +56,13 @@ class FullConversionToTeamForgeFunctionalTests
             assertStatus 200
 
             def repoName = "csvnrepo" + new Random().nextInt(1000)
+            def button = getMessage("repository.page.create.button.create")
             form {
                 name = repoName
-                click "Create"
+                click button
             }
             assertStatus 200
-            assertContentDoesNotContain("There was a problem saving one or " + 
-                "more of these values")
+            assertContentDoesNotContain(getMessage("default.errors.summary"))
         }
     }
 
@@ -95,64 +95,85 @@ class FullConversionToTeamForgeFunctionalTests
         // Step 2: Verify the credentials with teamforge.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def continueButton = 
+            getMessage("setupTeamForge.page.ctfInfo.button.continue")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = username
             ctfPassword = password
-            click "Continue"
+            click continueButton
         }
         assertStatus 200
 
+        def webDavUnreachable = 
+            getMessage("ctfRemoteClientService.local.webdav.unreachable")
+        def viewVCUnreachable = 
+            getMessage("ctfRemoteClientService.local.viewvc.unreachable")
         //TODO: if the viewvc or svn path is not reachable, then re-try once.
-        if (this.response.contentAsString.contains("TeamForge server cannot " +
-            "access the local ")) {
+        def responseString = this.response.contentAsString
+        if (responseString.contains(webDavUnreachable) || 
+            responseString.contains(viewVCUnreachable)) {
             form {
                 ctfURL = this.getTestCtfUrl()
                 ctfUsername = username
                 ctfPassword = password
-                click "Continue"
+                click continueButton
             }
             assertStatus 200
         }
-        assertContentDoesNotContain("An error occurred while trying")
-        assertContentContains("TeamForge project name")
-        assertContentContains("Project where repositories will be registered")
+        assertContentDoesNotContain(
+            getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error"))
+        assertContentContains(
+            getMessage("setupTeamForge.page.ctfProject.name.label"))
+        assertContentContains(
+            getMessage("setupTeamForge.page.ctfProject.name.label.tip"))
 
         this.createdProjectName = "csvnproj" + new Random().nextInt(1000)
+        def projButton = 
+            getMessage("setupTeamForge.page.ctfProject.button.continue")
         // Step 3: provide the project name.
         form {
             ctfProject = this.createdProjectName
-            click "Continue"
+            click projButton
         }
         assertStatus 200
 
         assertContentDoesNotContain("Error related to project name")
-        assertContentContains("Project '${this.createdProjectName}' will be " +
-            "created to initially host the imported repositories.")
+        assertContentContains(getMessage(
+            "setupTeamForge.action.updateProject.initialCreation", 
+            [this.createdProjectName]))
 
         // Step 4: choose the users name information.
+        def usersButton = 
+            getMessage("setupTeamForge.page.ctfUsers.button.continue")
         form {
-            click "Continue"
+            click usersButton
         }
         assertStatus 200
 
-        assertContentContains("Click the convert button to switch to TeamForge")
-        assertContentContains("CollabNet TeamForge server:")
+        assertContentContains(
+            getMessage("setupTeamForge.page.confirm.ready.tip"))
+        assertContentContains(getMessage("setupTeamForge.page.confirm.server"))
         assertContentContains(this.getTestCtfUrl())
-        assertContentContains("Project:")
+        assertContentContains(getMessage("setupTeamForge.page.confirm.project"))
         assertContentContains(this.createdProjectName)
 
         // Step 5: click on the convert button and verify the conversion.
+        def convertButton = 
+            getMessage("setupTeamForge.page.confirm.button.confirm")
         form {
-            click "Convert"
+            click convertButton
         }
         assertStatus 200
 
-        assertContentDoesNotContain("An error occurred while trying")
-        assertContentContains("CollabNet TeamForge is now managing the " +
-            "repositories on this server.")
-        assertContentContains("Project '${this.createdProjectName}' Source " +
-            "Code:")
+        assertContentDoesNotContain(
+            getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error"))
+        assertContentContains(
+            getMessage("setupTeamForge.action.convert.success"))
+        assertContentContains(getMessage("setupTeamForge.page.convert.project"))
+        assertContentContains(this.createdProjectName)
+        assertContentContains(
+            getMessage("setupTeamForge.page.convert.sourceCode"))
         def projectUrl = this.getTestCtfUrl() + "/sf/scm/do/listRepositories/" +
             "projects.${this.createdProjectName}/scm"
         assertContentContains(projectUrl)
@@ -206,15 +227,17 @@ class FullConversionToTeamForgeFunctionalTests
         def password = config.svnedge.ctfMaster.password
         def ctfHost = "unknown.cloud.sp.collab.net"
         def ctfUrlServer = "http://${ctfHost}"
+        def continueButton = 
+            getMessage("setupTeamForge.page.ctfInfo.button.continue")
         form {
             ctfURL = ctfUrlServer
             ctfUsername = username
             ctfPassword = password
-            click "Continue"
+            click continueButton
         }
         assertStatus 200
-        assertContentContains("The TeamForge host '${ctfHost}' is " +
-            "unknown to this Subversion Edge server.")
+        assertContentContains(getMessage(
+            "ctfRemoteClientService.host.unknown.error", [ctfHost]))
 
         // Step 4: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -243,15 +266,17 @@ class FullConversionToTeamForgeFunctionalTests
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.
+        def continueButton =
+            getMessage("setupTeamForge.page.ctfInfo.button.continue")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = "xyc"
             ctfPassword "wrongpass"
-            click "Continue"
+            click continueButton
         }
         assertStatus 200
-        assertContentContains("The credentials provided are invalid to login " +
-            "to the TeamForge server")
+        assertContentContains(getMessage("ctfRemoteClientService.auth.error",
+            [this.getTestCtfUrl()]))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -282,11 +307,13 @@ class FullConversionToTeamForgeFunctionalTests
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.
+        def continueButton = 
+            getMessage("setupTeamForge.page.ctfInfo.button.continue")
         form {
             ctfURL = ""
             ctfUsername = ""
             ctfPassword ""
-            click "Continue"
+            click continueButton
         }
         assertStatus 200
         assertContentContains(getMessage("ctfConversionBean.ctfURL.blank"))

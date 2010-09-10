@@ -62,11 +62,12 @@ class FreshConversionToTeamForgeFunctionalTests
         // Step 2: Convert to teamforge mode and verify it worked.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = username
             ctfPassword = password
-            click "Convert"
+            click button
         }
         assertStatus 200
 
@@ -77,14 +78,14 @@ class FreshConversionToTeamForgeFunctionalTests
                 ctfURL = this.getTestCtfUrl()
                 ctfUsername = username
                 ctfPassword = password
-                click "Convert"
+                click button
             }
             assertStatus 200
         }
-        assertContentDoesNotContain("An error occurred while trying")
-        assertContentContains("This CollabNet Subversion Edge server is now")
-        assertContentContains("available as an integration server for " +
-            "CollabNet TeamForge.")
+        assertContentDoesNotContain(getMessage(
+            "setupTeamForge.action.ctfInfo.ctfConnection.error"))
+        assertContentContains(getMessage(
+            "setupTeamForge.action.convert.success.managed"))
 
         // Step 3: Verify the conversion is persistent.
         assertConversionSucceeded()
@@ -115,17 +116,18 @@ class FreshConversionToTeamForgeFunctionalTests
         // Step 2: verify that incorrect URL does not convert.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         def ctfHost = "unknown.cloud.sp.collab.net"
         def ctfUrlServer = "http://${ctfHost}"
         form {
             ctfURL = ctfUrlServer
             ctfUsername = username
             ctfPassword = password
-            click "Convert"
+            click button
         }
         assertStatus 200
-        assertContentContains("The TeamForge host '${ctfHost}' is " +
-            "unknown to this Subversion Edge server.")
+        assertContentContains(
+            getMessage("ctfRemoteClientService.host.unknown.error", [ctfHost]))
 
         // Step 4: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -154,15 +156,16 @@ class FreshConversionToTeamForgeFunctionalTests
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.
+        def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = "xyc"
             ctfPassword "wrongpass"
-            click "Convert"
+            click button
         }
         assertStatus 200
-        assertContentContains("The credentials provided are invalid to login " +
-            "to the TeamForge server")
+        assertContentContains(getMessage("ctfRemoteClientService.auth.error",
+            [this.getTestCtfUrl()]))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -193,14 +196,15 @@ class FreshConversionToTeamForgeFunctionalTests
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.
+        def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         form {
             ctfURL = ""
             ctfUsername = ""
             ctfPassword ""
-            click "Convert"
+            click button
         }
         assertStatus 200
-        assertContentContains("An error occurred in the conversion process.")
+        assertContentContains(getMessage("setupTeamForge.action.general.error"))
         assertContentContains(getMessage("ctfConversionBean.ctfURL.blank"))
         assertContentContains(getMessage("ctfConversionBean.ctfUsername.blank"))
         assertContentContains(getMessage("ctfConversionBean.ctfPassword.blank"))

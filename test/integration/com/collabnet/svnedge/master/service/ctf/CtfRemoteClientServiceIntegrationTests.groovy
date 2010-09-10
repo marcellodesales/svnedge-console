@@ -25,9 +25,15 @@ import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
     def ctfTestUrl
+    def grailsApplication
+    def config
     
-    def config = ConfigurationHolder.config
-
+    @Override
+    protected void setUp() {
+        super.setUp()
+        this.config = grailsApplication.config
+    }
+    
     def ctfRemoteClientService
 
     // FIXME:  for now, skip this test on Windows, since the current service only works on *nix 

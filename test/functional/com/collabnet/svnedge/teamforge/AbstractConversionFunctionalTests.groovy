@@ -128,7 +128,8 @@ abstract class AbstractConversionFunctionalTests extends
     */
    protected boolean isServerOnTeamForgeMode() {
        get('/status/index')
-       return this.response.contentAsString.contains("TeamForge Base URL")
+       return this.response.contentAsString.contains(
+           getMessage("status.page.url.teamforge"))
    }
 
    /**
@@ -156,15 +157,16 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentContains("By submitting this form with the " +
             "administrator's credentials, this Subversion Edge server can " +
             "be converted back to Standalone mode...")
-        assertContentContains("TeamForge server URL:")
+        assertContentContains("TeamForge server URL")
         assertContentContains(this.getTestCtfUrl())
 
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         form {
             ctfUsername = username
             ctfPassword = password
-            click "Convert"
+            click button
         }
         assertStatus 200
         assertContentContains("This Subversion Edge server has been reverted " +
@@ -190,14 +192,16 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
-        assertContentDoesNotContain("TeamForge Base URL")
+        assertContentDoesNotContain(getMessage("status.page.url.teamforge"))
         // verify that the software version is still shown
-        assertContentContains("Software Version")
-        assertContentContains("Subversion Version")
+        assertContentContains(getMessage("status.page.status.version.software"))
+        assertContentContains(
+            getMessage("status.page.status.version.subversion"))
 
         get('/server/edit')
         assertStatus 200
-        assertContentDoesNotContain("TeamForge Mode")
+        assertContentDoesNotContain(
+            getMessage("server.page.leftNav.toStandalone"))
 
         // Step 2: verify that the CTF server DOES NOT list the system ID
         assertRevertSucceededOnCtfServer(ctfSystemId)
@@ -217,14 +221,15 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
-        assertContentContains("TeamForge Base URL")
+        assertContentContains(getMessage("status.page.url.teamforge"))
         // verify that the software version is still shown
-        assertContentContains("Software Version")
-        assertContentContains("Subversion Version")
+        assertContentContains(getMessage("status.page.status.version.software"))
+        assertContentContains(
+            getMessage("status.page.status.version.subversion"))
 
         get('/server/edit')
         assertStatus 200
-        assertContentContains("TeamForge Mode")
+        assertContentContains(getMessage("server.page.leftNav.toStandalone"))
 
         // Step 2: verify that the CTF server DOES list the system ID
         assertConversionSucceededOnCtfServer()
@@ -242,10 +247,11 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
-        assertContentDoesNotContain("TeamForge Base URL:")
+        assertContentDoesNotContain(getMessage("status.page.url.teamforge"))
         // verify that the software version is still shown
-        assertContentContains("Software Version")
-        assertContentContains("Subversion Version")
+        assertContentContains(getMessage("status.page.status.version.software"))
+        assertContentContains(
+            getMessage("status.page.status.version.subversion"))
     }
 
     /**
@@ -299,8 +305,8 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentContains("SCM Integrations")
         def appServerPort = System.getProperty("jetty.port", "8080")
         def csvnHostAndPort = server.hostname + ":" + appServerPort
-        assertContentContains("This is a CollabNet Subversion Edge server " +
-            "in managed mode from ${csvnHostAndPort}")
+        assertContentContains(getMessage(
+            "setupTeamForge.integration.description", [csvnHostAndPort]))
     }
 
     /**
@@ -316,8 +322,8 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginToCtfServerIfNecessary()
 
         assertContentContains(createdProjectName)
-        assertContentContains("Container for repositories existing prior to " +
-            "CollabNet Subversion Edge conversion to managed mode")
+        assertContentContains(
+            getMessage("setupTeamForge.integration.container.existed"))
         click(createdProjectName)
         assertStatus 200
     }
@@ -378,7 +384,7 @@ abstract class AbstractConversionFunctionalTests extends
        get('/repo/list')
        assertStatus 200
        return this.response.contentAsString.contains(
-           "There are no repositories yet")
+           getMessage("repository.page.list.noRepos"))
     }
 
     /**
@@ -386,11 +392,11 @@ abstract class AbstractConversionFunctionalTests extends
      */
     private void assertTabsOnFreshConversionAreCorrect() {
         //TODO: Add parameter of the current tab
-        //TODO: Verify if the correct tab is highlighted 
-        assertContentContains("1. Introduction".replaceAll(" ",
-                "&nbsp;"))
-        assertContentContains("2. Convert to TeamForge mode".replaceAll(" ",
-                "&nbsp;"))
+        //TODO: Verify if the correct tab is highlighted
+        def introTab = getMessage("setupTeamForge.page.tabs.index", [1])
+        assertContentContains(introTab.replaceAll(" ", "&nbsp;"))
+        def convertTab = getMessage("setupTeamForge.page.tabs.confirm", [2])
+        assertContentContains(convertTab.replaceAll(" ", "&nbsp;"))
     }
 
     /**
@@ -399,16 +405,20 @@ abstract class AbstractConversionFunctionalTests extends
     private void assertTabsOnCompleteConversionAreCorrect() {
         //TODO: Add parameter of the current tab
         //TODO: Verify if the correct tab is highlighted.
-        assertContentContains("1. Introduction".replaceAll(" ",
-            "&nbsp;"))
-        assertContentContains("2. TeamForge Credentials".replaceAll(" ",
-            "&nbsp;"))
-        assertContentContains("3. TeamForge Project".replaceAll(" ",
-            "&nbsp;"))
-        assertContentContains("4. TeamForge Users".replaceAll(" ",
-            "&nbsp;"))
-        assertContentContains("5. Convert to TeamForge mode".replaceAll(" ",
-            "&nbsp;"))
+        def introTab = getMessage("setupTeamForge.page.tabs.index", [1])
+        assertContentContains(introTab.replaceAll(" ", "&nbsp;"))
+
+        def credTab = getMessage("setupTeamForge.page.tabs.ctfInfo", [2])
+        assertContentContains(credTab.replaceAll(" ", "&nbsp;"))
+
+        def projTab = getMessage("setupTeamForge.page.tabs.ctfProject", [3])
+        assertContentContains(projTab.replaceAll(" ", "&nbsp;"))
+
+        def usersTab = getMessage("setupTeamForge.page.tabs.ctfUsers", [4])
+        assertContentContains(usersTab.replaceAll(" ", "&nbsp;"))
+
+        def convertTab = getMessage("setupTeamForge.page.tabs.confirm", [5])
+        assertContentContains(convertTab.replaceAll(" ", "&nbsp;"))
     }
 
     /**
@@ -429,12 +439,13 @@ abstract class AbstractConversionFunctionalTests extends
             assertTabsOnCompleteConversionAreCorrect()
         }
 
-        assertContentContains("Agile ALM for Distributed Development")
+        assertContentContains(getMessage("setupTeamForge.page.index.almTitle"))
 
         // Step 2: verify that the setup page is correct after clicking on 
         // the continue button.
+        def button = getMessage("setupTeamForge.page.index.button.continue")
         form {
-            click 'Continue'
+            click button
         }
         assertStatus 200
 
@@ -444,7 +455,6 @@ abstract class AbstractConversionFunctionalTests extends
             assertTabsOnCompleteConversionAreCorrect()
         }
 
-        assertContentContains("Credentials for a CollabNet TeamForge " +
-                "Site Administrator are needed")
+        assertContentContains(getMessage("setupTeamForge.page.ctfInfo.p1"))
     }
 }

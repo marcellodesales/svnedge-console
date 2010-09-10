@@ -94,7 +94,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
             click login
         }
 
-        assertContentContains(getMessage("layout.page.loggedAs"))
+        assertContentContains(getMessage("layout.page.loggedAs") + ":&nbsp;")
     }
 
     /**
@@ -118,7 +118,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
      */
     protected def getMessage(String key, params) {
         def appCtx = app.getMainContext()
-        return appCtx.getMessage(key, params, Locale.getDefault())
+        return appCtx.getMessage(key, params as String[], Locale.getDefault())
     }
 
     /**
