@@ -19,44 +19,49 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>acegi-0.5.2-grails-app-conf</name>
+			<name>acegi-0.5.3-grails-app-conf</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/grails-app/conf</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/grails-app/conf</locationURI>
 		</link>
 		<link>
-			<name>acegi-0.5.2-grails-app-controllers</name>
+			<name>acegi-0.5.3-grails-app-controllers</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/grails-app/controllers</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/grails-app/controllers</locationURI>
 		</link>
 		<link>
-			<name>acegi-0.5.2-grails-app-services</name>
+			<name>acegi-0.5.3-grails-app-services</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/grails-app/services</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/grails-app/services</locationURI>
 		</link>
 		<link>
-			<name>acegi-0.5.2-grails-app-taglib</name>
+			<name>acegi-0.5.3-grails-app-taglib</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/grails-app/taglib</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/grails-app/taglib</locationURI>
 		</link>
 		<link>
-			<name>acegi-0.5.2-src-groovy</name>
+			<name>acegi-0.5.3-src-groovy</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/src/groovy</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/src/groovy</locationURI>
 		</link>
 		<link>
-			<name>acegi-0.5.2-src-java</name>
+			<name>acegi-0.5.3-src-java</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.2/src/java</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/acegi-0.5.3/src/java</locationURI>
 		</link>
 		<link>
-			<name>background-thread-1.5-grails-app-services</name>
+			<name>background-thread-1.6-grails-app-services</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/background-thread-1.5/grails-app/services</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/background-thread-1.6/grails-app/services</locationURI>
 		</link>
 		<link>
-			<name>background-thread-1.5-src-java</name>
+			<name>background-thread-1.6-src-java</name>
 			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/background-thread-1.5/src/java</locationURI>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/background-thread-1.6/src/java</locationURI>
+		</link>
+		<link>
+			<name>code-coverage-1.1.8-grails-app-i18n</name>
+			<type>2</type>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/code-coverage-1.1.8/grails-app/i18n</locationURI>
 		</link>
 		<link>
 			<name>cometd-0.1.5-grails-app-i18n</name>
@@ -97,11 +102,6 @@
 			<name>functional-test-1.2.7-src-groovy</name>
 			<type>2</type>
 			<locationURI>GRAILS/projects/SvnEdge/plugins/functional-test-1.2.7/src/groovy</locationURI>
-		</link>
-		<link>
-			<name>hibernate-1.2.1-grails-app-i18n</name>
-			<type>2</type>
-			<locationURI>GRAILS/projects/SvnEdge/plugins/hibernate-1.2.1/grails-app/i18n</locationURI>
 		</link>
 		<link>
 			<name>jetty-1.2-SNAPSHOT-src-groovy</name>
