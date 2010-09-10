@@ -305,8 +305,8 @@ abstract class AbstractConversionFunctionalTests extends
         assertContentContains("SCM Integrations")
         def appServerPort = System.getProperty("jetty.port", "8080")
         def csvnHostAndPort = server.hostname + ":" + appServerPort
-        assertContentContains(getMessage(
-            "setupTeamForge.integration.description", [csvnHostAndPort]))
+        assertContentContains("This is a CollabNet Subversion Edge server in " +
+            "managed mode from ${csvnHostAndPort}.")
     }
 
     /**
