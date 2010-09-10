@@ -44,7 +44,7 @@ import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.teamforge.CtfServer
 
-class SetupTeamForgeService {
+class SetupTeamForgeService extends AbstractSvnEdgeService {
 
     static final int CTF_REPO_PATH_LIMIT = 128
 
@@ -344,8 +344,9 @@ class SetupTeamForgeService {
             if (e.message) {
                 conversionData.errorMessage = e.message
             } else {
-                conversionData.errorMessage = "Encountered an exception " +
-                    "while trying to connect: " + e.getClass().name
+                def msg = 
+                 getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error")
+                conversionData.errorMessage = msg + ": " + e.getClass().name
             }
         }
         return success
@@ -472,7 +473,7 @@ class SetupTeamForgeService {
         def server = Server.getServer()
 
         def adapterType = "Subversion"
-		def appServerPort = conversionData.consolePort
+        def appServerPort = conversionData.consolePort
         def title = "CollabNet Subversion Edge (${server.hostname}:" +
                 "${appServerPort})"
         def description = "This is a CollabNet Subversion Edge " +
@@ -485,9 +486,10 @@ class SetupTeamForgeService {
         def names = [ "RequireApproval", "HostName", "HostPort", "HostSSL", 
                 "isCSVN", "ScmViewerUrl", "RepositoryBaseUrl", 
                 "RepositoryRootPath" ] 
-        
-        def repositoryPath = operatingSystemService.isWindows() ? "/windows-scmroot" : server.repoParentDir
-        
+
+        def repositoryPath = operatingSystemService.isWindows() ? 
+            "/windows-scmroot" : server.repoParentDir
+
         // CTF assumes RepositoryBaseUrl does not include trailing slash --
         // removing from submitted value if present
         String svnUrl = server.svnURL();
@@ -550,30 +552,30 @@ class SetupTeamForgeService {
                     def newRepoDomain = new Repository(name:newRepo)
                     newRepoDomain.discard()
                     if (newRepo == repo || !newRepoDomain.validateName()) {
-                         throw new Exception(
-                            "Invalid CTF repository name: " + newRepo)
+                        def msg = getMessage(
+                            "setupTeamForge.integration.ctfRepoName.invalid")
+                        throw new Exception(msg + ": " + newRepo)
                     } else {
                         def parentDir = Server.getServer().repoParentDir
                         File f1 = new File(parentDir, repo)
                         File f2 = new File(parentDir, newRepo)
                         if (f2.exists()) {
-                            throw new Exception(
-                                "Renaming '" + repo + 
-                                "' failed because '" + newRepo + 
-                                "' already exists.")
+                            throw new Exception(getMessage(
+                                "setupTeamForge.integration.ctfRepoName" +
+                                ".alreadyExists", [repo, newRepo]))
                         } else if (!f1.renameTo(f2)) {
-                            throw new Exception(
-                                "Unexpected failure renaming '" + repo + 
-                                "' as '" + newRepo + "'")
+                            throw new Exception(getMessage("setupTeamForge." +
+                                "integration.ctfRepoName.unexpectedError", 
+                                [repo, newRepo]))
                         } else {
                             repoDomain.name = newRepo
                             repoDomain.save()
                         }
                     }
                 } else {
-                    throw new Exception(
-                        "Invalid CTF repository name: " + repo + 
-                        " could not be fixed.")
+                    throw new Exception(getMessage(
+                        "setupTeamForge.integration.ctfRepoName.cantBeFixed",
+                        [repo]))
                 }
             } 
         }
@@ -613,9 +615,8 @@ class SetupTeamForgeService {
             def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
             //TODO: move this method call to ctfRemoteClientService
             def p = ctfSoap.createProject(getUserSessionId(conversionData), 
-                projectPath, projectName, "Container for repositories " +
-                "existing prior to CollabNet Subversion Edge conversion to " +
-                "managed mode")
+                projectPath, projectName, getMessage(
+                    "setupTeamForge.integration.container.existed"))
             projectId = p.id
         }
         
@@ -624,7 +625,8 @@ class SetupTeamForgeService {
         def scmSoap = ctfRemoteClientService.makeScmSoap(conversionData.ctfURL)
         boolean idRequiredOnCommit = false
         boolean hideMonitoringDetails = false
-        def desc = "Added from existing CollabNet Subversion Edge repository"
+        def desc = getMessage("setupTeamForge.integration.addedFromExistingRepo"
+            , ["CollabNet Subversion Edge"])
         def repos = Repository.list()
         if (log.isDebugEnabled()) {
             log.debug "repos=" + repos
@@ -719,8 +721,8 @@ class SetupTeamForgeService {
                     getWebSessionId(conversionData), 
                     server, ctfServer, errors)
             } catch (Exception e) {
-                def msg = "Recovery from failed CTF mode conversion " +
-                    "failed. Check logs for details."
+                def msg = getMessage(
+                    "setupTeamForge.integration.recovery.failed")
                 log.error(msg, e)
                 errors << msg
             }
@@ -800,8 +802,8 @@ class SetupTeamForgeService {
             }
 
         } catch (Exception e) {
-            def msg = "Recovery from failed CTF mode conversion " +
-                "failed. Subversion server configuration was not reverted."
+            def msg = getMessage(
+                "setupTeamForge.integration.recovery.serverFailed")
             logMsg(msg, errors, e)
             errors << msg
         }
@@ -819,13 +821,13 @@ class SetupTeamForgeService {
         try {
             File idFile = new File(repoParent, ".scm.properties")
             if (idFile.exists() && !idFile.delete()) {
-                def msg = "While recovering from failed conversion, the " +
-                     "external system property file was not deleted."
-                logMsg(msg, errors, e)
+                def msg = getMessage(
+                    "setupTeamForge.integration.recovery.externalProperty")
+                logMsg(msg, errors, null)
             }
         } catch (Exception e) {
-            def msg = "While recovering from failed conversion, the " +
-                 "external system property file was not deleted."
+            def msg = getMessage(
+                    "setupTeamForge.integration.recovery.externalProperty")
             logMsg(msg, errors, e)
         }
 
@@ -837,8 +839,8 @@ class SetupTeamForgeService {
                 }
             }
         } catch (Exception e) {
-            def msg = "Recovery from failed CTF mode conversion " +
-                "failed. Some hook scripts were not reverted."
+            def msg = getMessage(
+                    "setupTeamForge.integration.recovery.hookscripts.failed")
             logMsg(msg, errors, e)
         }
     }
@@ -870,8 +872,9 @@ class SetupTeamForgeService {
         def exceptionIndex = page.indexOf("A TeamForge system error has occurred")
         if (systemId || exceptionIndex >= 0) {
             log.warn "Delete from CTF did not succeed\n\n" + page
-            errors << "After incomplete conversion, removal of this" +
-                " integration server from TeamForge failed."
+            def msg = getMessage(
+                "setupTeamForge.integration.recovery.incomplete")
+            errors << msg
             return false
         } else {
             return true
@@ -913,9 +916,8 @@ class SetupTeamForgeService {
             }
             this.undoLocalRepositoriesDependencies(server, errors)
         } else {
-            throw new CtfAuthenticationException("Unable to confirm the " +
-                "credentials. Error logging in. Please verify the " +
-                "username and password.")
+            def msg = getMessage("setupTeamForge.integration.ctf.auth.failed")
+            throw new CtfAuthenticationException(msg)
         }
     }
 
@@ -1000,8 +1002,8 @@ class SetupTeamForgeService {
                 "authorizer: " + newViewvcFile.absolutePath)
         }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
-            throw new Exception("Rename did not work; unable to " + 
-                "setup vcauth.")
+            throw new Exception(
+                getMessage("setupTeamForge.integration.vcauth.failed"))
         } else {
             oldViewvcFile.parentFile.parentFile.deleteDir()
         }
@@ -1018,8 +1020,8 @@ class SetupTeamForgeService {
                 "handler: " + newViewvcFile.absolutePath)
         }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
-            throw new Exception("Rename did not work; unable to " + 
-                "setup viewvc python handler at " + newViewvcFile)
+            throw new Exception(getMessage(
+                "setupTeamForge.integration.viewvc.failed", [newViewvcFile]))
         } else {
             oldViewvcFile.parentFile.parentFile.parentFile.deleteDir()
         }
@@ -1120,9 +1122,8 @@ class SetupTeamForgeService {
                 }
             }
         } catch (Exception e) {
-            def msg = "An error occured and one or more users were not " +
-                "imported into CollabNet TeamForge. " + 
-                "Check logs for details."
+            def msg = getMessage(
+                "setupTeamForge.integration.users.someNotImported")
             logMsg(msg, warnings, e)
         }
     }
@@ -1149,13 +1150,17 @@ class SetupTeamForgeService {
         } catch (com.collabnet.ce.soap50.fault.NoSuchObjectFault e) {
             log.warn("Error while assigning project membership to " + 
                      u.username, e)
-            warnings << "User '" + u.username + "' was not added as a " + 
-                "member of the project."
+            def msg = getMessage(
+                "setupTeamForge.integration.users.notAddedAsMember", 
+                [u.username])
+            warnings << msg
 
         } catch (RemoteMasterException remoteProblems) {
-            log.error("Error while assigning project membership to " + 
-                     u.username, remoteProblems)
-            warnings << remoteProblems.getMessage()
+            def msg = getMessage(
+                "setupTeamForge.integration.users.errorAssigningMembership", 
+                [u.username])
+            log.error(msg, remoteProblems)
+            warnings << msg + ": " + remoteProblems.getMessage()
         }
     }
 

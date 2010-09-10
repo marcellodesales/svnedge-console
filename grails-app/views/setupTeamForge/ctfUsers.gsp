@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CollabNet TeamForge Integration</title>
+    <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.ctfUsers.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
 
@@ -16,21 +16,19 @@
 
   </head>
   <content tag="title">
-    CollabNet TeamForge Integration
+    <g:message code="setupTeamForge.page.leftNav.header" />
   </content>
 
   <g:render template="/server/leftNav" />
 
   <body>
 
-   <g:render template="/common/tabs"
-       model="[tabs:[
-         [action:'index', label:'1. Introduction'],
-         [action:'ctfInfo', label:'2. TeamForge Credentials'],
-         [action:'ctfProject',label:'3. TeamForge Project'],
-         [active: true, label:'4. TeamForge Users'],
-         [label:'5. Convert to TeamForge mode']
-         ]]" />
+   <g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}" />
+   <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupTeamForge.page.tabs.ctfInfo', args:[2])]}" />
+   <g:set var="tabArray" value="${tabArray << [action:'ctfProject', label: message(code:'setupTeamForge.page.tabs.ctfProject', args:[3])]}" />
+   <g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupTeamForge.page.tabs.ctfUsers', args:[4])]}" />
+   <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.confirm', args:[5])]}" />
+   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
 <g:form method="post">
  <table class="ItemDetailContainer">
@@ -38,50 +36,38 @@
    <td class="ContainerBodyWithPaddedBorder">
  <g:if test="${server.ldapEnabled}">
       <div class="warningText">
-      This CollabNet Subversion instance is configured to use LDAP.  The conversion process will not import
-      users which are stored in LDAP.
+      <g:message code="setupTeamForge.page.ctfUsers.p1" />.
       </div>
  </g:if>
  <g:else>
     <g:if test="${existingUsers.size() == 0 && csvnOnlyUsers.size() == 0}">
-      <p>There are no internally managed users.</p>
+      <p><g:message code="setupTeamForge.page.ctfUsers.noUsers" />.</p>
     </g:if>
     <g:elseif test="${existingUsers.size() > 0 && csvnOnlyUsers.size() == 0}">
-        <p>CollabNet TeamForge already contains matching users for all the
-        users in CollabNet Subversion.
-        No users from CollabNet Subversion will be imported.</p>
+        <p><g:message code="setupTeamForge.page.ctfUsers.managedUsers" />.</p>
     </g:elseif>
     <g:else>
         <g:checkBox id="importUsers" name="importUsers" value="true" 
             checked="${wizardBean.importUsers}" onclick="showHide()" />
-        <label for="importUsers"> Import users into CollabNet TeamForge</label>
+        <label for="importUsers"><g:message code="setupTeamForge.page.ctfUsers.importUsers.label" /></label>
         <div id="userList"<g:if test="${!wizardBean.importUsers}"> style="display: none;"</g:if>>
           <label><g:checkBox name="assignMembership" id="assignMembership"
                     value="true" checked="${wizardBean.assignMembership}"/>
-                 Assign membership</label>&nbsp;&nbsp;
-                 <em>Adds the imported users as members in the 
-                  <g:if test="${wizardBean.ctfProject}">'${wizardBean.ctfProject}' project</g:if><g:else>project(s)</g:else>
-                    created to house the imported repositories
-                </em>
+            <g:message code="setupTeamForge.page.ctfUsers.importUsers.assignMembership" /></label>&nbsp;&nbsp;
+            <em>
+               <g:message code="setupTeamForge.page.ctfUsers.importUsers.addMembershipTo" args="${wizardBean.ctfProject ? 'project ' + wizardBean.ctfProject : 'project(s)'}"/>.
+            </em>
           <p>
           <g:if  test="${existingUsers.size() == 0}">
-            There are no conflicting usernames between CollabNet 
-            TeamForge and CollabNet Subversion. All users from CollabNet 
-            Subversion will be imported. Users will need to use "Forgot 
-            Your Password" link to receive a ticket to set their 
-            new password.
+             <g:message code="setupTeamForge.page.ctfUsers.importUsers.noConflicts" />.
           </g:if>
           <g:else>
-            Some of the users in CollabNet Subversion already exist in 
-            TeamForge.  Others will be imported into CollabNet TeamForge 
-            during the conversion. The imported users will need to use 
-            "Forgot Your Password" link to receive a ticket to set their 
-            new password.
+             <g:message code="setupTeamForge.page.ctfUsers.importUsers.someExists" />.
           </g:else>
           </p>
         <g:if  test="${existingUsers.size() > 0}">
          <table width="100%" border="1">
-          <tr><th>Existing TeamForge users</th><th>Users to be imported</th></tr>
+          <tr><th><g:message code="setupTeamForge.page.ctfUsers.column.existingUsers" /></th><th><g:message code="setupTeamForge.page.ctfUsers.column.toImport" /></th></tr>
           <tr>
           <td>
             <ul>
@@ -108,7 +94,7 @@
        <tr class="ContainerFooter">
          <td >
            <div class="AlignRight">
-                 <g:actionSubmit action="updateUsers" value="Continue" class="Button"/>
+                 <g:actionSubmit action="updateUsers" value="${message(code:'setupTeamForge.page.ctfUsers.button.continue')}" class="Button"/>
              </div>
          </td>
        </tr>

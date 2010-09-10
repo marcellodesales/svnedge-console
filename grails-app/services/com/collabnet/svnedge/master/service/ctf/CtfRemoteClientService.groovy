@@ -44,6 +44,7 @@ import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.master.ctf.CtfSessionExpiredException;
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.teamforge.CtfServer
 
 import java.net.NoRouteToHostException;
@@ -63,12 +64,13 @@ import java.util.regex.Pattern
  * For the CTF SDK, 
  * visit http://www.open.collab.net/community/cif/ctf/52/sdk.tar.gz
  *
- * @author mdesales
+ * @author Marcello de Sales(mdesales@collab.net)
  */
-public class CtfRemoteClientService {
+public class CtfRemoteClientService extends AbstractSvnEdgeService {
+
     private static String ROLE_USER = "ROLE_USER"
     private static String ROLE_ADMIN = "ROLE_ADMIN"
-    
+
     def securityService
 
     boolean transactional = false
@@ -135,30 +137,25 @@ public class CtfRemoteClientService {
         } catch (AxisFault e) {
             GrailsUtil.deepSanitize(e)
             if (e.faultString.contains("Error logging in.")) {
-
-                log.error("The credentials provided are invalid to login to " +
-                    "the TeamForge server '${ctfUrl}'")
-                throw new CtfAuthenticationException("The credentials " +
-                    "provided are invalid to login to the TeamForge server " +
-                    "'${ctfUrl}'.")
+                def msg = getMessage("ctfRemoteClientService.auth.error", 
+                    [ctfUrl])
+                log.error(msg)
+                throw new CtfAuthenticationException(msg)
 
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
-                throw new UnknownHostException("The TeamForge host " +
-                    "'${hostname}' is unknown to this Subversion Edge " +
-                    "server.")
+                throw new UnknownHostException(getMessage(
+                    "ctfRemoteClientService.host.unknown.error", [hostname]))
 
             } else if (e.detail instanceof NoRouteToHostException) {
                 def hostname = new URL(ctfUrl).host
-                throw new NoRouteToHostException("The TeamForge host " +
-                    "'${hostname}' cannot be reached from this Subversion " +
-                    "Edge server.")
+                throw new NoRouteToHostException(getMessage(
+                    "ctfRemoteClientService.host.unreachable.error",[hostname]))
             } else {
-                log.error("The credentials provided are invalid to login to " +
-                    "the TeamForge server '${ctfUrl}'", e)
-                throw new RemoteMasterException(ctfUrl, "The credentials " +
-                    "provided are invalid to login to the TeamForge server " +
-                    "'${ctfUrl}'.", e)
+                def msg = getMessage("ctfRemoteClientService.auth.error",
+                    [ctfUrl])
+                log.error(msg, e)
+                throw new RemoteMasterException(ctfUrl, msg, e)
             }
         }
     }
@@ -425,9 +422,9 @@ public class CtfRemoteClientService {
                    title, description, csvnProps)
            return sessionId
         } catch (LoginFault e) {
-            throw new CtfAuthenticationException(userSessionId, ctfUrl, 
-                "Could not login to TeamForge to add an external system", e)
-            log.error(msg + " Unable to create external system", e)
+            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl])
+            throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
+            log.error("Unable to create external system: " + msg, e)
 
         } catch (AxisFault e) {
             String faultMsg = e.faultString
@@ -442,42 +439,47 @@ public class CtfRemoteClientService {
                 GrailsUtil.deepSanitize(e)
                 if (paramType.equals("RepositoryBaseUrl")) {
                     throw new RemoteAndLocalConversationException(ctfUrl,
-                        "The remote TeamForge server cannot access the local " +
-                        "Subversion server through the WebDAV URL " +
-                        "'${paramValue}'. Try restarting the Server.")
+                        getMessage(
+                            "ctfRemoteClientService.local.webdav.unreachable",
+                            [paramValue]))
 
                 } else if (paramType.equals("ScmViewerUrl")) {
                     throw new RemoteAndLocalConversationException(ctfUrl, 
-                        "The remote TeamForge server cannot access the local " +
-                        "ViewVC URL '${paramValue}'. Try restarting the " +
-                        "server.")
+                        getMessage(
+                            "ctfRemoteClientService.local.viewvc.unreachable",
+                            [paramValue]))
 
                 } else {
-                    throw new RemoteAndLocalConversationException(ctfUrl, 
-                        "The remote TeamForge server cannot access the " +
-                        "local server: ${faultMsg}")
+                    def msg = getMessage(
+                            "ctfRemoteClientService.local.remote.general.error",
+                            [paramValue])
+                    throw new RemoteAndLocalConversationException(ctfUrl, msg +
+                        ": ${faultMsg}")
                 }
 
             } else if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, userSessionId,
-                    "The session had already expired when attempting to add" +
-                    " this Subversion Edge as an external system.", e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
+                    e)
             }
 
             // don't log LoginFault even if converted to AxisFault
             if (!faultMsg || faultMsg.indexOf("LoginFault") < 0) {
                 GrailsUtil.deepSanitize(e)
             }
-            log.error(faultMsg + " Unable to create external system", e)
-            throw new RemoteMasterException(ctfUrl, faultMsg + " Unable to create" +
-                    " external system", e)
+            def generalMsg = faultMsg + " " + getMessage(
+                "ctfRemoteClientService.createExternalSystem.error")
+            log.error(generalMsg, e)
+            throw new RemoteMasterException(ctfUrl, generalMsg, e)
+
         } catch (Exception e) {
             GrailsUtil.deepSanitize(e)
             // also no session, but log this one as it indicates a problem
             if (!(e instanceof LoginFault)) {
-                log.error("Unable to create external system", e)
-                throw new RemoteMasterException(ctfUrl, "Unable add external " +
-                    "system", e)
+                def generalMsg = getMessage(
+                    "ctfRemoteClientService.createExternalSystem.error")
+                log.error(generalMsg, e)
+                throw new RemoteMasterException(ctfUrl, generalMsg, e)
             }
         }
     }
@@ -503,10 +505,12 @@ public class CtfRemoteClientService {
             GrailsUtil.deepSanitize(e)
             if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, sessionId,
-                    "The session had already expired when attempting to " +
-                    "retrieve the list of users.", e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
+                    e)
             } else {
-                def errorMessage = "Unable to list the users: " + faultMsg
+                def errorMessage = getMessage(
+                    "ctfRemoteClientService.listUsers.error") + ": " +
+                    faultMsg
                 log.error(errorMessage, e)
                 throw new RemoteMasterException(ctfUrl, errorMessage, e)
             }
@@ -532,8 +536,8 @@ public class CtfRemoteClientService {
             GrailsUtil.deepSanitize(e)
             if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, sessionId,
-                    "The session had already expired when attempting to " +
-                    "retrieve the list of projects.", e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
+                    e)
             } else {
                 def errorMessage = "Unable to list the projects: " + faultMsg
                 log.error(errorMessage, e)
@@ -578,40 +582,39 @@ public class CtfRemoteClientService {
 
         } catch (ObjectAlreadyExistsFault userExists) {
             GrailsUtil.deepSanitize(userExists)
-            throw new RemoteMasterException(ctfUrl, "Another user already " +
-                "exists at ${ctfUrl} with the username '${username}'.", 
-                userExists)
+            throw new RemoteMasterException(ctfUrl, getMessage(
+                "ctfRemoteClientService.createUser.alreadyExists",
+                    [ctfUrl, username]), userExists)
 
         } catch (IllegalArgumentFault invalidProperties) {
             GrailsUtil.deepSanitize(invalidProperties)
-            throw new RemoteMasterException(ctfUrl, "Cannot create the user " +
-                "'${username}' because of invalid properties.", 
+            throw new RemoteMasterException(ctfUrl, getMessage(
+                "ctfRemoteClientService.createUser.invalidProps", [username]),
                 invalidProperties)
 
         } catch (InvalidSessionFault sessionExpired) {
             GrailsUtil.deepSanitize(sessionExpired)
-            throw new CtfSessionExpiredException(ctfUrl, userSessionId, 
-                "Cannot create the user '${username}' because of the provided" +
-                "sesssion ID '${userSessionId}' is expired.", sessionExpired)
+            throw new CtfSessionExpiredException(ctfUrl, userSessionId,
+                getMessage("ctfRemoteClientService.createUser.invalidProps",
+                    [username, userSessionId]), sessionExpired)
 
         } catch (PermissionDeniedFault permissionDenied) {
             GrailsUtil.deepSanitize(permissionDenied)
-            throw new RemoteMasterException(ctfUrl, userSessionId, 
-                "Cannot create the user '${username}' because of the provided" +
-                "sesssion ID '${userSessionId}' does not have permissions.", 
-                permissionDenied)
+            throw new RemoteMasterException(ctfUrl, userSessionId, getMessage(
+                "ctfRemoteClientService.createUser.sessionIdHasNoPermission",
+                    [username, userSessionId]), permissionDenied)
 
         } catch (UserLimitExceededFault noMoreUsers) {
             GrailsUtil.deepSanitize(noMoreUsers)
-            throw new RemoteMasterException(ctfUrl, userSessionId, 
-                "Cannot create the user '${username}' because the server " +
-                "${ctfUrl} exceeded the limit of users.", 
-                noMoreUsers)
+            throw new RemoteMasterException(ctfUrl, userSessionId, getMessage(
+                "ctfRemoteClientService.createUser.limitExceeded",
+                    [username, userSessionId]), noMoreUsers)
 
         } catch (SystemFault generalProblem) {
             GrailsUtil.deepSanitize(generalProblem)
-            throw new RemoteMasterException(ctfUrl, userSessionId, 
-                "General problem creating the user '${username}': " +
+            def msg = getMessage(
+                "ctfRemoteClientService.createUser.generalError", [username])
+            throw new RemoteMasterException(ctfUrl, userSessionId, msg + ": " +
                 "${generalProblem.message}", generalProblem)
         }
     }

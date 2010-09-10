@@ -1,33 +1,33 @@
 <html>
   <head>
-    <title>CollabNet TeamForge Integration</title>
+    <g:if test="${isFreshInstall}">
+        <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.ctfInfo.title.fresh" /></title>
+    </g:if>
+    <g:else>
+        <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.ctfInfo.title.complete" /></title>
+    </g:else>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
   </head>
   <content tag="title">
-    CollabNet TeamForge Integration
+    <g:message code="setupTeamForge.page.leftNav.header" />
   </content>
 
   <g:render template="/server/leftNav" />
 
   <body>
 
+    <g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}" />
     <g:if test="${isFreshInstall}">
-      <g:render template="/common/tabs"
-          model="[tabs:[
-            [action:'index', label:'1. Introduction'],
-            [active:true, label:'2. Convert to TeamForge mode']]]" />
+      <g:set var="tabArray" value="${tabArray << [active:true, label: message(code:'setupTeamForge.page.tabs.confirm', args:[2])]}" />
     </g:if>
     <g:else>
-      <g:render template="/common/tabs"
-          model="[tabs:[
-            [action:'index', label:'1. Introduction'],
-            [active:true, label:'2. TeamForge Credentials'],
-            [label:'3. TeamForge Project'],
-            [label:'4. TeamForge Users'],
-            [label:'5. Convert to TeamForge mode']
-            ]]" />
+      <g:set var="tabArray" value="${tabArray << [active:true, label: message(code:'setupTeamForge.page.tabs.ctfInfo', args:[2])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.ctfProject', args:[3])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.ctfUsers', args:[4])]}" />
+      <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.confirm', args:[5])]}" />
     </g:else>
+    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
     <g:form method="post">
 
@@ -45,21 +45,20 @@
           </g:if>
 
           <p>
-            Credentials for a CollabNet TeamForge Site Administrator are needed in 
-            order to add a new SCM integration server. 
+            <g:message code="setupTeamForge.page.ctfInfo.p1"/>.
           </p>
 
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfURL">TeamForge server URL:</label>
+          <label for="ctfURL"><g:message code="setupTeamForge.page.ctfInfo.ctfUrl.label"/>:</label>
         </td>
         <td valign="top" class="value">
           <input size="40" type="text" id="ctfURL" name="ctfURL" 
                         value="${fieldValue(bean:con, field:'ctfURL')}"/>
         </td>
         <td class="ItemDetailValue">
-            <em>Base URL including protocol and hostname</em>
+            <em><g:message code="setupTeamForge.page.ctfInfo.ctfUrl.label.tip"/></em>
         </td>
       </tr>
       <tr>
@@ -74,14 +73,14 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfUsername">TeamForge administrator username:</label>
+          <label for="ctfUsername"><g:message code="setupTeamForge.page.ctfInfo.ctfUsername.label"/>:</label>
         </td>
         <td class="value ${hasErrors(bean:con,field:'ctfUsername','errors')}">
           <input size="20" type="text" id="ctfUsername" name="ctfUsername" 
               value="${fieldValue(bean:con,field:'ctfUsername').replace(',','')}"/>
         </td>
         <td class="ItemDetailValue">
-          <em>Account must have permission to add new scm integration servers</em>
+          <em><g:message code="setupTeamForge.page.ctfInfo.ctfUsername.label.tip"/></em>
          </td>
       </tr>
       <tr>
@@ -96,7 +95,7 @@
       </tr> 
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfPassword">TeamForge administrator password:</label>
+          <label for="ctfPassword"><g:message code="setupTeamForge.page.ctfInfo.ctfPassword.label"/>:</label>
         </td>
         <td class="value ${hasErrors(bean:con,field:'ctfPassword','errors')}">
           <input size="20" type="password" id="ctfPassword" name="ctfPassword" 
@@ -124,10 +123,10 @@
         <td colspan="3">
           <div class="AlignRight">
             <g:if test="${isFreshInstall}">
-                <g:actionSubmit action="convert" value="Convert" class="Button"/>
+                <g:actionSubmit action="convert" value="${message(code:'setupTeamForge.page.ctfInfo.button.convert')}" class="Button"/>
             </g:if>
             <g:else>
-                <g:actionSubmit action="confirmCredentials" value="Continue" class="Button"/>
+                <g:actionSubmit action="confirmCredentials" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
             </g:else>
           </div>
         </td>

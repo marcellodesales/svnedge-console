@@ -72,8 +72,9 @@ class SetupTeamForgeController {
         def generalError = null
         if (savedCon?.errorMessage) {
             errorCause = savedCon.errorMessage
-            generalError = "An error occurred while trying to contact the " +
-                "given TeamForge server: '${savedCon.ctfURL}'"
+            def msg = message(code: 
+                "setupTeamForge.action.ctfInfo.ctfConnection.error")
+            generalError = msg + ": '${savedCon.ctfURL}'"
             session[WIZARD_BEAN_KEY] = null
         }
         [isFreshInstall: setupTeamForgeService.isFreshInstall(), con: con, 
@@ -120,20 +121,17 @@ class SetupTeamForgeController {
                 if (unfixableRepoNames.size() <= 10) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposList",
-                        [unfixableRepoNames].toArray(),
-                        "Some repos have invalid names.")
+                        [unfixableRepoNames].toArray())
                 } else {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposSample",
                         [unfixableRepoNames.size(), 
-                         unfixableRepoNames[0..<10]].toArray(),
-                        "Some repos have invalid names.")
+                         unfixableRepoNames[0..<10]].toArray())
                 }
                 if (!duplicatedReposIgnoringCase) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDiscover",
-                            ["discover"].toArray(),
-                            "Need to 'rediscover' repos after fixing.")
+                            ["discover"].toArray())
                 }
             }
 
@@ -141,19 +139,16 @@ class SetupTeamForgeController {
                 if (duplicatedReposIgnoringCase.size() <= 10) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDupeList",
-                        [duplicatedReposIgnoringCase].toArray(),
-                        "Some repos have upper and lowercase names.")
+                        [duplicatedReposIgnoringCase].toArray())
                 } else {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDupeSample",
                         [duplicatedReposIgnoringCase.size(), 
-                         duplicatedReposIgnoringCase[0..<10]].toArray(),
-                        "Some repos have upper and lowercase names.")
+                         duplicatedReposIgnoringCase[0..<10]].toArray())
                 }
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposDiscover",
-                        ["discover"].toArray(),
-                        "Need to 'rediscover' repos after fixing.")
+                        ["discover"].toArray())
             }
 
             if (containsUpperCaseRepos || 
@@ -174,25 +169,24 @@ class SetupTeamForgeController {
             def pathLimit = SetupTeamForgeService.CTF_REPO_PATH_LIMIT
             conversionObject.errors.reject(
                 "ctfConversion.ctfProject.invalidReposCtfPathConstraint",
-                [pathLimit].toArray(), "TF repo path constraint is 128.")
+                [pathLimit].toArray())
             conversionObject.errors.reject(
                 "ctfConversion.ctfProject.invalidReposCtfPathConstraintEg",
                 [longRepoPath].toArray(), longRepoPath)
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposLongPathDiscover",
-                        ["discover"].toArray(),
-                        "Need to 'rediscover' repos after fixing.")
+                        ["discover"].toArray())
             def parentDir = Server.getServer().repoParentDir
             def length = parentDir.length()
             if (length > pathLimit) {
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposTooLongParentPath",
-                [parentDir].toArray(), "Repo parent path > 128 char")
+                [parentDir].toArray())
 
             } else if (length > (pathLimit - Repository.NAME_MAX_LENGTH)) {
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposLongParentPath",
-                [parentDir, length].toArray(), "Repo parent path is long")
+                [parentDir, length].toArray())
             }
         }
 
@@ -220,8 +214,7 @@ class SetupTeamForgeController {
             if (conflict) {
                 con.errors.rejectValue("repoPrefix",
                     "ctfConversion.form.ctfProject.repoPrefix.invalid",
-                    [conflict].toArray(),
-                    "Invalid repo prefix")            
+                    [conflict].toArray())
             } else {
                 con.repoPrefix = params["repoPrefix"]
             }
@@ -249,24 +242,25 @@ class SetupTeamForgeController {
                         projectName)
                 } catch (RemoteMasterException serverException) {
                     session[WIZARD_BEAN_KEY] = null
-                    flash.error = "There was an error while creating the " +
-                        "TeamForge project: " + serverException.getMessage()
+                    def msg = message(code:
+                        "setupTeamForge.action.updateProject.creatingProject.error")
+                    flash.error = msg + ": " + serverException.getMessage()
                     forward(action:'ctfInfo')
                     return
                 }
                 if (ctfProjectName) {
                     con.ctfProject = ctfProjectName
-                    flash.message = "Imported repositories will be registered" +
-                    " with the existing project '" + ctfProjectName + "'."
+                    flash.message = message(code: 
+                        "setupTeamForge.action.updateProject.reposRegistered",
+                            args: [ctfProjectName])
                 } else {
-                    flash.message = "Project '" + projectName + 
-                        "' will be created to initially host the imported " +
-                        "repositories."
+                    flash.message = message(code: 
+                        "setupTeamForge.action.updateProject.initialCreation",
+                            args: [projectName])
                 }
             } else {
                 con.errors.rejectValue("ctfProject",
-                    "con.ctfProject.invalidName", 
-                    "Invalid project name")
+                    "ctfConversionBean.ctfProjec.invalid")
                 forward(action:'ctfProject')
                 return
             }
@@ -276,9 +270,8 @@ class SetupTeamForgeController {
                 def conflictedProjects =
                     setupTeamForgeService.getProjectsWhichMatchRepoNames(con)
                 if (conflictedProjects.size() == 0 || params.confirmed) {
-                    flash.message = "Repositories will be registered with " +
-                        "matching named projects. " + 
-                        "New projects will be created as needed."
+                    flash.message = message(code: 
+                        "setupTeamForge.action.updateProject.reposMatching")
                 } else {
                     flash.existingProjects = conflictedProjects
                     redirect(action:"ctfProject")
@@ -286,8 +279,9 @@ class SetupTeamForgeController {
 
             } catch (CtfSessionExpiredException sessionExpired) {
                 session[WIZARD_BEAN_KEY] = null
-                flash.error = "There was an error while creating the " +
-                    "TeamForge project: " + sessionExpired.getMessage()
+                def msg = message(code: 
+                    "setupTeamForge.action.updateProject.creatingProject.error")
+                flash.error = msg + ": " + sessionExpired.getMessage()
                 forward(action:'ctfInfo')
                 return
             }
@@ -314,8 +308,9 @@ class SetupTeamForgeController {
                 server: Server.getServer(), wizardBean: con]
         } catch (RemoteMasterException remoteError) {
             session[WIZARD_BEAN_KEY] = null
-            flash.error = "An error occurred while loading the users from " +
-                "TeamForge: " + remoteError.getMessage()
+            def msg = message(code:
+                "setupTeamForge.action.ctfUsers.loadingUsers.error")
+            flash.error = msg + ": " + remoteError.getMessage()
             redirect(action:'ctfInfo')
         }
     }
@@ -349,13 +344,6 @@ class SetupTeamForgeController {
         [wizardBean: con]
     }
 
-    private static final String API_KEY_MESSAGE = 
-        "The CollabNet Teamforge integration APIs are configured to " +
-        "require a secret key. This Subversion Edge server needs this " +
-        "key to communicate with Teamforge. The key can be found in a " +
-        "configuration file on the CollabNet Teamforge server under " +
-        "the property name, sfmain.integration.security.shared_secret."
-
     /**
      * Handles "Convert" button
      */
@@ -374,7 +362,7 @@ class SetupTeamForgeController {
         }
 
         if (con.hasErrors()) {
-            flash.error = "An error occurred in the conversion process."
+            flash.error = message(code: 'setupTeamForge.action.general.error')
             log.error("An error occurred in the conversion process:" + 
                 con.errors)
             forward(action : 'ctfInfo')
@@ -409,14 +397,13 @@ class SetupTeamForgeController {
                         "/sf/scm/do/listRepositories/" + 
                         projectPath + "/scm"
                     model['ctfProjectLink'] = link
-                    flash.message = "CollabNet TeamForge is now managing the " +
-                        "repositories on this server."
+                    flash.message = message(
+                        code: 'setupTeamForge.action.convert.success')
                 } else {
                     def link = con.ctfURL + "/sf/sfmain/do/listSystems"
                     model['ctfLink'] = link
-                    flash.message = "This CollabNet Subversion Edge server is "+
-                        "now available as an integration server for CollabNet "+
-                        "TeamForge."
+                    flash.message = message(
+                        code: 'setupTeamForge.action.convert.success.managed')
                 }
                 if (warnings) {
                     model['warnings'] = warnings
@@ -429,7 +416,8 @@ class SetupTeamForgeController {
                     }
                 }
                 if (con.requiresServerKey) {
-                    errors = [API_KEY_MESSAGE]
+                    def apiMsg = message(code: 'ctfConversion.session.expired')
+                    errors = [apiMsg]
                 }
                 flash.errors = errors
                 if (errors.size() == 1) {
@@ -461,20 +449,23 @@ class SetupTeamForgeController {
         } catch (CantBindPortException cantConvertScm) {
             // general errors that the administrator needs to take action.
             // 1. BindException due to old httpd.pid.
-            flash.error = "Error converting Subversion server: " + 
-                cantConvertScm.getMessage()
+            def msg = message(code: 'setupTeamForge.action.convert.svn.error')
+            flash.error = msg + ": " + cantConvertScm.getMessage()
             redirect(action: 'ctfInfo')
 
         } catch (RemoteAndLocalConversationException remoteCommProblem) {
             // general errors that the administrator needs to take action.
             // 2. ViewVC or SVN URLs not reachable from the Remote Master.
-            flash.error = "Communication error with the TeamForge server: " + 
-                remoteCommProblem.getMessage()
+            def msg = message(code: 
+                'setupTeamForge.action.convert.ctfComm.error')
+            flash.error = msg + ": " + remoteCommProblem.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
 
         } catch (CtfSessionExpiredException sessionExpiredDuringConversion) {
-            flash.error = "The TeamForge server cancelled the conversion: " + 
+            def msg = message(code: 
+                'setupTeamForge.action.convert.ctf.canceled')
+            flash.error = msg + ": " + 
                 sessionExpiredDuringConversion.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
@@ -482,14 +473,16 @@ class SetupTeamForgeController {
         } catch (RemoteMasterException remoteCommProblem) {
             // general errors that the administrator needs to take action.
             // 2. ViewVC or SVN URLs not reachable from the Remote Master.
-            flash.error = "Communication error with the TeamForge server: " + 
-                remoteCommProblem.getMessage()
+            def msg = message(code: 
+                'setupTeamForge.action.convert.ctfComm.error')
+            flash.error = msg + ": " + remoteCommProblem.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
 
         } catch (Exception otherException) {
-            flash.error = "Can't convert to TeamForge Mode: " + 
-                otherException.getMessage()
+            def msg = message(code: 
+                'setupTeamForge.action.convert.cantConvert.error')
+            flash.error = msg + ": " + otherException.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
         }
@@ -499,12 +492,13 @@ class SetupTeamForgeController {
     def discover = {
         try {
             svnRepoService.syncRepositories();
-            flash.message = "Repositories are now synchronized."
+            flash.message = message(code: 
+                'setupTeamForge.action.discover.sync.repos')
         }
         catch (Exception e) {
             log.error("Unable to discover repositories", e)
-            flash.error = "There was a problem reading the repository " +
-                "parent location. Please check file permissions."
+            flash.error = message(code: 
+                'setupTeamForge.action.discover.sync.cantSync')
         }
         redirect(action:ctfProject)
     }

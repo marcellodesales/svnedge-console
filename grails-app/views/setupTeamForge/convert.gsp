@@ -1,11 +1,11 @@
 <html>
   <head>
-    <title>CollabNet TeamForge Integration</title>
+    <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.convert.title" /></title>
       <meta name="layout" content="main" />
       <g:javascript library="prototype" />
   </head>
   <content tag="title">
-    CollabNet TeamForge Integration
+    <g:message code="setupTeamForge.page.leftNav.header" />
   </content>
 
   <g:render template="/server/leftNav" />
@@ -13,26 +13,23 @@
   <body>
   <div class="instructionText">
     <g:if test="${ctfProjectLink}">
-      <p>You may browse the repositories at the link below:</p>
-      <p>Project '${wizardBean.ctfProject}' Source Code: <a href="${ctfProjectLink}">${ctfProjectLink}</a></p>
+      <p><g:message code="setupTeamForge.page.convert.p1" />:</p>
+      <p><g:message code="setupTeamForge.page.convert.project" /> '${wizardBean.ctfProject}' <g:message code="setupTeamForge.page.convert.sourceCode" />: <a href="${ctfProjectLink}">${ctfProjectLink}</a></p>
     </g:if>
     <g:if test="${ctfLink}">
-      <p>CollabNet TeamForge SCM Integrations: <a href="${ctfLink}">${ctfLink}</a></p>
+      <p><g:message code="setupTeamForge.page.convert.tfIntegrations" />: <a href="${ctfLink}">${ctfLink}</a></p>
     </g:if>
   </div>
 
-<ul><li>CollabNet TeamForge usernames and passwords will now be used to login to the Subversion Edge console.</li> 
-<li>Limited server administration capabilities are still available from this console for TeamForge Site 
-Admin users.</li>
+<ul><li><g:message code="setupTeamForge.page.convert.bullet1" />.</li> 
+<li><g:message code="setupTeamForge.page.convert.bullet2" />.</li>
 </ul>
 
-In case you need to revert this conversion, click on the menu item "TeamForge Mode" 
-for details.
+<g:message code="setupTeamForge.page.convert.p3" />.
 
 <g:if test="${warnings}">
   <div class="warningText">
-Some problems were noted during the conversion. These shouldn't affect the
-functionality of the server, but might require some follow-up.
+      <g:message code="setupTeamForge.page.convert.warning" />.
     <ul>
     <g:each in="${warnings}">
     <li>${it}</li>
