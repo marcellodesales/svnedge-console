@@ -49,6 +49,7 @@ import com.collabnet.svnedge.teamforge.CtfServer
 
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
+import java.net.MalformedURLException
 import java.util.regex.Pattern
 
 /**
@@ -129,7 +130,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     private String makeLogin(ICollabNetSoap cnSoap, ctfUrl, username, password) 
         throws CtfAuthenticationException, RemoteMasterException, 
-            UnknownHostException, NoRouteToHostException {
+           UnknownHostException, NoRouteToHostException, MalformedURLException {
 
         try {
             return cnSoap.login(username, password)
@@ -157,6 +158,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 log.error(msg, e)
                 throw new RemoteMasterException(ctfUrl, msg, e)
             }
+        } catch (Exception otherErrors) {
+            throw new MalformedURLException(getMessage(
+                "ctfRemoteClientService.host.malformedUrl", [ctfUrl]))
         }
     }
 

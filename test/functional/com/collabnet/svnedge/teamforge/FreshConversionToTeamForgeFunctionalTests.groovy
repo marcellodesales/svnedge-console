@@ -212,4 +212,46 @@ class FreshConversionToTeamForgeFunctionalTests
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
     }
+
+    /**
+     <li>Test Case 5: Malformed TeamForge URL during the fresh conversion
+    * <ul><li>SetUp
+    * <ul><li>Login to SvnEdge
+        <li>Revert to Standalone Mode in case on TeamForge Mode
+     </ul>
+     <li>Steps to reproduce
+       <ul><li>Go to the Credentials Form
+        <li>Enter a malformed URL without protocol nor port number;
+     </ul>
+     <li>Expected Results
+        <ul><li>Error message is shown with "Malformed URL"
+            <li>All the error messages for the form fields are the same as 
+            the messages.properties by the keys.
+        <li>Login -> Logout -> Verify that the server is on Standalone mode;
+    </ul>
+    <li>Tear Down
+        <ul><li>Revert conversion if necessary
+        <li>Logout from the SvnEdge server
+     */
+    void testCase5_providingMalformedTeamForgeURL() {
+        // Step 1: Verify the tabs and go to the credentials one.
+        this.goToCredentialsTab()
+
+        // Step 2: verify that incorrect credentials do not convert.
+        def continueButton = 
+            getMessage("setupTeamForge.page.ctfInfo.button.convert")
+        def badUrl = "malformed_Url_Without_Protocol_Port"
+        form {
+            ctfURL = badUrl
+            ctfUsername = "usr"
+            ctfPassword "pwd"
+            click continueButton
+        }
+        assertStatus 200
+        assertContentContains(
+            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl]))
+
+        // Step 3: Verify the attempt to convert did not succeed.
+        assertConversionDidNotSucceeded()
+    }
 }

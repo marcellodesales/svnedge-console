@@ -28,6 +28,7 @@ import com.collabnet.svnedge.master.ctf.CtfSessionExpiredException;
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.teamforge.CtfConversionBean;
 
+import java.net.MalformedURLException;
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 
@@ -431,6 +432,11 @@ class SetupTeamForgeController {
             }
             return model
             
+        } catch (MalformedURLException malformedUrl) {
+            // Just display the error on the form
+            con.errorMessage = malformedUrl.message
+            redirect(action: 'ctfInfo')
+
         } catch (UnknownHostException unknownHost) {
             // Just display the error on the form
             con.errorMessage = unknownHost.message

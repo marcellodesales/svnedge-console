@@ -76,10 +76,10 @@ abstract class AbstractConversionFunctionalTests extends
      */
     protected void cleanRepositories() {
         StatValue.list().each{
-            it.delete()
+            it.delete(flush:true)
         }
         Repository.list().each {
-            it.delete()
+            it.delete(flush:true)
         }
     }
 

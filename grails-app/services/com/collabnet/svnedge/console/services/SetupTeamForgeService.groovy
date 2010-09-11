@@ -682,6 +682,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         } catch (NoRouteToHostException unreachableServer) {
             exception = unreachableServer
 
+        } catch (MalformedURLException malformedUrl) {
+            exception = malformedUrl
+
         } catch (CantBindPortException cantRestartServer) {
             if (!this.isFreshInstall()) {
                 this.undoLocalServerConfiguration(server)
@@ -712,6 +715,11 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             } else {
                 errors << "An exception occured: " + e.getClass().name
             }
+        }
+
+        // exceptions occurred before server configuration changes.
+        if (exception) {
+            undoServerMode(server)
         }
 
         if (errors && !exception) {
@@ -774,10 +782,14 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             log.warn(msg, e)
             errors << msg
     }
-
-    private void undoLocalServerConfiguration(Server server) {
+    
+    private undoServerMode(Server server) {
         server.mode = ServerMode.STANDALONE
         server.save(flush:true)
+    }
+
+    private void undoLocalServerConfiguration(Server server) {
+        undoServerMode(server)
         serverConfService.restoreHttpdConfFromBackup() 
         serverConfService.writeConfigFiles()
         try {
