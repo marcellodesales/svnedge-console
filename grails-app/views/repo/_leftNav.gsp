@@ -20,7 +20,7 @@
       </div>
 
 
-      <div class="${actionName == 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${actionName == 'create' || actionName == 'save' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
           <g:link action="create"><g:message code="repository.page.leftnav.new" /></g:link>
       </div>
