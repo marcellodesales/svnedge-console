@@ -386,9 +386,12 @@ abstract class AbstractConversionFunctionalTests extends
      * listed in the projects list on CTF.
      */
     protected void assertProjectWasCreatedOnCtfServer(createdProjectName) {
-        // Goes to the list projects page
-        // http://cu073.cloud.sp.collab.net/sf/sfmain/do/listProjectsAdmin
-        get(this.makeCtfUrl() + "/sf/sfmain/do/listProjectsAdmin")
+        // Goes to the list projects page 
+        // http://cu073.cloud.sp.collab.net/sf/sfmain/do/myProjects
+        // Adding the all projects page to avoid failures when 2 or more pages
+        // are displayed.
+        get(this.makeCtfUrl() + "/sf/sfmain/do/myProjects?selectedTab=" + 
+            "all&_pagesize=2500")
         this.loginToCtfServerIfNecessary()
 
         assertContentContains(createdProjectName)
