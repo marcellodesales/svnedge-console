@@ -162,9 +162,9 @@ class PackagesUpdateController {
         if (packagesType == "reloadInstalled") {
             def reload = message(code:'packagesUpdate.status.reloadReplace')
             action += msg.replace(reload,
-                "<a href='/csvn/packagesUpdate/reloadInstalled'>${reload}</a>.")
+                "<a href='/csvn/packagesUpdate/reloadInstalled'>${reload}</a>")
         } else {
-            action += msg + "."
+            action += msg + " ."
         }
         def server = this.packagesUpdateService.getImageOriginUrl() ?: ""
         def noConMsg = message(code: 'packagesUpdate.error.server.noConnection')

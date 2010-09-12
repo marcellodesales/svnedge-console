@@ -21,13 +21,6 @@
       <tbody>
 
       <tr class="prop">
-        <td valign="top" class="name"><g:message code="role.id.label"/></td>
-
-        <td valign="top" class="value">${fieldValue(bean: roleInstance, field: "id")}</td>
-
-      </tr>
-
-      <tr class="prop">
         <td valign="top" class="name"><g:message code="role.authority.label"/></td>
 
         <td valign="top" class="value">${fieldValue(bean: roleInstance, field: "authority")}</td>

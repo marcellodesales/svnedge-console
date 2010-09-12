@@ -1,9 +1,9 @@
 <head>
   <meta name='layout' content='login' />
-  <title>CollabNet Subversion Edge Login</title>
+  <title>CollabNet Subversion Edge <g:message code="login.page.auth.title" /></title>
 </head>
   <content tag="title">
-    Log In
+    <g:message code="login.page.auth.title" />
   </content>
 <body>
   <%--<g:if test='${flash.message}'>
@@ -13,13 +13,13 @@
   <table cellpadding="4" width="100%">
     <tbody>
       <tr>
-        <td width="10%"><label for='j_username'>User Name</label></td>
+        <td width="10%"><label for='j_username'><g:message code="login.page.auth.username.label" /></label></td>
         <td>
           <input type='text' class='text_' name='j_username' id='j_username' size="35" value='${request.remoteUser}' />
         </td>
       </tr>
       <tr>
-        <td width="10%"><label for='j_password'>Password</label></td>
+        <td width="10%"><label for='j_password'><g:message code="login.page.auth.password.label" /></label></td>
         <td>
           <input type='password' class='text_' name='j_password' id='j_password' size="35"/>
         </td>
@@ -29,7 +29,7 @@
     <tr class="ContainerFooter">
    <td colspan="2">
     <div class="AlignRight">
-      <input type='submit' value='Login' class="Button"/>
+      <input type='submit' value='${message(code:"login.page.auth.button.submit")}' class="Button"/>
     </div>
    </td>
    </tr>

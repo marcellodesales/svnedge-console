@@ -113,8 +113,8 @@
       <div id="footer">
         <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
         <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
-        width="102" height="31" alt="Powered by CollabNet" border="0"/></a></div>
-        &#169; 2010 CollabNet. CollabNet is a registered trademark of CollabNet, Inc.
+        width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
+        &#169; 2010 CollabNet. CollabNet <g:message code="layout.page.trademark" /> CollabNet, Inc.
       </div>
     </div>
     <!-- TeamForge content-area end -->

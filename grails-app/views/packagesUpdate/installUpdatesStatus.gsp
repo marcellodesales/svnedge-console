@@ -206,7 +206,7 @@
 
     <div style="position: absolute; top: -9999px; opacity: 0; left: 478px; visibility: hidden;" 
          dojoType="dijit.Dialog" id="updateProcessDialog" widgetid="updateProcessDialog" 
-         title="${message(code:'packagesUpdate.page.installUpdatesStatus.header')}" role="dialog" tabindex="-1"
+         title="CollabNet Subversion Edge ${message(code:'packagesUpdate.page.installUpdatesStatus.header')}" role="dialog" tabindex="-1"
          class="dijitDialog dijitContentPane" wairole="dialog"
          waistate="labelledby-updateProcessDialog_title">
       <table>

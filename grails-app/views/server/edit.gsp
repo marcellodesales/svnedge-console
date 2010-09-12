@@ -218,7 +218,7 @@ users access to ports less than 1024.</p>
 
       <tr>
         <td class="ItemDetailName">
-          <label for="port"><g:message code="server.port.label.tip" />:</label>
+          <label for="port"><g:message code="server.port.label" />:</label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'port','errors')}">
           <input size="6" type="text" id="port" name="port" 

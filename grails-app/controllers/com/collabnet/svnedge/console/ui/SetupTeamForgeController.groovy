@@ -434,7 +434,9 @@ class SetupTeamForgeController {
             
         } catch (MalformedURLException malformedUrl) {
             // Just display the error on the form
-            con.errorMessage = malformedUrl.message
+            def msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
+                args: [con.ctfURL])
+            con.errorMessage = msg
             redirect(action: 'ctfInfo')
 
         } catch (UnknownHostException unknownHost) {

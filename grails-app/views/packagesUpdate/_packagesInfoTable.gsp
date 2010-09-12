@@ -1,8 +1,7 @@
-    <g:render template="/common/tabs"
-        model="[tabs:[
-            [action:'available', label:'Updates'],
-            [action:'addOns', label:'New Packages'],
-            [action:'installed', label:'Installed Packages']]]" />
+   <g:set var="tabArray" value="${[[action:'available', label: message(code:'packagesUpdate.page.tabs.updates')]]}" />
+   <g:set var="tabArray" value="${tabArray << [action:'addOns', label: message(code:'packagesUpdate.page.tabs.addOns')]}" />
+   <g:set var="tabArray" value="${tabArray << [action:'installed', label: message(code:'packagesUpdate.page.tabs.installed')]}" />
+   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
     <table class="Container">
       <tbody>
@@ -46,7 +45,7 @@
                     <g:message code="packagesUpdate.page.table.noNewPackagesAvilable" />.
                 </g:if>
                 <g:else>
-                    <g:message code="packagesUpdate.page.table.noPackagesInstalled" />.
+                    <g:message code="packagesUpdate.page.table.noPackagesInstalled" />
                 </g:else>
             </g:else>
         </td>

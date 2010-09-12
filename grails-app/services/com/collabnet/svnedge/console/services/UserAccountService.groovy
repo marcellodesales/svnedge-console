@@ -23,7 +23,7 @@ import com.collabnet.svnedge.console.security.Role
 /**
  * This class provides User and Role management services and bootstraps the security context
  */
-class UserAccountService {
+class UserAccountService extends AbstractSvnEdgeService {
 
     def lifecycleService
     def authenticateService
@@ -33,19 +33,24 @@ class UserAccountService {
 
         // create required security roles if needed
         Role roleAdmin = Role.findByAuthority("ROLE_ADMIN") ?:
-            new Role(authority: "ROLE_ADMIN", description: "Super/Root Administrator (Full Privileges) ")
+            new Role(authority: "ROLE_ADMIN", 
+                description: getMessage("role.ROLE_ADMIN"))
 
         Role roleAdminSystem = Role.findByAuthority("ROLE_ADMIN_SYSTEM") ?:
-            new Role(authority: "ROLE_ADMIN_SYSTEM", description: "System/Server Administrator")
+            new Role(authority: "ROLE_ADMIN_SYSTEM", 
+                description: getMessage("role.ROLE_ADMIN_SYSTEM"))
 
         Role roleAdminRepo = Role.findByAuthority("ROLE_ADMIN_REPO") ?:
-            new Role(authority: "ROLE_ADMIN_REPO", description: "Repositories Administrator")
+            new Role(authority: "ROLE_ADMIN_REPO", 
+                description: getMessage("role.ROLE_ADMIN_REPO"))
 
         Role roleAdminUsers = Role.findByAuthority("ROLE_ADMIN_USERS") ?:
-            new Role(authority: "ROLE_ADMIN_USERS", description: "User Account Administrator")
+            new Role(authority: "ROLE_ADMIN_USERS", 
+                description: getMessage("role.ROLE_ADMIN_USERS"))
 
         Role roleUser = Role.findByAuthority("ROLE_USER") ?:
-            new Role(authority: "ROLE_USER", description: "Basic User Authority, required for console access")
+            new Role(authority: "ROLE_USER", 
+                description: getMessage("role.ROLE_USER"))
 
         // passwod "admin" used for all test users
         def password = authenticateService.encodePassword("admin")
@@ -57,7 +62,8 @@ class UserAccountService {
             case "test":
 
                 // create test users
-                log.info("Creating test users for all each role in this environment: ${env}")
+                log.info("Creating test users for all each role in this " +
+                    "environment: ${env}")
 
                 User superadmin = User.findByUsername("admin") ?:
                     saveNewSuperUser("admin", password)
@@ -105,7 +111,8 @@ class UserAccountService {
 
                 User superadmin = User.findByUsername("admin") 
                 if (!superadmin) {
-                    log.warn("Creating 'admin' super user since not found. Be sure to change password.")
+                    log.warn("Creating 'admin' super user since not found. " +
+                        "Be sure to change password.")
                     superadmin = saveNewSuperUser("admin", password)
                 }
             

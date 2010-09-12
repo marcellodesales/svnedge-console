@@ -135,7 +135,8 @@ class LogController {
                     fileModification: logModifiedTime])
 
         } catch (FileNotFoundException logDoesNotExist) {
-            flash.error = logDoesNotExist.getMessage()
+            flash.error = message(code: 'logs.page.show.header.fileNotFound',
+                args:[logName])
             redirect(action: "list")
             return
         }
