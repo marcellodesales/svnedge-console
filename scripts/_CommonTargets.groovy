@@ -62,7 +62,7 @@ target(prepare: 'Prepares properties and fields') {
 
     distDir = Ant.project.properties.'distDir'
 
-    urlPrefix = "https://mgr.cubit.sp.collab.net/pbl/svnedge/pub/3rdPartyPkgs/"
+    urlPrefix = "http://pkg.collab.net/build/"
 
     archiveFile = "${distDir}/svn-apache-viewvc-binaries" + 
         ((osName == "windows") ? ".zip" : ".tar.gz")
