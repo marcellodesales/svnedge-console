@@ -222,7 +222,7 @@ users access to ports less than 1024.</p>
         </td>
         <td class="value ${hasErrors(bean:server,field:'port','errors')}">
           <input size="6" type="text" id="port" name="port" 
-              value="${fieldValue(bean:server,field:'port').replace(',','')}"/>
+              value="${server.port}"/>
         </td>
         <td class="ItemDetailValue">
             <g:if test="${standardPortInstructions}">
