@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.services
 
 import java.net.NetworkInterface
+import java.net.InetAddress
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.util.Collections
@@ -64,7 +65,7 @@ public class NetworkingService {
 
         log.info("########## Networking Service ##########")
         log.info("# Network Interface: ${this.selectedInterface.name}")
-        log.info("# IP Address: ${this.ipAddress.hostAddress}")
+        log.info("# IP Address: ${getIpAddress().hostAddress}")
         log.info("# Hostname: ${getHostname()}")
         if (this.httpProxy) {
             log.info("# HTTP PROXY: ${httpProxy}")
@@ -84,13 +85,22 @@ public class NetworkingService {
     }
     
     /**
-     * @return the IPv4 version assigned to the default interface. If no 
-     * network connection is found on the network interface, the localhost is
-     * returned.
+     * @return the IPv4 (preferred, IPv6 if necessary) version assigned to the default 
+     * interface. 
      */
     def getIpAddress() {
-        def ipAddresses = this.selectedInterface.getInetAddresses()
-        return ipAddresses.find { it instanceof Inet4Address }
+        def ipAddresses = this.selectedInterface.getInetAddresses().toList()
+        InetAddress ip = ipAddresses.find { it instanceof Inet4Address }        
+        if (!ip) {
+            ip = ipAddresses.find { it instanceof Inet6Address }
+        }
+
+        if (!ip) {
+            // this shouldn't happen, but added as protection against 
+            // downstream NPEs
+            ip = InetAddress.getByAddress("unknown", [0,0,0,0] as byte[])
+        }
+        return ip
     }
 
     /**
