@@ -74,38 +74,91 @@ class BootStrap {
         def appHome = ConfigUtil.appHome(config)
         log.info("Application Home: " + appHome)
 
-        operatingSystemService.bootstrap(appHome)
-        networkingService.bootStrap()
+        log.info("Bootstrapping OS services...")
+        try {
+            operatingSystemService.bootstrap(appHome)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize OperatingSystemService: " + e.getMessage(), e)
+        }
+
+        log.info("Bootstrapping Network Information services...")
+        try {
+            networkingService.bootStrap()
+        } catch (Exception e) {
+            log.error ("Failed to intitialize NetworkingService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping Statistics services...")
-        networkStatisticsService.bootStrap()
-        fileSystemStatisticsService.bootStrap()
+        try {
+            networkStatisticsService.bootStrap()
+        } catch (Exception e) {
+            log.error ("Failed to intitialize NetworkStatisticsService: " + e.getMessage(), e)
+        }
+        try {
+            fileSystemStatisticsService.bootStrap()
+        } catch (Exception e) {
+            log.error ("Failed to intitialize FileSystemStatisticsService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping the commandLineService...")
-        commandLineService.bootstrap(config)
+        try {
+            commandLineService.bootstrap(config)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize CommandLineService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping the lifecycleService...")
-        lifecycleService.bootStrap(config)
+        try {
+            lifecycleService.bootStrap(config)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize LifecycleService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping Servers...")
-        def initServer = lifecycleService.bootstrapServer(config)
-        def server = initServer.server
+        def server
+        def initServer
+        try {
+            initServer = lifecycleService.bootstrapServer(config)
+            server = initServer.server
+        } catch (Exception e) {
+            log.error ("Failed to intitialize Server instance: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrap logging with consoleLogLevel from the Server...")
-        logManagementService.bootstrap(ConfigUtil.dataDirPath(config),
-            initServer.logLevel)
+        try {
+            logManagementService.bootstrap(ConfigUtil.dataDirPath(config),
+                initServer.logLevel)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize LogManagementService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping the ServerConfigService...")
-        serverConfService.bootstrap(config, server)
+        try {
+            serverConfService.bootstrap(config, server)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize ServerConfService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrap integration server configuration...")
-        setupTeamForgeService.bootStrap(appHome)
+        try {
+            setupTeamForgeService.bootStrap(appHome)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize SetupTeamForgeService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping packagesUpdateService...")
-        packagesUpdateService.bootstrap(config)
+        try {
+            packagesUpdateService.bootstrap(config)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize PackagesUpdateService: " + e.getMessage(), e)
+        }
 
         log.info("Bootstrapping svnRepoService...")
-        svnRepoService.bootStrap(config)
+        try {
+            svnRepoService.bootStrap(config)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize SvnRepoService: " + e.getMessage(), e)
+        }
 
         if (server.mode == ServerMode.MANAGED) {
             log.info("Changing auth to use CTF")
@@ -113,7 +166,11 @@ class BootStrap {
         }
 
         log.info("Bootstrapping userAccountService...")
-        userAccountService.bootStrap(GrailsUtil.environment)
+        try {
+            userAccountService.bootStrap(GrailsUtil.environment)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize UserAccountService: " + e.getMessage(), e)
+        }
 
         // If the svn server is configured to start with the console app,
         // start it now
@@ -128,7 +185,11 @@ class BootStrap {
         }
 
         log.info("Bootstrapping discoveryService...")
-        discoveryService.bootStrap(config)
+        try {
+            discoveryService.bootStrap(config)
+        } catch (Exception e) {
+            log.error ("Failed to intitialize DiscoveryService: " + e.getMessage(), e)
+        }
     }
 
     /**
