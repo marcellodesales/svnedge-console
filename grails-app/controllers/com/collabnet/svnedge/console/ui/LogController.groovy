@@ -24,6 +24,8 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
 
+import org.springframework.web.servlet.support.RequestContextUtils as RCU
+
 /**
  * Command class for 'saveConfiguration' action. Provides validation rules.
  */
@@ -52,9 +54,6 @@ class LogController {
     def operatingSystemService
     def logManagementService
 
-    def static final dateFormatter = 
-        new SimpleDateFormat("MM/dd/yyyy HH:mm:ss z")
-
     static allowedMethods = [saveConfiguration : 'POST']
 
     def list = {
@@ -75,8 +74,8 @@ class LogController {
         if (params.order == "desc") {
           files = files.reverse()
         }
-
-        render(view: "list", model: [ files: files ])
+        def dtFormat = message(code: "default.dateTime.format.withZone")
+        return [files: files, logDateFormat: dtFormat]
     }
 
     def saveConfiguration = { LogConfigurationCommand cmd ->
@@ -128,11 +127,15 @@ class LogController {
 
             def logSize = operatingSystemService.formatBytes(logFile.length())
             def modifiedTime = new Date(logFile.lastModified())
-            def logModifiedTime = dateFormatter.format(modifiedTime);
+            def currentLocale = RCU.getLocale(request)
+            def dtFormat = message(code: "default.dateTime.format.withZone")
+            def requestFormatter = new SimpleDateFormat(dtFormat,
+                currentLocale)
+            def logModifiedTime = requestFormatter.format(modifiedTime);
 
             render(view: view, contentType: contentType,
                 model: [ file: logFile, fileSize: logSize,
-                    fileModification: logModifiedTime])
+                    fileModification: logModifiedTime, dateTimeFormat:dtFormat])
 
         } catch (FileNotFoundException logDoesNotExist) {
             flash.error = message(code: 'logs.page.show.header.fileNotFound',

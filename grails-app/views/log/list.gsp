@@ -36,7 +36,7 @@
 
         <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
           <td><g:link action="show" params="[fileName : fileName]">${file.name}</g:link></td>
-          <td><%=new Date(file.lastModified()).format("yyyy-MM-dd HH:mm")%></td>
+          <td><g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/></td>
           <td><g:formatFileSize size="${file.size}"/></td>
         </tr>
 
