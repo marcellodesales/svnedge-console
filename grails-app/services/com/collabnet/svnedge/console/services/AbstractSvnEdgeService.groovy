@@ -39,16 +39,40 @@ abstract class AbstractSvnEdgeService {
     }
 
     /**
-     * Gets an i18n message from the messages.properties file without providing
-     * parameters using the default locale.
+     * Gets an i18n message from the messages.properties file with the default
+     * locale used by the JVM.
      * @param key is the key in the messages.properties file.
      * @param params is the list of parameters to provide the i18n.
      * @return the message related to the key in the messages.properties file
-     * using the default locale.
+     * using the default locale from the JVM.
      */
     protected def getMessage(String key, params) {
-        def appCtx = grailsApplication.getMainContext()
-        return appCtx.getMessage(key, params as String[], Locale.getDefault())
+        return this.getMessage(key, params as String[], Locale.getDefault())
     }
+
+    /**
+    * Gets an i18n message from the messages.properties file with the default
+    * locale used by the JVM.
+    * @param key is the key in the messages.properties file.
+    * @param params is the list of parameters to provide the i18n.
+    * @return the message related to the key in the messages.properties file
+    * using the default locale from the JVM.
+    */
+   protected def getMessage(String key, Locale locale) {
+       return this.getMessage(key, null, locale)
+   }
+
+   /**
+    * Gets an i18n message from the messages.properties file without providing
+    * parameters using the default locale.
+    * @param key is the key in the messages.properties file.
+    * @param params is the list of parameters to provide the i18n.
+    * @return the message related to the key in the messages.properties file
+    * using the default locale.
+    */
+   protected def getMessage(String key, params, locale) {
+       def appCtx = grailsApplication.getMainContext()
+       return appCtx.getMessage(key, params as String[], locale)
+   }
 
 }

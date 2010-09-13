@@ -18,6 +18,8 @@
 package com.collabnet.svnedge.console.ui
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import org.springframework.web.servlet.support.RequestContextUtils as RCU
+
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
@@ -27,6 +29,8 @@ import com.collabnet.svnedge.replica.manager.ReplicaConfig
 import com.collabnet.svnedge.replica.manager.ApprovalState
 
 import java.net.NoRouteToHostException
+import java.text.SimpleDateFormat;
+
 import com.collabnet.svnedge.console.ServerMode
 
 @Secured(['ROLE_USER'])
@@ -136,19 +140,23 @@ class StatusController {
                ]
     }
 
-   def getPerfStats(currentConfig, server) {
+    def getPerfStats(currentConfig, server) {
+       def dateTimeFormat = message(code:"default.dateTime.format.withZone")
+       def runningSinceDate = quartzScheduler.getMetaData().runningSince
+       def currentLocale = RCU.getLocale(request)
        def model = [
-           [label: message(code: 'status.page.status.running_since'), 
-            value: quartzScheduler.getMetaData().runningSince]]
+           [label: message(code: 'status.page.status.running_since'),
+            value: new SimpleDateFormat(dateTimeFormat, 
+                currentLocale).format(runningSinceDate)]]
        if (!server.managedByCtf()) {
            model << [label: message(code: 'status.page.status.repo_health'), 
                value: svnRepoService.formatRepoStatus(realTimeStatisticsService
-                                               ?.getReposStatus())]
+                   ?.getReposStatus(), currentLocale)]
        }
         if (operatingSystemService.isReady()) {
             model << [label: message(code: 'status.page.status.throughput'), 
                 value: networkingService.formatThroughput(
-                    realTimeStatisticsService?.getThroughput())]
+                    realTimeStatisticsService?.getThroughput(), currentLocale)]
              model << [label: message(code: 'status.page.status.space.system'),
                  value: operatingSystemService.formatBytes(
                      realTimeStatisticsService?.getSystemUsedDiskspace())]

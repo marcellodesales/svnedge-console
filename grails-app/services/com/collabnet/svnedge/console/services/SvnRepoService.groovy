@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
-class SvnRepoService {
+class SvnRepoService extends AbstractSvnEdgeService {
 
     // service dependencies
     def operatingSystemService
@@ -205,22 +205,23 @@ class SvnRepoService {
      * @param server is the current server instance.
      * @return the formatted string for the repository.
      */
-    def formatRepoStatus(repoStatus) {
+    def formatRepoStatus(repoStatus, locale) {
         def server = lifecycleService.getServer()
         def buffer = new StringBuilder()
         if (repoStatus.size() == 0) {
             if (server.replica) {
-                return "No repositories have been added yet."
+                return getMessage("repository.status.notAdded", locale)
             } else {
                 def num = Repository.list().size()
                 if (num == 0) {
-                    buffer.append "There are no repositories yet."
+                    buffer.append getMessage("repository.status.noRepos", locale)
                 } else {
-                    buffer.append "Total repositories: ${num}."
+                    buffer.append getMessage("repository.status.noRepos", 
+                        [num], locale)
                 }
                 if (server.mode == ServerMode.STANDALONE) {
-                   buffer.append " Go to the Repositories tab to create" 
-                   buffer.append " or discover repositories."
+                   buffer.append " " + 
+                       getMessage("repository.status.createNew", locale)
                 }
                 return buffer.toString()
            }

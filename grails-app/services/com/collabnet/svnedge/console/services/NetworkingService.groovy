@@ -29,7 +29,7 @@ import java.util.Collections
  *
  * @author Marcello de Sales (mdesales@collab.net)
  */
-public class NetworkingService {
+public class NetworkingService extends AbstractSvnEdgeService {
 
     boolean transactional = false
 
@@ -254,26 +254,38 @@ public class NetworkingService {
      * @param timeOut is the time interval of transmission.
      * @return a human-readable format of the throughput data.
      */
-    public static formatThroughput(rateIn, timeIn, rateOut, timeOut) {
+    public String formatThroughput(throughputData, locale) {
+        def rateIn = throughputData[0]
+        def timeIn = throughputData[1]
+        def rateOut = throughputData[2]
+        def timeOut = throughputData[3]
         def throughPutTxt = ""
         if (rateIn == null) {
-            return "No throughput IN data yet"
+            return getMessage("statistics.throughput.in.noData", locale)
         } else {
-            throughPutTxt = OperatingSystemService.formatBytes(rateIn) + "/s IN"
+            def bytes = OperatingSystemService.formatBytes(rateIn)
+            throughPutTxt = getMessage("statistics.throughput.in.bytes",
+                [bytes], locale)
             if (timeIn) {
-                throughPutTxt += " (over about " + 
-                OperatingSystemService.formatMinutes(timeIn) + " minutes)"
+                def min = OperatingSystemService.formatMinutes(timeIn)
+                throughPutTxt += " (" + 
+                    getMessage("statistics.throughput.overMinutes", [min],
+                        locale) + ")"
             }
         }
         throughPutTxt += "; "
         if (rateOut == null) {
-            throughPutTxt += "No throughput OUT data yet"
+            throughPutTxt += getMessage("statistics.throughput.out.noData",
+                    locale)
         } else {
-            throughPutTxt += OperatingSystemService.formatBytes(rateOut) + 
-               "/s OUT"
-            if (timeOut) {
-                throughPutTxt += " (over about " + 
-                    OperatingSystemService.formatMinutes(timeOut) + " minutes)"
+            def bytes = OperatingSystemService.formatBytes(rateOut)
+            throughPutTxt = getMessage("statistics.throughput.out.bytes",
+                [bytes], locale)
+            if (timeIn) {
+                def min = OperatingSystemService.formatMinutes(timeOut)
+                throughPutTxt += " (" +
+                    getMessage("statistics.throughput.overMinutes", [min],
+                        locale) + ")"
             }
         }
         return throughPutTxt
