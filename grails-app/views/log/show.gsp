@@ -1,3 +1,4 @@
+<%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -27,7 +28,14 @@
         <div style="width: 800px; height: 300px; overflow: auto;">
 <!-- Leave this left-justified so that spaces are not padded in the first line of the log -->        
 <pre>
-<% file.withReader { out << it } %>           
+<%
+file.withReader { reader ->
+  String line
+  while ( (line = reader.readLine() ) != null ) {
+    out << StringEscapeUtils.escapeHtml(line) + "\n"
+  }
+}
+%>           
 </pre>
         </div>
       </td>    
