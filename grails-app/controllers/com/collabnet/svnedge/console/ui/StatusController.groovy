@@ -143,6 +143,7 @@ class StatusController {
     def getPerfStats(currentConfig, server) {
        def dateTimeFormat = message(code:"default.dateTime.format.withZone")
        def runningSinceDate = quartzScheduler.getMetaData().runningSince
+       runningSinceDate = runningSinceDate ?: new Date()
        def currentLocale = RCU.getLocale(request)
        def model = [
            [label: message(code: 'status.page.status.running_since'),
