@@ -66,7 +66,8 @@ class StatisticsController {
             pattern: message(code: "default.dateTime.format.dayMonth")]]
     }
 
-    def graphList = [
+    def graphList() {
+        return [
         [statgroup: "UserCache", 
             graphName: message(code: 
                 "statistics.graph.leftNav.usersCache.chart"), 
@@ -89,8 +90,8 @@ class StatisticsController {
             graphData: "DISKSPACE_CHART"]
         /*[statgroup: "SvnRepoHits",
             graphName: "SVN hits by Repository",
-            graphData: "SVN_HITS_BY_REPO"]*/
-    ]
+            graphData: "SVN_HITS_BY_REPO"]*/]
+    }
 
     @Secured(['ROLE_USER'])
     def index = {
