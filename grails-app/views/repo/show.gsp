@@ -20,7 +20,7 @@
     CollabNet Subversion Edge <g:message code="repository.page.show.permission.p1" />
     </p>
     <p>
-      <g:message code="repository.page.show.permission.p2" />:
+      <g:message code="repository.page.show.permission.p2" />
     </p>
     <code>sudo chown -R ${svnUser}:${svnGroup} ${repoPath}</code>
     <p>
@@ -39,13 +39,13 @@
                     <tbody>
                     
                         <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.name" />:</td>
+                            <td valign="top" class="name"><g:message code="repository.page.show.name" /></td>
 
                             <td valign="top" class="value" width="100%">${fieldValue(bean:repositoryInstance, field:'name')}</td>
 
                         </tr>
                         <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.status" />:</td>
+                            <td valign="top" class="name"><g:message code="repository.page.show.status" /></td>
 
                             <td valign="top" class="value">
                               <g:if test="${repositoryInstance.permissionsOk}">

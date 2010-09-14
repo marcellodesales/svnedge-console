@@ -21,15 +21,15 @@
         <td class="ContainerBodyWithPaddedBorder">
 
            <p><g:message code="server.page.editIntegration.p1" /> 
-           <strong><i>${ctfServerBaseUrl}</i></strong>, <g:message code="server.page.editIntegration.p2" />:</p>
+           <strong><i>${ctfServerBaseUrl}</i></strong> <g:message code="server.page.editIntegration.p2" /></p>
             <ul>
-                <li><g:message code="server.page.editIntegration.bullet1" />;</li>
-                <li><g:message code="server.page.editIntegration.bullet2" />.
+                <li><g:message code="server.page.editIntegration.bullet1" /></li>
+                <li><g:message code="server.page.editIntegration.bullet2" />
             </ul>
 
-            <p><g:message code="server.page.editIntegration.p3" />:</p>
+            <p><g:message code="server.page.editIntegration.p3" /></p>
             <ul>
-               <li><g:message code="server.page.editIntegration.bullet3" />.</li>
+               <li><g:message code="server.page.editIntegration.bullet3" /></li>
             </ul>
       </td></tr>
       <tr>
@@ -52,13 +52,13 @@
       <tr><td colspan="3">&nbsp;</td></tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfURL"><g:message code="server.page.editIntegration.ctfUrl.label" />:</label>
+          <label for="ctfURL"><g:message code="server.page.editIntegration.ctfUrl.label" /></label>
         </td>
         <td valign="top" class="value" colspan="2">${ctfServerBaseUrl}</td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfUsername"><g:message code="server.page.editIntegration.ctfUsername.label" />:</label>
+          <label for="ctfUsername"><g:message code="server.page.editIntegration.ctfUsername.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfUsername','errors')}">
           <input size="20" type="text" id="ctfUsername" name="ctfUsername" 
@@ -80,7 +80,7 @@
    </g:hasErrors>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfPassword"><g:message code="server.page.editIntegration.ctfPassword.label" />:</label>
+          <label for="ctfPassword"><g:message code="server.page.editIntegration.ctfPassword.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfPassword','errors')}">
           <input size="20" type="password" id="ctfPassword" name="ctfPassword" 

@@ -35,7 +35,7 @@
       </tr>
 
       <tr class="prop">
-        <td valign="top" class="name"><g:message code="role.people.label"/>:</td>
+        <td valign="top" class="name"><g:message code="role.people.label"/></td>
 
         <td valign="top" style="text-align: left;" class="value">
           <ul>

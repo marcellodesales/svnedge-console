@@ -1,6 +1,6 @@
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="user.page.edit.title"/></title>
+    <title>CollabNet Subversion Edge <g:message code="user.page.edit.title"/></title>
 </head>
 
 
@@ -34,7 +34,7 @@
                     </tr>
 
                     <tr class="prop" id="passwd_row">
-                        <td class="name"><label for="passwd"><g:message code="user.page.edit.passwd"/>:</label></td>
+                        <td class="name"><label for="passwd"><g:message code="user.page.edit.passwd"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'passwd','errors')}">
                             <input type="password" id="passwd" name="passwd" value=""/>
                         </td>
@@ -54,14 +54,14 @@
     </g:hasErrors>
 
                     <tr class="prop" id="passwd_confirm_row">
-                        <td class="name"><label for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/>:</label></td>
+                        <td class="name"><label for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'passwd','errors')}">
                             <input type="password" id="confirmPasswd" name="confirmPasswd" value=""/>
                         </td>
                     </tr>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="realUserName"><g:message code="user.realUserName.label"/>:</label></td>
+                        <td valign="top" class="name"><label for="realUserName"><g:message code="user.realUserName.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'realUserName','errors')}">
                             <input type="text" id="realUserName" name="realUserName" value="${userInstance.realUserName?.encodeAsHTML()}"/>
                         </td>
@@ -78,7 +78,7 @@
     </g:hasErrors>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/>:</label></td>
+                        <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'description','errors')}">
                             <input type="text" id="description" name="description" value="${userInstance.description?.encodeAsHTML()}"/>
                         </td>
@@ -95,7 +95,7 @@
     </g:hasErrors>
 
                     <tr class="prop">
-                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/>:</label></td>
+                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
                             <input type="text" id="email" name="email" value="${userInstance?.email?.encodeAsHTML()}"/>
                         </td>
@@ -116,7 +116,7 @@
               
                     <tr class="prop">
                         <td valign="top" class="name" style="white-space: nowrap;">
-                          <label for="authorities"><g:message code="user.authorities.label" />:</label>
+                          <label for="authorities"><g:message code="user.authorities.label" /></label>
                         </td>
                         <td  colspan="2" class="value ${hasErrors(bean: userInstance, field: 'authorities', 'errors')}">
                           <g:each in="${roleList}" var="role">
@@ -141,18 +141,18 @@
     </g:hasErrors>
                    <tr class="ContainerFooter">
                      <td colspan="3">
-				          <div class="AlignRight">
-				              <g:actionSubmit class="Button save" value="Update" />
-				              <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-                				<g:actionSubmit class="Button delete" onclick="return confirm('Are you sure?');" value="Delete" />
-                				</g:ifAnyGranted>
-				            </div>
-          
-        </td>
-      </tr>    
+                        <div class="AlignRight">
+                           <g:actionSubmit class="Button save" value="${message(code:'user.page.edit.button.save')}" />
+                           <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
+                              <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
+                              <g:actionSubmit class="Button delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" />
+                           </g:ifAnyGranted>
+                        </div>
+                     </td>
+                  </tr>
+
                 </tbody>
                 </table>
-
 
         </g:form>
 

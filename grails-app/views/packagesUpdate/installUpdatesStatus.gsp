@@ -214,7 +214,7 @@
           <td valign="middle">
             <img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle">
             <font size="3"><strong><span id="progressStatus_phase">
-               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />...</span></strong>
+               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" /> &#133;</span></strong>
             </font>
           </td>
         </tr>

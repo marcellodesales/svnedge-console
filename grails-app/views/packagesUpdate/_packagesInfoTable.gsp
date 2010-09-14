@@ -5,7 +5,7 @@
 
     <table class="Container">
       <tbody>
-        <tr><td colspan="5"><strong><g:message code="packagesUpdate.page.table.repository" />:</strong>
+        <tr><td colspan="5"><strong><g:message code="packagesUpdate.page.table.repository" /></strong>
             ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong> <g:message code="packagesUpdate.page.table.throughProxy" /> </strong>${proxyToOriginURL}
                </g:if></td></tr>
 
@@ -38,11 +38,11 @@
       <tr class="ItemListNoData">
         <td colspan="3">
             <g:if test="${actionName == 'available'}"> 
-                <g:message code="packagesUpdate.page.table.noUpdatesAvilable" />.
+                <g:message code="packagesUpdate.page.table.noUpdatesAvilable" />
             </g:if>
             <g:else>
                 <g:if test="${actionName == 'addOns'}"> 
-                    <g:message code="packagesUpdate.page.table.noNewPackagesAvilable" />.
+                    <g:message code="packagesUpdate.page.table.noNewPackagesAvilable" />
                 </g:if>
                 <g:else>
                     <g:message code="packagesUpdate.page.table.noPackagesInstalled" />

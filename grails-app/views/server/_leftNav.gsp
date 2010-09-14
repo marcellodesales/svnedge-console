@@ -9,12 +9,10 @@
     <g:link controller="log" action="list" params="[sort : 'date', order: 'desc']"><g:message code="server.page.leftNav.logs" /></g:link>
   </div>
 
-<g:if test="${GrailsUtil.environment == 'production'}">
   <div class="<g:if test="${controllerName == 'packagesUpdate'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <g:link controller="packagesUpdate" action="available"><g:message code="server.page.leftNav.updates" /></g:link>
   </div>
-</g:if>
 
 <g:if test="${!isManagedMode}">
   <div class="<g:if test="${controllerName == 'setupTeamForge'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">

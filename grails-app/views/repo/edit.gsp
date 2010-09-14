@@ -25,7 +25,7 @@
                         
                             <tr class="prop">
                                 <td valign="top" class="name">
-                                    <label for="name"><g:message code="repository.page.edit.name" />:</label>
+                                    <label for="name"><g:message code="repository.page.edit.name" /></label>
                                 </td>
                                 <td width="100%" valign="top" class="value ${hasErrors(bean:repositoryInstance,field:'name','errors')}">
                                     <input type="text" id="name" name="name" value="${fieldValue(bean:repositoryInstance,field:'name')}"/>

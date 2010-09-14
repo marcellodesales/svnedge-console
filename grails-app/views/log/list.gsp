@@ -45,7 +45,7 @@
     </g:if>
     <g:else>
       <tr class="ItemListNoData">
-        <td colspan="3"><g:message code="logs.page.list.noFilesFound" />.</td>
+        <td colspan="3"><g:message code="logs.page.list.noFilesFound" /></td>
       </tr>
     </g:else>
 

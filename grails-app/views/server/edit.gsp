@@ -122,7 +122,7 @@
     <div class="message">${result}</div>
 <g:if test="${!isConfigurable}">
 <div class="instructionText">
-    <p><g:message code="server.page.edit.missingDirectives" />:
+    <p><g:message code="server.page.edit.missingDirectives" />
     <blockquote>
     <code>
     Include "${csvnConf}/csvn_main_httpd.conf"<br/>
@@ -135,13 +135,13 @@
 <g:if test="${standardPortInstructions}">
 <div class="instructionText">
     <i><g:message code="server.page.edit.standardPorts.header" /></i>
-    <p><g:message code="server.page.edit.standardPorts.instructions" />.
+    <p><g:message code="server.page.edit.standardPorts.instructions" />
 </p>
 <ul>
-<li><g:message code="server.page.edit.httpdBind" />. <a id="toggleBind" href="#" 
+<li><g:message code="server.page.edit.httpdBind" /> <a id="toggleBind" href="#" 
   onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="bindInstructions" style="border: 1px;">
-<p><g:message code="server.page.edit.httpdBind.instructions" />. <em><g:message code="server.page.edit.httpdBind.asRoot" />.</em>
+<p><g:message code="server.page.edit.httpdBind.instructions" /> <em><g:message code="server.page.edit.httpdBind.asRoot" /></em>
 </p>
 <blockquote>
 <code>chown root:${httpd_group} ${csvnHome}/lib/httpd_bind/httpd_bind
@@ -150,14 +150,14 @@ chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
 </blockquote>
 </div>
 </li>
-<li><g:message code="server.page.edit.httpd.asSudo" />. <a id="toggleSudo" href="#" 
+<li><g:message code="server.page.edit.httpd.asSudo" /> <a id="toggleSudo" href="#" 
   onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="sudoInstructions" style="border: 1px;">
 <p>
-<g:message code="server.page.edit.httpd.asSudo.instruction" />.
+<g:message code="server.page.edit.httpd.asSudo.instruction" />
 </p>
 <ul>
-<li><g:message code="server.page.edit.httpd.asSudo.command" args="${['<code>/usr/sbin/visudo</code>']}" />:<br/><br/>
+<li><g:message code="server.page.edit.httpd.asSudo.command" args="${['<code>/usr/sbin/visudo</code>']}" /><br/><br/>
 <code>Defaults env_keep += "PYTHONPATH"<br/>
 ${console_user}    ALL=(ALL) NOPASSWD: ${csvnHome}/bin/httpd</code>
 </li>
@@ -197,13 +197,13 @@ users access to ports less than 1024.</p>
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="hostname"><g:message code="server.hostname.label" />:</label>
+          <label for="hostname"><g:message code="server.hostname.label" /></label>
         </td>
         <td valign="top" class="value ${hasErrors(bean:server,field:'hostname','errors')}">
           <input size="30" type="text" id="hostname" name="hostname" 
               value="${fieldValue(bean:server,field:'hostname')}"/>
         </td>
-        <td class="ItemDetailValue"><i><g:message code="server.hostname.label.tip" />.</i></td>
+        <td class="ItemDetailValue"><i><g:message code="server.hostname.label.tip" /></i></td>
       </tr>
     <g:hasErrors bean="${server}" field="hostname">
       <tr>
@@ -218,7 +218,7 @@ users access to ports less than 1024.</p>
 
       <tr>
         <td class="ItemDetailName">
-          <label for="port"><g:message code="server.port.label" />:</label>
+          <label for="port"><g:message code="server.port.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'port','errors')}">
           <input size="6" type="text" id="port" name="port" 
@@ -226,11 +226,11 @@ users access to ports less than 1024.</p>
         </td>
         <td class="ItemDetailValue">
             <g:if test="${standardPortInstructions}">
-                <i><g:message code="server.port.label.tip" />.</i>
+                <i><g:message code="server.port.label.tip" /></i>
             </g:if>
             <g:else>
             <g:if test="${(server.useSsl && server.port != 443) || server.port != 80}">
-                <i><g:message code="server.port.label.tip.standardPorts" />.</i>
+                <i><g:message code="server.port.label.tip.standardPorts" /></i>
             </g:if>
             </g:else>
          </td>
@@ -248,13 +248,13 @@ users access to ports less than 1024.</p>
     
       <tr>
         <td class="ItemDetailName">
-          <label for="repoParentDir"><g:message code="server.repoParentDir.label" />:</label>
+          <label for="repoParentDir"><g:message code="server.repoParentDir.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'repoParentDir','errors')}">
           <input size="30" type="text" id="repoParentDir" name="repoParentDir" 
               value="${fieldValue(bean:server,field:'repoParentDir')}"/>
         </td>
-        <td class="ItemDetailValue"><i><g:message code="server.repoParentDir.label.tip" />.</i></td>
+        <td class="ItemDetailValue"><i><g:message code="server.repoParentDir.label.tip" /></i></td>
       </tr> 
     <g:hasErrors bean="${server}" field="repoParentDir">
       <tr>
@@ -269,7 +269,7 @@ users access to ports less than 1024.</p>
       
       <tr>
       	  <td class="ItemDetailName">
-              <label for="ipAddress"><g:message code="server.ipAddress.label" />:</label>
+              <label for="ipAddress"><g:message code="server.ipAddress.label" /></label>
           </td>
           <td valign="top" class="value">
               <select name="ipAddress" id="ipAddress" onchange="updateInterface(this)">
@@ -296,7 +296,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
           <td class="ItemDetailName">
-              <label for="interface"><g:message code="server.netInterface.label" />:</label>
+              <label for="interface"><g:message code="server.netInterface.label" /></label>
           </td>
           <td class="value">
              <g:select name="netInterface" from="${networkInterfaces}" 
@@ -306,7 +306,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
         <td class="ItemDetailName">
-              <label for="adminName"><g:message code="server.adminName.label" />:</label>
+              <label for="adminName"><g:message code="server.adminName.label" /></label>
           </td>
           <td colspan="2" class="ItemDetailValue">
               <!-- Widget should eventually change to person picker (See TeamForge) -->
@@ -322,7 +322,7 @@ users access to ports less than 1024.</p>
       <!-- The following 2 table rows should be removed after updating UI to person picker -->
       <tr>
           <td class="ItemDetailName">
-              <label for="adminEmail"><g:message code="server.adminEmail.label" />:</label>
+              <label for="adminEmail"><g:message code="server.adminEmail.label" /></label>
           </td>
           <td class="value errors" colspan="2">
               <input name="adminEmail" type="text" 
@@ -336,7 +336,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
           <td class="ItemDetailName">
-              <label for="adminAltContact"><g:message code="server.adminAltContact.label" />:</label>
+              <label for="adminAltContact"><g:message code="server.adminAltContact.label" /></label>
           </td>
           <td valign="top" class="ItemDetailValue" colspan="2">
               <input name="adminAltContact" type="text" 
@@ -350,25 +350,25 @@ users access to ports less than 1024.</p>
       </tr>      
       <tr>
          <td class="ItemDetailName">
-          <label for="name"><g:message code="server.useSsl.label" />:</label>
+          <label for="name"><g:message code="server.useSsl.label" /></label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSsl','errors')}" colspan="2">
           <g:checkBox name="useSsl" value="${server.useSsl}"/>
-          <g:message code="server.useSsl.label.tip" />.
+          <g:message code="server.useSsl.label.tip" />
         </td>
       </tr>
       <tr>
          <td class="ItemDetailName">
-          <label for="name"><g:message code="server.useSslConsole.label" />:</label>
+          <label for="name"><g:message code="server.useSslConsole.label" /></label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSslConsole','errors')}" colspan="2">
           <g:checkBox name="useSslConsole" value="${server.useSslConsole}"/>
-          <g:message code="server.useSslConsole.label.tip" />.
+          <g:message code="server.useSslConsole.label.tip" />
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="defaultStart"><g:message code="server.defaultStart.label" />:</label>
+          <label for="defaultStart"><g:message code="server.defaultStart.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'defaultStart','errors')}">
           <g:checkBox name="defaultStart" value="${server.defaultStart}"/>

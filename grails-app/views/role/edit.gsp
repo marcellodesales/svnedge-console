@@ -26,7 +26,7 @@
     <g:hiddenField name="version" value="${roleInstance?.version}"/>
         <tr class="prop">
           <td valign="top" class="name">
-            <label><g:message code="role.authority.label"/>:</label>
+            <label><g:message code="role.authority.label"/></label>
           </td>
           <td width="100%" valign="top" class="value ${hasErrors(bean: roleInstance, field: 'authority', 'errors')}">
             ${fieldValue(bean: roleInstance, field: "authority")}
@@ -35,7 +35,7 @@
 
         <tr class="prop">
           <td valign="top" class="name">
-            <label for="description"><g:message code="role.description.label"/>:</label>
+            <label for="description"><g:message code="role.description.label"/></label>
           </td>
           <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'description', 'errors')}">
             <g:textArea name="description" value="${roleInstance?.description}" />
@@ -44,7 +44,7 @@
 
         <tr class="prop">
           <td valign="top" class="name" style="white-space: nowrap;">
-            <label for="people"><g:message code="role.people.label"/>:</label>
+            <label for="people"><g:message code="role.people.label"/></label>
           </td>
           <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'people', 'errors')}">
             <g:select name="people" from="${userList}" multiple="yes" optionKey="id" optionValue="username" size="5" value="${roleInstance?.people}"/>

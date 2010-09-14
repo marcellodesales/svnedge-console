@@ -9,9 +9,6 @@
    <g:message code="server.page.edit.header" />
 </content>
 
-%{--
-  - Copyright 2010 CollabNet, Inc. All rights reserved.
-  --}%
 <g:render template="/server/leftNav" />
 
 <body>
@@ -28,7 +25,7 @@
           <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
-              <label for="consoleLevel"><g:message code="logConfigurationCommand.consoleLevel.label" />:</label>
+              <label for="consoleLevel"><g:message code="logConfigurationCommand.consoleLevel.label" /></label>
             </td>
             <td valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'consoleLevel','errors')}">
                  <select class="inputfield" name="consoleLevel" id="consoleLevel">
@@ -37,11 +34,11 @@
                     </g:each>
                  </select>
             </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.consoleLevel.label.tip" />.</i></td>
+            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.consoleLevel.label.tip" /></i></td>
           </tr>
           <tr>
             <td class="ItemDetailName">
-              <label for="apacheLevel"><g:message code="logConfigurationCommand.apacheLevel.label" />:</label>
+              <label for="apacheLevel"><g:message code="logConfigurationCommand.apacheLevel.label" /></label>
             </td>
             <td valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'apacheLevel','errors')}">
                  <select class="inputfield" name="apacheLevel" id="apacheLevel">
@@ -50,17 +47,17 @@
                     </g:each>
                  </select>
             </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.apacheLevel.label.tip" />.</i></td>
+            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.apacheLevel.label.tip" /></i></td>
           </tr>
           <tr>
             <td class="ItemDetailName">
-              <label for="pruneLogFileOlderThan"><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label" />:</label>
+              <label for="pruneLogFileOlderThan"><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label" /></label>
             </td>
             <td nowrap valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'pruneLogsOlderThan','errors')}">
               <input name="pruneLogsOlderThan" id="pruneLogFileOlderThan" type="text" size="3"
-                value="${logConfigurationCommand.pruneLogsOlderThan}"/> <g:message code="logConfigurationCommand.pruneLogFileOlderThan.days" />.
+                value="${logConfigurationCommand.pruneLogsOlderThan}"/> <g:message code="logConfigurationCommand.pruneLogFileOlderThan.days" />
             </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label.tip" />.</i></td>
+            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label.tip" /></i></td>
           </tr>
           <g:hasErrors bean="${logConfigurationCommand}" field="pruneLogsOlderThan">
           <tr>

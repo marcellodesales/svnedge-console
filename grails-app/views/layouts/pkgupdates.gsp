@@ -37,7 +37,7 @@
                     </g:link>
                 </g:isNotLoggedIn>
                 <g:isLoggedIn>
-                    <g:message code="layout.page.loggedAs" />:&nbsp;
+                    <g:message code="layout.page.loggedAs" />&nbsp;
                     <g:loggedInUserInfo field="realUserName"/>&nbsp;
 ~                    (<g:loggedInUsername/>)
                 </td>
@@ -114,7 +114,7 @@
         <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
         <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
         width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
-        &#169; 2010 CollabNet. CollabNet <g:message code="layout.page.trademark" /> CollabNet, Inc.
+        &#169; 2010 <g:message code="layout.page.trademark" />
       </div>
     </div>
     <!-- TeamForge content-area end -->

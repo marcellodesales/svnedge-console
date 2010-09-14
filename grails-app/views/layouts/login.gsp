@@ -22,9 +22,9 @@
           <table width="300" border="0" cellpadding="0" cellspacing="0"
                  class="mastHeadLink">
             <tr class="sitelogo">
-              <td><g:link controller="status"><img
-                src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
-                border="0" alt="Home"/></g:link></td>
+              <td><g:link controller="status"><img 
+                 src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
+                 border="0" alt="${message(code:'layout.page.home') }"/></g:link></td>
             </tr>
           </table>
         </td>
@@ -34,13 +34,14 @@
               <tr class="mastHeadLink" valign="top">
                 <td valign="middle">
                 <g:isNotLoggedIn>
-                    <g:link controller="login">Login
+                    <g:link controller="login"><g:message code="layout.page.login" />
                     </g:link>
                 </g:isNotLoggedIn>
                 <g:isLoggedIn>
-                    Logged in as:&nbsp;
-                    <g:loggedInUserInfo field="realUserName"/>&nbsp;
-~                    (<g:loggedInUsername/>)
+                    <g:message code="layout.page.loggedAs" />&nbsp;
+                    <g:link controller="user" action="showSelf">
+                    <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
+                    </g:link>
                 </td>
                 <td nowrap="nowrap">
                     <img src="${resource(dir:'images/masthead',
@@ -49,7 +50,7 @@
                 </td>
                 <td valign="middle">
                     <g:link controller="logout">
-                        LOGOUT
+                        <g:message code="layout.page.logout" />
                     </g:link>
                 </g:isLoggedIn>
                 </td>
@@ -60,6 +61,7 @@
                 <td nowrap="nowrap">&nbsp;&nbsp;&nbsp;<g:render template="/common/helpLink" model="['type' : 'img']"/></td>
 
                 <td nowrap="nowrap" valign="middle">&nbsp;<g:render template="/common/helpLink" model="['type' : 'text']"/>&nbsp;&nbsp;</td>
+
               </tr>
             </table>
         </td>
@@ -114,7 +116,7 @@
         <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
         <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
         width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
-        &#169; 2010 CollabNet. CollabNet <g:message code="layout.page.trademark" /> CollabNet, Inc.
+        &#169; 2010 <g:message code="layout.page.trademark" />
       </div>
     </div>
     <!-- TeamForge content-area end -->

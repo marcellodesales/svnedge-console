@@ -19,7 +19,7 @@
  <table class="Container">
   <tbody>
     <tr class="ContainerHeader">
-      <td><g:message code="logs.page.show.header.fileName" />: ${params.fileName} &nbsp;<g:message code="logs.page.show.header.size" />: ${fileSize} &nbsp;<g:message code="logs.page.show.header.lastModification" />: ${fileModification}</td>
+      <td><g:message code="logs.page.show.header.fileName" /> ${params.fileName} &nbsp;<g:message code="logs.page.show.header.size" /> ${fileSize} &nbsp;<g:message code="logs.page.show.header.lastModification" /> ${fileModification}</td>
     </tr>
     <g:if test="${file}">  
     <tr>

@@ -36,15 +36,15 @@
    <td class="ContainerBodyWithPaddedBorder">
  <g:if test="${server.ldapEnabled}">
       <div class="warningText">
-      <g:message code="setupTeamForge.page.ctfUsers.p1" />.
+      <g:message code="setupTeamForge.page.ctfUsers.p1" />
       </div>
  </g:if>
  <g:else>
     <g:if test="${existingUsers.size() == 0 && csvnOnlyUsers.size() == 0}">
-      <p><g:message code="setupTeamForge.page.ctfUsers.noUsers" />.</p>
+      <p><g:message code="setupTeamForge.page.ctfUsers.noUsers" /></p>
     </g:if>
     <g:elseif test="${existingUsers.size() > 0 && csvnOnlyUsers.size() == 0}">
-        <p><g:message code="setupTeamForge.page.ctfUsers.managedUsers" />.</p>
+        <p><g:message code="setupTeamForge.page.ctfUsers.managedUsers" /></p>
     </g:elseif>
     <g:else>
         <g:checkBox id="importUsers" name="importUsers" value="true" 
@@ -55,14 +55,14 @@
                     value="true" checked="${wizardBean.assignMembership}"/>
             <g:message code="setupTeamForge.page.ctfUsers.importUsers.assignMembership" /></label>&nbsp;&nbsp;
             <em>
-               <g:message code="setupTeamForge.page.ctfUsers.importUsers.addMembershipTo" args="${wizardBean.ctfProject ? 'project ' + wizardBean.ctfProject : 'project(s)'}"/>.
+               <g:message code="setupTeamForge.page.ctfUsers.importUsers.addMembershipTo" args="${wizardBean.ctfProject ? 'project ' + wizardBean.ctfProject : 'project(s)'}"/>
             </em>
           <p>
           <g:if  test="${existingUsers.size() == 0}">
-             <g:message code="setupTeamForge.page.ctfUsers.importUsers.noConflicts" />.
+             <g:message code="setupTeamForge.page.ctfUsers.importUsers.noConflicts" />
           </g:if>
           <g:else>
-             <g:message code="setupTeamForge.page.ctfUsers.importUsers.someExists" />.
+             <g:message code="setupTeamForge.page.ctfUsers.importUsers.someExists" />
           </g:else>
           </p>
         <g:if  test="${existingUsers.size() > 0}">

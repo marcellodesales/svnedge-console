@@ -39,19 +39,19 @@
             <div class="errorMessage">
                 ${generalError}.
                 <ul>
-                    <li><g:message code="ctfConversion.form.ctfInfo.noconnection"/>: ${errorCause}</li>
+                    <li><g:message code="ctfConversion.form.ctfInfo.noconnection"/> ${errorCause}</li>
                 </ul>
             </div>
           </g:if>
 
           <p>
-            <g:message code="setupTeamForge.page.ctfInfo.p1"/>.
+            <g:message code="setupTeamForge.page.ctfInfo.p1"/>
           </p>
 
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfURL"><g:message code="setupTeamForge.page.ctfInfo.ctfUrl.label"/>:</label>
+          <label for="ctfURL"><g:message code="setupTeamForge.page.ctfInfo.ctfUrl.label"/></label>
         </td>
         <td valign="top" class="value">
           <input size="40" type="text" id="ctfURL" name="ctfURL" 
@@ -73,7 +73,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfUsername"><g:message code="setupTeamForge.page.ctfInfo.ctfUsername.label"/>:</label>
+          <label for="ctfUsername"><g:message code="setupTeamForge.page.ctfInfo.ctfUsername.label"/></label>
         </td>
         <td class="value ${hasErrors(bean:con,field:'ctfUsername','errors')}">
           <input size="20" type="text" id="ctfUsername" name="ctfUsername" 
@@ -95,7 +95,7 @@
       </tr> 
       <tr>
         <td class="ItemDetailName">
-          <label for="ctfPassword"><g:message code="setupTeamForge.page.ctfInfo.ctfPassword.label"/>:</label>
+          <label for="ctfPassword"><g:message code="setupTeamForge.page.ctfInfo.ctfPassword.label"/></label>
         </td>
         <td class="value ${hasErrors(bean:con,field:'ctfPassword','errors')}">
           <input size="20" type="password" id="ctfPassword" name="ctfPassword" 

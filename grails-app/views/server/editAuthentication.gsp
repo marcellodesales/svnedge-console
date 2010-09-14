@@ -101,7 +101,7 @@
     <div class="message">${result}</div>
     <g:if test="${!isConfigurable}">
     <div class="instructionText">
-    <p><g:message code="server.page.edit.missingDirectives" />:
+    <p><g:message code="server.page.edit.missingDirectives" />
     <blockquote>
     <code>
       Include "${csvnConf}/csvn_main_httpd.conf"<br/>
@@ -129,7 +129,7 @@
       <table class="ItemDetailContainer">
       <tr>
         <td class="ItemDetailName">
-          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label" />:</label>
+          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label" /></label>
         </td>
         <td valign="top" colspan="2"
             class="ItemDetailValue ${hasErrors(bean:server,field:'allowAnonymousReadAccess','errors')}">
@@ -149,7 +149,7 @@
    </g:hasErrors>
       <tr>
         <td class="ItemDetailName">
-          <label><g:message code="server.authenticationMethods.label" />:</label>
+          <label><g:message code="server.authenticationMethods.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'fileLoginEnabled','errors')}">
           <g:checkBox name="fileLoginEnabled" value="${server.fileLoginEnabled}"/>
@@ -177,7 +177,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerHost.label" />:</label>
+          <label for="name"><g:message code="server.ldapServerHost.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerHost','errors')}">
           <input size="30" type="text" id="ldapServerHost" name="ldapServerHost" value="${fieldValue(bean:server,field:'ldapServerHost')}"/>
@@ -190,7 +190,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerPort.label" />:</label>
+          <label for="name"><g:message code="server.ldapServerPort.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerPort','errors')}">
           <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" value="${fieldValue(bean:server,field:'ldapServerPort')}"/>
@@ -204,7 +204,7 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBasedn.label" />:</label>
+          <label for="name"><g:message code="server.ldapAuthBasedn.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapAuthBasedn','errors')}">
           <input size="30" type="text" id="ldapAuthBasedn" name="ldapAuthBasedn" value="${fieldValue(bean:server,field:'ldapAuthBasedn')}"/>
@@ -212,40 +212,40 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBinddn.label" />:</label>
+          <label for="name"><g:message code="server.ldapAuthBinddn.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapAuthBinddn','errors')}">
           <input size="30" type="text" id="ldapAuthBinddn" name="ldapAuthBinddn" value="${fieldValue(bean:server,field:'ldapAuthBinddn')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><strong><g:message code="general.warning" /></strong>: <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
+          <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBindPassword.label" />:</label>
+          <label for="name"><g:message code="server.ldapAuthBindPassword.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapAuthBindPassword','errors')}">
           <input size="30" type="password" id="ldapAuthBindPassword" name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><strong><g:message code="general.warning" /></strong>: <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" />.</i>
+          <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapLoginAttribute.label" />:</label>
+          <label for="name"><g:message code="server.ldapLoginAttribute.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapLoginAttribute','errors')}">
           <input size="30" type="text" id="ldapLoginAttribute" name="ldapLoginAttribute" value="${fieldValue(bean:server,field:'ldapLoginAttribute')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><g:message code="server.ldapLoginAttribute.label.tip" />.</i>
+          <i><g:message code="server.ldapLoginAttribute.label.tip" /></i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapSearchScope.label" />:</label>
+          <label for="name"><g:message code="server.ldapSearchScope.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:select from="${['sub', 'one']}" value="${fieldValue(bean:server,field:'ldapSearchScope')}" name="ldapSearchScope"></g:select>
@@ -253,18 +253,18 @@
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapFilter.label" />:</label>
+          <label for="name"><g:message code="server.ldapFilter.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapFilter','errors')}">
           <input size="30" maxlength=8000 type="text" id="ldapFilter" name="ldapFilter" value="${fieldValue(bean:server,field:'ldapFilter')}"/>
         </td>
         <td class="ItemDetailValue">
-          <i><g:message code="server.ldapFilter.label.tip" />.</i>
+          <i><g:message code="server.ldapFilter.label.tip" /></i>
         </td>
       </tr>
       <tr>
         <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerCertVerificationNeeded.label" />:</label>
+          <label for="name"><g:message code="server.ldapServerCertVerificationNeeded.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerCertVerificationNeeded','errors')}">
           <g:checkBox name="ldapServerCertVerificationNeeded" value="${server.ldapServerCertVerificationNeeded}"/>

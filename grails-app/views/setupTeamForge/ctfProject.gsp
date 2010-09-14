@@ -35,17 +35,17 @@
           </g:if>
 
           <p>
-            <g:message code="setupTeamForge.page.ctfProject.p1" />.
+            <g:message code="setupTeamForge.page.ctfProject.p1" />
           </p>
 
           <p>
-            <g:message code="setupTeamForge.page.ctfProject.p2" />.
+            <g:message code="setupTeamForge.page.ctfProject.p2" />
           </p>
 
       <table class="ItemDetailTable">
         <tr>
              <td class="ItemDetailName">
-               <label for="ctfProject"><g:message code="setupTeamForge.page.ctfProject.name.label" />:</label>
+               <label for="ctfProject"><g:message code="setupTeamForge.page.ctfProject.name.label" /></label>
              </td>
              <td class="value ${hasErrors(bean:con,field:'ctfProject','errors')}">
              <g:hiddenField name="projectType" id="projectTypeSingle" value="single"/>
@@ -67,25 +67,25 @@
         <g:if test="${invalidRepoNames.containsUpperCaseRepos}">
         <tr>
              <td class="ItemDetailName">
-               <label for="lowercaseRepos"><g:message code="setupTeamForge.page.ctfProject.name.toLowerCase" />:</label>
+               <label for="lowercaseRepos"><g:message code="setupTeamForge.page.ctfProject.name.toLowerCase" /></label>
              </td>
              <td class="value">
                <g:checkBox id="lowercaseRepos" name="lowercaseRepos"
                    value="${con.lowercaseRepos}"/>
              </td>
-             <td class="ItemDetailValue"><em><g:message code="setupTeamForge.page.ctfProject.name.toLowerCase.tip" />.</em></td>
+             <td class="ItemDetailValue"><em><g:message code="setupTeamForge.page.ctfProject.name.toLowerCase.tip" /></em></td>
         </tr>
         </g:if>
         <g:if test="${invalidRepoNames.containsReposWithInvalidFirstChar}">
         <tr>
              <td class="ItemDetailName">
-               <label for="repoPrefix"><g:message code="setupTeamForge.page.ctfProject.repoName.prefix.label" />:</label>
+               <label for="repoPrefix"><g:message code="setupTeamForge.page.ctfProject.repoName.prefix.label" /></label>
              </td>
              <td class="value ${hasErrors(bean:con,field:'repoPrefix','errors')}">
                <input size="10" type="text" id="repoPrefix" name="repoPrefix" 
                   value="${fieldValue(bean:con, field:'repoPrefix')}"/>
              </td>
-             <td class="ItemDetailValue"><em><g:message code="setupTeamForge.page.ctfProject.repoName.prefix.label.tip" />.</em></td>
+             <td class="ItemDetailValue"><em><g:message code="setupTeamForge.page.ctfProject.repoName.prefix.label.tip" /></em></td>
         </tr>
         <tr>
          <td></td>

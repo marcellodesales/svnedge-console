@@ -20,7 +20,7 @@
         <g:form action="save" method="post" >
         <tr class="prop">
             <td valign="top" class="name">
-                <label for="name"><g:message code="repository.page.create.name" />:</label>
+                <label for="name"><g:message code="repository.page.create.name" /></label>
             </td>
             <td width="100%" valign="top" class="value errors">
                 <input type="text" id="name" name="name" value="${fieldValue(bean:repo,field:'name')}"/>
@@ -32,7 +32,7 @@
             </td>
         </tr> 
         <tr class="prop">
-            <td valign="top" class="name" style="white-space: nowrap;"><label for="useTemplate"><g:message code="repository.page.create.useTemplate" />:</label></td>
+            <td valign="top" class="name" style="white-space: nowrap;"><label for="useTemplate"><g:message code="repository.page.create.useTemplate" /></label></td>
             <td valign="top" class="value ${hasErrors(bean:repo,field:'useTemplate','errors')}">
                 <g:checkBox name="isTemplate" value="true" ></g:checkBox><g:message code="repository.page.create.defaultDirs" />
             </td>

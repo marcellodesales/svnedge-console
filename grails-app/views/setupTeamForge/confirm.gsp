@@ -28,18 +28,18 @@
           <g:render template="errorList"/>
         </g:if>
         <g:else>
-          <p><strong><g:message code="setupTeamForge.page.confirm.ready" /></strong> <g:message code="setupTeamForge.page.confirm.ready.tip" />.</p>
+          <p><strong><g:message code="setupTeamForge.page.confirm.ready" /></strong> <g:message code="setupTeamForge.page.confirm.ready.tip" /></p>
         </g:else>
 
       <table class="ItemDetailTable">
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.server" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.server" />
         </td>
         <td colspan="2" class="ItemDetailValue">${wizardBean.ctfURL}
         </td>
       </tr>
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.tfVersion" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.tfVersion" />
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:if test="${wizardBean.appVersion == wizardBean.apiVersion}">
@@ -51,11 +51,11 @@
         </td>
       </tr>
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.project" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.project" />
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:if test="${wizardBean.isProjectPerRepo}">
-             <g:message code="setupTeamForge.page.confirm.sameReposImported" />.
+             <g:message code="setupTeamForge.page.confirm.sameReposImported" />
           </g:if>
           <g:else>
           ${wizardBean.ctfProject}
@@ -64,41 +64,41 @@
       </tr>
     <g:if test="${wizardBean.lowercaseRepos || wizardBean.repoPrefix}">
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.repositories" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.repositories" />
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:if test="${wizardBean.lowercaseRepos}">
-            <div><g:message code="setupTeamForge.page.confirm.repositoriesConverted" />.</div>
+            <div><g:message code="setupTeamForge.page.confirm.repositoriesConverted" /></div>
           </g:if>
           <g:if test="${wizardBean.repoPrefix}">
-            <div><g:message code="setupTeamForge.page.confirm.repositoriesPrefixed" /> '${wizardBean.repoPrefix}'.
+            <div><g:message code="setupTeamForge.page.confirm.repositoriesPrefixed" args="${wizardBean.repoPrefix}" />
             </div>
           </g:if>
         </td>
       </tr>
     </g:if>
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.users" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.users" />
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:if test="${wizardBean.importUsers}">
-             <g:message code="setupTeamForge.page.confirm.users.imported" />.
+             <g:message code="setupTeamForge.page.confirm.users.imported" />
           </g:if>
           <g:else>
-             <g:message code="setupTeamForge.page.confirm.users.noUsersimported" />.
+             <g:message code="setupTeamForge.page.confirm.users.noUsersimported" />
           </g:else>
         </td>
       </tr>
     <g:if test="${wizardBean.importUsers}">
       <tr>
-        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.membership" />:
+        <td class="ItemDetailName"><g:message code="setupTeamForge.page.confirm.membership" />
         </td>
         <td colspan="2" class="ItemDetailValue">
           <g:if test="${wizardBean.assignMembership}">
-             <g:message code="setupTeamForge.page.confirm.membership.giveMembership" />.
+             <g:message code="setupTeamForge.page.confirm.membership.giveMembership" />
           </g:if>
           <g:else>
-             <g:message code="setupTeamForge.page.confirm.membership.giveLater" />.
+             <g:message code="setupTeamForge.page.confirm.membership.giveLater" />
           </g:else>
         </td>
       </tr>

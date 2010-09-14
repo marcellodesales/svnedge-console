@@ -8,7 +8,7 @@
 
     <iframe id="ocnContent" name="ocnContent" frameborder="0"
             src="http://tab.open.collab.net/nonav/csvn.html" width="100%" height="780">
-        <p><g:message code="ocn.page.proxy.iframe.error" />.</p>
+        <p><g:message code="ocn.page.proxy.iframe.error" /></p>
     </iframe>
   </body>
 </html>

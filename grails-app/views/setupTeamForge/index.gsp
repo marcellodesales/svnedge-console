@@ -39,16 +39,16 @@
     <br/>
     <p>
     <a href="http://www.open.collab.net/products/ctf/">CollabNet TeamForge</a> 
-       <g:message code="setupTeamForge.page.index.p1" />.
+       <g:message code="setupTeamForge.page.index.p1" />
     </p>
-    <p>CollabNet Subversion Edge <g:message code="setupTeamForge.page.index.p2" />.
+    <p>CollabNet Subversion Edge <g:message code="setupTeamForge.page.index.p2" />
     </p>
     <p>
       <g:if test="${isFreshInstall}">
-        <g:message code="setupTeamForge.page.index.p3.freshConversion" />.
+        <g:message code="setupTeamForge.page.index.p3.freshConversion" />
       </g:if>
       <g:else>
-        <g:message code="setupTeamForge.page.index.p3.complete" />.
+        <g:message code="setupTeamForge.page.index.p3.complete" />
       </g:else>
     </p>
    </td>
