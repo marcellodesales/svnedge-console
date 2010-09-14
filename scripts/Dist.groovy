@@ -194,8 +194,6 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         Ant.move(file: "${distDir}/lib/integration-scripts.zip",
                  tofile: "${updatesLibDir}/integration-scripts.zip")
 
-        Ant.copy(file: "${basedir}/ext/ocn-files/readme-windows.txt",
-                tofile: "${distDir}/README.TXT")
     } else {
         //move the console war file to the library dir
         Ant.copy(todir: distDir) {
