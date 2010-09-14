@@ -17,9 +17,9 @@
                 <td colspan="5"><g:message code="user.page.list.header"/></td>
               </tr>
                <tr class="ItemListHeader">
-                    <g:sortableColumn property="username" title="${message(code: 'user.username.label')}" />
-                    <g:sortableColumn property="realUserName" title="${message(code: 'user.realUserName.label')}" />
-                    <g:sortableColumn property="description" title="${message(code: 'user.description.label')}" />
+                    <g:sortableColumn property="username" title="${message(code: 'user.page.list.column.username')}" />
+                    <g:sortableColumn property="realUserName" title="${message(code: 'user.page.list.column.realUserName')}" />
+                    <g:sortableColumn property="description" title="${message(code: 'user.page.list.column.description')}" />
               </tr>
             </thead>
             <tbody>
