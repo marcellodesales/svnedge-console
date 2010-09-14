@@ -68,6 +68,7 @@ eventCleanEnd = {
     }
 
     Ant.echo(message: "Deleting the CSVN development artifacts on ${osName}.")
+    Ant.delete(file: "${basedir}/stacktrace.log")
 
     Ant.echo(message: "Deleting from all the components")
 
