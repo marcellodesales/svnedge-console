@@ -59,26 +59,33 @@ class StatisticsController {
         [index: 1, title: message(code: "statistics.graph.timespan.lastDay"),
             seconds: 60*60*24, pattern: "HH:mm"],
         [index: 2, title: message(code: "statistics.graph.timespan.lastWeek"),
-            seconds: 60*60*24*7, pattern: "MM/dd HH:mm"],
+            seconds: 60*60*24*7, 
+            pattern: message(code: "default.dateTime.format.dayMonth")],
         [index: 3, title: message(code: "statistics.graph.timespan.lastMonth"),
-            seconds: 60*60*24*30, pattern: "MM/dd"]]
+            seconds: 60*60*24*30, 
+            pattern: message(code: "default.dateTime.format.dayMonth")]]
     }
 
     def graphList = [
         [statgroup: "UserCache", 
-            graphName: "User Cache Pie Chart", 
+            graphName: message(code: 
+                "statistics.graph.leftNav.usersCache.chart"), 
             graphData: "USER_CACHE_PIE_CHART"],
         [statgroup: "UserCache", 
-            graphName: "User Cache Line Chart", 
+            graphName: message(code: 
+                "statistics.graph.leftNav.usersCache.chart"), 
             graphData: "USER_CACHE_LINE_CHART"],
         [statgroup: "NetworkThroughput", 
-            graphName: "Throughput Rates Chart",
+            graphName: message(code: 
+                "statistics.graph.leftNav.throughput.chart"),
             graphData: "BYTE_RATE_CHART"],
         [statgroup: "Latency", 
-            graphName: "Latency for Master",
+            graphName: message(code: 
+                "statistics.graph.leftNav.master.latency.chart"),
             graphData: "LATENCY_CHART"],
         [statgroup: "FileSystem", 
-            graphName: "Disk space chart",
+            graphName: message(code: 
+                "statistics.graph.leftNav.diskSpace.chart"),
             graphData: "DISKSPACE_CHART"]
         /*[statgroup: "SvnRepoHits",
             graphName: "SVN hits by Repository",
@@ -105,9 +112,19 @@ class StatisticsController {
                 if (!initialGraph && graphs.size() > 0) {
                     initialGraph = graphs[0].graphData
                 }
-                [statgroup: statgroup.getTitle(), graphs: graphs]
+                def title = ""
+                def n = statgroup.getName()
+                if (n.equals(networkStatisticsService.STATGROUP_NAME)) {
+                    title = message(code: "statistics.graph.leftNav.throughput")
+                } else 
+                if (n.equals(fileSystemStatisticsService.STATGROUP_NAME)) {
+                    title = message(code: "statistics.graph.leftNav.diskSpace")
+                }
+                [statgroup: title, graphs: graphs]
             }
-            [category: category.getName(), statgroups: statgroups]
+            [category: message(code: 
+                "statistics.graph.leftNav.category." + 
+                category.getName().toLowerCase()), statgroups: statgroups]
         }
 
         def timespanSelect = this.getTimespans().inject([:]) { map, ts ->
