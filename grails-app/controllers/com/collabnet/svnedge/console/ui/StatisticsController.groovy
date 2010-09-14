@@ -107,7 +107,7 @@ class StatisticsController {
                 }
             }
             statgroups = statgroups.collect { statgroup ->
-                def graphs = graphList.findAll{ gl -> 
+                def graphs = graphList().findAll{ gl -> 
                     gl.statgroup == statgroup.name
                 }
                 if (!initialGraph && graphs.size() > 0) {
@@ -135,7 +135,7 @@ class StatisticsController {
         return [timespanSelect: timespanSelect,
                 statData: statData,
                 initialGraph: initialGraph ? 
-                              initialGraph : graphList[0].graphData]
+                              initialGraph : graphList()[0].graphData]
     }
 
     def getTimespan = {
