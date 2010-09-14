@@ -94,7 +94,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
             click login
         }
 
-        assertContentContains(getMessage("layout.page.loggedAs") + ":&nbsp;")
+        assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
     }
 
     /**
