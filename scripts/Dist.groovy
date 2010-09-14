@@ -193,7 +193,9 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
 
         Ant.move(file: "${distDir}/lib/integration-scripts.zip",
                  tofile: "${updatesLibDir}/integration-scripts.zip")
-    
+
+        Ant.copy(file: "${basedir}/ext/ocn-files/readme-windows.txt",
+                tofile: "${distDir}/README.TXT")
     } else {
         //move the console war file to the library dir
         Ant.copy(todir: distDir) {
@@ -211,6 +213,9 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
 
         Ant.chmod(file: distDir + "/bin/collabnetsvn-config", perm: "+x")
         Ant.chmod(file: distDir + "/bin/svndbadmin", perm: "+x")
+
+        Ant.copy(file: "${basedir}/ext/ocn-files/readme-linux.txt",
+            tofile: "${distDir}/README")
     }
     // Make logs directory.  App needs it to start
     Ant.mkdir(dir: "${distDir}/temp-data/logs")

@@ -15,6 +15,8 @@ pkg = {
     },
 
     "files" : {
+        "README" : {"mode" : "0755", "os" : "unix"},
+        "README.TXT" : {"mode" : "0755", "os" : "windows"},
         "temp-data/conf/csvn-wrapper.conf" : {"mode" : "0755"},
         "bin/csvn" : {"mode" : "0755", "os" : "unix"},
         "bin/csvn-httpd" : {"mode" : "0755", "os" : "unix"},
