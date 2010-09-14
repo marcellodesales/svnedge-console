@@ -38,8 +38,7 @@ class NetworkStatisticsService extends AbstractStatisticsService {
     protected static String RECEIVED_STAT_NAME = "BytesIn"
     protected static String SENT_STAT_NAME = "BytesOut"
 
-    private String CATEGORY_NAME = "FIXME!  network stat service category" 
-        //getMessage("statistics.graph.leftNav.category.network")
+    public static String CATEGORY_NAME = "Network"
     public static String STATGROUP_NAME = "NetworkThroughput"
     public static String TRIGGER_NAME = "networkTrigger"
     public static String BPS_UNIT_NAME = "Bytes per Second"
