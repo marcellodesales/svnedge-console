@@ -19,9 +19,9 @@
         <td colspan="3"><g:message code="role.page.list.header"/></td>
       </tr>
       <tr class="ItemListHeader">
-        <g:sortableColumn property="authority" title="${message(code: 'role.authority.label')}"/>
+        <g:sortableColumn property="authority" title="${message(code: 'role.page.list.column.authority')}"/>
 
-        <g:sortableColumn property="description" title="${message(code: 'role.description.label')}"/>
+        <g:sortableColumn property="description" title="${message(code: 'role.page.list.column.description')}"/>
       </tr>
       <tbody>
       <g:each in="${roleList}" status="i" var="roleInstance">
