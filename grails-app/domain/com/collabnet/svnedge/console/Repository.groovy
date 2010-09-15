@@ -24,7 +24,7 @@ import com.collabnet.svnedge.statistics.StatValue
  */
 class Repository {
     
-    static final def RECOMMENDED_NAME_PATTERN = ~/[a-z][_a-z0-9]*/
+    static final def RECOMMENDED_NAME_PATTERN = ~/[a-z][_a-z0-9\-]*/
     static final int NAME_MAX_LENGTH = 32
 
     /** Name */
