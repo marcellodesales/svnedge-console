@@ -12,6 +12,7 @@
     <g:set var="installFinished" value="${message(code:'packagesUpdate.page.installUpdatesStatus.finished')}" />
     <g:set var="serverRestarting" value="${message(code:'packagesUpdate.page.installUpdatesStatus.serverIsRestarting')}" />
     <g:set var="serverRestartingTip" value="${message(code:'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip')}" />
+    <g:set var="serverRestartingTip2" value="${message(code:'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip2')}" />
 
     <script type="text/javascript">
         /**
@@ -167,11 +168,11 @@
          */
         function startBackgroundListener() {
             dojo.byId('roller').style.display = '';
-            dojo.byId('progressStatus_phase').innerHTML = "${serverRestarting}...";
+            dojo.byId('progressStatus_phase').innerHTML = "${serverRestarting}&#133;";
             dojo.byId('progressStatus_statusMessage').value = '';
             dojo.byId('progressStatus_statusMessage').style.display = 'none';
             dojo.byId('progressStatus_overallPercentage').style.display = 'none';
-            dojo.byId('restartServer').innerHTML = "${serverRestartingTip}.";
+            dojo.byId('restartServer').innerHTML = "${serverRestartingTip} <BR> ${serverRestartingTip2}";
             dojo.byId('restartButton').disabled = true;
             requestServerRestart();
             if (!timerIsOn) {
@@ -214,7 +215,7 @@
           <td valign="middle">
             <img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle">
             <font size="3"><strong><span id="progressStatus_phase">
-               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" /> &#133;</span></strong>
+               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />&#133;</span></strong>
             </font>
           </td>
         </tr>
