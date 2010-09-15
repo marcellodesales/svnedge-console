@@ -71,7 +71,7 @@
             <div><g:message code="setupTeamForge.page.confirm.repositoriesConverted" /></div>
           </g:if>
           <g:if test="${wizardBean.repoPrefix}">
-            <div><g:message code="setupTeamForge.page.confirm.repositoriesPrefixed" args="${wizardBean.repoPrefix}" />
+            <div><g:message code="setupTeamForge.page.confirm.repositoriesPrefixed" args="${[wizardBean.repoPrefix]}" />
             </div>
           </g:if>
         </td>

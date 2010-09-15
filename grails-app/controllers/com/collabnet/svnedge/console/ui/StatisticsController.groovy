@@ -412,7 +412,8 @@ class StatisticsController {
         else {
             lines = [[type: "repoUsed", color: colors[0],
                     title: message(code: "statistics.graph.repo.size")]]
-            chartTitle = message(code: "statistics.graph.repo.over") + ts.title
+            chartTitle = message(code: "statistics.graph.repo.over") + " " + 
+                ts.title
         }
         
         def chartValues = (repo) ?
