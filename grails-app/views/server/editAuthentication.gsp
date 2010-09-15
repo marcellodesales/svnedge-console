@@ -8,19 +8,16 @@
 
     <g:javascript>
 
-  var pristineFieldValues = "${server.allowAnonymousReadAccess}"
-    pristineFieldValues = pristineFieldValues + ":${server.fileLoginEnabled}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapEnabled}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapServerHost}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapSecurityLevel}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapServerPort}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapAuthBasedn}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapAuthBinddn}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapAuthBindPassword}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapLoginAttribute}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapSearchScope}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapFilter}"
-    pristineFieldValues = pristineFieldValues + ":${server.ldapServerCertVerificationNeeded}"
+        var fieldsChanged = false;
+        Event.observe(window, 'load', function() {
+            // track field changes for "unsaved changes" alert
+            var allInputs = Form.getElements("serverForm")
+            allInputs.each(function(item){
+                Event.observe(item, 'change', function(event) {
+                    fieldsChanged = true;
+                });
+            })
+        });
 
         // updates a select for the given values.  Assumes that the options
         // should have both text and value set the same.
@@ -61,20 +58,8 @@
   
 
     function warnForUnSavedData() {
-        var userFieldValues = document.forms[0].allowAnonymousReadAccess.checked
-        userFieldValues = userFieldValues + ":" + document.forms[0].fileLoginEnabled.checked
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapEnabled.checked
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapServerHost.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapSecurityLevel.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapServerPort.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapAuthBasedn.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapAuthBinddn.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapAuthBindPassword.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapLoginAttribute.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapSearchScope.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapFilter.value
-        userFieldValues = userFieldValues + ":" + document.forms[0].ldapServerCertVerificationNeeded.checked
-        if (userFieldValues == pristineFieldValues) {
+
+        if (!fieldsChanged) {
             document.location.href = "edit";
             return true
         }
@@ -118,7 +103,7 @@
     <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', active: true, label: message(code:'server.page.edit.tabs.authentication')]}" />
   </g:if>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-  <g:form method="post">
+  <g:form method="post" name="serverForm">
       <g:hiddenField name="view" value="editAuthentication"/>
 
       <input type="hidden" name="id" value="${server.id}" />

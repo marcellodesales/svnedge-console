@@ -16,20 +16,17 @@
 	    </g:each>
 	    ]
     </g:each>
-    var pristineFieldValues = "${fieldValue(bean:server,field:'hostname')}"
-    pristineFieldValues = pristineFieldValues + ":${server.port}"
-    // backslashes in windows paths are converted to forward slash for purposes of this
-    // field-dirtiness check
-    pristineFieldValues = pristineFieldValues
-            + ":${fieldValue(bean:server,field:'repoParentDir').toString().replaceAll("\\\\","/")}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'ipAddress')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'netInterface')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'adminName')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'adminEmail')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'adminAltContact')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'useSsl')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'useSslConsole')}"
-    pristineFieldValues = pristineFieldValues + ":${fieldValue(bean:server,field:'defaultStart')}"
+
+        var fieldsChanged = false;
+        Event.observe(window, 'load', function() {
+            // track field changes for "unsaved changes" alert
+            var allInputs = Form.getElements("serverForm")
+            allInputs.each(function(item){
+                Event.observe(item, 'change', function(event) {
+                    fieldsChanged = true;
+                });
+            })
+        });
 
         function updateInterface(addrSelect) {
             var val = addrSelect.value
@@ -84,21 +81,8 @@
         }
 
         function warnForUnSavedData() {
-            var userFieldValues = document.forms[0].hostname.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].port.value
-            // backslashes in windows paths are converted to forward slash for purposes of this
-            // field-dirtiness check
-            userFieldValues = userFieldValues + ":" + document.forms[0].repoParentDir.value.replace(/\\/g, "/")
-            userFieldValues = userFieldValues + ":" + document.forms[0].ipAddress.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].netInterface.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].adminName.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].adminEmail.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].adminAltContact.value
-            userFieldValues = userFieldValues + ":" + document.forms[0].useSsl.checked
-            userFieldValues = userFieldValues + ":" + document.forms[0].useSslConsole.checked
-            userFieldValues = userFieldValues + ":" + document.forms[0].defaultStart.checked
-
-            if (userFieldValues == pristineFieldValues) {
+          
+            if (!fieldsChanged) {
                 document.location.href = "editAuthentication";
                 return true
             }
@@ -187,7 +171,7 @@ users access to ports less than 1024.</p>
     <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', events:events, label: message(code:'server.page.edit.tabs.authentication')]}" />
   </g:if>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-  <g:form method="post" onSubmit="javascript:check();">
+  <g:form method="post" onSubmit="javascript:check();" name="serverForm">
       <g:hiddenField name="view" value="edit"/>
   
       <input type="hidden" name="id" value="${server.id}" />
