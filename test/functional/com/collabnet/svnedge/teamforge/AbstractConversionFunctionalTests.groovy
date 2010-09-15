@@ -21,6 +21,7 @@ import groovy.lang.MetaClass;
 
 import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.Repository;
+import com.collabnet.svnedge.console.Server;
 import com.collabnet.svnedge.console.security.User;
 import com.collabnet.svnedge.statistics.StatValue;
 
@@ -67,6 +68,7 @@ abstract class AbstractConversionFunctionalTests extends
     @Override
     protected void tearDown() {
         this.convertToStandaloneMode()
+        this.cleanRepositories()
         super.tearDown();
     }
 
@@ -78,7 +80,12 @@ abstract class AbstractConversionFunctionalTests extends
         StatValue.list().each{
             it.delete(flush:true)
         }
+        def repoParentDir = Server.getServer().repoParentDir
         Repository.list().each {
+            File f = new File(repoParentDir, it.name)
+            if (f.exists()) {
+                f.deleteDir()
+            }
             it.delete(flush:true)
         }
     }
