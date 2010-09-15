@@ -48,8 +48,8 @@ class RepositoryTests extends GrailsUnitTestCase {
         repo = new Repository(name: "Repo_1")
         assertFalse "the Repository domain class should not ALLOW 'Repo_1' name", repo.validateName()
 
-        repo = new Repository(name: "repo-1")
-        assertFalse "the Repository domain class should not ALLOW 'repo-1' name", repo.validateName()
+        repo = new Repository(name: "repo.1")
+        assertFalse "the Repository domain class should not ALLOW 'repo.1' name", repo.validateName()
 
         repo = new Repository()
         repo.validate()
