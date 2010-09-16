@@ -26,7 +26,7 @@
       <div class="ImageListParent">
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
           <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit class="stop" value="${message(code:'status.page.subversion.stop')}"/></span>
+            <span class="button"><g:actionSubmit class="stop" value="${message(code:'status.page.subversion.stop')}" action="stop"/></span>
           </div>
         </g:ifAnyGranted>
         <strong><g:message code="status.page.subversion" /> </strong>
@@ -49,7 +49,7 @@
       <div class="ImageListParent">
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
           <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit value="${message(code:'status.page.subversion.start')}"/></span>
+            <span class="button"><g:actionSubmit value="${message(code:'status.page.subversion.start')}" action="start"/></span>
           </div>
         </g:ifAnyGranted>
         <strong><g:message code="status.page.subversion" /> </strong>
