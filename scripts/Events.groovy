@@ -35,39 +35,8 @@ eventConfigureJetty = { server ->
 }
 
 eventCleanEnd = {
-    Ant.condition(property:"windowsPrepare") {
-        and() {
-            os(family:"windows")
-        }
-    }
-    Ant.condition(property:"linuxPrepare") {
-        and() {
-            os(family:"unix")
-        }
-    }
-    Ant.condition(property:"macPrepare") {
-        and() {
-            os(family:"mac")
-        }
-    }
-    Ant.condition(property:"x64") {
-        or() {
-            os(arch: "x86_64")
-            os(arch: "amd64")
-        }
-    }
 
-    if (Ant.project.properties."macPrepare") {
-        osName = "mac";
-    }
-    if (Ant.project.properties."windowsPrepare") {
-        osName = "windows"
-    }
-    if (Ant.project.properties."linuxPrepare") {
-        osName = "linux"
-    }
-
-    Ant.echo(message: "Deleting the CSVN development artifacts on ${osName}.")
+    Ant.echo(message: "Deleting the CSVN development artifacts.")
     Ant.delete(file: "${basedir}/stacktrace.log")
 
     Ant.echo(message: "Deleting from all the components")
