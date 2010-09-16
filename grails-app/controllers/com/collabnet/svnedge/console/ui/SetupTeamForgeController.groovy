@@ -85,14 +85,42 @@ class SetupTeamForgeController {
 
     def confirmCredentials = { CtfConversionBean con ->
         session[WIZARD_BEAN_KEY] = con
-        if(!con.hasErrors() && setupTeamForgeService.confirmConnection(con)) {
-            con.clearCredentials()
-            redirect(action:'ctfProject')
-        } else {
+        if(con.hasErrors()) {
             forward(action: 'ctfInfo')
         }
+        try {
+            setupTeamForgeService.confirmConnection(con)
+            con.clearCredentials()
+            redirect(action:'ctfProject')
+            return
+
+        } catch (Exception authExcp) {
+
+            def msg = authExcp.getMessage()
+           if (authExcp instanceof MalformedURLException) {
+                msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
+                    args: [con.ctfURL])
+
+           } else if (authExcp instanceof UnknownHostException) {
+                msg = message(code: 'ctfRemoteClientService.host.unknown.error',
+                    args: [con.ctfURL])
+
+           } else if (authExcp instanceof NoRouteToHostException) {
+                msg = message(code: 
+                    'ctfRemoteClientService.host.unreachable.error',
+                    args: [con.ctfURL])
+
+           } else if (authExcp instanceof CtfAuthenticationException) {
+               msg = message(code: 'ctfRemoteClientService.auth.error',
+                   args: [con.ctfURL])
+           }
+           log.debug("Can't confirm TeamForge credentials: " + authExcp)
+           con.errorMessage = msg
+           forward(action: 'ctfInfo')
+           return
+        }
     }
-    
+
     /**
      * Screen to supply project name or possibly multiple projects
      */

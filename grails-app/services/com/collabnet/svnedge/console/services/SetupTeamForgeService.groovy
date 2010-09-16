@@ -322,34 +322,20 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * for the conversionData object.  If unable to connect, conversionData.errorMessage may contain
      * useful information
      */
-    boolean confirmConnection(conversionData) {
-        boolean success = false
-        try {
-            def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
-            conversionData.userSessionId = ctfRemoteClientService.login(
-                conversionData.ctfURL, conversionData.ctfUsername,
-                conversionData.ctfPassword)
-            conversionData.apiVersion = ctfSoap.getApiVersion()
-            conversionData.appVersion = ctfSoap.getVersion(getUserSessionId(
-                conversionData))
-            // Calling this here because we may not keep the user's credentials
-            // after this point and we'll need the web session id to revert
-            getWebSessionId(conversionData)
-            success = true
-        } catch (Exception e) {
-            while (e.cause != null) {
-                e = e.cause
-            }
+    boolean confirmConnection(conversionData) throws CtfAuthenticationException,
+        RemoteMasterException, UnknownHostException, NoRouteToHostException, 
+            MalformedURLException {
 
-            if (e.message) {
-                conversionData.errorMessage = e.message
-            } else {
-                def msg = 
-                 getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error")
-                conversionData.errorMessage = msg + ": " + e.getClass().name
-            }
-        }
-        return success
+        def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
+        conversionData.userSessionId = ctfRemoteClientService.login(
+            conversionData.ctfURL, conversionData.ctfUsername,
+            conversionData.ctfPassword)
+        conversionData.apiVersion = ctfSoap.getApiVersion()
+        conversionData.appVersion = ctfSoap.getVersion(getUserSessionId(
+            conversionData))
+        // Calling this here because we may not keep the user's credentials
+        // after this point and we'll need the web session id to revert
+        getWebSessionId(conversionData)
     }
     
     private String encodeParameters(paramMap) {
