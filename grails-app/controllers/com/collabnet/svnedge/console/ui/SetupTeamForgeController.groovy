@@ -103,7 +103,7 @@ class SetupTeamForgeController {
 
            } else if (authExcp instanceof UnknownHostException) {
                 msg = message(code: 'ctfRemoteClientService.host.unknown.error',
-                    args: [con.ctfURL])
+                    args: [new URL(con.ctfURL).host])
 
            } else if (authExcp instanceof NoRouteToHostException) {
                 msg = message(code: 
