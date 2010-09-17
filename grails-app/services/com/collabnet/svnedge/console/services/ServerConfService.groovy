@@ -218,11 +218,11 @@ class ServerConfService {
                                pythonBindingDir.absolutePath)
 
         File modpyLibDir = new File(libDir, "mod_python")
-        String[] result1 = commandLineService
+        String[] result5 = commandLineService
             .executeWithOutput("rm", "-rf", modpyLibDir.absolutePath)
         File actualModpyLibDir = new File(libDir,
             "mod_python${getPythonVersion()}")
-        String[] result2 = commandLineService
+        String[] result6 = commandLineService
             .executeWithOutput("ln", "-s", actualModpyLibDir.absolutePath,
                                modpyLibDir.absolutePath)
 
