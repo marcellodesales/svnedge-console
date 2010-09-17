@@ -216,6 +216,16 @@ class ServerConfService {
         String[] result2 = commandLineService
             .executeWithOutput("ln", "-s", actualPythonBindingDir.absolutePath,
                                pythonBindingDir.absolutePath)
+
+        File modpyLibDir = new File(libDir, "mod_python")
+        String[] result1 = commandLineService
+            .executeWithOutput("rm", "-rf", modpyLibDir.absolutePath)
+        File actualModpyLibDir = new File(libDir,
+            "mod_python${getPythonVersion()}")
+        String[] result2 = commandLineService
+            .executeWithOutput("ln", "-s", actualModpyLibDir.absolutePath,
+                               modpyLibDir.absolutePath)
+
         File swigPythonLibPath = new File(libDir, "libsvn_swig_py-1.so.0.0.0")
         File actualSwigPythonLibPath = new File(libDir, 
             "libsvn_swig_py-1.so.0.0.0${getPythonVersion()}")
