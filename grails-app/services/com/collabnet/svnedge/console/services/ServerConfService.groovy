@@ -181,14 +181,14 @@ class ServerConfService {
     }
     
     private def getHttpdUser() {
-        if (!httpdUser) {
+        if (!httpdUser && !isWindows()) {
             setUserAndGroup()
         }
         return httpdUser
     }
 
     private def getHttpdGroup() {
-        if (!httpdGroup) {
+        if (!httpdGroup && !isWindows()) {
             setUserAndGroup()
         }
         return httpdGroup
