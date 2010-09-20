@@ -67,10 +67,9 @@ svnedge {
             // The following paths have defaults configured with respect to 
             // appHome, but the locations may be overridden using these 
             // properties: svnPath, svnadminPath, httpdPath, httpdPidPath, 
-            // htpasswdPath, confDirPath, cgiDirPath, logDirPath
+            // htpasswdPath, confDirPath, logDirPath
             svnPath = new File(appHome, "bin/svn.exe").absolutePath
             svnadminPath = new File(appHome, "bin/svnadmin.exe").absolutePath
-            cgiDirPath = new File(appHome, "bin/cgi-bin").absolutePath
             viewvcLibPath = new File(appHome, "lib/viewvc").absolutePath
             modPythonPath = new File(appHome, "bin/mod_python").absolutePath
             viewvcTemplatesPath = new File(appHome, "www/viewvc")
@@ -185,10 +184,9 @@ environments {
                     // The following paths have defaults configured with respect to 
                     // appHome, but the locations may be overridden using these 
                     // properties: svnPath, svnadminPath, httpdPath, httpdPidPath, 
-                    // htpasswdPath, confDirPath, cgiDirPath, logDirPath
+                    // htpasswdPath, confDirPath, logDirPath
                     svnPath = new File(appHome, "bin/svn.exe").absolutePath
                     svnadminPath = new File(appHome, "bin/svnadmin.exe").absolutePath
-                    cgiDirPath = new File(appHome, "bin/cgi-bin").absolutePath
                     viewvcLibPath = new File(appHome, "lib/viewvc").absolutePath
                     modPythonPath = new File(appHome, "bin/mod_python").absolutePath
                     viewvcTemplatesPath = new File(appHome, "www/viewVC")

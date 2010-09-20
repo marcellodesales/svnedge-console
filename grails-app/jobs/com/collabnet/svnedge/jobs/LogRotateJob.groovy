@@ -19,6 +19,7 @@ package com.collabnet.svnedge.jobs
 
 import java.util.Date
 import java.util.Calendar
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Server
 import org.quartz.CronTrigger
 
@@ -52,7 +53,7 @@ class LogRotateJob {
     }
 
     def pruneLog(olderThanToday) {
-        def dataDir = lifecycleService.dataDirPath
+        def dataDir = ConfigUtil.dataDirPath()
         def dataDirObj = new File(dataDir, "logs")
         Date today = new Date()
         Date oldday = new Date(today.getTime() - olderThanToday*1440*60000)

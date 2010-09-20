@@ -37,6 +37,7 @@ import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.master.RemoteAndLocalConversationException
 import com.collabnet.svnedge.master.RemoteMasterException
 import com.collabnet.svnedge.teamforge.CtfConversionBean
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
@@ -983,7 +984,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         "integration-scripts.zip"
 
     protected unpackIntegrationScripts() {
-        def libDir = new File(lifecycleService.appHome, "lib")
+        def libDir = new File(ConfigUtil.appHome(), "lib")
         def archiveFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
         def integrationDir = new File(libDir, "integration")
         if (integrationDir.exists() && !integrationDir.deleteDir()) {
@@ -1011,7 +1012,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         if (!oldViewvcFile.exists()) {
             throw new FileNotFoundException("missing file " + oldViewvcFile)
         }
-        newViewvcFile = new File(lifecycleService.appHome, 
+        newViewvcFile = new File(ConfigUtil.appHome(), 
                                  "bin/mod_python/viewvc_ctf_handler.py")
         if (newViewvcFile.exists() && !newViewvcFile.delete()) {
             log.warn("Unable to delete existing ViewVC teamforge " + 

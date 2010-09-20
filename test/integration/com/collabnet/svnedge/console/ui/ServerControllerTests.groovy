@@ -75,8 +75,6 @@ class ServerControllerTests extends ControllerUnitTestCase {
         params.port = "987652"
         controller.update()
 
-        def config = ConfigurationHolder.config
-        //fail(String.valueOf(config.svnedge.dataDirPath) + "is test!!!!")
         File f = new File(config.svnedge.svn.dataDirPath, "conf/csvn_main_httpd.conf")
         assertTrue "${f.absolutePath} does not exist", f.exists()
         assertTrue "Port directive was not updated.", (f.text.indexOf("Listen 987652") > 0)

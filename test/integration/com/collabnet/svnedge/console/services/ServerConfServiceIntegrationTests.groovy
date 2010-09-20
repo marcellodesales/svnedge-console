@@ -21,6 +21,7 @@ import grails.test.*
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.console.ConfigUtil
 
 /**
  * this test class validates the configuration files being modified
@@ -51,7 +52,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         serverConfService.writeConfigFiles();
 
         // validate expectations
-        def confFile = new File(serverConfService.confDirPath, "viewvc.conf")
+        def confFile = new File(ConfigUtil.confDirPath(), "viewvc.conf")
         String viewVcConf = confFile?.text
 
         // verfiy file is created and all placeholder tokens are replaced

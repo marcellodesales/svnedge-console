@@ -137,8 +137,8 @@ class ReplicationBootstrapService {
         log.info("Bootstrapping svnNotificationService...")
         svnNotificationService.bootStrap(
             config.svnedge.svn.repositoriesParentPath,
-            ConfigUtil.svnPath(config), ConfigUtil.svnadminPath(config),
-            ConfigUtil.svnsyncPath(config),
+            ConfigUtil.svnPath(), ConfigUtil.svnadminPath(),
+            ConfigUtil.svnsyncPath(),
             config.svnedge.replica.svn.svnsyncRate, defaultMaster)
 
         log.info("Bootstrapping actionCommandsExecutorService...")

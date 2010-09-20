@@ -22,7 +22,8 @@ import grails.test.GrailsUnitTestCase;
 import com.collabnet.svnedge.console.CantBindPortException;
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.Server;
+import com.collabnet.svnedge.console.ConfigUtil
+import com.collabnet.svnedge.console.Server
 
 class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     def lifecycleService
@@ -55,6 +56,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
                     lifecycleService.isStarted())
         def status = lifecycleService.startServer()
         assertServerIsRunning(status)
+        Thread.sleep 1000
         status = lifecycleService.stopServer()
         assertServerIsStopped(status)
     }
@@ -62,7 +64,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     private void assertServerIsRunning(int status) {
         assertEquals "startServer exitStatus should be 0", 0, status
         assertTrue "isStarted should return true", lifecycleService.started
-        File httpdPidFile = new File(lifecycleService.httpdPidPath)
+        File httpdPidFile = ConfigUtil.httpdPidFile()
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
         assertEquals "Tried to start already started server. Should return -1",
             -1, lifecycleService.startServer()
@@ -72,7 +74,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     private void assertServerIsStopped(int status) {
         assertEquals "stopServer exitStatus should be 0", 0, status
         assertFalse "isStarted should return false", lifecycleService.isStarted()
-        File httpdPidFile = new File(lifecycleService.httpdPidPath)
+        File httpdPidFile = ConfigUtil.httpdPidFile()
         assertFalse "httpd.pid was unexpectedly found", httpdPidFile.exists()   
     }
 
@@ -99,7 +101,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
                 assertEquals "startServer exitStatus should be 1", 1, status
                 assertFalse "isStarted should return false", 
                     lifecycleService.started
-                File httpdPidFile = new File(lifecycleService.httpdPidPath)
+                File httpdPidFile = ConfigUtil.httpdPidFile()
                 assertFalse "httpd.pid was unexpectedly found", 
                     httpdPidFile.exists()   
             }
@@ -116,9 +118,9 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     void testSetSvnAuth() {
         def testusername = 'testuser'
         def confDir = createTestDir("conf")
-        def origConfDirPath = lifecycleService.confDirPath
+        def origConfDirPath = ConfigUtil.confDirPath()
         try {
-        lifecycleService.confDirPath = confDir.absolutePath
+        ConfigUtil.confDirPath = confDir.absolutePath
 
         User u = new User(username: testusername, enabled: true)
         lifecycleService.setSvnAuth(u, "mypassword")
@@ -132,7 +134,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "testuser still in auth file when removed",
             authFile.getText().indexOf(testusername) < 0
         } finally {
-            lifecycleService.confDirPath = origConfDirPath
+            ConfigUtil.confDirPath = origConfDirPath
         }
     }
 
@@ -140,9 +142,8 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
         def confDir = createTestDir("conf")
-        def origConfDirPath = lifecycleService.confDirPath
-        lifecycleService.confDirPath = confDir.absolutePath
-        serverConfService.confDirPath = confDir.absolutePath
+        def origConfDirPath = ConfigUtil.confDirPath()
+        ConfigUtil.confDirPath = confDir.absolutePath
         copyConfFiles(origConfDirPath, confDir)
         Server server = lifecycleService.getServer()
         server.useSsl = true
@@ -150,7 +151,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         def status = lifecycleService.startServer()
         assertEquals "startServer exitStatus should be 0", 0, status
         assertTrue "isStarted should return true", lifecycleService.started
-        File httpdPidFile = new File(lifecycleService.httpdPidPath)
+        File httpdPidFile = ConfigUtil.httpdPidFile()
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
         assertEquals "Tried to start already started server. Should return -1",
             -1, lifecycleService.startServer()
@@ -165,17 +166,15 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse "httpd.pid was unexpectedly found", httpdPidFile.exists()
         server.useSsl = false
         server.save()
-        lifecycleService.confDirPath = origConfDirPath
-        serverConfService.confDirPath = origConfDirPath
+        ConfigUtil.confDirPath = origConfDirPath
     }
 
     void testLDAPAuth() {
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
         def confDir = createTestDir("conf")
-        def origConfDirPath = lifecycleService.confDirPath
-        lifecycleService.confDirPath = confDir.absolutePath
-        serverConfService.confDirPath = confDir.absolutePath
+        def origConfDirPath = ConfigUtil.confDirPath()
+        ConfigUtil.confDirPath = confDir.absolutePath
 
         Server server = lifecycleService.getServer()
 
@@ -195,7 +194,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         def status = lifecycleService.startServer()
         assertEquals "startServer exitStatus should be 0", 0, status
         assertTrue "isStarted should return true", lifecycleService.started
-        File httpdPidFile = new File(lifecycleService.httpdPidPath)
+        File httpdPidFile = ConfigUtil.httpdPidFile()
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
 
         File svnHttpdFile = new File(confDir, "csvn_main_httpd.conf")
@@ -241,8 +240,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         assertFalse "httpd.pid was unexpectedly found", httpdPidFile.exists()
-        lifecycleService.confDirPath = origConfDirPath
-        serverConfService.confDirPath = origConfDirPath
+        ConfigUtil.confDirPath = null
 
         server.ldapEnabled = false
         server.ldapServerHost = ""
@@ -275,7 +273,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
 
     File getApacheErrorLog() {
 
-        File logDir = new File(lifecycleService.dataDirPath, "logs")
+        File logDir = new File(ConfigUtil.dataDirPath(), "logs")
         def logNameSuffix = serverConfService.getLogFileSuffix()
         return new File(logDir, "error_${logNameSuffix}.log")
     }

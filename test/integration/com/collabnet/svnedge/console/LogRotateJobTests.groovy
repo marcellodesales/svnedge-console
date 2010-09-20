@@ -21,8 +21,6 @@ import grails.test.*
 
 class LogRotateJobTests extends GrailsUnitTestCase {
     def LogRotateJob
-    def lifecycleService
-
     def grailsApplication
 
     protected void setUp() {
@@ -36,7 +34,7 @@ class LogRotateJobTests extends GrailsUnitTestCase {
     }
 
     void testPruneLog() {
-        def dataDir = lifecycleService.dataDirPath
+        def dataDir = ConfigUtil.dataDirPath()
         long pruneOlderThanToday = 2
         def file1 = new File(dataDir, "logs/" + "subversion.log.1.days.older")
         def file2 = new File(dataDir, "logs/" + "subversion.log.2.days.older")

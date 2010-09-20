@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.console.services
 
+import java.io.File;
 import grails.util.GrailsUtil;
 
 import com.collabnet.svnedge.console.ConfigUtil
@@ -31,77 +32,22 @@ enum Command {START, STOP, GRACEFUL}
 class LifecycleService {
 
     boolean transactional = true
-    def commandLineService
+    
+    def grailsApplication
+    def commandLineService    
     def serverConfService
     def networkingService
 
     int MAX_SERVER_WAIT_TIME = 60
-    def appHome
-    def svnPath
-    def svnadminPath
-    def opensslPath
-    def httpdBindPath
-    def exeHttpdBindPath
-    def libHttpdBindPath
-    def httpdPidPath
-    def httpdPath
-    def htpasswdPath
-    def confDirPath
-    def viewvcScriptDirPath
-    def viewvcTemplateDirPath
-    def dataDirPath
-    def certDirPath
-    def winServiceName
-    
-    // these variables cache the result of the corresponding system checks
+
+        // these variables cache the result of the corresponding system checks
     // call "clearCachedResults" to enable re-checking
     private Boolean isSudoCache
     private Boolean isHttpdBindSuidCache
 
-    def bootStrap = { config ->
-
-        log.debug("Bootstrapping lifecycleService")
-
-        appHome = ConfigUtil.appHome(config)
-
-        def mkdirs = {
-            if (!it.exists()) {
-                it.mkdirs()
-            }
-        }
-        log.debug("CSVN_HOME will be " + appHome)
-        svnPath = ConfigUtil.svnPath(config)
-        svnadminPath = ConfigUtil.svnadminPath(config)
-        opensslPath = ConfigUtil.opensslPath(config)
-        httpdPath = ConfigUtil.httpdPath(config)
-        htpasswdPath = ConfigUtil.htpasswdPath(config)
-
-        httpdBindPath = ConfigUtil.httpdBindPath(config)
-        exeHttpdBindPath = ConfigUtil.exeHttpdBindPath(config)
-        libHttpdBindPath = ConfigUtil.libHttpdBindPath(config)
-
-        confDirPath = ConfigUtil.confDirPath(config)
-        viewvcScriptDirPath = ConfigUtil.viewvcScriptDir(config)
-        viewvcTemplateDirPath = ConfigUtil.viewvcTemplateDir(config)
-
-        // serviceName should only be set for windows
-        def serviceName = ConfigUtil.serviceName(config)
-        if (null != serviceName) {
-            winServiceName = serviceName
-        }
-
-        dataDirPath = ConfigUtil.dataDirPath(config)
-        certDirPath = new File(dataDirPath, "certs").absolutePath
-        
-        // make run and logs directories if not existing
-        mkdirs(new File(dataDirPath, "logs"))
-        File runFile = new File(dataDirPath, "run")
-        mkdirs(runFile)
-        httpdPidPath = new File(runFile, "httpd.pid").absolutePath
-    }
 
     private boolean isWindows() {
-        return null != winServiceName
+        return null != ConfigUtil.serviceName()
     }
 
     def bootstrapServer(config) {
@@ -160,6 +106,17 @@ class LifecycleService {
                 mySystemId: config.svnedge.ctfMaster.systemId).save(flush: true)
         }
 
+        def mkdirs = {
+            if (!it.exists()) {
+                it.mkdirs()
+            }
+        }
+    
+        def dataDirPath = ConfigUtil.dataDirPath()
+        // make run and logs directories if not existing
+        mkdirs(new File(dataDirPath, "logs"))
+        File runFile = new File(dataDirPath, "run")
+        mkdirs(runFile)    
         return [server: server, logLevel: logLevel]
     }
 
@@ -167,7 +124,9 @@ class LifecycleService {
      * Confirms whether the svn server is running.
      */
     boolean isStarted() {
-        File f = new File(httpdPidPath);
+        File f =  new File(new File(ConfigUtil.dataDirPath(), "run"), 
+            "httpd.pid")
+
         log.debug("Checking isStarted  Path=" + f.getPath() + 
                   " exists? " + f.exists())
         // TODO we could do extra check like "ps -p httpdPid()" and/or 
@@ -203,8 +162,8 @@ class LifecycleService {
     
     private def createSSLServerCert() {
         Server server = getServer()
-        File f1 = new File(confDirPath, "server.key")
-        File f2 = new File(confDirPath, "server.crt")
+        File f1 = new File(ConfigUtil.confDirPath(), "server.key")
+        File f2 = new File(ConfigUtil.confDirPath(), "server.crt")
         def keyFilePath = f1.getAbsolutePath()
         def exitStatus
         boolean newkey = false
@@ -217,7 +176,8 @@ class LifecycleService {
 
         // if they still don't exist, generate
         if (!f1.exists()) {
-            def cmd1 = [opensslPath, "genrsa", "-out", keyFilePath, "1024"]
+            def cmd1 = [ConfigUtil.opensslPath(), 
+                        "genrsa", "-out", keyFilePath, "1024"]
             exitStatus = commandLineService.executeWithStatus(
                 cmd1.toArray(new String[0]), null)
             if (exitStatus != 0) {
@@ -235,13 +195,14 @@ SomeOrganizationalUnit
 ${server.hostname}
 root@${server.hostname}
 """
-            File certFile = new File(confDirPath, "server.crt")
+            File certFile = new File(ConfigUtil.confDirPath(), "server.crt")
             def certFilePath = certFile.getAbsolutePath()
-            def opensslcnfPath = new File(appHome, "data/certs/openssl.cnf").absolutePath
+            def opensslcnfPath = new File(ConfigUtil.appHome(), 
+                "data/certs/openssl.cnf").absolutePath
 
-            def cmd2 = [opensslPath, "req", "-new", "-key", keyFilePath,
-                        "-config", opensslcnfPath, "-x509", "-days", "365",
-                        "-out", certFilePath]
+            def cmd2 = [ConfigUtil.opensslPath(), "req", "-new", "-key", 
+                        keyFilePath, "-config", opensslcnfPath, "-x509", 
+                        "-days", "365", "-out", certFilePath]
             exitStatus = commandLineService.executeWithStatus(
                               cmd2.toArray(new String[0]), null, certreqinput)
             if (exitStatus != 0)
@@ -256,7 +217,8 @@ root@${server.hostname}
      * @param keyTarget the File to which we are copying "svnedge.key"
      */
     private void copyShippedCerts(File certTarget, File keyTarget) {
-
+        def certDirPath = new File(ConfigUtil.dataDirPath(), 
+                                   "certs").canonicalPath
         File cert = new File(certDirPath, "svnedge.crt")
         File key  = new File(certDirPath, "svnedge.key")
 
@@ -281,28 +243,32 @@ root@${server.hostname}
     	    //In linux we do *not* ship python and do not install
 	        //anything persistent in host's PYTHONHOME, so we set
 	        //PYTHONPATH to locate mod_python.apache
-            String modPythonLibDir = new File(appHome, "lib").absolutePath
+            String modPythonLibDir = new File(ConfigUtil.appHome(), "lib")
+                .absolutePath
             modPythonLibDir = modPythonLibDir
             env.put("PYTHONPATH", modPythonLibDir)
         }
 
         if (!isWindows() && isHttpdBindSuid()) {
-            env.put("LD_PRELOAD", libHttpdBindPath)
+            env.put("LD_PRELOAD", ConfigUtil.libHttpdBindPath())
             String path = System.getenv("PATH")
             if (null != path && path.length() > 0) {
-                env.put("PATH", httpdBindPath + ':' + path)
+                env.put("PATH", ConfigUtil.httpdBindPath() + ':' + path)
             } else {
-                env.put("PATH", httpdBindPath)
+                env.put("PATH", ConfigUtil.httpdBindPath())
             }
         }
         env
     }
 
     private def createHttpdCmd() {
-        def cmd = [httpdPath,
-                   "-f", confDirPath + File.separator + "httpd.conf"]
+        println "createHttpdCmd"
+        
+        def cmd = [ConfigUtil.httpdPath(),
+            "-f", ConfigUtil.confDirPath() + File.separator + "httpd.conf"]
+        println "createHttpdCmd end"
         if (isWindows()) {
-            cmd.addAll(["-n", winServiceName])
+            cmd.addAll(["-n", ConfigUtil.serviceName()])
         }
         cmd
     }
@@ -335,12 +301,12 @@ root@${server.hostname}
         def exitStatus = Integer.parseInt(commandResponse[0])
         def output = commandResponse[1]
         def error = commandResponse[2]
-
+        
         // PID is old and needs to be removed.
         if (output?.startsWith("httpd") && output?.contains("pid") && 
                 output?.contains("not running")) {
 
-            new File(this.httpdPidPath).delete()
+            ConfigUtil.httpdPidFile().delete()
 
             commandResponse = commandLineService.execute(cmd.toArray(
                 new String[0]), createHttpdEnv())
@@ -366,7 +332,7 @@ root@${server.hostname}
                          MAX_SERVER_WAIT_TIME + " seconds.")
             } else {
                 log.debug("Server " + startOrStop + " attempt successful" +
-                          " using " + httpdPath)
+                          " using " + ConfigUtil.httpdPath())
             }
         } else {
             log.warn("Server " + startOrStop + 
@@ -401,16 +367,18 @@ root@${server.hostname}
      */
     def removeSvnAuth(User user) {
         def exitStatus
-        File authFile = new File(confDirPath, "svn_auth_file")
-        exitStatus = commandLineService.executeWithStatus(htpasswdPath, '-D',
+        File authFile = new File(ConfigUtil.confDirPath(), "svn_auth_file")
+        exitStatus = commandLineService
+            .executeWithStatus(ConfigUtil.htpasswdPath(), '-D',
             authFile.absolutePath, user.username)
         return exitStatus
     }
     
     private def writeHtpasswd(String username, String password) {
-        File authFile = new File(confDirPath, "svn_auth_file")
+        File authFile = new File(ConfigUtil.confDirPath(), "svn_auth_file")
         def options = authFile.exists() ? "-b" : "-cb"
-        def exitStatus = commandLineService.executeWithStatus(htpasswdPath, 
+        def exitStatus = commandLineService
+            .executeWithStatus(ConfigUtil.htpasswdPath(), 
             options, authFile.absolutePath, username, password)
         return exitStatus
     }
@@ -501,9 +469,10 @@ root@${server.hostname}
             return false;
         }
         boolean result = false
-        if (new File(httpdBindPath).exists()) {
+        if (new File(ConfigUtil.httpdBindPath()).exists()) {
             String[] fileProps = commandLineService.executeWithOutput(
-                "ls", "-l", exeHttpdBindPath).replaceAll(" +", " ").split(" ")
+                "ls", "-l", ConfigUtil.exeHttpdBindPath())
+                .replaceAll(" +", " ").split(" ")
             if (fileProps && fileProps.length > 2) {
                 String owner = fileProps[2]
                 result = (owner == "root")
@@ -513,7 +482,7 @@ root@${server.hostname}
                 }
             }
         } else {
-            log.debug(httpdBindPath + " does not exist") 
+            log.debug(ConfigUtil.httpdBindPath() + " does not exist") 
         }
         result
     }
@@ -530,7 +499,7 @@ root@${server.hostname}
 
     private def httpdPid() {
         def pid = 0
-        File f = new File(httpdPidPath)
+        File f = ConfigUtil.httpdPidFile()
         if (f.exists()) {
             f.eachLine { line -> pid = line }
         }

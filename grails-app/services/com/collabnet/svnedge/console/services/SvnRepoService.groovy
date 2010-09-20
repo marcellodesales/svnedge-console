@@ -34,20 +34,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def commandLineService
     def serverConfService
 
-    // configuration properties
-    String appHome
-    String svnadminPath
-    String svnPath
-
     boolean transactional = false
-
-    def bootStrap = { config ->
-        log.debug("Bootstrapping svnRepoService")
-
-        appHome = ConfigUtil.appHome(config)
-        svnPath = ConfigUtil.svnPath(config)
-        svnadminPath = ConfigUtil.svnadminPath(config)
-    }
 
     /**
      * Creates a new repository.
@@ -58,8 +45,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def createRepository(Repository repo, boolean useTemplate) {
         Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
-        def exitStatus = commandLineService.executeWithStatus(svnadminPath,
-                "create", repoPath)
+        def exitStatus = commandLineService.executeWithStatus(
+            ConfigUtil.svnadminPath(), "create", repoPath)
         if (exitStatus == 0 && useTemplate) {
             log.debug("Created repository " + repoPath +
                     ". Adding default paths...")
@@ -67,7 +54,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 return commandLineService.createSvnFileURI(
                         new File(repoPath, it))
             }
-            exitStatus = commandLineService.executeWithStatus(svnPath, "mkdir",
+            exitStatus = commandLineService.executeWithStatus(
+                    ConfigUtil.svnPath(), "mkdir",
                     fileURL("trunk"), fileURL("branches"), fileURL("tags"),
                     "-m", "Creating_initial_branch_structure",
                     "--no-auth-cache", "--non-interactive") // --quiet"

@@ -19,6 +19,7 @@ package com.collabnet.svnedge.console.services
 
 import grails.test.*
 import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 
@@ -28,8 +29,6 @@ import com.collabnet.svnedge.console.ServerMode
 class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
 
     def logManagementService
-    def serverConfService
-
 
     protected void setUp() {
         super.setUp()
@@ -64,7 +63,7 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals ("Console should be WARN after setting", LogManagementService.ConsoleLogLevel.WARN, c )
 
         // verify the apache conf update
-        def confFile = new File(serverConfService.confDirPath, "csvn_logging.conf")
+        def confFile = new File(ConfigUtil.confDirPath(), "csvn_logging.conf")
 
         boolean foundLogLevel = false
         confFile.eachLine {

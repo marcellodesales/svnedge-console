@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.GrailsUnitTestCase
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 
@@ -76,7 +77,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         def wcDir = createTestDir("wc")
         def testRepoFile = new File(wcDir, testRepoName)
         def status = commandLineService.executeWithStatus(
-            lifecycleService.svnPath, "checkout",
+            ConfigUtil.svnPath(), "checkout",
             "--no-auth-cache", "--non-interactive", commandLineService
             .createSvnFileURI(new File(repoParentDir, testRepoName)),
             testRepoFile.canonicalPath)

@@ -17,6 +17,9 @@
 */
 package com.collabnet.svnedge.console
 
+import java.io.File
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 /**
  * The configuration utility class is used during the bootstrap and services
  * that needs the values from the configuration as shortcuts.
@@ -26,106 +29,118 @@ package com.collabnet.svnedge.console
  */
 public final class ConfigUtil {
 
-    def static appHome(config) {
-        return new File(config.svnedge.appHome).absolutePath
+    def static configuration
+    static String confDirPath
+
+    private static def getConfig() {
+        if (!configuration) {
+            configuration = ConfigurationHolder.config
+        }
+        return configuration
+    }
+        
+    def static appHome() {
+        return new File(getConfig().svnedge.appHome).absolutePath
     }
 
-    def static httpdPath(config) {
-        return config.svnedge.svn.httpdPath ? config.svnedge.svn.httpdPath :
-            new File(appHome(config), "bin/httpd").absolutePath
+    def static httpdPath() {
+        return getConfig().svnedge.svn.httpdPath ? getConfig().svnedge.svn.httpdPath :
+            new File(appHome(), "bin/httpd").absolutePath
     }
 
-    def static httpdBindPath(config) {
-        return new File(appHome(config), "/lib/httpd_bind").absolutePath
+    def static httpdBindPath() {
+        return new File(appHome(), "/lib/httpd_bind").absolutePath
     }
 
-    def static exeHttpdBindPath(config) {
-        return new File(httpdBindPath(config), "httpd_bind").absolutePath
+    def static exeHttpdBindPath() {
+        return new File(httpdBindPath(), "httpd_bind").absolutePath
     }
 
-    def static libHttpdBindPath(config) {
-        return new File(httpdBindPath(config), "libhttpd_bind.so.1").absolutePath
+    def static libHttpdBindPath() {
+        return new File(httpdBindPath(), "libhttpd_bind.so.1").absolutePath
     }
 
-    def static htpasswdPath(config) {
-        return config.svnedge.svn.htpasswdPath ?
-            config.svnedge.svn.htpasswdPath : 
-            new File(appHome(config), "bin/htpasswd").absolutePath
+    def static htpasswdPath() {
+        return getConfig().svnedge.svn.htpasswdPath ?
+            getConfig().svnedge.svn.htpasswdPath : 
+            new File(appHome(), "bin/htpasswd").absolutePath
     }
 
-    def static opensslPath(config) {
-        return config.svnedge.opensslPath ?
-            config.svnedge.opensslPath :
-            new File(appHome(config), "bin/openssl").absolutePath
+    def static opensslPath() {
+        return getConfig().svnedge.opensslPath ?
+            getConfig().svnedge.opensslPath :
+            new File(appHome(), "bin/openssl").absolutePath
     }
 
-    def static svnPath(config) {
-        return config.svnedge.svn.svnPath ? config.svnedge.svn.svnPath :
-            new File(appHome(config), "bin/svn").absolutePath
+    def static svnPath() {
+        return getConfig().svnedge.svn.svnPath ? getConfig().svnedge.svn.svnPath :
+            new File(appHome(), "bin/svn").absolutePath
     }
 
-    def static svnadminPath(config) {
-        return config.svnedge.svn.svnadminPath ? 
-            config.svnedge.svn.svnadminPath : 
-            new File(appHome(config), "bin/svnadmin").absolutePath
+    def static svnadminPath() {
+        return getConfig().svnedge.svn.svnadminPath ? 
+            getConfig().svnedge.svn.svnadminPath : 
+            new File(appHome(), "bin/svnadmin").absolutePath
     }
 
-    def static svnsyncPath(config) {
-        return config.svnedge.replica.svn.svnsyncPath ?
-            config.svnedge.replica.svn.svnsyncPath : 
-            new File(appHome(config), "bin/svnsync").absolutePath
+    def static svnsyncPath() {
+        return getConfig().svnedge.replica.svn.svnsyncPath ?
+            getConfig().svnedge.replica.svn.svnsyncPath : 
+            new File(appHome(), "bin/svnsync").absolutePath
     }
 
-    def static dataDirPath(config) {
-        return new File(appHome(config), "data").absolutePath
+    def static dataDirPath() {
+        return new File(appHome(), "data").absolutePath
     }
 
-    def static viewvcTemplateDir(config) {
-        return config.svnedge.svn.viewvcTemplatesPath ? 
-            config.svnedge.svn.viewvcTemplatesPath : 
-            new File(appHome(config), "www/viewvc").absolutePath
+    def static viewvcTemplateDir() {
+        return getConfig().svnedge.svn.viewvcTemplatesPath ? 
+            getConfig().svnedge.svn.viewvcTemplatesPath : 
+            new File(appHome(), "www/viewvc").absolutePath
     }
 
-    def static viewvcTemplatesDirPath(config) {
-        return config.svnedge.svn.viewvcTemplatesPath ?
-            config.svnedge.svn.viewvcTemplatesPath : 
-            new File(appHome(config), "www/viewvc").absolutePath
+    def static viewvcTemplatesDirPath() {
+        return getConfig().svnedge.svn.viewvcTemplatesPath ?
+            getConfig().svnedge.svn.viewvcTemplatesPath : 
+            new File(appHome(), "www/viewvc").absolutePath
     }
 
-    def static cgiDirPath(config) {
-        return config.svnedge.svn.cgiDirPath ? config.svnedge.svn.cgiDirPath :
-            new File(appHome(config), "bin/cgi-bin").absolutePath
+    def static confDirPath() {
+        if (!confDirPath) {
+            org.apache.log4j.Logger.getLogger("com.collabnet.svnedge.console").error "confDirPath not cached yet.  Config value is: " + getConfig().svnedge.svn.confDirPath
+            println "Config: " + getConfig() + " confDirPath not cached yet.  Config value is: " + getConfig().svnedge.svn.confDirPath
+            confDirPath = getConfig().svnedge.svn.confDirPath ?:
+                new File(appHome(), "etc/conf").absolutePath
+            //throw new Exception("Test")
+        }
+        println "confDirPath: " + getConfig().svnedge.svn.confDirPath
+        return confDirPath 
     }
 
-    def static viewvcScriptDir(config) {
-        return cgiDirPath(config)
+    def static distDir() {
+        return getConfig().svnedge.svn.distDirPath ?:
+            new File(appHome(), "dist").absolutePath
     }
 
-    def static confDirPath(config) {
-        return config.svnedge.svn.confDirPath ?
-            config.svnedge.svn.confDirPath :
-            new File(appHome(config), "etc/conf").absolutePath
+    def static serviceName() {
+        return getConfig().svnedge.osName == "Win" ? 
+            getConfig().svnedge.svn.serviceName : null
     }
 
-    def static distDir(config) {
-        return config.svnedge.svn.distDirPath ?:
-            new File(appHome(config), "dist").absolutePath
+    def static viewvcLibPath() {
+        return getConfig().svnedge.svn.viewvcLibPath ?
+            getConfig().svnedge.svn.viewvcLibPath :
+            new File(appHome(), "lib/viewvc").absolutePath
     }
 
-    def static serviceName(config) {
-        return config.svnedge.osName == "Win" ? 
-            config.svnedge.svn.serviceName : null
+    def static modPythonPath() {
+        return getConfig().svnedge.svn.modPythonPath ? 
+            getConfig().svnedge.svn.modPythonPath : 
+            new File(appHome(), "bin/mod_python").absolutePath
     }
 
-    def static viewvcLibPath(config) {
-        return config.svnedge.svn.viewvcLibPath ?
-            config.svnedge.svn.viewvcLibPath :
-            new File(appHome(config), "lib/viewvc").absolutePath
-    }
-
-    def static modPythonPath(config) {
-        return config.svnedge.svn.modPythonPath ? 
-            config.svnedge.svn.modPythonPath : 
-            new File(appHome(config), "bin/mod_python").absolutePath
+    static File httpdPidFile() {
+        File runFile = new File(dataDirPath(), "run")
+        return new File(runFile, "httpd.pid")
     }
 }

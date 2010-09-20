@@ -58,49 +58,22 @@ class ServerConfService {
 [authz-teamforge]
 """
     
-    def appHome
-    private def svnPath
     def httpdUser
     def httpdGroup
-    def confDirPath
-    def distDirPath
-    def modPythonDirPath
-    def viewvcLibDirPath
-    private def viewvcTemplateDirPath
-    private def dataDirPath
-    private def winServiceName
 
-    def bootstrap = { config, server ->
-        appHome = new File(ConfigUtil.appHome(config)).absolutePath
-        confDirPath = new File(ConfigUtil.confDirPath(config)).absolutePath
+    def bootstrap = { server ->
 
-        log.debug("CSVN_HOME will be " + appHome)
         log.debug("Bootstrapping serverConfService")
-
         log.debug("Setting up data artifacts directory...")
-        bootstrapDataDirectory(ConfigUtil.appHome(config))
-        bootstrapConfiguration()
-
-        svnPath = new File(ConfigUtil.svnPath(config)).absolutePath
-        viewvcLibDirPath = new File(
-            ConfigUtil.viewvcLibPath(config)).absolutePath
-        modPythonDirPath = new File(
-            ConfigUtil.modPythonPath(config)).absolutePath
-        distDirPath = new File(ConfigUtil.distDir(config)).absolutePath
-        viewvcTemplateDirPath = new File(
-            ConfigUtil.viewvcTemplateDir(config)).absolutePath
-
-        // serviceName should only be set for windows
-        def serviceName = ConfigUtil.serviceName(config)
-        if (null != serviceName) {
-            winServiceName = serviceName
-        } else {
-            // user and group aren't relevant on windows (yet)
+        def appHome = ConfigUtil.appHome()
+        bootstrapDataDirectory(appHome)
+        bootstrapConfiguration(server)
+        if (!isWindows()) {
             setUserAndGroup()
         }
-        dataDirPath = new File(ConfigUtil.dataDirPath(config)).absolutePath
+        
         conditionalWriteHttpdConf()
-        deployPythonBindings()
+        deployPythonBindings(appHome)
 
         try {
             this.writeConfigFiles()
@@ -110,13 +83,17 @@ class ServerConfService {
         }
     }
     
-    private void bootstrapConfiguration() {
+    private String confDirPath() {
+        return ConfigUtil.confDirPath()
+    }
+    
+    private void bootstrapConfiguration(server ) {
         // remove unnecessary scm artifact
         switch(GrailsUtil.environment) {
             case "development":
             case "test":
                 log.debug("Deleting older httpd.conf file")
-                new File(confDirPath, "httpd.conf").delete()
+                new File(confDirPath(), "httpd.conf").delete()
 
                 File scmProps = new File(server.repoParentDir,".scm.properties")
                 if (scmProps.exists() && scmProps.delete()) {
@@ -182,7 +159,7 @@ class ServerConfService {
     }
 
     private boolean isWindows() {
-        return null != winServiceName
+        return null != ConfigUtil.serviceName()
     }
     
     /**
@@ -203,7 +180,21 @@ class ServerConfService {
         httpdGroup = result.length > 3 ? result[3] : "nobody"
     }
     
-    private def deployPythonBindings() {
+    private def getHttpdUser() {
+        if (!httpdUser) {
+            setUserAndGroup()
+        }
+        return httpdUser
+    }
+
+    private def getHttpdGroup() {
+        if (!httpdGroup) {
+            setUserAndGroup()
+        }
+        return httpdGroup
+    }
+
+    private def deployPythonBindings(appHome) {
         if (isWindows()) {
             return
         }
@@ -239,7 +230,7 @@ class ServerConfService {
     }
     
     private def conditionalWriteHttpdConf() {
-        def confDir = new File(confDirPath)
+        def confDir = new File(confDirPath())
         File dest = new File(confDir, "httpd.conf")
         if (!dest.exists()) {
             writeHttpdConf(dest)
@@ -247,17 +238,18 @@ class ServerConfService {
     }
     
     private def writeHttpdConf(destConfFile) {
-        def distFile = new File(distDirPath, "httpd.conf.dist")
+        def distFile = new File(ConfigUtil.distDir(), "httpd.conf.dist")
         if (!distFile.exists()) {
-            distFile = new File(confDirPath, "httpd.conf.dist")
+            distFile = new File(confDirPath(), "httpd.conf.dist")
         }
         String s = distFile.getText()
-        s = s.replace("__CSVN_HOME__", appHome)
-        s = s.replace("__CSVN_CONF__", confDirPath)
+        s = s.replace("__CSVN_HOME__", ConfigUtil.appHome())
+        s = s.replace("__CSVN_CONF__", confDirPath())
         destConfFile.write(s)
     }
     
     def writeConfigFiles() {
+        def confDirPath = confDirPath()
         Server server = getServer()
         conditionalWriteHttpdConf()
         writeMainConf(server)
@@ -272,8 +264,9 @@ class ServerConfService {
         String s = new File(confDirPath, "viewvc.conf.dist").getText()
         s = s.replace("__CSVN_REPO_ROOT__", server.repoParentDir)
         s = s.replace("__CSVN_CONF__", confDirPath)
-        s = s.replace("__CSVN_VIEWVC_TEMPLATES__", viewvcTemplateDirPath)
-        s = s.replace("__CSVN_SVN_CLIENT__", svnPath)
+        s = s.replace("__CSVN_VIEWVC_TEMPLATES__", 
+                      ConfigUtil.viewvcTemplateDir())
+        s = s.replace("__CSVN_SVN_CLIENT__", ConfigUtil.svnPath())
         s = s.replace("__SERVER_ADMIN__", server.adminEmail)
         
         String serverMode = server.mode.toString()
@@ -319,7 +312,7 @@ class ServerConfService {
      */
     String readSvnAccessFile() {
 
-        File f = new File(confDirPath, "svn_access_file")
+        File f = new File(confDirPath(), "svn_access_file")
         if (f.exists()) {
             return f.text
         }
@@ -334,7 +327,7 @@ class ServerConfService {
      */
     boolean writeSvnAccessFile(String content) {
 
-        File f = new File(confDirPath, "svn_access_file")
+        File f = new File(confDirPath(), "svn_access_file")
         if (f.canWrite()) {
             f.write content.trim()
             return true
@@ -370,7 +363,7 @@ ${ldapConfSnippet}
 ${fileAuthConfSnippet}
 ${sslSnippet}
 """
-        new File(confDirPath, "csvn_main_httpd.conf").write(conf)
+        new File(confDirPath(), "csvn_main_httpd.conf").write(conf)
     }
 
     def getLogFileSuffix() {
@@ -401,6 +394,7 @@ ${sslSnippet}
     }
 
     def writeLogConf() {
+        def dataDirPath = ConfigUtil.dataDirPath()
         def logNameSuffix = getLogFileSuffix()
         def logLevel = getServer().apacheLogLevel ?: ApacheLogLevel.WARN 
         def conf = """${DONT_EDIT}
@@ -410,7 +404,7 @@ ErrorLog "${dataDirPath}/logs/error_${logNameSuffix}.log"
 CustomLog "${dataDirPath}/logs/access_${logNameSuffix}.log" common
 CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T" env=SVN-ACTION
 """
-        new File(confDirPath, "csvn_logging.conf").write(conf)
+        new File(confDirPath(), "csvn_logging.conf").write(conf)
     }
 
     private def writeSvnViewvcConf(server) {
@@ -429,6 +423,7 @@ RedirectMatch ^(/svn)\$ \$1/
             getSVNHttpdConf(server)
         conf += "</Location>\n\n"
 
+        def viewvcTemplateDirPath = ConfigUtil.viewvcTemplateDir()
         conf += """
 <Directory "${viewvcTemplateDirPath}/docroot">
   AllowOverride None
@@ -445,20 +440,20 @@ LoadModule rewrite_module lib/modules/mod_rewrite.so
 RewriteEngine on
 RewriteRule ^/viewcvs(.*)\$ /viewvc\$1 [R,L]
 """ : """
-ScriptAlias /viewvc "${modPythonDirPath}/viewvc.py"
+ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
 """
         conf += """
 <Location /viewvc>
   SetHandler mod_python
   PythonDebug on
   AddDefaultCharset UTF-8
-  SetEnv CSVN_HOME "${appHome}"
+  SetEnv CSVN_HOME "${ConfigUtil.appHome()}"
 """
         conf += ctfMode ? getCtfViewVCHttpdConf(server) : 
             getViewVCHttpdConf(server)
         conf += "</Location>"
 
-        new File(confDirPath, "svn_viewvc_httpd.conf").write(conf)
+        new File(confDirPath(), "svn_viewvc_httpd.conf").write(conf)
     }
     
     private def getDefaultHttpdSnippets() {
@@ -474,7 +469,7 @@ MaxRequestsPerChild 0
 MaxMemFree 512
 """
         }
-        conf += """PidFile "${dataDirPath}/run/httpd.pid"\n"""
+        conf += """PidFile "${ConfigUtil.dataDirPath()}/run/httpd.pid"\n"""
     }    
         
     private def getLdapURL(server) {
@@ -540,7 +535,7 @@ LDAPVerifyServerCert Off
         if (server.fileLoginEnabled) {
             conf = """
 <AuthnProviderAlias file csvn-file-users>
-  AuthUserFile "${confDirPath}/svn_auth_file"
+  AuthUserFile "${confDirPath()}/svn_auth_file"
 </AuthnProviderAlias>
 """
         }
@@ -566,6 +561,7 @@ LDAPVerifyServerCert Off
     }
 
     private def getCtfSvnHttpdConf(server) {
+        def appHome = ConfigUtil.appHome()
         def ctfServer = CtfServer.getServer()
         def conf = """AuthType Basic
    AuthName "Authorization Realm"
@@ -582,7 +578,7 @@ LDAPVerifyServerCert Off
    # Provide variables to sfauth.py
    PythonOption svn.root.path "${escapePath(server.repoParentDir)}"
    PythonOption svn.root.uri /svn
-   PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath, "teamforge.properties").absolutePath)}"
+   PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    # Allows these operations to be disallowed higher up,
    # then enabled here for this Location
    <Limit COPY DELETE GET OPTIONS PROPFIND PROPPATCH PUT MKACTIVITY CHECKOUT MERGE REPORT>
@@ -597,7 +593,7 @@ LDAPVerifyServerCert Off
         def conf = ""
         def extraconf = ""
         if (server.useSsl) {
-            File f = new File(confDirPath, "server.ca")
+            File f = new File(confDirPath(), "server.ca")
             def chainFilePath = f.absolutePath
             if (f.exists()) {
                 extraconf = "SSLCertificateChainFile \"${chainFilePath}\""
@@ -608,9 +604,9 @@ LoadModule ssl_module lib/modules/mod_ssl.so
 SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
 SSLEngine on
-SSLCertificateFile    "${confDirPath}/server.crt"
-SSLCertificateKeyFile "${confDirPath}/server.key"
-SSLSessionCache       "shmcb:${dataDirPath}/run/ssl_scache(512000)"
+SSLCertificateFile    "${confDirPath()}/server.crt"
+SSLCertificateKeyFile "${confDirPath()}/server.key"
+SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
 ${extraconf}
 """
         }
@@ -618,7 +614,7 @@ ${extraconf}
     }
 
     private def getSVNHttpdConf(server) {
-        def conf = """  AuthzSVNAccessFile "${confDirPath}/svn_access_file"
+        def conf = """  AuthzSVNAccessFile "${confDirPath()}/svn_access_file"
   SVNListParentPath On
 """
         conf += getAuthBasic(server)
@@ -664,9 +660,9 @@ ${extraconf}
     private def getViewVCHttpdConf(server) {
         def conf = """
   PythonPath "[r'"""
-        conf += escapePath(new File(appHome, "lib").absolutePath) + "', r'" +
-            escapePath(modPythonDirPath) + "', r'" + 
-            escapePath(viewvcLibDirPath)
+        conf += escapePath(new File(ConfigUtil.appHome(), "lib").absolutePath) +
+            "', r'" + escapePath(ConfigUtil.modPythonPath()) + "', r'" + 
+            escapePath(ConfigUtil.viewvcLibPath())
         conf += """']+sys.path"
   PythonHandler handler
 """
@@ -680,23 +676,25 @@ ${extraconf}
     }
     
     private def getCtfViewVCHttpdConf(server) {
+        def appHome = ConfigUtil.appHome()
         def conf = """
   PythonPath "[r'"""
         conf += escapePath(new File(appHome, "lib").absolutePath) + "', r'"
         conf += escapePath(new File(appHome, "lib/svn-python").absolutePath) + "', r'"
         conf += escapePath(new File(appHome, "lib/integration").absolutePath) + 
-            "', r'" + modPythonDirPath + "', r'" + viewvcLibDirPath
+            "', r'" + ConfigUtil.modPythonPath() + "', r'" + ConfigUtil.viewvcLibPath()
         conf += """']+sys.path"
   PythonHandler viewvc_ctf_handler
   PythonOption viewvc.root.uri /viewvc
-  PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath, "teamforge.properties").absolutePath)}"
-  PythonOption sourceforge.home "${escapePath(new File(dataDirPath, "teamforge").absolutePath)}"
+  PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
+  PythonOption sourceforge.home "${escapePath(new File(ConfigUtil.dataDirPath(), "teamforge").absolutePath)}"
 """
         return conf
     }
 
 
     def createOrValidateHttpdConf() {
+        def confDirPath = confDirPath()
         File httpdConf = new File(confDirPath, "httpd.conf")
         boolean isValid = false
         if (httpdConf.exists()) {
@@ -725,7 +723,7 @@ ${extraconf}
         } else {
             s += "\nsfmain.integration.subversion.csvn=csvn-standalone\n"
         }
-        new File(confDirPath, "teamforge.properties").write(s)
+        new File(confDirPath(), "teamforge.properties").write(s)
         System.setProperty("csvnedge.resetTeamforgeProperties", "true")
     }
 
@@ -733,11 +731,14 @@ ${extraconf}
         if (isWindows()) {
             contents = contents.replace("\${os.name}", "windows")
         } else {
-            contents = contents.replace("\${user.name}", httpdUser)
-            contents = contents.replace("\${user.group}", httpdGroup)
+            contents = contents.replace("\${user.name}", getHttpdUser())
+            contents = contents.replace("\${user.group}", getHttpdGroup())
             contents = contents.replace("\${os.name}", "linux")
         }
-        contents = contents.replace("\${svn.binary}", escapePath(svnPath))
+        def appHome = ConfigUtil.appHome()
+        def dataDirPath = ConfigUtil.dataDirPath()
+        contents = contents.replace("\${svn.binary}", 
+                                    escapePath(ConfigUtil.svnPath()))
         contents = contents.replace("\${svnadmin.binary}", 
             escapePath(new File(appHome, "bin/svnadmin").absolutePath))
         contents = contents.replace("\${svnlook.binary}", 
@@ -804,8 +805,8 @@ ${extraconf}
      * the dist version.
      */
     void backupAndOverwriteHttpdConf() {
-        File confFile = new File(confDirPath, "httpd.conf")
-        File bkupFile = new File(confDirPath, "httpd.conf.bkup")
+        File confFile = new File(confDirPath(), "httpd.conf")
+        File bkupFile = new File(confDirPath(), "httpd.conf.bkup")
         archiveFile(bkupFile)
         confFile.renameTo(bkupFile)        
         writeHttpdConf(confFile)
@@ -815,8 +816,8 @@ ${extraconf}
      * If httpd.conf.bkup exists, use it to replace httpd.conf
      */
     void restoreHttpdConfFromBackup() {
-        File confFile = new File(confDirPath, "httpd.conf")
-        File bkupFile = new File(confDirPath, "httpd.conf.bkup")
+        File confFile = new File(confDirPath(), "httpd.conf")
+        File bkupFile = new File(confDirPath(), "httpd.conf.bkup")
         if (bkupFile.exists()) {
             archiveFile(confFile)
             bkupFile.renameTo(confFile)

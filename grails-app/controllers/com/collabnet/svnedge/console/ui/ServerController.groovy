@@ -23,6 +23,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException;
 import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
 
@@ -207,7 +208,7 @@ class ServerController {
                 .getInetAddressNetworkInterfaceMap(),
             csvnHome: config.svnedge.appHome ?
                 config.svnedge.appHome : '<AppHome>',
-            csvnConf: serverConfService.confDirPath,
+            csvnConf: ConfigUtil.confDirPath(),
             standardPortInstructions: showPortInstructions,
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,

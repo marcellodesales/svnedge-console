@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.console.services
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.quartz.JobDetail
 import java.text.SimpleDateFormat
 import org.quartz.Trigger
@@ -36,8 +35,6 @@ class JobsAdminService {
 
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(
             "MMM dd, yyyy HH:mm:ss") 
-
-    def config = ConfigurationHolder.config
 
     def bootStrap = {
         log.info("Bootstrapping jobs...")

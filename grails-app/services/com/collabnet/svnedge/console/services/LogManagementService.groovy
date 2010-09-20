@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.jobs.LogRotateJob
 
@@ -51,8 +52,7 @@ class LogManagementService {
     public static enum ConsoleLogLevel { DEBUG, INFO, WARN, ERROR}
     public static enum ApacheLogLevel { DEBUG, INFO, WARN, ERROR }
 
-    public def bootstrap = {  dataDir, consoleLogLevel  ->
-        this.dataDir = dataDir
+    public def bootstrap = {  consoleLogLevel  ->
         if (consoleLogLevel) {
             setConsoleLevel(consoleLogLevel)
         }
@@ -98,7 +98,7 @@ class LogManagementService {
      */
     List<File> getLogFiles() {
         def files = Arrays.asList (new File(
-                dataDir + "/logs").listFiles(
+                ConfigUtil.dataDirPath() + "/logs").listFiles(
                 {file -> !file.isDirectory() } as FileFilter))
 
         return files
@@ -168,7 +168,8 @@ class LogManagementService {
      * @return the File object with the reference to the log file.
      */
     def getLogFile(logFileName) throws FileNotFoundException {
-        def file = new File(dataDir + "/logs/" + logFileName.trim())
+        def file = new File(ConfigUtil.dataDirPath() + 
+            "/logs/" + logFileName.trim())
         if (!file.exists()) {
             throw new FileNotFoundException("The log file " +
                 "'${file.canonicalPath}' does not exist")

@@ -45,8 +45,6 @@ class BootStrap {
     def networkStatisticsService
     def fileSystemStatisticsService
 
-    def svnRepoService
-    def commandLineService
     def packagesUpdateService
     def discoveryService
 
@@ -63,15 +61,18 @@ class BootStrap {
 
     // Replication-related services for future CTF versions
     def replicationBootstrapService
-
+    def grailsApplication
+    
     def init = { servletContext ->
 
-        def config = ConfigurationHolder.config
-
+        def config = grailsApplication.config
+        log.debug("Bootstrap config: " + config)
+        ConfigUtil.configuration = config
+        
         def env = GrailsUtil.environment
         log.info("#### Starting up the ${env} environment...")
 
-        def appHome = ConfigUtil.appHome(config)
+        def appHome = ConfigUtil.appHome()
         log.info("Application Home: " + appHome)
 
         log.info("Bootstrapping OS services...")
@@ -100,20 +101,6 @@ class BootStrap {
             log.error ("Failed to intitialize FileSystemStatisticsService: " + e.getMessage(), e)
         }
 
-        log.info("Bootstrapping the commandLineService...")
-        try {
-            commandLineService.bootstrap(config)
-        } catch (Exception e) {
-            log.error ("Failed to intitialize CommandLineService: " + e.getMessage(), e)
-        }
-
-        log.info("Bootstrapping the lifecycleService...")
-        try {
-            lifecycleService.bootStrap(config)
-        } catch (Exception e) {
-            log.error ("Failed to intitialize LifecycleService: " + e.getMessage(), e)
-        }
-
         log.info("Bootstrapping Servers...")
         def server
         def initServer
@@ -126,15 +113,14 @@ class BootStrap {
 
         log.info("Bootstrap logging with consoleLogLevel from the Server...")
         try {
-            logManagementService.bootstrap(ConfigUtil.dataDirPath(config),
-                initServer.logLevel)
+            logManagementService.bootstrap(initServer.logLevel)
         } catch (Exception e) {
             log.error ("Failed to intitialize LogManagementService: " + e.getMessage(), e)
         }
 
         log.info("Bootstrapping the ServerConfigService...")
         try {
-            serverConfService.bootstrap(config, server)
+            serverConfService.bootstrap(server)
         } catch (Exception e) {
             log.error ("Failed to intitialize ServerConfService: " + e.getMessage(), e)
         }
@@ -151,13 +137,6 @@ class BootStrap {
             packagesUpdateService.bootstrap(config)
         } catch (Exception e) {
             log.error ("Failed to intitialize PackagesUpdateService: " + e.getMessage(), e)
-        }
-
-        log.info("Bootstrapping svnRepoService...")
-        try {
-            svnRepoService.bootStrap(config)
-        } catch (Exception e) {
-            log.error ("Failed to intitialize SvnRepoService: " + e.getMessage(), e)
         }
 
         if (server.mode == ServerMode.MANAGED) {

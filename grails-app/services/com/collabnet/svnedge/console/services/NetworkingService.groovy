@@ -45,7 +45,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
     /**
      * The list of all network interfaces.
      */
-    def networkInterfaces
+    def networkInterfacesWithIP
     /**
      * The hostname of the server as defined on the environment variables
      * HOSTNAME, COMPUTERNAME. If none is defined, then "localhost" is used.
@@ -58,11 +58,6 @@ public class NetworkingService extends AbstractSvnEdgeService {
     def httpProxy
 
     def bootStrap = {
-        this.httpProxy = System.getenv("http_proxy") ?: 
-            System.getenv("HTTP_PROXY")
-        this.networkInterfaces = this.getNetworkInterfacesWithIPAddresses()
-        this.selectedInterface = this.getDefaultNetworkInterface()
-
         log.info("########## Networking Service ##########")
         log.info("# Network Interface: ${this.selectedInterface.name}")
         log.info("# IP Address: ${getIpAddress().hostAddress}")
@@ -83,7 +78,15 @@ public class NetworkingService extends AbstractSvnEdgeService {
         }
         return this.hostname
     }
-    
+ 
+    String getHttpProxy() {
+        if (!httpProxy) {
+            httpProxy = System.getenv("http_proxy") ?: 
+                System.getenv("HTTP_PROXY")
+        }
+        return httpProxy
+    }
+       
     /**
      * @return the IPv4 (preferred, IPv6 if necessary) version assigned to the default 
      * interface. 
@@ -118,7 +121,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
      * address. In case no IP address is assigned, then the loopback is used.
      */
     def getDefaultNetworkInterface() {
-        def ifs = this.networkInterfaces ?: 
+        def ifs = this.networkInterfacesWithIP ?: 
             this.getNetworkInterfacesWithIPAddresses()
         def defaultIf
         if (ifs.size() > 1) {
@@ -132,13 +135,15 @@ public class NetworkingService extends AbstractSvnEdgeService {
             return ifs[0]
         }
     }
-
+    
     /**
      * Returns network interfaces which have been assigned site-local
      * or global IP addresses along with the loopback interface.  
      * Interfaces with only a link-local address are not included.
      */
     def getNetworkInterfacesWithIPAddresses() {
+        if (!networkInterfacesWithIP) {
+
         def networkInterfaces = Collections
             .list(NetworkInterface.getNetworkInterfaces())
         def niWithIP = []
@@ -156,9 +161,11 @@ public class NetworkingService extends AbstractSvnEdgeService {
                 }
             }
         }
-        niWithIP.sort { a, b -> 
+        networkInterfacesWithIP = niWithIP.sort { a, b -> 
             a.isLoopback() && !b.isLoopback() ? 1 : 
             !a.isLoopback() && b.isLoopback() ? -1 : a.name <=> b.name }
+        }
+        return networkInterfacesWithIP
     }
 
     def getInetAddressNetworkInterfaceMap() {

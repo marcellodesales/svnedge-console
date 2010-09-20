@@ -27,17 +27,6 @@ class CommandLineService {
 
     def operatingSystemService
 
-    String appHome
-    String confDir
-    String osName
-
-    def bootstrap(config) {
-        appHome = ConfigUtil.appHome(config)
-        confDir = ConfigUtil.confDirPath(config)
-        osName = operatingSystemService.properties.Name
-
-    }
-
     int executeWithStatus(String...command, Map<String, String> env=null, String input=null) {
         return Integer.parseInt(execute(command, (Map<String, String>) env, input)[0])
     }
@@ -98,7 +87,7 @@ class CommandLineService {
                 INTERESTING_ENVVARS.contains(key)})
                 .collect({key, value -> key + ":" + value}))
         }
-        pb.directory(new File(appHome))
+        pb.directory(new File(ConfigUtil.appHome()))
         log.debug("Calling pb.start() for command=" + command)
         return pb.start()
     }
