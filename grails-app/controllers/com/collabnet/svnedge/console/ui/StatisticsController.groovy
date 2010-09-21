@@ -226,9 +226,10 @@ class StatisticsController {
         def maxValue = 100
 
         if (!timeValues) {
-            c = new Chart(message(code: "statistics.graph.userCache.title") +
-                " " + ts.title + " : " + message(
-                    code: "statistics.graph.noDataYet"))
+            def noData = message(code: "statistics.graph.noDataYet")
+            c = new Chart(message(
+                code: "statistics.graph.userCache.title.noData",
+                args: [ts.title, noData]))
         } else {
 
             def lineCharts = []
@@ -240,9 +241,8 @@ class StatisticsController {
                 lc.setText(lines[index].title)
                 lineCharts << lc
             }
-            c = new Chart(message(code: "statistics.graph.userCache.hit.title")
-                + " " + ts.title)
-            .addElements(lineCharts)
+            c = new Chart(message(code: "statistics.graph.userCache.hit.title",
+                args: [ts.title])).addElements(lineCharts)
 
             addXAxis(c, timeValues, ts.pattern)
 
@@ -276,9 +276,10 @@ class StatisticsController {
 
         def rates = networkStatisticsService.getThroughputRates(start, now)
         if (!rates) {
-            c = new Chart(message(code: "statistics.graph.throughput.title") +
-                " " + ts.title + " : " + 
-                message(code: "statistics.graph.noDataYet"))
+            def noData = message(code: "statistics.graph.noDataYet")
+            c = new Chart(message(
+                code: "statistics.graph.throughput.title.noData",
+                args: [ts.title, noData]))
         } else {
             def minValue = 0
             def maxValue = 0
@@ -318,8 +319,8 @@ class StatisticsController {
                 lineCharts << lineChart
             } 
 
-            c = new Chart(message(code: "statistics.graph.throughput.title") +
-                " " + ts.title).addElements(lineCharts)
+            c = new Chart(message(code: "statistics.graph.throughput.title", 
+                args: [ts.title])).addElements(lineCharts)
             
             addXAxis(c, rates.keySet(), ts.pattern)
             
@@ -350,12 +351,13 @@ class StatisticsController {
             .getChartValues(start.getTime(), now.getTime())
 
         if (!chartData) {
-            c = new Chart(message(code:"statistics.graph.latency.replica.title")
-                + " " + ts.title + " : " + message(
-                    code: "statistics.graph.noDataYet"))
+            def noData = message(code: "statistics.graph.noDataYet")
+            c = new Chart(message(
+                code: "statistics.graph.latency.replica.title.noData",
+                args: [ts.title, noData]))
         } else {
-            c = new Chart(message(code:"statistics.graph.latency.replica.title")
-                + " " + ts.title)
+            c = new Chart(message(code:"statistics.graph.latency.replica.title",
+                args: [ts.title]))
             def minValue = 0
             def maxValue = 0
             def latValues = chartData.keySet().collect {
@@ -406,14 +408,14 @@ class StatisticsController {
                     [type: "repoFree", color: colors[2],
                     title: message(
                         code: "statistics.graph.space.vol.title")]]
-            chartTitle = message(code: "statistics.graph.space.title") + " " +
-                ts.title
+            chartTitle = message(code: "statistics.graph.space.title", 
+                args: [ts.title])
         }
         else {
             lines = [[type: "repoUsed", color: colors[0],
                     title: message(code: "statistics.graph.repo.size")]]
-            chartTitle = message(code: "statistics.graph.repo.over") + " " + 
-                ts.title
+            chartTitle = message(code: "statistics.graph.repo.over", 
+                args: [ts.title])
         }
         
         def chartValues = (repo) ?
@@ -498,11 +500,12 @@ class StatisticsController {
         
 
         if (!chartData) {
-            c = new Chart(message(code: "statistics.graph.space.repos") + " " +
-                ts.title + " : " + message(code: "statistics.graph.noDataYet"))
+            def noData = message(code: "statistics.graph.noDataYet")
+            c = new Chart(message(code: "statistics.graph.space.repos.noData",
+                args: [ts.title, noData]))
         } else {
-            c = new Chart(message(code: "statistics.graph.space.repos") +
-                ts.title)
+            c = new Chart(message(code: "statistics.graph.space.repos", 
+                args: [ts.title]))
             def minValue = 0
             def maxValue = 0
 
