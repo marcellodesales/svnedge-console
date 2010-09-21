@@ -79,4 +79,12 @@ class ServerControllerTests extends ControllerUnitTestCase {
         assertTrue "${f.absolutePath} does not exist", f.exists()
         assertTrue "Port directive was not updated.", (f.text.indexOf("Listen 987652") > 0)
     }
+    
+    void testEditAuthentication() {
+        controller.editAuthentication()
+    }
+
+    void testEditIntegration() {
+        controller.editIntegration()
+    }
 }

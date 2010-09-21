@@ -106,7 +106,7 @@ class ServerController {
     def editAuthentication = {
         def server = Server.getServer()
         return [server: server,
-                csvnConf: serverConfService.confDirPath,
+                csvnConf: ConfigUtil.confDirPath(),
                 isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
     }
