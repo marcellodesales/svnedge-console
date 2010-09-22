@@ -58,6 +58,7 @@ grails.logging.jul.usebridge = true
 
 svnedge {
     defaultHighPort = 18080
+    defaultApacheAuthHelperPort = 49152
     osName = System.getProperty("os.name").substring(0,3)
     if (osName == "Win") {
         // This will point to the parent directory of the application once production ready.

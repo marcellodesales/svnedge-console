@@ -38,6 +38,7 @@ class Server {
     String hostname
     
     int port
+    Integer authHelperPort
     String repoParentDir
     boolean defaultStart
     boolean allowAnonymousReadAccess
@@ -67,6 +68,10 @@ class Server {
 
     String svnURL() {
         return urlPrefix() + "/svn/"
+    }
+    
+    String secureURL() {
+        return urlPrefix() + "/secure/"
     }
     
     String viewvcURL(String repoName) {

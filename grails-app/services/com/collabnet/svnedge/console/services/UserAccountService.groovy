@@ -27,6 +27,7 @@ class UserAccountService extends AbstractSvnEdgeService {
 
     def lifecycleService
     def authenticateService
+    def csvnAuthenticationProvider
 
     // ensures the existence of essential Roles and Users
     def bootStrap = {env->
@@ -141,6 +142,15 @@ class UserAccountService extends AbstractSvnEdgeService {
         }
 
 
+    }
+
+    /**
+     * Test if the User object derives from LDAP authentication
+     * @param u
+     * @return boolean is the user an LDAP user
+     */
+    public boolean isLdapUser(User u) {
+        return csvnAuthenticationProvider.isLdapUser(u)
     }
 
     private User saveNewSuperUser(userid, password) {

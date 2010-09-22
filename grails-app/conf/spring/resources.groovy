@@ -26,4 +26,7 @@ beans = {
         ctfRemoteClientService = ref("ctfRemoteClientService")
     }
 
+    csvnAuthenticationProvider(com.collabnet.svnedge.console.security.CsvnAuthenticationProvider) {
+        daoAuthenticationProvider = ref("daoAuthenticationProvider")
+    }
 }

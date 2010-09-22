@@ -39,6 +39,7 @@ class ServerConfService {
     def commandLineService
     def securityService
     def networkingService
+    def csvnAuthenticationProvider
     
     private static final String DONT_EDIT = """#
 #
@@ -358,6 +359,7 @@ class ServerConfService {
 ServerAdmin "${server.adminEmail}"
 ServerName "${serverName}"
 Listen ${serverPort}
+Listen ${csvnAuthenticationProvider.getAuthHelperPort(server, true)}
 ${getDefaultHttpdSnippets()}
 ${ldapConfSnippet}
 ${fileAuthConfSnippet}
@@ -411,6 +413,8 @@ CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REP
         boolean ctfMode = server.mode == ServerMode.MANAGED ||
             server.mode == ServerMode.CONVERTING_TO_MANAGED
         def conf = """${DONT_EDIT}
+<VirtualHost *:${server.port}>
+${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
 # Work around authz and SVNListParentPath issue
 RedirectMatch ^(/svn)\$ \$1/
@@ -451,7 +455,19 @@ ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
 """
         conf += ctfMode ? getCtfViewVCHttpdConf(server) : 
             getViewVCHttpdConf(server)
-        conf += "</Location>"
+        conf += "</Location>\n"
+        conf += "</VirtualHost>\n\n"
+        conf += """
+#
+# auth helper endpoint for use by SvnEdge
+#        
+<VirtualHost localhost:${csvnAuthenticationProvider.getAuthHelperPort(server, false)}>
+  <Location "/">
+${getAuthBasic(server)}
+  Require valid-user
+  </Location>
+</VirtualHost>
+"""
 
         new File(confDirPath(), "svn_viewvc_httpd.conf").write(conf)
     }
@@ -471,7 +487,7 @@ MaxMemFree 512
         }
         conf += """PidFile "${ConfigUtil.dataDirPath()}/run/httpd.pid"\n"""
     }    
-        
+
     private def getLdapURL(server) {
         def ldapUrl
         if (server.ldapSecurityLevel != "NONE") {
@@ -482,7 +498,7 @@ MaxMemFree 512
         ldapUrl += "${server.ldapServerHost}"
         if (server.ldapServerPort != 389) {
             ldapUrl += ":${server.ldapServerPort}"
-        } 
+        }
         if (server.ldapAuthBasedn) {
             ldapUrl += "/${server.ldapAuthBasedn}"
         }
@@ -603,7 +619,6 @@ LDAPVerifyServerCert Off
 LoadModule ssl_module lib/modules/mod_ssl.so
 SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
-SSLEngine on
 SSLCertificateFile    "${confDirPath()}/server.crt"
 SSLCertificateKeyFile "${confDirPath()}/server.key"
 SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
@@ -651,7 +666,7 @@ ${extraconf}
             authProviders += " ldap-users"
         }
         conf += """  AuthType Basic
-  AuthName "CollabNet Subversion Repository"
+  AuthName "${csvnAuthenticationProvider.AUTH_REALM}"
   AuthBasicProvider ${authProviders}
 """
         conf

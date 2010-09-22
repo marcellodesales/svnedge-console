@@ -30,8 +30,7 @@ security {
     algorithm = "MD5"
     encodeHashAsBase64 = false
  
-    providerNames = ['daoAuthenticationProvider',
-        'anonymousAuthenticationProvider']
+    providerNames = ['csvnAuthenticationProvider']
 
     filterNames = [
         'httpSessionContextIntegrationFilter',

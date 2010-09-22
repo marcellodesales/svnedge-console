@@ -29,6 +29,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     def lifecycleService
     def commandLineService
     def serverConfService
+    def csvnAuthenticationProvider
     boolean initialStarted
     def repoParentDir 
 
@@ -251,6 +252,20 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         server.ldapSearchScope = ""
 
         server.save()
+    }
+    
+    void testAuthHelper() {
+        
+        assertFalse("Should start off with server stopped",
+                    lifecycleService.isStarted())
+        
+        lifecycleService.startServer()
+        
+        Server server = lifecycleService.getServer()
+        String authHelperUrl = csvnAuthenticationProvider.getAuthHelperUrl(server)
+        
+        assertTrue("Apache should have verifiable auth helper endpoint",
+                    csvnAuthenticationProvider.testAuthListener(authHelperUrl))
     }
 
     private def copyConfFiles(origConfDirPath, confDir) {

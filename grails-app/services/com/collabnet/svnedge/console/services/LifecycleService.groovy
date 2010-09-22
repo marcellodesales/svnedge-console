@@ -60,6 +60,7 @@ class LifecycleService {
         } else {
             def bootstrapParam = this.getServerLifecycleBootstrapParams()
             int port = config.svnedge.defaultHighPort
+            int authHelperPort = config.svnedge.defaultApacheAuthHelperPort
 
             File repoParentFile = new File(
                 config.svnedge.svn.repositoriesParentPath)
@@ -67,6 +68,7 @@ class LifecycleService {
             server = new Server(
                 hostname: bootstrapParam.hostname,
                 port: port,
+                authHelperPort: authHelperPort,
                 repoParentDir: repoParentDir,
                 netInterface: bootstrapParam.ifName,
                 ipAddress: bootstrapParam.ipAddress,

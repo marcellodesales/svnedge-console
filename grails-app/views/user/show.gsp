@@ -61,11 +61,13 @@
         <div class="buttons">
             <g:form>
                 <input type="hidden" name="id" value="${userInstance.id}" />
-                <span class="button"><g:actionSubmit class="edit" value="${message(code:'user.page.edit.button.edit')}" /></span>
-                <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
+                <g:if test="${editable}">
+                  <span class="button"><g:actionSubmit class="edit" value="${message(code:'user.page.edit.button.edit')}" /></span>
+                  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
                     <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
                     <span class="button"><g:actionSubmit class="delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" /></span>
-                </g:ifAnyGranted>
+                  </g:ifAnyGranted>
+                </g:if> 
             </g:form>
         </div>
 

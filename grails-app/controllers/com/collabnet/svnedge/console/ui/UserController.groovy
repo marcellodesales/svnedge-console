@@ -33,6 +33,7 @@ class UserController {
     def authenticateService
     def userCache
     def lifecycleService
+    def userAccountService
     org.hibernate.SessionFactory sessionFactory
 
     def index = {
@@ -52,7 +53,8 @@ class UserController {
 
         def username = authenticateService.principal().getUsername()
         def userInstance = User.findByUsername(username)
-        render(view: "show", model: [userInstance: userInstance])
+        def editable = !userAccountService.isLdapUser(userInstance)
+        render(view: "show", model: [userInstance: userInstance, editable: editable])
 
     }
 
@@ -132,6 +134,7 @@ class UserController {
 
     def show = {
         def userInstance = User.get(params.id)
+        def editable = !userAccountService.isLdapUser(userInstance)
         if (!userInstance) {
             flash.error = message(code: "default.not.found.message", 
                     args: [message(code: "user.label"),
@@ -145,7 +148,7 @@ class UserController {
             redirect(action: "list")
         }
         else {
-            [userInstance: userInstance]
+            [userInstance: userInstance, editable: editable ]
         }
     }
 
@@ -162,6 +165,10 @@ class UserController {
                     args: [message(code: "user.label"),
                            params.id])
             redirect(action: "list")
+        }
+        else if (userAccountService.isLdapUser(userInstance)) {
+            flash.warn = message(code: "user.page.edit.ldap.message")
+            redirect(action: "show", params: [id : params.id])
         }
         else {
 
@@ -398,7 +405,7 @@ class UserController {
         // 2) ROLE_ADMIN can edit anyone
         def uname = authenticateService.principal().getUsername();
         def sessionUser = User.findByUsername(uname)
-        if (sessionUser?.id?.toString() == id || 
+        if (sessionUser?.id?.toString() == id ||
                 authenticateService.ifAllGranted("ROLE_ADMIN")) return true
 
         // 3) ROLE_ADMIN_USERS can edit anyone having same or lower auth grants
