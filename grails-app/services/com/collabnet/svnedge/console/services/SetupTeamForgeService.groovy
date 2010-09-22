@@ -1115,8 +1115,18 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 getCsvnUsersComparedToCtfUsers(conversionData)[1]
 
             def csvnUsers = User.list()
+            def dotUsersAlreadyFound = false
             for (User user in csvnUsers) {
                 if (csvnUsernames.contains(user.username)) {
+                    if (user.username.contains(".")) {
+                        if (!dotUsersAlreadyFound) {
+                            def msg = getMessage("setupTeamForge.integration." +
+                                "users.usernamesWithDotsNotImported")
+                            warnings << msg
+                            dotUsersAlreadyFound = true
+                        }
+                        continue
+                    }
                     addUser(user, conversionData, warnings)
                 }
             }

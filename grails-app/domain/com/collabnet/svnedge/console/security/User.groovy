@@ -46,7 +46,7 @@ class User {
 
     static constraints = {
         username(blank: false, unique: true, minSize: 1, maxSize: 31, 
-            matches: "[A-Za-z][_A-Za-z0-9]*", validator: { val ->
+            matches: "[A-Za-z][._A-Za-z0-9]*", validator: { val ->
                 if (val.indexOf(" ") >= 0) {
                     return "spaces.not.allowed"
                 }
