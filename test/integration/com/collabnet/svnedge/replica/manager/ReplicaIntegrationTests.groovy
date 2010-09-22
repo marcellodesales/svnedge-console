@@ -36,6 +36,7 @@ class ReplicaIntegrationTests extends GrailsUnitTestCase {
         def server = new Server(
                 hostname: "test.host.name",
                 port: 1025,
+                authHelperPort: 1026,
                 fileLoginEnabled: true,
                 ipAddress: inetAddress.getHostAddress(),
                 netInterface: "eth0",
