@@ -259,9 +259,12 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
         
+        Server server = lifecycleService.getServer()
+        server.ldapEnabled = true
+        server.save()
+        
         lifecycleService.startServer()
         
-        Server server = lifecycleService.getServer()
         String authHelperUrl = csvnAuthenticationProvider.getAuthHelperUrl(server)
         
         assertTrue("Apache should have verifiable auth helper endpoint",

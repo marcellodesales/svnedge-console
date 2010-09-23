@@ -457,7 +457,8 @@ ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
             getViewVCHttpdConf(server)
         conf += "</Location>\n"
         conf += "</VirtualHost>\n\n"
-        conf += """
+        if (server.mode != ServerMode.MANAGED && server.ldapEnabled) {
+            conf += """
 #
 # auth helper endpoint for use by SvnEdge
 #        
@@ -468,7 +469,7 @@ ${getAuthBasic(server)}
   </Location>
 </VirtualHost>
 """
-
+        }
         new File(confDirPath(), "svn_viewvc_httpd.conf").write(conf)
     }
     
