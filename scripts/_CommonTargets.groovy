@@ -59,6 +59,7 @@ target(prepare: 'Prepares properties and fields') {
         osName = "solaris"
     }
     Ant.property(name: "osName", value: osName)
+    Ant.property(name: "bits", value: Ant.project.properties."x64" ? "64":"32")
 
     distDir = Ant.project.properties.'distDir'
 
@@ -86,10 +87,8 @@ target(downloadArtifacts: 'Downloads the csvn binaries') {
     System.setProperty( 'javax.net.ssl.trustStore', trustStore )
     System.setProperty( 'javax.net.ssl.keyStorePassword', "together" )
 
-    def bits = "32"
-    if (Ant.project.properties."x64") {
-        bits = "64"
-    }
+    def bits = Ant.project.properties."bits"
+
     //Downloading from the Cubit Project Build Library... "guest" access...
     if (osName == "linux") {
         Ant.get(dest: archiveFile,

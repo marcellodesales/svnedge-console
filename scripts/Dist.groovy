@@ -39,6 +39,7 @@ target(build: 'Builds the distribution file structure') {
     Ant.property(name: "distDir", value: distDir)
     prepare()
     osName = Ant.project.properties.'osName'
+    bits = Ant.project.properties."bits"
 
     Ant.echo(message: "Building the distribution system for $osName")
     def version = metadata.getApplicationVersion()
@@ -82,7 +83,7 @@ target(createDistributionStructure: 'Creates the distribution structure') {
 target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
     Ant.echo(message: "Building the distribution system for ${osName}")
 
-    if (osName == "linux" || osName == "solaris") {
+    if (osName == "linux") {
         Ant.exec(dir:"${distDir}", executable: "gunzip") {
             arg(line: archiveFile)
         }
@@ -129,13 +130,77 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/linux/lib/libwrapper-linux-x86-64.so",
             todir: "${distDir}/lib")
+
         // Copy the SIGAR libraries to lib folder which is on java.library.path
-        Ant.copy(file: "${basedir}/ext" +
-            "/sigar/libsigar-amd64-linux.so",
+        if (bits == "64") {
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-amd64-linux.so",
+                todir: "${distDir}/lib")
+        } else {
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-x86-linux.so",
+                todir: "${distDir}/lib")
+        }
+
+    } else if (osName == "solaris") {
+
+//        Ant.exec(dir:"${distDir}", executable: "gunzip") {
+//            arg(line: archiveFile)
+//        }
+//        // remove the .gz
+//        archiveFile = archiveFile.substring(0, archiveFile.length() - 3)
+//        Ant.exec(dir: "${distDir}", executable: "tar") {
+//            arg(line: "-xpf")
+//            arg(line: archiveFile)
+//        }
+//        Ant.delete(file: archiveFile)
+
+         //Copying the service wrapper artifacts
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/csvn",
+            todir: "${distDir}/bin")
+//        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+//            "/solaris/bin/csvn-httpd",
+//            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/wrapper-solaris-x86-${bits}",
+            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/wrapper-solaris-sparc-${bits}",
+            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/start.ini",
+            todir: "${distDir}/bin")
+        Ant.chmod(dir: distDir + "/bin", perm: "a+x",
+            includes: "csvn*")
+        Ant.chmod(dir: distDir + "/bin", perm: "a+x",
+            includes: "wrapper-solaris*")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/conf/csvn-wrapper.conf",
+            todir: "${distDir}/data/conf")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/conf/csvn.conf.dist",
+            todir: "${distDir}/data/conf")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/wrapper.jar",
             todir: "${distDir}/lib")
-        Ant.copy(file: "${basedir}/ext" +
-            "/sigar/libsigar-x86-linux.so",
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-x86-${bits}.so",
             todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-sparc-${bits}.so",
+            todir: "${distDir}/lib")
+
+        // Copy the SIGAR libraries to lib folder which is on java.library.path
+//        if (bits == "64") {
+//            Ant.copy(file: "${basedir}/ext" +
+//                "/sigar/libsigar-amd64-${osName}.so",
+//                todir: "${distDir}/lib")
+//        } else {
+//            Ant.copy(file: "${basedir}/ext" +
+//                "/sigar/libsigar-x86-${osName}.so",
+//                todir: "${distDir}/lib")
+//        }
 
     } else
     if (osName == "windows") {
