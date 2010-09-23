@@ -199,7 +199,7 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def editAuthorization = {
-
+        flash.clear()
         String accessRules = serverConfService.readSvnAccessFile()
         def command = new AuthzRulesCommand(accessRules: accessRules)
         [ authRulesCommand : command]
@@ -213,10 +213,12 @@ class RepoController {
                 cmd.accessRules)) {
             flash.message = message(
                 code: 'repository.action.saveAuthorization.success')
+            flash.error = null
         }
         else {
             flash.error = message(
                 code: 'repository.action.saveAuthorization.failure')
+            flash.message = null
         }
         render(view : 'editAuthorization', model : [authRulesCommand : cmd])
 
