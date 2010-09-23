@@ -41,6 +41,8 @@ class DiscoveryService {
     boolean transactional = false
 
     def networkingService
+    
+    def boolean bootstrapped
 
     /**
      * The instance of the SvnEdge register client.
@@ -49,14 +51,21 @@ class DiscoveryService {
 
     def bootStrap = { config ->
 
+        log.info("Bootstrapping the Discovery service...")
+
+        if (System.getProperty("csvn.discovery.disabled")) {
+            log.info("Discovery is disabled by the system properties " +
+                "'csvn.discovery.disabled'...")
+            bootstrapped = false
+            return
+        }
+
         def serviceName = config.svnedge.mdns.serviceName
         serviceName = serviceName as String
         def hostAddr = networkingService.ipAddress
         def port = config.svnedge.mdns.port
         def path = config.grails.app.context
         def tfPath = config.svnedge.mdns.teamForgeRegistrationPath
-
-        log.info("Bootstrapping the Discovery service...")
 
         try {
             register = SvnEdgeBonjourRegister.getInstance(
@@ -67,11 +76,12 @@ class DiscoveryService {
         } catch (Exception e) {
             e.printStackTrace()
             log.error(e)
+            bootstrapped = false
         }
     }
-    
-    private def registerServices = { config ->
-    
+
+    private void registerServices(config) throws IOException {
+
         if (register) {
             def serviceName = config.svnedge.mdns.serviceName
             serviceName = serviceName as String
@@ -101,7 +111,9 @@ class DiscoveryService {
      * unregister all the services 
      */
     def close = {
-        register.close()
+        if (bootstrapped) {
+            register.close()
+        }
     }
 
     /**
@@ -109,7 +121,10 @@ class DiscoveryService {
      * closes current responder
      * creates a new responder with updated config
      */
-    def serverUpdated = { 
+    def serverUpdated = {
+        if (!bootstrapped) {
+            return
+        }
         log.info("Updating discovery service information...")
         def currentConfig = ConfigurationHolder.config;
 
