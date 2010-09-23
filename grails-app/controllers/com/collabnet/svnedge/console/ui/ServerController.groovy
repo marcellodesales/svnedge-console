@@ -194,8 +194,14 @@ class ServerController {
         Collections.sort(networkInterfaces)
 
         String portValue = server.port.toString()
-        def showPortInstructions = Integer.parseInt(portValue) < 1024 &&
+        boolean isPrivatePort = Integer.parseInt(portValue) < 1024
+        def showPortInstructions = isPrivatePort && 
             !lifecycleService.isDefaultPortAllowed()
+        def isSolaris = operatingSystemService.isSolaris()
+        int solarisCheck = lifecycleService.checkSolarisNetPrivAddr()
+        def showSolarisPortHelp = isSolaris && isPrivatePort &&
+            solarisCheck == 2 && 
+            !lifecycleService.isHttpdBindSuid() && !lifecycleService.isSudo()
         def config = ConfigurationHolder.config
 
         return [
@@ -210,6 +216,8 @@ class ServerController {
                 config.svnedge.appHome : '<AppHome>',
             csvnConf: ConfigUtil.confDirPath(),
             standardPortInstructions: showPortInstructions,
+            isSolaris: isSolaris,
+            showSolarisPortHelp: showSolarisPortHelp,
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,
             isConfigurable: serverConfService.createOrValidateHttpdConf()

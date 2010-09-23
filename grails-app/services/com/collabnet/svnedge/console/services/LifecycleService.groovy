@@ -37,6 +37,7 @@ class LifecycleService {
     def commandLineService    
     def serverConfService
     def networkingService
+    def operatingSystemService
 
     int MAX_SERVER_WAIT_TIME = 60
 
@@ -47,7 +48,11 @@ class LifecycleService {
 
 
     private boolean isWindows() {
-        return null != ConfigUtil.serviceName()
+        return operatingSystemService.isWindows()
+    }
+
+    private boolean isSolaris() {
+        return operatingSystemService.isSolaris()
     }
 
     def bootstrapServer(config) {
@@ -410,9 +415,14 @@ root@${server.hostname}
     boolean isDefaultPortAllowed() {
         boolean result = isWindows()
         if (!result) {
-            result = isHttpdBindSuid()
+            if (checkSolarisNetPrivAddr()) {
+                result = true
+            }
             if (!result) {
-                result = isSudo()
+                result = isHttpdBindSuid()
+                if (!result) {
+                    result = isSudo()
+                }
             }
         }
         return result
@@ -489,6 +499,34 @@ root@${server.hostname}
         result
     }
 
+    /**
+     * Checks that the svnedge user has the user_attr entry to allow it to 
+     * start httpd on privileged ports.  
+     * 
+     * @return 0 -> false, 1 -> true, 2 -> inconclusive
+     */
+    int checkSolarisNetPrivAddr() {
+        if (!isSolaris()) {
+            return 0
+        }
+        int result = 2
+        String user = System.getProperty("user.name")
+        File userAttrFile = new File("/etc/user_attr")
+        if (userAttrFile.canRead()) {
+            result = 0
+            userAttrFile.eachLine { line ->
+                if (line.startsWith(user)) {
+                    int pos = line.indexOf("net_privaddr")
+                    if (pos > 0 && line.charAt(pos - 1) != '!') {
+                        result = 1
+                        return
+                    }
+                }
+            }
+        }
+        return result
+    }
+    
     /**
      * @return the map with the values for the bootstrap.
      */

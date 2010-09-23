@@ -205,6 +205,10 @@ class OperatingSystemService {
         return OperatingSystem.IS_WIN32
     }
 
+    def boolean isSolaris() {
+        return System.getProperty("os.name").startsWith("Sun")
+    }
+    
     /**
      * @return the single implementation of the sigar.
      */
