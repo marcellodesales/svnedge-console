@@ -7,7 +7,7 @@
     <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
 
     <g:javascript>
-
+    /* <![CDATA[ */
     var addrInterfaceMap = []
     <g:each in="${addrInterfaceMap}">
         addrInterfaceMap["${it.key}"] = [
@@ -93,6 +93,7 @@
                 return false;
             }
         }
+      /* ]]> */
     </g:javascript>
     
   </head>
@@ -171,7 +172,7 @@ users access to ports less than 1024.</p>
     <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', events:events, label: message(code:'server.page.edit.tabs.authentication')]}" />
   </g:if>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-  <g:form method="post" onSubmit="javascript:check();" name="serverForm">
+  <g:form method="post" onsubmit="javascript:check();" name="serverForm">
       <g:hiddenField name="view" value="edit"/>
   
       <input type="hidden" name="id" value="${server.id}" />
@@ -280,10 +281,10 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
           <td class="ItemDetailName">
-              <label for="interface"><g:message code="server.netInterface.label" /></label>
+              <label for="netInterface"><g:message code="server.netInterface.label" /></label>
           </td>
           <td class="value">
-             <g:select name="netInterface" from="${networkInterfaces}" 
+             <g:select name="netInterface" id="netInterface" from="${networkInterfaces}" 
                  value="${server.netInterface}"/>
              <script type="text/javascript">updateInterface(document.getElementById('ipAddress'))</script>
           </td>
@@ -294,7 +295,7 @@ users access to ports less than 1024.</p>
           </td>
           <td colspan="2" class="ItemDetailValue">
               <!-- Widget should eventually change to person picker (See TeamForge) -->
-              <input name="adminName" type="text" 
+              <input name="adminName" id="adminName" type="text" 
                   value="${server.adminName}"/>
               <g:hasErrors bean="${server}" field="adminName">
                  <ul><g:eachError bean="${server}" field="adminName">
@@ -309,7 +310,7 @@ users access to ports less than 1024.</p>
               <label for="adminEmail"><g:message code="server.adminEmail.label" /></label>
           </td>
           <td class="value errors" colspan="2">
-              <input name="adminEmail" type="text" 
+              <input name="adminEmail" id="adminEmail" type="text" 
                   value="${server.adminEmail}"/>
               <g:hasErrors bean="${server}" field="adminEmail">
                   <ul><g:eachError bean="${server}" field="adminEmail">
@@ -323,7 +324,7 @@ users access to ports less than 1024.</p>
               <label for="adminAltContact"><g:message code="server.adminAltContact.label" /></label>
           </td>
           <td valign="top" class="ItemDetailValue" colspan="2">
-              <input name="adminAltContact" type="text" 
+              <input name="adminAltContact" id="adminAltContact" type="text" 
                   value="${server.adminAltContact}"/>
               <g:hasErrors bean="${server}" field="adminAltContact">
                   <ul><g:eachError bean="${server}" field="adminAltContact">
@@ -334,7 +335,7 @@ users access to ports less than 1024.</p>
       </tr>      
       <tr>
          <td class="ItemDetailName">
-          <label for="name"><g:message code="server.useSsl.label" /></label>
+          <label for="useSsl"><g:message code="server.useSsl.label" /></label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSsl','errors')}" colspan="2">
           <g:checkBox name="useSsl" value="${server.useSsl}"/>
@@ -343,7 +344,7 @@ users access to ports less than 1024.</p>
       </tr>
       <tr>
          <td class="ItemDetailName">
-          <label for="name"><g:message code="server.useSslConsole.label" /></label>
+          <label for="useSslConsole"><g:message code="server.useSslConsole.label" /></label>
          </td>
         <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSslConsole','errors')}" colspan="2">
           <g:checkBox name="useSslConsole" value="${server.useSslConsole}"/>
@@ -367,7 +368,6 @@ users access to ports less than 1024.</p>
         <td >
           <div class="AlignRight">
                 <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
-            </div>
           </div>
         </td>
       </tr>
