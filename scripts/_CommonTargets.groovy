@@ -98,11 +98,7 @@ target(downloadArtifacts: 'Downloads the csvn binaries') {
 
     } else if (osName == "solaris") {
         def proc = System.getProperty("os.arch").startsWith("sparc") ?
-	    "SPARC" : "SPARC" // FIXME! should be "x86"
-	if (!System.getProperty("os.arch").startsWith("sparc")) {
-            Ant.echo("!!!!!!! x86 arch binaries don't exist yet.  " +
-	        "Downloading sparc binaries, but they won't work.")
-        }
+	    "SPARC" : "x86"
         Ant.get(dest: archiveFile, 
                 src: urlPrefix + "solaris/" +
                 "CollabNet_Subversion-Sol10-${proc}_${bits}-latest.tar.gz")
