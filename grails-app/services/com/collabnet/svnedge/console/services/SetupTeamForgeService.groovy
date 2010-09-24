@@ -235,7 +235,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * letters, numbers, and underscore in the name.  This method sets
      * several flags or lists in the wizard bean related to invalid repos
      */
-    def validateRepoNames() {
+    def validateRepos() {
         def repoParent = Server.getServer().repoParentDir
         def repos = Repository.list(sort:'name')
         def repoNames = new HashSet(repos.collect({ it.name }))
@@ -244,6 +244,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def containsUpperCaseRepos = false
         def containsReposWithInvalidFirstChar = false
         def longRepoPath = null
+        def permissionsNotOk = []
         for (repo in repos) {
             def repoName = repo.name
             if (!repo.validateName()) {
@@ -270,13 +271,17 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                     longRepoPath = repoPath                    
                 }                
             }
+            if (!repo.permissionsOk) {
+                permissionsNotOk << repoName
+            }
         }
         return ['unfixableRepoNames':unfixableRepoNames, 
                 'duplicatedReposIgnoringCase':duplicatedReposIgnoringCase,
                 'containsUpperCaseRepos':containsUpperCaseRepos, 
                 'containsReposWithInvalidFirstChar': 
                 containsReposWithInvalidFirstChar,
-                'longRepoPath':longRepoPath]
+                'longRepoPath':longRepoPath,
+                'permissionsNotOk':permissionsNotOk]
     }
 
     String validateRepoPrefix(prefix) {

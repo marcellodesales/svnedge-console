@@ -132,16 +132,18 @@ class SetupTeamForgeController {
             redirect(action:'ctfInfo')
             return
         }
-        def result = setupTeamForgeService.validateRepoNames()
+        def result = setupTeamForgeService.validateRepos()
         def unfixableRepoNames = result['unfixableRepoNames']
         def duplicatedReposIgnoringCase = 
             result['duplicatedReposIgnoringCase']
         def containsUpperCaseRepos = result['containsUpperCaseRepos']
         def containsReposWithInvalidFirstChar = 
             result['containsReposWithInvalidFirstChar']
+        def permissionsNotOk = result['permissionsNotOk']
 
         if (unfixableRepoNames || duplicatedReposIgnoringCase || 
-            containsUpperCaseRepos || containsReposWithInvalidFirstChar) {
+            containsUpperCaseRepos || containsReposWithInvalidFirstChar ||
+            permissionsNotOk) {
 
             conversionObject.errors.reject(
                 "ctfConversion.ctfProject.invalidReposValidDef")
@@ -191,6 +193,10 @@ class SetupTeamForgeController {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposAutoFixAll")
                 }
+            }
+
+            if (permissionsNotOk) {
+                conversionObject.errors.reject("ctfConversion.ctfProject.invalidReposPermissions")
             }
         }
 
@@ -250,7 +256,7 @@ class SetupTeamForgeController {
             }
         }
 
-        def val = setupTeamForgeService.validateRepoNames()
+        def val = setupTeamForgeService.validateRepos()
         con.validate()
         if (con.hasErrors() || val.unfixableRepoNames || 
             val.duplicatedReposIgnoringCase ||
@@ -258,6 +264,12 @@ class SetupTeamForgeController {
             (val.containsReposWithInvalidFirstChar && !con.repoPrefix)) {
 
             forward(action:'ctfProject')
+            return
+        }
+        // if permissions are still not fixed...
+        if (val.permissionsNotOk) {
+            con.errors.reject("ctfConversion.ctfProject.invalidReposPermissions")
+            render(view:'ctfProject', model: [con:con, invalidRepoNames:val])
             return
         }
 
