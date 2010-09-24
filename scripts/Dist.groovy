@@ -311,9 +311,9 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
          todir: "${distdataDir}")
     Ant.copy(file: "${distDir}/temp-data/conf/csvn-wrapper.conf",
          todir: "${distdataDir}")
-    if (osName == "linux") {
+    if (osName == "linux" || osName == "solaris") {
 	    Ant.copy(file: "${distDir}/temp-data/conf/csvn.conf.dist",
-	         todir: "${distdataDir}")    
+	         todir: "${distdataDir}")
     }
     Ant.delete(file: "${distDir}/temp-data/conf/httpd.conf")
     if (osName == "windows") {
