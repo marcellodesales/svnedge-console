@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.ui
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.Repository
@@ -486,7 +487,8 @@ class SetupTeamForgeController {
             // general errors that the administrator needs to take action.
             // 1. BindException due to old httpd.pid.
             def msg = message(code: 'setupTeamForge.action.convert.svn.error')
-            flash.error = msg + " " + cantConvertScm.getMessage(request.locale)
+            flash.error = msg + " " + cantConvertScm.getMessage(
+                RCU.getLocale(request))
             redirect(action: 'ctfInfo')
 
         } catch (RemoteAndLocalConversationException remoteCommProblem) {

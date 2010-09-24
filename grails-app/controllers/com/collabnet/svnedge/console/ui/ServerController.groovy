@@ -26,6 +26,7 @@ import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
+import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 class CtfCredentialCommand {
     String ctfUsername
@@ -170,7 +171,7 @@ class ServerController {
                     }
                 } catch (CantBindPortException cantStopRunningServer) {
                     flash.error = cantStopRunningServer.getMessage(
-                        request.locale)
+                        RCU.getLocale(request))
                 }
             } else {
                 serverConfService.writeConfigFiles()
