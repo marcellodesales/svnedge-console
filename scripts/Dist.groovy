@@ -145,16 +145,16 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
 
     } else if (osName == "solaris") {
 
-//        Ant.exec(dir:"${distDir}", executable: "gunzip") {
-//            arg(line: archiveFile)
-//        }
-//        // remove the .gz
-//        archiveFile = archiveFile.substring(0, archiveFile.length() - 3)
-//        Ant.exec(dir: "${distDir}", executable: "tar") {
-//            arg(line: "-xpf")
-//            arg(line: archiveFile)
-//        }
-//        Ant.delete(file: archiveFile)
+        Ant.exec(dir:"${distDir}", executable: "gunzip") {
+            arg(line: archiveFile)
+        }
+        // remove the .gz
+        archiveFile = archiveFile.substring(0, archiveFile.length() - 3)
+        Ant.exec(dir: "${distDir}", executable: "tar") {
+            arg(line: "-xpf")
+            arg(line: archiveFile)
+        }
+        Ant.delete(file: archiveFile)
 
          //Copying the service wrapper artifacts
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
@@ -164,10 +164,10 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
 //            "/solaris/bin/csvn-httpd",
 //            todir: "${distDir}/bin")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-            "/solaris/bin/wrapper-solaris-x86-${bits}",
+            "/solaris/bin/wrapper-solaris-x86-64",
             todir: "${distDir}/bin")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-            "/solaris/bin/wrapper-solaris-sparc-${bits}",
+            "/solaris/bin/wrapper-solaris-sparc-64",
             todir: "${distDir}/bin")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/bin/start.ini",
@@ -186,10 +186,10 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             "/solaris/lib/wrapper.jar",
             todir: "${distDir}/lib")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-            "/solaris/lib/libwrapper-solaris-x86-${bits}.so",
+            "/solaris/lib/libwrapper-solaris-x86-64.so",
             todir: "${distDir}/lib")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-            "/solaris/lib/libwrapper-solaris-sparc-${bits}.so",
+            "/solaris/lib/libwrapper-solaris-sparc-64.so",
             todir: "${distDir}/lib")
 
         // Copy the SIGAR libraries to lib folder which is on java.library.path
