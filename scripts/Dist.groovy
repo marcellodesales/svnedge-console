@@ -40,6 +40,7 @@ target(build: 'Builds the distribution file structure') {
     prepare()
     osName = Ant.project.properties.'osName'
     bits = Ant.project.properties."bits"
+    arch = Ant.project.properties."arch"
 
     Ant.echo(message: "Building the distribution system for $osName")
     def version = metadata.getApplicationVersion()
@@ -192,15 +193,28 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             todir: "${distDir}/lib")
 
         // Copy the SIGAR libraries to lib folder which is on java.library.path
-//        if (bits == "64") {
-//            Ant.copy(file: "${basedir}/ext" +
-//                "/sigar/libsigar-amd64-${osName}.so",
-//                todir: "${distDir}/lib")
-//        } else {
-//            Ant.copy(file: "${basedir}/ext" +
-//                "/sigar/libsigar-x86-${osName}.so",
-//                todir: "${distDir}/lib")
-//        }
+        if (bits == "64") {
+            if (arch == "amd64") {
+                Ant.copy(file: "${basedir}/ext" +
+                    "/sigar/libsigar-amd64-solaris.so",
+                    todir: "${distDir}/lib")
+            } else {
+                Ant.copy(file: "${basedir}/ext" +
+                    "/sigar/libsigar-sparc64-solaris.so",
+                    todir: "${distDir}/lib")
+            }
+
+        } else {
+            if (arch == "sparc") {
+                Ant.copy(file: "${basedir}/ext" +
+                    "/sigar/libsigar-sparc-solaris.so",
+                    todir: "${distDir}/lib")
+            } else {
+                Ant.copy(file: "${basedir}/ext" +
+                    "/sigar/libsigar-x86-solaris.so",
+                    todir: "${distDir}/lib")
+            }
+        }
 
     } else
     if (osName == "windows") {

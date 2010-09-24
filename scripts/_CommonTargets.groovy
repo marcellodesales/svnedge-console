@@ -45,6 +45,16 @@ target(prepare: 'Prepares properties and fields') {
             os(arch: "amd64")
         }
     }
+    Ant.condition(property:"sparc") {
+        or() {
+            os(arch: "sparc")
+        }
+    }
+    Ant.condition(property:"amd64") {
+        and() {
+            os(arch: "amd64")
+        }
+    }
     
     if (Ant.project.properties."macPrepare") {
         osName = "mac";
@@ -59,6 +69,18 @@ target(prepare: 'Prepares properties and fields') {
         osName = "solaris"
     }
     Ant.property(name: "osName", value: osName)
+
+    if (Ant.project.properties."amd64") {
+        arch = "amd64"
+
+    } else if (Ant.project.properties."sparc") {
+        arch = "sparc"
+
+    } else {
+        arch = "x86"
+    }
+    Ant.property(name: "arch", value: arch)
+
     Ant.property(name: "bits", value: Ant.project.properties."x64" ? "64":"32")
 
     distDir = Ant.project.properties.'distDir'
