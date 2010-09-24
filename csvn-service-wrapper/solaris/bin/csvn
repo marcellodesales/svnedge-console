@@ -135,20 +135,24 @@ do
     fi
 done
 
+# Change the current directory to the location of the script
+cd "`dirname "$REALPATH"`"
+REALDIR=`pwd`
+
 # artf62798 moving the wrapper configuration in case the directory "data" does
 # not exist. 
-if [ ! -d "$REALPATH/../data/" ]; then
-    mkdir -p $REALPATH/../data/conf $REALPATH/../data/logs $REALPATH/../data/run $REALPATH/../data/repositories
+if [ ! -d "$REALDIR/../data/" ]; then
+    mkdir -p $REALDIR/../data/conf $REALDIR/../data/logs $REALDIR/../data/run $REALDIR/../data/repositories
 fi
-if [ -f "$REALPATH/../temp-data/conf/csvn-wrapper.conf" ]; then
-    mv $REALPATH/../temp-data/conf/csvn-wrapper.conf $REALPATH/../data/conf
+if [ -f "$REALDIR/../temp-data/conf/csvn-wrapper.conf" ]; then
+    mv $REALDIR/../temp-data/conf/csvn-wrapper.conf $REALDIR/../data/conf
 fi
-if [ ! -f "$REALPATH/../data/conf/csvn-wrapper.conf" ]; then
-    cp $REALPATH/../dist/csvn-wrapper.conf $REALPATH/../data/conf
+if [ ! -f "$REALDIR/../data/conf/csvn-wrapper.conf" ]; then
+    cp $REALDIR/../dist/csvn-wrapper.conf $REALDIR/../data/conf
 fi
 # create csvn.conf if necessary
-if [ ! -f "$REALPATH/$CSVN_CONF" ]; then
-    cp $REALPATH/../dist/csvn.conf.dist $REALPATH/$CSVN_CONF
+if [ ! -f "$REALDIR/$CSVN_CONF" ]; then
+    cp $REALDIR/../dist/csvn.conf.dist $REALDIR/$CSVN_CONF
 fi
 
 # Change the current directory to the location of the script
