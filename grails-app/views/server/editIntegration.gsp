@@ -20,8 +20,9 @@
       <tr>
         <td class="ContainerBodyWithPaddedBorder">
 
-           <p><g:message code="server.page.editIntegration.p1" /> 
-           <strong><i>${ctfServerBaseUrl}</i></strong> <g:message code="server.page.editIntegration.p2" /></p>
+           <p>
+            <g:message code="server.page.editIntegration.p1" args="${['<strong><i>' + ctfServerBaseUrl + '</i></strong>']}" />
+           </p>
             <ul>
                 <li><g:message code="server.page.editIntegration.bullet1" /></li>
                 <li><g:message code="server.page.editIntegration.bullet2" />
