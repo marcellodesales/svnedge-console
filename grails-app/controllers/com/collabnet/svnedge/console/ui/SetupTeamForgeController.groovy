@@ -486,7 +486,7 @@ class SetupTeamForgeController {
             // general errors that the administrator needs to take action.
             // 1. BindException due to old httpd.pid.
             def msg = message(code: 'setupTeamForge.action.convert.svn.error')
-            flash.error = msg + ": " + cantConvertScm.getMessage()
+            flash.error = msg + " " + cantConvertScm.getMessage(request.locale)
             redirect(action: 'ctfInfo')
 
         } catch (RemoteAndLocalConversationException remoteCommProblem) {
@@ -494,14 +494,14 @@ class SetupTeamForgeController {
             // 2. ViewVC or SVN URLs not reachable from the Remote Master.
             def msg = message(code: 
                 'setupTeamForge.action.convert.ctfComm.error')
-            flash.error = msg + ": " + remoteCommProblem.getMessage()
+            flash.error = msg + " " + remoteCommProblem.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
 
         } catch (CtfSessionExpiredException sessionExpiredDuringConversion) {
             def msg = message(code: 
                 'setupTeamForge.action.convert.ctf.canceled')
-            flash.error = msg + ": " + 
+            flash.error = msg + " " + 
                 sessionExpiredDuringConversion.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
@@ -511,14 +511,14 @@ class SetupTeamForgeController {
             // 2. ViewVC or SVN URLs not reachable from the Remote Master.
             def msg = message(code: 
                 'setupTeamForge.action.convert.ctfComm.error')
-            flash.error = msg + ": " + remoteCommProblem.getMessage()
+            flash.error = msg + " " + remoteCommProblem.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
 
         } catch (Exception otherException) {
             def msg = message(code: 
                 'setupTeamForge.action.convert.cantConvert.error')
-            flash.error = msg + ": " + otherException.getMessage()
+            flash.error = msg + " " + otherException.getMessage()
             session[WIZARD_BEAN_KEY] = null
             redirect(action: 'ctfInfo')
         }

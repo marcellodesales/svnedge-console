@@ -210,7 +210,7 @@ class StatusController {
                     flash.error = message(code: 'server.status.errorStarting')
                 }
             } catch (CantBindPortException startServiceException) {
-                flash.error = startServiceException.getMessage()
+                flash.error = startServiceException.getMessage(request.locale)
             }
 
         } else {

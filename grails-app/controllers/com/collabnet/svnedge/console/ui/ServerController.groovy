@@ -169,7 +169,8 @@ class ServerController {
                                 "server.action.update.cantRestartServer")
                     }
                 } catch (CantBindPortException cantStopRunningServer) {
-                    flash.error = cantStopRunningServer.getMessage()
+                    flash.error = cantStopRunningServer.getMessage(
+                        request.locale)
                 }
             } else {
                 serverConfService.writeConfigFiles()

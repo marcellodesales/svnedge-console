@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
+import java.util.Locale;
+
 import org.codehaus.groovy.grails.commons.ApplicationHolder;
 
 /**
@@ -105,5 +107,13 @@ class CantBindPortException extends Exception {
         def args = [this.portNumber] as String[]
         def appCtx = appHolder.getMainContext()
         return appCtx.getMessage(key, args, Locale.getDefault())
+    }
+
+    @Override
+    public String getMessage(Locale locale) {
+        def key = 'server.error.cantBindPort'
+        def args = [this.portNumber] as String[]
+        def appCtx = appHolder.getMainContext()
+        return appCtx.getMessage(key, args, locale)
     }
 }
