@@ -201,8 +201,10 @@ class ServerConfService {
         }
         String libDir = new File(appHome, "lib").absolutePath
         File pythonBindingDir = new File(libDir, "svn-python")
-        String[] result1 = commandLineService
-            .executeWithOutput("rm", "-rf", pythonBindingDir.absolutePath)
+        if (pythonBindingDir.exists()) {
+            String[] result1 = commandLineService
+               .executeWithOutput("rm", "-rf", pythonBindingDir.absolutePath)
+        }
         File actualPythonBindingDir = new File(libDir,
             "svn-python${getPythonVersion()}")
         String[] result2 = commandLineService
@@ -210,8 +212,10 @@ class ServerConfService {
                                pythonBindingDir.absolutePath)
 
         File modpyLibDir = new File(libDir, "mod_python")
-        String[] result5 = commandLineService
-            .executeWithOutput("rm", "-rf", modpyLibDir.absolutePath)
+        if (modpyLibDir.exists()) {
+            String[] result5 = commandLineService
+                .executeWithOutput("rm", "-rf", modpyLibDir.absolutePath)
+        }
         File actualModpyLibDir = new File(libDir,
             "mod_python${getPythonVersion()}")
         String[] result6 = commandLineService
