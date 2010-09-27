@@ -20,6 +20,7 @@ package com.collabnet.svnedge.teamforge
 import groovy.lang.MetaClass;
 
 import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests;
+import com.collabnet.svnedge.AdminLoggedInAbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.Repository;
 import com.collabnet.svnedge.console.Server;
 import com.collabnet.svnedge.console.security.User;
@@ -33,7 +34,7 @@ import com.collabnet.svnedge.statistics.StatValue;
 *
 */
 abstract class AbstractConversionFunctionalTests extends 
-    AbstractSvnEdgeFunctionalTests {
+        AdminLoggedInAbstractSvnEdgeFunctionalTests {
 
     /**
      * It is the test URL based on the properties in the Config.groovy

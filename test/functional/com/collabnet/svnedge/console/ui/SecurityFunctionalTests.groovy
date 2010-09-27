@@ -17,114 +17,64 @@
  */
 package com.collabnet.svnedge.console.ui
 
-class SecurityFunctionalTests extends functionaltestplugin.FunctionalTestCase {
+import com.collabnet.svnedge.LoggedOutAbstractSvnEdgeFunctionalTests
+
+class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
     void testAdminAuthority() {
-        get('/login/auth')
-        assertStatus 200
-
-        form('loginForm') {
-            j_username = 'admin'
-            j_password = 'admin'
-            click 'Login'
-        }
-
-        assertStatus 200
-        assertContentContains 'Logged in as:' 
-        assertContentContains 'Administrator&nbsp;(admin)'
+        this.loginAdmin()
 
         get('/user/index')
         assertStatus 200
-        assertContentContains 'User List'
+        assertContentContains getMessage("user.page.list.header")
     }
-
 
     void testUserAuthority() {
-        get('/login/auth')
-        assertStatus 200
-        
-        form('loginForm') {
-            j_username = 'user'
-            j_password = 'admin'
-            click 'Login'
-        }
+        this.loginUser()
 
-        assertStatus 200
-        assertContentContains 'Logged in as:' 
-        assertContentContains 'Regular User&nbsp;(user)'
-
-        redirectEnabled = false
         get('/server/index')
-        assertRedirectUrlContains "login/denied"
-        //  Sorry, you're not authorized to view this page.
-
+        assertContentContains getMessage("user.page.denied.error")
     }
 
+    void testUserWithDotAuthority() {
+        this.login("user.new", "admin")
+
+        get('/server/index')
+        assertContentContains getMessage("user.page.denied.error")
+    }
 
     void testAdminUsersAuthority() {
-        get('/login/auth')
-        assertStatus 200
-
-        form('loginForm') {
-            j_username = 'adminUsers'
-            j_password = 'admin'
-            click 'Login'
-        }
-
-        assertStatus 200
-        assertContentContains 'Logged in as:'
+        this.login("adminUsers", "admin")
 
         get('/user/index')
         assertStatus 200
-        assertContentContains 'User List'
+        assertContentContains getMessage("user.page.list.header")
 
-        redirectEnabled = false
         get('/server/index')
-        assertRedirectUrlContains "login/denied"
+        assertContentContains getMessage("user.page.denied.error")
     }
 
     void testAdminSystemAuthority() {
-        get('/login/auth')
-        assertStatus 200
-
-        form('loginForm') {
-            j_username = 'adminSystem'
-            j_password = 'admin'
-            click 'Login'
-        }
-
-        assertStatus 200
-        assertContentContains 'Logged in as:'
+        this.login("adminSystem", "admin")
 
         get('/user/index')
         assertStatus 200
-        assertContentContains 'Show User'
+        assertContentContains getMessage("user.page.show.details.header")
 
         get('/server/edit')
         assertStatus 200
-        assertContentContains 'Server Settings'
+        assertContentContains getMessage('server.page.leftNav.settings')
     }
 
-      void testAdminReposAuthority() {
-        get('/login/auth')
-        assertStatus 200
+    void testAdminReposAuthority() {
+        this.login("adminRepo", "admin")
 
-        form('loginForm') {
-            j_username = 'adminRepo'
-            j_password = 'admin'
-            click 'Login'
-        }
-
-        assertStatus 200
-        assertContentContains 'Logged in as:'
-
-        redirectEnabled = false
         get('/server/index')
-        assertRedirectUrlContains "login/denied"
+        assertContentContains getMessage("user.page.denied.error")
 
         get('/repo/create')
         assertStatus 200
-        assertContentContains 'Create Repository'
+        assertContentContains getMessage('repository.page.create.title')
     }
 
 }

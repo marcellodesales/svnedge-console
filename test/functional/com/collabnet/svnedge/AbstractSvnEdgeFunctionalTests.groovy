@@ -63,23 +63,16 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
     protected void setUp() {
         //The web framework must be initialized.
         super.setUp()
-
-        this.loginAdmin()
     }
 
     @Override
     protected void tearDown() {
-        //Stop Svn Server in case it is running
-        this.stopSvnServer()
-
-        this.logout()
-
         //The tear down method terminates all the web-related objects, and
         //therefore, must be performed in the end of the operation.
         super.tearDown()
     }
 
-    protected void loginAdmin() {
+    protected void login(username, password) {
         get('/login/auth')
         assertStatus(200)
 
@@ -89,12 +82,24 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         }
         def login = getMessage("layout.page.login")
         form('loginForm') {
-            j_username = 'admin'
-            j_password = 'admin'
+            j_username = username
+            j_password = password
             click login
         }
-
+        assertStatus(200)
         assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
+    }
+
+    protected void loginAdmin() {
+        this.login ("admin", "admin")
+    }
+
+    protected void loginUser() {
+        this.login ("user", "admin")
+    }
+
+    protected void loginUserDot() {
+        this.login ("user.new", "admin")
     }
 
     /**
@@ -129,7 +134,8 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         if (this.response.contentAsString.contains(logout)) {
             click logout
         }
-        
+        assertStatus(200)
+        assertContentContains(getMessage("login.page.auth.header"))
     }
 
     /**
