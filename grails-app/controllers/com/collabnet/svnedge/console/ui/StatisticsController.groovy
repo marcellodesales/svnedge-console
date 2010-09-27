@@ -139,7 +139,7 @@ class StatisticsController {
     }
 
     def getTimespan = {
-        def index = 0
+        def index = 1 // set default timespan to 'day'
         if (params && params['timespan']) {
             index = Integer.parseInt(params['timespan'])
         }

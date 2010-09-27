@@ -32,7 +32,7 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
     protected void setUp() {
         super.setUp()
         controller.quartzScheduler = quartzScheduler
-        controller.realTimeStatisticsService = realTimeStatisticsService
+        controller.lastCollectedStatisticsService = realTimeStatisticsService
         controller.lifecycleService = lifecycleService 
         controller.packagesUpdateService = packagesUpdateService
         controller.operatingSystemService = operatingSystemService

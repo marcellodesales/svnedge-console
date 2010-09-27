@@ -40,7 +40,7 @@ class StatusController {
     def networkingService
     def svnRepoService
     def quartzScheduler
-    def realTimeStatisticsService
+    def lastCollectedStatisticsService
     def lifecycleService
     def packagesUpdateService
 
@@ -151,31 +151,31 @@ class StatusController {
                 currentLocale).format(runningSinceDate)]]
        if (!server.managedByCtf()) {
            model << [label: message(code: 'status.page.status.repo_health'), 
-               value: svnRepoService.formatRepoStatus(realTimeStatisticsService
+               value: svnRepoService.formatRepoStatus(lastCollectedStatisticsService
                    ?.getReposStatus(), currentLocale)]
        }
         if (operatingSystemService.isReady()) {
             model << [label: message(code: 'status.page.status.throughput'), 
                 value: networkingService.formatThroughput(
-                    realTimeStatisticsService?.getThroughput(), currentLocale)]
+                    lastCollectedStatisticsService.getThroughput(), currentLocale)]
              model << [label: message(code: 'status.page.status.space.system'),
                  value: operatingSystemService.formatBytes(
-                     realTimeStatisticsService?.getSystemUsedDiskspace())]
+                     lastCollectedStatisticsService.getSystemUsedDiskspace())]
              model << [label: message(code: 'status.page.status.space.repos'),
                  value: operatingSystemService.formatBytes(
-                     realTimeStatisticsService?.getRepoUsedDiskspace())]
+                     lastCollectedStatisticsService.getRepoUsedDiskspace())]
              model << [label: message(code: 'status.page.status.space.avail'),
                  value: operatingSystemService.formatBytes(
-                     realTimeStatisticsService?.getRepoAvailableDiskspace())]
+                     lastCollectedStatisticsService.getRepoAvailableDiskspace())]
         }
         if (server.replica) {
             model << [label: message(code: 'status.page.status.master_latency'),
                 value:  operatingSystemService.truncate(
-                    realTimeStatisticsService?.getLatency(), 2) + " " +
+                    lastCollectedStatisticsService.getLatency(), 2) + " " +
                     message(code: 'general.measurement.milliseconds.short')]
             model << [label: message(
                 code: 'status.page.status.users_cache.number'),
-                value: realTimeStatisticsService?.getNumUsersCached()]
+                value: lastCollectedStatisticsService.getNumUsersCached()]
             model << [label: message(
                 code: 'status.page.status.users_cache.timeout'),
                 value: currentConfig.positiveExpirationRate + " " + 
@@ -183,7 +183,7 @@ class StatusController {
             model << [label: message(
                 code: 'status.page.status.users_cache.percent'),
                 value: operatingSystemService.truncate(
-                    realTimeStatisticsService?.getUserCachePercentageHit() *
+                    lastCollectedStatisticsService.getUserCachePercentageHit() *
                         100, 2) + " %"]
         }
         return model

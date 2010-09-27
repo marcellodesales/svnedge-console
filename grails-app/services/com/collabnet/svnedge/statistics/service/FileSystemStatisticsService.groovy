@@ -28,6 +28,7 @@ import com.collabnet.svnedge.statistics.Unit
 
 import org.quartz.SchedulerException
 import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.statistics.StatAction
 
 /**
  * Service for getting and storing filesystem statistics.
@@ -357,5 +358,42 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         }
         repoUsedStatId = repoUsedStat.getId()
         log.info("Successfully created filesystem statistics.")
+    }
+
+
+    /**
+     * Add stat collection times for Filesystem stats (override defaults)
+     */
+    def addDefaultActions = { statGroup ->
+
+        createIntervals()
+        StatAction raw = new StatAction(group: statGroup,
+                                        collect:hour,
+                                        delete:week,
+                                        consolidateSource:null)
+        check(raw)
+        raw.save()
+        statGroup.addToActions(raw).save()
+        StatAction derive1 = new StatAction(group: statGroup,
+                                            collect:day,
+                                            delete:week,
+                                            consolidateSource:raw)
+        check(derive1)
+        derive1.save()
+        statGroup.addToActions(derive1).save()
+        StatAction derive2 = new StatAction(group: statGroup,
+                                            collect:week,
+                                            delete:thirty_days, 
+                                            consolidateSource:derive1)
+        check(derive2)
+        derive2.save()
+        statGroup.addToActions(derive2).save()
+        if (!statGroup.getActions()) {
+            log.error("No actions found!")
+        } else {
+            for (StatAction action: statGroup.getActions()) {
+                log.info("Action = " + action)
+            }
+        }
     }
 }

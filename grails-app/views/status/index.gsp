@@ -107,7 +107,7 @@
                 <g:each status="i" var="stat" in="${perfStats}">
                   <tr class="prop, ${i % 2 == 0 ? 'EvenRow' : 'OddRow'}">
                     <td class="ItemDetailName"><strong>${stat.label}</strong></td>
-                    <td class="ItemDetailValue">${stat.value}</td>
+                    <td class="ItemDetailValue">${stat.value ?: message(code:'status.page.status.noData')}</td>
                   </tr>
                 </g:each>
 

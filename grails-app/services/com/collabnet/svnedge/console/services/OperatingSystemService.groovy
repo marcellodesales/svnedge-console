@@ -258,8 +258,12 @@ class OperatingSystemService {
 
    /**
     * Format a value given in bytes to something human-readable (i.e. 32.56 GB)
+    * @return formatted string or null for null input
     */
    public static formatBytes(space) {
+       if (space == null) {
+           return null
+       }
        def prefixes = ['', 'K', 'M', 'G', 'T', 'P', 'E']
        def mag = prefixes.size() - 1
        for (int i = 0; i < prefixes.size(); i++) {

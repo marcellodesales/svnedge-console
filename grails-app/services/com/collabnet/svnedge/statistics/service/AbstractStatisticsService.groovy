@@ -36,6 +36,13 @@ abstract class AbstractStatisticsService {
 
     private app = ApplicationHolder.application
 
+    // data collection job intervals
+    protected Interval five_min
+    protected Interval hour
+    protected Interval day
+    protected Interval week
+    protected Interval thirty_days
+
     /**
      * Gets an i18n message from the messages.properties file without providing
      * parameters using the default locale.
@@ -64,45 +71,8 @@ abstract class AbstractStatisticsService {
      * Add default collect/delete intervals to the StatGroup.
      */
     def addDefaultActions = { statGroup ->
-        Interval five_min = Interval.findByName(
-            StatisticsTime.FIVE_MINUTES.toString())
-        if (!five_min) {
-            five_min = new Interval(
-                name: StatisticsTime.FIVE_MINUTES.toString(),
-                seconds: StatisticsTime.FIVE_MINUTES.getSeconds())
-            check(five_min)
-            five_min.save()
-        }
-        Interval hour = Interval.findByName(StatisticsTime.HOUR.toString())
-        if (!hour) {
-            hour = new Interval(name:StatisticsTime.HOUR.toString(),
-                               seconds:StatisticsTime.HOUR.getSeconds())
-            check(hour)
-            hour.save()
-        }
-        Interval day = Interval.findByName(StatisticsTime.DAY.toString())
-        if (!day) {
-            day = new Interval(name: StatisticsTime.DAY.toString(),
-                               seconds: StatisticsTime.DAY.getSeconds())
-            check(day)
-            day.save()
-        }
-        Interval week = Interval.findByName(StatisticsTime.WEEK.toString())
-        if (!week) {
-            week = new Interval(name: StatisticsTime.WEEK.toString(),
-                                seconds: StatisticsTime.WEEK.getSeconds())
-            check(week)
-            week.save()
-        }
-        Interval thirty_days = Interval.findByName(
-            StatisticsTime.THIRTY_DAYS.toString())
-        if (!thirty_days) {
-            thirty_days = new Interval(
-                name: StatisticsTime.THIRTY_DAYS.toString(),
-                seconds: StatisticsTime.THIRTY_DAYS.getSeconds())
-            check(thirty_days)
-            thirty_days.save()
-        }
+
+        createIntervals()
         StatAction raw = new StatAction(group: statGroup,
                                         collect:five_min, 
                                         delete:day, 
@@ -130,6 +100,51 @@ abstract class AbstractStatisticsService {
             for (StatAction action: statGroup.getActions()) {
                 log.info("Action = " + action)
             }
+        }
+    }
+
+    /**
+     * Creates the Interval rows if needed
+     */
+    protected void createIntervals() {
+        five_min = Interval.findByName(
+            StatisticsTime.FIVE_MINUTES.toString())
+        if (!five_min) {
+            five_min = new Interval(
+                name: StatisticsTime.FIVE_MINUTES.toString(),
+                seconds: StatisticsTime.FIVE_MINUTES.getSeconds())
+            check(five_min)
+            five_min.save()
+        }
+        hour = Interval.findByName(StatisticsTime.HOUR.toString())
+        if (!hour) {
+            hour = new Interval(name:StatisticsTime.HOUR.toString(),
+                               seconds:StatisticsTime.HOUR.getSeconds())
+            check(hour)
+            hour.save()
+        }
+        day = Interval.findByName(StatisticsTime.DAY.toString())
+        if (!day) {
+            day = new Interval(name: StatisticsTime.DAY.toString(),
+                               seconds: StatisticsTime.DAY.getSeconds())
+            check(day)
+            day.save()
+        }
+        week = Interval.findByName(StatisticsTime.WEEK.toString())
+        if (!week) {
+            week = new Interval(name: StatisticsTime.WEEK.toString(),
+                                seconds: StatisticsTime.WEEK.getSeconds())
+            check(week)
+            week.save()
+        }
+        thirty_days = Interval.findByName(
+            StatisticsTime.THIRTY_DAYS.toString())
+        if (!thirty_days) {
+            thirty_days = new Interval(
+                name: StatisticsTime.THIRTY_DAYS.toString(),
+                seconds: StatisticsTime.THIRTY_DAYS.getSeconds())
+            check(thirty_days)
+            thirty_days.save()
         }
     }
 
@@ -416,14 +431,32 @@ abstract class AbstractStatisticsService {
     }
 
     /**
-     * Return the last two statValue for a given statistic.
+     * Return the last statValue for a given statistic.
      */
     def getLastStatValue(stat) {
+         def crit = StatValue.createCriteria()
+        def values = crit.list {
+            and {
+                eq('statistic', stat)
+                eq('derived', false)
+            }
+            maxResults(1)
+            order('timestamp', 'desc')
+        }
+        (values)? values[0] : null
+    }
+
+    /**
+     * Return the last statValue for a given statistic by Repo
+     * @param repo the Repository
+     */
+    def getLastStatValue(stat, repo) {
         def crit = StatValue.createCriteria()
         def values = crit.list {
             and {
                 eq('statistic', stat)
                 eq('derived', false)
+                eq('repo', repo)
             }
             maxResults(1)
             order('timestamp', 'desc')

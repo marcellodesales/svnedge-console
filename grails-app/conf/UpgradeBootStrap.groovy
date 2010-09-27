@@ -21,6 +21,8 @@ import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.SchemaVersion
 import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.statistics.StatAction
+import groovy.sql.Sql
 
 /**
  * Bootstrap script for handling any special conditions associated with upgrades
@@ -28,11 +30,14 @@ import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLeve
 class UpgradeBootStrap {
 
     def operatingSystemService
+    def fileSystemStatisticsService
+    def dataSource
 
     def init = { servletContext ->
         log.info("Applying updates") 
         release1_1_0()
         release1_2_0()
+        release1_3_0()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -102,4 +107,30 @@ class UpgradeBootStrap {
         v.save()
     }
 
+    def void release1_3_0() {
+
+        if (isSchemaCurrent(1, 3, 0)) {
+            log.info("Schema is current for 1.3.0 release")
+            return
+        }
+
+        log.info("Applying 1.3.0 updates")
+        int groupId = fileSystemStatisticsService.statGroup.id
+        def db = new Sql(dataSource)
+        try {
+           db.execute("update STAT_ACTION set COLLECT_ID = '4' where GROUP_ID='${groupId}' and COLLECT_ID='3'")
+           db.execute("update STAT_ACTION set COLLECT_ID = '3' where GROUP_ID='${groupId}' and COLLECT_ID='2'")
+           db.execute("update STAT_ACTION set COLLECT_ID = '2' where GROUP_ID='${groupId}' and COLLECT_ID='1'")
+        } catch(Exception e) {
+           log.error("Unable to update File System Statistics run intervals", e)
+           return
+        }
+        finally {
+            db.close()
+        }
+
+        SchemaVersion v = new SchemaVersion(major: 1, minor: 3, revision: 0,
+                description: "1.3.0 updated FileSystemStat jobs for less frequent runs")
+        v.save()
+    }
 }
