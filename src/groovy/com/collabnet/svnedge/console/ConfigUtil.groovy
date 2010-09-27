@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console
 
 import java.io.File
+import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
@@ -107,13 +108,12 @@ public final class ConfigUtil {
 
     def static confDirPath() {
         if (!confDirPath) {
-            org.apache.log4j.Logger.getLogger("com.collabnet.svnedge.console").error "confDirPath not cached yet.  Config value is: " + getConfig().svnedge.svn.confDirPath
-            println "Config: " + getConfig() + " confDirPath not cached yet.  Config value is: " + getConfig().svnedge.svn.confDirPath
+            Logger.getLogger("com.collabnet.svnedge.console")
+                .debug("confDirPath not cached yet.  Config value is: " + 
+                       getConfig().svnedge.svn.confDirPath)
             confDirPath = getConfig().svnedge.svn.confDirPath ?:
                 new File(appHome(), "etc/conf").absolutePath
-            //throw new Exception("Test")
         }
-        println "confDirPath: " + getConfig().svnedge.svn.confDirPath
         return confDirPath 
     }
 

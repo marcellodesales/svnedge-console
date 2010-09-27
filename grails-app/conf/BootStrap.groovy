@@ -69,6 +69,13 @@ class BootStrap {
         log.debug("Bootstrap config: " + config)
         ConfigUtil.configuration = config
         
+        log.info("Bootstrap logging with consoleLogLevel from the Server...")
+        try {
+            logManagementService.bootstrap()
+        } catch (Exception e) {
+            log.error ("Failed to intitialize LogManagementService: " + e.getMessage(), e)
+        }
+
         def env = GrailsUtil.environment
         log.info("#### Starting up the ${env} environment...")
 
@@ -103,19 +110,10 @@ class BootStrap {
 
         log.info("Bootstrapping Servers...")
         def server
-        def initServer
         try {
-            initServer = lifecycleService.bootstrapServer(config)
-            server = initServer.server
+            server = lifecycleService.bootstrapServer(config)
         } catch (Exception e) {
             log.error ("Failed to intitialize Server instance: " + e.getMessage(), e)
-        }
-
-        log.info("Bootstrap logging with consoleLogLevel from the Server...")
-        try {
-            logManagementService.bootstrap(initServer.logLevel)
-        } catch (Exception e) {
-            log.error ("Failed to intitialize LogManagementService: " + e.getMessage(), e)
         }
 
         log.info("Bootstrapping the ServerConfigService...")

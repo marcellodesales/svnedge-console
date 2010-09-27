@@ -52,7 +52,9 @@ class LogManagementService {
     public static enum ConsoleLogLevel { DEBUG, INFO, WARN, ERROR}
     public static enum ApacheLogLevel { DEBUG, INFO, WARN, ERROR }
 
-    public def bootstrap = {  consoleLogLevel  ->
+    public def bootstrap = {
+        def server = Server.getServer()
+        ConsoleLogLevel consoleLogLevel = server?.consoleLogLevel
         if (consoleLogLevel) {
             setConsoleLevel(consoleLogLevel)
         }

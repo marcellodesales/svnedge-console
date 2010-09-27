@@ -23,7 +23,6 @@ import grails.util.GrailsUtil;
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.teamforge.CtfServer;
 
@@ -57,12 +56,8 @@ class LifecycleService {
 
     def bootstrapServer(config) {
 
-        ConsoleLogLevel logLevel
         def server = Server.getServer()
-        if (server) {
-            logLevel = server.consoleLogLevel
-
-        } else {
+        if (!server) {
             def bootstrapParam = this.getServerLifecycleBootstrapParams()
             int port = config.svnedge.defaultHighPort
             int authHelperPort = config.svnedge.defaultApacheAuthHelperPort
@@ -124,7 +119,7 @@ class LifecycleService {
         mkdirs(new File(dataDirPath, "logs"))
         File runFile = new File(dataDirPath, "run")
         mkdirs(runFile)    
-        return [server: server, logLevel: logLevel]
+        return server
     }
 
     /**
