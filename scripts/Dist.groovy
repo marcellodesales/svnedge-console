@@ -133,15 +133,12 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             todir: "${distDir}/lib")
 
         // Copy the SIGAR libraries to lib folder which is on java.library.path
-        if (bits == "64") {
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-amd64-linux.so",
-                todir: "${distDir}/lib")
-        } else {
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-x86-linux.so",
-                todir: "${distDir}/lib")
-        }
+       Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-amd64-linux.so",
+            todir: "${distDir}/lib")
+       Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-x86-linux.so",
+            todir: "${distDir}/lib")
 
     } else if (osName == "solaris") {
 
@@ -192,28 +189,20 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             "/solaris/lib/libwrapper-solaris-sparc-64.so",
             todir: "${distDir}/lib")
 
-        // Copy the SIGAR libraries to lib folder which is on java.library.path
-        if (bits == "64") {
-            if (arch == "amd64") {
-                Ant.copy(file: "${basedir}/ext" +
-                    "/sigar/libsigar-amd64-solaris.so",
-                    todir: "${distDir}/lib")
-            } else {
-                Ant.copy(file: "${basedir}/ext" +
-                    "/sigar/libsigar-sparc64-solaris.so",
-                    todir: "${distDir}/lib")
-            }
-
+        if (arch == "sparc") {
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-sparc-solaris.so",
+                todir: "${distDir}/lib")
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-sparc64-solaris.so",
+                todir: "${distDir}/lib")
         } else {
-            if (arch == "sparc") {
-                Ant.copy(file: "${basedir}/ext" +
-                    "/sigar/libsigar-sparc-solaris.so",
-                    todir: "${distDir}/lib")
-            } else {
-                Ant.copy(file: "${basedir}/ext" +
-                    "/sigar/libsigar-x86-solaris.so",
-                    todir: "${distDir}/lib")
-            }
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-x86-solaris.so",
+                todir: "${distDir}/lib")
+            Ant.copy(file: "${basedir}/ext" +
+                "/sigar/libsigar-amd64-solaris.so",
+                todir: "${distDir}/lib")
         }
 
     } else
