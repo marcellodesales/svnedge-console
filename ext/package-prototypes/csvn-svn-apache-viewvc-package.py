@@ -53,6 +53,8 @@ pkg = {
     
     "excludedirs" : [
         "appserver",
+        "lib/svn-python",
+        "lib/mod_python",
         "updates/appserver",
         "updates/svcwrapper",
     ],
