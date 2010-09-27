@@ -12,7 +12,7 @@
 <body>
 
     <div class="body">
-        <h1>Show User</h1>
+        <h1><g:message code="user.page.show.details.header"/></h1>
         <div class="dialog">
             <table>
             <tbody>

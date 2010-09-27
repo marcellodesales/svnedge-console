@@ -1,6 +1,6 @@
 <meta name='layout' content='main' />
-<title>Denied</title>
+<title><g:message code="user.page.denied.title"/></title>
 
 <div class='body'>
-  <div class='errors'>Sorry, you're not authorized to view this page.</div>
+  <div class='errors'><g:message code="user.page.denied.error"/></div>
 </div>
