@@ -132,7 +132,7 @@
     </g:else>
 <ul>
 <li><g:message code="server.page.edit.httpdBind" /> <a id="toggleBind" href="#" 
-  onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+  onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="bindInstructions" style="border: 1px;">
 <p><g:message code="server.page.edit.httpdBind.instructions" /> <em><g:message code="server.page.edit.httpdBind.asRoot" /></em>
 </p>
@@ -144,7 +144,7 @@ chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
 </div>
 </li>
 <li><g:message code="server.page.edit.httpd.asSudo" /> <a id="toggleSudo" href="#" 
-  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('Hide'); } else { this.update('Show commands'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="sudoInstructions" style="border: 1px;">
 <p>
 <g:message code="server.page.edit.httpd.asSudo.instruction" />
