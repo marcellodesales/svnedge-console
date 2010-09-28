@@ -20,7 +20,7 @@
           <td colspan="4"><g:message code="repository.page.list.header" /></td>
         </tr>
         <tr class="ItemListHeader">
-           <g:sortableColumn property="name" title="Name" />
+           <g:sortableColumn property="name" title="${message(code:'repository.page.list.name')}" />
 
       <g:if test="${isReplica}">
               <g:sortableColumn property="lastSyncTime" title="${message(code:'repository.page.list.replica.lastSyncTime')}" />
