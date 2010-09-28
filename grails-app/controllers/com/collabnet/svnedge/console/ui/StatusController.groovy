@@ -28,10 +28,8 @@ import com.collabnet.svnedge.replica.manager.Master
 import com.collabnet.svnedge.replica.manager.ReplicaConfig
 import com.collabnet.svnedge.replica.manager.ApprovalState
 
-import java.net.NoRouteToHostException
 import java.text.SimpleDateFormat;
 
-import com.collabnet.svnedge.console.ServerMode
 
 @Secured(['ROLE_USER'])
 class StatusController {
@@ -40,7 +38,7 @@ class StatusController {
     def networkingService
     def svnRepoService
     def quartzScheduler
-    def lastCollectedStatisticsService
+    def statisticsService
     def lifecycleService
     def packagesUpdateService
 
@@ -151,31 +149,31 @@ class StatusController {
                 currentLocale).format(runningSinceDate)]]
        if (!server.managedByCtf()) {
            model << [label: message(code: 'status.page.status.repo_health'), 
-               value: svnRepoService.formatRepoStatus(lastCollectedStatisticsService
+               value: svnRepoService.formatRepoStatus(statisticsService
                    ?.getReposStatus(), currentLocale)]
        }
         if (operatingSystemService.isReady()) {
             model << [label: message(code: 'status.page.status.throughput'), 
                 value: networkingService.formatThroughput(
-                    lastCollectedStatisticsService.getThroughput(), currentLocale)]
+                    statisticsService.getThroughput(), currentLocale)]
              model << [label: message(code: 'status.page.status.space.system'),
                  value: operatingSystemService.formatBytes(
-                     lastCollectedStatisticsService.getSystemUsedDiskspace())]
+                     statisticsService.getSystemUsedDiskspace())]
              model << [label: message(code: 'status.page.status.space.repos'),
                  value: operatingSystemService.formatBytes(
-                     lastCollectedStatisticsService.getRepoUsedDiskspace())]
+                     statisticsService.getRepoUsedDiskspace())]
              model << [label: message(code: 'status.page.status.space.avail'),
                  value: operatingSystemService.formatBytes(
-                     lastCollectedStatisticsService.getRepoAvailableDiskspace())]
+                     statisticsService.getRepoAvailableDiskspace())]
         }
         if (server.replica) {
             model << [label: message(code: 'status.page.status.master_latency'),
                 value:  operatingSystemService.truncate(
-                    lastCollectedStatisticsService.getLatency(), 2) + " " +
+                    statisticsService.getLatency(), 2) + " " +
                     message(code: 'general.measurement.milliseconds.short')]
             model << [label: message(
                 code: 'status.page.status.users_cache.number'),
-                value: lastCollectedStatisticsService.getNumUsersCached()]
+                value: statisticsService.getNumUsersCached()]
             model << [label: message(
                 code: 'status.page.status.users_cache.timeout'),
                 value: currentConfig.positiveExpirationRate + " " + 
@@ -183,7 +181,7 @@ class StatusController {
             model << [label: message(
                 code: 'status.page.status.users_cache.percent'),
                 value: operatingSystemService.truncate(
-                    lastCollectedStatisticsService.getUserCachePercentageHit() *
+                    statisticsService.getUserCachePercentageHit() *
                         100, 2) + " %"]
         }
         return model

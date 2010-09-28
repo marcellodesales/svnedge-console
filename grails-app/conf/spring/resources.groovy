@@ -29,4 +29,14 @@ beans = {
     csvnAuthenticationProvider(com.collabnet.svnedge.console.security.CsvnAuthenticationProvider) {
         daoAuthenticationProvider = ref("daoAuthenticationProvider")
     }
+
+    // use the db-based statistics service
+    statisticsService(com.collabnet.svnedge.statistics.service.LastCollectedStatisticsService) { bean ->
+        bean.autowire = 'byName'
+    }
+
+    // use the real-time statistics service
+    // statisticsService(com.collabnet.svnedge.statistics.service.RealTimeStatisticsService) { bean ->
+    //    bean.autowire = 'byName'
+    //}
 }

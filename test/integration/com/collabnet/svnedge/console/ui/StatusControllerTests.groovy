@@ -22,7 +22,7 @@ import grails.test.*
 class StatusControllerTests extends AbstractSvnEdgeControllerTests {
 
     def quartzScheduler
-    def realTimeStatisticsService
+    def statisticsService
     def lifecycleService
     def packagesUpdateService
     def operatingSystemService
@@ -32,7 +32,7 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
     protected void setUp() {
         super.setUp()
         controller.quartzScheduler = quartzScheduler
-        controller.lastCollectedStatisticsService = realTimeStatisticsService
+        controller.statisticsService = statisticsService
         controller.lifecycleService = lifecycleService 
         controller.packagesUpdateService = packagesUpdateService
         controller.operatingSystemService = operatingSystemService
