@@ -183,6 +183,12 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             "/solaris/lib/wrapper.jar",
             todir: "${distDir}/lib")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-x86-32.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-sparc-32.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/lib/libwrapper-solaris-x86-64.so",
             todir: "${distDir}/lib")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
