@@ -19,83 +19,34 @@ package com.collabnet.svnedge.console.ui
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder;
 
-class LoginFunctionalTests extends functionaltestplugin.FunctionalTestCase {
+import com.collabnet.svnedge.LoggedOutAbstractSvnEdgeFunctionalTests;
 
-    /**
-     * The default grails application instance.
-     * The same as adding the autowire of the grails application bean.
-     * def grailsApplication
-     */
-    private app = ApplicationHolder.application
+class LoginFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
-    /**
-     * Gets an i18n message from the messages.properties file without providing
-     * parameters using the default locale.
-     * @param key is the key in the messages.properties file.
-     * @return the message related to the key in the messages.properties file
-     * using the default locale.
-     */
-    public String getMessage(String key, params) {
-        def appCtx = app.getMainContext()
-        return appCtx.getMessage(key, params, Locale.getDefault())
+    @Override
+    protected void setUp() {
+        super.setUp();
     }
 
-    public String getMessage(String key) {
-        return this.getMessage(key, null)
+    @Override
+    protected void tearDown() {
+        super.tearDown();
     }
 
     void testRootLogin() {
-        get('/login/auth')
-        assertStatus 200
-
-        def login = getMessage("layout.page.login")
-        form('loginForm') {
-            j_username = 'admin'
-            j_password = 'admin'
-            click login
-        }
-
-        assertStatus 200
-        assertContentContains getMessage("layout.page.loggedAs")
-        assertContentContains 'Administrator&nbsp;(admin)'
-
-        click getMessage("layout.page.logout")
-        assertStatus 200
-        assertContentContains login
+        this.loginAdmin()
     }
 
-/* Will we have non-admin logins?
-    void testUserLogin() {
-        get('/login/auth')
-        assertStatus 200
-        
-        form('loginForm') {
-            j_username = 'marcello'
-            j_password = '1234'
-            click 'Login'
-        }
-
-        assertStatus 200
-        assertContentContains 'Logged in as:' 
-        assertContentContains 'Marcello de Sales&nbsp;(marcello)'
-
-        click 'LOGOUT'
-        assertStatus 200
-        assertContentContains 'Login'
+    void testRegularLogin() {
+        this.loginUser()
     }
-*/
+
+    void testDotsLogin() {
+        this.loginUserDot()
+    }
 
     void testFailLogin() {
-        get('/login/auth')
-        assertStatus 200
-
-        def login = getMessage("layout.page.login")
-        form('loginForm') {
-            j_username = 'marcello'
-            j_password = 'xyzt'
-            click login
-        }
-
+        this.login("marcello", "xyzt")
         assertContentContains getMessage("user.credential.incorrect", 
             ["marcello"] as String[])
     }

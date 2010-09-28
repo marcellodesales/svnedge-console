@@ -34,9 +34,8 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 
 /**
- * This is the basic implementation of functional tests for the SvnEdge.
- * It contains supporting methods for the execution of common functional tests, 
- * exposing the references to internal objects and services.
+ * This is the basic implementation of functional tests for the SvnEdge, having
+ * the user logged out.
  * 
  * References about the instance the FunctionaltestCase, see 
  * http://plugins.grails.org/grails-functional-test/tags/RELEASE_1_2_4/src/groovy/functionaltestplugin/FunctionalTestCase.groovy

@@ -31,7 +31,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
  *
  */
 class FullConversionToTeamForgeFunctionalTests 
-    extends AbstractConversionFunctionalTests {
+        extends AbstractConversionFunctionalTests {
 
     /**
      * The name of the project created during the complete conversion.
