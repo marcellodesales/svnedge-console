@@ -90,6 +90,12 @@ class UserAccountService extends AbstractSvnEdgeService {
                             description: "regular user", enabled: true,
                             email: "user@example.com").save(flush: true)
 
+                User normalDots = User.findByUsername("user.new") ?:
+                    new User(username: "user.new",
+                            realUserName: "Regular User Dot", passwd: password,
+                            description: "regular user with dot", enabled: true,
+                            email: "user.new@example.com").save(flush: true)
+
 
                 roleAdminSystem.addToPeople(adminSystem)
                 roleAdminRepo.addToPeople(adminRepo)
@@ -100,6 +106,7 @@ class UserAccountService extends AbstractSvnEdgeService {
                 roleUser.addToPeople(adminRepo)
                 roleUser.addToPeople(adminUsers)
                 roleUser.addToPeople(normalUser)
+                roleUser.addToPeople(normalDots)
 
                 // Allow admin account access to svn
 
@@ -107,6 +114,7 @@ class UserAccountService extends AbstractSvnEdgeService {
                 lifecycleService.setSvnAuth(adminRepo, "admin")
                 lifecycleService.setSvnAuth(adminUsers, "admin")
                 lifecycleService.setSvnAuth(normalUser, "admin")
+                lifecycleService.setSvnAuth(normalDots, "admin")
 
             default:
 
