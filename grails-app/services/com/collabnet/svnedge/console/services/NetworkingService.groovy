@@ -126,14 +126,13 @@ public class NetworkingService extends AbstractSvnEdgeService {
         def defaultIf
         if (ifs.size() > 1) {
             ifs.each { NetworkInterface netIf ->
-                if (netIf.name != "lo") {
+                if (!netIf.name.startsWith("lo")) {
                     defaultIf = netIf
+                    return
                 }
             }
-            return defaultIf
-        } else {
-            return ifs[0]
         }
+        return defaultIf ?: ifs[0]
     }
     
     /**
