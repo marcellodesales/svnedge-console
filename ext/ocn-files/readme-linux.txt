@@ -88,7 +88,7 @@ Contents
       execute.
       
       $ cd csvn
-      $ sudo bin/csvn install
+      $ sudo -E bin/csvn install
       
       In addition to configuring your system so that the server is started
       with the system, it will also write the current JAVA_HOME and the
