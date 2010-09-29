@@ -117,8 +117,10 @@ fi
 # Load the configuration from CSVN_CONF, and export JAVA_HOME and HTTP_PROXY 
 # (found there or in environment)
 . $REALDIR/$CSVN_CONF
-export JAVA_HOME=$JAVA_HOME
-export HTTP_PROXY=$HTTP_PROXY
+JAVA_HOME=$JAVA_HOME
+HTTP_PROXY=$HTTP_PROXY
+export JAVA_HOME
+export HTTP_PROXY
 
 
 # If the PIDDIR is relative, set its value relative to the full REALPATH to avoid problems if
