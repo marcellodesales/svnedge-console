@@ -123,6 +123,7 @@ class UserAccountService extends AbstractSvnEdgeService {
                     log.warn("Creating 'admin' super user since not found. " +
                         "Be sure to change password.")
                     superadmin = saveNewSuperUser("admin", password)
+                    lifecycleService.setSvnAuth(superadmin, "admin")
                 }
             
                 if (!superadmin.authorities?.contains(roleUser)) {
@@ -131,8 +132,6 @@ class UserAccountService extends AbstractSvnEdgeService {
                 if (!superadmin.authorities?.contains(roleAdmin)) {
                     roleAdmin.addToPeople(superadmin)
                 }
-                lifecycleService.setSvnAuth(superadmin, "admin")
-
 
                 try {
                     roleAdmin.save(flush: true)
