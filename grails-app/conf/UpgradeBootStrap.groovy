@@ -120,9 +120,9 @@ class UpgradeBootStrap {
             int groupId = fileSystemStatisticsService.statGroup.id
             def db = new Sql(dataSource)
             try {
-               db.execute("update STAT_ACTION set COLLECT_ID = '4' where GROUP_ID='${groupId}' and COLLECT_ID='3'")
-               db.execute("update STAT_ACTION set COLLECT_ID = '3' where GROUP_ID='${groupId}' and COLLECT_ID='2'")
-               db.execute("update STAT_ACTION set COLLECT_ID = '2' where GROUP_ID='${groupId}' and COLLECT_ID='1'")
+               db.execute("update STAT_ACTION set COLLECT_ID = '4' where GROUP_ID=${groupId} and COLLECT_ID='3'")
+               db.execute("update STAT_ACTION set COLLECT_ID = '3' where GROUP_ID=${groupId} and COLLECT_ID='2'")
+               db.execute("update STAT_ACTION set COLLECT_ID = '2' where GROUP_ID=${groupId} and COLLECT_ID='1'")
             } catch(Exception e) {
                log.error("Unable to update File System Statistics run intervals", e)
                return
