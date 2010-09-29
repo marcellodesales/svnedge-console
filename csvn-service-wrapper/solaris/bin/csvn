@@ -743,8 +743,8 @@ saveenvironment() {
 
     # copy the current JAVA_HOME and USER into the csvn.conf file
 
-    runAsUserDefault=`cat $REALDIR/$CSVN_CONF | grep -e "^#RUN_AS_USER=$"`
-    javaHomeDefault=`cat $REALDIR/$CSVN_CONF | grep -e "^#JAVA_HOME=$"`
+    runAsUserDefault=`cat $REALDIR/$CSVN_CONF | grep "^#RUN_AS_USER=$"`
+    javaHomeDefault=`cat $REALDIR/$CSVN_CONF | grep "^#JAVA_HOME=$"`
 
     # if RUN_AS_USER is in default state, supply current $USER or $SUDO_USER (if applicable)
     if [ "X$runAsUserDefault" != "X" ] ;
@@ -937,8 +937,8 @@ status() {
 }
 
 installdaemon() {
-    if [ `id | sed 's/^uid=//;s/(.*$//'` != "0" ] ; then       
-        echo "Must be root to perform this action."
+    if [ `id | sed 's/^uid=//;s/(.*$//'` = "0" ] ; then
+        echo "Cannot be root to perform this action."
         exit 1
     else 
         if [ "$DIST_OS" = "solaris" ] ; then
@@ -948,9 +948,9 @@ installdaemon() {
                 exit 1
             else
                 echo " Installing the $APP_LONG_NAME daemon.."
-                ln -s $REALPATH /etc/init.d/$APP_NAME
-                ln -s /etc/init.d/$APP_NAME /etc/rc3.d/K20$APP_NAME
-                ln -s /etc/init.d/$APP_NAME /etc/rc3.d/S20$APP_NAME
+                sudo ln -s $REALPATH /etc/init.d/$APP_NAME
+                sudo ln -s /etc/init.d/$APP_NAME /etc/rc3.d/K20$APP_NAME
+                sudo ln -s /etc/init.d/$APP_NAME /etc/rc3.d/S20$APP_NAME
             fi
         elif [ "$DIST_OS" = "linux" ] ; then
             if [ -f /etc/redhat-release -o -f /etc/redhat_version -o -f /etc/fedora-release ]  ; then
@@ -1113,8 +1113,8 @@ installdaemon() {
 }
 
 removedaemon() {
-    if [ `id | sed 's/^uid=//;s/(.*$//'` != "0" ] ; then       
-        echo "Must be root to perform this action."
+    if [ `id | sed 's/^uid=//;s/(.*$//'` = "0" ] ; then
+        echo "Cannot be root to perform this action."
         exit 1
     else
         stopit "0"
@@ -1124,7 +1124,7 @@ removedaemon() {
                 echo " Removing $APP_LONG_NAME daemon..."
                 for i in /etc/rc3.d/S20$APP_NAME /etc/rc3.d/K20$APP_NAME /etc/init.d/$APP_NAME
                 do
-                    rm -f $i
+                    sudo rm -f $i
                 done
             else
                 echo " The $APP_LONG_NAME daemon is not currently installed."
