@@ -380,7 +380,7 @@ root@${server.hostname}
         File authFile = new File(ConfigUtil.confDirPath(), "svn_auth_file")
         def options = authFile.exists() ? "-b" : "-cb"
         def exitStatus = commandLineService
-            .executeWithStatus(ConfigUtil.htpasswdPath(), 
+            .executeWithStatusQuietly(ConfigUtil.htpasswdPath(),
             options, authFile.absolutePath, username, password)
         return exitStatus
     }

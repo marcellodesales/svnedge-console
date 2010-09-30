@@ -36,6 +36,30 @@ class CommandLineService {
     }
 
     /**
+     * version of executeWithStatus which suppresses logging
+     * @param command vararg list of command and arguments
+     * @param env process builder additions to
+     * @param input
+     * @return int exitcode
+     */
+    int executeWithStatusQuietly(String...command, Map<String, String> env=null,
+                          String input=null) {
+        return Integer.parseInt(execute(command, (Map<String, String>) env, input, true)[0])
+    }
+
+    /**
+     * version of executeWithOutput which suppresses logging
+     * @param command vararg list of command and arguments
+     * @param env process builder additions to
+     * @param input
+     * @return int exitcode
+     */
+    String executeWithOutputQuietly(String...command, Map<String, String> env=null,
+                             String input=null) {
+        return execute(command, (Map<String, String>) env, input, true)[1]
+    }
+
+    /**
      * this method will launch the input command and return immediately without waiting for result or output
      */
     void executeDetached(String command)  {
@@ -44,8 +68,16 @@ class CommandLineService {
         return
     }
 
-    String[] execute(String... command, Map<String, String> env=null, String input=null) {
-        Process p = startProcess(command, env)
+    /**
+     *
+     * @param command vararg list of command and arguments
+     * @param env Map environment
+     * @param input input to provide to teh command
+     * @param quiet when true, most logging is suppressed (for security, eg)
+     * @return String[] of exit code, out, and err
+     */
+    String[] execute(String... command, Map<String, String> env=null, String input=null, boolean quiet=false) {
+        Process p = startProcess(command, env, quiet)
         def output = new StringBuffer(512)
         def error = new StringBuffer(512)
         if (input) {
@@ -54,19 +86,27 @@ class CommandLineService {
         p.out.close()
         p.waitForProcessOutput(output, error)
         def exitStatus = p.waitFor()
-        log.debug("Command: " + command + " result=" + exitStatus)
-        if (output.length() > 0) {
-            log.debug("Process output: " + output)
-        }
-        if (error.length() > 0) {
-            if (exitStatus == 0) {
-                // Some apps write to stderr even though they start normally, 
-                // e.g. httpd
-                log.debug("Process err output: " + error)
-            } else {
-                log.error("Exit status=" + exitStatus + 
-                         " Process err output: " + error)                
+        // logging command and output can be suppressed
+        if (!quiet) {
+            log.debug("Command: " + command + " result=" + exitStatus)
+
+            if (output.length() > 0) {
+                log.debug("Process output: " + output)
             }
+            if (error.length() > 0) {
+                if (exitStatus == 0) {
+                    // Some apps write to stderr even though they start normally,
+                    // e.g. httpd
+                    log.debug("Process err output: " + error)
+                } else {
+                    log.error("Exit status=" + exitStatus +
+                             " Process err output: " + error)
+                }
+            }
+        }
+        else {
+            // limited logging when requested
+            log.debug("Command '${command[0]}' executed with return code: " + exitStatus)
         }
         return [String.valueOf(exitStatus), output.toString(), error.toString()]
     }
@@ -76,7 +116,7 @@ class CommandLineService {
         "SSH_TTY", "LOGNAME", "LD_LIBRARY_PATH", "SSH_CONNECTION", 
         "SHELL", "PATH", "USER", "HOME", "PYTHONPATH"]) 
 
-    private Process startProcess(String... command, Map<String, String> addEnv) {
+    private Process startProcess(String... command, Map<String, String> addEnv, boolean quiet=false) {
         ProcessBuilder pb = new ProcessBuilder(command)
         Map<String, String> env = pb.environment();
         if (null != addEnv) {
@@ -88,7 +128,9 @@ class CommandLineService {
                 .collect({key, value -> key + ":" + value}))
         }
         pb.directory(new File(ConfigUtil.appHome()))
-        log.debug("Calling pb.start() for command=" + command)
+        if (!quiet) {
+            log.debug("Calling pb.start() for command=" + command)
+        }
         return pb.start()
     }
     
