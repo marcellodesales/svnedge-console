@@ -31,6 +31,19 @@ class LastCollectedStatisticsService extends RealTimeStatisticsService {
     def fileSystemStatisticsService
 
     /**
+     * gets the time of FileSystem data points if I use this service
+     * @return
+     */
+    @Override
+    Date getTimeOfFileSystemDataCollection() {
+        Statistic stat = fileSystemStatisticsService.getRepoFreeStat()
+        StatValue val = fileSystemStatisticsService.getLastStatValue(stat)
+        Long time = val?.timestamp
+        return (time) ? new Date(time) : null
+    }
+
+
+    /**
      * returns the last disk-used data point, or null if the job has not run
      * @return Double bytes used or null
      */

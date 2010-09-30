@@ -35,6 +35,15 @@ class RealTimeStatisticsService {
 
     boolean transactional = true
 
+
+    /**
+     * gets the time of FileSystem data point if I use this service
+     * @return
+     */
+    Date getTimeOfFileSystemDataCollection() {
+        return new Date()
+    }
+
     /**
      * Returns the number of users currently stored in the user cache.
      * @return number of users cached (int).
