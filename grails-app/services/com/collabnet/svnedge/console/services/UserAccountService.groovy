@@ -66,9 +66,6 @@ class UserAccountService extends AbstractSvnEdgeService {
                 log.info("Creating test users for all each role in this " +
                     "environment: ${env}")
 
-                User superadmin = User.findByUsername("admin") ?:
-                    saveNewSuperUser("admin", password)
-
                 User adminSystem = User.findByUsername("adminSystem") ?: 
                     saveNewSuperUser("adminSystem", password)
 
