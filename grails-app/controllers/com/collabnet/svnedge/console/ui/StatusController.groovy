@@ -153,18 +153,29 @@ class StatusController {
                    ?.getReposStatus(), currentLocale)]
        }
         if (operatingSystemService.isReady()) {
-            model << [label: message(code: 'status.page.status.throughput'), 
+
+            String timestamp = message(code: "status.page.status.timestamp",
+                    args: [statisticsService.getTimestampFileSystemData()])
+
+            def usedDisk = operatingSystemService.formatBytes(
+                     statisticsService.getSystemUsedDiskspace())
+            def usedRepo = operatingSystemService.formatBytes(
+                     statisticsService.getRepoUsedDiskspace())
+            def freeRepo = operatingSystemService.formatBytes(
+                     statisticsService.getRepoAvailableDiskspace())
+
+            model << [label: message(code: 'status.page.status.throughput'),
                 value: networkingService.formatThroughput(
                     statisticsService.getThroughput(), currentLocale)]
-             model << [label: message(code: 'status.page.status.space.system'),
-                 value: operatingSystemService.formatBytes(
-                     statisticsService.getSystemUsedDiskspace())]
-             model << [label: message(code: 'status.page.status.space.repos'),
-                 value: operatingSystemService.formatBytes(
-                     statisticsService.getRepoUsedDiskspace())]
-             model << [label: message(code: 'status.page.status.space.avail'),
-                 value: operatingSystemService.formatBytes(
-                     statisticsService.getRepoAvailableDiskspace())]
+
+            model << [label: message(code: 'status.page.status.space.system'),
+                 value: usedDisk ? usedDisk + " (${timestamp})" : null]
+
+            model << [label: message(code: 'status.page.status.space.repos'),
+                 value: usedRepo ? usedRepo + " (${timestamp})" : null]
+
+            model << [label: message(code: 'status.page.status.space.avail'),
+                 value: freeRepo ? freeRepo + " (${timestamp})" : null]
         }
         if (server.replica) {
             model << [label: message(code: 'status.page.status.master_latency'),

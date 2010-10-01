@@ -58,6 +58,7 @@ class NetworkStatisticsService extends AbstractStatisticsService {
         try {
             statCollectJob.schedule(StatCollectJob
                 .createTrigger(TRIGGER_NAME, interval, params, 12800L))
+            log.info("creating stat collection job at interval (millis): " + interval)
         } catch (SchedulerException ex) {
             log.error("Failed to start StatCollectJob due to exception.", ex)
         }

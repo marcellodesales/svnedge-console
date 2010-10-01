@@ -37,10 +37,11 @@ class RealTimeStatisticsService {
 
 
     /**
-     * gets the time of FileSystem data point if I use this service
-     * @return
+     * gets the time of FileSystem data when using this service. Real time
+     * data is timestamped "now"
+     * @return Date or null
      */
-    Date getTimeOfFileSystemDataCollection() {
+    Date getTimestampFileSystemData() {
         return new Date()
     }
 

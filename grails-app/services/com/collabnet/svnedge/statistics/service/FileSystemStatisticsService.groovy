@@ -62,6 +62,7 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         try {
             statCollectJob.schedule(StatCollectJob
                 .createTrigger(TRIGGER_NAME, interval, params, 12400L))
+            log.info("creating stat collection job at interval (millis): " + interval)
         } catch (SchedulerException ex) {
             log.error("Failed to start StatCollectJob due to exception.", ex)
         }
@@ -212,6 +213,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def dbRepoFreeValue = StatValue.get(repoFreeValue.id)
         log.debug("DB Repo Free: ${dbRepoFreeValue.averageValue}" +
             "${getByteMagPrefix(dbRepoFreeValue.averageValue)};")
+        log.debug("%%%%%%%%%%%%%%%%%%%%%%%% ############### ##################")
+        log.debug("Data collection run time: ${new Date().getTime() - now}ms")
         log.debug("%%%%%%%%%%%%%%%%%%%%%%%% ############### ##################")
     }
 
@@ -364,7 +367,7 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
     /**
      * Add stat collection times for Filesystem stats (override defaults)
      */
-    def addDefaultActions = { statGroup ->
+    def addDefaultActions_ignore = { statGroup ->
 
         createIntervals()
         StatAction raw = new StatAction(group: statGroup,
