@@ -17,6 +17,8 @@
 */
 package com.collabnet.svnedge.teamforge
 
+import java.util.Locale;
+
 import groovy.lang.MetaClass;
 
 import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests;
@@ -101,7 +103,7 @@ abstract class AbstractConversionFunctionalTests extends
         def sessionId = cnSoap.login(username, password)
 
         def projects = ctfRemoteClientService.getProjectList(
-            this.getTestCtfUrl(), sessionId)
+            this.getTestCtfUrl(), sessionId, Locale.getDefault())
         String projectId = null
         for (p in projects) {
             if (this.createdProjectName == p.title.toLowerCase()) {
