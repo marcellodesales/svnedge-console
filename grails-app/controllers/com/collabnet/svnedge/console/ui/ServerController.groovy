@@ -65,7 +65,7 @@ class ServerController {
                 def errors = []
                 this.setupTeamForgeService.revertFromCtfMode(
                     ctfCredentials.ctfUsername, ctfCredentials.ctfPassword,
-                        errors)
+                        errors, RCU.getLocale(request))
                 if (errors) {
                     def formError = 
                         message(code: "server.action.revert.error.general")

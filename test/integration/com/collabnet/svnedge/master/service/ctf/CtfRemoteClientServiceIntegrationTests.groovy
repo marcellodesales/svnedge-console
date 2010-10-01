@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.master.service.ctf
 
+import java.util.Locale;
+
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
@@ -85,7 +87,7 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
         try {
             def sessionId = ctfRemoteClientService.login(ctfUrl, username,
-                password)
+                password, Locale.getDefault())
             assertNotNull("The session ID must have been created with " +
                 "correct credentials", sessionId)
         } catch (CtfAuthenticationException loginFailedAsExpected) {
@@ -106,7 +108,7 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
         try {
             def sessionId = ctfRemoteClientService.login(ctfUrl, username,
-                password)
+                password, Locale.getDefault())
             fail("The login must throw a login fault", sessionId)
         } catch (CtfAuthenticationException loginFailedAsExpected) {
             println(loginFailedAsExpected.message)

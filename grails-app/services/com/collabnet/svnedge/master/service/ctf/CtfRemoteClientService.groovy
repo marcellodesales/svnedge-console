@@ -50,6 +50,7 @@ import com.collabnet.svnedge.teamforge.CtfServer
 import java.net.NoRouteToHostException;
 import java.net.UnknownHostException;
 import java.net.MalformedURLException
+import java.util.Locale;
 import java.util.regex.Pattern
 
 /**
@@ -128,8 +129,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             "/integration/servlet/ScmPermissionsProxyServlet?"
     }
 
-    private String makeLogin(ICollabNetSoap cnSoap, ctfUrl, username, password) 
-        throws CtfAuthenticationException, RemoteMasterException, 
+    public String makeLogin(ICollabNetSoap cnSoap, ctfUrl, username, password, 
+            locale) throws CtfAuthenticationException, RemoteMasterException, 
            UnknownHostException, NoRouteToHostException, MalformedURLException {
 
         try {
@@ -139,28 +140,30 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(e)
             if (e.faultString.contains("Error logging in.")) {
                 def msg = getMessage("ctfRemoteClientService.auth.error", 
-                    [ctfUrl])
+                    [ctfUrl], locale)
                 log.error(msg)
                 throw new CtfAuthenticationException(msg)
 
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new UnknownHostException(getMessage(
-                    "ctfRemoteClientService.host.unknown.error", [hostname]))
+                    "ctfRemoteClientService.host.unknown.error", [hostname], 
+                    locale))
 
             } else if (e.detail instanceof NoRouteToHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new NoRouteToHostException(getMessage(
-                    "ctfRemoteClientService.host.unreachable.error",[hostname]))
+                    "ctfRemoteClientService.host.unreachable.error", [hostname],
+                    locale))
             } else {
                 def msg = getMessage("ctfRemoteClientService.auth.error",
-                    [ctfUrl])
+                    [ctfUrl], locale)
                 log.error(msg, e)
                 throw new RemoteMasterException(ctfUrl, msg, e)
             }
         } catch (Exception otherErrors) {
             throw new MalformedURLException(getMessage(
-                "ctfRemoteClientService.host.malformedUrl", [ctfUrl]))
+                "ctfRemoteClientService.host.malformedUrl", [ctfUrl], locale))
         }
     }
 
@@ -169,8 +172,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @param password is the password.
      * @return the User Session ID from the CTF server. 
      */
-    public String login(username, password) {
-        return makeLogin(cnSoap(), CtfServer.server.baseUrl, username, password)
+    public String login(username, password, locale) {
+        return makeLogin(cnSoap(), CtfServer.server.baseUrl, username, password,
+            locale)
     }
 
     /**
@@ -182,8 +186,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @throws CtfAuthenticationException in case the login is incorrect
      * @throws RemoteMasterException in case any other exception occurs
      */
-    public String login(ctfUrl, username, password) {
-        return makeLogin(cnSoap(ctfUrl), ctfUrl, username, password)
+    public String login(ctfUrl, username, password, locale) {
+        return makeLogin(cnSoap(ctfUrl), ctfUrl, username, password, locale)
     }
 
     /**
@@ -418,7 +422,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * call.
      */
     def String addExternalSystem(ctfUrl, userSessionId, adapterType, title, 
-            description, csvnProps) {
+            description, csvnProps, locale) {
 
         try {
            def scmSoap = this.makeScmSoap(ctfUrl)
@@ -426,7 +430,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                    title, description, csvnProps)
            return sessionId
         } catch (LoginFault e) {
-            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl])
+            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
+                locale)
             throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
             log.error("Unable to create external system: " + msg, e)
 
@@ -445,26 +450,26 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     throw new RemoteAndLocalConversationException(ctfUrl,
                         getMessage(
                             "ctfRemoteClientService.local.webdav.unreachable",
-                            [paramValue]))
+                            [paramValue], locale))
 
                 } else if (paramType.equals("ScmViewerUrl")) {
                     throw new RemoteAndLocalConversationException(ctfUrl, 
                         getMessage(
                             "ctfRemoteClientService.local.viewvc.unreachable",
-                            [paramValue]))
+                            [paramValue], locale))
 
                 } else {
                     def msg = getMessage(
                             "ctfRemoteClientService.local.remote.general.error",
-                            [paramValue])
+                            [paramValue], locale)
                     throw new RemoteAndLocalConversationException(ctfUrl, msg +
-                        ": ${faultMsg}")
+                        " ${faultMsg}")
                 }
 
             } else if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, userSessionId,
-                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
-                    e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired", 
+                        locale), e)
             }
 
             // don't log LoginFault even if converted to AxisFault
@@ -472,7 +477,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 GrailsUtil.deepSanitize(e)
             }
             def generalMsg = faultMsg + " " + getMessage(
-                "ctfRemoteClientService.createExternalSystem.error")
+                "ctfRemoteClientService.createExternalSystem.error", locale)
             log.error(generalMsg, e)
             throw new RemoteMasterException(ctfUrl, generalMsg, e)
 
@@ -481,7 +486,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             // also no session, but log this one as it indicates a problem
             if (!(e instanceof LoginFault)) {
                 def generalMsg = getMessage(
-                    "ctfRemoteClientService.createExternalSystem.error")
+                    "ctfRemoteClientService.createExternalSystem.error", locale)
                 log.error(generalMsg, e)
                 throw new RemoteMasterException(ctfUrl, generalMsg, e)
             }
@@ -499,7 +504,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @throws RemoteMasterException if any other error occurs during the
      * method execution.
      */
-    def getUserList(ctfUrl, sessionId) throws RemoteMasterException {
+    def getUserList(ctfUrl, sessionId, locale) throws RemoteMasterException {
         try {
             def filter = null
             return this.cnSoap(ctfUrl).getUserList(sessionId, filter).dataRows
@@ -509,11 +514,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(e)
             if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, sessionId,
-                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
-                    e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired",
+                        locale), e)
             } else {
                 def errorMessage = getMessage(
-                    "ctfRemoteClientService.listUsers.error") + ": " +
+                    "ctfRemoteClientService.listUsers.error", locale) + " " +
                     faultMsg
                 log.error(errorMessage, e)
                 throw new RemoteMasterException(ctfUrl, errorMessage, e)
@@ -531,7 +536,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @throws RemoteMasterException if any other error occurs during the
      * method execution.
      */
-    def getProjectList(ctfUrl, sessionId) throws RemoteMasterException {
+    def getProjectList(ctfUrl, sessionId, locale) throws RemoteMasterException {
         try {
             return this.cnSoap(ctfUrl).getProjectList(sessionId).dataRows
 
@@ -540,10 +545,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(e)
             if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, sessionId,
-                    getMessage("ctfRemoteClientService.remote.sessionExpired"),
-                    e)
+                    getMessage("ctfRemoteClientService.remote.sessionExpired", 
+                        locale), e)
             } else {
-                def errorMessage = "Unable to list the projects: " + faultMsg
+                def errorMessage = getMessage(
+                    "ctfRemoteClientService.listProjects.error", locale) + " " +
+                    faultMsg
                 log.error(errorMessage, e)
                 throw new RemoteMasterException(ctfUrl, errorMessage, e)
             }
@@ -575,7 +582,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * general errors.
      */
     public def createUser(ctfUrl, userSessionId, username, password, email, 
-        realName, boolean isSuperUser, boolean isRestrictedUser) 
+        realName, boolean isSuperUser, boolean isRestrictedUser, locale) 
             throws RemoteMasterException {
 
         try {
@@ -588,37 +595,38 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(userExists)
             throw new RemoteMasterException(ctfUrl, getMessage(
                 "ctfRemoteClientService.createUser.alreadyExists",
-                    [ctfUrl, username]), userExists)
+                    [ctfUrl, username], locale), userExists)
 
         } catch (IllegalArgumentFault invalidProperties) {
             GrailsUtil.deepSanitize(invalidProperties)
             throw new RemoteMasterException(ctfUrl, getMessage(
-                "ctfRemoteClientService.createUser.invalidProps", [username]),
-                invalidProperties)
+                "ctfRemoteClientService.createUser.invalidProps", [username],
+                locale), invalidProperties)
 
         } catch (InvalidSessionFault sessionExpired) {
             GrailsUtil.deepSanitize(sessionExpired)
             throw new CtfSessionExpiredException(ctfUrl, userSessionId,
                 getMessage("ctfRemoteClientService.createUser.invalidProps",
-                    [username, userSessionId]), sessionExpired)
+                    [username, userSessionId], locale), sessionExpired)
 
         } catch (PermissionDeniedFault permissionDenied) {
             GrailsUtil.deepSanitize(permissionDenied)
             throw new RemoteMasterException(ctfUrl, userSessionId, getMessage(
                 "ctfRemoteClientService.createUser.sessionIdHasNoPermission",
-                    [username, userSessionId]), permissionDenied)
+                    [username, userSessionId], locale), permissionDenied)
 
         } catch (UserLimitExceededFault noMoreUsers) {
             GrailsUtil.deepSanitize(noMoreUsers)
             throw new RemoteMasterException(ctfUrl, userSessionId, getMessage(
                 "ctfRemoteClientService.createUser.limitExceeded",
-                    [username, userSessionId]), noMoreUsers)
+                    [username, userSessionId], locale), noMoreUsers)
 
         } catch (SystemFault generalProblem) {
             GrailsUtil.deepSanitize(generalProblem)
             def msg = getMessage(
-                "ctfRemoteClientService.createUser.generalError", [username])
-            throw new RemoteMasterException(ctfUrl, userSessionId, msg + ": " +
+                "ctfRemoteClientService.createUser.generalError", [username],
+                locale)
+            throw new RemoteMasterException(ctfUrl, userSessionId, msg + " " +
                 "${generalProblem.message}", generalProblem)
         }
     }
@@ -628,10 +636,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * projectPath parameters.  If found, returns the name of the project
      * as it exists in CTF, otherwise returns null
      */
-    String projectExists(ctfUrl, sessionId, projectName, projectPath)
+    String projectExists(ctfUrl, sessionId, projectName, projectPath, locale)
         throws RemoteMasterException {
 
-        def projects = this.getProjectList(ctfUrl, sessionId)
+        def projects = this.getProjectList(ctfUrl, sessionId, locale)
         String realName
         for (p in projects) {
             if (projectName.toLowerCase() == p.title.toLowerCase() || 

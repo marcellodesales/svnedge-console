@@ -200,7 +200,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         throws RemoteMasterException {
 
         return ctfRemoteClientService.projectExists(conversionData.ctfURL,
-            conversionData.userSessionId, projectName, projectUrl(projectName))
+            conversionData.userSessionId, projectName, projectUrl(projectName),
+            conversionData.userLocale)
     }
 
     /**
@@ -214,7 +215,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         throws RemoteMasterException {
 
         def ctfProjectsList = ctfRemoteClientService.getProjectList(
-            conversionData.ctfURL, conversionData.userSessionId)
+            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.userLocale)
         def projects = new HashSet(ctfProjectsList.dataRows.toList().collect {
             it.title })
         def repos = Repository.list(sort:"name")
@@ -307,7 +309,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      */
     List<List<String>> getCsvnUsersComparedToCtfUsers(conversionData) {
         def ctfRemoteUsers = ctfRemoteClientService.getUserList(
-            conversionData.ctfURL, conversionData.userSessionId)
+            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.userLocale)
         def ctfUsers = new HashSet(ctfRemoteUsers.toList().collect { 
             it.userName })
         def csvnUsers = User.list(sort:"username")
@@ -335,7 +338,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
         conversionData.userSessionId = ctfRemoteClientService.login(
             conversionData.ctfURL, conversionData.ctfUsername,
-            conversionData.ctfPassword)
+            conversionData.ctfPassword, conversionData.userLocale)
         conversionData.apiVersion = ctfSoap.getApiVersion()
         conversionData.appVersion = ctfSoap.getVersion(getUserSessionId(
             conversionData))
@@ -496,7 +499,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def uSessionId = getUserSessionId(conversionData)
         def systemId = ctfRemoteClientService.addExternalSystem(
             conversionData.ctfURL, uSessionId, adapterType, title, description,
-            props)
+            props, conversionData.userLocale)
 
         return systemId
     }
@@ -545,7 +548,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                     newRepoDomain.discard()
                     if (newRepo == repo || !newRepoDomain.validateName()) {
                         def msg = getMessage(
-                            "setupTeamForge.integration.ctfRepoName.invalid")
+                            "setupTeamForge.integration.ctfRepoName.invalid",
+                            conversionData.userLocale)
                         throw new Exception(msg + ": " + newRepo)
                     } else {
                         def parentDir = Server.getServer().repoParentDir
@@ -554,11 +558,12 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                         if (f2.exists()) {
                             throw new Exception(getMessage(
                                 "setupTeamForge.integration.ctfRepoName" +
-                                ".alreadyExists", [repo, newRepo]))
+                                ".alreadyExists", [repo, newRepo], 
+                                conversionData.userLocale))
                         } else if (!f1.renameTo(f2)) {
                             throw new Exception(getMessage("setupTeamForge." +
                                 "integration.ctfRepoName.unexpectedError", 
-                                [repo, newRepo]))
+                                [repo, newRepo], conversionData.userLocale))
                         } else {
                             repoDomain.name = newRepo
                             repoDomain.save()
@@ -567,7 +572,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 } else {
                     throw new Exception(getMessage(
                         "setupTeamForge.integration.ctfRepoName.cantBeFixed",
-                        [repo]))
+                        [repo], conversionData.userLocale))
                 }
             } 
         }
@@ -591,7 +596,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def projectName = conversionData.ctfProject
         def projectPath = projectUrl(projectName)
         def projects = ctfRemoteClientService.getProjectList(
-            conversionData.ctfURL, conversionData.userSessionId)
+            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.userLocale)
         String projectId = null
         for (p in projects) {
             if (projectName.toLowerCase() == p.title.toLowerCase() || 
@@ -608,7 +614,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             //TODO: move this method call to ctfRemoteClientService
             def p = ctfSoap.createProject(getUserSessionId(conversionData), 
                 projectPath, projectName, getMessage(
-                    "setupTeamForge.integration.container.existed"))
+                    "setupTeamForge.integration.container.existed", 
+                    conversionData.userLocale))
             projectId = p.id
         }
         
@@ -618,7 +625,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         boolean idRequiredOnCommit = false
         boolean hideMonitoringDetails = false
         def desc = getMessage("setupTeamForge.integration.addedFromExistingRepo"
-            , ["CollabNet Subversion Edge"])
+            , ["CollabNet Subversion Edge"], conversionData.userLocale)
         def repos = Repository.list()
         if (log.isDebugEnabled()) {
             log.debug "repos=" + repos
@@ -664,7 +671,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             if (this.isFreshInstall()) {
                 conversionData.userSessionId = ctfRemoteClientService.login(
                     conversionData.ctfURL, conversionData.ctfUsername, 
-                    conversionData.ctfPassword)
+                    conversionData.ctfPassword, conversionData.userLocale)
             }
             doConvert(conversionData, ctfServer, server, errors, warnings)
 
@@ -722,7 +729,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                     server, ctfServer, errors)
             } catch (Exception e) {
                 def msg = getMessage(
-                    "setupTeamForge.integration.recovery.failed")
+                    "setupTeamForge.integration.recovery.failed", 
+                    conversionData.userLocale)
                 log.error(msg, e)
                 errors << msg
             }
@@ -799,7 +807,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * @param ctfServer is the current ctf server
      * @param errors is the errors to be collected.
      */
-    private void undoServers(Server server, CtfServer ctfServer, errors) {
+    private void undoServers(Server server, CtfServer ctfServer, error, locale) {
         try {
             if (ctfServer && ctfServer.mySystemId || server) {
                 this.undoLocalServerConfiguration(server)
@@ -807,7 +815,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
 
         } catch (Exception e) {
             def msg = getMessage(
-                "setupTeamForge.integration.recovery.serverFailed")
+                "setupTeamForge.integration.recovery.serverFailed", locale)
             logMsg(msg, errors, e)
             errors << msg
         }
@@ -820,18 +828,21 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 anonymousAuthenticationProvider]
     }
 
-    private void undoLocalRepositoriesDependencies(Server server, errors) {
+    private void undoLocalRepositoriesDependencies(Server server, errors, 
+            locale) {
         File repoParent = new File(server.repoParentDir)
         try {
             File idFile = new File(repoParent, ".scm.properties")
             if (idFile.exists() && !idFile.delete()) {
                 def msg = getMessage(
-                    "setupTeamForge.integration.recovery.externalProperty")
+                    "setupTeamForge.integration.recovery.externalProperty", 
+                    locale)
                 logMsg(msg, errors, null)
             }
         } catch (Exception e) {
             def msg = getMessage(
-                    "setupTeamForge.integration.recovery.externalProperty")
+                    "setupTeamForge.integration.recovery.externalProperty", 
+                    locale)
             logMsg(msg, errors, e)
         }
 
@@ -844,7 +855,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             }
         } catch (Exception e) {
             def msg = getMessage(
-                    "setupTeamForge.integration.recovery.hookscripts.failed")
+                    "setupTeamForge.integration.recovery.hookscripts.failed", 
+                    locale)
             logMsg(msg, errors, e)
         }
     }
@@ -860,7 +872,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * @return boolean if the system id has been deleted
      */
     private undoExternalSystemOnRemoteCtfServer(ctfUrl, jsessionid, 
-            externalSystemId, errors) {
+            externalSystemId, errors, locale) {
 
         def delUrl = ctfUrl + "/sf/sfmain/do/selectSystems;jsessionid=" + 
             jsessionid
@@ -877,7 +889,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         if (systemId || exceptionIndex >= 0) {
             log.warn "Delete from CTF did not succeed\n\n" + page
             def msg = getMessage(
-                "setupTeamForge.integration.recovery.incomplete")
+                "setupTeamForge.integration.recovery.incomplete", locale)
             errors << msg
             return false
         } else {
@@ -897,7 +909,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * CTF server.
      */
     protected void revertFromCtfMode(String ctfUsername, String ctfPassword,
-            errors) throws CtfAuthenticationException {
+            errors, locale) throws CtfAuthenticationException {
 
         Server server = Server.getServer()
         CtfServer ctfServer = CtfServer.getServer()
@@ -906,21 +918,22 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             def sessionIds = this.loginCtfWebapp(ctfServer.baseUrl, ctfUsername,
                 ctfPassword)
             doRevertFromCtfMode(ctfServer.baseUrl, ctfServer.mySystemId,
-                sessionIds?.jsessionid, server, ctfServer, errors)
+                sessionIds?.jsessionid, server, ctfServer, errors, locale)
         }
     }
 
     private void doRevertFromCtfMode(ctfUrl, exSystemId, jsessionid, 
-                                     server, ctfServer, errors) {
+                                     server, ctfServer, errors, locale) {
         if (jsessionid) {
             this.undoServers(server, ctfServer, errors)
             if (ctfUrl && exSystemId) {
                 this.undoExternalSystemOnRemoteCtfServer(
-                    ctfUrl, jsessionid, exSystemId, errors)
+                    ctfUrl, jsessionid, exSystemId, errors, locale)
             }
-            this.undoLocalRepositoriesDependencies(server, errors)
+            this.undoLocalRepositoriesDependencies(server, errors, locale)
         } else {
-            def msg = getMessage("setupTeamForge.integration.ctf.auth.failed")
+            def msg = getMessage("setupTeamForge.integration.ctf.auth.failed",
+                locale)
             throw new CtfAuthenticationException(msg)
         }
     }

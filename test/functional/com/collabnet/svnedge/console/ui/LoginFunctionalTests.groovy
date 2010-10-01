@@ -42,11 +42,11 @@ class LoginFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
     }
 
     void testDotsLogin() {
-        this.loginUserDot()
+        loginUserDot()
     }
 
     void testFailLogin() {
-        this.login("marcello", "xyzt")
+        login "marcello", "xyzt"
         assertContentContains getMessage("user.credential.incorrect", 
             ["marcello"] as String[])
     }

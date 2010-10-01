@@ -39,7 +39,8 @@ class CtfConversionBean {
     String serverKey
     boolean lowercaseRepos
     String repoPrefix
-    
+    Locale userLocale
+
     boolean validateProjectName() {
         isProjectPerRepo || (null != ctfProject && ctfProject.trim().length() > 0)
     }

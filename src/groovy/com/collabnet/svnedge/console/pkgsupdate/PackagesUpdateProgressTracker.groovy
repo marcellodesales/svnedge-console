@@ -29,6 +29,7 @@ import org.cometd.Channel
 import org.mortbay.cometd.ChannelImpl
 
 import com.sun.pkg.client.Fmri
+import com.sun.pkg.client.Image;
 import com.sun.pkg.client.ImagePlanProgressTracker
 import com.sun.pkg.client.Manifest
 import com.sun.pkg.client.Action
@@ -102,17 +103,25 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     private int overallPercentage
     /**
-     * Current percentage
-     */
-    private int currentPercentage
-    /**
      * Current phase
      */
     private String currentPhase
     /**
+     * The total number of packages to be downloaded
+     */
+    private int totalNumberPackages
+    /**
      * The total number of files to be downloaded
      */
     private int totalDownloadFiles
+    /**
+     * The current file index being downloaded.
+     */
+    private int currentFileDownloadIndex
+    /**
+     * The current file download total size
+     */
+    private long currentFileDownloadTotalSize
     /**
      * The total number of files to be removed
      */
@@ -166,13 +175,14 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     private PackagesUpdateProgressTracker(String imagePath, Client client, 
                 Channel statusChannel, Channel percentagesChannel, 
-                boolean newPackages) {
+                boolean newPackages, int totalFilesToDownload) {
 
         this.imagePath = imagePath
         this.bayeuxPublisherClient = client
         this.statusMessageChannel = statusChannel
         this.percentageMessageChannel = percentagesChannel
         this.newPackagesInstalled = newPackages
+        this.totalDownloadFiles = totalFilesToDownload
     }
 
     /**
@@ -183,10 +193,11 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     public static PackagesUpdateProgressTracker makeNew(String imagePath, 
             Client client, Channel statusChannel, Channel percentagesChannel,
-            boolean newPackages) {
+            boolean newPackages, int totalFilesToDownload) {
 
         return new PackagesUpdateProgressTracker(imagePath, client, 
-                statusChannel, percentagesChannel, newPackages)
+            statusChannel, percentagesChannel, newPackages, 
+            totalFilesToDownload)
     }
 
     /**
@@ -257,8 +268,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         } else {
             total += "package"
         }
+        this.totalNumberPackages = totalPackages
         this.overallPercentage = 0
-        this.currentPercentage = 0
         this.currentPhase = "Downloading..."
         this.publishStatusMessage("Starting the download phase of " + total)
     }
@@ -287,7 +298,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         } else {
             totalFiles += "file"
         }
-        this.totalDownloadFiles = totalDownloadFiles
         def formattedSize = this.getFormattedFileSize(totalDownloadSize)
         this.publishStatusMessage("Downloading  package'${pkg.getName()}'" +
                 "... ${totalFiles} with total of ${formattedSize}")
@@ -297,20 +307,37 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#startFileDownload(int, long)
      */
     public void startFileDownload(int index, long fileSize) {
-        this.overallPercentage = 15
-        this.currentPercentage = Math.round(
-                    (index / this.totalDownloadFiles) * 100)
+        this.currentFileDownloadIndex++
+        this.currentFileDownloadTotalSize = fileSize
+        this.overallPercentage += Math.round((
+                    (index / this.totalDownloadFiles) * 100) / 2)
         this.publishStatusMessage("Downloading " +
                     "${this.getFormattedFileSize(fileSize)} (File " +
                     "${++index}/${this.totalDownloadFiles})")
     }
 
     /* (non-Javadoc)
+     * @see com.sun.pkg.client.ImagePlanProgressTracker#onFileDownloadProgress(int, long)
+     */
+    public void onFileDownloadProgress(int index, long xferedBytes) {
+        def percentTransferred = xferedBytes / this.currentFileDownloadTotalSize
+        def filePerc = this.currentFileDownloadIndex / this.totalDownloadFiles
+        def totalSoFar = this.overallPercentage + 
+            Math.round(((filePerc * percentTransferred) / 100) / 5)
+        log.debug("The file index '${this.currentFileDownloadIndex}'")
+        log.debug("Transferred: ${xferedBytes} = ${percentTransferred}%")
+        log.debug("Overral Percentage to be: ${totalSoFar}")
+        if (totalSoFar <= 50) {
+             this.overallPercentage = totalSoFar
+             log.debug("Published Percentage: ${this.overallPercentage}")
+             this.publishPercentageMessage()
+        }
+    }
+
+    /* (non-Javadoc)
      * @see com.sun.pkg.client.ImagePlanProgressTracker#endPackageDownload(com.sun.pkg.client.Fmri, int)
      */
     public void endPackageDownload(Fmri pkg, int totalDownloadFiles) {
-        this.overallPercentage = 20
-        this.currentPercentage = 100
         this.publishStatusMessage("Finished downloading '${pkg.getName()}'...")
     }
 
@@ -318,8 +345,7 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#endDownloadPhase()
      */
     public void endDownloadPhase() {
-        this.overallPercentage = 25
-        this.currentPercentage = 0
+        this.overallPercentage = 50
         this.currentPhase = "Finished Downloading..."
         this.publishStatusMessage("Finished downloading packages...")
     }
@@ -328,8 +354,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#startActions(int)
      */
     public void startActions(int totalActions) {
-        this.overallPercentage = 30
-        this.currentPercentage = 0
         this.currentPhase = "Preparing system..."
         this.publishStatusMessage("Preparing system for removal, update, " +
                 "install phases...")
@@ -339,8 +363,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#startRemovalPhase(int)
      */
     public void startRemovalPhase(int totalRemovalActions) {
-        this.overallPercentage = 35
-        this.currentPercentage = 0
         this.currentPhase = "Removing..."
         this.totalRemovalActions = totalRemovalActions 
         this.publishStatusMessage("Removing ${totalRemovalActions} old " +
@@ -351,10 +373,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#onRemovalAction(com.sun.pkg.client.Action)
      */
     public void onRemovalAction(Action a) {
-        this.overallPercentage = 35
-        this.currentPercentage = Math.round((
-                ++this.currentRemovalAction / this.totalRemovalActions) * 100)
-        this.totalRemovalActions = totalRemovalActions 
+        this.overallPercentage += Math.round(((
+            ++this.currentRemovalAction / this.totalRemovalActions) * 100) * 0.166)
         this.publishPercentageMessage()
     }
 
@@ -362,8 +382,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#endRemovalPhase()
      */
     public void endRemovalPhase() {
-        this.overallPercentage = 45
-        this.currentPercentage = 100
         this.currentPhase = "Removing..."
         this.publishStatusMessage("Finished removing old files...")
     }
@@ -372,8 +390,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#startUpdatePhase(int)
      */
     public void startUpdatePhase(int totalUpdateActions) {
-        this.overallPercentage = 60
-        this.currentPercentage = 0
         this.totalUpdateActions = totalUpdateActions
         this.currentPhase = "Updating..."
         this.publishStatusMessage("Updating the CSVN packages...")
@@ -383,9 +399,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#onUpdateAction(com.sun.pkg.client.Action, com.sun.pkg.client.Action)
      */
     public void onUpdateAction(Action from, Action to) {
-        this.overallPercentage = 70
-        this.currentPercentage = Math.round((
-                ++this.currentUpdateAction / this.totalUpdateActions) * 100) 
+        this.overallPercentage += Math.round(((
+            ++this.currentUpdateAction / this.totalUpdateActions) * 100) * 0.166)
         this.publishPercentageMessage()
     }
 
@@ -393,8 +408,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#endUpdatePhase()
      */
     public void endUpdatePhase() {
-        this.overallPercentage = 75
-        this.currentPercentage = 100
         this.currentPhase = "Finished Updating..."
         this.publishStatusMessage("Finished updating the packages...")
     }
@@ -403,8 +416,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#startInstallPhase(int)
      */
     public void startInstallPhase(int totalInstallActions) {
-        this.overallPercentage = 80
-        this.currentPercentage = 0
         this.currentPhase = "Installing..."
         this.totalInstallActions = totalInstallActions
         if (this.newPackagesInstalled) {
@@ -418,9 +429,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @see com.sun.pkg.client.ImagePlanProgressTracker#onInstallAction(com.sun.pkg.client.Action)
      */
     public void onInstallAction(Action a) {
-        this.overallPercentage = 90
-        this.currentPercentage = Math.round((
-                ++this.currentInstallAction / this.totalInstallActions) * 100) 
+        this.overallPercentage += Math.round(((
+           ++this.currentInstallAction / this.totalInstallActions) * 100) * 0.166)
         this.publishPercentageMessage()
     }
 
@@ -429,12 +439,9 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     public void endInstallPhase() {
         this.overallPercentage = 100
-        this.currentPercentage = 100
         this.currentPhase = "Finished Instaling..."
         this.publishStatusMessage("Finished installing new files...")
 
-        this.overallPercentage = 100
-        this.currentPercentage = 100
         this.currentPhase = this.newPackagesInstalled ? 
                 "New Packages Installed." : "Update Complete."
         def upgrVrs = "${this.upgradeReleaseNumber}-${this.upgradeBranchNumber}"

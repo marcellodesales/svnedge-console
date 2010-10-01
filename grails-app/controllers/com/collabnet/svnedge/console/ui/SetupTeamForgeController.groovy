@@ -76,7 +76,7 @@ class SetupTeamForgeController {
             errorCause = savedCon.errorMessage
             def msg = message(code: 
                 "setupTeamForge.action.ctfInfo.ctfConnection.error")
-            generalError = msg + ": '${savedCon.ctfURL}'"
+            generalError = msg + " '${savedCon.ctfURL}'"
             session[WIZARD_BEAN_KEY] = null
         }
         [isFreshInstall: setupTeamForgeService.isFreshInstall(), con: con, 
@@ -85,6 +85,7 @@ class SetupTeamForgeController {
     }
 
     def confirmCredentials = { CtfConversionBean con ->
+        con.userLocale = RCU.getLocale(request)
         session[WIZARD_BEAN_KEY] = con
         if(con.hasErrors()) {
             forward(action: 'ctfInfo')
@@ -127,6 +128,7 @@ class SetupTeamForgeController {
      */
     def ctfProject = {
         CtfConversionBean conversionObject = session[WIZARD_BEAN_KEY]
+        conversionObject.userLocale = RCU.getLocale(request)
         if (!conversionObject) {
             flash.warn = message(code: 'ctfConversion.session.expired')
             redirect(action:'ctfInfo')
@@ -231,6 +233,7 @@ class SetupTeamForgeController {
     
     def updateProject = {
         CtfConversionBean con = session[WIZARD_BEAN_KEY]
+        con.userLocale = RCU.getLocale(request)
         if (!con) {
             flash.warn = message(code: 'ctfConversion.session.expired')
             redirect(action:'ctfInfo')
@@ -286,7 +289,7 @@ class SetupTeamForgeController {
                     session[WIZARD_BEAN_KEY] = null
                     def msg = message(code:
                         "setupTeamForge.action.updateProject.creatingProject.error")
-                    flash.error = msg + ": " + serverException.getMessage()
+                    flash.error = msg + " " + serverException.getMessage()
                     forward(action:'ctfInfo')
                     return
                 }
@@ -323,7 +326,7 @@ class SetupTeamForgeController {
                 session[WIZARD_BEAN_KEY] = null
                 def msg = message(code: 
                     "setupTeamForge.action.updateProject.creatingProject.error")
-                flash.error = msg + ": " + sessionExpired.getMessage()
+                flash.error = msg + " " + sessionExpired.getMessage()
                 forward(action:'ctfInfo')
                 return
             }
@@ -339,6 +342,7 @@ class SetupTeamForgeController {
      */
     def ctfUsers = {
         CtfConversionBean con = session[WIZARD_BEAN_KEY]
+        con.userLocale = RCU.getLocale(request)
         if (!con) {
             flash.warn = message(code: 'ctfConversion.session.expired')
             redirect(action:'ctfInfo')
@@ -352,13 +356,14 @@ class SetupTeamForgeController {
             session[WIZARD_BEAN_KEY] = null
             def msg = message(code:
                 "setupTeamForge.action.ctfUsers.loadingUsers.error")
-            flash.error = msg + ": " + remoteError.getMessage()
+            flash.error = msg + " " + remoteError.getMessage()
             redirect(action:'ctfInfo')
         }
     }
     
     def updateUsers = {
         CtfConversionBean con = session[WIZARD_BEAN_KEY]
+        con.userLocale = RCU.getLocale(request)
         if (!con) {
             flash.warn = message(code: 'ctfConversion.session.expired')
             redirect(action:'ctfInfo')
@@ -378,6 +383,7 @@ class SetupTeamForgeController {
      */
     def confirm = {
         def con = session[WIZARD_BEAN_KEY]
+        con.userLocale = RCU.getLocale(request)
         if (!con) {
             flash.warn = message(code: 'ctfConversion.session.expired')
             redirect(action:'ctfInfo')
@@ -400,6 +406,7 @@ class SetupTeamForgeController {
         } else if (freshInstall){
             // came from the fresh installation
             con = freshCon
+            con.userLocale = RCU.getLocale(request)
             session[WIZARD_BEAN_KEY] = con
         }
 

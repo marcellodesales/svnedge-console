@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.replica.service
 
+import java.util.Locale;
+
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
@@ -41,7 +43,7 @@ class CacheMananagementAuthIntegrationTests extends GrailsUnitTestCase {
             def adminPassword = config.svnedge.ctfMaster.password
 
             def adminSessionId = ctfRemoteClientService.login(ctfUrl, 
-                adminUsername, adminPassword)
+                adminUsername, adminPassword, Locale.getDefault())
             ctfRemoteClientService.createUser(ctfUrl, adminSessionId, 
                 TEST_USERNAME, TEST_PASSWORD, "mdesales@collab.net", 
                 "Marcello de Sales", true, false)

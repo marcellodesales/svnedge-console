@@ -89,6 +89,18 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         assertStatus(200)
     }
 
+    /**
+     * Performs the logout by clicking on the link.
+     */
+    protected void logout() {
+        def logout = getMessage("layout.page.logout")
+        if (this.response.contentAsString.contains(logout)) {
+            click logout
+        }
+        assertStatus(200)
+        assertContentContains(getMessage("login.page.auth.header"))
+    }
+
     protected void loginAdmin() {
         this.login ("admin", "admin")
         assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
@@ -126,18 +138,6 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
     protected def getMessage(String key, params) {
         def appCtx = app.getMainContext()
         return appCtx.getMessage(key, params as String[], Locale.getDefault())
-    }
-
-    /**
-     * Performs the logout by clicking on the link.
-     */
-    protected void logout() {
-        def logout = getMessage("layout.page.logout")
-        if (this.response.contentAsString.contains(logout)) {
-            click logout
-        }
-        assertStatus(200)
-        assertContentContains(getMessage("login.page.auth.header"))
     }
 
     /**

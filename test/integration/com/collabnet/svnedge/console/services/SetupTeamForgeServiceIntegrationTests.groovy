@@ -17,14 +17,11 @@
  */
 package com.collabnet.svnedge.console.services;
 
-import grails.test.GrailsUnitTestCase
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
+import grails.test.GrailsUnitTestCase;
+
+import java.util.Locale;
+
+import com.collabnet.svnedge.console.Repository;
 import com.collabnet.svnedge.teamforge.CtfConversionBean;
 
 class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
@@ -50,7 +47,8 @@ class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
         def ctfProtocol = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
         def ctfURL = ctfProtocol + config.svnedge.ctfMaster.domainName
 
-        def sessionId = ctfRemoteClientService.login(ctfURL, usr, pwd)
+        def sessionId = ctfRemoteClientService.login(ctfURL, usr, pwd, 
+            Locale.getDefault())
 
         CtfConversionBean ctfProps = new CtfConversionBean(ctfURL: ctfURL, 
             userSessionId: sessionId)
