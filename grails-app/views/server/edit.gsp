@@ -121,10 +121,13 @@
 <div class="instructionText">
     <i><g:message code="server.page.edit.standardPorts.header" /></i>
     <g:if test="${isSolaris}">
-      <p><g:message code="server.page.edit.solarisStandardPorts.instructions" args="${[params.port ?: server.port]}" /></p>
-      <blockquote>
-        <code>usermod -K defaultpriv=basic,net_privaddr ${console_user}</code>
-      </blockquote>
+      <p><g:message code="server.page.edit.solarisStandardPorts.instructions" /></p>
+      <ul>
+        <li><g:message code="server.page.edit.solarisStandardPorts.instructions1" args="${[console_user, params.port ?: server.port]}" /></li>
+        <li><g:message code="server.page.edit.solarisStandardPorts.instructions2" args="${[console_user]}" /></li>
+        <li><g:message code="server.page.edit.solarisStandardPorts.instructions3" /></li>
+        <li><g:message code="server.page.edit.solarisStandardPorts.instructions4" /></li>
+      </ul>
       <p><g:message code="server.page.edit.solarisStandardPorts.altInstructions" /></p>
     </g:if>
     <g:else>
@@ -211,15 +214,6 @@ $('bindInstructions').hide();
             <g:if test="${standardPortInstructions}">
                 <i><g:message code="server.port.label.tip" /></i>
             </g:if>
-            <g:elseif test="${showSolarisPortHelp}">
-              <g:set var="js_link"> id="toggleSolaris" href="#" onclick="var el = $('solarisPortHelp'); el.toggle(); if (el.visible()) { this.parentNode.parentNode.hide(); } return false;"</g:set>
-                <div id="solarisPortHelpLink">
-                <img style="align: top; border=0px" width="15" height="15" alt="" 
-                  src="${resource(dir:'images/icons',file:'icon_info_sml.gif')}" />
-                <em><g:message code="server.page.edit.solarisStandardPorts.helpLink" 
-                    args="${[js_link , params.port ?: server.port]}" /></em>
-                </div>
-            </g:elseif>
             <g:else>
             <g:if test="${(server.useSsl && server.port != 443) || server.port != 80}">
                 <i><g:message code="server.port.label.tip.standardPorts" /></i>
@@ -237,33 +231,6 @@ $('bindInstructions').hide();
         </td>
       </tr>
     </g:hasErrors>
-    <g:if test="${showSolarisPortHelp}">
-      <tr>
-        <td></td>
-        <td colspan="2" width="100%" valign="top">
-          <div class="instructionText" id="solarisPortHelp">
-            <em><g:message code="server.page.edit.solarisStandardPorts.help.header" 
-                args="${[params.port ?: server.port]}"/></em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <a href="#" onclick="var el = $('solarisPortHelpLink'); el.toggle(); if (el.visible()) { this.parentNode.hide(); } return false;">
-                [ <g:message code="general.hide" /> ]</a>
-            <ul>
-            <li><g:message code="server.page.edit.solarisStandardPorts.help1" /> </li>
-            <li><g:message code="server.page.edit.solarisStandardPorts.help2" 
-                args="${[console_user, params.port ?: server.port]}" /></li>
-            <li><g:message code="server.page.edit.solarisStandardPorts.help3" />
-              <blockquote>
-                <code>usermod -K defaultpriv=basic,net_privaddr ${console_user}</code>
-              </blockquote>
-              </li>
-            </ul>
-          </div>
-          <script type="text/javascript">
-             $('solarisPortHelp').hide();
-          </script>
-        </td>
-      </tr>
-    </g:if>
-
     
       <tr>
         <td class="ItemDetailName">

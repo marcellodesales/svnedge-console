@@ -200,10 +200,6 @@ class ServerController {
         def showPortInstructions = isPrivatePort && 
             !lifecycleService.isDefaultPortAllowed()
         def isSolaris = operatingSystemService.isSolaris()
-        int solarisCheck = lifecycleService.checkSolarisNetPrivAddr()
-        def showSolarisPortHelp = isSolaris && isPrivatePort &&
-            solarisCheck == 2 && 
-            !lifecycleService.isHttpdBindSuid() && !lifecycleService.isSudo()
         def config = ConfigurationHolder.config
 
         return [
@@ -219,7 +215,6 @@ class ServerController {
             csvnConf: ConfigUtil.confDirPath(),
             standardPortInstructions: showPortInstructions,
             isSolaris: isSolaris,
-            showSolarisPortHelp: showSolarisPortHelp,
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,
             isConfigurable: serverConfService.createOrValidateHttpdConf()

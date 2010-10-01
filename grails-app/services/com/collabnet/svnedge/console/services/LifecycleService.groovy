@@ -44,7 +44,7 @@ class LifecycleService {
     // call "clearCachedResults" to enable re-checking
     private Boolean isSudoCache
     private Boolean isHttpdBindSuidCache
-
+    private Boolean isSolarisDefaultPortCache
 
     private boolean isWindows() {
         return operatingSystemService.isWindows()
@@ -293,11 +293,35 @@ root@${server.hostname}
         }
 
         def cmd = createHttpdCmd()
-        if (getServer().port < 1024 && !isWindows() && !isHttpdBindSuid() && isSudo()) {
-            cmd.add(0, "sudo")
-            cmd.add(1, "-S")
-        }
         cmd.addAll([ "-k", startOrStop])
+        if (getServer().port < 1024) {
+            if (!isWindows() && !isHttpdBindSuid() && isSudo()) {
+                cmd.add(0, "sudo")
+                cmd.add(1, "-S")
+
+            } else if (isSolarisDefaultPortAllowed() && !isHttpdBindSuid()) {
+                def httpdCmd = cmd.collect({it.replace(" ", "\\ ")}).join(" ")
+		cmd = ["ppriv", "-s", "EIP+net_privaddr", "-e", 
+                       "sh", "-c", httpdCmd]
+
+/*
+The following was developed as an alternative to the above as there were
+some spurious warnings in the logs and also wasn't sure how it might handle
+spaces in paths, but those problems are cleared up. Just keeping for initial
+commit; it can be removed as soon as the method above is proven to work 
+                File f =  new File(new File(ConfigUtil.dataDirPath(), "run"), 
+                    "exec_httpd.sh")
+                f.write(
+"""#!/bin/sh
+ppriv -s EIP+net_privaddr \$\$
+${httpdCmd}
+""")
+                f.setExecutable(true)
+                cmd = [f.canonicalPath]
+*/
+            }
+        }
+
         def commandResponse = commandLineService.execute(cmd.toArray(
                 new String[0]), createHttpdEnv())
         def exitStatus = Integer.parseInt(commandResponse[0])
@@ -319,6 +343,7 @@ root@${server.hostname}
 
         // Look for port-bind issue
         if (exitStatus == 1 && error?.contains("could not bind")) {
+                clearCachedResults()
                 throw new CantBindPortException(server.port)
 
         } else if (exitStatus == 0) {
@@ -337,6 +362,7 @@ root@${server.hostname}
                           " using " + ConfigUtil.httpdPath())
             }
         } else {
+            clearCachedResults()
             log.warn("Server " + startOrStop + 
                      " attempt failed with code=" + exitStatus)
             log.warn("Output: " + commandResponse[1])
@@ -408,19 +434,8 @@ root@${server.hostname}
      * the httpd server on a privileged port.
      */
     boolean isDefaultPortAllowed() {
-        boolean result = isWindows()
-        if (!result) {
-            if (checkSolarisNetPrivAddr()) {
-                result = true
-            }
-            if (!result) {
-                result = isHttpdBindSuid()
-                if (!result) {
-                    result = isSudo()
-                }
-            }
-        }
-        return result
+        return isWindows() || isHttpdBindSuid() ||
+            isSolarisDefaultPortAllowed() || isSudo()
     }
     
     private boolean isSudo() {
@@ -445,7 +460,7 @@ root@${server.hostname}
         
         isSudoCache = null
         isHttpdBindSuidCache = null
-        
+        isSolarisDefaultPortCache = null        
     }
 
     private boolean checkSudo() {
@@ -455,7 +470,11 @@ root@${server.hostname}
 
         // validate sudo NOPASSWD is available for executing httpd
         try {
-            def cmd = createHttpdCmd()
+            // clear any earlier sudo timestamp
+            def cmd = ["sudo", "-K"]
+            commandLineService.execute(cmd.toArray(new String[2]))
+
+            cmd = createHttpdCmd()
             // Checks config file, which if corrupt could lead
             // to false negative, but httpd won't start anyway, so
             // there will be worse problems
@@ -494,31 +513,32 @@ root@${server.hostname}
         result
     }
 
+    private boolean isSolarisDefaultPortAllowed() {
+        
+        if (isSolarisDefaultPortCache == null) {
+            isSolarisDefaultPortCache = checkSolarisNetPrivAddr()
+        }
+        return isSolarisDefaultPortCache
+    }
+
+
     /**
-     * Checks that the svnedge user has the user_attr entry to allow it to 
-     * start httpd on privileged ports.  
-     * 
-     * @return 0 -> false, 1 -> true, 2 -> inconclusive
+     * Checks that the svnedge user is allowed to start httpd 
+     * on privileged ports.  
      */
-    int checkSolarisNetPrivAddr() {
+    private boolean checkSolarisNetPrivAddr() {
         if (!isSolaris()) {
-            return 0
+            return false
         }
-        int result = 2
-        String user = System.getProperty("user.name")
-        File userAttrFile = new File("/etc/user_attr")
-        if (userAttrFile.canRead()) {
-            result = 0
-            userAttrFile.eachLine { line ->
-                if (line.startsWith(user)) {
-                    int pos = line.indexOf("net_privaddr")
-                    if (pos > 0 && line.charAt(pos - 1) != '!') {
-                        result = 1
-                        return
-                    }
-                }
-            }
-        }
+
+        String[] cmd = ["ppriv", "-s", "EIP+net_privaddr", "-e", 
+                        "sh", "-c", "echo foo"]
+        def commandResponse = commandLineService.execute(cmd)
+        def exitStatus = Integer.parseInt(commandResponse[0])
+        def output = commandResponse[1]
+        boolean result = (exitStatus == 0 && output == "foo\n")
+        log.debug("checkSolarisNetPrivAddr()=" + result + "; exitStatus=" + 
+                  exitStatus + " output='" + output + "'")
         return result
     }
     
