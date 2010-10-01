@@ -925,7 +925,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     private void doRevertFromCtfMode(ctfUrl, exSystemId, jsessionid, 
                                      server, ctfServer, errors, locale) {
         if (jsessionid) {
-            this.undoServers(server, ctfServer, errors)
+            this.undoServers(server, ctfServer, errors, locale)
             if (ctfUrl && exSystemId) {
                 this.undoExternalSystemOnRemoteCtfServer(
                     ctfUrl, jsessionid, exSystemId, errors, locale)
