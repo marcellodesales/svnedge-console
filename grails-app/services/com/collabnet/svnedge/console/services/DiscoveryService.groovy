@@ -56,7 +56,6 @@ class DiscoveryService {
         if (System.getProperty("csvn.discovery.disabled")) {
             log.info("Discovery is disabled by the system properties " +
                 "'csvn.discovery.disabled'...")
-            bootstrapped = false
             return
         }
 
@@ -74,9 +73,7 @@ class DiscoveryService {
             registerServices(config)
 
         } catch (Exception e) {
-            e.printStackTrace()
             log.error(e)
-            bootstrapped = false
         }
     }
 
@@ -103,6 +100,8 @@ class DiscoveryService {
             params[SvnEdgeHttpServiceKey.PATH] = path ?: "/"
 
             register.registerService(port, SvnEdgeServiceType.HTTP, params);
+
+            bootstrapped = true
         }
     }
 
@@ -112,7 +111,10 @@ class DiscoveryService {
      */
     def close = {
         if (bootstrapped) {
+            log.info("The Discovery Service will announce the server " + 
+                "shutdown...")
             register.close()
+            log.debug("The announcement was sent...")
         }
     }
 
@@ -133,7 +135,6 @@ class DiscoveryService {
             registerServices(currentConfig)
 
         } catch (Exception e) {
-            e.printStackTrace()
             log.error(e)
         }
     }
