@@ -56,7 +56,7 @@ class NetworkingServiceTests extends GrailsUnitTestCase {
             Collection interfaces = addrInts.value
             if (addr.startsWith("127")) {
                 interfaces.each { 
-                    assertEquals "Expect lo for loopback addresses", "lo", it
+                    assertTrue "Expect lo for loopback addresses", it.startsWith("lo")
                 }
             } else if (addr.startsWith("169") || addr.startsWith("fe80")) {
                 fail "Link-local address found"
