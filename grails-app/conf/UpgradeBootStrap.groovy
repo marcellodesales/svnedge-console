@@ -37,7 +37,6 @@ class UpgradeBootStrap {
         log.info("Applying updates") 
         release1_1_0()
         release1_2_0()
-        release1_3_0()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -104,36 +103,6 @@ class UpgradeBootStrap {
         SchemaVersion v = new SchemaVersion(major : 1, minor : 2, revision : 0,
                 description: "1.2.0 updated Statistic values: name. " +
                     "(WinBytesIn -> BytesIn), (WinBytesOut -> BytesOut).")
-        v.save()
-    }
-
-    def void release1_3_0() {
-
-        if (isSchemaCurrent(1, 3, 0)) {
-            log.info("Schema is current for 1.3.0 release")
-            return
-        }
-
-        log.info("Applying 1.3.0 updates")
-        // if the stat group is null, the DB is uninitialized, so the updates can be skipped
-        if (fileSystemStatisticsService.statGroup) {
-            int groupId = fileSystemStatisticsService.statGroup.id
-            def db = new Sql(dataSource)
-            try {
-               db.execute("update STAT_ACTION set COLLECT_ID = '4' where GROUP_ID=${groupId} and COLLECT_ID='3'")
-               db.execute("update STAT_ACTION set COLLECT_ID = '3' where GROUP_ID=${groupId} and COLLECT_ID='2'")
-               db.execute("update STAT_ACTION set COLLECT_ID = '2' where GROUP_ID=${groupId} and COLLECT_ID='1'")
-            } catch(Exception e) {
-               log.error("Unable to update File System Statistics run intervals", e)
-               return
-            }
-            finally {
-                db.close()
-            }
-        }
-
-        SchemaVersion v = new SchemaVersion(major: 1, minor: 3, revision: 0,
-                description: "1.3.0 updated FileSystemStat jobs for less frequent runs")
         v.save()
     }
 }

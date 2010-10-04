@@ -168,14 +168,14 @@ class StatusController {
                 value: networkingService.formatThroughput(
                     statisticsService.getThroughput(), currentLocale)]
 
+            model << [label: message(code: 'status.page.status.space.header'),
+                 value: timestamp]
             model << [label: message(code: 'status.page.status.space.system'),
-                 value: usedDisk ? usedDisk + " (${timestamp})" : null]
-
+                 value: usedDisk]
             model << [label: message(code: 'status.page.status.space.repos'),
-                 value: usedRepo ? usedRepo + " (${timestamp})" : null]
-
+                 value: usedRepo]
             model << [label: message(code: 'status.page.status.space.avail'),
-                 value: freeRepo ? freeRepo + " (${timestamp})" : null]
+                 value: freeRepo]
         }
         if (server.replica) {
             model << [label: message(code: 'status.page.status.master_latency'),

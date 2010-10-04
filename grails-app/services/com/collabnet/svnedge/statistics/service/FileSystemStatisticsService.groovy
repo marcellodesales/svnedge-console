@@ -44,6 +44,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
     public static String REPOUSED_NAME = "repoUsed"
     public static String TRIGGER_NAME = "fileSystemTrigger"
     public static String DISKSPACE_UNIT_NAME = "Bytes"
+    public static long JOB_INTERVAL_MILLIS = 1800000 // 30 minutes
+    public static long JOB_START_DELAY = 120000 // 2 minutes
 
     def statGroupId
     def sysUsedStatId
@@ -56,13 +58,13 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         if (!getStatGroup()) {
             createFileSystemStatistics()
         }
-        def interval = getStatGroup().getRawInterval() * 1000
+        //def interval = getStatGroup().getRawInterval() * 1000
         def params = ["serviceName": "fileSystemStatisticsService"]
         def statCollectJob = new StatCollectJob()
         try {
             statCollectJob.schedule(StatCollectJob
-                .createTrigger(TRIGGER_NAME, interval, params, 12400L))
-            log.info("creating stat collection job at interval (millis): " + interval)
+                .createTrigger(TRIGGER_NAME, JOB_INTERVAL_MILLIS, params, JOB_START_DELAY))
+            log.info("creating stat collection job at interval (millis): " + JOB_INTERVAL_MILLIS)
         } catch (SchedulerException ex) {
             log.error("Failed to start StatCollectJob due to exception.", ex)
         }
@@ -161,7 +163,7 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         Repository.list().each { it ->
             repoUsed = getRepoUsedDiskspace(it)
             repoUsedTotal += repoUsed
-            repoStatValue = new StatValue(timestamp: idealStartTime(interval, now),
+            repoStatValue = new StatValue(timestamp: now,
                                       interval: interval,
                                       minValue: repoUsed,
                                       maxValue: repoUsed,
@@ -173,7 +175,8 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
             log.debug("Repo '${it.name}' Used: ${repoUsed}${getByteMagPrefix(repoUsed)}")
         }
 
-        repoStatValue = new StatValue(timestamp: idealStartTime(interval, now),
+        // save  general repo space used
+        repoStatValue = new StatValue(timestamp: now,
                                       interval: interval,
                                       minValue: repoUsedTotal,
                                       maxValue: repoUsedTotal,
@@ -181,7 +184,7 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
                                       lastValue: repoUsedTotal,
                                       statistic: getRepoUsedStat(),
                                       repo: null)
-        repoStatValue.save()
+        repoStatValue.save(flush:true)
         log.debug("Repo Total Used: ${repoUsedTotal}${getByteMagPrefix(repoUsedTotal)}")
 
 
@@ -363,40 +366,4 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         log.info("Successfully created filesystem statistics.")
     }
 
-
-    /**
-     * Add stat collection times for Filesystem stats (override defaults)
-     */
-    def addDefaultActions_ignore = { statGroup ->
-
-        createIntervals()
-        StatAction raw = new StatAction(group: statGroup,
-                                        collect:hour,
-                                        delete:week,
-                                        consolidateSource:null)
-        check(raw)
-        raw.save()
-        statGroup.addToActions(raw).save()
-        StatAction derive1 = new StatAction(group: statGroup,
-                                            collect:day,
-                                            delete:week,
-                                            consolidateSource:raw)
-        check(derive1)
-        derive1.save()
-        statGroup.addToActions(derive1).save()
-        StatAction derive2 = new StatAction(group: statGroup,
-                                            collect:week,
-                                            delete:thirty_days, 
-                                            consolidateSource:derive1)
-        check(derive2)
-        derive2.save()
-        statGroup.addToActions(derive2).save()
-        if (!statGroup.getActions()) {
-            log.error("No actions found!")
-        } else {
-            for (StatAction action: statGroup.getActions()) {
-                log.info("Action = " + action)
-            }
-        }
-    }
 }

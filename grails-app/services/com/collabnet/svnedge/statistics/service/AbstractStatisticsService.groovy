@@ -342,7 +342,8 @@ abstract class AbstractStatisticsService {
             def statValues = getStatValues(stat, idealStart, endTime, interval, repo)
                      
             statValues.each { statValue ->
-                def hash = map[statValue.getTimestamp()]
+                def idealTime = idealStartTime(interval, statValue.getTimestamp())
+                def hash = map[idealTime]
                 if (hash == null) {
                     // very unexpected.  We have a data point that's not
                     // where we expect it to be (i.e. not evenly spaced and 
