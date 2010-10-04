@@ -204,7 +204,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 if (num == 0) {
                     buffer.append getMessage("repository.status.noRepos", locale)
                 } else {
-                    buffer.append getMessage("repository.status.noRepos", 
+                    buffer.append getMessage("repository.status.totalNumber",
                         [num], locale)
                 }
                 if (server.mode == ServerMode.STANDALONE) {
