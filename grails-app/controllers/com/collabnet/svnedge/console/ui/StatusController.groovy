@@ -154,8 +154,10 @@ class StatusController {
        }
         if (operatingSystemService.isReady()) {
 
-            String timestamp = message(code: "status.page.status.timestamp",
-                    args: [statisticsService.getTimestampFileSystemData()])
+            def timestampDate = statisticsService.getTimestampFileSystemData()
+            String timestampString = timestampDate ?
+                message(code: "status.page.status.timestamp", args: [timestampDate]) :
+                message(code: "status.page.status.noData")
 
             def usedDisk = operatingSystemService.formatBytes(
                      statisticsService.getSystemUsedDiskspace())
@@ -169,7 +171,7 @@ class StatusController {
                     statisticsService.getThroughput(), currentLocale)]
 
             model << [label: message(code: 'status.page.status.space.header'),
-                 value: timestamp]
+                 value: timestampString]
             model << [label: message(code: 'status.page.status.space.system'),
                  value: usedDisk]
             model << [label: message(code: 'status.page.status.space.repos'),
