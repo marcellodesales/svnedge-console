@@ -285,7 +285,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
                     locale)
         } else {
             def bytes = OperatingSystemService.formatBytes(rateOut)
-            throughPutTxt = getMessage("statistics.throughput.out.bytes",
+            throughPutTxt += getMessage("statistics.throughput.out.bytes",
                 [bytes], locale)
             if (timeIn) {
                 def min = OperatingSystemService.formatMinutes(timeOut)
