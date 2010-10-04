@@ -156,7 +156,9 @@ class StatusController {
 
             def timestampDate = statisticsService.getTimestampFileSystemData()
             String timestampString = timestampDate ?
-                message(code: "status.page.status.timestamp", args: [timestampDate]) :
+                message(code: "status.page.status.timestamp",
+                        args: [new SimpleDateFormat(dateTimeFormat,
+                        currentLocale).format(timestampDate)]) :
                 message(code: "status.page.status.noData")
 
             def usedDisk = operatingSystemService.formatBytes(
