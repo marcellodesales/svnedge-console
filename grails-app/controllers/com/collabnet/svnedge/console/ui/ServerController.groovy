@@ -129,7 +129,19 @@ class ServerController {
                     return
             }
         }
-        // copy form params to the entity
+
+        // checking for port error before params are applied
+        // since changes to Server seem to persist automatically with
+        // call to service methods
+        boolean portError = false
+        if (params.port?.isNumber() && params.port.toInteger() < 1024 ) {
+            lifecycleService.clearCachedResults()
+            if (!lifecycleService.isDefaultPortAllowed()) {
+                portError = true
+            }
+        }
+        
+        // copy form params to the entity and validate
         server.properties = params
         //In editAuthentication UI repoParentDir does not exist in Params.
         if (params.repoParentDir != null) {
@@ -139,13 +151,11 @@ class ServerController {
           server.repoParentDir = repoParent
         }
 
+        // validate, and reject port value if needed
         server.validate()
-        if (server.port < 1024 ) {
-           lifecycleService.clearCachedResults() 
-           if (!lifecycleService.isDefaultPortAllowed()) {
+        if (portError) {
             server.errors.rejectValue("port",
                 "server.port.defaultValue.rejected")
-           }
         }
 
         if(!server.hasErrors() && server.save(flush:true)) {
