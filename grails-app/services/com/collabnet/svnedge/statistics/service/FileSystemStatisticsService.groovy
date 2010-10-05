@@ -240,21 +240,21 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
     }
 
     /**
-      * Returns the amount of disk space available for the repositories.
+     * Returns the amount of disk space available for the repositories.
      * @return the space for repositories (in bytes)
      */
     def long getRepoAvailableDiskspace() {
         operatingSystemService.sigar.getFileSystemUsage(
-            operatingSystemService.appRootVolumePath).avail * 1024
+            getRepoSystemRoot().canonicalPath).avail * 1024
     }
 
-        /**
+    /**
      * Returns the total space in the partition containing the repo storage.
      * @return the space for repo storage (in bytes)
      */
     def long getRepoTotalDiskspace() {
         operatingSystemService.sigar.getFileSystemUsage(
-            operatingSystemService.appRootVolumePath).total * 1024
+            getRepoSystemRoot().canonicalPath).total * 1024
     }
 
     /**
