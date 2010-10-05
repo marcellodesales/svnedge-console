@@ -78,6 +78,23 @@
     </g:hasErrors>
 
                     <tr class="prop">
+                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/></label></td>
+                        <td class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
+                            <input type="text" id="email" name="email" value="${userInstance?.email?.encodeAsHTML()}"/>
+                        </td>
+                    </tr>
+    <g:hasErrors bean="${userInstance}" field="email">
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2" width="100%" class="errors">
+          <ul><g:eachError bean="${userInstance}" field="email">
+              <li><g:message error="${it}"/></li>
+          </g:eachError></ul>
+        </td>
+      </tr>
+    </g:hasErrors>
+
+                    <tr class="prop">
                         <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'description','errors')}">
                             <input type="text" id="description" name="description" value="${userInstance.description?.encodeAsHTML()}"/>
@@ -94,22 +111,6 @@
       </tr>
     </g:hasErrors>
 
-                    <tr class="prop">
-                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
-                            <input type="text" id="email" name="email" value="${userInstance?.email?.encodeAsHTML()}"/>
-                        </td>
-                    </tr>
-    <g:hasErrors bean="${userInstance}" field="email">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="email">
-              <li><g:message error="${it}"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
 
                   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
                    <g:if test="${allowEditingRoles}">

@@ -61,6 +61,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     def daoAuthenticationProvider
     def anonymousAuthenticationProvider
     def discoveryService
+    def userAccountService
 
     /**
      * The integration properties file.
@@ -313,7 +314,10 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             conversionData.userLocale)
         def ctfUsers = new HashSet(ctfRemoteUsers.toList().collect { 
             it.userName })
-        def csvnUsers = User.list(sort:"username")
+        // get non-ldap users for CTF import
+        def csvnUsers = User.list(sort:"username").findAll{ u -> 
+            !userAccountService.isLdapUser(u)
+        }
         List<String> ctfUsernames = new ArrayList<String>(csvnUsers.size())
         List<String> csvnOnlyUsernames = new ArrayList<String>(csvnUsers.size())
         for (user in csvnUsers) {
