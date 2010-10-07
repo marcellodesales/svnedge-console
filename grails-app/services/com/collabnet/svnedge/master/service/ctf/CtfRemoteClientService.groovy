@@ -143,6 +143,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     [ctfUrl], locale)
                 log.error(msg)
                 throw new CtfAuthenticationException(msg)
+            } else if (e.faultString.contains("SSLHandshakeException")) {
+                def msg = getMessage("ctfRemoteClientService.ssl.error", 
+                    ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"], 
+                    locale)
+                log.warn(msg)
+                throw new CtfAuthenticationException(msg)
 
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host

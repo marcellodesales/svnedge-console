@@ -744,7 +744,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
 
     private def doConvert(conversionData, ctfServer, server, errors, warnings) {
         installIntegrationServer(conversionData)
-        unpackIntegrationScripts()
+        unpackIntegrationScripts(conversionData.userLocale)
 
         serverConfService.backupAndOverwriteHttpdConf()
         serverConfService.writeConfigFiles()
@@ -1005,7 +1005,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     private static final String INTEGRATION_SCRIPTS_ZIP =
         "integration-scripts.zip"
 
-    protected unpackIntegrationScripts() {
+    protected unpackIntegrationScripts(Locale locale = null) {
         def libDir = new File(ConfigUtil.appHome(), "lib")
         def archiveFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
         def integrationDir = new File(libDir, "integration")
@@ -1024,7 +1024,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
             throw new Exception(
-                getMessage("setupTeamForge.integration.vcauth.failed"))
+                getMessage("setupTeamForge.integration.vcauth.failed", locale))
         } else {
             oldViewvcFile.parentFile.parentFile.deleteDir()
         }
@@ -1042,7 +1042,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
         if (!oldViewvcFile.renameTo(newViewvcFile)) {
             throw new Exception(getMessage(
-                "setupTeamForge.integration.viewvc.failed", [newViewvcFile]))
+                "setupTeamForge.integration.viewvc.failed", 
+                [newViewvcFile], locale))
         } else {
             oldViewvcFile.parentFile.parentFile.parentFile.deleteDir()
         }
@@ -1143,7 +1144,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                     if (user.username.contains(".")) {
                         if (!dotUsersAlreadyFound) {
                             def msg = getMessage("setupTeamForge.integration." +
-                                "users.usernamesWithDotsNotImported")
+                                "users.usernamesWithDotsNotImported", 
+                                conversionData.userLocale)
                             warnings << msg
                             dotUsersAlreadyFound = true
                         }
@@ -1154,7 +1156,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             }
         } catch (Exception e) {
             def msg = getMessage(
-                "setupTeamForge.integration.users.someNotImported")
+                "setupTeamForge.integration.users.someNotImported",
+                conversionData.userLocale)
             logMsg(msg, warnings, e)
         }
     }
@@ -1183,13 +1186,13 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                      u.username, e)
             def msg = getMessage(
                 "setupTeamForge.integration.users.notAddedAsMember", 
-                [u.username])
+                [u.username], conversionData.userLocale)
             warnings << msg
 
         } catch (RemoteMasterException remoteProblems) {
             def msg = getMessage(
                 "setupTeamForge.integration.users.errorAssigningMembership", 
-                [u.username])
+                [u.username], conversionData.userLocale)
             log.error(msg, remoteProblems)
             warnings << msg + ": " + remoteProblems.getMessage()
         }

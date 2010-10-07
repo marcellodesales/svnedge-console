@@ -85,6 +85,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
      * succeeds or fails as would be expected.
      */
     void testPort80() {
+        Thread.sleep(100)
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
         boolean isPort80Allowed = lifecycleService.isDefaultPortAllowed()
@@ -140,6 +141,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testSSLInstance() {
+        Thread.sleep(100)
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
         def confDir = createTestDir("conf")
@@ -171,6 +173,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testLDAPAuth() {
+        Thread.sleep(100)
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
         def confDir = createTestDir("conf")

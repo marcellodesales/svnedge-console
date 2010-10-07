@@ -71,6 +71,9 @@ abstract class AbstractSvnEdgeService {
     * using the default locale.
     */
    protected def getMessage(String key, params, locale) {
+       if (!locale) {
+           locale = Locale.getDefault()
+       }
        def appCtx = grailsApplication.getMainContext()
        return appCtx.getMessage(key, params as String[], locale)
    }
