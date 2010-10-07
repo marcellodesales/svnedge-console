@@ -16,19 +16,22 @@
     <property name="LIGHTWEIGHT-DIR"
               value="${basedir}${file.separator}ext${file.separator}production-images${file.separator}lightweight"/>
 
-    <condition property="TARGET-OS" value="linux">
-        <os family="unix"/>
-    </condition>
     <condition property="TARGET-OS" value="windows">
         <os family="windows"/>
     </condition>
-    <condition property="TARGET-OS" value="mac">
+    <condition property="TARGET-OS" value="solaris">
+        <os name="sunos"/>
+    </condition>
+    <condition property="TARGET-OS" value="linux">
         <and>
-            <os family="mac"/>
+            <os family="unix"/>
             <not>
-                <os family="unix"/>
+                <isset property="TARGET-OS"/>
             </not>
         </and>
+    </condition>
+    <condition property="TARGET-OS" value="mac">
+        <os family="mac"/>
     </condition>
 
     <condition property="TARGET-BUILD-4-linux">
@@ -70,6 +73,14 @@
                 <os arch="x86_64"/>
             </or>
         </and>
+    </condition>
+    <condition property="TARGET-BUILD-4-solaris-sparc">
+        <os name="sunos" arch="sparc"/>
+    </condition>
+    <condition property="TARGET-BUILD-4-solaris-x86">
+        <not>
+            <isset property="TARGET-BUILD-4-solaris-sparc"/>
+        </not>
     </condition>
     <condition property="TARGET-BUILD-4-mac">
         <and>
@@ -123,6 +134,24 @@
         <property name="TARGET-pkg-OS" value="windows"/>
     </target>
 
+    <target name="solarisX86Properties" if="TARGET-BUILD-4-solaris-x86">
+        <echo message="Setting build properties for Solaris x86"/>
+        <property name="CSVN-REPO-URL"
+                  value="http://${CSVN-REPO-HOST}:${CSVN-REPO-PORT-SOLARIS-X86}"/>
+        <property name="STAGE-CSVN-REPO-URL"
+                  value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-X86}"/>
+        <property name="TARGET-pkg-OS" value="solaris"/>
+    </target>
+
+    <target name="solarisSparcProperties" if="TARGET-BUILD-4-solaris-sparc">
+        <echo message="Setting build properties for Solaris Sparc"/>
+        <property name="CSVN-REPO-URL"
+                  value="http://${CSVN-REPO-HOST}:${CSVN-REPO-PORT-SOLARIS-SPARC}"/>
+        <property name="STAGE-CSVN-REPO-URL"
+                  value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-SPARC}"/>
+        <property name="TARGET-pkg-OS" value="solaris"/>
+    </target>
+
     <target name="macProperties" if="TARGET-BUILD-4-mac">
         <echo message="Setting build properties for Mac"/>
         <property name="CSVN-REPO-URL"
@@ -153,7 +182,7 @@
     </macrodef>
 
     <target name="create-package-csvn"
-            depends="linuxProperties, linux64Properties, windowsProperties, windows64Properties, macProperties">
+            depends="linuxProperties, linux64Properties, windowsProperties, windows64Properties, macProperties, solarisX86Properties, solarisSparcProperties">
         <create-csvn-pkg-package prototype="csvn-svn-apache-viewvc-package.py"
                                  version="${SVN-DEFAULT-PACKAGE-VERSION}"
                                  description="Creating the SVN Binaries Package (${SVN-DEFAULT-PACKAGE-VERSION} - ${env.BUILD_ID})..."/>
@@ -165,7 +194,7 @@
 
     <!-- promotes the current platform images from stage to release repository -->
     <target name="promote-staged-packages-to-release"
-            depends="linuxProperties, linux64Properties, windowsProperties, windows64Properties, macProperties">
+            depends="linuxProperties, linux64Properties, windowsProperties, windows64Properties, macProperties, solarisX86Properties, solarisSparcProperties">
 
         <taskdef name="groovy"
                  classname="org.codehaus.groovy.ant.Groovy"
