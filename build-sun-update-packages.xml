@@ -38,16 +38,20 @@
         <and>
             <os family="unix"/>
             <not>
-                <or>
+                <and>
+                    <os name="sunos"/>
                     <os arch="amd64"/>
                     <os arch="x86_64"/>
-                </or>
+                </and>
             </not>
         </and>
     </condition>
     <condition property="TARGET-BUILD-4-linux64">
         <and>
             <os family="unix"/>
+            <not>
+               <os name="sunos"/>
+            </not>
             <or>
                 <os arch="amd64"/>
                 <os arch="x86_64"/>
