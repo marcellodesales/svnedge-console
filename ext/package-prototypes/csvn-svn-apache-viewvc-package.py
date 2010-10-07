@@ -19,16 +19,13 @@ pkg = {
     },
 
     "dirtrees" : {
-        "bin"        : {"os" : "unix"},
-        "bin"        : {"os" : "solaris"},
+        "bin"        : {"os" : [ "solaris", "unix" ]},
         "dist"       : {},
-        "lib"        : {"os" : "unix"},
-        "lib"        : {"os" : "solaris"},
+        "lib"        : {"os" : [ "solaris", "unix" ]},
         "licenses"   : {},
         "temp-data"  : {},
         "updates"    : {"os" : "windows"},
-        "www"        : {"os" : "unix"},
-        "www"        : {"os" : "solaris"},
+        "www"        : {"os" : [ "solaris", "unix" ]},
     },
 
     "excludefiles" : [
