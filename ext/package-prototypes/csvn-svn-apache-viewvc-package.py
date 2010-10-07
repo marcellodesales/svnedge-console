@@ -20,12 +20,15 @@ pkg = {
 
     "dirtrees" : {
         "bin"        : {"os" : "unix"},
+        "bin"        : {"os" : "solaris"},
         "dist"       : {},
         "lib"        : {"os" : "unix"},
+        "lib"        : {"os" : "solaris"},
         "licenses"   : {},
         "temp-data"  : {},
         "updates"    : {"os" : "windows"},
         "www"        : {"os" : "unix"},
+        "www"        : {"os" : "solaris"},
     },
 
     "excludefiles" : [
