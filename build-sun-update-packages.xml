@@ -44,6 +44,9 @@
             </not>
         </and>
     </condition>
+    <condition property="TARGET-OS" value="solaris-sparc">
+        <isset property="TARGET-BUILD-4-solaris-sparc" />
+    </condition>
     <condition property="TARGET-BUILD-4-linux">
         <and>
             <os family="unix"/>
@@ -107,6 +110,7 @@
             </not>
         </and>
     </condition>
+
     <import file="${basedir}${file.separator}ext${file.separator}${TARGET-OS}/pkg-toolkit/pkg/lib/pkg-ant-tasks.xml"/>
 
     <target name="linuxProperties" if="TARGET-BUILD-4-linux">
