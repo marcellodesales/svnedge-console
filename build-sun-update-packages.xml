@@ -20,7 +20,7 @@
         <os family="windows"/>
     </condition>
     <condition property="TARGET-OS" value="solaris">
-        <os name="sunos"/>
+        <os name="sunos" family="unix"/>
     </condition>
     <condition property="TARGET-OS" value="linux">
         <and>
@@ -33,16 +33,23 @@
     <condition property="TARGET-OS" value="mac">
         <os family="mac"/>
     </condition>
-
+    <condition property="TARGET-BUILD-4-solaris-sparc">
+        <os family="unix" name="sunos" arch="sparc"/>
+    </condition>
+    <condition property="TARGET-BUILD-4-solaris-x86">
+        <os family="unix" name="sunos"/>
+        <not>
+            <isset property="TARGET-BUILD-4-solaris-sparc"/>
+        </not>
+    </condition>
     <condition property="TARGET-BUILD-4-linux">
         <and>
             <os family="unix"/>
             <not>
-                <and>
-                    <os name="sunos"/>
-                    <os arch="amd64"/>
-                    <os arch="x86_64"/>
-                </and>
+                <isset property="TARGET-BUILD-4-solaris-x86" />
+                <isset property="TARGET-BUILD-4-solaris-sparc" />
+                <os arch="amd64"/>
+                <os arch="x86_64"/>
             </not>
         </and>
     </condition>
@@ -77,14 +84,6 @@
                 <os arch="x86_64"/>
             </or>
         </and>
-    </condition>
-    <condition property="TARGET-BUILD-4-solaris-sparc">
-        <os name="sunos" arch="sparc"/>
-    </condition>
-    <condition property="TARGET-BUILD-4-solaris-x86">
-        <not>
-            <isset property="TARGET-BUILD-4-solaris-sparc"/>
-        </not>
     </condition>
     <condition property="TARGET-BUILD-4-mac">
         <and>
