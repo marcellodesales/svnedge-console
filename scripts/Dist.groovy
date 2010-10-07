@@ -157,9 +157,9 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/bin/csvn",
             todir: "${distDir}/bin")
-//        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-//            "/solaris/bin/csvn-httpd",
-//            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/csvn-httpd",
+            todir: "${distDir}/bin")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/bin/wrapper-solaris-x86-64",
             todir: "${distDir}/bin")

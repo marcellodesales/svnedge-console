@@ -18,7 +18,7 @@ pkg = {
         "README" : {"mode" : "0755", "os" : "unix"},
         "temp-data/conf/csvn-wrapper.conf" : {"mode" : "0755"},
         "bin/csvn" : {"mode" : "0755", "os" : [ "solaris", "unix" ]},
-        "bin/csvn-httpd" : {"mode" : "0755", "os" : "unix"},
+        "bin/csvn-httpd" : {"mode" : "0755", "os" : [ "solaris", "unix" ]},
         "bin/wrapper-linux-x86-32" : {"mode" : "0755", "os" : "unix"},
         "bin/wrapper-linux-x86-64" : {"mode" : "0755", "os" : "unix"},
         "bin/wrapper-solaris-x86-32" : {"mode" : "0755", "os" : "solaris"},
