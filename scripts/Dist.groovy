@@ -167,6 +167,12 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             "/solaris/bin/wrapper-solaris-sparc-64",
             todir: "${distDir}/bin")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/wrapper-solaris-x86-32",
+            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/bin/wrapper-solaris-sparc-32",
+            todir: "${distDir}/bin")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/bin/start.ini",
             todir: "${distDir}/bin")
         Ant.chmod(dir: distDir + "/bin", perm: "a+x",
@@ -193,6 +199,12 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             todir: "${distDir}/lib")
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/lib/libwrapper-solaris-sparc-64.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-x86-32.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
+            "/solaris/lib/libwrapper-solaris-sparc-32.so",
             todir: "${distDir}/lib")
 
         if (arch == "sparc") {
