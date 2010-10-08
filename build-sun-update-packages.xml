@@ -182,6 +182,7 @@
         <echo message="Setting build properties for Solaris Sparc">
             CSVN-REPO-URL = ${CSVN-REPO-URL}
             TARGET-pkg-OS = ${TARGET-pkg-OS}
+            TARGET-OS = ${TARGET-OS}
         </echo>
     </target>
 
@@ -206,6 +207,11 @@
         <attribute name="description"/>
         <sequential>
             <echo message="@{description}"/>
+            <echo message="Running the pkg package for ${TARGET-pkg-OS}">
+                CSVN-REPO-URL = ${CSVN-REPO-URL}
+                TARGET-pkg-OS = ${TARGET-pkg-OS}
+                TARGET-OS = ${TARGET-OS}
+            </echo>
             <makepkgs
                     repourl="${CSVN-REPO-URL}"
                     version="@{version}"
