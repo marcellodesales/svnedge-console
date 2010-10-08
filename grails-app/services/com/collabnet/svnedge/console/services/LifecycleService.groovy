@@ -264,11 +264,8 @@ root@${server.hostname}
     }
 
     private def createHttpdCmd() {
-        println "createHttpdCmd"
-        
         def cmd = [ConfigUtil.httpdPath(),
             "-f", ConfigUtil.confDirPath() + File.separator + "httpd.conf"]
-        println "createHttpdCmd end"
         if (isWindows()) {
             cmd.addAll(["-n", ConfigUtil.serviceName()])
         }
@@ -301,24 +298,8 @@ root@${server.hostname}
 
             } else if (isSolarisDefaultPortAllowed() && !isHttpdBindSuid()) {
                 def httpdCmd = cmd.collect({it.replace(" ", "\\ ")}).join(" ")
-		cmd = ["ppriv", "-s", "EIP+net_privaddr", "-e", 
+                cmd = ["ppriv", "-s", "EIP+net_privaddr", "-e", 
                        "sh", "-c", httpdCmd]
-
-/*
-The following was developed as an alternative to the above as there were
-some spurious warnings in the logs and also wasn't sure how it might handle
-spaces in paths, but those problems are cleared up. Just keeping for initial
-commit; it can be removed as soon as the method above is proven to work 
-                File f =  new File(new File(ConfigUtil.dataDirPath(), "run"), 
-                    "exec_httpd.sh")
-                f.write(
-"""#!/bin/sh
-ppriv -s EIP+net_privaddr \$\$
-${httpdCmd}
-""")
-                f.setExecutable(true)
-                cmd = [f.canonicalPath]
-*/
             }
         }
 
