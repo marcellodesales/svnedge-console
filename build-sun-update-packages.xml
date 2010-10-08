@@ -117,10 +117,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-LINUX}"/>
         <property name="TARGET-pkg-OS" value="unix"/>
-        <echo message="Setting build properties for Linux">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-        </echo>
     </target>
 
     <target name="linux64Properties" if="TARGET-BUILD-4-linux64">
@@ -129,10 +125,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-LINUX64}"/>
         <property name="TARGET-pkg-OS" value="unix"/>
-        <echo message="Setting build properties for Linux-64">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}-64
-        </echo>
     </target>
 
     <target name="windowsProperties" if="TARGET-BUILD-4-windows">
@@ -142,10 +134,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-WINDOWS}"/>
         <property name="TARGET-pkg-OS" value="windows"/>
-        <echo message="Setting build properties for Windows">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-        </echo>
     </target>
 
     <target name="windows64Properties" if="TARGET-BUILD-4-windows64">
@@ -155,10 +143,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-WIN64}"/>
         <property name="TARGET-pkg-OS" value="windows"/>
-        <echo message="Setting build properties for Windows 64">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-        </echo>
     </target>
 
     <target name="solarisX86Properties" if="TARGET-BUILD-4-solaris-x86">
@@ -168,10 +152,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-X86}"/>
         <property name="TARGET-pkg-OS" value="solaris"/>
-        <echo message="Setting build properties for Solaris x86">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-        </echo>
     </target>
 
     <target name="solarisSparcProperties" if="TARGET-BUILD-4-solaris-sparc">
@@ -181,11 +161,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-SPARC}"/>
         <property name="TARGET-pkg-OS" value="solaris"/>
-        <echo message="Setting build properties for Solaris Sparc">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-            TARGET-OS = ${TARGET-OS}
-        </echo>
     </target>
 
     <target name="macProperties" if="TARGET-BUILD-4-mac">
@@ -195,10 +170,6 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-MAC}"/>
         <property name="TARGET-pkg-OS" value="mac"/>
-        <echo message="Setting build properties for Solaris Mac">
-            CSVN-REPO-URL = ${CSVN-REPO-URL}
-            TARGET-pkg-OS = ${TARGET-pkg-OS}
-        </echo>
     </target>
 
     <import file="${basedir}${file.separator}ext${file.separator}${TARGET-OS}/pkg-toolkit/pkg/lib/pkg-ant-tasks.xml"/>

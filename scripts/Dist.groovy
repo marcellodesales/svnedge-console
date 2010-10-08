@@ -207,21 +207,18 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             "/solaris/lib/libwrapper-solaris-sparc-32.so",
             todir: "${distDir}/lib")
 
-        if (arch == "sparc") {
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-sparc-solaris.so",
-                todir: "${distDir}/lib")
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-sparc64-solaris.so",
-                todir: "${distDir}/lib")
-        } else {
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-x86-solaris.so",
-                todir: "${distDir}/lib")
-            Ant.copy(file: "${basedir}/ext" +
-                "/sigar/libsigar-amd64-solaris.so",
-                todir: "${distDir}/lib")
-        }
+        Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-sparc-solaris.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-sparc64-solaris.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-x86-solaris.so",
+            todir: "${distDir}/lib")
+        Ant.copy(file: "${basedir}/ext" +
+            "/sigar/libsigar-amd64-solaris.so",
+            todir: "${distDir}/lib")
 
     } else
     if (osName == "windows") {
