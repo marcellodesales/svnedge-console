@@ -19,8 +19,11 @@
     <condition property="TARGET-OS" value="windows">
         <os family="windows"/>
     </condition>
+    <condition property="TARGET-OS" value="solaris-sparc">
+        <os name="sunos" family="unix" arch="sparc"/>
+    </condition>
     <condition property="TARGET-OS" value="solaris">
-        <os name="sunos" family="unix"/>
+        <os name="sunos" family="unix" />
     </condition>
     <condition property="TARGET-OS" value="linux">
         <and>
@@ -177,8 +180,7 @@
                   value="http://${CSVN-REPO-HOST}:${CSVN-REPO-PORT-SOLARIS-SPARC}"/>
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-SPARC}"/>
-        <property name="TARGET-pkg-OS" value="solaris-sparc"/>
-        <property name="TARGET-OS" value="solaris-sparc" />
+        <property name="TARGET-pkg-OS" value="solaris"/>
         <echo message="Setting build properties for Solaris Sparc">
             CSVN-REPO-URL = ${CSVN-REPO-URL}
             TARGET-pkg-OS = ${TARGET-pkg-OS}
