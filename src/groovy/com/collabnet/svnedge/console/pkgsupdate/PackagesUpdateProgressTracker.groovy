@@ -20,6 +20,7 @@ package com.collabnet.svnedge.console.pkgsupdate;
 import java.text.DecimalFormat
 
 import grails.converters.JSON
+import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 
 import org.apache.commons.collections.map.HashedMap
 import org.apache.log4j.Logger
@@ -160,19 +161,28 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     private boolean newPackagesInstalled
 
     /**
+     * Locale for messages that emanate from this class
+     */
+    private Locale locale
+
+    /**
      * Builds a new progress tracker with the given print writer
      * @param outputWriter is the print writer where the output must be 
      * redirected.
      */
     private PackagesUpdateProgressTracker(String imagePath, Client client, 
                 Channel statusChannel, Channel percentagesChannel, 
-                boolean newPackages) {
+                boolean newPackages, Locale locale) {
 
         this.imagePath = imagePath
         this.bayeuxPublisherClient = client
         this.statusMessageChannel = statusChannel
         this.percentageMessageChannel = percentagesChannel
         this.newPackagesInstalled = newPackages
+        this.locale = locale
+        if (!this.locale) {
+           this.locale = Locale.getDefault()
+        }
     }
 
     /**
@@ -183,10 +193,10 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     public static PackagesUpdateProgressTracker makeNew(String imagePath, 
             Client client, Channel statusChannel, Channel percentagesChannel,
-            boolean newPackages) {
+            boolean newPackages, Locale locale) {
 
         return new PackagesUpdateProgressTracker(imagePath, client, 
-                statusChannel, percentagesChannel, newPackages)
+                statusChannel, percentagesChannel, newPackages, locale)
     }
 
     /**
@@ -251,16 +261,17 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      * @param message is the tartDownloadPhase(int)
      */
     public void startDownloadPhase(int totalPackages) {
-        def total = totalPackages + " "
+
+        String total
         if (totalPackages > 1) {
-            total += "packages"
+            total = getMessage("packagesUpdate.progressTracker.packageCount.plural", [totalPackages])
         } else {
-            total += "package"
+            total = getMessage("packagesUpdate.progressTracker.packageCount.singular", [totalPackages])
         }
         this.overallPercentage = 0
         this.currentPercentage = 0
-        this.currentPhase = "Downloading..."
-        this.publishStatusMessage("Starting the download phase of " + total)
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.downloading")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.downloading.status", [total]))
     }
 
     /* (non-Javadoc)
@@ -281,16 +292,15 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
             this.subversionUpdated = true
         }
 
-        def totalFiles = totalDownloadFiles + " "
+        String totalFiles
         if (totalDownloadFiles > 1) {
-            totalFiles += "files"
+            totalFiles = getMessage("packagesUpdate.progressTracker.fileCount.plural", [totalDownloadFiles])
         } else {
-            totalFiles += "file"
+            totalFiles = getMessage("packagesUpdate.progressTracker.fileCount.singular", [totalDownloadFiles])
         }
         this.totalDownloadFiles = totalDownloadFiles
         def formattedSize = this.getFormattedFileSize(totalDownloadSize)
-        this.publishStatusMessage("Downloading  package'${pkg.getName()}'" +
-                "... ${totalFiles} with total of ${formattedSize}")
+        this.publishStatusMessage (getMessage("packagesUpdate.progressTracker.download.package", [pkg.getName(), totalFiles, formattedSize]))
     }
 
     /* (non-Javadoc)
@@ -300,9 +310,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         this.overallPercentage = 15
         this.currentPercentage = Math.round(
                     (index / this.totalDownloadFiles) * 100)
-        this.publishStatusMessage("Downloading " +
-                    "${this.getFormattedFileSize(fileSize)} (File " +
-                    "${++index}/${this.totalDownloadFiles})")
+        this.publishStatusMessage (getMessage("packagesUpdate.progressTracker.download.file",
+                [this.getFormattedFileSize(fileSize), ++index, this.totalDownloadFiles]))
     }
 
     /* (non-Javadoc)
@@ -311,7 +320,7 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void endPackageDownload(Fmri pkg, int totalDownloadFiles) {
         this.overallPercentage = 20
         this.currentPercentage = 100
-        this.publishStatusMessage("Finished downloading '${pkg.getName()}'...")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.download.finished", [pkg.getName()]))
     }
 
     /* (non-Javadoc)
@@ -320,8 +329,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void endDownloadPhase() {
         this.overallPercentage = 25
         this.currentPercentage = 0
-        this.currentPhase = "Finished Downloading..."
-        this.publishStatusMessage("Finished downloading packages...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.downloading.finished")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.downloading.finished.status"))
     }
     
     /* (non-Javadoc)
@@ -330,9 +339,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void startActions(int totalActions) {
         this.overallPercentage = 30
         this.currentPercentage = 0
-        this.currentPhase = "Preparing system..."
-        this.publishStatusMessage("Preparing system for removal, update, " +
-                "install phases...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.preparing")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.preparing.status"))
     }
 
     /* (non-Javadoc)
@@ -341,10 +349,9 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void startRemovalPhase(int totalRemovalActions) {
         this.overallPercentage = 35
         this.currentPercentage = 0
-        this.currentPhase = "Removing..."
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.removing")
         this.totalRemovalActions = totalRemovalActions 
-        this.publishStatusMessage("Removing ${totalRemovalActions} old " +
-                "files...")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.removing.status", [totalRemovalActions]))
     }
 
     /* (non-Javadoc)
@@ -354,7 +361,7 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         this.overallPercentage = 35
         this.currentPercentage = Math.round((
                 ++this.currentRemovalAction / this.totalRemovalActions) * 100)
-        this.totalRemovalActions = totalRemovalActions 
+        this.totalRemovalActions = totalRemovalActions
         this.publishPercentageMessage()
     }
 
@@ -364,8 +371,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void endRemovalPhase() {
         this.overallPercentage = 45
         this.currentPercentage = 100
-        this.currentPhase = "Removing..."
-        this.publishStatusMessage("Finished removing old files...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.removing.finished")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.removing.finished.status"))
     }
 
     /* (non-Javadoc)
@@ -375,8 +382,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         this.overallPercentage = 60
         this.currentPercentage = 0
         this.totalUpdateActions = totalUpdateActions
-        this.currentPhase = "Updating..."
-        this.publishStatusMessage("Updating the CSVN packages...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.updating")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.updating.status"))
     }
 
     /* (non-Javadoc)
@@ -385,7 +392,7 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void onUpdateAction(Action from, Action to) {
         this.overallPercentage = 70
         this.currentPercentage = Math.round((
-                ++this.currentUpdateAction / this.totalUpdateActions) * 100) 
+                ++this.currentUpdateAction / this.totalUpdateActions) * 100)
         this.publishPercentageMessage()
     }
 
@@ -395,8 +402,8 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void endUpdatePhase() {
         this.overallPercentage = 75
         this.currentPercentage = 100
-        this.currentPhase = "Finished Updating..."
-        this.publishStatusMessage("Finished updating the packages...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.updating.finished")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.updating.finished.status"))
     }
 
     /* (non-Javadoc)
@@ -405,12 +412,12 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void startInstallPhase(int totalInstallActions) {
         this.overallPercentage = 80
         this.currentPercentage = 0
-        this.currentPhase = "Installing..."
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.installing")
         this.totalInstallActions = totalInstallActions
         if (this.newPackagesInstalled) {
-            this.publishStatusMessage("Installing new package files...")
+            this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.installing.package.status"))
         } else {
-            this.publishStatusMessage("Installing new update files...")
+            this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.installing.file.status"))
         }
     }
 
@@ -420,7 +427,7 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void onInstallAction(Action a) {
         this.overallPercentage = 90
         this.currentPercentage = Math.round((
-                ++this.currentInstallAction / this.totalInstallActions) * 100) 
+                ++this.currentInstallAction / this.totalInstallActions) * 100)
         this.publishPercentageMessage()
     }
 
@@ -430,20 +437,19 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
     public void endInstallPhase() {
         this.overallPercentage = 100
         this.currentPercentage = 100
-        this.currentPhase = "Finished Instaling..."
-        this.publishStatusMessage("Finished installing new files...")
+        this.currentPhase = getMessage("packagesUpdate.progressTracker.phase.installing.finished")
+        this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.installing.finished.status"))
 
         this.overallPercentage = 100
         this.currentPercentage = 100
-        this.currentPhase = this.newPackagesInstalled ? 
-                "New Packages Installed." : "Update Complete."
+        this.currentPhase = this.newPackagesInstalled ?
+                getMessage("packagesUpdate.progressTracker.phase.final.package") :
+                getMessage("packagesUpdate.progressTracker.phase.final.file")
         def upgrVrs = "${this.upgradeReleaseNumber}-${this.upgradeBranchNumber}"
         if (!this.newPackagesInstalled) {
-            this.publishStatusMessage("The CSVN system is up-to-date to " +
-                    "version ${upgrVrs}")
+            this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.final.file.status", [upgrVrs]))
         } else {
-            this.publishStatusMessage("New packages were installed in the " +
-                    "CSVN system")
+            this.publishStatusMessage(getMessage("packagesUpdate.progressTracker.phase.final.package.status"))
         }
         this.finishedProcess = true
         //Write the updated version on the flag file
@@ -512,5 +518,28 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
         if (!this.csvnUpdated && this.subversionUpdated) {
             return "install-updates.bat justapache"
         } else return null
+    }
+
+
+    /**
+     * Gets an i18n message from the messages.properties file
+     * @param key is the key in the messages.properties file
+     * (excluding prefix "packagesUpdate.progressTracker" if desired)
+     * @param params is the list of parameters to provide the i18n.
+     * @return the message related to the key in the messages.properties file
+     * using the default locale.
+     */
+    private def getMessage(String key, params) {
+
+        String keyPrefix = "packagesUpdate.progressTracker."
+        if (!key.startsWith(keyPrefix)) {
+            key = keyPrefix + key
+        }
+        def ctx = AH.application.mainContext
+        return ctx.getMessage(key, params as String[], this.locale)
+    }
+
+    private def getMessage(String key) {
+        return getMessage(key, [])
     }
 }

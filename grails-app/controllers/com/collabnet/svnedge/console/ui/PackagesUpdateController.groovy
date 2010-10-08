@@ -24,6 +24,7 @@ import java.net.ConnectException
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 /**
  * The packages update controller is used to manage the packages 
@@ -301,10 +302,10 @@ class PackagesUpdateController {
         //page, which shows the current status from the cometd service.
         //The update process occurs in a separate daemon thread.
         if (session["install"].equals("addOns")) {
-            this.packagesUpdateService.installPackagesAddOns()
+            this.packagesUpdateService.installPackagesAddOns(RCU.getLocale(request))
         } else
         if (session["install"].equals("updates")){
-            this.packagesUpdateService.installPackagesUpdates()
+            this.packagesUpdateService.installPackagesUpdates(RCU.getLocale(request))
         }
         session["install"] = null
 

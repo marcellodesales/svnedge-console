@@ -856,13 +856,14 @@ public final class PackagesUpdateService implements InitializingBean {
      * Performs the software installation
      * @param packagesToInstall is the collection of package names to be 
      * installed. Those packages are on the state of updatable.
+     * @param locale the request context locale (used for cometd messages)
      * @throws NoRouteToHostException if there's no connection to the image
      * repository.
      * @throws IOException if any IO problems occur while installing new 
      * packages. This can be related to file permissions, missing files, etc.
      */
     def installPackages(Collection<Image.FmriState> packagesToInstall,
-            boolean newPackages)
+            boolean newPackages, Locale locale)
             throws NoRouteToHostException, IOException {
 
         if (packagesToInstall.size() > 0) {
@@ -875,7 +876,7 @@ public final class PackagesUpdateService implements InitializingBean {
             this.progressTracker = PackagesUpdateProgressTracker.makeNew(
                     this.imagePath, this.bayeuxPublisherClient, 
                     this.statusMessageChannel, this.percentageMessageChannel,
-                    newPackages)
+                    newPackages, locale)
             imgPlan.execute(this.progressTracker)
 
             this.areThereUpdates = false
@@ -886,12 +887,13 @@ public final class PackagesUpdateService implements InitializingBean {
 
     /**
      * Installs all updates for the CSVN packages.
+     * @param locale the request context locale (used for cometd messages)
      * @throws NoRouteToHostException if there's no connection to the image
      * repository.
      * @throws IOException if any IO problems occur while installing new 
      * packages. This can be related to file permissions, missing files, etc.
      */
-    def installPackagesAddOns() throws NoRouteToHostException, IOException {
+    def installPackagesAddOns(Locale locale) throws NoRouteToHostException, IOException {
         Thread.startDaemon("Csvn Installer Daemon") {
             log.debug("Starting the installation process for addons...")
 
@@ -900,18 +902,19 @@ public final class PackagesUpdateService implements InitializingBean {
                 addOns << a.getFmriState()
             }
             log.debug("Installing ${addOns.size()} updates...")
-            this.installPackages(addOns, true)
+            this.installPackages(addOns, true, locale)
         }
     }
 
     /**
      * Installs all updates for the CSVN packages.
+     * @param locale the request context locale (used for cometd messages)
      * @throws NoRouteToHostException if there's no connection to the image
      * repository.
      * @throws IOException if any IO problems occur while installing new 
      * packages. This can be related to file permissions, missing files, etc.
      */
-    def installPackagesUpdates() throws NoRouteToHostException, IOException {
+    def installPackagesUpdates(Locale locale) throws NoRouteToHostException, IOException {
         Thread.startDaemon("Csvn Installer Daemon") {
             log.debug("Starting the update process...")
 
@@ -920,7 +923,7 @@ public final class PackagesUpdateService implements InitializingBean {
                 updates << a.getFmriState()
             }
             log.debug("Installing ${updates.size()} updates...")
-            this.installPackages(updates, false)
+            this.installPackages(updates, false, locale)
         }
     }
 
