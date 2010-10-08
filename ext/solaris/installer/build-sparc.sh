@@ -10,19 +10,19 @@ case "$1" in
     'dev')
         REPOS=http://cu025.cubit.sp.collab.net/release/${OS}
         UPDATES=$REPOS
-        TAR=CollabNetSubversionEdge-${VERSION}-dev_${OS}.tar.gz
+        TAR=CollabNetSubversionEdge-${VERSION}-dev_${OS}.tar
         ;;
 
     'stage')
         REPOS=http://pkg.collab.net/qa/${OS}/
         UPDATES=$REPOS
-        TAR=CollabNetSubversionEdge-${VERSION}-RC_${OS}.tar.gz
+        TAR=CollabNetSubversionEdge-${VERSION}-RC_${OS}.tar
         ;;
 
     'release')
         REPOS=http://pkg.collab.net/qa/${OS}/
         UPDATES=http://pkg.collab.net/release/${OS}/
-        TAR=CollabNetSubversionEdge-${VERSION}_${OS}.tar.gz
+        TAR=CollabNetSubversionEdge-${VERSION}_${OS}.tar
         ;;
 
     *)
