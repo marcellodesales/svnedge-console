@@ -177,7 +177,7 @@
                   value="http://${CSVN-REPO-HOST}:${CSVN-REPO-PORT-SOLARIS-SPARC}"/>
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-SPARC}"/>
-        <property name="TARGET-pkg-OS" value="solaris"/>
+        <property name="TARGET-pkg-OS" value="solaris-sparc"/>
         <property name="TARGET-OS" value="solaris-sparc" />
         <echo message="Setting build properties for Solaris Sparc">
             CSVN-REPO-URL = ${CSVN-REPO-URL}
