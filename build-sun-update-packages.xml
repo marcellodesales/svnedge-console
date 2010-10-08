@@ -44,9 +44,6 @@
             </not>
         </and>
     </condition>
-    <condition property="TARGET-OS" value="solaris-sparc">
-        <isset property="TARGET-BUILD-4-solaris-sparc" />
-    </condition>
     <condition property="TARGET-BUILD-4-linux">
         <and>
             <os family="unix"/>
@@ -110,8 +107,6 @@
             </not>
         </and>
     </condition>
-
-    <import file="${basedir}${file.separator}ext${file.separator}${TARGET-OS}/pkg-toolkit/pkg/lib/pkg-ant-tasks.xml"/>
 
     <target name="linuxProperties" if="TARGET-BUILD-4-linux">
         <property name="CSVN-REPO-URL"
@@ -183,6 +178,7 @@
         <property name="STAGE-CSVN-REPO-URL"
                   value="http://${STAGE-CSVN-REPO-HOST}:${STAGE-CSVN-REPO-PORT-SOLARIS-SPARC}"/>
         <property name="TARGET-pkg-OS" value="solaris"/>
+        <property name="TARGET-OS" value="solaris-sparc" />
         <echo message="Setting build properties for Solaris Sparc">
             CSVN-REPO-URL = ${CSVN-REPO-URL}
             TARGET-pkg-OS = ${TARGET-pkg-OS}
@@ -201,6 +197,8 @@
             TARGET-pkg-OS = ${TARGET-pkg-OS}
         </echo>
     </target>
+
+    <import file="${basedir}${file.separator}ext${file.separator}${TARGET-OS}/pkg-toolkit/pkg/lib/pkg-ant-tasks.xml"/>
 
     <macrodef name="create-csvn-pkg-package">
         <attribute name="version" default="${DEFAULT-PACKAGE-VERSION}"/>
