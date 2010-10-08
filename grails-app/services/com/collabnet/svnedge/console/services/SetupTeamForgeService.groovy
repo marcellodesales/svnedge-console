@@ -590,8 +590,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
     }
 
-    private String projectUrl(String projectName) {
-        return projectName.toLowerCase().replace(' ', '_')
+    String projectUrl(String projectName) {
+        return projectName.toLowerCase().replace(' ', '_').replace('.', '_')
     }
 
     private void addReposToSingleProject(conversionData) 

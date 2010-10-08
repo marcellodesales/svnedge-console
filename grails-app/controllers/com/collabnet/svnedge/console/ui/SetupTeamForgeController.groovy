@@ -441,7 +441,7 @@ class SetupTeamForgeController {
             if (!errors) {
                 if (con.ctfProject) {
                     def projectPath = con.ctfProjectPath ?: "projects." + 
-                        con.ctfProject.replace(" ", "_") 
+                        setupTeamForgeService.projectUrl(con.ctfProject)
                     def link = con.ctfURL + 
                         "/sf/scm/do/listRepositories/" + 
                         projectPath + "/scm"
