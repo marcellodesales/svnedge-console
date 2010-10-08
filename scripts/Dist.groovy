@@ -295,8 +295,13 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         Ant.chmod(file: distDir + "/bin/collabnetsvn-config", perm: "+x")
         Ant.chmod(file: distDir + "/bin/svndbadmin", perm: "+x")
 
-        Ant.copy(file: "${basedir}/ext/ocn-files/readme-linux.txt",
-            tofile: "${distDir}/README")
+        if (osName == "solaris") {
+           Ant.copy(file: "${basedir}/ext/ocn-files/readme-solaris.txt",
+               tofile: "${distDir}/README")
+        } else {
+           Ant.copy(file: "${basedir}/ext/ocn-files/readme-linux.txt",
+               tofile: "${distDir}/README")
+        }
     }
     // Make logs directory.  App needs it to start
     Ant.mkdir(dir: "${distDir}/temp-data/logs")
