@@ -32,7 +32,7 @@
       <g:if test="${!isReplica}">
               <g:sortableColumn property="permissionsOk" title="${message(code:'repository.page.list.status')}" />
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-              <th><g:message code="repository.page.list.edit" /></th>
+              <th><g:message code="repository.page.list.show" /></th>
         </g:ifAnyGranted>
       </g:if>
                         </tr>
@@ -81,7 +81,7 @@
                   </td>
 
       <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-                            <td><g:link action="show" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.edit" /></g:link></td>
+                            <td><g:link action="show" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.info" /></g:link></td>
       </g:ifAnyGranted>
       </g:if> 
                         </tr>
