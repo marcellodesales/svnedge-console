@@ -26,7 +26,29 @@
                     fieldsChanged = true;
                 });
             })
+
+            // toggle standard server ports with useSsl field
+            $("useSsl").observe('click', updatePort.bind(this) )
+
         });
+
+        // update standard server ports based on useSsl change event
+        function updatePort(event) {
+            var sslChkbox = Event.element(event)
+
+            // hack for IE event problems
+            if (Prototype.Browser.IE) {
+               sslChkbox.blur()
+               sslChkbox.focus()
+            }
+
+            if (sslChkbox.checked && $("port").value == '80') {
+                $("port").value = '443'
+            }
+            else if (!sslChkbox.checked && $("port").value == '443') {
+                $("port").value = '80'
+            }
+        }
 
         function updateInterface(addrSelect) {
             var val = addrSelect.value
