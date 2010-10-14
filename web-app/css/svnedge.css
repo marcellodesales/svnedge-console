@@ -38,3 +38,7 @@
   padding-left: 10px;
 }
 
+tr.prop td.name {
+  white-space: nowrap;
+}
+
