@@ -94,10 +94,16 @@ target(build: 'Builds the distribution file structure') {
             diffProps << prop
         }
     }
+    def removedProps = []
+    for(prop in esNames) {
+        if (!propsEn.getProperty(prop)) {
+            removedProps << prop
+        }
+    }
 
     def chosenLocale = localeIndex[new Integer(chosenLang)]
     def langName = chosenLocale.getDisplayName()
-    if (diffProps.size() == 0) {
+    if (diffProps.size() == 0 && removedProps.size() == 0) {
         println "# The language '${langName}' is up-to-date!"
         return
     }
@@ -123,9 +129,25 @@ target(build: 'Builds the distribution file structure') {
                 }
             }
         }
+        if (removedProps.size()) {
+            it.writeLine "------------------"
+            it.writeLine "-- REMOVED KEYS --"
+            it.writeLine "------------------"
+            it.writeLine ""
+            for (l in removedProps.sort()) {
+                it.writeLine "-- " + l
+            }
+        }
     }
-    println "# The language '${langName}' needs more ${diffProps.size()} " +
-        "string" + (diffProps.size() == 1 ? '' : 's')
+    if (diffProps.size() > 0) {
+        println "# The language '${langName}' needs more ${diffProps.size()} " +
+            "string" + (diffProps.size() == 1 ? '' : 's')
+    }
+    if (removedProps.size() > 0) {
+        println "# ${removedProps.size()} key" +
+            (removedProps.size() == 1 ? ' was' : 's were') + " removed from " + 
+            "the language '${langName}'."
+    }
     println "# See the diff at " + reprt.canonicalPath
     println "# Remember to edit your language '${langName}' using an editor " +
         "in the format UTF-8."
