@@ -588,19 +588,11 @@ class LocalSubversionRepository(vclib.Repository):
       if self.auth is None and not include_changed_paths:
         return date, author, msg, None
 
-      ### TeamForge customization: If our authorizer has a
-      ### global_access member (as our 'teamforge' authorizer does),
-      ### consult it to see if we can bypass expensive changed-paths
-      ### lookups.)
-      if self.auth and hasattr(self.auth, 'global_access') \
-             and self.auth.global_access is not None:
-        if self.auth.global_access and not include_changed_paths:
+      ### TeamForge customization: See if we can bypass expensive changed-paths
+      ### lookups.
+      if self.auth and hasattr(self.auth, 'check_global_access'):
+        if self.auth.check_global_access(self.rootname()) and not include_changed_paths:
           return date, author, msg, None
-        elif not self.auth.global_access:
-          if include_changed_paths:
-            return None, None, None, []
-          else:
-            return None, None, None, None
   
       # If we get here, then we either need the changed paths because we
       # were asked for them, or we need them to do authorization checks.
