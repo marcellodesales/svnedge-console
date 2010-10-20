@@ -718,13 +718,11 @@ ${extraconf}
         File httpdConf = new File(confDirPath, "httpd.conf")
         boolean isValid = false
         if (httpdConf.exists()) {
-            String conf = httpdConf.getText()
             String include = "Include \"${confDirPath}/csvn_main_httpd.conf\""
-            httpdConf.eachLine { isValid |= include.equals(it) }
+            isValid = verifyFileContains(httpdConf, include, true)
             if (isValid) {
-                isValid = false
                 include = "Include \"${confDirPath}/svn_viewvc_httpd.conf\""
-                httpdConf.eachLine { isValid |= include.equals(it) }
+                isValid = verifyFileContains(httpdConf, include, true)
             }
         } else {
             log.info("httpd.conf was missing; recreating it from template.")
@@ -732,6 +730,25 @@ ${extraconf}
             isValid = true
         }
         isValid
+    }
+
+    /**
+     * method will validate that file contains the expected content, but
+     * ignores variation in path separators if ignorePathDifferences is true
+     * @param file file to scan
+     * @param stringToVerify
+     * @parram ignorePathDifferences
+     * @return boolean match was found or not
+     */
+    private boolean verifyFileContains(File file, String stringToVerify, boolean ignorePathDifferences) {
+        boolean foundMatch = false
+        String content = file.getText()
+        content.eachLine {
+            def stringSought = (ignorePathDifferences) ? stringToVerify.replaceAll("\\\\", "/") : stringToVerify
+            def stringToCheck = (ignorePathDifferences) ? it.replaceAll("\\\\", "/") : it
+            foundMatch |= stringSought.equals(stringToCheck)
+        }
+        foundMatch
     }
 
     private def writeTeamforgeConf(server, teamforgePropsTemplate) {
