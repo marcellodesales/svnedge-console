@@ -1170,7 +1170,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         try {
             userDO = ctfRemoteClientService.createUser(conversionData.ctfURL,
                 getUserSessionId(conversionData), u.username, password, u.email,
-                u.realUserName, isSuperUser, isRestrictedUser)
+                u.realUserName, isSuperUser, isRestrictedUser, conversionData.userLocale)
 
             if (userDO && conversionData.assignMembership) {
                 //TODO: expose the method call addProjectMemeber to the service
