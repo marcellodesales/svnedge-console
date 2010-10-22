@@ -39,7 +39,7 @@ class AuthenticationIntegrationTests extends GrailsUnitTestCase {
     def config
 
     def TEST_USERNAME = "marcello"
-    def TEST_PASSWORD = "12345"
+    def TEST_PASSWORD = "C0ll@b123"
 
     protected void setUp() {
         super.setUp()
