@@ -94,9 +94,9 @@ svnedge {
     
     ctfMaster {
         ssl = false
-        domainName = "cu082.cubit.sp.collab.net"
+        domainName = "cu093.cloud.sp.collab.net"
         username = "admin"
-        password = "admin"
+        password = "Co!!ab123"
         port = 80
         systemId = "exsy1002"
     }
@@ -211,9 +211,9 @@ environments {
             
             ctfMaster {
                 ssl = false
-                domainName = "cu082.cubit.sp.collab.net"
+                domainName = "cu093.cloud.sp.collab.net"
                 username = "admin"
-                password = "admin"
+                password = "Co!!ab123"
                 port = 80
                 systemId = "exsy1002"
             }
