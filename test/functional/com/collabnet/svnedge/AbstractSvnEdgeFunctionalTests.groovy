@@ -102,9 +102,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
     }
 
     protected void loginAdmin() {
-        def ctfUsername = config.svnedge.ctfMaster.username
-        def ctfPassword = config.svnedge.ctfMaster.password
-        this.login (ctfUsername, ctfPassword)
+        this.login ("admin", "admin")
         assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
     }
 

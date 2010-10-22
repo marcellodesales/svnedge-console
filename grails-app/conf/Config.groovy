@@ -96,7 +96,7 @@ svnedge {
         ssl = false
         domainName = "cu093.cloud.sp.collab.net"
         username = "admin"
-        password = "Co!!ab123"
+        password = "coLL@b123"
         port = 80
         systemId = "exsy1002"
     }
@@ -213,7 +213,7 @@ environments {
                 ssl = false
                 domainName = "cu093.cloud.sp.collab.net"
                 username = "admin"
-                password = "Co!!ab123"
+                password = "coLL@b123"
                 port = 80
                 systemId = "exsy1002"
             }

@@ -28,8 +28,8 @@ class CacheMananagementAuthIntegrationTests extends GrailsUnitTestCase {
     def ctfRemoteClientService
     def config = ConfigurationHolder.config
 
-    def TEST_USERNAME = "marcello"
-    def TEST_PASSWORD = "12345"
+    def TEST_USERNAME = "mdesales"
+    def TEST_PASSWORD = "Coll@b123"
 
     protected void setUp() {
         cacheManagementService.flushAllCache()

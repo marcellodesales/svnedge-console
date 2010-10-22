@@ -38,8 +38,8 @@ class AuthenticationIntegrationTests extends GrailsUnitTestCase {
     def grailsApplication
     def config
 
-    def TEST_USERNAME = "marcello"
-    def TEST_PASSWORD = "C0ll@b123"
+    def TEST_USERNAME = "mdesales"
+    def TEST_PASSWORD = "Coll@b123"
 
     protected void setUp() {
         super.setUp()
@@ -94,10 +94,10 @@ class AuthenticationIntegrationTests extends GrailsUnitTestCase {
                 adminUsername, adminPassword, Locale.getDefault())
             ctfRemoteClientService.createUser(ctfUrl, adminSessionId, 
                 TEST_USERNAME, TEST_PASSWORD, "mdesales@collab.net", 
-                "Marcello de Sales", true, false)
+                "Marcello de Sales", true, false, null)
         } catch (Exception e) {
-            System.err.println(e.getMessage())
-            // do not do anything if the user already exists.
+            println(e.message)
+            e.printStackTrace()
         }
 
         def username = TEST_USERNAME
