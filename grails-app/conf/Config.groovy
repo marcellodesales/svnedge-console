@@ -211,9 +211,9 @@ environments {
             
             ctfMaster {
                 ssl = false
-                domainName = "cu093.cloud.sp.collab.net"
+                domainName = "cu082.cubit.sp.collab.net"
                 username = "admin"
-                password = "coLL@b123"
+                password = "admin"
                 port = 80
                 systemId = "exsy1002"
             }
