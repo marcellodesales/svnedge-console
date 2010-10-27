@@ -264,6 +264,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         
         Server server = lifecycleService.getServer()
         server.ldapEnabled = true
+        server.ldapEnabledConsole = true
         server.save()
         
         lifecycleService.startServer()
