@@ -82,6 +82,7 @@ class LifecycleService {
                 ldapAuthBindPassword: "",
                 fileLoginEnabled: true,
                 ldapEnabled: false,
+                ldapEnabledConsole: false,
                 ldapLoginAttribute: "",
                 ldapSearchScope: "sub",
                 ldapFilter: "",

@@ -45,6 +45,7 @@ class ServerController {
     def networkingService
     def serverConfService
     def setupTeamForgeService
+    def csvnAuthenticationProvider
 
     def index = { redirect(action:edit, params:params) }
 
@@ -106,6 +107,10 @@ class ServerController {
 
     def editAuthentication = {
         def server = Server.getServer()
+        if (!server.authHelperPort) {
+           server.authHelperPort =     
+                csvnAuthenticationProvider.getAuthHelperPort(server, server.ldapEnabled) 
+        }
         return [server: server,
                 csvnConf: ConfigUtil.confDirPath(),
                 isConfigurable: serverConfService.createOrValidateHttpdConf()

@@ -363,7 +363,7 @@ class ServerConfService {
 ServerAdmin "${server.adminEmail}"
 ServerName "${serverName}"
 Listen ${serverPort}
-Listen ${csvnAuthenticationProvider.getAuthHelperPort(server, true)}
+${getAuthHelperListen(server)}
 ${getDefaultHttpdSnippets()}
 ${ldapConfSnippet}
 ${fileAuthConfSnippet}
@@ -461,7 +461,7 @@ ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
             getViewVCHttpdConf(server)
         conf += "</Location>\n"
         conf += "</VirtualHost>\n\n"
-        if (server.mode != ServerMode.MANAGED && server.ldapEnabled) {
+        if (server.mode == ServerMode.STANDALONE && server.ldapEnabled && server.ldapEnabledConsole) {
             conf += """
 #
 # auth helper endpoint for use by SvnEdge
@@ -475,6 +475,14 @@ ${getAuthBasic(server)}
 """
         }
         new File(confDirPath(), "svn_viewvc_httpd.conf").write(conf)
+    }
+    
+    private def getAuthHelperListen(server) {
+        def conf = ""
+        if (server.mode == ServerMode.STANDALONE && server.ldapEnabled && server.ldapEnabledConsole) {
+            conf += "Listen ${csvnAuthenticationProvider.getAuthHelperPort(server, true)}"
+        }
+        conf
     }
     
     private def getDefaultHttpdSnippets() {

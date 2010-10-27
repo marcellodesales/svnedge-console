@@ -43,6 +43,7 @@ class Server {
     boolean defaultStart
     boolean allowAnonymousReadAccess
     boolean ldapEnabled
+    Boolean ldapEnabledConsole
     boolean fileLoginEnabled 
     String ldapServerHost
     int ldapServerPort

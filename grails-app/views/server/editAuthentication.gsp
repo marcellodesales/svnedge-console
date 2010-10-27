@@ -17,6 +17,12 @@
                     fieldsChanged = true;
                 });
             })
+            
+            // toggle the console ldap auth with the general ldapenabled setting
+            $('ldapEnabled').observe('change', function(event){
+                $('ldapEnabledConsole').checked = $('ldapEnabled').checked
+                
+            })
         });
 
         // updates a select for the given values.  Assumes that the options
@@ -255,7 +261,32 @@
           <g:checkBox name="ldapServerCertVerificationNeeded" value="${server.ldapServerCertVerificationNeeded}"/>
           <g:message code="server.ldapServerCertVerificationNeeded.label.tip" />
         </td>
-      </tr>
+      </tr> 
+      <tr>
+        <td class="ItemDetailName">
+          <label for="ldapEnabledConsole"><g:message code="server.ldapEnabledConsole.label" /></label>
+        </td>
+        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapEnabledConsole','errors')}">
+          <g:checkBox name="ldapEnabledConsole" value="${server.ldapEnabledConsole}"/>
+          <g:message code="server.ldapEnabledConsole.label.tip" />
+        </td>
+      </tr>      
+     <tr>
+        <td class="ItemDetailName">
+          <label for="authHelperPort"><g:message code="server.authHelperPort.label" /></label>
+        </td>
+        <td class="value ${hasErrors(bean:server,field:'authHelperPort','errors')}">
+          <g:textField size="6" name="authHelperPort" value="${fieldValue(bean:server,field:'authHelperPort')}"/>
+          <g:hasErrors bean="${server}" field="authHelperPort">
+              <ul><g:eachError bean="${server}" field="authHelperPort">
+                  <li><g:message error="${it}"/></li>
+              </g:eachError></ul>
+          </g:hasErrors>
+        </td>
+        <td class="ItemDetailValue">
+          <i><g:message code="server.authHelperPort.label.tip" /></i>
+        </td>
+      </tr>  
       </table>
       </div>
       </td>

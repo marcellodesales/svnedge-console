@@ -37,6 +37,7 @@ class UpgradeBootStrap {
         log.info("Applying updates") 
         release1_1_0()
         release1_2_0()
+        release1_3_1()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -103,6 +104,23 @@ class UpgradeBootStrap {
         SchemaVersion v = new SchemaVersion(major : 1, minor : 2, revision : 0,
                 description: "1.2.0 updated Statistic values: name. " +
                     "(WinBytesIn -> BytesIn), (WinBytesOut -> BytesOut).")
+        v.save()
+    }
+    
+    
+    def void release1_3_1() {
+
+        if (isSchemaCurrent(1,3,1)) {
+            log.info("Schema is current for 1.3.1 release")
+            return
+        }
+
+        log.info("Applying 1.3.1 updates")
+
+        Server.executeUpdate("UPDATE Server s SET s.ldapEnabledConsole = s.ldapEnabled")
+            
+        SchemaVersion v = new SchemaVersion(major : 1, minor : 3, revision : 1,
+                description: "1.3.1 updated Server adding field 'ldapEnabledConsole'.")
         v.save()
     }
 }

@@ -71,7 +71,8 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
         log.debug("Attempting CSVN authentication")
 
         // if not ldap enabled, proceed to Acegi daoAuthProvider
-        if (!Server.getServer().ldapEnabled) {
+        def server = Server.getServer()
+        if (!server.ldapEnabled && !server.ldapEnabledConsole) {
             return daoAuthenticationProvider.authenticate(auth)
         }
 
