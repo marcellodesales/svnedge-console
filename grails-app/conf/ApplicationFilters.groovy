@@ -43,7 +43,7 @@ class ApplicationFilters {
                     case "statistics":
                     case "server":
                         flash.error = app.getMainContext().getMessage(
-                            "server.failed.loading.libraries", [] as String,
+                            "server.failed.loading.libraries", [] as String[],
                             Locale.getDefault())
                         break;
                     }
