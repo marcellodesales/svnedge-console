@@ -46,7 +46,7 @@ abstract class AbstractSvnEdgeService {
      * @return the message related to the key in the messages.properties file
      * using the default locale from the JVM.
      */
-    protected def getMessage(String key, params) {
+    protected def getMessage(String key, List<String> params) {
         return this.getMessage(key, params as String[], Locale.getDefault())
     }
 
@@ -70,7 +70,7 @@ abstract class AbstractSvnEdgeService {
     * @return the message related to the key in the messages.properties file
     * using the default locale.
     */
-   protected def getMessage(String key, params, locale) {
+   protected def getMessage(String key, List<String> params, Locale locale) {
        if (!locale) {
            locale = Locale.getDefault()
        }
