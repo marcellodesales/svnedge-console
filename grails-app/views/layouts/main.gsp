@@ -115,6 +115,7 @@
                       log: 'admin',
                       packagesUpdate: 'admin',
                       setupTeamForge: 'admin',
+                      setupReplica: 'admin',
                       ocn: 'ocn'
                       ]}" />
 

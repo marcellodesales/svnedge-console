@@ -1,0 +1,124 @@
+<html>
+<head>
+  %{--
+  - CollabNet Subversion Edge
+  - Copyright (C) 2010, CollabNet Inc. All rights reserved.
+  -  
+  - This program is free software: you can redistribute it and/or modify
+  - it under the terms of the GNU Affero General Public License as published by
+  - the Free Software Foundation, either version 3 of the License, or
+  - (at your option) any later version.
+  -
+  - This program is distributed in the hope that it will be useful,
+  - but WITHOUT ANY WARRANTY; without even the implied warranty of
+  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  - GNU Affero General Public License for more details.
+  -
+  - You should have received a copy of the GNU Affero General Public License
+  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  --}%
+
+  <meta name="layout" content="main"/>
+  <g:javascript library="prototype"/>
+</head>
+<content tag="title">
+  <g:message code="setupTeamForge.page.leftNav.header"/>
+</content>
+
+<g:render template="/server/leftNav"/>
+
+<body>
+
+<g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
+<g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
+<g:set var="tabArray" value="${tabArray << [active:true, label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
+<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
+
+<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+
+<g:form method="post">
+
+  <table class="ItemDetailContainer">
+    <tr>
+      <td class="ContainerBodyWithPaddedBorder">
+
+        <p>
+          <g:message code="setupReplica.page.replicaSetup.p1"/>
+        </p>
+
+        <table class="ItemDetailContainer">
+          <tr>
+            <td class="ItemDetailName">
+              <label for="svnMasterUrl"><g:message code="setupReplica.page.replicaSetup.svnMasterUrl.label"/></label>
+            </td>
+            <td valign="top" class="value">
+              <g:select name="svnMasterUrl" from="${integrationServers}" value="${cmd?.svnMasterUrl}"></g:select>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="errors">
+              <g:hasErrors bean="${cmd}" field="svnMasterUrl">
+                <ul><g:eachError bean="${cmd}" field="svnMasterUrl">
+                  <li><g:message error="${it}"/></li>
+                </g:eachError></ul>
+              </g:hasErrors>
+            </td>
+          </tr>
+          <tr>
+            <td class="ItemDetailName">
+              <label for="description"><g:message code="setupReplica.page.replicaSetup.description.label"/></label>
+            </td>
+            <td class="value ${hasErrors(bean: cmd, field: 'description', 'errors')}">
+              <textarea name="description" id="description" rows="5" cols="50">${cmd?.description}</textarea>
+            </td>
+
+          </tr>
+          <tr>
+            <td></td>
+            <td class="errors">
+              <g:hasErrors bean="${cmd}" field="description">
+                <ul><g:eachError bean="${cmd}" field="description">
+                  <li><g:message error="${it}"/></li>
+                </g:eachError></ul>
+              </g:hasErrors>
+            </td>
+          </tr>
+          <tr>
+            <td class="ItemDetailName">
+              <label for="message"><g:message code="setupReplica.page.replicaSetup.message.label"/></label>
+            </td>
+            <td class="value ${hasErrors(bean: cmd, field: 'message', 'errors')}">
+              <textarea name="message" id="message" rows="5" cols="50">${cmd?.message}</textarea>
+            </td>
+            <td></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="errors">
+              <g:hasErrors bean="${cmd}" field="message">
+                <ul><g:eachError bean="${cmd}" field="message">
+                  <li><g:message error="${it}"/></li>
+                </g:eachError></ul>
+              </g:hasErrors>
+            </td>
+          </tr>
+
+        </table>
+
+    <tr class="ContainerFooter">
+      <td colspan="3">
+        <div class="AlignRight">
+          <g:actionSubmit action="confirm" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
+        </div>
+      </td>
+    </tr>
+
+  </table>
+  </td>
+  </tr>
+</g:form>
+
+</body>
+</html>
+  

@@ -15,7 +15,7 @@
   </div>
 
 <g:if test="${!isManagedMode}">
-  <div class="<g:if test="${controllerName == 'setupTeamForge'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
+  <div class="<g:if test="${controllerName == 'setupTeamForge' || controllerName == 'setupReplica'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <g:link controller="setupTeamForge" action="index">CollabNet TeamForge</g:link>
   </div>

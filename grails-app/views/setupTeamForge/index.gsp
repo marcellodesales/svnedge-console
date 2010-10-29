@@ -12,7 +12,10 @@
 
   <body>
 
+
     <g:set var="tabArray" value="${[[active:true, label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}" />
+    <g:set var="tabArray" value="${tabArray << [label: ' ... ', args:[2]]}" />
+ <%--
     <g:if test="${isFreshInstall}">
       <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupTeamForge.page.tabs.confirm', args:[2])]}" />
     </g:if>
@@ -22,8 +25,8 @@
       <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.ctfUsers', args:[4])]}" />
       <g:set var="tabArray" value="${tabArray << [label: message(code:'setupTeamForge.page.tabs.confirm', args:[5])]}" />
     </g:else>
+ --%>
     <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-
  <table class="ItemDetailContainer">
   <tr>
    <td class="ContainerBodyWithPaddedBorder">
@@ -57,8 +60,11 @@
        <td >
          <g:form method="post">
          <div class="AlignRight">
-           <g:actionSubmit action="ctfInfo" class="Button"
-               value="${message(code:'setupTeamForge.page.index.button.continue')}" />
+             <g:link controller="setupTeamForge" action="ctfInfo">
+                 <input id="btnCtfMode" type="button" value="${message(code:'setupTeamForge.page.index.button.ctfMode')}" /></g:link>
+             <g:link controller="setupReplica" action="ctfInfo">
+                <input id="btnReplicaMode" type="button" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}" /></g:link>
+             
          </div>
          </g:form>
        </td>
