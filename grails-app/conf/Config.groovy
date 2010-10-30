@@ -307,3 +307,9 @@ log4j = {
            additivity = true
     }
 }
+
+codenarc {
+    reportName = 'CodeNarcReport.xml'
+    reportType = 'xml'
+    // any further settings like maxPriority1Violations=0
+}
