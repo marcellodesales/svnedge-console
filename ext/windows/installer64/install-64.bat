@@ -1,6 +1,6 @@
 rem %~dp0 is location of current script under NT
 set _REALPATH=%~dp0
-set PATH=C:\pkg-tools\bin;C:\Program Files\GnuWin32\bin;C:\Program Files\Caphyon\Advanced Installer 7.6.1\bin\x86;C:\Program Files\CollabNet\CUBiT API Client;%PATH%
+set PATH=C:\pkg-tools\bin;C:\Program Files\GnuWin32\bin;C:\Program Files\Caphyon\Advanced Installer 7.7\bin\x86;C:\Program Files\CollabNet\CUBiT API Client;%PATH%
 set PKG=cmd /c pkg
 set VERSION=1.4.0
 set CSVN=C:\collabnet-csvn
