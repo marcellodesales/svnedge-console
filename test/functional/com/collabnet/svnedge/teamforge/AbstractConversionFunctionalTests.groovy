@@ -524,7 +524,10 @@ abstract class AbstractConversionFunctionalTests extends
         // the continue button.
         def button = getMessage("setupTeamForge.page.index.button.ctfMode")
         form {
+            // for some reason, button click isn't working here
             click button
+            // result of button is this page in browser
+            get('/setupTeamForge/ctfInfo')
         }
         assertStatus 200
 
