@@ -28,7 +28,10 @@ import com.collabnet.svnedge.replica.manager.Master
 import com.collabnet.svnedge.replica.manager.ReplicaConfig
 import com.collabnet.svnedge.replica.manager.ApprovalState
 
-import java.text.SimpleDateFormat;
+import java.text.SimpleDateFormat
+import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.replication.ReplicaConfiguration;
 
 
 @Secured(['ROLE_USER'])
@@ -53,28 +56,29 @@ class StatusController {
     }
 
     def index = {
-       def server = Server.getServer()
-       def defaultMaster = Master.getDefaultMaster()
-       def currentReplica = ReplicaConfig.getCurrentConfig()
-       if (server.replica) { 
-           if (!defaultMaster.isActive && !currentReplica.getState()) {
-               redirect(controller:"wizard", action:"index")
-           }
+        def server = Server.getServer()
+        def ctfUrl
+        def currentReplica = ReplicaConfiguration.getCurrentConfig()
+        def ctfServer = CtfServer.getServer()
 
-           if(!currentReplica) {
+        if (server.mode == ServerMode.REPLICA) {
+
+            if(!currentReplica) {
                flash.error = message(code: 'replica.error.notStarted')
-           }
-           if (currentReplica.getState() == ApprovalState.PENDING) {
+            }
+            if (currentReplica.approvalState == ApprovalState.PENDING) {
                flash.message = message(code: 'replica.error.notApproved')
-           } else if (currentReplica.getState() == ApprovalState.DENIED) {
+            } else if (currentReplica.approvalState == ApprovalState.DENIED) {
                flash.error = message(code: 'replica.error.denied')
-           } else if (currentReplica.getState() == ApprovalState.NOT_FOUND 
-                      || currentReplica.getState() == ApprovalState
+            } else if (currentReplica.approvalState == ApprovalState.NOT_FOUND
+                      || currentReplica.approvalState == ApprovalState
                       .REGISTRATION_FAILED) {
                flash.error = message(code: 'replica.error.cantRegister')
-           }
+            }
+            
+            ctfUrl = ctfServer.getWebAppUrl()
         }
-        def ctfUrl
+
         if (server.managedByCtf()) {
             ctfUrl = server.getManagedServer().getWebAppUrl()
         }
@@ -128,7 +132,6 @@ class StatusController {
        return [isStarted: isStarted,
                isDefaultPortAllowed: lifecycleService.isDefaultPortAllowed(),
                sampleRepo: sampleRepo,
-               defaultMaster: defaultMaster, 
                currentReplica: currentReplica,
                server: server,
                perfStats: getPerfStats(currentReplica, server),

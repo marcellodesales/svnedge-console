@@ -49,20 +49,20 @@
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
-              <label for="ctfUrl"><g:message code="setupReplica.page.ctfInfo.ctfUrl.label"/></label>
+              <label for="ctfURL"><g:message code="setupReplica.page.ctfInfo.ctfURL.label"/></label>
             </td>
             <td valign="top" class="value">
-              <g:textField name="ctfUrl" value="${cmd.ctfUrl}" size="40"/> 
+              <g:textField name="ctfURL" value="${cmd.ctfURL}" size="40"/> 
             </td>
             <td>
-              <em><g:message code="setupReplica.page.ctfInfo.ctfUrl.label.tip"/></em>
+              <em><g:message code="setupReplica.page.ctfInfo.ctfURL.label.tip"/></em>
             </td>
           </tr>
           <tr>
             <td></td>
             <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="ctfUrl">
-                <ul><g:eachError bean="${cmd}" field="ctfUrl">
+              <g:hasErrors bean="${cmd}" field="ctfURL">
+                <ul><g:eachError bean="${cmd}" field="ctfURL">
                   <li><g:message error="${it}"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
@@ -73,7 +73,7 @@
               <label for="ctfUsername"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></label>
             </td>
             <td class="value ${hasErrors(bean: cmd, field: 'ctfUsername', 'errors')}">
-              <g:textField name="ctfUsername" value="${cmd.ctfUsername}" size="40"/> 
+              <g:textField name="ctfUsername" value="${cmd.ctfUsername}" size="20"/> 
             </td>
             <td>
               <em><g:message code="setupReplica.page.ctfInfo.ctfUsername.label.tip"/></em>

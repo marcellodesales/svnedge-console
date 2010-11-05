@@ -21,6 +21,7 @@ import grails.test.*
 
 import com.collabnet.svnedge.replica.cache.ProxyCache
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.teamforge.CtfServer
 
 
 class CacheManagementRoleIntegrationTests extends GrailsUnitTestCase {
@@ -32,6 +33,21 @@ class CacheManagementRoleIntegrationTests extends GrailsUnitTestCase {
     protected void setUp() {
         this.config = grailsApplication.config
         cacheManagementService.flushAllCache()
+        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+        def ctfHost = config.svnedge.ctfMaster.domainName
+        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
+                config.svnedge.ctfMaster.port
+        def ctfUrl = ctfProto + ctfHost + ctfPort
+        def adminUsername = config.svnedge.ctfMaster.username
+        def adminPassword = config.svnedge.ctfMaster.password
+
+        if (!CtfServer.getServer()) {
+            CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
+                    internalApiKey: "testApiKey",
+                    ctfUsername: adminUsername,
+                    ctfPassword: adminPassword)
+            s.save(flush:true)
+        }
     }
 
     protected void tearDown() {

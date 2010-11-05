@@ -52,6 +52,10 @@ import java.net.UnknownHostException;
 import java.net.MalformedURLException
 import java.util.Locale;
 import java.util.regex.Pattern
+import com.collabnet.svnedge.replication.ReplicaConversionBean
+import com.collabnet.svnedge.teamforge.CtfConnectionBean
+import com.collabnet.svnedge.replica.manager.ReplicaConfig
+import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 
@@ -88,6 +92,49 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     def registerReplica(server, replica) {
         ApprovalState.APPROVED.getName()
+    }
+
+    def registerReplica(ReplicaConversionBean replicaInfo) {
+        // todo use a real service
+        // simulate success and return system identifier
+        "repl1001"
+    }
+
+    def fetchCommands() {
+        // todo use a real service
+        // simulate success and return command
+        ["NOOP"]
+    }
+    
+    /**
+     * @param ctfInfo the bean representing a ctf connection
+     * @return the list of integration servers in the TeamForge server reached by the
+     * given ctfUrl, using the given sessionId.
+     * @throws CtfSessionExpiredException if the given sessionId is expired.
+     * @throws RemoteMasterException if any other error occurs during the
+     * method execution.
+     */
+    def getIntegrationServers(CtfConnectionBean ctfInfo) throws CtfSessionExpiredException, RemoteMasterException {
+        try {
+            def filter = null
+            // TODO create and use service method for getting external systems
+            return this.cnSoap(ctfInfo.ctfURL).getUserList(ctfInfo.userSessionId, filter).dataRows
+
+        } catch (AxisFault e) {
+            String faultMsg = e.faultString
+            GrailsUtil.deepSanitize(e)
+            if (faultMsg.contains("Session is invalid or timed out")) {
+                throw new CtfSessionExpiredException(ctfInfo.ctfURL, ctfInfo.userSessionId,
+                    getMessage("ctfRemoteClientService.remote.sessionExpired",
+                        ctfInfo.userLocale), e)
+            } else {
+                def errorMessage = getMessage(
+                    "ctfRemoteClientService.listUsers.error",  ctfInfo.userLocale) + " " +
+                    faultMsg
+                log.error(errorMessage, e)
+                throw new RemoteMasterException(ctfInfo.ctfURL, errorMessage, e)
+            }
+        }
     }
 
     def getReplicaApprovalState() {

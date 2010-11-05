@@ -17,29 +17,23 @@
  */
 package com.collabnet.svnedge.teamforge
 
-class CtfConversionBean {
-    String ctfURL
-    String ctfUsername
-    String ctfPassword
-    String webSessionId
-    String userSessionId
+class CtfConversionBean extends CtfConnectionBean {
+
     String exSystemId
     String ctfProject
     String ctfProjectId
     String ctfProjectPath
     boolean isProjectPerRepo
-    String apiVersion
-    String appVersion
     String errorMessage
     boolean importUsers = true
     boolean assignMembership = true
     boolean requiresServerKey = false
     boolean consoleSsl = false
     int consolePort
-    String serverKey
+
     boolean lowercaseRepos
     String repoPrefix
-    Locale userLocale
+
 
     boolean validateProjectName() {
         isProjectPerRepo || (null != ctfProject && ctfProject.trim().length() > 0)

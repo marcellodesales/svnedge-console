@@ -26,6 +26,7 @@ import org.springframework.security.providers.UsernamePasswordAuthenticationToke
 import org.springframework.security.BadCredentialsException
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.teamforge.CtfServer
 
 class AuthenticationIntegrationTests extends GrailsUnitTestCase {
 
@@ -46,6 +47,23 @@ class AuthenticationIntegrationTests extends GrailsUnitTestCase {
         this.config = grailsApplication.config
         server = Server.getServer()
         authenticationManager.providers = [ctfAuthenticationProvider]
+        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+        def ctfHost = config.svnedge.ctfMaster.domainName
+        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
+                config.svnedge.ctfMaster.port
+        def ctfUrl = ctfProto + ctfHost + ctfPort
+        def adminUsername = config.svnedge.ctfMaster.username
+        def adminPassword = config.svnedge.ctfMaster.password
+
+        def adminSessionId = ctfRemoteClientService.login(ctfUrl,
+            adminUsername, adminPassword, Locale.getDefault())
+        if (!CtfServer.getServer()) {
+            CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
+                    internalApiKey: "testApiKey",
+                    ctfUsername: adminUsername,
+                   ctfPassword: adminPassword)
+            s.save(flush:true)
+        }
     }
 
     protected void tearDown() {

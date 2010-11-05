@@ -23,6 +23,7 @@ import grails.test.*
 
 import com.collabnet.svnedge.replica.cache.ProxyCache
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.teamforge.CtfServer
 
 class CacheManagementUserInfoIntegrationTests extends GrailsUnitTestCase {
 
@@ -47,9 +48,18 @@ class CacheManagementUserInfoIntegrationTests extends GrailsUnitTestCase {
 
             def adminSessionId = ctfRemoteClientService.login(ctfUrl, 
                 adminUsername, adminPassword, Locale.getDefault())
-            ctfRemoteClientService.createUser(ctfUrl, adminSessionId, 
+            if (!CtfServer.getServer()) {
+                CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
+                        internalApiKey: "testApiKey",
+                        ctfUsername: adminUsername,
+                        ctfPassword: adminPassword)
+                s.save(flush:true)
+            }
+
+            ctfRemoteClientService.createUser(ctfUrl, adminSessionId,
                 TEST_USERNAME, TEST_PASSWORD, "mdesales@collab.net", 
                 "Marcello de Sales", true, false)
+
         } catch (Exception e) {
             println(e.getMessage())
             // do not do anything if the user already exists.

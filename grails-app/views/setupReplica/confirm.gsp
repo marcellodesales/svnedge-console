@@ -57,13 +57,13 @@
                 </tr>
                 
                 <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.ctfUrl.label"/></strong></td>
-                  <td class="ItemDetailValue">${ctfUrl}</td>
+                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></td>
+                  <td class="ItemDetailValue">${ctfURL}</td>
                 </tr>
                 
                 <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnMasterUrl.label"/></strong></td>
-                  <td class="ItemDetailValue">${svnMasterUrl}</td>
+                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></strong></td>
+                  <td class="ItemDetailValue">${svnMasterURL}</td>
                 </tr>
                 
                 <tr class="prop, OddRow">

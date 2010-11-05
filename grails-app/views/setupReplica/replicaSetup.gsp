@@ -49,17 +49,17 @@
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
-              <label for="svnMasterUrl"><g:message code="setupReplica.page.replicaSetup.svnMasterUrl.label"/></label>
+              <label for="svnMasterURL"><g:message code="setupReplica.page.replicaSetup.svnMasterURL.label"/></label>
             </td>
             <td valign="top" class="value">
-              <g:select name="svnMasterUrl" from="${integrationServers}" value="${cmd?.svnMasterUrl}"></g:select>
+              <g:select name="svnMasterURL" from="${integrationServers}" value="${cmd?.svnMasterURL}"></g:select>
             </td>
           </tr>
           <tr>
             <td></td>
             <td class="errors">
-              <g:hasErrors bean="${cmd}" field="svnMasterUrl">
-                <ul><g:eachError bean="${cmd}" field="svnMasterUrl">
+              <g:hasErrors bean="${cmd}" field="svnMasterURL">
+                <ul><g:eachError bean="${cmd}" field="svnMasterURL">
                   <li><g:message error="${it}"/></li>
                 </g:eachError></ul>
               </g:hasErrors>

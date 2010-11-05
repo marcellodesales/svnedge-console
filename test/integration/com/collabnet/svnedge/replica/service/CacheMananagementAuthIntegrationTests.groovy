@@ -21,6 +21,7 @@ import java.util.Locale;
 
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.teamforge.CtfServer
 
 class CacheMananagementAuthIntegrationTests extends GrailsUnitTestCase {
 
@@ -42,8 +43,19 @@ class CacheMananagementAuthIntegrationTests extends GrailsUnitTestCase {
             def adminUsername = config.svnedge.ctfMaster.username
             def adminPassword = config.svnedge.ctfMaster.password
 
+            if (!CtfServer.getServer()) {
+                CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
+                        internalApiKey: "testApiKey",
+                        ctfUsername: adminUsername,
+                        ctfPassword: adminPassword)
+                s.save(flush:true)
+            }
+
             def adminSessionId = ctfRemoteClientService.login(ctfUrl, 
                 adminUsername, adminPassword, Locale.getDefault())
+
+
+
             ctfRemoteClientService.createUser(ctfUrl, adminSessionId, 
                 TEST_USERNAME, TEST_PASSWORD, "mdesales@collab.net", 
                 "Marcello de Sales", true, false)

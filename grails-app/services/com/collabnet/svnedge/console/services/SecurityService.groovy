@@ -18,11 +18,29 @@
 package com.collabnet.svnedge.console.services
 
 import java.security.SecureRandom
+import javax.crypto.Cipher
+import sun.misc.BASE64Encoder
+import sun.misc.BASE64Decoder
+import java.security.Key
+import javax.crypto.spec.DESKeySpec
+import javax.crypto.SecretKeyFactory
+import javax.crypto.SecretKey
 
 class SecurityService {
 
     boolean transactional = true
     SecureRandom randomNumGen = new SecureRandom()
+    Key key
+
+    public SecurityService() {
+
+        // todo: needs a better persistent key
+        byte[] desKeyData = [ 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08 ] as byte[]
+        DESKeySpec desKeySpec = new DESKeySpec(desKeyData)
+        SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("DES")
+        key = keyFactory.generateSecret(desKeySpec)
+
+    }
 
     String generatePassword(int minPassLength, int maxPassLength) {
         int variation = maxPassLength - minPassLength
@@ -40,5 +58,53 @@ class SecurityService {
             sb.append((char) (((int)'!') + randomNumGen.nextInt(93)))
         }
         sb.toString()
+    }
+
+
+    /**
+     * Encrypts and base-64 encodes a clear-text input
+     * @param input
+     * @return encrypted
+     */
+    public String encrypt(String input)  {
+        // Get a cipher object.
+        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+
+        // Gets the raw bytes to encrypt, UTF8 is needed for
+        // having a standard character set
+        byte[] stringBytes = input.getBytes("UTF8");
+
+        // encrypt using the cypher
+        byte[] raw = cipher.doFinal(stringBytes);
+
+        // converts to base64 for easier display.
+        BASE64Encoder encoder = new BASE64Encoder();
+        String encodedOutput = encoder.encode(raw);
+
+        return encodedOutput;
+    }
+
+    /**
+     * Decrypts an encrypted and base-64 encoded input (created by <code>encrypt()</code> method)
+     * @param encrypted text
+     * @return clear text
+     */
+    public String decrypt(String encrypted) {
+
+        // Get a cipher object.
+        Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, key);
+
+        //decode the BASE64 coded message
+        BASE64Decoder decoder = new BASE64Decoder();
+        byte[] raw = decoder.decodeBuffer(encrypted);
+
+        //decode the message
+        byte[] stringBytes = cipher.doFinal(raw);
+
+        //converts the decoded message to a String
+        String clear = new String(stringBytes, "UTF8");
+        return clear;
     }
 }

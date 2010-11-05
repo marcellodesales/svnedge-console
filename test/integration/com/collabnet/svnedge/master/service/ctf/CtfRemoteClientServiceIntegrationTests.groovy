@@ -23,6 +23,7 @@ import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
+import com.collabnet.svnedge.teamforge.CtfServer
 
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -34,6 +35,23 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
         this.config = grailsApplication.config
+        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+        def ctfHost = config.svnedge.ctfMaster.domainName
+        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
+                config.svnedge.ctfMaster.port
+        def ctfUrl = ctfProto + ctfHost + ctfPort
+        def adminUsername = config.svnedge.ctfMaster.username
+        def adminPassword = config.svnedge.ctfMaster.password
+
+        def adminSessionId = ctfRemoteClientService.login(ctfUrl,
+            adminUsername, adminPassword, Locale.getDefault())
+        if (!CtfServer.getServer()) {
+            CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
+                    internalApiKey: "testApiKey",
+                    ctfUsername: adminUsername,
+                   ctfPassword: adminPassword)
+            s.save(flush:true)
+        }
     }
     
     def ctfRemoteClientService

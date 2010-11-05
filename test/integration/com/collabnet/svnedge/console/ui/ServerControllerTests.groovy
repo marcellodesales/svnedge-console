@@ -20,7 +20,8 @@ package com.collabnet.svnedge.console.ui
 import com.collabnet.svnedge.console.Server
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import java.io.File;
+import java.io.File
+import com.collabnet.svnedge.teamforge.CtfServer;
 
 class ServerControllerTests extends ControllerUnitTestCase {
 
@@ -85,6 +86,17 @@ class ServerControllerTests extends ControllerUnitTestCase {
     }
 
     void testEditIntegration() {
+        if (!CtfServer.getServer()) {
+
+            CtfServer s = new CtfServer(baseUrl: "http://ctf", mySystemId: "exsy1000",
+                    internalApiKey: "testApiKey",
+                    ctfUsername: "myCtfUser",
+                    ctfPassword: "encrypted")
+            if (!s.validate()) {
+                s.errors.each { println(it)}
+            }
+            s.save(flush:true)
+        }
         controller.editIntegration()
     }
 }

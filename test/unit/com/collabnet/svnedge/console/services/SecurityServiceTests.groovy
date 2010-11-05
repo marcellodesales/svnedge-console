@@ -63,4 +63,20 @@ class SecurityServiceTests extends GrailsUnitTestCase {
             // expected
         }
     }
+    
+    void testEncryptDecrypt() {
+        
+        String plainText = "Test Input String"
+        String cipherText = securityService.encrypt(plainText)
+        log.info("The plaintext and cipher text are: ${plainText}, ${cipherText}")
+        
+        assertNotSame("Plain text and cipher text must differ", plainText, cipherText)
+        
+        String decrypted = securityService.decrypt(cipherText)
+        log.info("The cipher text and decrypted text are: ${cipherText}, ${decrypted}")
+        
+        assertEquals("Plain text and decrypted should be equal", plainText, decrypted)
+                
+    }
+    
 }

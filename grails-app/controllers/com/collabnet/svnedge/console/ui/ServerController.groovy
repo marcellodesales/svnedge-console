@@ -95,7 +95,7 @@ class ServerController {
     def editIntegration = {
         flash.warn = message(code: "server.action.revert.warn")
         def ctfCredentialsCmd = new CtfCredentialCommand()
-        return [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
+        return [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
                 ctfCredentials: ctfCredentialsCmd]
     }
 

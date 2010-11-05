@@ -22,6 +22,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.ConfigUtil
+import com.collabnet.svnedge.teamforge.CtfServer
 
 /**
  * this test class validates the configuration files being modified
@@ -34,6 +35,16 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
+        CtfServer ctf = new CtfServer(baseUrl: "http://ctf",
+                mySystemId: "exsy1000",
+                internalApiKey: "456",
+                ctfUsername: "testuser",
+                ctfPassword: "testpwd")
+        if (!ctf.validate()) {
+            ctf.errors.each { log.error(it.toString())}
+            throw new RuntimeException("unable to save CtfServer for testing managed mode")
+        }
+        ctf.save()
 
     }
 

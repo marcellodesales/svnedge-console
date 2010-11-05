@@ -28,6 +28,8 @@ class CtfServer {
     String baseUrl
     String mySystemId
     String internalApiKey
+    String ctfUsername
+    String ctfPassword
     
     public String getWebAppUrl() {
         return baseUrl + "/sf";

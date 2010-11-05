@@ -58,7 +58,11 @@ class ApplicationFilters {
         featureAvailability(controller: '*', action: '*') {
             
             before = {
-                if (ServerMode.STANDALONE == Server.getServer().mode && 
+
+                boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
+                        || ServerMode.REPLICA == Server.getServer().mode)
+
+                if (!isManagedMode &&
                     "server" == controllerName && (
                         "editIntegration" == actionName || "revert" == actionName)) {
                     flash.error = app.getMainContext().getMessage(
@@ -67,7 +71,7 @@ class ApplicationFilters {
                     redirect(controller: "status")
                     return false
                 }
-                if (ServerMode.MANAGED == Server.getServer().mode &&
+                if (isManagedMode &&
                 (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
                 ("server" == controllerName && "editAuthentication" == actionName))) {
                     flash.error = app.getMainContext().getMessage(
@@ -81,7 +85,8 @@ class ApplicationFilters {
             // after running the action, add "featureList" to the page model
             after = {model ->
                 
-                boolean isManagedMode = ServerMode.MANAGED == Server.getServer().mode
+                boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
+                        || ServerMode.REPLICA == Server.getServer().mode)
 
                 // default list of features for all users
                 def featureList = ["status"]
