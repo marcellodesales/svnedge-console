@@ -518,17 +518,11 @@ abstract class AbstractConversionFunctionalTests extends
         get('/setupTeamForge/index')
         assertStatus 200
 
-        if (isFresh) {
-            assertTabsOnFreshConversionAreCorrect()
-        } else {
-            assertTabsOnCompleteConversionAreCorrect()
-        }
-
         assertContentContains(getMessage("setupTeamForge.page.index.almTitle"))
 
         // Step 2: verify that the setup page is correct after clicking on 
         // the continue button.
-        def button = getMessage("setupTeamForge.page.index.button.continue")
+        def button = getMessage("setupTeamForge.page.index.button.ctfMode")
         form {
             click button
         }
