@@ -25,6 +25,7 @@ import com.collabnet.svnedge.master.RemoteMasterException
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.replica.manager.ApprovalState
+import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 /**
  * This service handles replication-related functionality
@@ -97,10 +98,13 @@ class ReplicaService {
             }
             throw new ReplicaConversionException("Could not convert to replica")
         }
-        
+
         rc.save(flush:true)
         ctfServer.save(flush:true)
         server.save(flush:true)
+
+        log.info("Resuming replica jobs")
+        jobsAdminService.resumeGroup(REPLICA_GROUP)
     }
     
     
