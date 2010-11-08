@@ -60,11 +60,12 @@
        <td >
          <g:form method="post">
          <div class="AlignRight">
-             <g:link controller="setupTeamForge" action="ctfInfo">
-                 <input id="btnCtfMode" type="button" value="${message(code:'setupTeamForge.page.index.button.ctfMode')}" /></g:link>
-             <g:link controller="setupReplica" action="ctfInfo">
-                <input id="btnReplicaMode" type="button" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}" /></g:link>
-             
+             <g:actionSubmit id="btnCtfMode" value="${message(code:'setupTeamForge.page.index.button.ctfMode')}" 
+                 controller="setupTeamForge" action="ctfInfo"
+                 />
+             <g:actionSubmit id="btnReplicaMode" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}" 
+                 controller="setupReplica" action="ctfInfo"
+                 />
          </div>
          </g:form>
        </td>
