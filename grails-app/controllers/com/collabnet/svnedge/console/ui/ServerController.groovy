@@ -27,6 +27,7 @@ import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
+import com.collabnet.svnedge.console.ServerMode
 
 class CtfCredentialCommand {
     String ctfUsername
@@ -95,8 +96,13 @@ class ServerController {
     def editIntegration = {
         flash.warn = message(code: "server.action.revert.warn")
         def ctfCredentialsCmd = new CtfCredentialCommand()
-        return [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
-                ctfCredentials: ctfCredentialsCmd]
+        Server s = Server.getServer()
+        String view = (s.mode == ServerMode.REPLICA) ?
+                "editReplica" :
+                "editIntegration"
+
+        render (view : view, model: [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
+                ctfCredentials: ctfCredentialsCmd, server: s])
     }
 
     def edit = {

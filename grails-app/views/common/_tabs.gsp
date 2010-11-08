@@ -26,7 +26,10 @@
       </g:if>
     </g:else>
     <g:set var="tabLink" value="${tab.href}"/>
-    <g:if test="${!tabLink}"> 
+    <g:if test="${!tabLink && tab.controller}">
+        <g:set var="tabLink" value="${createLink(controller: tab.controller, action: tab.action)}"/>
+    </g:if>
+    <g:if test="${!tabLink && !tab.controller}">
         <g:set var="tabLink" value="${tab.action}"/>
     </g:if>
     <td style="background: url(${resource(dir:'images/tabs',file:tabImage)})" width="0" 

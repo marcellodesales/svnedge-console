@@ -28,6 +28,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.replication.ReplicaConversionBean
 import org.springframework.beans.BeanUtils
+import com.collabnet.svnedge.teamforge.CtfServer
 
 
 class CtfConnectionCommand {
@@ -149,7 +150,8 @@ class SetupReplicaController {
                 server = Server.getServer()
                 repoName = (Repository.list()) ? Repository.list()[0].name : "example"
                 userName = authenticateService.principal().getUsername()
-                
+
+                flash.message = message(code: 'setupReplica.action.confirm.success')
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
                         svnMasterURL: getReplicaInfoCommand().svnMasterURL,
                         svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
@@ -162,23 +164,66 @@ class SetupReplicaController {
             }
         }
         
-        if (input.hasErrors()) {
-            // return to input view with errors
-            render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
+        // return to input view with errors
+        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
+    }
+
+    /**
+     * Edit CTF credentials
+     */
+    def editCredentials = {
+        def command = getCtfConnectionCommand()
+        def ctfServer = CtfServer.getServer()
+        command.ctfUsername = ctfServer.ctfUsername
+        command.ctfURL = ctfServer.baseUrl
+        [cmd: command]
+    }
+
+    /**
+     * Persist updated CTF connection
+     */
+    def updateCredentials = { CtfConnectionCommand input ->
+
+        if (!input.hasErrors()) {
+
+            try {
+                // copy input params to the conversion bean
+                CtfConnectionBean conn = getConversionBean(input)
+                // persist the connection
+                replicaService.updateCtfConnection(conn)
+
+                // save form input to session (in case tab is re-enterd)
+                def cmd = getCtfConnectionCommand()
+                BeanUtils.copyProperties(input, cmd)
+
+                // success changing the credentials
+                flash.message = message(code:"setupReplica.action.updateCredentials.success")
+            }
+            catch (MalformedURLException e) {
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.malformedUrl',
+                        [input.ctfURL] as Object[], 'bad url')
+            }
+            catch (UnknownHostException e) {
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.unknown.error',
+                        [new URL(input.ctfURL).host] as Object[], 'unknown host')
+            }
+            catch (NoRouteToHostException e) {
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.unreachable.error',
+                        [input.ctfURL] as Object[], 'no route')
+            }
+            catch (CtfAuthenticationException e) {
+                input.errors.rejectValue('ctfUsername', 'ctfRemoteClientService.auth.error',
+                        [input.ctfUsername] as Object[], 'bad credentials')
+            }
         }
-        else {
-        
-            [ctfURL: getCtfConnectionCommand().ctfURL,
-                    svnMasterURL: getReplicaInfoCommand().svnMasterURL,
-                    svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
-                    ]
-        }
+
+        // return to input view with success or errors
+        render([view: "editCredentials", model: [cmd: input]])
     }
 
     private List getIntegrationServers() {
 
-        // todo: real data
-        ["https://system1/svn", "https://system2/svn", "https://system3/svn"]
+        return replicaService.getIntegrationServers(getConversionBean())
 
     }
 
@@ -220,7 +265,7 @@ class SetupReplicaController {
     }
 
     /**
-     * obtain a ctf conersion bean from the session, and apply properties from command
+     * obtain a ctf conversion bean from the session, and apply properties from command
      * @param cmd the controller action command bean 
      */
     private ReplicaConversionBean getConversionBean(CtfConnectionCommand cmd) {
@@ -233,7 +278,7 @@ class SetupReplicaController {
     }
 
     /**
-     * obtain a ctf conersion bean from the session, and apply properties from command
+     * obtain a ctf conversion bean from the session, and apply properties from command
      * @param cmd the controller action command bean 
      */
     private ReplicaConversionBean getConversionBean(ReplicaInfoCommand cmd) {

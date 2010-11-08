@@ -106,7 +106,25 @@ class ReplicaService {
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
     }
-    
+
+    /**
+     * update the TeamForge credentials on file
+     * @param ctfConn
+     */
+    public void updateCtfConnection(CtfConnectionBean ctfConn) {
+
+        // confirm that new credentials are legit
+        confirmCtfConnection(ctfConn)
+
+        // persist
+        log.warn("Updating the CTF credentials used for SVN Replication")
+        def ctfServer = CtfServer.getServer() 
+
+        ctfServer.ctfUsername = ctfConn.ctfUsername
+        ctfServer.ctfPassword = securityService.encrypt(ctfConn.ctfPassword)
+
+    }
+
     
     /**
      * Obtain a list of integration servers from the Ctf connection represented
@@ -116,7 +134,8 @@ class ReplicaService {
      */
     public List<String> getIntegrationServers (CtfConnectionBean ctfConn) {
         
-        return ctfRemoteClientService.getIntegrationServers(ctfConn.ctfURL, ctfConn.userSessionId, 
-            ctfConn.userLocale)
+        return ["https://system1/svn", "https://system2/svn", "https://system3/svn"]
+//        return ctfRemoteClientService.getIntegrationServers(ctfConn.ctfURL, ctfConn.userSessionId,
+//            ctfConn.userLocale)
     }
 }

@@ -1,3 +1,4 @@
+<%@ page import="com.collabnet.svnedge.console.ServerMode" %>
 <html>
 <head>
   %{--
@@ -29,12 +30,9 @@
 
 <body>
 
-<g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
-<g:set var="tabArray" value="${tabArray << [active:true, label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
-
-<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+   <g:set var="tabArray" value="${[[controller: 'server', action: 'editIntegration', label: message(code:'server.page.editIntegration.tab.convert')]]}" />
+   <g:set var="tabArray" value="${ tabArray << [active: true, controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]}" />
+   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
 <g:form method="post">
 
@@ -43,7 +41,7 @@
       <td class="ContainerBodyWithPaddedBorder">
 
         <p>
-          <g:message code="setupReplica.page.ctfInfo.p1"/>
+          <g:message code="setupReplica.page.editCredentials.p1"/>
         </p>
 
         <table class="ItemDetailContainer">
@@ -52,7 +50,8 @@
               <label for="ctfURL"><g:message code="setupReplica.page.ctfInfo.ctfURL.label"/></label>
             </td>
             <td valign="top" class="value">
-              <g:textField name="ctfURL" value="${cmd.ctfURL}" size="40"/> 
+              ${cmd.ctfURL}
+              <g:hiddenField name="ctfURL" value="${cmd.ctfURL}"/>
             </td>
             <td>
               <em><g:message code="setupReplica.page.ctfInfo.ctfURL.label.tip"/></em>
@@ -117,7 +116,7 @@
     <tr class="ContainerFooter">
       <td colspan="3">
         <div class="AlignRight">
-          <g:actionSubmit action="replicaSetup" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
+          <g:actionSubmit action="updateCredentials" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
         </div>
       </td>
     </tr>
