@@ -63,9 +63,8 @@
              <g:actionSubmit id="btnCtfMode" value="${message(code:'setupTeamForge.page.index.button.ctfMode')}" 
                  controller="setupTeamForge" action="ctfInfo"
                  />
-             <g:actionSubmit id="btnReplicaMode" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}" 
-                 controller="setupReplica" action="ctfInfo"
-                 />
+             <input type="button" id="btnReplicaMode" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}"
+                 onclick="document.location.href='${createLink(controller: 'setupReplica', action:'ctfInfo')}'; return false"/>
          </div>
          </g:form>
        </td>
