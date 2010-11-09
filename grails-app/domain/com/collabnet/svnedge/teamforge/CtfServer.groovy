@@ -45,6 +45,8 @@ class CtfServer {
         baseUrl(nullable: false, blank: false, unique: true)
         mySystemId(nullable: true, blank: true, unique: true)
         internalApiKey(nullable: true, blank: true, unique: true)
+        ctfUsername(nullable: true, blank: true, unique: true)
+        ctfPassword(nullable: true, blank: true, unique: true)
     }
     
     static CtfServer getServer() {
