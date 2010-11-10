@@ -21,7 +21,7 @@
   </div>
 </g:if>
 <g:else>
-  <div class="<g:if test="${actionName == 'editIntegration' || actionName == 'revert'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
+  <div class="<g:if test="${['editIntegration','revert','editCredentials','updateCredentials'].contains(actionName) }">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <g:link controller="server" action="editIntegration"><g:message code="server.page.leftNav.toStandalone" /></g:link>
   </div>
