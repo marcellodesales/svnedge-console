@@ -4,10 +4,6 @@
     <ROW Name="HiddenItems" Value="DigCertStoreComponent;UpdaterComponent;SerValComponent;MsiMergeModsComponent;MsiExtComponent;MsiAssemblyComponent;MsiOrgComponent;ActSyncAppComponent;CPLAppletComponent;MsiClassComponent;MsiOdbcDataSrcComponent"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiPropsComponent">
-    <ROW Property="AI_CLEAN_RESOURCES_DISABLE_UPGRADE" Value="1"/>
-    <ROW Property="AI_CLEAN_RESOURCES_UNINSTALL" Value="1"/>
-    <ROW Property="AI_CLEAN_RESOURCES_USER_PROMPT_BASIC_UI" Value="0"/>
-    <ROW Property="AI_CLEAN_RESOURCES_USER_PROMPT_FULL_UI" Value="0"/>
     <ROW Property="AI_FINDEXE_TITLE" Value="Select the installation package for [|ProductName]" ValueLocId="AI.Property.FindExeTitle"/>
     <ROW Property="AI_UPGRADE" Value="No"/>
     <ROW Property="ALLUSERS" Value="2" MultiBuildValue="DefaultBuild:1"/>
@@ -279,19 +275,12 @@
     <ROW Component="HTMLAnchorElement.pyc" ComponentId="{44806E91-7EEE-4081-8620-54EDD4A4CBC9}" Directory_="html_1_DIR" Attributes="0" KeyPath="HTMLAnchorElement.pyc" Type="0"/>
     <ROW Component="HtmlLib.pyc" ComponentId="{4B2FBFE9-F45F-4B1A-8231-FBEA5677BEBE}" Directory_="reader_DIR" Attributes="0" KeyPath="HtmlLib.pyc" Type="0"/>
     <ROW Component="LICENSE.txt" ComponentId="{DDD52822-381B-4830-954B-88216CC3F8B9}" Directory_="Python25_DIR" Attributes="0" KeyPath="LICENSE.txt_4" Type="0"/>
-    <ROW Component="Modules" ComponentId="{880BAB76-644A-423D-9BAC-3EF8D45CB807}" Directory_="APPDIR" Attributes="4" KeyPath="Modules"/>
     <ROW Component="OPENSOLARIS.LICENSE" ComponentId="{A12CC6A7-520F-4224-B31B-8CF721E5D039}" Directory_="pkg_2_DIR" Attributes="0" KeyPath="OPENSOLARIS.LICENSE" Type="0"/>
-    <ROW Component="Python" ComponentId="{EB893783-39D5-474E-A553-EA304A736070}" Directory_="APPDIR" Attributes="4" KeyPath="Python"/>
-    <ROW Component="PythonCore" ComponentId="{3DFFD786-D606-4D5A-9A61-71B68C1C2763}" Directory_="APPDIR" Attributes="4" KeyPath="PythonCore"/>
     <ROW Component="Pythonwin.exe_1" ComponentId="{AD9D4D31-6475-4CE7-8A31-1AB918AF134E}" Directory_="pythonwin_1_DIR" Attributes="0" KeyPath="Pythonwin.exe_1"/>
     <ROW Component="README.txt_1" ComponentId="{6727D90E-BA64-4A47-BFB3-498EB6E5E376}" Directory_="leakers_1_DIR" Attributes="0" KeyPath="README.txt_9" Type="0"/>
     <ROW Component="ReadMe.txt" ComponentId="{835A3C99-CFB1-42F9-A1FD-CC0B3A2A8BB8}" Directory_="core_DIR" Attributes="0" KeyPath="ReadMe.txt_11" Type="0"/>
     <ROW Component="SHORTCUTDIR" ComponentId="{8B3981AF-B0F0-427B-833F-7BD32EB48468}" Directory_="SHORTCUTDIR" Attributes="0"/>
     <ROW Component="T005008Z_01.xml" ComponentId="{8AD7A21C-C505-4C82-BBAF-4E819FB0E193}" Directory_="history_DIR" Attributes="0" KeyPath="T144037Z_01.xml" Type="0"/>
-    <ROW Component="_" ComponentId="{E5CBB0BE-8BE4-4692-828E-712A3C5B8BEA}" Directory_="APPDIR" Attributes="4" KeyPath="_"/>
-    <ROW Component="__4" ComponentId="{7121E2CB-2B46-4DF6-B7A8-E8795BCD5F20}" Directory_="APPDIR" Attributes="4" KeyPath="__4"/>
-    <ROW Component="__5" ComponentId="{FC782F44-62B2-41A6-94A1-0B1A517D935D}" Directory_="APPDIR" Attributes="4" KeyPath="__5"/>
-    <ROW Component="__6" ComponentId="{0F3F15F2-9957-47A4-98B0-93F6B1CB616A}" Directory_="APPDIR" Attributes="4" KeyPath="__6"/>
     <ROW Component="a.gif" ComponentId="{05A22A30-6FB5-4131-8C8C-836B6691F7F5}" Directory_="icons_DIR" Attributes="0" KeyPath="a.gif" Type="0"/>
     <ROW Component="aboutDialog.py_1" ComponentId="{0C1E5F17-354C-45A5-90C1-7B1EB696B7EF}" Directory_="idlelib_1_DIR" Attributes="0" KeyPath="aboutDialog.py_1" Type="0"/>
     <ROW Component="abs.decTest_1" ComponentId="{EE0A9DBD-48AD-4F69-A61E-0C006F29026B}" Directory_="decimaltestdata_1_DIR" Attributes="0" KeyPath="abs.decTest_1" Type="0"/>
@@ -562,7 +551,7 @@
     <ROW Component="zlib1.dll_1" ComponentId="{60954BA0-1BA4-4D28-B871-B5E286532226}" Directory_="vendor_packages_DIR" Attributes="0" KeyPath="zlib1.dll_1"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="catalog_cache attrs cfg_cache T005008Z_01.xml fast_add.v1 installed_5 installed_10 csvn_edge_1.0.0_2C6.1.7600_394.15_3A2010 csvn.bat httpd.exe archivepkgs config.shtml advanced_search.shtml base.css feed_icon_14x14.png base.css_1 base.css_2 feed_icon_14x14.png_1 p5i_link.png base.css_3 pkg.1 pkg.depotd.1m pkg.5 OPENSOLARIS.LICENSE CURL_COPYING bz2.pyd anydbm.pyc db.pyc ast.pyc has_key.pyc base64MIME.pyc aliases.pyc config.pyc cherrypy.pth domreg.pyc expat.pyc expatreader.pyc init_.pyc msvcr71.dll python.exe python24.dll pythonw.exe cherryd auth.py plugins.py init_.py_5 init_.py_6 ChangeLog basicfirst.py callbacks.html test.py ast.py autohandler.py dependency_links.txt crypto.pyd libeay32.dll_1 ssleay32.dll_1 attribute.py DirectoryBundle.py catalog.py actuator.py engine.py base.py os_aix.py dependencies.py api.py cpp.py dependency_links.txt_1 pycurl.pyd decoder.pyc zlib1.dll_1 Attr.pyc c14n.pyc HtmlLib.pyc HTMLAnchorElement.pyc FtCore.pyc expat.pyc_1 expatreader.pyc_1 characters.pyc SHORTCUTDIR file Python PythonCore _ __4 __5 Modules __6 readme.txt AI_ExePath ApacheMonitor.exe apr_dbd_odbc_1.dll apr_ldap_1.dll printenv htcacheclean.exe htdbm.exe htdigest.exe htpasswd.exe httxt2dbm.exe adobe_stdenc.so libapr_1.dll libapriconv_1.dll libaprutil_1.dll libeay32.dll libhttpd.dll libsasl.dll libsvnjavahl_1.dll libsvn_client_1.dll libsvn_delta_1.dll libsvn_diff_1.dll libsvn_fs_1.dll libsvn_ra_1.dll libsvn_repos_1.dll libsvn_subr_1.dll libsvn_wc_1.dll logresolve.exe htaccess openssl.exe rotatelogs.exe ssleay32.dll svn_populate_node_origins_index.exe svn.exe svnadmin.exe svndumpfilter.exe svnlook.exe svnserve.exe svnsync.exe svnversion.exe wintty.exe zlib1.dll openssl.cnf csvn_wrapper.conf repositories run csvn_wrapper.conf_1 mod_actions.so client.py libsvn_swig_py_1.dll client.dll core.dll delta.dll fs.dll ra.dll repos.dll wc.dll client.py_1 accept.py init_.py init_.py_1 init_.py_2 init_.py_3 bincvs.py common.py default_v svn_ra.py init_.py_4 apache_2.0.txt bz2.pyd_1 sqlite3.dll tcl84.dll tclpip84.dll tix84.dll tk84.dll aifc.py db.py test_1413192.py ast.py_1 dyld.py runtests.py util.py ascii.py archive_util.py bdist.py LICENSE.txt msvcr71.dll_1 python.exe_1 python25.dll pythoncom25.dll_1 pythonw.exe_1 pywintypes25.dll_1 w9xpopen.exe csvn.xml jdbcRealm.properties ext jetty_ajp_7.0.2.v20100331.jar activation_1.1.jar ant_1.6.5.jar jetty.policy security start.jar csvn.war_1 work csvn.xml_1 work_1 logs genConfig.bat wininst_6.exe_1 wininst_7.1.exe_1 support.py_1 base64mime.py_1 application.py_1 audiotest.au_1 test_email.py_1 aliases.py_1 log.py_1 aboutDialog.py_1 folder.gif_1 Canvas.py_1 config.py_1 schema.py_1 apache.py_1 mod_python_3.3.1_py2.5.egg_info_1 dde.pyd_1 mfc71.dll_1 Pythonwin.exe_1 configui.py_2 default.cfg_1 basictimerapp.py_1 cmdserver.py_1 demoutils.py_1 ideoptions.py_1 DockingBar.py_1 app.py_1 coloreditor.py_1 configui.py_3 AutoExpand.py_1 activex.py_1 bindings.py_1 browseProjects.py_1 scintilla.dll_1 pythoncom25.dll_3 pywintypes25.dll_3 afxres.py_1 license.txt_1 perfmondata.dll_1 pythonservice.exe_1 backupEventLog.py_1 pysynch.py_1 BrandProject.py_1 handles.py_1 python.bmp_1 dbapi2.py_1 dbapi.py_1 test.db_1 bogus_code_obj.py_1 abs.decTest_1 README.txt_1 test_cgi_1 handlers.py_1 domreg.py_1 cElementTree.py_1 expat.py_1 expatreader.py_1 init_.py_13 wrapper.conf commons_cli_2.jar groovy_all_1.6.4.jar jna.jar netty_3.2.0.BETA1.jar ReadMe.txt jrexx_1.1.1.jar velocity_1.5.jar_1 release_notes.txt restart.gv daemon.vm_1 contact.html.var bottom.html a.gif back.gif index.html diff.ezt help.css annotate.png annotate_icon.gif diff_form.ezt installed_2 installed libdb41.dll sigar_amd64_winnt.dll sigar_x86_winnt.dll big5freq.py integration_scripts.zip AUTHORS init_.py_7 bbcode.py agile.py autumn.py Client.py c14n.py test_t1.py binding.py builder.py appender.py attribute.py_1 http.py attrlist.py deplist.py"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="catalog_cache attrs cfg_cache T005008Z_01.xml fast_add.v1 installed_5 installed_10 csvn_edge_1.0.0_2C6.1.7600_394.15_3A2010 csvn.bat httpd.exe archivepkgs config.shtml advanced_search.shtml base.css feed_icon_14x14.png base.css_1 base.css_2 feed_icon_14x14.png_1 p5i_link.png base.css_3 pkg.1 pkg.depotd.1m pkg.5 OPENSOLARIS.LICENSE CURL_COPYING bz2.pyd anydbm.pyc db.pyc ast.pyc has_key.pyc base64MIME.pyc aliases.pyc config.pyc cherrypy.pth domreg.pyc expat.pyc expatreader.pyc init_.pyc msvcr71.dll python.exe python24.dll pythonw.exe cherryd auth.py plugins.py init_.py_5 init_.py_6 ChangeLog basicfirst.py callbacks.html test.py ast.py autohandler.py dependency_links.txt crypto.pyd libeay32.dll_1 ssleay32.dll_1 attribute.py DirectoryBundle.py catalog.py actuator.py engine.py base.py os_aix.py dependencies.py api.py cpp.py dependency_links.txt_1 pycurl.pyd decoder.pyc zlib1.dll_1 Attr.pyc c14n.pyc HtmlLib.pyc HTMLAnchorElement.pyc FtCore.pyc expat.pyc_1 expatreader.pyc_1 characters.pyc SHORTCUTDIR file readme.txt AI_ExePath ApacheMonitor.exe apr_dbd_odbc_1.dll apr_ldap_1.dll printenv htcacheclean.exe htdbm.exe htdigest.exe htpasswd.exe httxt2dbm.exe adobe_stdenc.so libapr_1.dll libapriconv_1.dll libaprutil_1.dll libeay32.dll libhttpd.dll libsasl.dll libsvnjavahl_1.dll libsvn_client_1.dll libsvn_delta_1.dll libsvn_diff_1.dll libsvn_fs_1.dll libsvn_ra_1.dll libsvn_repos_1.dll libsvn_subr_1.dll libsvn_wc_1.dll logresolve.exe htaccess openssl.exe rotatelogs.exe ssleay32.dll svn_populate_node_origins_index.exe svn.exe svnadmin.exe svndumpfilter.exe svnlook.exe svnserve.exe svnsync.exe svnversion.exe wintty.exe zlib1.dll openssl.cnf csvn_wrapper.conf repositories run csvn_wrapper.conf_1 mod_actions.so client.py libsvn_swig_py_1.dll client.dll core.dll delta.dll fs.dll ra.dll repos.dll wc.dll client.py_1 accept.py init_.py init_.py_1 init_.py_2 init_.py_3 bincvs.py common.py default_v svn_ra.py init_.py_4 apache_2.0.txt bz2.pyd_1 sqlite3.dll tcl84.dll tclpip84.dll tix84.dll tk84.dll aifc.py db.py test_1413192.py ast.py_1 dyld.py runtests.py util.py ascii.py archive_util.py bdist.py LICENSE.txt msvcr71.dll_1 python.exe_1 python25.dll pythoncom25.dll_1 pythonw.exe_1 pywintypes25.dll_1 w9xpopen.exe csvn.xml jdbcRealm.properties ext jetty_ajp_7.0.2.v20100331.jar activation_1.1.jar ant_1.6.5.jar jetty.policy security start.jar csvn.war_1 work csvn.xml_1 work_1 logs genConfig.bat wininst_6.exe_1 wininst_7.1.exe_1 support.py_1 base64mime.py_1 application.py_1 audiotest.au_1 test_email.py_1 aliases.py_1 log.py_1 aboutDialog.py_1 folder.gif_1 Canvas.py_1 config.py_1 schema.py_1 apache.py_1 mod_python_3.3.1_py2.5.egg_info_1 dde.pyd_1 mfc71.dll_1 Pythonwin.exe_1 configui.py_2 default.cfg_1 basictimerapp.py_1 cmdserver.py_1 demoutils.py_1 ideoptions.py_1 DockingBar.py_1 app.py_1 coloreditor.py_1 configui.py_3 AutoExpand.py_1 activex.py_1 bindings.py_1 browseProjects.py_1 scintilla.dll_1 pythoncom25.dll_3 pywintypes25.dll_3 afxres.py_1 license.txt_1 perfmondata.dll_1 pythonservice.exe_1 backupEventLog.py_1 pysynch.py_1 BrandProject.py_1 handles.py_1 python.bmp_1 dbapi2.py_1 dbapi.py_1 test.db_1 bogus_code_obj.py_1 abs.decTest_1 README.txt_1 test_cgi_1 handlers.py_1 domreg.py_1 cElementTree.py_1 expat.py_1 expatreader.py_1 init_.py_13 wrapper.conf commons_cli_2.jar groovy_all_1.6.4.jar jna.jar netty_3.2.0.BETA1.jar ReadMe.txt jrexx_1.1.1.jar velocity_1.5.jar_1 release_notes.txt restart.gv daemon.vm_1 contact.html.var bottom.html a.gif back.gif index.html diff.ezt help.css annotate.png annotate_icon.gif diff_form.ezt installed_2 installed libdb41.dll sigar_amd64_winnt.dll sigar_x86_winnt.dll big5freq.py integration_scripts.zip AUTHORS init_.py_7 bbcode.py agile.py autumn.py Client.py c14n.py test_t1.py binding.py builder.py appender.py attribute.py_1 http.py attrlist.py deplist.py"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
@@ -4470,9 +4459,6 @@
     <ROW File="zlib_codec.py_1" Component_="aliases.py_1" FileName="zlib_c~1.py|zlib_codec.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\encodings\zlib_codec.py" SelfReg="false" Sequence="1977"/>
     <ROW File="zlib_codec.pyc" Component_="aliases.pyc" FileName="zlib_c~1.pyc|zlib_codec.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\encodings\zlib_codec.pyc" SelfReg="false" Sequence="282"/>
   </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.AiRemoveRegComponent">
-    <ROW RemoveReg="_" InstallMode="2" Condition="(AI_CLEAN_RESOURCES_UNINSTALL = &quot;1&quot;) AND (NOT UPGRADINGPRODUCTCODE)"/>
-  </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BuildComponent">
     <ROW BuildKey="DefaultBuild" BuildName="DefaultBuild" BuildOrder="1" BuildType="1" PackageFolder="Setup Files" PackageFileName="CollabNetSubversionEdge-[|ProductVersion]_setup" Languages="en" InstallationType="4" CabsLocation="1" PackageType="1" FilesInsideExe="true" ExeIconPath="collabnet.ICO" ExtractionFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\install" ExtUI="true"/>
     <ATTRIBUTE name="CurrentBuild" value="DefaultBuild"/>
@@ -4497,9 +4483,6 @@
     <ROW Fragment="Validation.aip" Path="&lt;AI_FRAGS&gt;Validation.aip"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiActionTextComponent">
-    <ROW Action="AI_AiRemoveRegsCommit" Description="Executing registry removal operations." Template="Removing registry entry: [1]" DescriptionLocId="ActionText.Description.AI_AiRemoveRegsCommit" TemplateLocId="ActionText.Template.AI_AiRemoveRegsCommit"/>
-    <ROW Action="AI_AiRemoveRegsDeferred" Description="Executing registry removal operations." Template="Removing registry entry: [1]" DescriptionLocId="ActionText.Description.AI_AiRemoveRegsDeferred" TemplateLocId="ActionText.Template.AI_AiRemoveRegsDeferred"/>
-    <ROW Action="AI_AiRemoveRegsImmediate" Description="Generating actions to remove registry entries." DescriptionLocId="ActionText.Description.AI_AiRemoveRegsImmediate"/>
     <ROW Action="AI_DeleteLzma" Description="Deleting files extracted from archive" DescriptionLocId="ActionText.Description.AI_DeleteLzma" TemplateLocId="-"/>
     <ROW Action="AI_DeleteRLzma" Description="Deleting files extracted from archive" DescriptionLocId="ActionText.Description.AI_DeleteLzma" TemplateLocId="-"/>
     <ROW Action="AI_ExtractLzma" Description="Extracting files from archive" DescriptionLocId="ActionText.Description.AI_ExtractLzma" TemplateLocId="-"/>
@@ -4517,7 +4500,6 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiBinaryComponent">
     <ROW Name="NetFirewall.dll" SourcePath="&lt;AI_CUSTACTS&gt;NetFirewall.dll"/>
     <ROW Name="Prereq.dll" SourcePath="&lt;AI_CUSTACTS&gt;Prereq.dll"/>
-    <ROW Name="ResourceCleaner.dll" SourcePath="&lt;AI_CUSTACTS&gt;ResourceCleaner.dll"/>
     <ROW Name="aicustact.dll" SourcePath="&lt;AI_CUSTACTS&gt;aicustact.dll"/>
     <ROW Name="banner_image.jpg" SourcePath="&lt;AI_THEMES&gt;classic\resources\banner-image.jpg"/>
     <ROW Name="dialog_image.jpg" SourcePath="&lt;AI_THEMES&gt;classic\resources\dialog-image.jpg"/>
@@ -4555,9 +4537,6 @@
     <ROW Directory_="logs_DIR" Component_="logs"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiCustActComponent">
-    <ROW Action="AI_AiRemoveRegsCommit" Type="11777" Source="ResourceCleaner.dll" Target="OnAiRemoveRegs" WithoutSeq="true"/>
-    <ROW Action="AI_AiRemoveRegsDeferred" Type="11265" Source="ResourceCleaner.dll" Target="OnAiRemoveRegs" WithoutSeq="true"/>
-    <ROW Action="AI_AiRemoveRegsImmediate" Type="1" Source="ResourceCleaner.dll" Target="OnAiRemoveRegsImmediate"/>
     <ROW Action="AI_AppSearchEx" Type="1" Source="Prereq.dll" Target="DoAppSearchEx"/>
     <ROW Action="AI_CleanPrereq" Type="65" Source="Prereq.dll" Target="CleanPrereq" WithoutSeq="true"/>
     <ROW Action="AI_DeleteCadLzma" Type="51" Source="AI_DeleteLzma" Target="[AI_SETUPEXEPATH]"/>
@@ -4607,7 +4586,6 @@
     <ROW Action="AI_ResolveKnownFolders" Sequence="51"/>
     <ROW Action="AI_DeleteCadLzma" Condition="SETUPEXEDIR=&quot;&quot; AND Installed AND (REMOVE&lt;&gt;&quot;ALL&quot;) AND (NOT PATCH)" Sequence="199" Builds="DefaultBuild"/>
     <ROW Action="AI_AppSearchEx" Sequence="101"/>
-    <ROW Action="AI_AiRemoveRegsImmediate" Sequence="2599"/>
     <ROW Action="AI_DeleteRCadLzma" Condition="SETUPEXEDIR=&quot;&quot; AND Installed AND (REMOVE&lt;&gt;&quot;ALL&quot;) AND (NOT PATCH)" Sequence="198" Builds="DefaultBuild"/>
     <ROW Action="AI_ExtractCadLzma" Condition="SETUPEXEDIR=&quot;&quot; AND Installed AND (REMOVE&lt;&gt;&quot;ALL&quot;) AND (NOT PATCH)" Sequence="197" Builds="DefaultBuild"/>
     <ROW Action="AI_FindExeLzma" Condition="SETUPEXEDIR=&quot;&quot; AND Installed AND (REMOVE&lt;&gt;&quot;ALL&quot;) AND (NOT PATCH)" Sequence="196" Builds="DefaultBuild"/>
@@ -4636,16 +4614,6 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiRegsComponent">
     <ROW Registry="AI_ExePath" Root="-1" Key="Software\Caphyon\Advanced Installer\LZMA\[ProductCode]\[ProductVersion]" Name="AI_ExePath" Value="[AI_SETUPEXEPATH]" Component_="AI_ExePath"/>
-    <ROW Registry="Modules" Root="2" Key="SOFTWARE\Python\PythonCore\2.5\Modules" Name="+" Component_="Modules"/>
-    <ROW Registry="Python" Root="2" Key="SOFTWARE\Python" Name="+" Component_="Python"/>
-    <ROW Registry="PythonCore" Root="2" Key="SOFTWARE\Python\PythonCore" Name="+" Component_="PythonCore"/>
-    <ROW Registry="_" Root="2" Key="SOFTWARE\Python\PythonCore\2.5" Name="+" Component_="_"/>
-    <ROW Registry="__4" Root="2" Key="SOFTWARE\Python\PythonCore\2.5\InstallPath" Value="&quot;[Python25_DIR]&quot;" Component_="__4"/>
-    <ROW Registry="__5" Root="2" Key="SOFTWARE\Python\PythonCore\2.5\InstallPath\InstallGroup" Value="Python 2.5" Component_="__5"/>
-    <ROW Registry="__6" Root="2" Key="SOFTWARE\Python\PythonCore\2.5\PythonPath" Value="&quot;[Lib_1_DIR]&quot;;&quot;[DLLs_1_DIR]&quot;;&quot;[lib_DIR]&quot;;&quot;[svn_python_DIR]&quot;" Component_="__6"/>
-  </COMPONENT>
-  <COMPONENT cid="caphyon.advinst.msicomp.MsiRemoveRegComponent">
-    <ROW RemoveRegistry="_" Root="2" Key="SOFTWARE\Python\PythonCore\2.5" Name="-" Component_="dependency_links.txt_1"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiServCtrlComponent">
     <ROW ServiceControl="httpd.exe" Name="CollabNetSubversionServer" Event="160" Wait="1" Component_="httpd.exe"/>
