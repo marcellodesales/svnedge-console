@@ -4598,7 +4598,7 @@
   <COMPONENT cid="caphyon.advinst.msicomp.MsiEnvComponent">
     <ROW Environment="APR_ICONV1_PATH" Name="=-*APR_ICONV1_PATH" Value="[iconv_DIR]" Component_="AI_ExePath"/>
     <ROW Environment="JAVA_HOME" Name="=-*JAVA_HOME" Value="[JAVA_HOME]" Component_="AI_ExePath"/>
-    <ROW Environment="PATH" Name="=-*Path" Value="[bin_DIR];[Python25_DIR];[~]" Component_="httpd.exe"/>
+    <ROW Environment="PATH" Name="=-*Path" Value="[bin_DIR];[Python25_DIR];[JAVA_HOME]\bin;[~]" Component_="httpd.exe"/>
     <ROW Environment="PYTHONHOME" Name="=-*PYTHONHOME" Value="[Python25_DIR]" Component_="AI_ExePath"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiIconsComponent">
