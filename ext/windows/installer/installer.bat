@@ -69,7 +69,7 @@ rmdir download /Q/S
 
 AdvancedInstaller.com /edit "%_REALPATH%\setup.aip" /ResetSync APPDIR -clearcontent
 AdvancedInstaller.com /edit "%_REALPATH%\setup.aip" /NewSync APPDIR %CSVN%
-AdvancedInstaller.com /edit "%_REALPATH%\setup.aip" /SetVersion %VERSION% -noprodcode
+AdvancedInstaller.com /edit "%_REALPATH%\setup.aip" /SetVersion %VERSION%
 AdvancedInstaller.com /rebuild "%_REALPATH%\setup.aip"
 cd "%_REALPATH%\Setup Files"
 pbl upload -u markphip -k f04b2c60-2650-1378-80a8-4350af7da540 -l https://mgr.cloud.sp.collab.net/cubit_api/1 -p svnedge -t pub -r %LOC% --force CollabNetSubversionEdge-%VERSION%_setup.exe
