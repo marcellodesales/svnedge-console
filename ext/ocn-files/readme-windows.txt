@@ -62,11 +62,8 @@ Contents
 4. Installation Notes
 
    The installer will update the system PATH variable to include the path to
-   the "bin" and "Python25" folders that are installed by the installer.
-
-   The installer will update the Python 2.5 registry entries to point to the
-   Python installed by the installer and it will also create or update the
-   PYTHONHOME environment variable.
+   the "bin" and "Python25" folders that are installed by the installer and
+   it will also create or update the PYTHONHOME environment variable.
 
    The installer will add rules to the Windows Firewall to allow access to the 
    Apache binary and to open up ports 3343 and 4434.
