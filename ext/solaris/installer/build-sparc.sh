@@ -75,4 +75,4 @@ rm $TAR
 rm ${TAR}.gz
 tar -cf $TAR csvn/
 gzip $TAR
-pbl.py upload -u mphippard -k 10f7fdb0-f258-1375-8113-b9bfb93d5b8c -l https://mgr.cubit.sp.collab.net/cubit_api/1 -p svnedge -t pub -r /Installers/solaris --force ${TAR}.gz
+pbl.py upload -u markphip -k f04b2c60-2650-1378-80a8-4350af7da540 -l https://mgr.cloud.sp.collab.net/cubit_api/1 -p svnedge -t pub -r /Installers/solaris --force ${TAR}.gz

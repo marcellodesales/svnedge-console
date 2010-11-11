@@ -72,4 +72,5 @@ AdvancedInstaller.com /edit "%_REALPATH%\setup64.aip" /ResetSync APPDIR -clearco
 AdvancedInstaller.com /edit "%_REALPATH%\setup64.aip" /NewSync APPDIR %CSVN%
 AdvancedInstaller.com /edit "%_REALPATH%\setup64.aip" /SetVersion %VERSION% -noprodcode
 AdvancedInstaller.com /rebuild "%_REALPATH%\setup64.aip"
-pbl upload -u mphippard -k 10f7fdb0-f258-1375-8113-b9bfb93d5b8c -l https://mgr.cubit.sp.collab.net/cubit_api/1 -p svnedge -t pub -r %LOC% --force "%_REALPATH%\Setup Files\CollabNetSubversionEdge-%VERSION%_setup-x86_64.exe"
+cd "%_REALPATH%\Setup Files"
+pbl upload -u markphip -k f04b2c60-2650-1378-80a8-4350af7da540 -l https://mgr.cloud.sp.collab.net/cubit_api/1 -p svnedge -t pub -r %LOC% --force CollabNetSubversionEdge-%VERSION%_setup-x86_64.exe
