@@ -148,7 +148,9 @@ class Server {
     }
     
     boolean managedByCtf() {
-        return this.mode == ServerMode.MANAGED
+        return (this.mode == ServerMode.MANAGED || 
+                this.mode == ServerMode.CONVERTING_TO_MANAGED ||       
+                this.mode == ServerMode.REPLICA )       
     }
     
     static CtfServer getManagedServer() {

@@ -123,11 +123,11 @@ class SetupReplicaController {
         // success logging in 
         [cmd: getReplicaInfoCommand(), integrationServers: getIntegrationServers()]
     }
-
+    
     /**
-     * Do conversion, show confirmation 
+     * Verify information
      */
-    def confirm = { ReplicaInfoCommand input ->
+    def confirm = { ReplicaInfoCommand input -> 
 
         def server
         def repoName
@@ -136,25 +136,14 @@ class SetupReplicaController {
         if (!input.hasErrors()) {
             
             try {
-                // copy input params to the conversion bean
-                ReplicaConversionBean conn = getConversionBean(input)
-
-                // register the replica
-                replicaService.registerReplica(conn)
-                
                 // save input for form re-entry
                 def cmd = getReplicaInfoCommand()
                 BeanUtils.copyProperties(input, cmd)
 
-                // prepare confirmation data
-                server = Server.getServer()
-                repoName = (Repository.list()) ? Repository.list()[0].name : "example"
-                userName = authenticateService.principal().getUsername()
-
-                flash.message = message(code: 'setupReplica.action.confirm.success')
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
+                        ctfUsername: getCtfConnectionCommand().ctfUsername,
                         svnMasterURL: getReplicaInfoCommand().svnMasterURL,
-                        svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
+                        replicaDescription: getReplicaInfoCommand().description
                         ]
             }
             catch (Exception e) {
@@ -165,7 +154,56 @@ class SetupReplicaController {
         }
         
         // return to input view with errors
-        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
+        render([view: "replicaInfo", model: [cmd: input, integrationServers: getIntegrationServers()]])
+    }
+    
+
+    /**
+     * Do conversion, show confirmation 
+     */
+    def convert = { 
+
+        def server
+        def repoName
+        def userName
+        
+        try {
+            // copy input params to the conversion bean
+            def input = getReplicaInfoCommand()
+            ReplicaConversionBean conn = getConversionBean(input)
+    
+            // register the replica
+            replicaService.registerReplica(conn)
+            
+            // save input for form re-entry
+            def cmd = getReplicaInfoCommand()
+            BeanUtils.copyProperties(input, cmd)
+            
+            // prepare confirmation data
+            server = Server.getServer()
+            repoName = (Repository.list()) ? Repository.list()[0].name : "example"
+            userName = authenticateService.principal().getUsername()
+            
+            flash.message = message(code: 'setupReplica.action.confirm.success')
+            return [ctfURL: getCtfConnectionCommand().ctfURL,
+                    ctfUsername: getCtfConnectionCommand().ctfUsername,
+                    svnMasterURL: getReplicaInfoCommand().svnMasterURL,
+                    svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
+                    ]
+            
+        }
+        catch (Exception e) {
+            log.error("Unable to register replica", e)
+            input.errors.rejectValue('svnMasterURL', 'setupTeamForge.page.error.general',
+                    [new URL(input.svnMasterURL).host] as Object[], 'error registering')
+        }
+        
+        
+        // return to input view with errors
+        render([view: "confirm", model: [ctfURL: getCtfConnectionCommand().ctfURL,
+                        ctfUsername: getCtfConnectionCommand().ctfUsername,
+                        svnMasterURL: getReplicaInfoCommand().svnMasterURL,
+                        replicaDescription: getReplicaInfoCommand().description]])
     }
 
     /**

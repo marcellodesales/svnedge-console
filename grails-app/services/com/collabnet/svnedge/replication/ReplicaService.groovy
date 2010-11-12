@@ -39,6 +39,8 @@ class ReplicaService {
     def setupTeamForgeService
     def jobsAdminService
     def securityService
+    def serverConfService
+    def lifecycleService
 
 
     /**
@@ -102,6 +104,14 @@ class ReplicaService {
         rc.save(flush:true)
         ctfServer.save(flush:true)
         server.save(flush:true)
+        
+        log.info("Rewriting server config and restarting")
+        // setupTeamForgeService.installIntegrationServer(replicaInfo)
+        setupTeamForgeService.unpackIntegrationScripts(replicaInfo.userLocale)
+
+        serverConfService.backupAndOverwriteHttpdConf()
+        serverConfService.writeConfigFiles()
+        setupTeamForgeService.restartServer()
 
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)

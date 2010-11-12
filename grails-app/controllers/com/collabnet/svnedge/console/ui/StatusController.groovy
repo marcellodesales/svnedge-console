@@ -78,9 +78,8 @@ class StatusController {
             
             ctfUrl = ctfServer.getWebAppUrl()
         }
-
-        if (server.managedByCtf()) {
-            ctfUrl = server.getManagedServer().getWebAppUrl()
+        else if (server.mode == ServerMode.MANAGED) {
+            ctfUrl = ctfServer.getWebAppUrl()
         }
 
         boolean isStarted = lifecycleService.isStarted()

@@ -33,6 +33,8 @@
 <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
 <g:set var="tabArray" value="${tabArray << [active:true, label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
 <g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
+<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.convert', args:[5])]}"/>
+
 
 <g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
 

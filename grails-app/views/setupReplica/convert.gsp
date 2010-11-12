@@ -29,11 +29,11 @@
 
 <body>
 
-<g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
-<g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
-<g:set var="tabArray" value="${tabArray << [action:'replicaSetup', label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
-<g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.convert', args:[5])]}"/>
+<g:set var="tabArray" value="${[[label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
+<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
+<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
+<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
+<g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.convert', args:[5])]}"/>
 
 
 <g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
@@ -45,7 +45,7 @@
       <td class="ContainerBodyWithPaddedBorder">
 
         <p>
-          <g:message code="setupReplica.page.confirm.p1"/>
+          <g:message code="setupReplica.page.convert.p1"/>
         </p>
 
         <div class="dialog">
@@ -57,28 +57,28 @@
                 <tr class="ContainerHeader">
                   <td colspan="2"><g:message code="status.page.header.server"/></td>
                 </tr>
-
+                
                 <tr class="prop, OddRow">
                   <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></td>
                   <td class="ItemDetailValue">${ctfURL}</td>
                 </tr>
-
+                
                 <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
-                  <td class="ItemDetailValue">${ctfUsername}</td>
-                </tr>
-
-
+                   <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
+                   <td class="ItemDetailValue">${ctfUsername}</td>
+                 </tr>
+                  
+                
                 <tr class="prop, OddRow">
                   <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></strong></td>
                   <td class="ItemDetailValue">${svnMasterURL}</td>
                 </tr>
-
+                
                 <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
-                  <td class="ItemDetailValue">${replicaDescription}</td>
+                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></strong></td>
+                  <td class="ItemDetailValue">${svnReplicaCheckout}</td>
                 </tr>
-
+                
                 </tbody>
               </table>
             </td></tr>
@@ -87,14 +87,7 @@
         </div>
 
 
-    <tr class="ContainerFooter">
-      <td colspan="3">
-        <div class="AlignRight">
-          <g:actionSubmit action="convert" value="${message(code:'setupTeamForge.page.confirm.button.confirm')}" class="Button"/>
-        </div>
-      </td>
-    </tr>
-
+    
   </table>
   </td>
   </tr>

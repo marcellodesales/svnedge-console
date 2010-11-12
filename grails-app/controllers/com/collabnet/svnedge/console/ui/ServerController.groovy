@@ -56,10 +56,15 @@ class ServerController {
     def revert = { CtfCredentialCommand ctfCredentials ->
         ctfCredentials.validate()
         def ctfServer = CtfServer.getServer()
+        def server = Server.getServer()
+         String errorView = (server.mode == ServerMode.REPLICA) ?
+                "editReplica" :
+                "editIntegration"
+        
         if (ctfCredentials.hasErrors()) {
             def formError = message(code: 
                 "server.action.revert.error.credentials")
-            render(view: 'editIntegration',
+            render(view: errorView,
                     model: [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
                         ctfCredentials: ctfCredentials, formError: formError])
         } else {
@@ -71,7 +76,7 @@ class ServerController {
                 if (errors) {
                     def formError = 
                         message(code: "server.action.revert.error.general")
-                    render(view: 'editIntegration',
+                    render(view: errorView,
                         model: [ctfServerBaseUrl: ctfServer.baseUrl,
                             ctfCredentials: ctfCredentials,
                             formError: formError, errorCause: errors])
@@ -84,7 +89,7 @@ class ServerController {
                 def ctfBaseUrl = ctfServer.baseUrl
                 def formError = message(code:
                     "server.action.revert.error.connection", [ctfBaseUrl])
-                render(view: 'editIntegration',
+                render(view: errorView,
                         model: [ctfServerBaseUrl: ctfBaseUrl,
                             ctfCredentials: ctfCredentials,
                             formError: formError, 

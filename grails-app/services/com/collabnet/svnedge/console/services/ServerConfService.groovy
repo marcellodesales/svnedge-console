@@ -25,13 +25,13 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.replica.manager.Master
 import com.collabnet.svnedge.teamforge.CtfServer
 
 import grails.util.GrailsUtil
 
 import java.util.Calendar
 import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 class ServerConfService {
 
@@ -279,7 +279,7 @@ class ServerConfService {
 
         // CTF default ViewVC "allowed_views"
         String allowedViews = "annotate, co, diff, markup"
-        if (ServerMode.MANAGED.equals(server.mode)) {
+        if (server.managedByCtf()) {
             appServerUrl = CtfServer.getServer().baseUrl
             docroot = server.urlPrefix() + "/viewvc-static"
             authorizer = "teamforge"
@@ -356,7 +356,7 @@ class ServerConfService {
         def serverPort = "${port}"
         
         def ldapConfSnippet = getLdapHttpdConf(server)
-        def fileAuthConfSnippet = (server.mode == ServerMode.MANAGED) ? 
+        def fileAuthConfSnippet = (server.managedByCtf()) ? 
             "" : getFileAuthHttpdConf(server)
         def sslSnippet = getSSLHttpdConf(server)
         def conf = """${DONT_EDIT}
@@ -414,8 +414,7 @@ CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REP
     }
 
     private def writeSvnViewvcConf(server) {
-        boolean ctfMode = server.mode == ServerMode.MANAGED ||
-            server.mode == ServerMode.CONVERTING_TO_MANAGED
+        boolean ctfMode = server.managedByCtf()
         def conf = """${DONT_EDIT}
 <VirtualHost *:${server.port}>
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
@@ -592,7 +591,14 @@ LDAPVerifyServerCert Off
     private def getCtfSvnHttpdConf(server) {
         def appHome = ConfigUtil.appHome()
         def ctfServer = CtfServer.getServer()
-        def conf = """AuthType Basic
+        def conf = ""
+        if (server.mode == ServerMode.REPLICA) {
+            def replicaConfig = ReplicaConfiguration.getCurrentConfig()
+            def masterSVNURI = replicaConfig.svnMasterUrl
+            conf += "   SVNMasterURI ${masterSVNURI}"
+        }
+        conf += """
+   AuthType Basic
    AuthName "Authorization Realm"
    AuthBasicAuthoritative Off
    Require valid-user
@@ -658,14 +664,6 @@ ${extraconf}
             conf += """  Require valid-user
 """
 }
-        if (server.replica) {
-            def master = Master.getDefaultMaster()
-            def masterSVNURI = (master.sslEnabled ? "https" : "http") +
-                 "://" + master.hostName + "/svn/repos"
-        conf += """
-  SVNMasterURI ${masterSVNURI}
-"""
-        }
         conf
     }
     
@@ -763,7 +761,7 @@ ${extraconf}
         CtfServer ctfServer = CtfServer.getServer()
         String s = getTeamforgeConf(
             teamforgePropsTemplate.text, ctfServer, server)
-        if (ctfServer && server.mode == ServerMode.MANAGED) {
+        if (ctfServer && server.managedByCtf()) {
             s += "\nsfmain.integration.subversion.csvn=csvn-managed\n"
         } else {
             s += "\nsfmain.integration.subversion.csvn=csvn-standalone\n"
@@ -811,8 +809,7 @@ ${extraconf}
         contents = contents.replace("\${python.path}", escapePath(pythonPath))
 
 
-        if (ctfServer && (server.mode == ServerMode.MANAGED ||
-            server.mode == ServerMode.CONVERTING_TO_MANAGED)) {
+        if (ctfServer && (server.managedByCtf())) {
             contents = contents.replace("\${ctf.webserver.url}", 
                                         ctfServer.getWebAppUrl())
             String baseUrl = ctfServer.baseUrl

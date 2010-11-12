@@ -1005,7 +1005,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     private static final String INTEGRATION_SCRIPTS_ZIP =
         "integration-scripts.zip"
 
-    protected unpackIntegrationScripts(Locale locale = null) {
+    public unpackIntegrationScripts(Locale locale = null) {
         def libDir = new File(ConfigUtil.appHome(), "lib")
         def archiveFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
         def integrationDir = new File(libDir, "integration")
@@ -1198,7 +1198,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
     }
 
-    private def restartServer() {
+    public def restartServer() {
         def result = -1;
         if (lifecycleService.isStarted()) {
             result = lifecycleService.gracefulRestartServer()
