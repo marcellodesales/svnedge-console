@@ -38,7 +38,7 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Tests the current state of the users cache at bootstrap
      */
     void testExecuteService() {
-        actionCommandsExecutorService.retrieveAndExecuteActionCommandsFromMaster()
+        actionCommandsExecutorService.retrieveAndExecuteActionCommands()
         
     }
 

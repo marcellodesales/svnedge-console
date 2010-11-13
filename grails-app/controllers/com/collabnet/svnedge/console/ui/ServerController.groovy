@@ -46,6 +46,7 @@ class ServerController {
     def networkingService
     def serverConfService
     def setupTeamForgeService
+    def setupReplicaService
     def csvnAuthenticationProvider
 
     def index = { redirect(action:edit, params:params) }
@@ -57,7 +58,8 @@ class ServerController {
         ctfCredentials.validate()
         def ctfServer = CtfServer.getServer()
         def server = Server.getServer()
-         String errorView = (server.mode == ServerMode.REPLICA) ?
+        boolean isReplica = (server.mode == ServerMode.REPLICA)
+        String errorView = isReplica ?
                 "editReplica" :
                 "editIntegration"
         
@@ -66,20 +68,30 @@ class ServerController {
                 "server.action.revert.error.credentials")
             render(view: errorView,
                     model: [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
-                        ctfCredentials: ctfCredentials, formError: formError])
+                        ctfCredentials: ctfCredentials, formError: formError,
+                        canEditCredentials: isReplica])
         } else {
             try {
                 def errors = []
-                this.setupTeamForgeService.revertFromCtfMode(
-                    ctfCredentials.ctfUsername, ctfCredentials.ctfPassword,
+                if (isReplica) {
+                    this.setupReplicaService.revertFromReplicaMode(
+                        ctfCredentials.ctfUsername, ctfCredentials.ctfPassword,
                         errors, RCU.getLocale(request))
+                }
+                else {
+                    this.setupTeamForgeService.revertFromCtfMode(
+                        ctfCredentials.ctfUsername, ctfCredentials.ctfPassword,
+                        errors, RCU.getLocale(request))
+                }
+                
                 if (errors) {
                     def formError = 
                         message(code: "server.action.revert.error.general")
                     render(view: errorView,
                         model: [ctfServerBaseUrl: ctfServer.baseUrl,
                             ctfCredentials: ctfCredentials,
-                            formError: formError, errorCause: errors])
+                            formError: formError, errorCause: errors,
+                            canEditCredentials: isReplica])
                 } else {
                     flash.message = message(code: 
                         "server.action.revert.success")
@@ -88,12 +100,13 @@ class ServerController {
             } catch (CtfAuthenticationException wrongCredentials) {
                 def ctfBaseUrl = ctfServer.baseUrl
                 def formError = message(code:
-                    "server.action.revert.error.connection", [ctfBaseUrl])
+                    "server.action.revert.error.connection", args: [ctfBaseUrl])
                 render(view: errorView,
                         model: [ctfServerBaseUrl: ctfBaseUrl,
                             ctfCredentials: ctfCredentials,
                             formError: formError, 
-                            errorCause: wrongCredentials.getMessage()])
+                            errorCause: wrongCredentials.getMessage(),
+                            canEditCredentials: isReplica])
             }
         }
     }
@@ -107,7 +120,8 @@ class ServerController {
                 "editIntegration"
 
         render (view : view, model: [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
-                ctfCredentials: ctfCredentialsCmd, server: s])
+                ctfCredentials: ctfCredentialsCmd,
+                canEditCredentials: (s.mode == ServerMode.REPLICA)])
     }
 
     def edit = {

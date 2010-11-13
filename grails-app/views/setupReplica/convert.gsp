@@ -55,7 +55,7 @@
               <table class="ItemDetailContainer">
                 <tbody>
                 <tr class="ContainerHeader">
-                  <td colspan="2"><g:message code="status.page.header.server"/></td>
+                  <td colspan="2"><g:message code="setupReplica.page.confirm.settings.heading"/></td>
                 </tr>
                 
                 <tr class="prop, OddRow">

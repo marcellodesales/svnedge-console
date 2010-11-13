@@ -61,6 +61,8 @@ class BootStrap {
 
     // Replication-related services for future CTF versions
     def replicationBootstrapService
+    def jobsAdminService
+    
     def grailsApplication
     
     def init = { servletContext ->
@@ -166,6 +168,13 @@ class BootStrap {
             discoveryService.bootStrap(config)
         } catch (Exception e) {
             log.error ("Failed to intitialize DiscoveryService: " + e.getMessage(), e)
+        }
+        
+        log.info("Bootstrapping jobsAdminService...")
+        try {
+            jobsAdminService.bootStrap()
+        } catch (Exception e) {
+            log.error ("Failed to intitialize JobsAdminService: " + e.getMessage(), e)
         }
     }
 

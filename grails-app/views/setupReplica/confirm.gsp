@@ -55,7 +55,7 @@
               <table class="ItemDetailContainer">
                 <tbody>
                 <tr class="ContainerHeader">
-                  <td colspan="2"><g:message code="status.page.header.server"/></td>
+                  <td colspan="2"><g:message code="setupReplica.page.confirm.settings.heading"/></td>
                 </tr>
 
                 <tr class="prop, OddRow">
@@ -75,7 +75,7 @@
                 </tr>
 
                 <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
+                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.replicaSetup.description.label"/></strong></td>
                   <td class="ItemDetailValue">${replicaDescription}</td>
                 </tr>
 

@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat
 import org.quartz.Trigger
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.jobs.CheckStateJob
+import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 class JobsAdminService {
     public static def REPLICA_GROUP = "Replica"
@@ -45,14 +47,12 @@ class JobsAdminService {
         log.info("Resuming all relevant jobs...")
         quartzScheduler.resumeAll()
         def server = Server.getServer()
-        if (!server || !server.replica) {
+        if (server.mode != ServerMode.REPLICA) {
+            log.info("Replication jobs are paused in server mode ${server.mode}")
             pauseGroup(REPLICA_GROUP)
-            pauseGroup(CheckStateJob.group)
-        } else if (server.replica) {
-            def replica = ReplicaConfig.getCurrentConfig()
-            if (replica.state != ApprovalState.APPROVED) {
-                pauseGroup(REPLICA_GROUP)
-            }
+        } 
+        else {
+            log.info("Replication jobs are running")
         }
     }
 
@@ -218,6 +218,7 @@ class JobsAdminService {
         // in a group are paused individually or by way of pauseJobGroup
         // the group is not flagged as paused.
         //quartzScheduler.pauseJobGroup(groupName)
+        log.info("Pausing jobs in group ${groupName}")
         quartzScheduler.pauseTriggerGroup(groupName + "_Triggers")
     }
 
@@ -238,6 +239,7 @@ class JobsAdminService {
     }
 
     def resumeGroup(groupName) {
+        log.info("Resuming jobs in group ${groupName}")
         quartzScheduler.resumeTriggerGroup(groupName + "_Triggers")
     }
 

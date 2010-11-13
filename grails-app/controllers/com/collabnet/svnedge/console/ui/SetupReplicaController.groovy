@@ -63,7 +63,7 @@ class SetupReplicaController {
     private static String REPLICA_INFO_SESSION_KEY = "replicaInfoCommand"
     private static String REPLICA_CONVERSION_BEAN_SESSION_KEY = "replicaConversionBean"
 
-    def replicaService
+    def setupReplicaService
     def authenticateService
     
     /**
@@ -91,7 +91,7 @@ class SetupReplicaController {
                 // copy input params to the conversion bean
                 CtfConnectionBean conn = getConversionBean(input)
                 // verify connection
-                replicaService.confirmCtfConnection(conn)
+                setupReplicaService.confirmCtfConnection(conn)
                 
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
@@ -173,7 +173,7 @@ class SetupReplicaController {
             ReplicaConversionBean conn = getConversionBean(input)
     
             // register the replica
-            replicaService.registerReplica(conn)
+            setupReplicaService.registerReplica(conn)
             
             // save input for form re-entry
             def cmd = getReplicaInfoCommand()
@@ -228,7 +228,7 @@ class SetupReplicaController {
                 // copy input params to the conversion bean
                 CtfConnectionBean conn = getConversionBean(input)
                 // persist the connection
-                replicaService.updateCtfConnection(conn)
+                setupReplicaService.updateCtfConnection(conn)
 
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
@@ -261,7 +261,7 @@ class SetupReplicaController {
 
     private List getIntegrationServers() {
 
-        return replicaService.getIntegrationServers(getConversionBean())
+        return setupReplicaService.getIntegrationServers(getConversionBean())
 
     }
 

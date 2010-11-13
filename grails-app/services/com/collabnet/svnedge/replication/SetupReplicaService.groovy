@@ -26,11 +26,12 @@ import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
+import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 
 /**
  * This service handles replication-related functionality
  */
-class ReplicaService {
+class SetupReplicaService {
 
     boolean transactional = true
     public static String DEFAULT_SYNC_RATE = 5 // minutes for polling interval
@@ -133,6 +134,19 @@ class ReplicaService {
         ctfServer.ctfUsername = ctfConn.ctfUsername
         ctfServer.ctfPassword = securityService.encrypt(ctfConn.ctfPassword)
 
+    }
+   
+    /**
+     * revert from managed replica mode to standalone
+     * delegates to <code>setupTeamForgeService.revertFromCtfMode()</code> and 
+     * pauses replication jobs
+     * @param ctfConn
+     */
+    public void revertFromReplicaMode (String ctfUsername, String ctfPassword,
+            errors, locale) throws CtfAuthenticationException {
+        
+        setupTeamForgeService.revertFromCtfMode(ctfUsername, ctfPassword, errors, locale)
+        jobsAdminService.pauseGroup(REPLICA_GROUP)
     }
 
     
