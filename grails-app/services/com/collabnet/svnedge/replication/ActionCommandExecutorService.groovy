@@ -28,7 +28,7 @@ import org.springframework.remoting.RemoteAccessException
  * and the file system artifacts.
  * @author mdesales
  */
-public class ActionCommandsExecutorService implements ApplicationContextAware {
+public class ActionCommandExecutorService implements ApplicationContextAware {
 
     boolean transactional = true
 

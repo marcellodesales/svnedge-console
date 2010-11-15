@@ -21,7 +21,7 @@ import grails.test.*
 
 class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
-    def actionCommandsExecutorService
+    def actionCommandExecutorService
     def svnNotificationService
 
     def REPO_NAME = "testproject2"
@@ -38,7 +38,7 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Tests the current state of the users cache at bootstrap
      */
     void testExecuteService() {
-        actionCommandsExecutorService.retrieveAndExecuteActionCommands()
+        actionCommandExecutorService.retrieveAndExecuteActionCommands()
         
     }
 
@@ -47,7 +47,7 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      */
     void testProcessBadCommand() {
         def badCommand = [code: 'Notacommand', id: 0, params: []]
-        def result = actionCommandsExecutorService
+        def result = actionCommandExecutorService
             .processCommandRequest(badCommand)
         assertNotNull("Processing a bad command should not return null.", 
                       result)
@@ -63,7 +63,7 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     void testProcessAddCommand() {
         def command = [code: 'repoAdd', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        def result = actionCommandsExecutorService
+        def result = actionCommandExecutorService
             .processCommandRequest(command)
         assertNotNull("Processing a command should not return null.", 
                       result)
@@ -83,12 +83,12 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         // add first
         def command = [code: 'repoAdd', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        def result = actionCommandsExecutorService
+        def result = actionCommandExecutorService
             .processCommandRequest(command)
         // then remove
         command = [code: 'repoRemove', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        result = actionCommandsExecutorService
+        result = actionCommandExecutorService
             .processCommandRequest(command)
         assertNotNull("Processing a command should not return null.", 
                       result)

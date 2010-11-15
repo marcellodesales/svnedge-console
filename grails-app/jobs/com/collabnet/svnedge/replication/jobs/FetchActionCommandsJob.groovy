@@ -24,7 +24,7 @@ import com.collabnet.svnedge.console.ServerMode
 
 class FetchActionCommandsJob {
 
-    def actionCommandsExecutorService
+    def actionCommandExecutorService
 
     static def group = JobsAdminService.REPLICA_GROUP
 
@@ -49,6 +49,6 @@ class FetchActionCommandsJob {
 
     private def doExecute() {
         log.info("Checking for replication commands")
-        actionCommandsExecutorService.retrieveAndExecuteActionCommands()
+        actionCommandExecutorService.retrieveAndExecuteActionCommands()
     }
 }
