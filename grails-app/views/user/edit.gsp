@@ -143,10 +143,10 @@
                    <tr class="ContainerFooter">
                      <td colspan="3">
                         <div class="AlignRight">
-                           <g:actionSubmit class="Button save" value="${message(code:'user.page.edit.button.save')}" />
+                           <g:actionSubmit action="update" class="Button save" value="${message(code:'user.page.edit.button.save')}" />
                            <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
                               <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
-                              <g:actionSubmit class="Button delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" />
+                              <g:actionSubmit action="delete" class="Button delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" />
                            </g:ifAnyGranted>
                         </div>
                      </td>

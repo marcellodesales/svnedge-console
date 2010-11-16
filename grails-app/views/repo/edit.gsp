@@ -34,8 +34,8 @@
                         <tr class="ContainerFooter">
                      <td colspan="2">
                        <div class="AlignRight">
-                           <g:actionSubmit class="Button save" value="${message(code: 'repository.page.edit.button.save')}" />
-                           <g:actionSubmit class="Button delete" onclick="return confirm('${message(code: 'repository.page.edit.button.save.confirm')}');" value="Delete" />
+                           <g:actionSubmit action="save" class="Button save" value="${message(code: 'repository.page.edit.button.save')}" />
+                           <g:actionSubmit action="delete" class="Button delete" onclick="return confirm('${message(code: 'repository.page.edit.button.save.confirm')}');" value="Delete" />
                        </div>
           
         </td>
