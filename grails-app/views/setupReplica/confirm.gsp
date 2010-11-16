@@ -33,7 +33,6 @@
 <g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
 <g:set var="tabArray" value="${tabArray << [action:'replicaSetup', label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
 <g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.convert', args:[5])]}"/>
 
 
 <g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
@@ -45,37 +44,34 @@
       <td class="ContainerBodyWithPaddedBorder">
 
         <p>
-          <g:message code="setupReplica.page.confirm.p1"/>
+          <p><strong><g:message code="setupTeamForge.page.confirm.ready" /></strong> <g:message code="setupReplica.page.confirm.p1" /></p>
         </p>
 
         <div class="dialog">
           <table align="center" width="99%">
             <tbody>
             <tr><td>
-              <table class="ItemDetailContainer">
+              <table class="ItemDetailTable">
                 <tbody>
-                <tr class="ContainerHeader">
-                  <td colspan="2"><g:message code="setupReplica.page.confirm.settings.heading"/></td>
-                </tr>
 
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.ctfURL.label"/></td>
                   <td class="ItemDetailValue">${ctfURL}</td>
                 </tr>
 
-                <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></td>
                   <td class="ItemDetailValue">${ctfUsername}</td>
                 </tr>
 
 
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
                   <td class="ItemDetailValue">${svnMasterURL}</td>
                 </tr>
 
-                <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.replicaSetup.description.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.replicaSetup.description.label"/></td>
                   <td class="ItemDetailValue">${replicaDescription}</td>
                 </tr>
 

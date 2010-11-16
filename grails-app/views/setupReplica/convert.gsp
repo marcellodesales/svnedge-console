@@ -29,14 +29,6 @@
 
 <body>
 
-<g:set var="tabArray" value="${[[label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
-<g:set var="tabArray" value="${tabArray << [label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
-<g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.convert', args:[5])]}"/>
-
-
-<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
 
 <g:form method="post">
 
@@ -54,28 +46,24 @@
             <tr><td>
               <table class="ItemDetailContainer">
                 <tbody>
-                <tr class="ContainerHeader">
-                  <td colspan="2"><g:message code="setupReplica.page.confirm.settings.heading"/></td>
-                </tr>
-                
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.ctfURL.label"/></td>
                   <td class="ItemDetailValue">${ctfURL}</td>
                 </tr>
                 
-                <tr class="prop, EvenRow">
-                   <td class="ItemDetailName"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></td>
+                <tr>
+                   <td class="ItemDetailName"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></td>
                    <td class="ItemDetailValue">${ctfUsername}</td>
                  </tr>
                   
                 
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
                   <td class="ItemDetailValue">${svnMasterURL}</td>
                 </tr>
                 
-                <tr class="prop, EvenRow">
-                  <td class="ItemDetailName"><strong><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></strong></td>
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></td>
                   <td class="ItemDetailValue">${svnReplicaCheckout}</td>
                 </tr>
                 

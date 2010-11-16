@@ -61,10 +61,11 @@
          <g:form method="post">
          <div class="AlignRight">
              <g:actionSubmit id="btnCtfMode" value="${message(code:'setupTeamForge.page.index.button.ctfMode')}" 
-                 controller="setupTeamForge" action="ctfInfo"
+                 controller="setupTeamForge" action="ctfInfo" class="Button"
                  />
              <input type="button" id="btnReplicaMode" value="${message(code:'setupTeamForge.page.index.button.replicaMode')}"
-                 onclick="document.location.href='${createLink(controller: 'setupReplica', action:'ctfInfo')}'; return false"/>
+                 onclick="document.location.href='${createLink(controller: 'setupReplica', action:'ctfInfo')}'; return false"
+                 class="Button"/>
          </div>
          </g:form>
        </td>
