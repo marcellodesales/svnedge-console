@@ -607,6 +607,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             if (projectName.toLowerCase() == p.title.toLowerCase() || 
                 projectPath == p.path.substring(9)) {
                 projectId = p.id
+                conversionData.ctfProjectPath = p.path
                 break
             }
         }
