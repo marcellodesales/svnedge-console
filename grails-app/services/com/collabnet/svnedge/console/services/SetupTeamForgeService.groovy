@@ -730,7 +730,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 doRevertFromCtfMode(conversionData.ctfURL,
                     conversionData.exSystemId,
                     getWebSessionId(conversionData), 
-                    server, ctfServer, errors)
+                    server, ctfServer, errors, conversionData.userLocale)
             } catch (Exception e) {
                 def msg = getMessage(
                     "setupTeamForge.integration.recovery.failed", 
@@ -912,7 +912,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * @throws CtfAuthenticationException if the authentication fails with the
      * CTF server.
      */
-    protected void revertFromCtfMode(String ctfUsername, String ctfPassword,
+    public void revertFromCtfMode(String ctfUsername, String ctfPassword,
             errors, locale) throws CtfAuthenticationException {
 
         Server server = Server.getServer()
