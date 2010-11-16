@@ -414,7 +414,8 @@ CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REP
     }
 
     private def writeSvnViewvcConf(server) {
-        boolean ctfMode = server.managedByCtf()
+        boolean ctfMode = server.managedByCtf() ||
+            server.convertingToManagedByCtf()
         def conf = """${DONT_EDIT}
 <VirtualHost *:${server.port}>
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
@@ -809,7 +810,8 @@ ${extraconf}
         contents = contents.replace("\${python.path}", escapePath(pythonPath))
 
 
-        if (ctfServer && (server.managedByCtf())) {
+        if (ctfServer && (server.managedByCtf() || 
+                          server.convertingToManagedByCtf())) {
             contents = contents.replace("\${ctf.webserver.url}", 
                                         ctfServer.getWebAppUrl())
             String baseUrl = ctfServer.baseUrl
