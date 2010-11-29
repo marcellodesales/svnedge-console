@@ -8,7 +8,7 @@ BUILD_TEMP=/u1/hudson/solaris-sparc/trunk
 case "$1" in
 
     'dev')
-        REPOS=http://cu025.cubit.sp.collab.net/release/${OS}
+        REPOS=http://pkg.collab.net/dev/${OS}
         UPDATES=$REPOS
         TAR=CollabNetSubversionEdge-${VERSION}-dev_${OS}.tar
         ;;

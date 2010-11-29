@@ -8,7 +8,7 @@ BUILD_TEMP=/u1/hudson/linux32/trunk
 case "$1" in
 
     'dev')
-        REPOS=http://cu025.cubit.sp.collab.net/release/linux
+        REPOS=http://pkg.collab.net/dev/linux
         UPDATES=$REPOS
         TAR=CollabNetSubversionEdge-${VERSION}-dev_${OS}.tar.gz
         ;;

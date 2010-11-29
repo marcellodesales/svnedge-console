@@ -9,7 +9,7 @@ if %1.==stage. goto stage
 if %1.==release. goto release
 
 :dev
-set REPOS=http://cu025.cubit.sp.collab.net/release/windows64/
+set REPOS=http://pkg.collab.net/dev/windows64/
 set UPDATES=%REPOS%
 set LOC=/Installers/windows/dev-builds
 goto start
