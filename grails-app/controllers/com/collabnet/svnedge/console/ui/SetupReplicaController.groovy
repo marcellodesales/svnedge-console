@@ -47,11 +47,13 @@ class CtfConnectionCommand {
 class ReplicaInfoCommand {
 
     String svnMasterURL
+    String name
     String description
     String message
 
     static constraints = {
         svnMasterURL(blank: false)
+        name(blank: false)
         description(blank: false)
     }
 }
@@ -154,7 +156,7 @@ class SetupReplicaController {
         }
         
         // return to input view with errors
-        render([view: "replicaInfo", model: [cmd: input, integrationServers: getIntegrationServers()]])
+        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
     }
     
 
@@ -166,10 +168,10 @@ class SetupReplicaController {
         def server
         def repoName
         def userName
+        def input = getReplicaInfoCommand()
         
         try {
             // copy input params to the conversion bean
-            def input = getReplicaInfoCommand()
             ReplicaConversionBean conn = getConversionBean(input)
     
             // register the replica
@@ -200,10 +202,7 @@ class SetupReplicaController {
         
         
         // return to input view with errors
-        render([view: "confirm", model: [ctfURL: getCtfConnectionCommand().ctfURL,
-                        ctfUsername: getCtfConnectionCommand().ctfUsername,
-                        svnMasterURL: getReplicaInfoCommand().svnMasterURL,
-                        replicaDescription: getReplicaInfoCommand().description]])
+        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
     }
 
     /**
@@ -323,6 +322,7 @@ class SetupReplicaController {
 
         ReplicaConversionBean b = getConversionBean();
         b.svnMasterURL = cmd.svnMasterURL
+        b.name = cmd.name
         b.description = cmd.description
         b.message = cmd.message
         return b

@@ -26,6 +26,7 @@ import com.collabnet.svnedge.teamforge.CtfConnectionBean
 class ReplicaConversionBean extends CtfConnectionBean {
     
     String svnMasterURL
+    String name
     String description
     String message
 }

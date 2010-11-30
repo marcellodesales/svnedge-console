@@ -78,6 +78,7 @@ class SetupReplicaService {
             rc = new ReplicaConfiguration()
         }
         rc.svnMasterUrl = replicaInfo.svnMasterURL
+        rc.name = replicaInfo.name
         rc.description = replicaInfo.description
         rc.message = replicaInfo.message
         rc.approvalState = ApprovalState.PENDING

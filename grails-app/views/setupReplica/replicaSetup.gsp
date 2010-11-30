@@ -55,12 +55,34 @@
             <td valign="top" class="value">
               <g:select name="svnMasterURL" from="${integrationServers}" value="${cmd?.svnMasterURL}"></g:select>
             </td>
+            <td></td>
           </tr>
           <tr>
             <td></td>
-            <td class="errors">
+            <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="svnMasterURL">
                 <ul><g:eachError bean="${cmd}" field="svnMasterURL">
+                  <li><g:message error="${it}"/></li>
+                </g:eachError></ul>
+              </g:hasErrors>
+            </td>
+          </tr>
+          <tr>
+            <td class="ItemDetailName">
+              <label for="name"><g:message code="setupReplica.page.replicaSetup.name.label"/></label>
+            </td>
+            <td class="value ${hasErrors(bean: cmd, field: 'name', 'errors')}">
+              <g:textField name="name" size="40"/>
+            </td>
+            <td>
+              <em><g:message code="setupReplica.page.replicaSetup.name.label.tip"/></em>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td class="errors" colspan="2">
+              <g:hasErrors bean="${cmd}" field="name">
+                <ul><g:eachError bean="${cmd}" field="name">
                   <li><g:message error="${it}"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
@@ -73,11 +95,13 @@
             <td class="value ${hasErrors(bean: cmd, field: 'description', 'errors')}">
               <textarea name="description" id="description" rows="5" cols="50">${cmd?.description}</textarea>
             </td>
-
+            <td>
+              <em><g:message code="setupReplica.page.replicaSetup.description.label.tip"/></em>
+            </td>
           </tr>
           <tr>
             <td></td>
-            <td class="errors">
+            <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="description">
                 <ul><g:eachError bean="${cmd}" field="description">
                   <li><g:message error="${it}"/></li>
@@ -92,11 +116,13 @@
             <td class="value ${hasErrors(bean: cmd, field: 'message', 'errors')}">
               <textarea name="message" id="message" rows="5" cols="50">${cmd?.message}</textarea>
             </td>
-            <td></td>
+            <td>
+              <em><g:message code="setupReplica.page.replicaSetup.message.label.tip"/></em>
+            </td>
           </tr>
           <tr>
             <td></td>
-            <td class="errors">
+            <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="message">
                 <ul><g:eachError bean="${cmd}" field="message">
                   <li><g:message error="${it}"/></li>

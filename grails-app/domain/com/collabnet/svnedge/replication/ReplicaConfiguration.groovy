@@ -28,6 +28,9 @@ public class ReplicaConfiguration {
     // server with which to sync
     String svnMasterUrl
 
+    // simple title or name
+    String name
+
     // description (eg, location)
     String description
     String message
