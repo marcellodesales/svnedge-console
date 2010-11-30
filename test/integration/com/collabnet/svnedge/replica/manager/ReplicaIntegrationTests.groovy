@@ -66,7 +66,7 @@ class ReplicaIntegrationTests extends GrailsUnitTestCase {
         assertNotNull("The server instance should not be null", server)
         if (!server.validate()) {
             server.errors.allErrors.each { 
-                log.error(it)
+                log.severe(it)
             }
             fail("The validation to create a default server failed.")
         }
