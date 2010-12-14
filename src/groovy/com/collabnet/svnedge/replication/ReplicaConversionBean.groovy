@@ -24,7 +24,8 @@ import com.collabnet.svnedge.teamforge.CtfConnectionBean
  * This class, with super class, represents data needed for Replica conversion
  */
 class ReplicaConversionBean extends CtfConnectionBean {
-    
+
+    String masterExternalSystemId
     String svnMasterURL
     String name
     String description

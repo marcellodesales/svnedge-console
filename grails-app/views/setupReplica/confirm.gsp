@@ -82,6 +82,11 @@
                   <td class="ItemDetailValue">${replicaDescription}</td>
                 </tr>
 
+                <tr>
+                  <td class="ItemDetailName"><g:message code="setupReplica.page.replicaSetup.message.label"/></td>
+                  <td class="ItemDetailValue">${replicaMessageForAdmin}</td>
+                </tr>
+
                 </tbody>
               </table>
             </td></tr>

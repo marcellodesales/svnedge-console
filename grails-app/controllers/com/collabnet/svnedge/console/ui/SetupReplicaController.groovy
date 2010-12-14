@@ -46,6 +46,7 @@ class CtfConnectionCommand {
 
 class ReplicaInfoCommand {
 
+    String masterExternalSystemId
     String svnMasterURL
     String name
     String description
@@ -147,13 +148,15 @@ class SetupReplicaController {
                 for (scmServer in scmList) {
                     if (scmServer.scmUrl.equals(input.svnMasterURL)) {
                         selectedScm = scmServer
+                        cmd.masterExternalSystemId = scmServer.id
                         break
                     }
                 }
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
                         ctfUsername: getCtfConnectionCommand().ctfUsername,
                         selectedScmServer: selectedScm,
-                        replicaDescription: getReplicaInfoCommand().description
+                        replicaDescription: getReplicaInfoCommand().description,
+                        replicaMessageForAdmin: getReplicaInfoCommand().message
                         ]
             }
             catch (Exception e) {
@@ -181,14 +184,14 @@ class SetupReplicaController {
         try {
             // copy input params to the conversion bean
             ReplicaConversionBean conn = getConversionBean(input)
-    
-            // register the replica
-            setupReplicaService.registerReplica(conn)
-            
+
             // save input for form re-entry
             def cmd = getReplicaInfoCommand()
-            BeanUtils.copyProperties(input, cmd)
-            
+            BeanUtils.copyProperties(cmd, conn)
+
+            // register the replica
+            setupReplicaService.registerReplica(conn)
+
             // prepare confirmation data
             server = Server.getServer()
             repoName = (Repository.list()) ? Repository.list()[0].name : "example"
@@ -201,14 +204,12 @@ class SetupReplicaController {
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
                     ]
             
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Unable to register replica", e)
             input.errors.rejectValue('svnMasterURL', 'setupTeamForge.page.error.general',
                     [new URL(input.svnMasterURL).host] as Object[], 'error registering')
         }
-        
-        
+
         // return to input view with errors
         render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
     }

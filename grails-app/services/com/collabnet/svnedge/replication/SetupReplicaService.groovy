@@ -61,11 +61,14 @@ class SetupReplicaService {
      * @param conversion the CtfConversionBean holding connection info
      */
     public void registerReplica(ReplicaConversionBean replicaInfo) 
-            throws RemoteMasterException, ReplicaConversionException
-    {
+            throws RemoteMasterException, ReplicaConversionException {
 
         log.debug("Attempting replica conversion...")
-        String systemId = ctfRemoteClientService.registerReplica(replicaInfo)
+
+        String systemId = ctfRemoteClientService.addExternalSystemReplica(
+            replicaInfo.ctfURL, replicaInfo.userSessionId, 
+            replicaInfo.masterExternalSystemId, replicaInfo.name, 
+            replicaInfo.description, replicaInfo.message)
 
         log.debug("Conversion successful, got ID: " + systemId)
 
@@ -95,7 +98,6 @@ class SetupReplicaService {
         ctfServer.ctfPassword = securityService.encrypt(replicaInfo.ctfPassword)
         
         if (!rc.validate() || !ctfServer.validate() || !server.validate()) {
-            
             log.error("could not save necessary domain objects")
             [rc, ctfServer, server].each { domainObj ->
                 domainObj.errors.each { log.error(it) }

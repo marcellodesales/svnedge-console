@@ -78,6 +78,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     private static String ROLE_ADMIN = "ROLE_ADMIN"
 
     def securityService
+    def networkingService
 
     boolean transactional = false
 
@@ -92,49 +93,6 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     def registerReplica(server, replica) {
         ApprovalState.APPROVED.getName()
-    }
-
-    def registerReplica(ReplicaConversionBean replicaInfo) {
-        // todo use a real service
-        // simulate success and return system identifier
-        "repl1001"
-    }
-
-    def fetchCommands() {
-        // todo use a real service
-        // simulate success and return command
-        ["NOOP"]
-    }
-    
-    /**
-     * @param ctfInfo the bean representing a ctf connection
-     * @return the list of integration servers in the TeamForge server reached by the
-     * given ctfUrl, using the given sessionId.
-     * @throws CtfSessionExpiredException if the given sessionId is expired.
-     * @throws RemoteMasterException if any other error occurs during the
-     * method execution.
-     */
-    def getIntegrationServers(CtfConnectionBean ctfInfo) throws CtfSessionExpiredException, RemoteMasterException {
-        try {
-            def filter = null
-            // TODO create and use service method for getting external systems
-            return this.cnSoap(ctfInfo.ctfURL).getUserList(ctfInfo.userSessionId, filter).dataRows
-
-        } catch (AxisFault e) {
-            String faultMsg = e.faultString
-            GrailsUtil.deepSanitize(e)
-            if (faultMsg.contains("Session is invalid or timed out")) {
-                throw new CtfSessionExpiredException(ctfInfo.ctfURL, ctfInfo.userSessionId,
-                    getMessage("ctfRemoteClientService.remote.sessionExpired",
-                        ctfInfo.userLocale), e)
-            } else {
-                def errorMessage = getMessage(
-                    "ctfRemoteClientService.listUsers.error",  ctfInfo.userLocale) + " " +
-                    faultMsg
-                log.error(errorMessage, e)
-                throw new RemoteMasterException(ctfInfo.ctfURL, errorMessage, e)
-            }
-        }
     }
 
     def getReplicaApprovalState() {
@@ -545,6 +503,123 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         }
     }
+            
+    /**
+    * The list of replicable external systems element of the list is a
+    * map of the properties of the integration server. Each elements has the
+    * properties of the external system.
+    *
+    * @param ctfUrl is the ctf server complete URL, including protocol,
+    * hostname and port.
+    * @param sessionId is the user sessionId retrieved after logging in.
+    * @return the list of replicable external systems in the TeamForge server
+    * reached by the given ctfUrl, using the given sessionId.
+    * @throws CtfSessionExpiredException if the given sessionId is expired.
+    * @throws RemoteMasterException if any other error occurs during the
+    * method execution.
+    */
+   def getReplicableScmExternalSystemList(ctfUrl, sessionId) throws
+          RemoteMasterException {
+       try {
+           def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
+               sessionId).dataRows
+           def scmList = []
+              if (lt && lt.length > 0) {
+                  lt.each { extSystem ->
+                      def scmSys = [:]
+                      scmSys.id = extSystem.id
+                      scmSys.title = extSystem.title
+                      scmSys.isSvnEdge = extSystem.isSvnEdge
+                      scmSys.scmUrl = extSystem.scmUrl
+                      scmSys.scmViewerUrl = extSystem.scmViewerUrl
+                      scmList << scmSys
+                  }
+              }
+              return scmList
+
+       } catch (AxisFault e) {
+           String faultMsg = e.faultString
+           GrailsUtil.deepSanitize(e)
+           if (faultMsg.contains("Session is invalid or timed out")) {
+               throw new CtfSessionExpiredException(ctfUrl, sessionId,
+                   getMessage("ctfRemoteClientService.remote.sessionExpired",
+                       locale), e)
+           } else {
+               def errorMessage = getMessage(
+                  "ctfRemoteClientService.listProjects.error", locale) + " " +
+                      faultMsg
+              log.error(errorMessage, e)
+              throw new RemoteMasterException(ctfUrl, errorMessage, e)
+          }
+       }
+    }
+
+    /**
+    * Adds this instance of SVN Edge as a new external system at a given
+    * CTF located at the given ctfUrl.
+    *
+    * @param ctfUrl is the url of the CTF system.
+    * @param userSessionId is sessionID of the default user to call the soap
+    * client.
+    * @param title is the title of the new external system
+    * @param description is the description of the new external system
+    * @param csvnProps is an instance of SoapNamedValues with the parameters
+    * to the service.
+    *
+    * @return the String value of the system ID
+    *
+    * @throws CtfAuthenticationException if the authentication fails with
+    * TeamForge.
+    * @throws RemoteMasterException if any error occurs during the method
+    * call.
+    */
+    def String addExternalSystemReplica(ctfUrl, userSessionId, masterSystemId, 
+            name, description, comment) throws RemoteMasterException {
+
+        def hostname = networkingService.getHostname()
+        try {
+            def scmSoap = this.makeScmSoap(ctfUrl)
+            def replicaServId = scmSoap.addExternalSystemReplica(userSessionId, 
+                masterSystemId, name, description, hostname, comment)
+
+          return replicaServId
+
+        } catch (LoginFault e) {
+            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
+                locale)
+            log.error("Unable to create external system: " + msg, e)
+            throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
+
+        } catch (AxisFault e) {
+             String faultMsg = e.faultString
+             if (faultMsg.contains("The parameter type/value") && 
+                faultMsg.contains("is invalid for the adapter type")) {
+                // No such object: The parameter type/value
+                //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
+                // is invalid for the adapter type 'Subversion'
+                def typeValue = faultMsg.split("'")[1].split("=")
+                def paramType = typeValue[0]
+                def paramValue = typeValue[1]
+                GrailsUtil.deepSanitize(e)
+
+                if (faultMsg.contains("Session is invalid or timed out")) {
+                   throw new CtfSessionExpiredException(ctfUrl, userSessionId,
+                       getMessage("ctfRemoteClientService.remote.sessionExpired",
+                           locale), e)
+                }
+             }
+         } catch (Exception e) {
+             GrailsUtil.deepSanitize(e)
+             // also no session, but log this one as it indicates a problem
+             if (!(e instanceof LoginFault)) {
+                 def generalMsg = getMessage(
+                     "ctfRemoteClientService.createExternalSystem.error", 
+                     locale)
+                 log.error(generalMsg, e)
+                 throw new RemoteMasterException(ctfUrl, generalMsg, e)
+           }
+       }
+   }
 
     /**
      * @param ctfUrl is the ctf server complete URL, including protocol, 
@@ -578,57 +653,6 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         }
     }
-
-    /**
-     * The list of replicable external systems element of the list is a 
-     * map of the properties of the integration server. Each elements has the
-     * properties of the external system.
-     * 
-     * @param ctfUrl is the ctf server complete URL, including protocol,
-     * hostname and port.
-     * @param sessionId is the user sessionId retrieved after logging in.
-     * @return the list of replicable external systems in the TeamForge server 
-     * reached by the given ctfUrl, using the given sessionId.
-     * @throws CtfSessionExpiredException if the given sessionId is expired.
-     * @throws RemoteMasterException if any other error occurs during the
-     * method execution.
-     */
-    def getReplicableScmExternalSystemList(ctfUrl, sessionId) throws 
-           RemoteMasterException {
-       try {
-           def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
-               sessionId).dataRows
-
-           def scmList = []
-           if (lt && lt.length > 0) {
-               lt.each { extSystem ->
-                   def scmSys = [:]
-                   scmSys.id = extSystem.id
-                   scmSys.title = extSystem.title
-                   scmSys.isSvnEdge = extSystem.isSvnEdge
-                   scmSys.scmUrl = extSystem.scmUrl
-                   scmSys.scmViewerUrl = extSystem.scmViewerUrl
-                   scmList << scmSys
-               }
-           }
-           return scmList
-
-       } catch (AxisFault e) {
-           String faultMsg = e.faultString
-           GrailsUtil.deepSanitize(e)
-           if (faultMsg.contains("Session is invalid or timed out")) {
-               throw new CtfSessionExpiredException(ctfUrl, sessionId,
-                   getMessage("ctfRemoteClientService.remote.sessionExpired",
-                       locale), e)
-           } else {
-               def errorMessage = getMessage(
-                   "ctfRemoteClientService.listProjects.error", locale) + " " +
-                   faultMsg
-               log.error(errorMessage, e)
-               throw new RemoteMasterException(ctfUrl, errorMessage, e)
-           }
-       }
-   }
 
     /**
      * @param ctfUrl is the ctf server complete URL, including protocol, 
