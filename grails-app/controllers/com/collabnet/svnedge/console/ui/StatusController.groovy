@@ -64,12 +64,12 @@ class StatusController {
         if (server.mode == ServerMode.REPLICA) {
 
             if(!currentReplica) {
-               flash.error = message(code: 'replica.error.notStarted')
+               flash.warn = message(code: 'replica.error.notStarted')
             }
             if (currentReplica.approvalState == ApprovalState.PENDING) {
-               flash.message = message(code: 'replica.error.notApproved')
+               flash.warn = message(code: 'replica.error.notApproved')
             } else if (currentReplica.approvalState == ApprovalState.DENIED) {
-               flash.error = message(code: 'replica.error.denied')
+               flash.warn = message(code: 'replica.error.denied')
             } else if (currentReplica.approvalState == ApprovalState.NOT_FOUND
                       || currentReplica.approvalState == ApprovalState
                       .REGISTRATION_FAILED) {
