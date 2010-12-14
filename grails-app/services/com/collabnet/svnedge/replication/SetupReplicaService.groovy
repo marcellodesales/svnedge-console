@@ -150,17 +150,17 @@ class SetupReplicaService {
         jobsAdminService.pauseGroup(REPLICA_GROUP)
     }
 
-    
     /**
      * Obtain a list of integration servers from the Ctf connection represented
-     * in the conversion bean
-     * @param ctfConn
-     * @return List of servers which can be mirrored 
+     * in the conversion bean. Each element of the list is a map of the
+     * properties of the integration server.
+     * @param ctfConn is the connection bean.
+     * @return List of SCM integration servers which can be replicated.
      */
-    public List<String> getIntegrationServers (CtfConnectionBean ctfConn) {
-        
-        return ["https://system1/svn", "https://system2/svn", "https://system3/svn"]
-//        return ctfRemoteClientService.getIntegrationServers(ctfConn.ctfURL, ctfConn.userSessionId,
-//            ctfConn.userLocale)
+    public List<Map<String, String>> getIntegrationServers(
+            CtfConnectionBean ctfConn) {
+
+        return ctfRemoteClientService.getReplicableScmExternalSystemList(
+            ctfConn.ctfURL, ctfConn.userSessionId)
     }
 }

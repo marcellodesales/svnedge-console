@@ -52,8 +52,16 @@
             <td class="ItemDetailName">
               <label for="svnMasterURL"><g:message code="setupReplica.page.replicaSetup.svnMasterURL.label"/></label>
             </td>
-            <td valign="top" class="value">
-              <g:select name="svnMasterURL" from="${integrationServers}" value="${cmd?.svnMasterURL}"></g:select>
+            <td valign="top" class="value" colspan="2">
+              <select name="svnMasterURL">
+                <g:each in="${integrationServers}" var="scmServer">
+                    <option value="${scmServer.scmUrl}">
+                        ${scmServer.title} (${scmServer.isSvnEdge ? 
+                            message(code:"setupReplica.page.replicaSetup.scmtype.svnedge") :
+                            message(code:"setupReplica.page.replicaSetup.scmtype.teamforge")})
+                            - '${scmServer.scmUrl}'</option>
+                </g:each>
+              </select>
             </td>
             <td></td>
           </tr>

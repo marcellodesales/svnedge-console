@@ -142,9 +142,17 @@ class SetupReplicaController {
                 def cmd = getReplicaInfoCommand()
                 BeanUtils.copyProperties(input, cmd)
 
+                def scmList = getIntegrationServers()
+                def selectedScm = null
+                for (scmServer in scmList) {
+                    if (scmServer.scmUrl.equals(input.svnMasterURL)) {
+                        selectedScm = scmServer
+                        break
+                    }
+                }
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
                         ctfUsername: getCtfConnectionCommand().ctfUsername,
-                        svnMasterURL: getReplicaInfoCommand().svnMasterURL,
+                        selectedScmServer: selectedScm,
                         replicaDescription: getReplicaInfoCommand().description
                         ]
             }

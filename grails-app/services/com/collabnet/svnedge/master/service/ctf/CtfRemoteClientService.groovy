@@ -580,6 +580,57 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * The list of replicable external systems element of the list is a 
+     * map of the properties of the integration server. Each elements has the
+     * properties of the external system.
+     * 
+     * @param ctfUrl is the ctf server complete URL, including protocol,
+     * hostname and port.
+     * @param sessionId is the user sessionId retrieved after logging in.
+     * @return the list of replicable external systems in the TeamForge server 
+     * reached by the given ctfUrl, using the given sessionId.
+     * @throws CtfSessionExpiredException if the given sessionId is expired.
+     * @throws RemoteMasterException if any other error occurs during the
+     * method execution.
+     */
+    def getReplicableScmExternalSystemList(ctfUrl, sessionId) throws 
+           RemoteMasterException {
+       try {
+           def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
+               sessionId).dataRows
+
+           def scmList = []
+           if (lt && lt.length > 0) {
+               lt.each { extSystem ->
+                   def scmSys = [:]
+                   scmSys.id = extSystem.id
+                   scmSys.title = extSystem.title
+                   scmSys.isSvnEdge = extSystem.isSvnEdge
+                   scmSys.scmUrl = extSystem.scmUrl
+                   scmSys.scmViewerUrl = extSystem.scmViewerUrl
+                   scmList << scmSys
+               }
+           }
+           return scmList
+
+       } catch (AxisFault e) {
+           String faultMsg = e.faultString
+           GrailsUtil.deepSanitize(e)
+           if (faultMsg.contains("Session is invalid or timed out")) {
+               throw new CtfSessionExpiredException(ctfUrl, sessionId,
+                   getMessage("ctfRemoteClientService.remote.sessionExpired",
+                       locale), e)
+           } else {
+               def errorMessage = getMessage(
+                   "ctfRemoteClientService.listProjects.error", locale) + " " +
+                   faultMsg
+               log.error(errorMessage, e)
+               throw new RemoteMasterException(ctfUrl, errorMessage, e)
+           }
+       }
+   }
+
+    /**
      * @param ctfUrl is the ctf server complete URL, including protocol, 
      * hostname and port.
      * @param sessionId is the user sessionId retrieved after logging in.

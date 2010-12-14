@@ -67,7 +67,14 @@
 
                 <tr>
                   <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
-                  <td class="ItemDetailValue">${svnMasterURL}</td>
+                  <td class="ItemDetailValue">${selectedScmServer.title} (${selectedScmServer.scmUrl}) <BR>
+                  (<g:if test="${selectedScmServer.isSvnEdge}">
+                        <g:message code="setupReplica.page.confirm.svnMasterIsSvnEdge.label"/>
+                    </g:if>
+                    <g:else>
+                        <g:message code="setupReplica.page.confirm.svnMasterIsNotSvnEdge.label"/>
+                    </g:else>
+                  )</td>
                 </tr>
 
                 <tr>
