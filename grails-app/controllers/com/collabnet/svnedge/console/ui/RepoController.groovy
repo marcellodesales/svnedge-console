@@ -38,6 +38,8 @@ class RepoController {
 
     def svnRepoService
     def serverConfService
+    def packagesUpdateService
+    def statisticsService
 
     @Secured(['ROLE_USER'])
     def index = { redirect(action:list,params:params) }
@@ -93,11 +95,20 @@ class RepoController {
             redirect(action:list)
 
         } else {
-
             def repoParentDir = serverConfService.server.repoParentDir
             def repoPath = new File(repoParentDir, repo.name).absolutePath
             def username = serverConfService.httpdUser
             def group = serverConfService.httpdGroup
+            def minPackedRev = svnRepoService.findMinPackedRev(repo)
+            def headRev = svnRepoService.findHeadRev(repo)
+            def sharded = svnRepoService.getReposSharding(repo)
+            def fsType = svnRepoService.getReposFsType(repo)
+            def fsFormat = svnRepoService.getReposFsFormat(repo)
+            def repoFormat = svnRepoService.getReposFormat(repo)
+            def repoUUID = svnRepoService.getReposUUID(repo)
+            def svnVersion = packagesUpdateService.getInstalledSvnVersionNumber()
+            def diskUsage = statisticsService.getRepoUsedDiskspace(repo)
+            def repSharing = svnRepoService.getReposRepSharing(repo)
 
             def timespans = [[index: 0, 
                 title: message(code: "statistics.graph.timespan.lastHour"),
@@ -122,7 +133,17 @@ class RepoController {
                 repositoryInstance : repo,
                 svnUser : username,
                 svnGroup : group,
-                repoPath : repoPath ]
+                repoPath : repoPath,
+                minPackedRev : minPackedRev,
+                headRev : headRev,
+                sharded : sharded,
+                fsType : fsType,
+                fsFormat : fsFormat,
+                repoFormat : repoFormat,
+                repoUUID : repoUUID,
+                svnVersion : svnVersion,
+                diskUsage : diskUsage,
+                repSharing : repSharing]
         }
     }
 

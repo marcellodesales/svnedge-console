@@ -38,6 +38,7 @@
 
                     <tbody>
                     
+                        <g:include controller="repo" action="info" id="${repositoryInstance.id}" />
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.name" /></td>
 
@@ -55,6 +56,79 @@
                                 <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
                               </g:else>
                              </td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.revision" /></td>
+
+                            <td valign="top" class="value" width="100%">${headRev}</td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.uuid" /></td>
+
+                            <td valign="top" class="value" width="100%">${repoUUID}</td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.size" /></td>
+
+                            <td valign="top" class="value" width="100%">${diskusage ?: message(code:'status.page.status.noData')}</td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
+                                <g:if test="${svnVersion}">
+                                   <td valign="top" class="value" width="100%">
+                                     <g:message code="repository.page.show.repoformat.value" args="${[repoFormat, svnVersion]}"/>
+                                    </td>
+                                </g:if>
+                                <g:else>
+                                   <td valign="top" class="value" width="100%">${repoFormat}</td>
+                                </g:else>
+                            </td>
+
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
+
+                            <td valign="top" class="value" width="100%">
+                                <g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/>
+                            </td>
+                        </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.sharding" /></td>
+
+                            <td valign="top" class="value">
+                              <g:if test="${sharded >= 0}">
+                                <g:message code="repository.page.show.sharding.enabled" args="${[sharded]}"/>
+                              </g:if>
+                              <g:else>
+                                <g:message code="repository.page.show.sharding.disabled"/>
+                              </g:else>
+                             </td>
+                        </tr>
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.repshare" /></td>
+
+                            <td valign="top" class="value">
+                              <g:if test="${repSharing}">
+                                <g:message code="default.boolean.true" />
+                              </g:if>
+                              <g:else>
+                                <g:message code="default.boolean.false" />
+                              </g:else>
+                             </td> 
+                        </tr>
+
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.packed" /></td>
+"
+                            <td valign="top" class="value">
+                              <g:if test="${minPackedRev > 0}">
+                                <g:message code="default.boolean.true" />
+                              </g:if>
+                              <g:else>
+                                <g:message code="default.boolean.false" />
+                              </g:else>
+                             </td> 
                         </tr>
                         <tr>
                             <td colspan="2">

@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
+import java.util.regex.Pattern
+
 class SvnRepoService extends AbstractSvnEdgeService {
 
     // service dependencies
@@ -33,8 +35,200 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def lifecycleService
     def commandLineService
     def serverConfService
+    def statisticsService
 
     boolean transactional = false
+
+    /**
+     * Returns repository UUID.
+     *
+     * @param repo is the instance of a repository.
+     * @return uuid string
+     *
+     */
+    def getReposUUID(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def uuid = ""
+
+	def f = new File(new File(repoPath, "db/uuid").canonicalPath)
+        if (f.exists()) {
+           uuid = f.readLines()[0]
+        }
+        return uuid
+    }
+
+
+    /**
+     * Returns repository fstype.
+     *
+     * @param repo is the instance of a repository.
+     * @return fstype string
+     *
+     */
+    def getReposFsType(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def fsType = "FSFS"
+
+	def f = new File(new File(repoPath, "db/fs-type").canonicalPath)
+        if (f.exists()) {
+           fsType = f.readLines()[0].toUpperCase()
+        }
+        return fsType
+    }
+
+
+    /**
+     * Returns repository fs format
+     *
+     * @param repo is the instance of a repository.
+     * @return repository fs format integer.
+     */
+    def getReposFsFormat(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def fsFormat = 0
+	def f = new File(new File(repoPath, "db/format").canonicalPath)
+        if (f.exists()) {
+           fsFormat = f.readLines()[0].toInteger()
+        }
+        return fsFormat
+    }
+
+
+    /**
+     * Checks rep-sharing is enabled or disabled.
+     *
+     * @param repo is the instance of a repository.
+     * @return Boolean
+     */
+    def getReposRepSharing(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def repSharing = true
+	def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
+        if (!f.exists()) {
+           repSharing = false
+        }
+        f.withReader {reader ->
+             String line
+             while ( (line = reader.readLine() ) != null ) {
+                    line = line.trim()
+                    log.debug(line)
+                    if (line.matches("[# ]*enable-rep-sharing[ ]*=.*")) {
+                        if (line.startsWith("#")) {
+                            repSharing = true
+                        } else {
+                           String[] strsplit = line.split("=")
+                           if (strsplit.length <= 2){
+                              repSharing = Boolean.parseBoolean(strsplit[1].trim())
+                           } else {
+                              repSharing = true
+                           } 
+                        }
+                        break
+                    }
+             }
+        }
+
+        return repSharing
+    }
+
+
+    /**
+     * Returns repository format
+     *
+     * @param repo is the instance of a repository.
+     * @return repository format integer.
+     */
+    def getReposFormat(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def repoFormat = 0
+	def f = new File(new File(repoPath, "format").canonicalPath)
+        if (f.exists()) {
+           repoFormat = f.readLines()[0].toInteger()
+        }
+        return repoFormat
+    }
+
+
+    /**
+     * Returns Sharding information.
+     *
+     * @param repo is the instance of a repository.
+     * @return Sharding revision number in case its enabled else
+     *         return -1.
+     */
+    def getReposSharding(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+        def sharded = -1
+
+        def f = new File(new File(repoPath, "db/format").canonicalPath)
+        if (! f.exists()) {
+          shared = -1
+        }
+        f.withReader { reader ->
+             String line
+             while ( (line = reader.readLine() ) != null ) {
+                    line = line.trim()
+                    if (line.matches("^layout\\ sharded.*")) {
+                        String[] strsplit = line.split("\\ ")
+                        if (strsplit.length == 3) {
+                            sharded = strsplit[2].toLong()
+                        }
+                        break
+                    }
+             }
+        }
+
+        return sharded
+    }
+
+
+    /**
+     * Returns the current head revision.
+     *
+     * @param repo is the instance of a repository.
+     * @return revision number.
+     */
+    def findHeadRev(Repository repo) {
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+	def f = new File(new File(repoPath, "db/current").canonicalPath)
+        if (!f.exists()) {
+           return 0
+        }
+
+        return (f.readLines()[0]).toInteger()
+    }
+
+    /**
+     * Finds least packed revision
+     *
+     * @param repo is the instance of a repository.
+     * @return revision number.
+     */
+    def findMinPackedRev(Repository repo) {
+
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+	def f = new File(new File(repoPath, "db/min-unpacked-rev").canonicalPath)
+        if (!f.exists()) {
+           return 0
+        }
+
+        return (f.readLines()[0]).toInteger()
+    }
 
     /**
      * Creates a new repository.
