@@ -53,13 +53,9 @@
               <label for="svnMasterURL"><g:message code="setupReplica.page.replicaSetup.svnMasterURL.label"/></label>
             </td>
             <td valign="top" class="value" colspan="2">
-              <select name="svnMasterURL">
+              <select name="masterExternalSystemId">
                 <g:each in="${integrationServers}" var="scmServer">
-                    <option value="${scmServer.scmUrl}">
-                        ${scmServer.title} (${scmServer.isSvnEdge ? 
-                            message(code:"setupReplica.page.replicaSetup.scmtype.svnedge") :
-                            message(code:"setupReplica.page.replicaSetup.scmtype.teamforge")})
-                            - '${scmServer.scmUrl}'</option>
+                    <option value="${scmServer.id}">${scmServer.title}</option>
                 </g:each>
               </select>
             </td>

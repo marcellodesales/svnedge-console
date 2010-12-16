@@ -524,18 +524,17 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
            def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
                sessionId).dataRows
            def scmList = []
-              if (lt && lt.length > 0) {
-                  lt.each { extSystem ->
-                      def scmSys = [:]
-                      scmSys.id = extSystem.id
-                      scmSys.title = extSystem.title
-                      scmSys.isSvnEdge = extSystem.isSvnEdge
-                      scmSys.scmUrl = extSystem.scmUrl
-                      scmSys.scmViewerUrl = extSystem.scmViewerUrl
-                      scmList << scmSys
-                  }
-              }
-              return scmList
+           if (lt && lt.length > 0) {
+               lt.each { extSystem ->
+                   def scmSys = [:]
+                   scmSys.id = extSystem.id
+                   scmSys.title = extSystem.title
+                   scmSys.description = extSystem.description
+                   scmSys.isSvnEdge = extSystem.isSvnEdge
+                   scmList << scmSys
+               }
+           }
+           return scmList
 
        } catch (AxisFault e) {
            String faultMsg = e.faultString
@@ -803,4 +802,72 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         soapNamedValues.setValues(values);
         return soapNamedValues
     }
+
+    /**
+     * Retrieves the queued commands from the CTF server identified by the
+     * ctfUrl for the given replicaServerId.
+     * @param ctfUrl is the url of the CTF system.
+     * @param userSessionId is sessionID of the default user to call the soap
+     * @param replicaServerId is ID of the replica server
+     * @return List of replica command execution with Id, command and repository
+     * name, if any.
+     * @throws RemoteMasterException if any error occurs during the method
+     * call.
+     */
+    def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId)
+            throws RemoteMasterException {
+
+        try {
+            def scmSoap = this.makeScmSoap(ctfUrl)
+            def queuedCommands = scmSoap.getReplicaQueuedCommands(userSessionId,
+                replicaServerId)
+
+            def cmdsList = []
+            if (queuedCommands && queuedCommands.length > 0) {
+                queuedCommands.each { cmd ->
+                    def queuedCmd = [:]
+                    queuedCmd.id = cmd.id
+                    queuedCmd.command = cmd.command
+                    queuedCmd.repositoryName = cmd.repositoryName
+                    cmdsList << queuedCmd
+                }
+            }
+            return cmdsList
+
+        } catch (LoginFault e) {
+            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
+                locale)
+            log.error("Unable to create external system: " + msg, e)
+            throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
+
+        } catch (AxisFault e) {
+             String faultMsg = e.faultString
+             if (faultMsg.contains("The parameter type/value") &&
+                faultMsg.contains("is invalid for the adapter type")) {
+                // No such object: The parameter type/value
+                // 'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
+                // is invalid for the adapter type 'Subversion'
+                def typeValue = faultMsg.split("'")[1].split("=")
+                def paramType = typeValue[0]
+                def paramValue = typeValue[1]
+                GrailsUtil.deepSanitize(e)
+
+                if (faultMsg.contains("Session is invalid or timed out")) {
+                   throw new CtfSessionExpiredException(ctfUrl, userSessionId,
+                       getMessage("ctfRemoteClientService.remote.sessionExpired",
+                           locale), e)
+                }
+             }
+         } catch (Exception e) {
+             GrailsUtil.deepSanitize(e)
+             // also no session, but log this one as it indicates a problem
+             if (!(e instanceof LoginFault)) {
+                 def generalMsg = getMessage(
+                     "ctfRemoteClientService.createExternalSystem.error",
+                     locale)
+                 log.error(generalMsg, e)
+                 throw new RemoteMasterException(ctfUrl, generalMsg, e)
+           }
+       }
+   }
 }

@@ -47,13 +47,12 @@ class CtfConnectionCommand {
 class ReplicaInfoCommand {
 
     String masterExternalSystemId
-    String svnMasterURL
     String name
     String description
     String message
 
     static constraints = {
-        svnMasterURL(blank: false)
+        masterExternalSystemId(blank: false)
         name(blank: false)
         description(blank: false)
     }
@@ -146,7 +145,7 @@ class SetupReplicaController {
                 def scmList = getIntegrationServers()
                 def selectedScm = null
                 for (scmServer in scmList) {
-                    if (scmServer.scmUrl.equals(input.svnMasterURL)) {
+                    if (scmServer.id == input.masterExternalSystemId) {
                         selectedScm = scmServer
                         cmd.masterExternalSystemId = scmServer.id
                         break
@@ -161,8 +160,6 @@ class SetupReplicaController {
             }
             catch (Exception e) {
                 log.error("Unable to register replica", e)
-                input.errors.rejectValue('svnMasterURL', 'setupTeamForge.page.error.general',
-                        [new URL(input.svnMasterURL).host] as Object[], 'error registering')
             }
         }
         
