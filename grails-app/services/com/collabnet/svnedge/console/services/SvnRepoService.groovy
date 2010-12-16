@@ -52,7 +52,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def uuid = ""
 
-	def f = new File(new File(repoPath, "db/uuid").canonicalPath)
+        def f = new File(new File(repoPath, "db/uuid").canonicalPath)
         if (f.exists()) {
            uuid = f.readLines()[0]
         }
@@ -73,7 +73,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def fsType = "FSFS"
 
-	def f = new File(new File(repoPath, "db/fs-type").canonicalPath)
+        def f = new File(new File(repoPath, "db/fs-type").canonicalPath)
         if (f.exists()) {
            fsType = f.readLines()[0].toUpperCase()
         }
@@ -92,7 +92,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repoPath = this.getRepositoryHomePath(repo)
 
         def fsFormat = 0
-	def f = new File(new File(repoPath, "db/format").canonicalPath)
+        def f = new File(new File(repoPath, "db/format").canonicalPath)
         if (f.exists()) {
            fsFormat = f.readLines()[0].toInteger()
         }
@@ -111,7 +111,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repoPath = this.getRepositoryHomePath(repo)
 
         def repSharing = true
-	def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
+        def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
         if (!f.exists()) {
            repSharing = false
         }
@@ -151,7 +151,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repoPath = this.getRepositoryHomePath(repo)
 
         def repoFormat = 0
-	def f = new File(new File(repoPath, "format").canonicalPath)
+        def f = new File(new File(repoPath, "format").canonicalPath)
         if (f.exists()) {
            repoFormat = f.readLines()[0].toInteger()
         }
@@ -203,7 +203,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
-	def f = new File(new File(repoPath, "db/current").canonicalPath)
+        def f = new File(new File(repoPath, "db/current").canonicalPath)
         if (!f.exists()) {
            return 0
         }
@@ -222,7 +222,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
-	def f = new File(new File(repoPath, "db/min-unpacked-rev").canonicalPath)
+        def f = new File(new File(repoPath, "db/min-unpacked-rev").canonicalPath)
         if (!f.exists()) {
            return 0
         }
