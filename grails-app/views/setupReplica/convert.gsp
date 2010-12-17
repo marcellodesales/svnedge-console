@@ -55,13 +55,7 @@
                    <td class="ItemDetailName"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></td>
                    <td class="ItemDetailValue">${ctfUsername}</td>
                  </tr>
-                  
-                
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
-                  <td class="ItemDetailValue">${svnMasterURL}</td>
-                </tr>
-                
+
                 <tr>
                   <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></td>
                   <td class="ItemDetailValue">${svnReplicaCheckout}</td>

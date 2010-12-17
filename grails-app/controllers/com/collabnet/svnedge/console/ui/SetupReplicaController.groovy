@@ -193,18 +193,15 @@ class SetupReplicaController {
             server = Server.getServer()
             repoName = (Repository.list()) ? Repository.list()[0].name : "example"
             userName = authenticateService.principal().getUsername()
-            
+
             flash.message = message(code: 'setupReplica.action.confirm.success')
             return [ctfURL: getCtfConnectionCommand().ctfURL,
                     ctfUsername: getCtfConnectionCommand().ctfUsername,
-                    svnMasterURL: getReplicaInfoCommand().svnMasterURL,
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
                     ]
             
         } catch (Exception e) {
             log.error("Unable to register replica", e)
-            input.errors.rejectValue('svnMasterURL', 'setupTeamForge.page.error.general',
-                    [new URL(input.svnMasterURL).host] as Object[], 'error registering')
         }
 
         // return to input view with errors
@@ -327,7 +324,7 @@ class SetupReplicaController {
     private ReplicaConversionBean getConversionBean(ReplicaInfoCommand cmd) {
 
         ReplicaConversionBean b = getConversionBean();
-        b.svnMasterURL = cmd.svnMasterURL
+        b.masterExternalSystemId = cmd.masterExternalSystemId
         b.name = cmd.name
         b.description = cmd.description
         b.message = cmd.message

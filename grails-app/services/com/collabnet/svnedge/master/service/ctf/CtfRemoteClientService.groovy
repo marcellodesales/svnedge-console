@@ -43,6 +43,7 @@ import com.collabnet.svnedge.master.RemoteAndLocalConversationException
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.master.ctf.CtfSessionExpiredException;
 import com.collabnet.svnedge.replica.manager.ApprovalState
+import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.teamforge.CtfServer
@@ -575,17 +576,22 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     def String addExternalSystemReplica(ctfUrl, userSessionId, masterSystemId, 
             name, description, comment) throws RemoteMasterException {
 
+        def server = Server.getServer()
         def hostname = networkingService.getHostname()
+        int portNumber = server.getPort()
+        boolean useSsl = server.getUseSsl()
+        String svnUrlPath = Server.getSvnBasePath()
         try {
             def scmSoap = this.makeScmSoap(ctfUrl)
-            def replicaServId = scmSoap.addExternalSystemReplica(userSessionId, 
-                masterSystemId, name, description, hostname, comment)
+            def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
+                masterSystemId, name, description, hostname, portNumber,
+                useSsl, svnUrlPath, comment)
 
-          return replicaServId
+            return replicaId
 
         } catch (LoginFault e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
-                locale)
+                Locale.getDefault())
             log.error("Unable to create external system: " + msg, e)
             throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
 
@@ -603,8 +609,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
                 if (faultMsg.contains("Session is invalid or timed out")) {
                    throw new CtfSessionExpiredException(ctfUrl, userSessionId,
-                       getMessage("ctfRemoteClientService.remote.sessionExpired",
-                           locale), e)
+                      getMessage("ctfRemoteClientService.remote.sessionExpired",
+                           Locale.getDefault()), e)
                 }
              }
          } catch (Exception e) {
@@ -613,7 +619,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
              if (!(e instanceof LoginFault)) {
                  def generalMsg = getMessage(
                      "ctfRemoteClientService.createExternalSystem.error", 
-                     locale)
+                     Locale.getDefault())
                  log.error(generalMsg, e)
                  throw new RemoteMasterException(ctfUrl, generalMsg, e)
            }

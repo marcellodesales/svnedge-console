@@ -67,8 +67,12 @@ class Server {
     ApacheLogLevel apacheLogLevel = ApacheLogLevel.WARN
     ConsoleLogLevel consoleLogLevel = ConsoleLogLevel.WARN
 
+    static String getSvnBasePath() {
+        return "/svn"
+    }
+
     String svnURL() {
-        return urlPrefix() + "/svn/"
+        return urlPrefix() + getSvnBasePath() + "/"
     }
     
     String secureURL() {

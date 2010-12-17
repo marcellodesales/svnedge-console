@@ -46,7 +46,8 @@ public class ReplicaConfiguration {
 
 
     static constraints = {
-        svnMasterUrl(nullable:false)
+        svnMasterUrl(nullable:true)
+        systemId(nullable:false)
         description(nullable:false)
     }
 
