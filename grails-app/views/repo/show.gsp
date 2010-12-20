@@ -120,7 +120,6 @@
 
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.packed" /></td>
-"
                             <td valign="top" class="value">
                               <g:if test="${minPackedRev > 0}">
                                 <g:message code="default.boolean.true" />
