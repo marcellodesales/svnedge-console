@@ -119,7 +119,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
              String line
              while ( (line = reader.readLine() ) != null ) {
                     line = line.trim()
-                    log.debug(line)
                     if (line.matches("[# ]*enable-rep-sharing[ ]*=.*")) {
                         if (line.startsWith("#")) {
                             repSharing = true
@@ -205,10 +204,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/current").canonicalPath)
         if (!f.exists()) {
-           return 0
+          return 0
         }
 
-        return (f.readLines()[0]).toInteger()
+        try {
+           String[] strsplit = f.readLines()[0].split("\\ ")
+           return strsplit[0].toInteger()
+        } catch (Exception e) {
+            log.error("Can't find head revision for repository " +  repoPath)
+            return 0
+        }
     }
 
     /**
