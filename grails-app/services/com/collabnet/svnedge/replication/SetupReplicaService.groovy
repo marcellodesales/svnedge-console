@@ -66,7 +66,7 @@ class SetupReplicaService {
         log.debug("Attempting replica conversion...")
 
         String systemId = ctfRemoteClientService.addExternalSystemReplica(
-            replicaInfo.ctfURL, replicaInfo.userSessionId, 
+            replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 
             replicaInfo.masterExternalSystemId, replicaInfo.name, 
             replicaInfo.description, replicaInfo.message)
 
@@ -80,7 +80,8 @@ class SetupReplicaService {
         if (!rc) {
             rc = new ReplicaConfiguration()
         }
-        rc.svnMasterUrl = replicaInfo.svnMasterURL
+        // this is now provided by approval command 
+        // rc.svnMasterUrl = replicaInfo.svnMasterURL
         rc.name = replicaInfo.name
         rc.description = replicaInfo.description
         rc.message = replicaInfo.message
@@ -159,8 +160,7 @@ class SetupReplicaService {
      * @param ctfConn is the connection bean.
      * @return List of SCM integration servers which can be replicated.
      */
-    public List<Map<String, String>> getIntegrationServers(
-            CtfConnectionBean ctfConn) {
+    public List<Map<String, String>> getIntegrationServers(ctfConn) {
 
         return ctfRemoteClientService.getReplicableScmExternalSystemList(
             ctfConn.ctfURL, ctfConn.userSessionId)

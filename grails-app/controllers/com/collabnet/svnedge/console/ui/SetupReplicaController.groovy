@@ -91,9 +91,9 @@ class SetupReplicaController {
 
             try {
                 // copy input params to the conversion bean
-                CtfConnectionBean conn = getConversionBean(input)
+                def bean = getConversionBean(input)
                 // verify connection
-                setupReplicaService.confirmCtfConnection(conn)
+                setupReplicaService.confirmCtfConnection(bean.ctfConn)
                 
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
@@ -180,14 +180,10 @@ class SetupReplicaController {
         
         try {
             // copy input params to the conversion bean
-            ReplicaConversionBean conn = getConversionBean(input)
-
-            // save input for form re-entry
-            def cmd = getReplicaInfoCommand()
-            BeanUtils.copyProperties(cmd, conn)
+            ReplicaConversionBean bean = getConversionBean(input)
 
             // register the replica
-            setupReplicaService.registerReplica(conn)
+            setupReplicaService.registerReplica(bean)
 
             // prepare confirmation data
             server = Server.getServer()
@@ -202,6 +198,7 @@ class SetupReplicaController {
             
         } catch (Exception e) {
             log.error("Unable to register replica", e)
+            flash.error = message(code: 'ctfRemoteClientService.createExternalSystem.error') + " " + e.message
         }
 
         // return to input view with errors
@@ -228,9 +225,9 @@ class SetupReplicaController {
 
             try {
                 // copy input params to the conversion bean
-                CtfConnectionBean conn = getConversionBean(input)
+                def bean = getConversionBean(input)
                 // persist the connection
-                setupReplicaService.updateCtfConnection(conn)
+                setupReplicaService.updateCtfConnection(bean.ctfConn)
 
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
@@ -263,7 +260,8 @@ class SetupReplicaController {
 
     private List getIntegrationServers() {
 
-        return setupReplicaService.getIntegrationServers(getConversionBean())
+        CtfConnectionBean conn = getConversionBean().ctfConn
+        return setupReplicaService.getIntegrationServers(conn)
 
     }
 
@@ -297,7 +295,7 @@ class SetupReplicaController {
         ReplicaConversionBean bean = session.getAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY)
         if (!bean) {
             bean = new ReplicaConversionBean()
-            bean.userLocale = request.locale
+            bean.ctfConn = new CtfConnectionBean(userLocale: request.locale)
             session.setAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY, bean)
         }
         return bean
@@ -311,9 +309,9 @@ class SetupReplicaController {
     private ReplicaConversionBean getConversionBean(CtfConnectionCommand cmd) {
 
         ReplicaConversionBean b = getConversionBean();
-        b.ctfURL = cmd.ctfURL
-        b.ctfUsername = cmd.ctfUsername
-        b.ctfPassword = cmd.ctfPassword
+        b.ctfConn.ctfURL = cmd.ctfURL
+        b.ctfConn.ctfUsername = cmd.ctfUsername
+        b.ctfConn.ctfPassword = cmd.ctfPassword
         return b
     }
 

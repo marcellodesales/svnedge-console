@@ -76,7 +76,7 @@
               <label for="name"><g:message code="setupReplica.page.replicaSetup.name.label"/></label>
             </td>
             <td class="value ${hasErrors(bean: cmd, field: 'name', 'errors')}">
-              <g:textField name="name" size="40"/>
+              <g:textField name="name" size="40" value="${cmd?.name}"/>
             </td>
             <td>
               <em><g:message code="setupReplica.page.replicaSetup.name.label.tip"/></em>

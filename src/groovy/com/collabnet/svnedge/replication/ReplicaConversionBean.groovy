@@ -21,12 +21,14 @@ package com.collabnet.svnedge.replication
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
 
 /**
- * This class, with super class, represents data needed for Replica conversion
+ * This class represents data needed for Replica conversion
  */
-class ReplicaConversionBean extends CtfConnectionBean {
+class ReplicaConversionBean {
 
     String masterExternalSystemId
     String name
     String description
     String message
+    
+    CtfConnectionBean ctfConn
 }

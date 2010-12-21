@@ -613,17 +613,19 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                            Locale.getDefault()), e)
                 }
              }
+             else {
+                throw new RemoteMasterException(e.faultString, e)
+             }
+            
          } catch (Exception e) {
+           
              GrailsUtil.deepSanitize(e)
-             // also no session, but log this one as it indicates a problem
-             if (!(e instanceof LoginFault)) {
-                 def generalMsg = getMessage(
-                     "ctfRemoteClientService.createExternalSystem.error", 
-                     Locale.getDefault())
-                 log.error(generalMsg, e)
-                 throw new RemoteMasterException(ctfUrl, generalMsg, e)
-           }
-       }
+             def generalMsg = getMessage(
+                 "ctfRemoteClientService.createExternalSystem.error", 
+                 Locale.getDefault())
+             log.error(generalMsg, e)
+             throw new RemoteMasterException(ctfUrl, generalMsg, e)
+         }
    }
 
     /**
