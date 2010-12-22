@@ -70,7 +70,14 @@
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.size" /></td>
 
-                            <td valign="top" class="value" width="100%">${diskUsage ?: message(code:'status.page.status.noData')}</td>
+                            <td valign="top" class="value" width="100%">
+                               <g:if test="${diskUsage}">
+                                  <g:formatFileSize size="${diskUsage}"/>
+                               </g:if>
+                               <g:else>
+                                  <g:message code="status.page.status.noData"/>
+                               </g:else>
+                            </td>
                         </tr>
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
