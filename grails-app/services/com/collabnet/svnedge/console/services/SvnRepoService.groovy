@@ -113,7 +113,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repSharing = true
         def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
         if (!f.exists()) {
-           repSharing = false
+           return false
         }
         f.withReader {reader ->
              String line
@@ -172,7 +172,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/format").canonicalPath)
         if (! f.exists()) {
-          shared = -1
+          return -1
         }
         f.withReader { reader ->
              String line
