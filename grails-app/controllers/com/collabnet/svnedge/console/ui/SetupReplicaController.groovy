@@ -87,6 +87,8 @@ class SetupReplicaController {
      */
     def replicaSetup = { CtfConnectionCommand input ->
 
+        def externalSystems;
+        
         if (!input.hasErrors()) {
 
             try {
@@ -98,6 +100,13 @@ class SetupReplicaController {
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
                 BeanUtils.copyProperties(input, cmd)
+                
+                // fetch available external systems (error if none available)
+                externalSystems = getIntegrationServers()
+                if (!externalSystems) {
+                    input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.externalSystems.error',
+                        [input.ctfURL] as Object[], 'no replicable masters')
+                }
             }
             catch (MalformedURLException e) {
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.malformedUrl',
@@ -123,7 +132,7 @@ class SetupReplicaController {
         }
 
         // success logging in 
-        [cmd: getReplicaInfoCommand(), integrationServers: getIntegrationServers()]
+        [cmd: getReplicaInfoCommand(), integrationServers: externalSystems]
     }
     
     /**
