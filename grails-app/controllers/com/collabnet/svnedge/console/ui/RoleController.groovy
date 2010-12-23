@@ -93,18 +93,16 @@ class RoleController {
         }
 
         role.properties = params
+        // update members when all deleted
+        if (!params.people) {
+            role.people = []
+        }
+        // restore self to collection if needed
         if (addSelf) {
             role.addToPeople (u)
         }
 
         if (role.save()) {
-
-            // update members when all deleted
-            if (!params.people) {
-                role.people = []
-            }
-
-
             flash.message = "The Role has been updated"
             redirect action: show, id: role.id
         }
