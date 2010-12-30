@@ -81,16 +81,8 @@
                         </tr>
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
-                                <g:if test="${svnVersion}">
-                                   <td valign="top" class="value" width="100%">
-                                     <g:message code="repository.page.show.repoformat.value" args="${[repoFormat, svnVersion]}"/>
-                                    </td>
-                                </g:if>
-                                <g:else>
-                                   <td valign="top" class="value" width="100%">${repoFormat}</td>
-                                </g:else>
-                            </td>
 
+                            <td valign="top" class="value" width="100%">${repoFormat}</td>
                         </tr>
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
