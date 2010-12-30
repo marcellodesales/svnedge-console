@@ -90,8 +90,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def getReposFsFormat(Repository repo) {
         Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
-
-        def fsFormat = 0
+        // As per the Subversion FS design docs, Svn asssumes fsformat as 1
+        // in case db/format file is missing from repository. We follow the
+        // same.
+        def fsFormat = 1
         def f = new File(new File(repoPath, "db/format").canonicalPath)
         if (f.exists()) {
            fsFormat = f.readLines()[0].toInteger()
