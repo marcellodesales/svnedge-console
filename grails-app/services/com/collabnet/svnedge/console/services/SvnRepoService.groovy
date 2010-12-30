@@ -39,6 +39,42 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
     boolean transactional = false
 
+
+    /**
+     * Returns repository feature for give FS format.
+     *
+     * @param repo is the instance of a repository.
+     * @param fsFormat is fsformat number of given repository. 
+     * @return String
+     *
+     */
+    def getRepoFeatures(Repository repo, int fsFormat) {
+        def list = [
+         "",
+         "svndiff0",
+         "svndiff0, svndiff1",
+         "svndiff0, svndiff1, sharding, mergeinfo",
+         "svndiff0, svndiff1, sharding, mergeinfo, Memcache, rep-sharing, Packing",
+         "svndiff0, svndiff1, sharding, mergeinfo, Memcache, rep-sharing, Packing",
+        ]
+
+        Server server = lifecycleService.getServer()
+        def repoPath = this.getRepositoryHomePath(repo)
+
+        def feature = ""
+
+        if (fsFormat <=1) {
+          feature = list.get(1)
+        } else if (fsFormat >= list.size()) {
+          feature = list.get(list.size() -1) 
+        } else {
+          feature = list.get(fsFormat)
+        }
+
+        return feature
+    }
+
+
     /**
      * Returns repository UUID.
      *

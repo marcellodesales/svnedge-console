@@ -109,6 +109,7 @@ class RepoController {
             def svnVersion = packagesUpdateService.getInstalledSvnVersionNumber()
             def diskUsage = statisticsService.getRepoUsedDiskspace(repo)
             def repSharing = svnRepoService.getReposRepSharing(repo)
+            def repoSupport = svnRepoService.getRepoFeatures(repo, fsFormat)
 
             def timespans = [[index: 0, 
                 title: message(code: "statistics.graph.timespan.lastHour"),
@@ -143,7 +144,8 @@ class RepoController {
                 repoUUID : repoUUID,
                 svnVersion : svnVersion,
                 diskUsage : diskUsage,
-                repSharing : repSharing]
+                repSharing : repSharing,
+                repoSupport: repoSupport]
         }
     }
 

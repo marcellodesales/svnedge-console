@@ -84,12 +84,19 @@
 
                             <td valign="top" class="value" width="100%">${repoFormat}</td>
                         </tr>
+
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
 
                             <td valign="top" class="value" width="100%">
                                 <g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/>
                             </td>
+                        </tr>
+
+
+                        <tr class="prop">
+                            <td valign="top" class="name"><g:message code="repository.page.show.supports" /></td>
+                            <td valign="top" class="value" width="100%">${repoSupport}</td>
                         </tr>
 
                         <tr class="prop">
