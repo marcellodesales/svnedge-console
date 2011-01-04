@@ -42,8 +42,9 @@
 
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.name" /></td>
-                            <td valign="top" class="value" width="100%">${fieldValue(bean:repositoryInstance, field:'name')}</td>
-                        </tr>
+                            <td colspan="3" valign="top" class="value" width="100%">${fieldValue(bean:repositoryInstance, field:'name')}</td>
+
+                         </tr>
  
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.status" /></td>
@@ -55,16 +56,27 @@
                                 <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
                               </g:else>
                              </td>
+
+                            <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
+                            <td valign="top" class="value" width="100%">
+                                <g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/>
+                            </td>
                         </tr>
  
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.revision" /></td>
                             <td valign="top" class="value" width="100%">${headRev}</td>
+
+                            <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
+                            <td valign="top" class="value" width="100%">${repoFormat}</td>
                         </tr>
  
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.uuid" /></td>
                             <td valign="top" class="value" width="100%">${repoUUID}</td>
+
+                            <td valign="top" class="name"><g:message code="repository.page.show.supports" /></td>
+                            <td valign="top" class="value" width="100%">${repoSupport}</td>
                         </tr>
  
                         <tr class="prop">
@@ -77,27 +89,7 @@
                                   <g:message code="status.page.status.noData"/>
                                </g:else>
                             </td>
-                        </tr>
 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
-                            <td valign="top" class="value" width="100%">${repoFormat}</td>
-                        </tr>
-
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
-                            <td valign="top" class="value" width="100%">
-                                <g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/>
-                            </td>
-                        </tr>
-
-
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.supports" /></td>
-                            <td valign="top" class="value" width="100%">${repoSupport}</td>
-                        </tr>
-
-                        <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.sharding" /></td>
                             <td valign="top" class="value">
                               <g:if test="${sharded >= 0}">
@@ -110,18 +102,6 @@
                         </tr>
 
                         <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.repshare" /></td>
-                            <td valign="top" class="value">
-                              <g:if test="${repSharing}">
-                                <g:message code="default.boolean.true" />
-                              </g:if>
-                              <g:else>
-                                <g:message code="default.boolean.false" />
-                              </g:else>
-                             </td> 
-                        </tr>
-
-                        <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.packed" /></td>
                             <td valign="top" class="value">
                               <g:if test="${minPackedRev > 0}">
@@ -131,10 +111,19 @@
                                 <g:message code="default.boolean.false" />
                               </g:else>
                              </td> 
-                        </tr>
 
-                        <tr>
-                            <td colspan="2">
+                            <td valign="top" class="name"><g:message code="repository.page.show.repshare" /></td>
+                            <td valign="top" class="value">
+                              <g:if test="${repSharing}">
+                                <g:message code="default.boolean.true" />
+                              </g:if>
+                              <g:else>
+                                <g:message code="default.boolean.false" />
+                              </g:else>
+                             </td>                         </tr>
+
+                         <tr>
+                            <td colspan="4">
                                 <g:render template="../statistics/chart"/>
                             </td>
                         </tr>
