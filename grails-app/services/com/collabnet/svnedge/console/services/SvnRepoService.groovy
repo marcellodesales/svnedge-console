@@ -52,10 +52,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def list = [
          "",
          "svndiff0",
-         "svndiff0, svndiff1",
-         "svndiff0, svndiff1, sharding, mergeinfo",
-         "svndiff0, svndiff1, sharding, mergeinfo, memcache, rep-sharing, packing",
-         "svndiff0, svndiff1, sharding, mergeinfo, memcache, rep-sharing, packing",
+         "svndiff1",
+         "svndiff1, sharding, mergeinfo",
+         "svndiff1, sharding, mergeinfo, rep-sharing, packed revs",
+         "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
         ]
 
         Server server = lifecycleService.getServer()
