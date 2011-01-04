@@ -21,6 +21,7 @@ import com.collabnet.svnedge.console.Server
 
 
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.master.RemoteMasterException
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
@@ -31,7 +32,7 @@ import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 /**
  * This service handles replication-related functionality
  */
-class SetupReplicaService {
+class SetupReplicaService  extends AbstractSvnEdgeService {
 
     boolean transactional = true
     public static String DEFAULT_SYNC_RATE = 5 // minutes for polling interval
@@ -93,11 +94,12 @@ class SetupReplicaService {
         if (!ctfServer) {
             ctfServer = new CtfServer()
         }
-        ctfServer.baseUrl = replicaInfo.ctfURL
-        ctfServer.internalApiKey = replicaInfo.serverKey
-        ctfServer.ctfUsername = replicaInfo.ctfUsername
-        ctfServer.ctfPassword = securityService.encrypt(replicaInfo.ctfPassword)
-        
+        ctfServer.baseUrl = replicaInfo.ctfConn.ctfURL
+        ctfServer.internalApiKey = replicaInfo.ctfConn.serverKey
+        ctfServer.ctfUsername = replicaInfo.ctfConn.ctfUsername
+        ctfServer.ctfPassword = securityService.encrypt(
+            replicaInfo.ctfConn.ctfPassword)
+
         if (!rc.validate() || !ctfServer.validate() || !server.validate()) {
             log.error("could not save necessary domain objects")
             [rc, ctfServer, server].each { domainObj ->
@@ -109,10 +111,11 @@ class SetupReplicaService {
         rc.save(flush:true)
         ctfServer.save(flush:true)
         server.save(flush:true)
-        
+
         log.info("Rewriting server config and restarting")
         // setupTeamForgeService.installIntegrationServer(replicaInfo)
-        setupTeamForgeService.unpackIntegrationScripts(replicaInfo.userLocale)
+        setupTeamForgeService.unpackIntegrationScripts(
+            replicaInfo.ctfConn.userLocale)
 
         serverConfService.backupAndOverwriteHttpdConf()
         serverConfService.writeConfigFiles()
