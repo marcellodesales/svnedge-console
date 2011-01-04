@@ -54,8 +54,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
          "svndiff0",
          "svndiff0, svndiff1",
          "svndiff0, svndiff1, sharding, mergeinfo",
-         "svndiff0, svndiff1, sharding, mergeinfo, Memcache, rep-sharing, Packing",
-         "svndiff0, svndiff1, sharding, mergeinfo, Memcache, rep-sharing, Packing",
+         "svndiff0, svndiff1, sharding, mergeinfo, memcache, rep-sharing, packing",
+         "svndiff0, svndiff1, sharding, mergeinfo, memcache, rep-sharing, packing",
         ]
 
         Server server = lifecycleService.getServer()
