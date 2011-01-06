@@ -66,39 +66,31 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * Master host for any reason.
      */
     def retrieveAndExecuteActionCommands(){
-        //receive the commands from cee
-        def queuedCommands = getReplicaQueuedCommands()
 
-        def actionCommandsResults = []
-        //execute each command, having them being updated with status
-        for(command in queuedCommands) {
-            actionCommandsResults << processCommandRequest(command)
-        }
-        //upload the commands results back to ctf
-        ctfRemoteClientService.uploadActionCommandResults(actionCommandsResults)
-    }
-    
-    /**
-     * @return the list of queued commands from the master CTF server.
-     * @throws RemoteMasterException in case any remote communication problem
-     * occurs.
-     */
-    public List<Map<String, String>> getReplicaQueuedCommands() 
-            throws RemoteMasterException {
-
+        def locale = Locale.getDefault()
         ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
         if (!replica) {
-            def msg = getMessage("filter.probihited.mode.replica",
-                Locale.getDefault())
+            def msg = getMessage("filter.probihited.mode.replica", locale)
             throw new IllegalStateException(msg)
         }
         def ctfServer = CtfServer.getServer()
         def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
         def userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
-            ctfServer.ctfUsername, ctfPassword, Locale.getDefault())
+            ctfServer.ctfUsername, ctfPassword, locale)
 
-        return ctfRemoteClientService.getReplicaQueuedCommands(
-            ctfServer.baseUrl, userSessionId, replica.systemId)
+        //receive the commands from cee
+        def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
+            ctfServer.baseUrl, userSessionId, replica.systemId, locale)
+
+        //execute each command, having them being updated with status
+        for(command in queuedCommands) {
+            def commandWithResult = processCommandRequest(command)
+
+            //upload the commands results back to ctf
+            ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
+                userSessionId, replica.systemId, commandWithResult.id, 
+                commandWithResult.succeeded, locale)
+        }
     }
 
     /**
@@ -112,7 +104,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * 
      * @return the updated value of the command with the following properties:
      * 
-     * <li>command['status'] = the status of the command, which is a boolean
+     * <li>command['succeeded'] = the status of the command, which is a boolean
      * value that determines if the command executed successfully or not.
      * <li>command['exception'] = the exception that happened during the
      * execution of the command, if any.
@@ -130,18 +122,25 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         } catch (ClassNotFoundException clne) {
             command['exception'] = 
                 new CommandNotImplementedException(clne, className)
-            command['status'] = false
+            command['succeeded'] = false
             return command
         }
-        
+        log.debug("Instantiating the class for the command " + command)
         def commandInstance = classObject.newInstance();
+        log.debug("Class " + commandInstance)
+
         commandInstance.init(command['params'], applicationContext)
+        log.debug("Initialized the parameters " + command['params'])
         try {
+            log.debug("Ready to run the command " + command)
             commandInstance.run()
+            log.debug("Command successfully run: " + command)
+
         } catch (CommandExecutionException ceex) {
             command['exception'] = ceex
+            log.error("The command failed: " + command)
         }
-        command['status'] = commandInstance.succeeded
+        command['succeeded'] = commandInstance.succeeded
         return command
     }
 }

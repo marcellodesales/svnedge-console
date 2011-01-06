@@ -399,14 +399,6 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         return statValue
     }
 
-    def getActionCommands() {
-        return [cmd:[]]
-    }
-
-    def uploadActionCommandResults(actionCommandsResults) {
-
-    }
-
     def getSVNNotifications(timestamp) {
     }
 
@@ -815,14 +807,15 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * Retrieves the queued commands from the CTF server identified by the
      * ctfUrl for the given replicaServerId.
      * @param ctfUrl is the url of the CTF system.
-     * @param userSessionId is sessionID of the default user to call the soap
-     * @param replicaServerId is ID of the replica server
+     * @param userSessionId is sessionID of the default user to call the soap.
+     * @param replicaServerId is ID of the replica server.
+     * @param locale is the locale defined for error messages.
      * @return List of replica command execution with Id, command and repository
      * name, if any.
      * @throws RemoteMasterException if any error occurs during the method
      * call.
      */
-    def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId)
+    def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId, locale)
             throws RemoteMasterException {
 
         try {
@@ -867,7 +860,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
              if (faultMsg.contains("The parameter type/value") &&
                 faultMsg.contains("is invalid for the adapter type")) {
                 // No such object: The parameter type/value
-                // 'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
+                //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
                 // is invalid for the adapter type 'Subversion'
                 def typeValue = faultMsg.split("'")[1].split("=")
                 def paramType = typeValue[0]
@@ -889,7 +882,63 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                      locale)
                  log.error(generalMsg, e)
                  throw new RemoteMasterException(ctfUrl, generalMsg, e)
-           }
-       }
-   }
+             }
+        }
+    }
+
+    /**
+     * Uploads the result of a given command to the master.
+     * @param ctfUrl is the url of the CTF system.
+     * @param userSessionId is sessionID of the default user to call the soap
+     * @param replicaServerId is ID of the replica server
+     * @param commandId is the ID of the command execution
+     * @param succeeded defines if the command succeeded or not.
+     * @param locale is the locale defined for error messages.
+     * @throws RemoteMasterException if any error occurs during the method
+     * call.
+     */
+    def uploadCommandResult(ctfUrl, userSessionId, replicaServerId, commandId,
+            succeeded, locale) throws RemoteMasterException {
+
+        try {
+            def scmSoap = this.makeScmSoap(ctfUrl)
+            scmSoap.uploadCommandResult(userSessionId, replicaServerId,
+                commandId, succeeded)
+
+        } catch (LoginFault e) {
+            def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
+                locale)
+            log.error("Unable to create external system: " + msg, e)
+            throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
+
+        } catch (AxisFault e) {
+            String faultMsg = e.faultString
+            if (faultMsg.contains("The parameter type/value") &&
+                faultMsg.contains("is invalid for the adapter type")) {
+                // No such object: The parameter type/value
+                //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
+                // is invalid for the adapter type 'Subversion'
+                def typeValue = faultMsg.split("'")[1].split("=")
+                def paramType = typeValue[0]
+                def paramValue = typeValue[1]
+                GrailsUtil.deepSanitize(e)
+    
+                if (faultMsg.contains("Session is invalid or timed out")) {
+                   throw new CtfSessionExpiredException(ctfUrl, userSessionId,
+                       getMessage("ctfRemoteClientService.remote.sessionExpired"
+                           , locale), e)
+                }
+             }
+
+         } catch (Exception e) {
+            GrailsUtil.deepSanitize(e)
+            // also no session, but log this one as it indicates a problem
+            if (!(e instanceof LoginFault)) {
+                def generalMsg = getMessage(
+                    "ctfRemoteClientService.uploadCommandResult.error", locale)
+                log.error(generalMsg, e)
+                throw new RemoteMasterException(ctfUrl, generalMsg, e)
+            }
+        }
+    }
 }

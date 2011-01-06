@@ -21,7 +21,9 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.context.ApplicationContext
 import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.replica.manager.ApprovalState;
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replication.ReplicaConfiguration;
 
 /**
  * This command updates the state of the replica server with the URL of the
@@ -38,6 +40,12 @@ public class ReplicaApproveCommand extends AbstractActionCommand {
     def repoDbTuple
 
     def constraints() {
+        def replica = ReplicaConfiguration.getCurrentConfig()
+        if (replica.approvalState == ApprovalState.APPROVED) {
+            throw new IllegalStateException("The replica is already approved " +
+                "with the id '${replica.systemId}'")
+        }
+        
         // Verify if the parameter "scmUrl" exists.
         if (!this.params["scmUrl"]) {
             throw new IllegalStateException("The command does not have the " +
