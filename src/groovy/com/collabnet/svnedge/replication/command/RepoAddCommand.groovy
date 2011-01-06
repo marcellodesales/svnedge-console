@@ -15,18 +15,17 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.commands
+package com.collabnet.svnedge.replication.command
 
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.context.ApplicationContext
-//import com.collabnet.svnedge.replica.service.ActionCommandsIF
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 /**
  * This command adds a repository into the system, by using the svn service.
  * 
- * @author mdesales
+ * @author Marcello de Sales (mdesales@collab.net)
  *
  */
 public class RepoAddCommand extends AbstractActionCommand {
@@ -44,7 +43,10 @@ public class RepoAddCommand extends AbstractActionCommand {
                 this.params["repoName"])
 
         //Verify if the file-system does not contain the repo dir.
-        assert !this.repoFileDir.exists()
+        if (!this.repoFileDir.exists()) {
+            throw new IllegalStateException("The replicated repository '" + 
+                this.params["repoName"] +"' does not exist in the file-system.")
+        }
 
         def repoRecord = Repository.findByName(this.params["repoName"])
         if (repoRecord) {
@@ -53,7 +55,10 @@ public class RepoAddCommand extends AbstractActionCommand {
         // Verify if the command has not been created in the database or
         // has been created and removed.
         if (this.repoDbTuple) {
-            assert this.repoDbTuple.getStatus() == RepoStatus.REMOVED
+            if (this.repoDbTuple.getStatus() == RepoStatus.REMOVED) {
+                throw new IllegalStateException("The replicated repository '" +
+                    this.params["repoName"]+ "' has been removed.")
+            }
         }
         
     }

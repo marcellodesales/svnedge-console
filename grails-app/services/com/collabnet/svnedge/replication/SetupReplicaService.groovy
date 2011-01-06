@@ -44,6 +44,15 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def serverConfService
     def lifecycleService
 
+    /**
+    * Sets system properties used to configure the integration webapp
+    * and scripts
+    *
+    * @param appHome is the application home directory
+    */
+   def bootStrap = {
+       log.debug("Bootrastrapping the Setup Replica service")
+   }
 
     /**
      * Confirm the ctf connection
@@ -167,5 +176,18 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         return ctfRemoteClientService.getReplicableScmExternalSystemList(
             ctfConn.ctfURL, ctfConn.userSessionId)
+    }
+
+    /**
+     * Updates the server information with the given scmMasterUrl and updates
+     * the approval status to Approved.
+     * 
+     * @param scmMasterUrl the scmUrl from the master server.
+     */
+    public void updateServerAfterApproval(scmMasterUrl) {
+        ReplicaConfiguration rc = ReplicaConfiguration.getCurrentConfig()
+        rc.svnMasterUrl = scmMasterUrl
+        rc.approvalState = ApprovalState.APPROVED
+        rc.save(flush:true)
     }
 }

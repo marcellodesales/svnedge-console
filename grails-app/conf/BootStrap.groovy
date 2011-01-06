@@ -53,6 +53,7 @@ class BootStrap {
     def lifecycleService
     def serverConfService
     def setupTeamForgeService
+    def setupReplicaService
     def logManagementService
 
     // Alternate auth mechanism for CTF mode
@@ -128,6 +129,8 @@ class BootStrap {
         log.info("Bootstrap integration server configuration...")
         try {
             setupTeamForgeService.bootStrap(appHome)
+            setupReplicaService.bootStrap()
+
         } catch (Exception e) {
             log.error ("Failed to intitialize SetupTeamForgeService: " + e.getMessage(), e)
         }

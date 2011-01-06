@@ -17,24 +17,36 @@
  */
 package com.collabnet.svnedge.replication
 
-import com.collabnet.svnedge.replica.commands.CommandExecutionException
-import com.collabnet.svnedge.replica.commands.CommandNotImplementedException
+import java.util.List;
+import java.util.Map;
+
+import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
+import com.collabnet.svnedge.master.RemoteMasterException;
+import com.collabnet.svnedge.replication.command.CommandExecutionException
+import com.collabnet.svnedge.replication.command.CommandNotImplementedException
+import com.collabnet.svnedge.teamforge.CtfServer;
+
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import org.springframework.remoting.RemoteAccessException
 
 /**
- * The cache management manages the cache structures for the user authentication
- * and the file system artifacts.
- * @author mdesales
+ * The ReplicaCommandExecutiorService is responsible for retrieving the
+ * queued commands from the master server, interpret and transform them
+ * into Groovy Classes based on the name of the command, and execute each
+ * of them. The result of the command is returned for each of the executed
+ * command, being uploaded back to the server.
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
  */
-public class ActionCommandExecutorService implements ApplicationContextAware {
+public class ReplicaCommandExecutorService extends AbstractSvnEdgeService 
+        implements ApplicationContextAware {
 
     boolean transactional = true
 
     ApplicationContext applicationContext
 
     def ctfRemoteClientService
+    def securityService
 
     /** The default Master instance */
     def defaultMaster
@@ -48,75 +60,45 @@ public class ActionCommandExecutorService implements ApplicationContextAware {
     }
 
     /**
-     * @param username is the username on the CEE site
-     * @param password is the password associated with the username on the
-     * CEE site
      * @return boolean if the local cache contains the given username and 
      * password as a key. 
      * @throws RemoteAccessException if the communication fails with the remote
      * Master host for any reason.
      */
     def retrieveAndExecuteActionCommands(){
-    
         //receive the commands from cee
-        def remoteResponse = ctfRemoteClientService?.getActionCommands()
-
-        //translate the commands for execution
-        def actionCommands = translateWsCommandsForExecution(remoteResponse.cmd)
+        def queuedCommands = getReplicaQueuedCommands()
 
         def actionCommandsResults = []
         //execute each command, having them being updated with status
-        for(command in actionCommands) {
+        for(command in queuedCommands) {
             actionCommandsResults << processCommandRequest(command)
         }
         //upload the commands results back to ctf
         ctfRemoteClientService.uploadActionCommandResults(actionCommandsResults)
     }
-
+    
     /**
-     * @param wsCommandsList is an array of ReplicaWs.CommandType
-     * @return a list commands represented as the following conversion:
-     * 
-     * commands['id'] = wsCommand.id
-     * commands['code'] = wsCommand.code
-     * commands['params'] = wsCommand.param[]
-     * 
-     * The type commands['params'] is a list of the following:
-     * 
-     * commands['params']['name'] = wsCommand.param[].name
-     * commands['params']['values'] = wsCommand.param[].val[].string or .int
-     * 
-     * The wsCommand.param[].val[] has types: string has precedence over the
-     * others.
-     * 
+     * @return the list of queued commands from the master CTF server.
+     * @throws RemoteMasterException in case any remote communication problem
+     * occurs.
      */
-    def translateWsCommandsForExecution(wsCommandsList) {
-        def commands = []
-        for(wsCommand in wsCommandsList) {
-            def command = [:]
-            command['id'] = wsCommand.id
-            command['code'] = wsCommand.code
-            def params = []
-            for(wsCommandParameter in wsCommand.param) {
-                def param = [:]
-                param['name'] = wsCommandParameter.name
-                def paramValues = []
-                for (wsCommandParameterValue in wsCommandParameter.val) {
-                    //the only implemented types are string and int... If 
-                    //the webservice type Replica.CommandParameterValueType 
-                    //adds support to more, this needs to be changed.
-                    //String has precedence over int here.
-                    def paramValue = wsCommandParameterValue.string ?: 
-                            (int) wsCommandParameterValue.int
-                    paramValues << paramValue
-                }
-                param['values'] = paramValues
-                params << param
-            }
-            command['params'] = params
-            commands << command
+    public List<Map<String, String>> getReplicaQueuedCommands() 
+            throws RemoteMasterException {
+
+        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
+        if (!replica) {
+            def msg = getMessage("filter.probihited.mode.replica",
+                Locale.getDefault())
+            throw new IllegalStateException(msg)
         }
-        return commands
+        def ctfServer = CtfServer.getServer()
+        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
+        def userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
+            ctfServer.ctfUsername, ctfPassword, Locale.getDefault())
+
+        return ctfRemoteClientService.getReplicaQueuedCommands(
+            ctfServer.baseUrl, userSessionId, replica.systemId)
     }
 
     /**
@@ -137,10 +119,9 @@ public class ActionCommandExecutorService implements ApplicationContextAware {
      * 
      */
     def processCommandRequest(command) {
-        def commandPackage = "com.collabnet.svnedge.replica.commands"
+        def commandPackage = "com.collabnet.svnedge.replication.command"
         
-        def className = command['code'][0].toUpperCase() + 
-            command['code'][1..-1] + "Command"
+        def className = command['code'].capitalize() + "Command"
 
         def classObject = null
         try {

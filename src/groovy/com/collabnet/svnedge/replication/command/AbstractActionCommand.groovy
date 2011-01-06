@@ -15,9 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.commands
+package com.collabnet.svnedge.replication.command
 
 import org.apache.log4j.Logger
+
 /**
  * Defines the Abstract Action Command to be executed by the Action Commands
  * Executor Service. Any command implementation must extend this class, which
@@ -29,12 +30,12 @@ import org.apache.log4j.Logger
  * params.exeption = in the case of an unsuccessful execution, this property
  * contains the exception that occurred.
  * 
- * @author mdesales
+ * @author Marcello de Sales (mdesales@collab.net)
  */
 public abstract class AbstractActionCommand {
 
     private Logger log = Logger.getLogger(getClass())
-     
+
     /**
      * The final state of the command. If it is false, the params property
      * will contain an exception
@@ -53,16 +54,16 @@ public abstract class AbstractActionCommand {
      * in the command classes, where methods are called from.
      */
     private appContext
-    
+
     public getService(serviceName) {
         return appContext.getBean(serviceName)
     }
-    
+
     /**
      * The parameters to execute the method.
      */
     protected originalParameters
-    
+
     protected Map params
 
     def AbstractActionCommand() {
@@ -72,16 +73,9 @@ public abstract class AbstractActionCommand {
 
     def init(initialParameter, appCtx) {
         appContext = appCtx
-        originalParameters = initialParameter
+        params = initialParameter
         log.debug("Instantiating the command " + getClass().getName() + 
                 " with the parameters " + initialParameter)
-        
-        for(paramAndValue in initialParameter) {
-            def paramName = paramAndValue['name']
-            def paramValue = paramAndValue['values'].size() == 1 ? 
-                    paramAndValue['values'][0] : paramAndValue['values']
-            params[paramName] = paramValue
-        }
     }
 
     /**

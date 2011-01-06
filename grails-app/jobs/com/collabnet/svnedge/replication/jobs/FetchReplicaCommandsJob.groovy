@@ -17,14 +17,19 @@
  */
 package com.collabnet.svnedge.replication.jobs
 
-
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.services.JobsAdminService
 import com.collabnet.svnedge.console.ServerMode
 
-class FetchActionCommandsJob {
+/**
+ * Fetch the replica commands from the server.
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
+ *
+ */
+class FetchReplicaCommandsJob {
 
-    def actionCommandExecutorService
+    def replicaCommandExecutorService
 
     static def group = JobsAdminService.REPLICA_GROUP
 
@@ -49,6 +54,6 @@ class FetchActionCommandsJob {
 
     private def doExecute() {
         log.info("Checking for replication commands")
-        actionCommandExecutorService.retrieveAndExecuteActionCommands()
+        replicaCommandExecutorService.retrieveAndExecuteActionCommands()
     }
 }

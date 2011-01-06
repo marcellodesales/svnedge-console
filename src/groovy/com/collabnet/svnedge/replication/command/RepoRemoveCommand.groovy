@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.commands
+package com.collabnet.svnedge.replication.command
 
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
@@ -39,24 +39,25 @@ public class RepoRemoveCommand extends AbstractActionCommand {
             this.repoDbTuple = ReplicatedRepository.findByRepo(repoRecord)
         }
         if (!this.repoDbTuple) {
-            throw new IllegalStateException("Cannot remove the " 
-                                            + "repository.  It does not " 
-                                            + "exist.")
+            throw new IllegalStateException("The repository '" + 
+                this.params["repoName"] + "' does not exist.")
+
         } else if (this.repoDbTuple.getStatus() == RepoStatus.REMOVED) {
-            throw new IllegalStateException("Cannot remove the " 
-                                            + "repository.  It has " 
-                                            + "already been removed.")
-        }   
+            throw new IllegalStateException("The repository '" + 
+                this.params["repoName"] + "' has already been removed.")
+        }
     }
 
     def execute() {
         log.debug("Acquiring the svn notifications service...")
         def svn = getService("svnNotificationService")
 
-        log.debug("Removing the repository from the database...")
+        log.debug("Removing the repository '"+this.params["repoName"]+ 
+            "' from the database...")
         svn.removeRepositoryOnDatabase(this.params["repoName"])
 
-        log.debug("Removing the repository on the file system...")
+        log.debug("Removing the repository '"+this.params["repoName"]+ 
+            "' from the file system...")
         svn.removeRepositoryOnFileSystem(this.params["repoName"])
     }
 

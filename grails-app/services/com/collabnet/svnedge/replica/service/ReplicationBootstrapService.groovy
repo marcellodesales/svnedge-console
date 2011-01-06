@@ -42,11 +42,11 @@ class ReplicationBootstrapService {
     def svnStatisticsService
     def svnNotificationService
     def jobsAdminService
-    def actionCommandsExecutorService
+    def replicaCommandExecutorService
 
     def userCacheStatisticsService
     def latencyStatisticsService
-    
+
     def bootstrap = { config, servletContext, server ->
 
         if (!config.svnedge.ctfMaster) {
@@ -142,6 +142,6 @@ class ReplicationBootstrapService {
             config.svnedge.replica.svn.svnsyncRate, defaultMaster)
 
         log.info("Bootstrapping actionCommandsExecutorService...")
-        actionCommandsExecutorService.bootStrap(defaultMaster, server)
+        replicaCommandExecutorService.bootStrap(defaultMaster, server)
     }
 }

@@ -831,12 +831,26 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 replicaServerId)
 
             def cmdsList = []
-            if (queuedCommands && queuedCommands.length > 0) {
-                queuedCommands.each { cmd ->
+            if (queuedCommands && queuedCommands.mDataRows.length > 0) {
+                queuedCommands.mDataRows.each { cmd ->
                     def queuedCmd = [:]
                     queuedCmd.id = cmd.id
-                    queuedCmd.command = cmd.command
-                    queuedCmd.repositoryName = cmd.repositoryName
+                    queuedCmd.code = cmd.command
+                    // building the params, if any
+                    def paramNames = cmd.parameters.names
+                    def paramValues = cmd.parameters.values
+                    def cmdParams = [:]
+                    if (paramNames.length == paramValues.length) {
+                        def param = [:]
+                        for (int i = 0; i < paramNames.length; i++) {
+                            param[paramNames[i]] = paramValues[i]
+                        }
+                        cmdParams << param
+                    }
+                    // TODO: the repository name should be defined in the params
+                    // TODO: Remove the repositoryName property when removed
+                    cmdParams['repositoryName'] = cmd.repositoryName
+                    queuedCmd.params = cmdParams
                     cmdsList << queuedCmd
                 }
             }
