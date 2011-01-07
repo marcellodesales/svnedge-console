@@ -19,18 +19,17 @@ package com.collabnet.svnedge.replication
 
 import grails.test.*
 
-class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
+class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
-    def actionCommandExecutorService
+    def replicaCommandExecutorService
     def svnNotificationService
 
     def REPO_NAME = "testproject2"
 
     protected void setUp() {
         // delete the repo directory for the repo we are adding.
-        def repoFileDir = new File(svnNotificationService
-                                   .getReplicaParentDirPath() + "/" 
-                                   + REPO_NAME)
+        def repoFileDir = new File(
+            svnNotificationService.getReplicaParentDirPath() + "/" + REPO_NAME)
         deleteRecursive(repoFileDir)
     }
 
@@ -38,7 +37,7 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Tests the current state of the users cache at bootstrap
      */
     void testExecuteService() {
-        actionCommandExecutorService.retrieveAndExecuteActionCommands()
+        replicaCommandExecutorService.retrieveAndExecuteActionCommands()
         
     }
 
@@ -47,8 +46,8 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      */
     void testProcessBadCommand() {
         def badCommand = [code: 'Notacommand', id: 0, params: []]
-        def result = actionCommandExecutorService
-            .processCommandRequest(badCommand)
+        def result = replicaCommandExecutorService.processCommandRequest(
+            badCommand)
         assertNotNull("Processing a bad command should not return null.", 
                       result)
         assertNotNull("Processing a bad command should return an exception.", 
@@ -63,8 +62,8 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     void testProcessAddCommand() {
         def command = [code: 'repoAdd', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        def result = actionCommandExecutorService
-            .processCommandRequest(command)
+        def result = replicaCommandExecutorService.processCommandRequest(
+            command)
         assertNotNull("Processing a command should not return null.", 
                       result)
         if (result['exception']) {
@@ -75,7 +74,6 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         assertTrue("Processing a command should return a true status.",
                    result['status'])
     }
-
     /**
      * Test processing a good remove command.
      */
@@ -83,13 +81,12 @@ class ActionCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         // add first
         def command = [code: 'repoAdd', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        def result = actionCommandExecutorService
-            .processCommandRequest(command)
+        def result = replicaCommandExecutorService.processCommandRequest(
+            command)
         // then remove
         command = [code: 'repoRemove', id: 0, 
             params: [[name: 'repoName', values: REPO_NAME]]]
-        result = actionCommandExecutorService
-            .processCommandRequest(command)
+        result = replicaCommandExecutorService.processCommandRequest(command)
         assertNotNull("Processing a command should not return null.", 
                       result)
         if (result['exception']) {
