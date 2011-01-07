@@ -573,11 +573,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         int portNumber = server.getPort()
         boolean useSsl = server.getUseSsl()
         String svnUrlPath = Server.getSvnBasePath()
+        String viewvcUrlPath = Server.getViewvcBasePath()
         try {
             def scmSoap = this.makeScmSoap(ctfUrl)
             def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
                 masterSystemId, name, description, hostname, portNumber,
-                useSsl, svnUrlPath, comment)
+                useSsl, svnUrlPath, viewvcUrlPath, comment)
 
             return replicaId
 

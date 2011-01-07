@@ -71,6 +71,10 @@ class Server {
         return "/svn"
     }
 
+    static String getViewvcBasePath() {
+        return "/viewvc"
+    }
+
     String svnURL() {
         return urlPrefix() + getSvnBasePath() + "/"
     }
