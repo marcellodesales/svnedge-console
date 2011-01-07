@@ -43,6 +43,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def securityService
     def serverConfService
     def lifecycleService
+    def replicaCommandExecutorService
 
     /**
     * Sets system properties used to configure the integration webapp
@@ -78,7 +79,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         String systemId = ctfRemoteClientService.addExternalSystemReplica(
             replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 
             replicaInfo.masterExternalSystemId, replicaInfo.name, 
-            replicaInfo.description, replicaInfo.message)
+            replicaInfo.description, replicaInfo.message, 
+            replicaInfo.ctfConn.userLocale)
 
         log.debug("Conversion successful, got ID: " + systemId)
 
@@ -132,6 +134,10 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
+
+        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands(
+            replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 
+            replicaInfo.masterExternalSystemId, replicaInfo.ctfConn.userLocale)
     }
 
     /**

@@ -566,7 +566,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     * call.
     */
     def String addExternalSystemReplica(ctfUrl, userSessionId, masterSystemId, 
-            name, description, comment) throws RemoteMasterException {
+            name, description, comment, locale) throws RemoteMasterException {
 
         def server = Server.getServer()
         def hostname = networkingService.getHostname()
@@ -584,7 +584,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
         } catch (LoginFault e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
-                Locale.getDefault())
+                locale)
             log.error("Unable to create external system: " + msg, e)
             throw new CtfAuthenticationException(userSessionId, ctfUrl, msg, e)
 
@@ -603,7 +603,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 if (faultMsg.contains("Session is invalid or timed out")) {
                    throw new CtfSessionExpiredException(ctfUrl, userSessionId,
                       getMessage("ctfRemoteClientService.remote.sessionExpired",
-                           Locale.getDefault()), e)
+                           locale), e)
                 }
              }
              else {
@@ -615,7 +615,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
              GrailsUtil.deepSanitize(e)
              def generalMsg = getMessage(
                  "ctfRemoteClientService.createExternalSystem.error", 
-                 Locale.getDefault())
+                 locale)
              log.error(generalMsg, e)
              throw new RemoteMasterException(ctfUrl, generalMsg, e)
          }

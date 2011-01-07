@@ -37,7 +37,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Tests the current state of the users cache at bootstrap
      */
     void testExecuteService() {
-        replicaCommandExecutorService.retrieveAndExecuteActionCommands()
+        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
     }
 
     /**

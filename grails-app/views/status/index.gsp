@@ -14,6 +14,16 @@
     <content tag="leftMenu">
   <g:form method="post">
   <div>
+    <g:if test="${isReplicaMode}">
+      <div class="ImageListParent">
+        <strong><g:message code="status.page.replica.name" /></strong> ${currentReplica.name}</a>
+      </div>
+      <g:if test="${currentReplica.svnMasterUrl}">
+         <div class="ImageListParent">
+           <strong><g:message code="status.page.replica.location" /></strong> <a href="${currentReplica.svnMasterUrl}" target="_blank">${currentReplica.svnMasterUrl}</a>
+         </div>
+      </g:if>
+    </g:if>
     <g:if test="${ctfUrl}">
       <div class="ImageListParent">
         <strong><g:message code="status.page.url.teamforge" /></strong> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a>

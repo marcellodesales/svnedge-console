@@ -131,6 +131,7 @@ class StatusController {
        return [isStarted: isStarted,
                isDefaultPortAllowed: lifecycleService.isDefaultPortAllowed(),
                sampleRepo: sampleRepo,
+               isReplicaMode: server.mode == ServerMode.REPLICA,
                currentReplica: currentReplica,
                server: server,
                perfStats: getPerfStats(currentReplica, server),

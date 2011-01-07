@@ -54,6 +54,6 @@ class FetchReplicaCommandsJob {
 
     private def doExecute() {
         log.info("Checking for replication commands")
-        replicaCommandExecutorService.retrieveAndExecuteActionCommands()
+        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
     }
 }

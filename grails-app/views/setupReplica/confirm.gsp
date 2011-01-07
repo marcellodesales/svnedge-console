@@ -67,12 +67,12 @@
 
                 <tr>
                   <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
-                  <td class="ItemDetailValue">${selectedScmServer.title}: ${selectedScmServer.description}</td>
+                  <td class="ItemDetailValue">${selectedScmServer.title}: <i>${selectedScmServer.description}</i></td>
                 </tr>
 
                 <tr>
                   <td class="ItemDetailName"><g:message code="setupReplica.page.replicaSetup.description.label"/></td>
-                  <td class="ItemDetailValue">${replicaDescription}</td>
+                  <td class="ItemDetailValue">${replicaTitle}: <i>${replicaDescription}</i></td>
                 </tr>
 
                 <tr>

@@ -59,13 +59,31 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         this.currentReplica = initialReplica
     }
 
+    def retrieveAndExecuteReplicaCommands(ctfUrl, userSessionId, masterSystemId,
+            locale) {
+
+        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
+        if (!replica) {
+            def msg = getMessage("filter.probihited.mode.replica", locale)
+            throw new IllegalStateException(msg)
+        }
+
+        //receive the commands from ctf
+        def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
+            ctfUrl, userSessionId, masterSystemId, locale)
+
+        //execute each of them
+        executeCommands(queuedCommands, ctfUrl, userSessionId, masterSystemId,
+            locale)
+    }
+
     /**
      * @return boolean if the local cache contains the given username and 
      * password as a key. 
      * @throws RemoteAccessException if the communication fails with the remote
      * Master host for any reason.
      */
-    def retrieveAndExecuteActionCommands(){
+    def retrieveAndExecuteReplicaCommands(){
 
         def locale = Locale.getDefault()
         ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
@@ -78,18 +96,34 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
             ctfServer.ctfUsername, ctfPassword, locale)
 
-        //receive the commands from cee
+        //receive the commands from ctf
         def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
             ctfServer.baseUrl, userSessionId, replica.systemId, locale)
+
+        //execute each of them
+        executeCommands(queuedCommands, ctfServer.baseUrl, userSessionId, 
+            replica.systemId, locale)
+    }
+
+    def executeCommands(queuedCommands, ctfUrl, userSessionId, masterSystemId,
+            locale) {
 
         //execute each command, having them being updated with status
         for(command in queuedCommands) {
             def commandWithResult = processCommandRequest(command)
 
-            //upload the commands results back to ctf
-            ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
-                userSessionId, replica.systemId, commandWithResult.id, 
-                commandWithResult.succeeded, locale)
+            try {
+                //upload the commands results back to ctf
+                ctfRemoteClientService.uploadCommandResult(ctfUrl,
+                    userSessionId, masterSystemId, commandWithResult.id,
+                    commandWithResult.succeeded, locale)
+                log.debug("Command successfully acknowledged: " + command)
+
+            } catch (Exception remoteError) {
+                log.error("Error while acknowledging the command: " + command, 
+                    remoteError)
+                //TODO: Add the error to the error list to guarantee delivery.
+            }
         }
     }
 
@@ -112,7 +146,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      */
     def processCommandRequest(command) {
         def commandPackage = "com.collabnet.svnedge.replication.command"
-        
+
         def className = command['code'].capitalize() + "Command"
 
         def classObject = null

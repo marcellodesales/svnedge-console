@@ -163,6 +163,7 @@ class SetupReplicaController {
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
                         ctfUsername: getCtfConnectionCommand().ctfUsername,
                         selectedScmServer: selectedScm,
+                        replicaTitle: getReplicaInfoCommand().name,
                         replicaDescription: getReplicaInfoCommand().description,
                         replicaMessageForAdmin: getReplicaInfoCommand().message
                         ]
