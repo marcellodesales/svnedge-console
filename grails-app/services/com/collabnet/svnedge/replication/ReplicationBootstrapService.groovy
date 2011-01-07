@@ -15,7 +15,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.collabnet.svnedge.replica.service
+package com.collabnet.svnedge.replication
+
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
