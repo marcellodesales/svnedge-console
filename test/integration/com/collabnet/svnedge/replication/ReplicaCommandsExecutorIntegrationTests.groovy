@@ -37,8 +37,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Tests the current state of the users cache at bootstrap
      */
     void testExecuteService() {
-        replicaCommandExecutorService.retrieveAndExecuteActionCommands()
-        
+        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
     }
 
     /**
@@ -52,8 +51,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                       result)
         assertNotNull("Processing a bad command should return an exception.", 
                       result['exception'])
-        assertFalse("Processing a bad command should return a false status.",
-                    result['status'])
+        assertFalse("Processing a bad command should return a false succeeded.",
+                    result['succeeded'])
     }
 
     /**
@@ -71,8 +70,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         }
         assertNull("Processing a command should not return an exception.\n" + 
                    result['exception'], result['exception'])
-        assertTrue("Processing a command should return a true status.",
-                   result['status'])
+        assertTrue("Processing a command should return a true succeeded.",
+                   result['succeeded'])
     }
     /**
      * Test processing a good remove command.
@@ -94,8 +93,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         }
         assertNull("Processing a command should not return an exception.\n" + 
                    result['exception'], result['exception'])
-        assertTrue("Processing a command should return a true status.",
-                   result['status'])
+        assertTrue("Processing a command should return a true succeeded.",
+                   result['succeeded'])
     }
 
     // recursively delete the file/directory
