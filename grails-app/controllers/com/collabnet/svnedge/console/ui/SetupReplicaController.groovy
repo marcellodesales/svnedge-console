@@ -124,11 +124,16 @@ class SetupReplicaController {
                 input.errors.rejectValue('ctfUsername', 'ctfRemoteClientService.auth.error',
                         [input.ctfUsername] as Object[], 'bad credentials')
             }
+            catch (RemoteMasterException e) {
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.noReplicaSupport.error',
+                        [input.ctfURL] as Object[], 'older ctf')
+            }
         }
 
         if (input.hasErrors()) {
             // return to input view with errors
             render([view: "ctfInfo", model: [cmd: input]])
+            return
         }
 
         // success logging in 
@@ -268,7 +273,7 @@ class SetupReplicaController {
         render([view: "editCredentials", model: [cmd: input]])
     }
 
-    private List getIntegrationServers() {
+    private List getIntegrationServers() throws RemoteMasterException {
 
         CtfConnectionBean conn = getConversionBean().ctfConn
         return setupReplicaService.getIntegrationServers(conn)

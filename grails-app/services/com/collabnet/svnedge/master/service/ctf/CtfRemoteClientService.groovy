@@ -505,13 +505,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     * @param ctfUrl is the ctf server complete URL, including protocol,
     * hostname and port.
     * @param sessionId is the user sessionId retrieved after logging in.
+    * @param locale is the request locale for messaging
     * @return the list of replicable external systems in the TeamForge server
     * reached by the given ctfUrl, using the given sessionId.
     * @throws CtfSessionExpiredException if the given sessionId is expired.
     * @throws RemoteMasterException if any other error occurs during the
     * method execution.
     */
-   def getReplicableScmExternalSystemList(ctfUrl, sessionId) throws
+   def getReplicableScmExternalSystemList(ctfUrl, sessionId, locale) throws
           RemoteMasterException {
        try {
            def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
@@ -536,7 +537,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                throw new CtfSessionExpiredException(ctfUrl, sessionId,
                    getMessage("ctfRemoteClientService.remote.sessionExpired",
                        locale), e)
-           } else {
+           } 
+           else if (faultMsg.contains("No such operation")) {
+               def errorMessage = getMessage(
+                  "ctfRemoteClientService.host.noReplicaSupport.error", [ctfUrl], locale) 
+               log.error(errorMessage, e)
+               throw new RemoteMasterException(ctfUrl, errorMessage, e)
+           }
+           else {
                def errorMessage = getMessage(
                   "ctfRemoteClientService.listProjects.error", locale) + " " +
                       faultMsg

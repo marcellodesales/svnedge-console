@@ -176,12 +176,13 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      * in the conversion bean. Each element of the list is a map of the
      * properties of the integration server.
      * @param ctfConn is the connection bean.
+     * @param locale the request locale for messaging
      * @return List of SCM integration servers which can be replicated.
      */
-    public List<Map<String, String>> getIntegrationServers(ctfConn) {
+    public List<Map<String, String>> getIntegrationServers(ctfConn) throws RemoteMasterException {
 
         return ctfRemoteClientService.getReplicableScmExternalSystemList(
-            ctfConn.ctfURL, ctfConn.userSessionId)
+            ctfConn.ctfURL, ctfConn.userSessionId, ctfConn.userLocale)
     }
 
     /**
