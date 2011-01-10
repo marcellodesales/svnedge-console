@@ -23,6 +23,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import grails.util.GrailsUtil;
 
 import com.collabnet.svnedge.console.ConfigUtil;
+import com.collabnet.svnedge.replica.manager.ApprovalState;
 import com.collabnet.svnedge.replica.manager.Master;
 import com.collabnet.svnedge.replica.manager.ReplicaConfig;
 
@@ -74,6 +75,7 @@ class ReplicationBootstrapService {
                     isActive:false)
             defaultMaster.save()
         }
+        def master = Master.getDefaultMaster()
 
         def prot = isSslEnabled ? "https" : "http"
         log.info("Bootstrapping Replica for Master...")

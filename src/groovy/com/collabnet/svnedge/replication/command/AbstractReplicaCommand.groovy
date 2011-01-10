@@ -32,7 +32,7 @@ import org.apache.log4j.Logger
  * 
  * @author Marcello de Sales (mdesales@collab.net)
  */
-public abstract class AbstractActionCommand {
+public abstract class AbstractReplicaCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -66,7 +66,7 @@ public abstract class AbstractActionCommand {
 
     protected Map params
 
-    def AbstractActionCommand() {
+    def AbstractReplicaCommand() {
         succeeded = false
         params = new HashMap<String, Object>()
     }

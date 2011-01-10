@@ -851,7 +851,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     }
                     // TODO: the repository name should be defined in the params
                     // TODO: Remove the repositoryName property when removed
-                    cmdParams['repositoryName'] = cmd.repositoryName
+                    cmdParams['repoName'] = cmd.repositoryName
                     queuedCmd.params = cmdParams
                     cmdsList << queuedCmd
                 }

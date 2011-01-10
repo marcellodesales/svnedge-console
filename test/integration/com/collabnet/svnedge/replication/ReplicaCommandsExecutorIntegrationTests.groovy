@@ -17,6 +17,9 @@
  */
 package com.collabnet.svnedge.replication
 
+
+import com.collabnet.svnedge.replica.manager.ApprovalState;
+
 import grails.test.*
 
 class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
@@ -25,19 +28,28 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     def svnNotificationService
 
     def REPO_NAME = "testproject2"
+    def rConf
+    
+    public ReplicaCommandsExecutorIntegrationTests() {
+        // delete the repo directory for the repo we are adding.
+        this.rConf = ReplicaConfiguration.getCurrentConfig()
+        if (!this.rConf) {
+            rConf = new ReplicaConfiguration(svnMasterUrl: null, 
+                name: "Test Replica", description: "Super replica", 
+                message: "Auto-approved", systemId: "replica1001", 
+                svnSyncRate: 5, approvalState: ApprovalState.APPROVED)
+            this.rConf.save()
+        }
+    }
 
     protected void setUp() {
-        // delete the repo directory for the repo we are adding.
+        super.setUp()
+
+        assertNotNull("The replica instance must exist", this.rConf)
+
         def repoFileDir = new File(
             svnNotificationService.getReplicaParentDirPath() + "/" + REPO_NAME)
         deleteRecursive(repoFileDir)
-    }
-
-    /**
-     * Tests the current state of the users cache at bootstrap
-     */
-    void testExecuteService() {
-        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
     }
 
     /**
@@ -59,8 +71,10 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Test processing a good add command.
      */
     void testProcessAddCommand() {
-        def command = [code: 'repoAdd', id: 0, 
-            params: [[name: 'repoName', values: REPO_NAME]]]
+        def cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
+
+        def command = [code: 'repoAdd', id: 0, params: cmdParams]
         def result = replicaCommandExecutorService.processCommandRequest(
             command)
         assertNotNull("Processing a command should not return null.", 
@@ -73,21 +87,21 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         assertTrue("Processing a command should return a true succeeded.",
                    result['succeeded'])
     }
+
     /**
      * Test processing a good remove command.
      */
     void testProcessRemoveCommand() {
+        def cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
         // add first
-        def command = [code: 'repoAdd', id: 0, 
-            params: [[name: 'repoName', values: REPO_NAME]]]
+        def command = [code: 'repoAdd', id: 0, params: cmdParams]
         def result = replicaCommandExecutorService.processCommandRequest(
             command)
         // then remove
-        command = [code: 'repoRemove', id: 0, 
-            params: [[name: 'repoName', values: REPO_NAME]]]
+        command = [code: 'repoRemove', id: 0, params: cmdParams]
         result = replicaCommandExecutorService.processCommandRequest(command)
-        assertNotNull("Processing a command should not return null.", 
-                      result)
+        assertNotNull("Processing a command should not return null.", result)
         if (result['exception']) {
             println result['exception']
         }

@@ -17,25 +17,27 @@
  */
 package com.collabnet.svnedge.replication.command
 
-
-
 /**
- * @author mdesales
+ * Exception raised when a command has been requested, but there is no 
+ * implementing class. The name of the command is retrieved by "commandName".
+ * The cause of the exception can be retrieved from the exception as well.
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class CommandNotImplementedException extends Exception{
+public class CommandNotImplementedException extends Exception {
 
     private String commandName
-    
+
     /**
      * When the attempt to execute a method throws a ClassNotFoundException,
      * then it is clear that the command requested has not been implemented
-     * in the package com.collabnet.svnedge.replica.commands.
+     * in the package com.collabnet.svnedge.replication.command.CMDNAME.
+     * @param cmdName is the name of the command.
      */
     def CommandNotImplementedException(classNotFoundExe, cmdName) {
         super("The requested command '" + cmdName + "' is not implemented.", 
                 classNotFoundExe)
         commandName = cmdName
     }
-    
 }

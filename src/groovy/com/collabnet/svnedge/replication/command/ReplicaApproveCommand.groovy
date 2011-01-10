@@ -32,7 +32,7 @@ import com.collabnet.svnedge.replication.ReplicaConfiguration;
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class ReplicaApproveCommand extends AbstractActionCommand {
+public class ReplicaApproveCommand extends AbstractReplicaCommand {
 
     private Logger log = Logger.getLogger(getClass())
 

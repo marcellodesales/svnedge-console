@@ -28,7 +28,7 @@ import com.collabnet.svnedge.replica.manager.ReplicatedRepository
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class RepoAddCommand extends AbstractActionCommand {
+public class RepoAddCommand extends AbstractReplicaCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -36,19 +36,20 @@ public class RepoAddCommand extends AbstractActionCommand {
     def repoDbTuple
     
     def constraints() {
+        def repoName = this.params["repoName"]
         log.debug("Acquiring the svn notifications service...")
         def svn = getService("svnNotificationService")
 
         this.repoFileDir = new File(svn.getReplicaParentDirPath() + "/" + 
-                this.params["repoName"])
+                repoName)
 
-        //Verify if the file-system does not contain the repo dir.
-        if (!this.repoFileDir.exists()) {
+        //Verify if the file-system contain the repo dir.
+        if (this.repoFileDir.exists()) {
             throw new IllegalStateException("The replicated repository '" + 
-                this.params["repoName"] +"' does not exist in the file-system.")
+                repoName +"' already exists in the file-system.")
         }
 
-        def repoRecord = Repository.findByName(this.params["repoName"])
+        def repoRecord = Repository.findByName(repoName)
         if (repoRecord) {
             this.repoDbTuple = ReplicatedRepository.findByRepo(repoRecord)
         }
@@ -57,21 +58,21 @@ public class RepoAddCommand extends AbstractActionCommand {
         if (this.repoDbTuple) {
             if (this.repoDbTuple.getStatus() == RepoStatus.REMOVED) {
                 throw new IllegalStateException("The replicated repository '" +
-                    this.params["repoName"]+ "' has been removed.")
+                    repoName + "' has been removed.")
             }
         }
-        
     }
 
     def execute() {
         log.debug("Acquiring the svn notifications service...")
         def svn = getService("svnNotificationService")
 
+        def repoName = this.params["repoName"]
         log.debug("Creating a new repository on the database...")
-        svn.addRepositoryOnDatabase(this.params["repoName"])
+        svn.addRepositoryOnDatabase(repoName)
 
         log.debug("Creating a new repository on the file system...")
-        svn.createRepositoryOnFileSystem(this.params["repoName"])
+        svn.createRepositoryOnFileSystem(repoName)
    }
 
    def undo() {

@@ -59,14 +59,18 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         this.currentReplica = initialReplica
     }
 
-    def retrieveAndExecuteReplicaCommands(ctfUrl, userSessionId, masterSystemId,
-            locale) {
-
+    private ReplicaConfiguration getCurrentReplica() {
         ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
         if (!replica) {
             def msg = getMessage("filter.probihited.mode.replica", locale)
             throw new IllegalStateException(msg)
         }
+    }
+
+    def retrieveAndExecuteReplicaCommands(ctfUrl, userSessionId, masterSystemId,
+            locale) {
+
+        ReplicaConfiguration replica = getCurrentReplica()
 
         //receive the commands from ctf
         def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
@@ -86,11 +90,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     def retrieveAndExecuteReplicaCommands(){
 
         def locale = Locale.getDefault()
-        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
-        if (!replica) {
-            def msg = getMessage("filter.probihited.mode.replica", locale)
-            throw new IllegalStateException(msg)
-        }
+        ReplicaConfiguration replica = getCurrentReplica()
+
         def ctfServer = CtfServer.getServer()
         def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
         def userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,

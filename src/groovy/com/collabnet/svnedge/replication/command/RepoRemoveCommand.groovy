@@ -27,24 +27,26 @@ import org.apache.log4j.Logger
  * This action removes the repository from the filesystem, sets the
  * repository status to REMOVED, and disables sync for the repository.
  */
-public class RepoRemoveCommand extends AbstractActionCommand {
+public class RepoRemoveCommand extends AbstractReplicaCommand {
+
     private Logger log = Logger.getLogger(getClass())
-    
+
     def repoFileDir
     def repoDbTuple
 
     def constraints() {
-        def repoRecord = Repository.findByName(this.params["repoName"])
+        def repoName = this.params["repoName"]
+        def repoRecord = Repository.findByName(repoName)
         if (repoRecord) {
             this.repoDbTuple = ReplicatedRepository.findByRepo(repoRecord)
         }
         if (!this.repoDbTuple) {
-            throw new IllegalStateException("The repository '" + 
-                this.params["repoName"] + "' does not exist.")
+            throw new IllegalStateException("The repository '" + repoName + 
+                "' does not exist.")
 
         } else if (this.repoDbTuple.getStatus() == RepoStatus.REMOVED) {
-            throw new IllegalStateException("The repository '" + 
-                this.params["repoName"] + "' has already been removed.")
+            throw new IllegalStateException("The repository '" + repoName + 
+                "' has already been removed.")
         }
     }
 
@@ -52,13 +54,13 @@ public class RepoRemoveCommand extends AbstractActionCommand {
         log.debug("Acquiring the svn notifications service...")
         def svn = getService("svnNotificationService")
 
-        log.debug("Removing the repository '"+this.params["repoName"]+ 
-            "' from the database...")
-        svn.removeRepositoryOnDatabase(this.params["repoName"])
+        def repoName = this.params["repoName"]
+        log.debug("Removing the repository '"+ repoName + "' from the database")
+        svn.removeRepositoryOnDatabase(repoName)
 
-        log.debug("Removing the repository '"+this.params["repoName"]+ 
-            "' from the file system...")
-        svn.removeRepositoryOnFileSystem(this.params["repoName"])
+        log.debug("Removing the repository '" + repoName + "'" +
+            "from the file-system...")
+        svn.removeRepositoryOnFileSystem(repoName)
     }
 
     def undo() {

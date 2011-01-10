@@ -18,10 +18,11 @@
 package com.collabnet.svnedge.replication.command
 
 /**
- * Exception for the Abstract Action Commands, which has references to
+ * Exception for the Abstract Replica Commands, which has references to
  * the originating command, and the exceptions that might have occurred
  * during either/both the execution or/and rollback.
- * @author mdesales
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
  */
 public class CommandExecutionException extends Exception {
 
@@ -37,7 +38,7 @@ public class CommandExecutionException extends Exception {
      * case both exceptions occur, the execution exception will have priority
      * on the traceability of this Exception.
      */
-    def CommandExecutionException(AbstractActionCommand command, 
+    def CommandExecutionException(AbstractReplicaCommand command, 
             Throwable executionException, Throwable undoException) {
         super("Errors occurred while executing the action command '"+
                 "${command.getClass().getName()}: " +
@@ -52,7 +53,7 @@ public class CommandExecutionException extends Exception {
     }
 
     def getUsedCommandParameters() {
-        return command.params
+        return originatingCommand.params
     }
 
     def getActionCommandName() {
@@ -60,10 +61,10 @@ public class CommandExecutionException extends Exception {
     }
 
     def getExecutionThrowable() {
-        return executionException
+        return executionThrowable
     }
 
     def getUndoThrowable() {
-        return undoException
+        return undoThrowable
     }
 }
