@@ -44,7 +44,6 @@ class ReplicationBootstrapService {
     def svnStatisticsService
     def svnNotificationService
     def jobsAdminService
-    def replicaCommandExecutorService
 
     def userCacheStatisticsService
     def latencyStatisticsService
@@ -143,8 +142,5 @@ class ReplicationBootstrapService {
             ConfigUtil.svnPath(), ConfigUtil.svnadminPath(),
             ConfigUtil.svnsyncPath(),
             config.svnedge.replica.svn.svnsyncRate, defaultMaster)
-
-        log.info("Bootstrapping actionCommandsExecutorService...")
-        replicaCommandExecutorService.bootStrap(defaultMaster, server)
     }
 }

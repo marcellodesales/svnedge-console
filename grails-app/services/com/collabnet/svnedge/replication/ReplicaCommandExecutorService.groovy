@@ -18,13 +18,12 @@
 package com.collabnet.svnedge.replication
 
 import java.util.List;
-import java.util.Map;
 
+import com.collabnet.svnedge.console.ConfigUtil;
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
-import com.collabnet.svnedge.master.RemoteMasterException;
 import com.collabnet.svnedge.replication.command.CommandExecutionException
 import com.collabnet.svnedge.replication.command.CommandNotImplementedException
-import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.teamforge.CtfServer
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -48,25 +47,33 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     def ctfRemoteClientService
     def securityService
 
-    /** The default Master instance */
-    def defaultMaster
-    
-    /** The current Replica instance */
-    def currentReplica
+    def cmdExecLogsDir
 
-    def bootStrap = { initialMaster, initialReplica ->
-        this.defaultMaster = initialMaster
-        this.currentReplica = initialReplica
+    def bootStrap = { dataDir ->
+        cmdExecLogsDir = new File(dataDir + "/logs")
+        log.debug("Commands execution will be logged to " + cmdExecLogsDir)
     }
 
+    /**
+     * @return The current replica configuration.
+     */
     private ReplicaConfiguration getCurrentReplica() {
         ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
         if (!replica) {
             def msg = getMessage("filter.probihited.mode.replica", locale)
             throw new IllegalStateException(msg)
         }
+        return replica
     }
 
+    /**
+     * Retrieves and executes the commands executions from the replica 
+     * identified by the masterSystemId, managed by the given TeamForge URL.
+     * @param ctfUrl is the CTF URL
+     * @param userSessionId is a valid session ID
+     * @param masterSystemId is the master external system.
+     * @param locale is the local
+     */
     def retrieveAndExecuteReplicaCommands(ctfUrl, userSessionId, masterSystemId,
             locale) {
 
@@ -152,12 +159,15 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
 
         def classObject = null
         try {
+            logReplicaCommandExecution("LOAD", command, null)
             classObject = getClass().getClassLoader().loadClass(
                     "$commandPackage.$className")
+
         } catch (ClassNotFoundException clne) {
             command['exception'] = 
                 new CommandNotImplementedException(clne, className)
             command['succeeded'] = false
+            logReplicaCommandExecution("LOAD-FAILED", command, clne)
             return command
         }
         log.debug("Instantiating the class for the command " + command)
@@ -167,15 +177,49 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         commandInstance.init(command['params'], applicationContext)
         log.debug("Initialized the parameters " + command['params'])
         try {
-            log.debug("Ready to run the command " + command)
+            logReplicaCommandExecution("RUN", command, null)
             commandInstance.run()
             log.debug("Command successfully run: " + command)
+            logReplicaCommandExecution("RUN-SUCCESSED", command, null)
 
         } catch (CommandExecutionException ceex) {
             command['exception'] = ceex
             log.error("The command failed: " + command)
+            logReplicaCommandExecution("RUN-FAILED", command, ceex)
         }
         command['succeeded'] = commandInstance.succeeded
         return command
+    }
+
+    /**
+     * Logs the execution of a command into the file 
+     * "data/logs/replica_cmds_YYYY_MM_DD.log".
+     * @param executionStep is a TOKEN of the execution step
+     * @param command is the instance of a replica command execution.
+     * @param exception is an optional execution thrown.
+     */
+    def logReplicaCommandExecution(executionStep, command, exception) {
+        def now = new Date()
+        //creates the file for the current day
+        def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
+            ".log"
+
+        new File(cmdExecLogsDir, logName).withWriterAppend("UTF-8") {
+
+            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', now)
+
+            def logEntry = timeToken + " " + executionStep + "-" + command.id +
+                " " + command
+            it.write(logEntry + "\n")
+
+            if (exception) {
+                def sw = new StringWriter();
+                def pw = new PrintWriter(sw, true);
+                exception.printStackTrace(pw);
+                pw.flush();
+                sw.flush();
+                it.write(sw.toString() + "\n")
+            }
+        }
     }
 }

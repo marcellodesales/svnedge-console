@@ -29,13 +29,28 @@
 <!-- Leave this left-justified so that spaces are not padded in the first line of the log -->        
 <pre>
 <%
-file.withReader { reader ->
-  String line
-  while ( (line = reader.readLine() ) != null ) {
-    out << StringEscapeUtils.escapeHtml(line) + "\n"
-  }
+if (params.highlight) {
+   file.withReader { reader ->
+	  String line
+      boolean found = false
+	  while ( (line = reader.readLine() ) != null ) {
+        if (!found && line.contains(params.highlight)) {
+            line = "<a name='loc'> </a>"  + line
+            found = true
+        }
+        line = line.replace(params.highlight, "<span style='background-color: #FFFF00'>${params.highlight}</span>")
+	    out << line + "<BR/>"
+     }
+   }
+} else {
+    file.withReader { reader ->
+       String line
+       while ( (line = reader.readLine() ) != null ) {
+         out << StringEscapeUtils.escapeHtml(line) + "\n"
+      }
+    }
 }
-%>           
+%>
 </pre>
         </div>
       </td>    

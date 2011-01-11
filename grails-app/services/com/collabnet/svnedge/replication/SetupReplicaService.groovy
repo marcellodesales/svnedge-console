@@ -51,9 +51,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     *
     * @param appHome is the application home directory
     */
-   def bootStrap = {
-       log.debug("Bootrastrapping the Setup Replica service")
-   }
+    def bootStrap = {
+        log.debug("Bootrastrapping the Setup Replica service")
+    }
 
     /**
      * Confirm the ctf connection
@@ -61,7 +61,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     public void confirmCtfConnection(CtfConnectionBean ctfConn) {
         // attempt connection -- throws exception on failure
         log.debug("Verifying CTF connection")
-        setupTeamForgeService.confirmConnection(ctfConn)        
+        setupTeamForgeService.confirmConnection(ctfConn)
     }
  
     /**
@@ -134,10 +134,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
-
-        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands(
-            replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 
-            replicaInfo.masterExternalSystemId, replicaInfo.ctfConn.userLocale)
     }
 
     /**
