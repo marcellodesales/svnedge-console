@@ -28,6 +28,7 @@ import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 
 /**
  * This service handles replication-related functionality
@@ -132,6 +133,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         serverConfService.writeConfigFiles()
         setupTeamForgeService.restartServer()
 
+        log.info("starting FetchReplicaCommandsJob")
+        new FetchReplicaCommandsJob().start()
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
     }

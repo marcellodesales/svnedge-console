@@ -64,27 +64,17 @@ public class RepoAddCommand extends AbstractReplicaCommand {
     }
 
     def execute() {
-        log.debug("Acquiring the svn notifications service...")
-        def svn = getService("svnNotificationService")
+        log.debug("Acquiring the command executor service...")
+        def rceService = getService("replicaCommandExecutorService")
 
         def repoName = this.params["repoName"]
-        log.debug("Creating a new repository on the database...")
-        svn.addRepositoryOnDatabase(repoName)
-
-        log.debug("Creating a new repository on the file system...")
-        svn.createRepositoryOnFileSystem(repoName)
+        rceService.addReplicatedRepository(repoName)
    }
 
    def undo() {
-       log.error("Execute failed... Undoing the command...")
-       def svn = getService("svnNotificationService")
-
-       //delete directory
-       if (this.repoFileDir && this.repoFileDir.exists()) {
-           svn.deleteDirectory(this.repoFileDir)
-       }
-
-       //delete db instance.
-       this.repoDbTuple.delete()
+        log.debug("Acquiring the command executor service...")
+        def rceService = getService("replicaCommandExecutorService")
+        def repoName = this.params["repoName"]
+        rceService.removeReplicatedRepository(repoName)
     }
 }

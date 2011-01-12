@@ -50,13 +50,13 @@ class SvnNotificationService {
 
     def config = ConfigurationHolder.config
 
-    def isWindows = false
+    private boolean isWindows() {
+        return System.getProperty("os.name").startsWith("Windows");
+    }
     
     def bootStrap = { repoDirectoryPath, svnPath, svnAdminPath, svnSyncPath, 
             syncRate, initialtMaster ->
-        if (System.getProperty("os.name").startsWith("Windows")) {
-            isWindows = true
-        }
+
         svn = svnPath
         svnadmin = svnAdminPath
         svnsync = svnSyncPath
@@ -297,142 +297,10 @@ class SvnNotificationService {
         return notices.masterTimestamp
     }
 
-    /*
-     * Creates local replica repositories
-     */
-    def createRepositoryOnFileSystem(repoName) {
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(repoName))
-        def repoPath = svnReplicaParentPath + "/" + repoName
-
-        def command = "${svnadmin} create ${quoteIfWindows(repoPath)}" //+ 
-//            "--config-dir=/tmp"
-        if (execCommand(command, repo)) {
-            log.info("Created the repo with svnadmin.")
-            repo.status = RepoStatus.IN_PROGRESS
-            repo.statusMsg = null
-            repo.save()
-
-            prepareHookScripts(repoPath, repo)
-            prepareSyncRepo(repoPath, repo, repoName)
-        } else {
-            def msg = "Svnadmin failed to create repository."
-            log.error(msg)
-            repo.status = RepoStatus.ERROR
-            repo.statusMsg = msg
-            repo.save()
-        }
-    }
-
-    private def prepareHookScripts(repoPath, repo) {
-        log.info("Changing the rev prop hooks.")
-        def dummyPreRevPropChangeScript = repoPath +
-                                          '/hooks/pre-revprop-change'
-        if (isWindows) {
-            dummyPreRevPropChangeScript += ".bat"
-        }
-        new File("${dummyPreRevPropChangeScript}").withWriter { out ->
-            out.writeLine("#!/bin/bash\nexit 0;\n")
-        }
-        if (!isWindows) {
-            def command = "chmod 755 ${dummyPreRevPropChangeScript}"
-            execCommand(command, repo)
-        }
-        log.info("Done changing the rev prop hooks.")
-    }
-
-    private def prepareSyncRepo(repoPath, repo, repoName) {
-        log.info("Initing the repo...")
-        def defaultMaster = getMaster()
-        def protocol = defaultMaster.sslEnabled ? "https" : "http"
-        def masterRepoUrl = "${protocol}://${defaultMaster.hostName}/" +
-                            "svn/repos/${repoName}"
-        def syncRepoURI = commandLineService.createSvnFileURI(
-            new File(svnReplicaParentPath, repoName))
-        syncRepoURI = quoteIfWindows(syncRepoURI)
-        def password = defaultMaster.accessPassword.replaceAll(/"/, /\\"/)
-        password = quoteIfWindows(password)
-        def command = "${svnsync} init ${syncRepoURI} ${masterRepoUrl}" +
-           " --source-username ${defaultMaster.accessUsername}" +
-            " --source-password ${password}" +
-            " --non-interactive --no-auth-cache --config-dir=/tmp"
-        execCommand(command, repo)
-        log.info("Done initing the repo.")
-        repo.lastSyncRev = 0
-
-        def masterUUID = getMasterUUID(defaultMaster, repoName)
-        command = "${svnadmin} setuuid ${quoteIfWindows(repoPath)} ${masterUUID}"
-        execCommand(command, repo)
-        log.info("Done setting uuid ${masterUUID} of the repo as that of master.")
-
-        execSvnSync(repo, recentMasterTimeStamp, 
-            defaultMaster.accessUsername, password, syncRepoURI)
-    }
-
-    /**
-     * Remove the repository on the filesystem, if it exists.
-     */
-    def removeRepositoryOnFileSystem(repoName) {
-        def repoDir = new File(svnReplicaParentPath, repoName)
-        repoDir.deleteDir()
-    }
-
-    /**
-     * Adds the repository on the database.  If the repository has no db
-     * record, it will be added.  If it's been previously removed, it's
-     * status will be changed back to NOT_READY_YET and enabled.
-     */
-    def addRepositoryOnDatabase(repoName) {
-        def repoRecord = Repository.findByName(repoName)
-        if (!repoRecord) {
-            createRepositoryOnDatabase(repoName)
-        } else {
-            def repo = ReplicatedRepository.findByRepo(repoRecord)
-            repo.enabled = true;
-            repo.status = RepoStatus.NOT_READY_YET
-            repo.statusMsg = null
-            repo.save()
-        }
-    }
-
-    /**
-     * Removes the repository on the database.  This involves changing the
-     * status, sync time/revs and disabling the repo.
-     */
-    def removeRepositoryOnDatabase(repoName) {
-        def repoRecord = Repository.findByName(repoName)
-        if (!repoRecord) {
-            log.error("removeRepositoryOnDatabase: No repo found for name " 
-                            + "${repoName}")
-        } else {
-            def repo = ReplicatedRepository.findByRepo(repoRecord)
-            if (repo) {
-                repo.enabled = false;
-                repo.status = RepoStatus.REMOVED
-                repo.lastSyncTime = -1
-                repo.lastSyncRev = -1
-                repo.statusMsg = "Repository removed at " + new Date()
-                repo.save()
-            } else {
-                log.error("removeRepositoryOnDatabase: No repo found for name " 
-                          + "${repoName}")
-            }
-        }
-    }
-
-    /**
-     * Creates a new repository instance in the database layer, with the 
-     * default properties.
-     */
-    def createRepositoryOnDatabase(repoName) {
-        new ReplicatedRepository(repo: new Repository(name:repoName).save(), 
-            lastSyncTime: -1, lastSyncRev:-1, enabled: true, 
-            status: RepoStatus.NOT_READY_YET).save(flush:true)
-    }
-
     /**
      * Wrap the given string in quotes, if the platform is windows.
      */
     def quoteIfWindows(str) {
-        isWindows? "\"${str}\"" : str
+        return isWindows() ? "\"${str}\"" : str
     }
 }

@@ -280,7 +280,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * will be generated.
      */
     def createRepository(Repository repo, boolean useTemplate) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
         def exitStatus = commandLineService.executeWithStatus(
             ConfigUtil.svnadminPath(), "create", repoPath)

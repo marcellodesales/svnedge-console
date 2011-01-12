@@ -21,6 +21,7 @@ import org.quartz.JobDetail
 import java.text.SimpleDateFormat
 import org.quartz.Trigger
 import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.replica.jobs.CheckStateJob
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.replication.ReplicaConfiguration
@@ -133,14 +134,9 @@ class JobsAdminService {
 
     def getJobsAndTriggersInfo() {
         def jobsTriggers = [:]
-
-        // don't show replica jobs, if the server is not a replica
-        def showReplica = Server.getServer().replica
-        
         //trigger group names (paused or not)
         def triggerGroupNames = quartzScheduler.getTriggerGroupNames()
         for (triggerGroupName in triggerGroupNames) {
-            if (!triggerGroupName.startsWith("Replica") || showReplica) {
                 def triggerNames = quartzScheduler.getTriggerNames(triggerGroupName)
                 anyJobsRunning = false
                 anyJobsPaused = false
@@ -156,7 +152,6 @@ class JobsAdminService {
                     group[triggerDetails.jobName] = job
                     jobsTriggers[triggerDetails.jobGroup] = group
                 }
-            }
         }
 
         

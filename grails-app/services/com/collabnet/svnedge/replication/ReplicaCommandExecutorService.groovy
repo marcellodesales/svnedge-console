@@ -19,11 +19,17 @@ package com.collabnet.svnedge.replication
 
 import java.util.List;
 
+import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.ConfigUtil;
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
+import com.collabnet.svnedge.replica.manager.RepoStatus
+import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replication.command.CommandExecutionException
 import com.collabnet.svnedge.replication.command.CommandNotImplementedException
-import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.teamforge.CtfServer;
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -44,14 +50,21 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
 
     ApplicationContext applicationContext
 
+    def commandLineService
     def ctfRemoteClientService
+    def operatingSystemService
     def securityService
+    def svnRepoService
 
     def cmdExecLogsDir
 
     def bootStrap = { dataDir ->
         cmdExecLogsDir = new File(dataDir + "/logs")
         log.debug("Commands execution will be logged to " + cmdExecLogsDir)
+
+        if (Server.getServer().mode == ServerMode.REPLICA) {
+            new FetchReplicaCommandsJob().start()
+        }
     }
 
     /**
@@ -83,6 +96,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
             ctfUrl, userSessionId, masterSystemId, locale)
 
+        log.debug("Retrieved " + (queuedCommands ? queuedCommands.size() : 0) + 
+                  " commands for execution")
         //execute each of them
         executeCommands(queuedCommands, ctfUrl, userSessionId, masterSystemId,
             locale)
@@ -191,6 +206,141 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         return command
     }
 
+    def addReplicatedRepository(repoName) {
+        log.debug("Creating a new repository on the database...")
+        addRepositoryOnDatabase(repoName)
+
+        log.debug("Creating a new repository on the file system...")
+        createRepositoryOnFileSystem(repoName)
+    }
+
+    /**
+     * Adds the repository on the database.  If the repository has no db
+     * record, it will be added.  If it's been previously removed, it's
+     * status will be changed back to NOT_READY_YET and enabled.
+     */
+    private def addRepositoryOnDatabase(repoName) {
+        def repoRecord = Repository.findByName(repoName)
+        if (repoRecord) {
+            def repo = ReplicatedRepository.findByRepo(repoRecord)
+            repo.enabled = true;
+            repo.status = RepoStatus.NOT_READY_YET
+            repo.statusMsg = null
+            repo.save()
+        } else {
+            Repository repository = new Repository(name:repoName)
+            repository.save()
+            new ReplicatedRepository(repo: repository, 
+                lastSyncTime: -1, lastSyncRev:-1, enabled: true, 
+                status: RepoStatus.NOT_READY_YET).save(flush:true)
+        }
+    }
+
+    /*
+     * Creates local replica repositories
+     */
+    private def createRepositoryOnFileSystem(repoName) {
+        def repo = Repository.findByName(repoName)
+        def replRepo = ReplicatedRepository.findByRepo(repo)
+        if (svnRepoService.createRepository(repo, false) == 0) {
+            log.info("Created the repo with svnadmin.")
+            replRepo.status = RepoStatus.IN_PROGRESS
+            replRepo.statusMsg = null
+            replRepo.save()
+
+            def repoPath = svnRepoService.getRepositoryHomePath(repo)
+            prepareHookScripts(repoPath, replRepo)
+            // TODO update the sync process
+            //prepareSyncRepo(repoPath, replRepo, repoName)
+            Thread.sleep(30000)
+        } else {
+            def msg = "Svnadmin failed to create repository."
+            log.error(msg)
+            replRepo.status = RepoStatus.ERROR
+            replRepo.statusMsg = msg
+            replRepo.save()
+        }
+    }
+
+    private def prepareHookScripts(repoPath, repo) {
+        log.info("Changing the rev prop hooks.")
+        def dummyPreRevPropChangeScript = repoPath +
+                                          '/hooks/pre-revprop-change'
+        if (isWindows()) {
+            dummyPreRevPropChangeScript += ".bat"
+        }
+        new File("${dummyPreRevPropChangeScript}").withWriter { out ->
+            out.writeLine("#!/bin/bash\nexit 0;\n")
+        }
+        if (!isWindows()) {
+            commandLineService.executeWithStatus("chmod", "755", 
+                dummyPreRevPropChangeScript)
+        }
+        log.info("Done changing the rev prop hooks.")
+    }
+
+    private def prepareSyncRepo(repoPath, repo, repoName) {
+        log.info("Initing the repo...")
+        def defaultMaster = getMaster()
+        def protocol = defaultMaster.sslEnabled ? "https" : "http"
+        def masterRepoUrl = "${protocol}://${defaultMaster.hostName}/" +
+                            "svn/repos/${repoName}"
+        def syncRepoURI = commandLineService.createSvnFileURI(
+            new File(svnReplicaParentPath, repoName))
+        syncRepoURI = quoteIfWindows(syncRepoURI)
+        def password = defaultMaster.accessPassword.replaceAll(/"/, /\\"/)
+        password = quoteIfWindows(password)
+        def command = "${svnsync} init ${syncRepoURI} ${masterRepoUrl}" +
+           " --source-username ${defaultMaster.accessUsername}" +
+            " --source-password ${password}" +
+            " --non-interactive --no-auth-cache --config-dir=/tmp"
+        execCommand(command, repo)
+        log.info("Done initing the repo.")
+        repo.lastSyncRev = 0
+
+        def masterUUID = getMasterUUID(defaultMaster, repoName)
+        command = "${svnadmin} setuuid ${quoteIfWindows(repoPath)} ${masterUUID}"
+        execCommand(command, repo)
+        log.info("Done setting uuid ${masterUUID} of the repo as that of master.")
+
+        execSvnSync(repo, recentMasterTimeStamp, 
+            defaultMaster.accessUsername, password, syncRepoURI)
+    }
+
+    def removeReplicatedRepository(repoName) {
+        def repoDir = new File(Server.getServer().repoParentPath, repoName)
+        if (repoDir && repoDir.exists()) {
+            repoDir.deleteDir()
+        }
+
+        removeRepositoryOnDatabase(repoName)
+    }
+
+    /**
+     * Removes the repository on the database.  This involves changing the
+     * status, sync time/revs and disabling the repo.
+     */
+    private def removeRepositoryOnDatabase(repoName) {
+        def repoRecord = Repository.findByName(repoName)
+        if (!repoRecord) {
+            log.error("removeRepositoryOnDatabase: No repo found for name " 
+                            + "${repoName}")
+        } else {
+            def repo = ReplicatedRepository.findByRepo(repoRecord)
+            if (repo) {
+                repo.enabled = false;
+                repo.status = RepoStatus.REMOVED
+                repo.lastSyncTime = -1
+                repo.lastSyncRev = -1
+                repo.statusMsg = "Repository removed at " + new Date()
+                repo.save()
+            } else {
+                log.error("removeRepositoryOnDatabase: No repo found for name " 
+                          + "${repoName}")
+            }
+        }
+    }
+
     /**
      * Logs the execution of a command into the file 
      * "data/logs/replica_cmds_YYYY_MM_DD.log".
@@ -221,5 +371,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 it.write(sw.toString() + "\n")
             }
         }
+    }
+
+    private boolean isWindows() {
+        return operatingSystemService.isWindows()
     }
 }
