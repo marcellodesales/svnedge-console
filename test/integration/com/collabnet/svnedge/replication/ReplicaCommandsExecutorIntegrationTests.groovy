@@ -18,20 +18,26 @@
 package com.collabnet.svnedge.replication
 
 
+import java.io.File;
+
 import com.collabnet.svnedge.replica.manager.ApprovalState;
+import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replica.manager.RepoStatus
+
 
 import grails.test.*
 
 class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandExecutorService
-    def svnNotificationService
 
     def REPO_NAME = "testproject2"
     def rConf
-    
+    File repoParentDir
+        
     public ReplicaCommandsExecutorIntegrationTests() {
-        // delete the repo directory for the repo we are adding.
         this.rConf = ReplicaConfiguration.getCurrentConfig()
         if (!this.rConf) {
             rConf = new ReplicaConfiguration(svnMasterUrl: null, 
@@ -40,6 +46,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                 svnSyncRate: 5, approvalState: ApprovalState.APPROVED)
             this.rConf.save()
         }
+        // Setup a test repository parent
+        repoParentDir = createTestDir("repo")
     }
 
     protected void setUp() {
@@ -47,9 +55,13 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
         assertNotNull("The replica instance must exist", this.rConf)
 
-        def repoFileDir = new File(
-            svnNotificationService.getReplicaParentDirPath() + "/" + REPO_NAME)
-        deleteRecursive(repoFileDir)
+        Server server = Server.getServer()
+        server.repoParentDir = repoParentDir.getCanonicalPath()
+        server.save()
+        
+        // delete the repo directory for the repo we are adding.
+        def repoFileDir = new File(repoParentDir, REPO_NAME)
+        repoFileDir.deleteDir()
     }
 
     /**
@@ -111,15 +123,97 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                    result['succeeded'])
     }
 
-    // recursively delete the file/directory
-    static void deleteRecursive(file) {
-        if (!file.exists()) {
-            return
+    void testAddReplicatedRepository() {
+        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        
+        File repoDir = new File(repoParentDir, REPO_NAME)
+        assertTrue("Repository directory should exist: " + repoDir.getCanonicalPath(), repoDir.exists())
+    }
+
+    void testRemoveReplicatedRepository() {
+        // create first
+        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+        
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        replicaCommandExecutorService.removeReplicatedRepository(REPO_NAME)
+        repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        assertEquals("The repo's status should be REMOVED.",
+                     RepoStatus.REMOVED, repo.getStatus())
+
+        File repoDir = new File(repoParentDir, REPO_NAME)
+        assertFalse("Repository directory should not exist: " + repoDir.getCanonicalPath(), repoDir.exists())
+    }
+    
+    void testAddRemoveReAddRepoOnDatabase() {
+        // create first
+        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        // removed
+        replicaCommandExecutorService.removeReplicatedRepository(REPO_NAME)
+        repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        // add again
+        try {
+            replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+        } catch (Exception e) {
+            fail("Should be able to re-add a removed repository.")
         }
-        if (file.isDirectory()) {
-            // delete contents
-            file.listFiles().each { deleteRecursive(it) }
+        repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertTrue("The repository should be enabled.", repo.getEnabled())
+    }
+
+    //TODO: Enable these tests when Replication is
+    void skip_testCreateRepoOnFS() {
+        def replicaDir = File.createTempFile("repo-test", null)
+        log.info("replicaDir = " + replicaDir.getCanonicalPath())
+        // we want a dir, not a file, so delete and mkdir
+        replicaDir.delete()
+        replicaDir.mkdir()
+        replicaDir.deleteOnExit()
+        svnNotificationService.svnReplicaParentPath = replicaDir
+            .getCanonicalPath()
+        def repoName = "testproject"
+        svnNotificationService.addRepositoryOnDatabase(repoName)
+        svnNotificationService.createRepositoryOnFileSystem(repoName)
+        def repoDir = new File(replicaDir.getCanonicalPath() + "/" + repoName)
+        assertTrue("The repo directory should exist.", repoDir.exists())
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(repoName))
+        log.info("Repo status msg: " + repo.getStatusMsg())
+        assertTrue("The repository should have OK status.",
+                   repo.status.equals(RepoStatus.OK))
+        def defaultMaster = svnNotificationService.getMaster()
+        def masterUUID = svnNotificationService.getMasterUUID(defaultMaster,
+                                                              repoName)
+        def replicaUUID = null
+
+        try {
+            def replicaUUIDFile = replicaDir.getCanonicalPath() +
+                                  "/" + repoName + "/db/uuid"
+            new File(replicaUUIDFile).withReader { reader ->
+                replicaUUID = reader.readLine()
+            }
+        } catch (Exception e) {
+            fail("Not able to read the replica's UUID file.")
         }
-        file.delete()
+        assertEquals("UUID of replica repo and Master repo should be same.",
+                     masterUUID, replicaUUID)
+    }
+
+    private File createTestDir(String prefix) {
+        def testDir = File.createTempFile(prefix + "-test", null)
+        log.info("testDir = " + testDir.getCanonicalPath())
+        // we want a dir, not a file, so delete and mkdir
+        testDir.delete()
+        testDir.mkdir()
+        // TODO This doesn't seem to work, might need to delete in teardown
+        testDir.deleteOnExit()
+        return testDir
     }
 }

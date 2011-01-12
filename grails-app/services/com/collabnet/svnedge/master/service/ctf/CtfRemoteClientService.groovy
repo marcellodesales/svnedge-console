@@ -577,7 +577,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             name, description, comment, locale) throws RemoteMasterException {
 
         def server = Server.getServer()
-        def hostname = networkingService.getHostname()
+        def hostname = server.getHostname()
         int portNumber = server.getPort()
         boolean useSsl = server.getUseSsl()
         String svnUrlPath = Server.getSvnBasePath()

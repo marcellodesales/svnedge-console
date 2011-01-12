@@ -51,16 +51,12 @@ public class RepoRemoveCommand extends AbstractReplicaCommand {
     }
 
     def execute() {
-        log.debug("Acquiring the svn notifications service...")
-        def svn = getService("svnNotificationService")
+        log.debug("Acquiring the command executor service...")
+        def rceService = getService("replicaCommandExecutorService")
 
         def repoName = this.params["repoName"]
-        log.debug("Removing the repository '"+ repoName + "' from the database")
-        svn.removeRepositoryOnDatabase(repoName)
-
-        log.debug("Removing the repository '" + repoName + "'" +
-            "from the file-system...")
-        svn.removeRepositoryOnFileSystem(repoName)
+        log.debug("Removing the repository '"+ repoName + "'")
+        rceService.removeReplicatedRepository(repoName)
     }
 
     def undo() {

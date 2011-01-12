@@ -252,7 +252,6 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
             prepareHookScripts(repoPath, replRepo)
             // TODO update the sync process
             //prepareSyncRepo(repoPath, replRepo, repoName)
-            Thread.sleep(30000)
         } else {
             def msg = "Svnadmin failed to create repository."
             log.error(msg)
@@ -286,7 +285,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def masterRepoUrl = "${protocol}://${defaultMaster.hostName}/" +
                             "svn/repos/${repoName}"
         def syncRepoURI = commandLineService.createSvnFileURI(
-            new File(svnReplicaParentPath, repoName))
+            new File(Server.getServer().repoParentDir, repoName))
         syncRepoURI = quoteIfWindows(syncRepoURI)
         def password = defaultMaster.accessPassword.replaceAll(/"/, /\\"/)
         password = quoteIfWindows(password)
@@ -308,7 +307,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     }
 
     def removeReplicatedRepository(repoName) {
-        def repoDir = new File(Server.getServer().repoParentPath, repoName)
+        def repoDir = new File(Server.getServer().repoParentDir, repoName)
         if (repoDir && repoDir.exists()) {
             repoDir.deleteDir()
         }
