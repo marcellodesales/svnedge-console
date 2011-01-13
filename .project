@@ -64,6 +64,11 @@
 			<locationURI>GRAILS/projects/SvnEdge/plugins/code-coverage-1.1.8/grails-app/i18n</locationURI>
 		</link>
 		<link>
+			<name>codenarc-0.7-grails-app-i18n</name>
+			<type>2</type>
+			<locationURI>GRAILS/projects/SvnEdge/plugins/codenarc-0.7/grails-app/i18n</locationURI>
+		</link>
+		<link>
 			<name>cometd-0.1.5-grails-app-i18n</name>
 			<type>2</type>
 			<locationURI>GRAILS/projects/SvnEdge/plugins/cometd-0.1.5/grails-app/i18n</locationURI>
