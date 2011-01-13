@@ -155,8 +155,8 @@ svnedge {
     helpUrl = "http://help.collab.net"
 
     softwareupdates {
-        hudsonUrl = "http://cu086.cubit.sp.collab.net:8080/"
-        isHudson = System?.getenv("HUDSON_URL")?.equals(hudsonUrl)
+        //hudsonUrl = "http://cu087.cloud.sp.collab.net:8080/"
+        //isHudson = System?.getenv("HUDSON_URL")?.equals(hudsonUrl)
         imagepath = new File(".").canonicalPath + "/target/csvn-image-test-${appVersion}"
         currentVersion = appVersion
     }

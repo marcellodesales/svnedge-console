@@ -37,30 +37,9 @@ public class RepoAddCommand extends AbstractReplicaCommand {
     
     def constraints() {
         def repoName = this.params["repoName"]
-        log.debug("Acquiring the svn notifications service...")
-        def svn = getService("svnNotificationService")
-
-        this.repoFileDir = new File(svn.getReplicaParentDirPath() + "/" + 
-                repoName)
-
-        //Verify if the file-system contain the repo dir.
-        if (this.repoFileDir.exists()) {
-            throw new IllegalStateException("The replicated repository '" + 
-                repoName +"' already exists in the file-system.")
-        }
-
-        def repoRecord = Repository.findByName(repoName)
-        if (repoRecord) {
-            this.repoDbTuple = ReplicatedRepository.findByRepo(repoRecord)
-        }
-        // Verify if the command has not been created in the database or
-        // has been created and removed.
-        if (this.repoDbTuple) {
-            if (this.repoDbTuple.getStatus() == RepoStatus.REMOVED) {
-                throw new IllegalStateException("The replicated repository '" +
-                    repoName + "' has been removed.")
-            }
-        }
+        log.debug("Acquiring the replica commands executor service...")
+        def svn = getService("replicaCommandExecutorService")
+        // do we want to check anything here?
     }
 
     def execute() {

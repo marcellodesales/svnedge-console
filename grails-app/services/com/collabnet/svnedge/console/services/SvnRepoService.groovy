@@ -300,6 +300,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
+    * Runs svnadmin verify on a repository.
+    *
+    * @return true, if no errors
+    */
+   def verifyRepository(Repository repo) {
+       def repoPath = this.getRepositoryHomePath(repo)
+       def exitStatus = commandLineService.executeWithStatus(
+           ConfigUtil.svnadminPath(), "verify", repoPath)
+       return (exitStatus == 0)
+   }
+
+    /**
      * @param repo is the instance of a repository.
      * @return the canonical path to the repository in the file system.
      */

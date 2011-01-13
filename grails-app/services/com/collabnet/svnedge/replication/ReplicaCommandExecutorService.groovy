@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.replication
 
+import java.io.File;
 import java.util.List;
 
 import com.collabnet.svnedge.console.Repository
@@ -242,22 +243,42 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     private def createRepositoryOnFileSystem(repoName) {
         def repo = Repository.findByName(repoName)
         def replRepo = ReplicatedRepository.findByRepo(repo)
-        if (svnRepoService.createRepository(repo, false) == 0) {
-            log.info("Created the repo with svnadmin.")
-            replRepo.status = RepoStatus.IN_PROGRESS
-            replRepo.statusMsg = null
-            replRepo.save()
-
-            def repoPath = svnRepoService.getRepositoryHomePath(repo)
-            prepareHookScripts(repoPath, replRepo)
-            // TODO update the sync process
-            //prepareSyncRepo(repoPath, replRepo, repoName)
+        
+        def repoPath = svnRepoService.getRepositoryHomePath(repo)
+        if (new File(repoPath).exists()) {
+            if (svnRepoService.verifyRepository(repo)) {
+                log.info("createRepositoryOnFileSystem found an existing repo: "
+                         + repoName)
+                replRepo.status = RepoStatus.IN_PROGRESS
+                replRepo.statusMsg = null
+                replRepo.save()
+            }  else {
+                def msg = "createRepositoryOnFileSystem found existing directory " +
+                    repoPath + ", but it would not verify as a valid repository."
+                log.error(msg)
+                replRepo.status = RepoStatus.ERROR
+                replRepo.statusMsg = msg
+                replRepo.save()
+                throw new IllegalStateException(msg)
+            }
         } else {
-            def msg = "Svnadmin failed to create repository."
-            log.error(msg)
-            replRepo.status = RepoStatus.ERROR
-            replRepo.statusMsg = msg
-            replRepo.save()
+            if (svnRepoService.createRepository(repo, false) == 0) {
+                log.info("Created the repo with svnadmin.")
+                replRepo.status = RepoStatus.IN_PROGRESS
+                replRepo.statusMsg = null
+                replRepo.save()
+                
+                prepareHookScripts(repoPath, replRepo)
+                // TODO update the sync process
+                //prepareSyncRepo(repoPath, replRepo, repoName)
+            } else {
+                def msg = "Svnadmin failed to create repository: " + repoName
+                log.error(msg)
+                replRepo.status = RepoStatus.ERROR
+                replRepo.statusMsg = msg
+                replRepo.save()
+                throw new IllegalStateException(msg)
+            }
         }
     }
 
