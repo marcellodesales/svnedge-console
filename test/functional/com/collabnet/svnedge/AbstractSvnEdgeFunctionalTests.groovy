@@ -191,7 +191,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
 
         if (!pkgInternalDirectory.exists()) {
             validImageFileDir.mkdirs()
-            def csvnBinUrl = "https://mgr.cubit.sp.collab.net/pbl/svnedge/" +
+            def csvnBinUrl = "https://mgr.cloud.sp.collab.net/pbl/svnedge/" +
                    "pub/Installers/linux/CollabNetSubversionEdge-" +
                    "${currentVersion}-dev_linux-x86.tar.gz"
             csvnBinUrl = csvnBinUrl.toURL()

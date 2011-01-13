@@ -77,7 +77,7 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
     private void setupTestCsvnImage() {
         if (!this.pkgInternalDirectory.exists()) {
             this.validImageFileDir.mkdirs()
-            def csvnBinUrl = "https://mgr.cubit.sp.collab.net/pbl/svnedge/" +
+            def csvnBinUrl = "https://mgr.cloud.sp.collab.net/pbl/svnedge/" +
                 "pub/Installers/linux/CollabNetSubversionEdge-" +
                 "${currentVersion}-dev_linux-x86.tar.gz"
             csvnBinUrl = csvnBinUrl.toURL()
