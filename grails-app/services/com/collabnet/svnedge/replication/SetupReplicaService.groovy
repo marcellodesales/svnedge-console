@@ -58,7 +58,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     /**
      * Confirm the ctf connection
      */
-    public void confirmCtfConnection(CtfConnectionBean ctfConn) {
+    public void confirmCtfConnection(CtfConnectionBean ctfConn) throws 
+            CtfAuthenticationException, RemoteMasterException,
+            UnknownHostException, NoRouteToHostException, MalformedURLException {
         // attempt connection -- throws exception on failure
         log.debug("Verifying CTF connection")
         setupTeamForgeService.confirmConnection(ctfConn)
