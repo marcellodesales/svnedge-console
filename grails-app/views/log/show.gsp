@@ -35,7 +35,7 @@ if (params.highlight) {
       boolean found = false
 	  while ( (line = reader.readLine() ) != null ) {
         if (!found && line.contains(params.highlight)) {
-            line = "<a name='loc'> </a>"  + line
+            line = "<a name='loc'> </a><BR>"  + line
             found = true
         }
         line = line.replace(params.highlight, "<span style='background-color: #FFFF00'>${params.highlight}</span>")

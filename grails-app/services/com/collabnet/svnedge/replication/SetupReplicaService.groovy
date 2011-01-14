@@ -18,8 +18,6 @@
 package com.collabnet.svnedge.replication
 
 import com.collabnet.svnedge.console.Server
-
-
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.master.RemoteMasterException
@@ -45,6 +43,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def serverConfService
     def lifecycleService
     def replicaCommandExecutorService
+    def networkingService
 
     /**
     * Sets system properties used to configure the integration webapp
@@ -77,24 +76,34 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         log.debug("Attempting replica conversion...")
 
+        def server = Server.getServer()
+
+        def names = [ "HostName", "HostPort", "HostSSL", "ConsolePort",
+            "ViewVCContextPath", "SVNContextPath" ]
+
+        def values = [ networkingService.getHostname(), server.getPort(),
+            server.getUseSsl(), Server.getConsolePort(),
+              Server.getSvnBasePath(), Server.getViewvcBasePath()];
+
+        def props = ctfRemoteClientService.makeSoapNamedValues(names, values)
+
         String systemId = ctfRemoteClientService.addExternalSystemReplica(
             replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 
             replicaInfo.masterExternalSystemId, replicaInfo.name, 
-            replicaInfo.description, replicaInfo.message, 
+            replicaInfo.description, replicaInfo.message, props,
             replicaInfo.ctfConn.userLocale)
 
         log.debug("Conversion successful, got ID: " + systemId)
 
         // with success, make modification to this instance
-        def server = Server.getServer()
+        server = Server.getServer()
         server.mode = ServerMode.REPLICA
 
         ReplicaConfiguration rc = ReplicaConfiguration.getCurrentConfig()
         if (!rc) {
             rc = new ReplicaConfiguration()
         }
-        // this is now provided by approval command 
-        // rc.svnMasterUrl = replicaInfo.svnMasterURL
+        // rc.svnMasterUrl is now provided by approval command 
         rc.name = replicaInfo.name
         rc.description = replicaInfo.description
         rc.message = replicaInfo.message

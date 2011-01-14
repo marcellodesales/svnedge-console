@@ -540,7 +540,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
            } 
            else if (faultMsg.contains("No such operation")) {
                def errorMessage = getMessage(
-                  "ctfRemoteClientService.host.noReplicaSupport.error", [ctfUrl], locale) 
+                  "ctfRemoteClientService.host.noReplicaSupport.error", 
+                  [ctfUrl], locale) 
                log.error(errorMessage, e)
                throw new RemoteMasterException(ctfUrl, errorMessage, e)
            }
@@ -574,19 +575,13 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     * call.
     */
     def String addExternalSystemReplica(ctfUrl, userSessionId, masterSystemId, 
-            name, description, comment, locale) throws RemoteMasterException {
+            name, description, comment, replicaProps, locale)
+            throws RemoteMasterException { 
 
-        def server = Server.getServer()
-        def hostname = server.getHostname()
-        int portNumber = server.getPort()
-        boolean useSsl = server.getUseSsl()
-        String svnUrlPath = Server.getSvnBasePath()
-        String viewvcUrlPath = Server.getViewvcBasePath()
         try {
             def scmSoap = this.makeScmSoap(ctfUrl)
             def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
-                masterSystemId, name, description, hostname, portNumber,
-                useSsl, svnUrlPath, viewvcUrlPath, comment)
+                masterSystemId, name, description, comment, replicaProps)
 
             return replicaId
 

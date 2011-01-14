@@ -167,6 +167,22 @@ class Server {
     static CtfServer getManagedServer() {
         return CtfServer.getServer()
     }
+
+    /**
+     * @return the port number of the console web application. That is, the
+     * Jetty Server port number.
+     */
+    public static String getConsolePort() {
+        int portNumber = 8080;
+        if (System.getProperty("jetty.port")) {
+            try {
+                portNumber = Integer.parseInt(
+                    System.getProperty("jetty.port").trim())
+            } catch (Exception e) {
+            }
+        }
+        return portNumber
+    }
 }
 
 enum ServerMode { STANDALONE, CONVERTING_TO_MANAGED, MANAGED, REPLICA }
