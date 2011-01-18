@@ -231,19 +231,27 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def saveAuthorization = { AuthzRulesCommand cmd ->
+        def result = serverConfService.validateSvnAccessFile(
+                cmd.accessRules)
+        def exitStatus = Integer.parseInt(result[0]) 
 
-        if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
-                cmd.accessRules)) {
-            flash.message = message(
-                code: 'repository.action.saveAuthorization.success')
-            flash.error = null
-        }
-        else {
-            flash.error = message(
-                code: 'repository.action.saveAuthorization.failure')
+        if (exitStatus != 0) {
+            def msg = message(code: 'repository.action.saveAuthorization.validate.failure')
+            flash.error = msg + ":" + result[2].replace("svnauthz-validate:", "")
             flash.message = null
+        } else {
+            if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
+                     cmd.accessRules)) {
+                flash.message = message(
+                        code: 'repository.action.saveAuthorization.success')
+                flash.error = null
+            } else {
+                flash.error = message(
+                        code: 'repository.action.saveAuthorization.failure')
+                flash.message = null
+            }
         }
-        render(view : 'editAuthorization', model : [authRulesCommand : cmd])
 
+        render(view : 'editAuthorization', model : [authRulesCommand : cmd])
     }
 }

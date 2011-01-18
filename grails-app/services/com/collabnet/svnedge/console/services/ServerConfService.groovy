@@ -342,6 +342,24 @@ class ServerConfService {
         }
     }
 
+    /**
+     * service method to validate input text to the svn_acccess_file (path-based permissions)
+     */
+    String[] validateSvnAccessFile(String content) {
+
+        File f = File.createTempFile("svn_access_file", ".temp")
+        f.deleteOnExit()
+
+        if (f.canWrite()) {
+            f.write content.trim()
+        }
+
+        def output = commandLineService.execute(
+                    ConfigUtil.svnauthzvalidatePath(), f.absolutePath)
+
+        return (output)
+    }
+
     private def writeMainConf(server) {
         def hostname, port
         if (server) {
