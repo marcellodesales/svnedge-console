@@ -83,9 +83,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         def names = [ "HostName", "HostPort", "HostSSL", "ConsolePort",
             "ViewVCContextPath", "SVNContextPath" ]
 
-        def values = [ networkingService.getHostname(), server.getPort(),
+        def values = [ server.getHostname(), server.getPort(),
             server.getUseSsl(), Server.getConsolePort(),
-              Server.getSvnBasePath(), Server.getViewvcBasePath()];
+              Server.getViewvcBasePath(), Server.getSvnBasePath()];
 
         def props = ctfRemoteClientService.makeSoapNamedValues(names, values)
 
@@ -201,10 +201,14 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      * 
      * @param scmMasterUrl the scmUrl from the master server.
      */
-    public void updateServerAfterApproval(scmMasterUrl) {
+    public void updateServerAfterApproval(scmMasterUrl, scmMasterId) {
         ReplicaConfiguration rc = ReplicaConfiguration.getCurrentConfig()
         rc.svnMasterUrl = scmMasterUrl
         rc.approvalState = ApprovalState.APPROVED
         rc.save(flush:true)
-    }
+
+        Server server = Server.getServer()
+        File idFile = new File(server.repoParentDir, ".scm.properties")
+        idFile.text = "external_system_id=" + scmMasterId
+     }
 }

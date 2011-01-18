@@ -36,7 +36,7 @@ public class RepoAddCommand extends AbstractReplicaCommand {
     def repoDbTuple
     
     def constraints() {
-        def repoName = this.params["repoName"]
+        def repoName = getRepoName()
         log.debug("Acquiring the replica commands executor service...")
         def svn = getService("replicaCommandExecutorService")
         // do we want to check anything here?
@@ -46,14 +46,23 @@ public class RepoAddCommand extends AbstractReplicaCommand {
         log.debug("Acquiring the command executor service...")
         def rceService = getService("replicaCommandExecutorService")
 
-        def repoName = this.params["repoName"]
+        def repoName = getRepoName()
         rceService.addReplicatedRepository(repoName)
-   }
+    }
 
-   def undo() {
+    def undo() {
         log.debug("Acquiring the command executor service...")
         def rceService = getService("replicaCommandExecutorService")
-        def repoName = this.params["repoName"]
+        def repoName = getRepoName()
         rceService.removeReplicatedRepository(repoName)
+    }
+    
+    private String getRepoName() {
+        String repoName = this.params["repoName"]
+        int pos = repoName.lastIndexOf('/');
+        if (pos >= 0 && repoName.length() > pos + 1) {
+            repoName = repoName.substring(pos + 1)
+        }
+        return repoName
     }
 }

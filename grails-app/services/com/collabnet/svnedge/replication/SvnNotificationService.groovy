@@ -101,115 +101,11 @@ class SvnNotificationService {
         return getReplicaParentDirPath() + "/" + LAST_UPDATE_FILE
     }
 
-    private execCommandWithResults(command, repo) {
-        def retVal = 1
-        def msg
-        String[] result = null
-        try {
-            result = commandLineService.execute(command.split(" "))
-            retVal = Integer.parseInt(result[0])
-            msg = result[2]
-        } catch (Exception e) {
-            retVal = -1
-            msg = "Configured ${command} failed: ${e.getMessage()}"
-        }
-        if (retVal != 0) {
-            log.error(msg)
-            if (null != repo) {
-                repo.status = RepoStatus.ERROR
-                repo.statusMsg = msg
-                repo.save()
-            }
-        }
-        return result
-    }
-
-    private def execCommand(command, repo) {
-        return execCommandWithResults(command, repo)[0] == '0'
-    }
 
     private def execCommandWithOutput(command, repo) {
         return execCommandWithResults(command, repo)[1]
     }
 
-    /**
-     * Returns revision number of last successful sync.
-     * If there is *no* commit since the last sync this function itself
-     * should not be called. But it would be called in situations when the 
-     * initial setup of '0' revision repositories(Not possible in CEE but
-     * possible in CTF.). 
-     * In such situations it would return 0 indicating 
-     * do *not* update the lastSyncRev in DB.
-     * If sync fails return -1 and updates the Repo record 
-     * in the db indicating failure.
-     */
-    def execSvnSync(repo, masterTimestamp, username, password, syncRepoURI) {
-        log.info("Syncing repo '${repo.repo.name}' at " +
-                 " master timestamp: ${masterTimestamp}...")
-        def command = "${svnsync} sync --source-username" +
-            " ${username} --source-password" +
-            " ${password} ${syncRepoURI}" +
-            " --non-interactive --no-auth-cache --config-dir=/tmp"
-
-        def revision = -1
-        def retVal = 1
-        def msg = "Configured ${command} failed."
-        try {
-            String[] result = commandLineService.execute(command.split(" "))
-            retVal = Integer.parseInt(result[0])
-            msg += result[2]
-            def output = result[1]
-            if (output.length() > 0) {
-                def numBuffer = output.substring(
-                    output.lastIndexOf(' ') + 1, output.length() - 2)
-                revision = java.lang.Long.parseLong(numBuffer)
-            }
-            if (retVal == 0 && revision == -1) {
-                revision = 0
-            }
-        } catch (Exception e) {
-            retVal = -1
-            log.warn("Configured ${command} failed.", e)
-            msg = "Configured ${command} failed: ${e.getMessage()}"
-        }
-        if (retVal != 0) {
-            log.error(msg)
-            repo.status = RepoStatus.ERROR
-            repo.statusMsg = msg
-            repo.save()
-        }
-        if (revision != -1) {
-            repo.status = RepoStatus.OK
-            repo.statusMsg = null
-            repo.lastSyncTime = masterTimestamp
-            if (revision)
-                repo.lastSyncRev = revision
-            repo.save()
-        }
-        log.info("Done syncing repo '${repo.repo.name}'.")
-    }
-    /**
-     * Returns Master Repository's UUID.
-     */
-    def getMasterUUID(defaultMaster, repoName) {
-        def UUID = null
-        def retVal = 1
-        def protocol = defaultMaster.sslEnabled ? "https" : "http"
-        def masterRepoUrl = "${protocol}://${defaultMaster.hostName}/" +
-                            "svn/repos/${repoName}"
-        def password = defaultMaster.accessPassword.replaceAll(/"/, /\\"/)
-        password = quoteIfWindows(password)
-        def command = "${svn} info ${masterRepoUrl}" +
-                  " --username ${defaultMaster.accessUsername}" +
-                  " --password ${password} --non-interactive --no-auth-cache" +
-                  " --config-dir=/tmp"
-        def output = execCommandWithOutput(command, null)
-        int start = output.indexOf("Repository UUID: ") + 17
-        if (start >= 17) {
-            UUID = output.substring(start, output.indexOf("\n", start))
-        }
-        return UUID
-    }
     /**
      * Makes the getSVNNotifications SOAP call and processes the results.
      */

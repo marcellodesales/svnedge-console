@@ -269,7 +269,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 replRepo.save()
                 
                 prepareHookScripts(repoPath, replRepo)
-                // TODO update the sync process
+                // FIXME! Need to get tests working to uncomment
                 //prepareSyncRepo(repoPath, replRepo, repoName)
             } else {
                 def msg = "Svnadmin failed to create repository: " + repoName
@@ -300,32 +300,132 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     }
 
     private def prepareSyncRepo(repoPath, repo, repoName) {
-        log.info("Initing the repo...")
-        def defaultMaster = getMaster()
-        def protocol = defaultMaster.sslEnabled ? "https" : "http"
-        def masterRepoUrl = "${protocol}://${defaultMaster.hostName}/" +
-                            "svn/repos/${repoName}"
+        log.info("Initing the repo...: " + repoName)
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.getCurrentConfig()
+        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
         def syncRepoURI = commandLineService.createSvnFileURI(
             new File(Server.getServer().repoParentDir, repoName))
-        syncRepoURI = quoteIfWindows(syncRepoURI)
-        def password = defaultMaster.accessPassword.replaceAll(/"/, /\\"/)
-        password = quoteIfWindows(password)
-        def command = "${svnsync} init ${syncRepoURI} ${masterRepoUrl}" +
-           " --source-username ${defaultMaster.accessUsername}" +
-            " --source-password ${password}" +
-            " --non-interactive --no-auth-cache --config-dir=/tmp"
+        def ctfServer = CtfServer.getServer()
+        def username = ctfServer.ctfUsername
+        def password = securityService.decrypt(ctfServer.ctfPassword)
+        def command = [ConfigUtil.svnsyncPath(), "init", syncRepoURI, masterRepoUrl,
+            "--source-username", username, "--source-password", password,
+            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
+        
         execCommand(command, repo)
         log.info("Done initing the repo.")
         repo.lastSyncRev = 0
-
-        def masterUUID = getMasterUUID(defaultMaster, repoName)
-        command = "${svnadmin} setuuid ${quoteIfWindows(repoPath)} ${masterUUID}"
-        execCommand(command, repo)
-        log.info("Done setting uuid ${masterUUID} of the repo as that of master.")
-
-        execSvnSync(repo, recentMasterTimeStamp, 
-            defaultMaster.accessUsername, password, syncRepoURI)
+        
+        def masterUUID = getMasterUUID(masterRepoUrl, username, password, repoName)
+        if (masterUUID) {
+            command = [ConfigUtil.svnadminPath(), "setuuid", repoPath, masterUUID]
+            execCommand(command, repo)
+            log.info("Done setting uuid ${masterUUID} of the repo as that of master.")
+            
+            execSvnSync(repo, System.currentTimeMillis(), username, password, syncRepoURI)
+        }
     }
+
+    /**
+     * Returns Master Repository's UUID.
+     */
+    private def getMasterUUID(masterRepoUrl, username, password, repoName) {
+        def uuid = null
+        def retVal = 1
+        def command = [ConfigUtil.svnPath(), "info", masterRepoUrl,
+            "--username", username,"--password", password,
+            "--non-interactive", "--no-auth-cache"] //"--config-dir=/tmp"
+        def output = execCommand(command, null)
+        int start = output.indexOf("Repository UUID: ") + 17
+        if (start >= 17) {
+            uuid = output.substring(start, output.indexOf("\n", start))
+        } else {
+            String msg = "Unable to get master UUID for repo: " + repoName
+            log.warn(msg)
+            throw new IllegalStateException(msg)
+        }
+        return uuid
+    }
+    
+    /**
+     * Returns revision number of last successful sync.
+     * If there is *no* commit since the last sync this function itself
+     * should not be called. But it would be called in situations when the
+     * initial setup of '0' revision repositories(Not possible in CEE but
+     * possible in CTF.).
+     * In such situations it would return 0 indicating
+     * do *not* update the lastSyncRev in DB.
+     * If sync fails return -1 and updates the Repo record
+     * in the db indicating failure.
+     */
+    def execSvnSync(repo, masterTimestamp, username, password, syncRepoURI) {
+        log.info("Syncing repo '${repo.repo.name}' at " +
+                " master timestamp: ${masterTimestamp}...")
+        def command = [ConfigUtil.svnsyncPath(), "sync", syncRepoURI,
+            "--source-username", username, "--source-password", password,
+            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
+        
+        def revision = -1
+        def retVal = 1
+        def msg = "${command} failed. "
+        try {
+            String[] result = commandLineService.execute(command.toArray(new String[0]))
+            retVal = Integer.parseInt(result[0])
+            msg += result[2]
+            def output = result[1]
+            if (output.length() > 0) {
+                def numBuffer = output.substring(
+                        output.lastIndexOf(' ') + 1, output.length() - 2)
+                revision = java.lang.Long.parseLong(numBuffer)
+            }
+            if (retVal == 0 && revision == -1) {
+                revision = 0
+            }
+        } catch (Exception e) {
+            retVal = -1
+            log.warn(msg, e)
+            msg += e.getMessage()
+        }
+        if (retVal != 0) {
+            log.warn(msg)
+            repo.status = RepoStatus.ERROR
+            repo.statusMsg = msg
+            repo.save()
+        }
+        if (revision != -1) {
+            repo.status = RepoStatus.OK
+            repo.statusMsg = null
+            repo.lastSyncTime = masterTimestamp
+            if (revision)
+                repo.lastSyncRev = revision
+            repo.save()
+        }
+        log.info("Done syncing repo '${repo.repo.name}'.")
+    }
+
+    private String execCommand(command, repo) {
+        def retVal = 1
+        def msg
+        String[] result = null
+        try {
+            result = commandLineService.execute(command.toArray(new String[0]))
+            retVal = Integer.parseInt(result[0])
+            msg = result[2]
+        } catch (Exception e) {
+            retVal = -1
+            msg = "${command} failed: ${e.getMessage()}"
+        }
+        if (retVal != 0) {
+            log.warn(msg)
+            if (null != repo) {
+                repo.status = RepoStatus.ERROR
+                repo.statusMsg = msg
+                repo.save()
+            }
+            throw new IllegalStateException(msg)
+        }
+        return result[1]
+    }   
 
     def removeReplicatedRepository(repoName) {
         def repoDir = new File(Server.getServer().repoParentDir, repoName)

@@ -46,10 +46,14 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand {
                 "with the id '${replica.systemId}'")
         }
         
-        // Verify if the parameter "scmUrl" exists.
+        // Verify if the necessary parameters exists.
         if (!this.params["scmUrl"]) {
             throw new IllegalStateException("The command does not have the " +
                 "required parameter 'scmUrl'.")
+        }
+        if (!this.params["masterId"]) {
+            throw new IllegalStateException("The command does not have the " +
+                "required parameter 'masterId'.")
         }
     }
 
@@ -57,11 +61,14 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand {
         log.debug("Acquiring the replica setup service...")
         def replicaService = getService("setupReplicaService")
 
-        log.debug("Creating a new repository on the database...")
-        replicaService.updateServerAfterApproval(this.params["scmUrl"])
+        def url = this.params["scmUrl"]
+        def masterId = this.params["masterId"]
+        log.debug("Updating replica with master URL: " + url + 
+            " and masterId: " + masterId)
+        replicaService.updateServerAfterApproval(url, masterId)
    }
 
    def undo() {
-       log.error("Execute failed... Undoing the command...")
+       log.warn("Execute failed... Undoing the command (doesn't do anything)...")
     }
 }
