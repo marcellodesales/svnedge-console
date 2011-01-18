@@ -84,6 +84,12 @@ public final class ConfigUtil {
             new File(appHome(), "bin/svnadmin").absolutePath
     }
 
+    def static svnauthzvalidatePath() {
+        return getConfig().svnedge.svn.svnauthzvalidatePath ? 
+            getConfig().svnedge.svn.svnauthzvalidatePath : 
+            new File(appHome(), "bin/svnauthz-validate").absolutePath
+    }
+
     def static svnsyncPath() {
         return getConfig().svnedge.replica.svn.svnsyncPath ?
             getConfig().svnedge.replica.svn.svnsyncPath : 
