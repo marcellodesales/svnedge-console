@@ -123,6 +123,36 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                    result['succeeded'])
     }
 
+    /**
+     * Test processing the replica props update command.
+     */
+    void testProcessReplicaPropsUpdateCommand() {
+        def newName = "Updated Replica Name"
+        def newDescription = "Description Updated"
+        def cmdParams = [:]
+        cmdParams["name"] = newName
+        cmdParams["description"] = newDescription
+
+        // add first
+        def command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
+        def result = replicaCommandExecutorService.processCommandRequest(
+            command)
+
+        if (result['exception']) {
+            println result['exception']
+        }
+        assertNull("Processing a command should not return an exception.\n" + 
+                   result['exception'], result['exception'])
+        assertTrue("Processing a command should return a true succeeded.",
+                   result['succeeded'])
+
+        this.rConf = ReplicaConfiguration.getCurrentConfig()
+        assertEquals("The name should have been changed with the command " +
+            "update", this.rConf.name, newName)
+        assertEquals("The description should have been changed with the " +
+            "command update", this.rConf.description, newDescription)
+    }
+
     void testAddReplicatedRepository() {
         replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
 
