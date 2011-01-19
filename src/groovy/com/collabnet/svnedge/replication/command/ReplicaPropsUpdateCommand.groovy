@@ -54,9 +54,8 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
         log.debug("Acquiring the replica configuration instance...")
 
         def replica = ReplicaConfiguration.getCurrentConfig()
-        for (paramName in this.params.keySet()) {
-            replica."${paramName}" = this.params[paramName]
-        }
+        replica.name = this.params.name
+        replica.description = this.params.description
 
         log.debug("Trying to flush the saved replica properties...")
         replica.save(flush:true)
