@@ -237,7 +237,13 @@ class RepoController {
 
         if (exitStatus != 0) {
             def msg = message(code: 'repository.action.saveAuthorization.validate.failure')
-            flash.error = msg + ":" + result[2].replace("svnauthz-validate:", "")
+            def err = result[2].split(":")
+            if (err.length == 4) {
+                flash.error = msg + " (Line " + err[2] + "): " + err[3]
+            } else {
+                flash.error = msg + ": " + err[err.length-1]
+            }
+                 
             flash.message = null
         } else {
             if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
