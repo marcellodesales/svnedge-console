@@ -269,8 +269,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 replRepo.save()
                 
                 prepareHookScripts(repoPath, replRepo)
-                // FIXME! Need to get tests working to uncomment
-                //prepareSyncRepo(repoPath, replRepo, repoName)
+                prepareSyncRepo(repoPath, replRepo, repoName)
             } else {
                 def msg = "Svnadmin failed to create repository: " + repoName
                 log.error(msg)

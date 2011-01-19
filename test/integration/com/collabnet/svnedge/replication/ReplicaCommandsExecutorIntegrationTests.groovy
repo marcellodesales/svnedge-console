@@ -25,6 +25,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replica.manager.RepoStatus
+import com.collabnet.svnedge.teamforge.CtfServer;
 
 
 import grails.test.*
@@ -32,8 +33,11 @@ import grails.test.*
 class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandExecutorService
+    def grailsApplication
+    def config
 
     def REPO_NAME = "testproject2"
+    def EXSY_ID = "exsy9876"
     def rConf
     File repoParentDir
         
@@ -54,6 +58,9 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         super.setUp()
 
         assertNotNull("The replica instance must exist", this.rConf)
+        this.config = grailsApplication.config
+        this.rConf.svnMasterUrl = makeCtfBaseUrl() + "/svn/repos"
+        this.rConf.save()
 
         Server server = Server.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
@@ -62,6 +69,21 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         // delete the repo directory for the repo we are adding.
         def repoFileDir = new File(repoParentDir, REPO_NAME)
         repoFileDir.deleteDir()
+        
+        CtfServer ctfServer = CtfServer.getServer()    
+        ctfServer.baseUrl = makeCtfBaseUrl()
+        ctfServer.mySystemId = EXSY_ID
+        ctfServer.ctfUsername = "admin"
+        ctfServer.ctfPassword = "n3TEQWKEjpY="
+        ctfServer.save()
+   }
+
+    private def makeCtfBaseUrl() {
+        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+        def ctfHost = config.svnedge.ctfMaster.domainName
+        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
+                config.svnedge.ctfMaster.port
+        return ctfProto + ctfHost + ctfPort
     }
 
     /**
@@ -85,6 +107,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     void testProcessAddCommand() {
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
 
         def command = [code: 'repoAdd', id: 0, params: cmdParams]
         def result = replicaCommandExecutorService.processCommandRequest(
@@ -106,6 +129,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     void testProcessRemoveCommand() {
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
+
         // add first
         def command = [code: 'repoAdd', id: 0, params: cmdParams]
         def result = replicaCommandExecutorService.processCommandRequest(
