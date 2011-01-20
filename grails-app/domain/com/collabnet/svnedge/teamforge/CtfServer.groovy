@@ -25,11 +25,20 @@ class CtfServer {
     
     static transients = ['webAppUrl']
 
-    String baseUrl
+    private String baseUrl
     String mySystemId
     String internalApiKey
     String ctfUsername
     String ctfPassword
+    
+    public void setBaseUrl(String url) {
+        baseUrl = (url && url.lastIndexOf('/') == url.length() - 1) ?
+            url.substring(0, url.length() - 1) : url
+    }
+    
+    public String getBaseUrl() {
+        return baseUrl
+    }
     
     public String getWebAppUrl() {
         return baseUrl + "/sf";
