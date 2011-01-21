@@ -91,6 +91,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def f = new File(new File(repoPath, "db/uuid").canonicalPath)
         if (f.exists()) {
            uuid = f.readLines()[0]
+        } else {
+           log.warn("Missing $repoPath/db/uuid file...")
         }
         return uuid
     }
@@ -111,8 +113,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/fs-type").canonicalPath)
         if (f.exists()) {
-           fsType = f.readLines()[0].toUpperCase()
+           try {
+               fsType = f.readLines()[0].toUpperCase()
+           } catch (e) {
+               log.debug("Reading from $repoPath/db/fs-type (" +
+                         e.getMessage() +  "), Assuming FSFS as FS-Type.")
+           }
+        } else {
+           log.warn("Missing $repoPath/db/fs-type file..." +
+                    ", Assuming FSFS as FS-Type.")
         }
+          
         return fsType
     }
 
@@ -136,8 +147,13 @@ class SvnRepoService extends AbstractSvnEdgeService {
            try {
                fsFormat = f.readLines()[0].toInteger()
            } catch (e) {
+               log.debug("Reading from $repoPath/db/format (" + e.getMessage() +
+                         "), Assuming repository fs format to be '1'.")
                fsFormat = 1
            }
+        } else {
+           log.warn("Missing $repoPath/db/format file..." +
+                    ", Assuming repository fs format to be '1'.")
         }
         return fsFormat
     }
@@ -156,6 +172,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repSharing = true
         def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
         if (!f.exists()) {
+           log.warn("Missing $repoPath/db/fsfs.conf file...")
            return false
         }
         f.withReader {reader ->
@@ -198,8 +215,13 @@ class SvnRepoService extends AbstractSvnEdgeService {
            try {
                repoFormat = f.readLines()[0].toInteger()
            } catch (e) {
-             repoFormat = 0
+               repoFormat = 0
+               log.debug("Reading from $repoPath/format (" + e.getMessage() +
+                         "), Assuming repository format to be '0'.")
            }
+        } else {
+           log.warn("Missing $repoPath/format file..." +
+                    ", Assuming repository format to be '0'.")
         }
         return repoFormat
     }
@@ -219,7 +241,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/format").canonicalPath)
         if (! f.exists()) {
-          return -1
+            log.warn("Missing $repoPath/db/format file...")
+            return -1
         }
         f.withReader { reader ->
              String line
@@ -251,7 +274,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/current").canonicalPath)
         if (!f.exists()) {
-          return 0
+            log.warn("Missing $repoPath/db/current file...")
+            return 0
         }
 
         try {
@@ -276,13 +300,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/min-unpacked-rev").canonicalPath)
         if (!f.exists()) {
-           return 0
+            log.warn("Missing $repoPath/db/min-unpacked-rev file...")
+            return 0
         }
 
         try {
-           return (f.readLines()[0]).toInteger()
-        } catch (e) {
-           return 0
+            return (f.readLines()[0]).toInteger()
+        } catch (e) {  
+            log.debug("Reading from $repoPath/db/min-unpacked-rev (" +
+                     e.getMessage() + "), Assuming min-unpacked-rev to be '0'.")
+            return 0
         }
     }
 
