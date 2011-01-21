@@ -91,6 +91,178 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoParentDir.deleteDir()
     }
 
+    private File createMockRepo(String repoName, boolean doSync) {
+
+        //TODO: files/directories listed here is bare minimum needed for 
+        //      present set of tests to work. In future if need more
+        //      file/dir add it at will.
+        def entities = [ [dir:'conf'], [dir:'db'], [dir:'hooks'], [dir:'locks'],
+                         [file:'format'], [file:'db/current'],
+                         [file:'db/fsfs.conf'], [file:'db/min-unpacked-rev'],
+                         [file:'format'], [file:'db/uuid'], [file:'db/fs-type'],
+                         [file:'db/txn-current'], [file:'db/txn-current-lock']
+                       ]
+        File repoDir
+        File repoFile
+
+        def newRepo = new File(repoParentDir.absolutePath, repoName)
+        newRepo.mkdir()
+
+        entities.each {
+           if (it['dir'] != null) {
+              repoDir = new File(newRepo, it['dir'])
+              repoDir.mkdir()
+           } else if (it['file'] != null) {
+              repoFile = new File(newRepo, it['file'])
+              repoFile.createNewFile()
+           }
+        }
+
+        // run the sync method
+        if (doSync) {
+          svc.syncRepositories()
+        }
+
+        return newRepo
+    }
+
+    private void removeMockRepo(String repoName, boolean doSync) {
+
+        def newRepo = new File(repoParentDir.absolutePath, repoName)
+        assert newRepo.deleteDir() == true
+
+        if (doSync) {
+          svc.syncRepositories()
+        }
+    }
+
+    void testGetReposUUID() {
+        def str="55288c01-efc9-40d0-b6bb-08ab79949e00"
+
+        assertEquals("One repository expected at startup", 1, Repository.count())
+
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+
+        // run the sync method
+        assertEquals("Two repositories expected after sync", 2, Repository.count())
+
+        File repoUUIDFile = new File(newRepo, "db/uuid")
+        repoUUIDFile.write(str)
+
+
+        // getting uuid and comparing
+        def testRepo = new Repository(name: "newRepo")
+        def uuid = svc.getReposUUID(testRepo)
+        assertEquals ("Repository UUID expected", uuid, str)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testGetReposFsType() {
+        def str="FSFS"
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals ("Two repositories expected after sync", 2, Repository.count())
+
+        File repoFsTypeFile = new File(newRepo, "db/fs-type")
+        repoFsTypeFile.write(str)
+
+        // getting fstpe and comparing
+        def testRepo = new Repository(name: "newRepo")
+        def fsType = svc.getReposFsType(testRepo)
+        assertEquals("Repository FSFS type expected", fsType, str)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testGetReposFsFormat() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository(name: "newRepo")
+        File repoDBFormatFile = new File(newRepo, "db/format")
+
+        // testing against empty db/format file
+        def format = svc.getReposFsFormat(testRepo)
+        assertEquals ("Repository FS format when empty", 1, format)
+
+        // testing a specific db/format schema
+        repoDBFormatFile.write("4")
+        format = svc.getReposFsFormat(testRepo)
+        assertEquals ("Repository FS format", 4, format)
+
+        // testing against missing db/format file
+        repoDBFormatFile.delete()
+        format = svc.getReposFsFormat(testRepo)
+        assertEquals ("Repository FS format when missing", 1, format)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testGetReposFormat() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals ("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository( name: "newRepo")
+        File repoFormatFile = new File(newRepo, "format")
+
+        // testing against empty format file
+        def format = svc.getReposFormat(testRepo)
+        assertEquals ("Repository format when empty", 0, format)
+
+        // testing a specific format schema
+        repoFormatFile.write("5")
+        format = svc.getReposFormat(testRepo)
+        assertEquals ("Repository format", 5, format)
+
+        // testing against missing format file
+        repoFormatFile.delete()
+        format = svc.getReposFormat(testRepo)
+        assertEquals ("Repository format when missing", 0, format)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testFindHeadRev() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals ("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository( name: "newRepo")
+        File repoCurrentFile = new File(newRepo, "db/current")
+
+        // testing against empty db/current file
+        def rev = svc.findHeadRev(testRepo)
+        assertEquals ("Repository head revision", 0, rev)
+
+        // testing a specific revision
+        repoCurrentFile.write("1000")
+        rev = svc.findHeadRev(testRepo)
+        assertEquals ("Repository head revision", 1000, rev)
+
+        // testing against missing db/current file
+        repoCurrentFile.delete()
+        rev = svc.findHeadRev(testRepo)
+        assertEquals ("Repository head revision", 0, rev)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
 
     void testSyncRepositoriesCreate() {
 
