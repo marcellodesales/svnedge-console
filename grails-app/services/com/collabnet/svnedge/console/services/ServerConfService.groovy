@@ -355,7 +355,9 @@ class ServerConfService {
         }
 
         def output = commandLineService.execute(
-                    ConfigUtil.svnauthzvalidatePath(), f.absolutePath)
+                         ConfigUtil.svnauthzvalidatePath(), f.absolutePath)
+
+        f.delete()
 
         return (output)
     }
