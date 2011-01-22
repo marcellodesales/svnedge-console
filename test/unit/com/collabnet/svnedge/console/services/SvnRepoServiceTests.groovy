@@ -269,20 +269,13 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         assertEquals ("One repository expected at startup", 1, Repository.count())
 
         // create a new repo "externally" / out of band
-        def repoOnDisk1 = new File(repoParentDir.absolutePath, "existingRepoFile")
-        repoOnDisk1.mkdir()
-        File repoOnDiskMarkerFile = new File(repoOnDisk1, "format")
-        repoOnDiskMarkerFile.createNewFile()
-        File repoOnDiskMarkerDir = new File(repoOnDisk1, "db")
-        repoOnDiskMarkerDir.mkdir()
+        def repoOnDisk1 = createMockRepo("existingRepoFile", false)
         
         // run the sync method
         svc.syncRepositories()
         assertEquals ("Two repositories expected after sync", 2, Repository.count())
 
-        repoOnDiskMarkerFile.delete()
-        repoOnDiskMarkerDir.deleteDir()
-        repoOnDisk1.delete()
+        removeMockRepo("existingRepoFile", true)
     }
 
     void testSyncRepositoriesDelete() {
