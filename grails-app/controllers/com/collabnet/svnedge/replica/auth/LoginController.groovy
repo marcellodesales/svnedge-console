@@ -159,7 +159,7 @@ class LoginController {
         def exception = session[AbstractProcessingFilter.SPRING_SECURITY_LAST_EXCEPTION_KEY]
         if (exception) {
             if (exception instanceof DisabledException) {
-                msg = message(code: 'user.login.disabled', args: [username])
+                msg = message(code: 'user.disabled', args: [username])
             }
             else {
                 msg = message(code: 'user.credential.incorrect', args: [username])
