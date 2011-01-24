@@ -244,18 +244,25 @@ class SvnRepoService extends AbstractSvnEdgeService {
             log.warn("Missing $repoPath/db/format file...")
             return -1
         }
-        f.withReader { reader ->
-             String line
-             while ( (line = reader.readLine() ) != null ) {
-                    line = line.trim()
-                    if (line.matches("^layout\\ sharded.*")) {
-                        String[] strsplit = line.split("\\ ")
-                        if (strsplit.length == 3) {
-                            sharded = strsplit[2].toLong()
+
+        try { 
+            f.withReader { reader ->
+                 String line
+                 while ( (line = reader.readLine() ) != null ) {
+                        line = line.trim()
+                        if (line.matches("^layout\\ sharded.*")) {
+                            String[] strsplit = line.split("\\ ")
+                            if (strsplit.length == 3) {
+                                sharded = strsplit[2].toLong()
+                            }
+                            break
                         }
-                        break
-                    }
-             }
+                 }
+            }
+        } catch (e) {
+            sharded = -1
+            log.debug("Reading from $repoPath/db/format (" + e.getMessage() +
+                      "), Assuming repository sharding disabled.")
         }
 
         return sharded
