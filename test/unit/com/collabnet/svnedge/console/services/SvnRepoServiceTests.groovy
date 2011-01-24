@@ -208,6 +208,39 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         removeMockRepo("newRepo", true)
     }
 
+    void testGetRepoFeatures() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository(name: "newRepo")
+        File repoDBFormatFile = new File(newRepo, "db/format")
+
+        // testing against empty db/format file
+        def format = svc.getReposFsFormat(testRepo)
+        def features = svc.getRepoFeatures(testRepo, format)
+        assertEquals ("Repository features expected", "svndiff0", features)
+
+        // testing a specific db/format schema
+        repoDBFormatFile.write("5")
+        format = svc.getReposFsFormat(testRepo)
+        features = svc.getRepoFeatures(testRepo, format)
+        assertEquals ("Repository features expected",
+            "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
+            features)
+
+        // testing against missing db/format file
+        repoDBFormatFile.delete()
+        format = svc.getReposFsFormat(testRepo)
+        features = svc.getRepoFeatures(testRepo, format)
+        assertEquals ("Repository FS format when missing", "svndiff0", features)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
     void testGetReposFormat() {
 
         assertEquals ("One repository expected at startup", 1, Repository.count())
@@ -259,6 +292,77 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoCurrentFile.delete()
         rev = svc.findHeadRev(testRepo)
         assertEquals ("Repository head revision", 0, rev)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testGetReposRepSharing() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository(name: "newRepo")
+        File repoDBConfFile = new File(newRepo, "db/fsfs.conf")
+
+        // testing against empty db/fsfs.conf file
+        def isEnabled = svc.getReposRepSharing(testRepo)
+        assertEquals ("Repository rep-sharing", true, isEnabled)
+
+        // testing a commented rep-sharing line
+        repoDBConfFile.write("###enable-rep-sharing   = ")
+        isEnabled = svc.getReposRepSharing(testRepo)
+        assertEquals ("Repository rep-sharing", true, isEnabled)
+
+        // testing by setting true to enable-rep-sharing
+        repoDBConfFile.write("enable-rep-sharing  = True ")
+        isEnabled = svc.getReposRepSharing(testRepo)
+        assertEquals ("Repository rep-sharing", true, isEnabled)
+
+        // testing by setting false to enable-rep-sharing
+        repoDBConfFile.write("enable-rep-sharing  = False")
+        isEnabled = svc.getReposRepSharing(testRepo)
+        assertEquals ("Repository rep-sharing", false, isEnabled)
+
+        // testing against missing db/fsfs.conf file
+        repoDBConfFile.delete()
+        isEnabled = svc.getReposRepSharing(testRepo)
+        assertEquals ("Repository rep-sharing", false, isEnabled)
+
+        // cleanup.
+        removeMockRepo("newRepo", true)
+    }
+
+    void testGetReposSharding() {
+
+        assertEquals ("One repository expected at startup", 1, Repository.count())
+        // create a new repo "externally" / out of band
+        def newRepo = createMockRepo("newRepo", true)
+        assertEquals("Two repositories expected after sync", 2, Repository.count())
+
+        def testRepo = new Repository(name: "newRepo")
+        File repoDBFormatFile = new File(newRepo, "db/format")
+
+        // testing against empty db/format file
+        def shard = svc.getReposSharding(testRepo)
+        assertEquals ("Repository sharding", -1, shard)
+
+        // testing by setting shard to specific value
+        repoDBFormatFile.write("layout sharded 1000")
+        shard = svc.getReposSharding(testRepo)
+        assertEquals ("Repository sharding", 1000, shard)
+
+        // testing by setting shard to invalid value
+        repoDBFormatFile.write("layout sharded foo")
+        shard = svc.getReposSharding(testRepo)
+        assertEquals ("Repository sharding", -1, shard)
+
+        // testing against missing db/format file
+        repoDBFormatFile.delete()
+        shard = svc.getReposSharding(testRepo)
+        assertEquals ("Repository sharding", -1, shard)
 
         // cleanup.
         removeMockRepo("newRepo", true)
