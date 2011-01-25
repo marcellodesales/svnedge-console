@@ -216,6 +216,23 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     }
 
     /**
+     * Synchronizes the replica's repository with the master
+     * 
+     * @param repoName The simple name of the repository directory
+     */
+    def syncReplicatedRepository(repoName) {
+        log.debug("Synchronizing repo: " + repoName)
+        def syncRepoURI = commandLineService.createSvnFileURI(
+                new File(Server.getServer().repoParentDir, repoName))
+        def ctfServer = CtfServer.getServer()
+        def username = ctfServer.ctfUsername
+        def password = securityService.decrypt(ctfServer.ctfPassword)
+        def repo = Repository.findByName(repoName)
+        def replRepo = ReplicatedRepository.findByRepo(repo)
+        execSvnSync(replRepo, System.currentTimeMillis(), username, password, syncRepoURI)
+    }
+
+    /**
      * Adds the repository on the database.  If the repository has no db
      * record, it will be added.  If it's been previously removed, it's
      * status will be changed back to NOT_READY_YET and enabled.

@@ -35,7 +35,7 @@ public class RepoRemoveCommand extends AbstractReplicaCommand {
     def repoDbTuple
 
     def constraints() {
-        def repoName = this.params["repoName"]
+        def repoName = getRepoName()
         def repoRecord = Repository.findByName(repoName)
         if (repoRecord) {
             this.repoDbTuple = ReplicatedRepository.findByRepo(repoRecord)
@@ -54,7 +54,7 @@ public class RepoRemoveCommand extends AbstractReplicaCommand {
         log.debug("Acquiring the command executor service...")
         def rceService = getService("replicaCommandExecutorService")
 
-        def repoName = this.params["repoName"]
+        def repoName = getRepoName()
         log.debug("Removing the repository '"+ repoName + "'")
         rceService.removeReplicatedRepository(repoName)
     }

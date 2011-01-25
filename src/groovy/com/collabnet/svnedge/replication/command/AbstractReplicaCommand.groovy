@@ -161,4 +161,17 @@ public abstract class AbstractReplicaCommand {
                     undoException)
         }
     }
+    
+    /**
+     * Takes the "repoName" parameter and strips any parent paths
+     * @return just the path name after the final /
+     */
+    protected String getRepoName() {
+        String repoName = this.params["repoName"]
+        int pos = repoName.lastIndexOf('/');
+        if (pos >= 0 && repoName.length() > pos + 1) {
+            repoName = repoName.substring(pos + 1)
+        }
+        return repoName
+    }
 }

@@ -21,6 +21,7 @@ package com.collabnet.svnedge.replication
 import java.io.File;
 
 import com.collabnet.svnedge.replica.manager.ApprovalState;
+import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
@@ -33,6 +34,8 @@ import grails.test.*
 class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandExecutorService
+    def commandLineService
+    def securityService
     def grailsApplication
     def config
 
@@ -76,8 +79,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         ctfServer.ctfUsername = "admin"
         ctfServer.ctfPassword = "n3TEQWKEjpY="
         ctfServer.save()
-   }
-
+    }
+    
     private def makeCtfBaseUrl() {
         def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
         def ctfHost = config.svnedge.ctfMaster.domainName
@@ -224,6 +227,68 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         assertTrue("The repository should be enabled.", repo.getEnabled())
     }
 
+    void testSyncReplicatedRepository() {
+        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+        
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        
+        File repoDir = new File(repoParentDir, REPO_NAME)
+        assertTrue("Repository directory should exist: " + repoDir.getCanonicalPath(), repoDir.exists())
+        
+        File wcDir = createTestDir("wc")
+        
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.getCurrentConfig()
+        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + REPO_NAME
+        
+        def ctfServer = CtfServer.getServer()
+        def username = ctfServer.ctfUsername
+        def password = securityService.decrypt(ctfServer.ctfPassword)
+        def command = [ConfigUtil.svnPath(), "co", masterRepoUrl, wcDir.canonicalPath,
+            "--username", username, "--password", password,
+            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
+        commandLineService.execute(command.toArray(new String[0]))
+        
+        File dotSvn = new File(wcDir, ".svn")
+        assertTrue("Working copy missing .svn folder", dotSvn.exists())
+        
+        def testFile = File.createTempFile("sync-test", ".txt", wcDir)
+        String filename = testFile.name
+        testFile.text = "This is a test file"
+        command = [ConfigUtil.svnPath(), "add", testFile.canonicalPath,
+            "--non-interactive"]
+        commandLineService.execute(command.toArray(new String[0]))
+        
+        command = [ConfigUtil.svnPath(), "ci", testFile.canonicalPath,
+            "--username", username, "--password", password,
+            "--non-interactive", "-m", "Test commit"]
+        commandLineService.execute(command.toArray(new String[0]))
+        
+        def repoUri = commandLineService.createSvnFileURI(repoDir)
+        File wcDir2 = createTestDir("wc2")
+        command = [ConfigUtil.svnPath(), "co", repoUri, wcDir2.canonicalPath,
+            //"--username", username, "--password", password,
+            "--non-interactive", "--no-auth-cache"]
+        commandLineService.execute(command.toArray(new String[0]))
+        File testFile2 = new File(wcDir2, filename)
+        assertFalse("Test file should not exist yet: " + testFile2.canonicalPath, testFile2.exists())
+        
+        replicaCommandExecutorService.syncReplicatedRepository(REPO_NAME)
+        
+        boolean fileExists = false
+        for (int i = 0; i < 30 && !fileExists; i++) {
+            command = [ConfigUtil.svnPath(), "up", wcDir2.canonicalPath,
+                //"--username", username, "--password", password,
+                "--non-interactive", "--no-auth-cache"]
+            commandLineService.execute(command.toArray(new String[0]))
+            fileExists = testFile2.exists()
+            if (!fileExists) {
+                Thread.sleep(1000)
+            }
+        }
+        assertTrue("Test file should exist: " + testFile2.canonicalPath, fileExists)
+    }
+    
     //TODO: Enable these tests when Replication is
     void skip_testCreateRepoOnFS() {
         def replicaDir = File.createTempFile("repo-test", null)

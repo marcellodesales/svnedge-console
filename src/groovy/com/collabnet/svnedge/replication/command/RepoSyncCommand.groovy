@@ -23,12 +23,9 @@ import org.springframework.context.ApplicationContext
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 /**
- * This command adds a repository into the system, by using the svn service.
- * 
- * @author Marcello de Sales (mdesales@collab.net)
- *
+ * This command uses svnsync to update the given repository 
  */
-public class RepoAddCommand extends AbstractReplicaCommand {
+public class RepoSyncCommand extends AbstractReplicaCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -42,15 +39,11 @@ public class RepoAddCommand extends AbstractReplicaCommand {
     def execute() {
         log.debug("Acquiring the command executor service...")
         def rceService = getService("replicaCommandExecutorService")
-
         def repoName = getRepoName()
-        rceService.addReplicatedRepository(repoName)
+        rceService.syncReplicatedRepository(repoName)
     }
 
     def undo() {
-        log.debug("Acquiring the command executor service...")
-        def rceService = getService("replicaCommandExecutorService")
-        def repoName = getRepoName()
-        rceService.removeReplicatedRepository(repoName)
+        log.debug("Can't undo an svnsync")
     }
 }
