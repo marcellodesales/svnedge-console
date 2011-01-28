@@ -56,7 +56,7 @@ class FetchReplicaCommandsJob {
    void start() {
         if (!isStarted) {
             schedule(createTrigger("FetchReplicaCommandsTrigger", 
-                     2 * 60000L, 20000L))
+                     1 * 60000L, 20000L))
             isStarted = true
             log.info("Started FetchReplicaCommandsJob")
         } else {

@@ -436,7 +436,14 @@ CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REP
     private def writeSvnViewvcConf(server) {
         boolean ctfMode = server.managedByCtf() ||
             server.convertingToManagedByCtf()
-        def conf = """${DONT_EDIT}
+        def conf = DONT_EDIT
+        if (server.mode == ServerMode.REPLICA) {
+            conf += """
+LoadModule proxy_module lib/modules/mod_proxy.so
+LoadModule proxy_http_module lib/modules/mod_proxy_http.so"""
+        }
+        conf += """
+
 <VirtualHost *:${server.port}>
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
