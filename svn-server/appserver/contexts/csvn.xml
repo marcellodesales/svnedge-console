@@ -4,4 +4,5 @@
 <Configure class="org.eclipse.jetty.webapp.WebAppContext">
   <Set name="contextPath">/csvn</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/csvn.war</Set>
+  <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
 </Configure>
