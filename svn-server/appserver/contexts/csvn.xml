@@ -5,4 +5,17 @@
   <Set name="contextPath">/csvn</Set>
   <Set name="war"><SystemProperty name="jetty.home" default="."/>/webapps/csvn.war</Set>
   <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
+
+  <Set name="sessionHandler">
+    <New class="org.eclipse.jetty.server.session.SessionHandler">
+      <Arg>
+        <New id="hashMgr"
+class="org.eclipse.jetty.server.session.HashSessionManager">
+          <Set name="secureCookies">true</Set>
+          <Set name="httpOnly">true</Set>
+        </New>
+      </Arg>
+    </New>
+  </Set>
+
 </Configure>
