@@ -51,7 +51,17 @@ public class ReplicaConfiguration {
         description(nullable:false)
     }
 
+    /**
+     * pseudo singleton provider
+     * @return
+     */
     static ReplicaConfiguration getCurrentConfig() {
-        return ReplicaConfiguration.get(1)
+        def replicaConfigRows = ReplicaConfiguration.list()
+        if (replicaConfigRows) {
+            return replicaConfigRows.last()
+        }
+        else {
+            return null
+        }
     }
 }

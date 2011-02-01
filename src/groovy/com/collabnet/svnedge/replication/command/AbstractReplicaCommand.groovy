@@ -132,7 +132,7 @@ public abstract class AbstractReplicaCommand {
         } catch (Throwable t) {
             succeeded = false
             executionException = t
-            log.error("Failed to execute command: " + t.getMessage())
+            log.error("Failed to execute command: ${t.getMessage()}", t)
         }
 
         if (executionException) {

@@ -148,7 +148,6 @@ class LifecycleService {
         }
         return startOrStopServer(Command.GRACEFUL)
     }
-    
 
     /**
      * Starts the svn server
@@ -161,6 +160,20 @@ class LifecycleService {
         if (server.useSsl) 
             createSSLServerCert()
         return startOrStopServer(Command.START)
+    }
+
+    /**
+     * Starts or gracefully restarts the server
+     * @return
+     */
+    def restartServer() throws CantBindPortException {
+        def result = -1;
+        if (isStarted()) {
+            result = gracefulRestartServer()
+        } else {
+            result = startServer()
+        }
+        return result
     }
     
     private def createSSLServerCert() {

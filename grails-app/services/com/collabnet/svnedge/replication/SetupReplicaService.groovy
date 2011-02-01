@@ -27,6 +27,8 @@ import com.collabnet.svnedge.replica.manager.ApprovalState
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.console.CantBindPortException
+import com.collabnet.svnedge.console.Repository
 
 /**
  * This service handles replication-related functionality
@@ -41,22 +43,18 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def jobsAdminService
     def securityService
     def serverConfService
+    def svnRepoService
     def lifecycleService
+    def discoveryService
     def replicaCommandExecutorService
     def networkingService
 
-    /**
-    * Sets system properties used to configure the integration webapp
-    * and scripts
-    *
-    * @param appHome is the application home directory
-    */
     def bootStrap = {
         log.debug("Bootrastrapping the Setup Replica service")
     }
 
     /**
-     * Confirm the ctf connection
+     * Confirms the ctf connection
      */
     public void confirmCtfConnection(CtfConnectionBean ctfConn) throws 
             CtfAuthenticationException, RemoteMasterException,
@@ -67,7 +65,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     }
  
     /**
-     * Attempt to register (or re-register) the Replica with the Master.
+     * Attempts to register (or re-register) the Replica with the Master.
      * This should be called after the Replica is first setup, or any time
      * the Replica is updated or the Master is changed.
      * @param rc the Replica Configuration data
@@ -167,17 +165,35 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         ctfServer.ctfPassword = securityService.encrypt(ctfConn.ctfPassword)
 
     }
-   
+
+
     /**
-     * revert from managed replica mode to standalone
-     * delegates to <code>setupTeamForgeService.revertFromCtfMode()</code> and 
-     * pauses replication jobs
-     * @param ctfConn
+     * Revert from managed replica mode to standalone. This method will *not* notify
+     * the ctf instance -- for use where the Ctf instance
+     * has initiated the removal and therefore already knows
+     * @param errors
+     * @param locale
+     */
+    public void revertFromReplicaMode(errors, locale) {
+
+        undoReplicaModeConfiguration(errors, locale)
+        jobsAdminService.pauseGroup(REPLICA_GROUP)
+
+    }
+
+    /**
+     * Revert from managed replica mode to standalone. This method will notify
+     * the Ctf instance.
+     * @param ctfUsername
+     * @param ctfPassword
+     * @param errors collection
+     * @param locale for error messaging
      */
     public void revertFromReplicaMode (String ctfUsername, String ctfPassword,
-            errors, locale) throws CtfAuthenticationException {
-        
-        setupTeamForgeService.revertFromCtfMode(ctfUsername, ctfPassword, errors, locale)
+            errors, locale) throws CtfAuthenticationException, RemoteMasterException {
+
+        unregisterReplica(ctfUsername, ctfPassword, errors, locale)
+        undoReplicaModeConfiguration(errors, locale)
         jobsAdminService.pauseGroup(REPLICA_GROUP)
     }
 
@@ -213,4 +229,50 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         setupTeamForgeService.restartServer()
      }
+
+
+    private void unregisterReplica(String ctfUsername, String ctfPassword, List errors, Locale locale)
+        throws CtfAuthenticationException, RemoteMasterException {
+
+        ctfRemoteClientService.deleteReplica(
+            ctfUsername, ctfPassword, errors, locale)
+
+    }
+
+    private void undoReplicaModeConfiguration(Collection errors, Locale locale) {
+
+        Server server = Server.getServer()
+        CtfServer ctfServer = CtfServer.getServer()
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.getCurrentConfig()
+
+        server.mode = ServerMode.STANDALONE
+        server.save(flush:true)
+
+        if (ctfServer) {
+            ctfServer.delete()
+        }
+
+        if (replicaConfig) {
+            replicaConfig.approvalState = ApprovalState.REMOVED
+            replicaConfig.save(flush:true)
+        }
+
+        // delete all repos
+        Repository.list().each {
+            svnRepoService.deleteRepository(it)
+        }
+
+        serverConfService.restoreHttpdConfFromBackup()
+        serverConfService.writeConfigFiles()
+        discoveryService.serverUpdated()
+        try {
+            lifecycleService.restartServer();
+        }
+        catch (CantBindPortException e) {
+            log.error("Could not restart server", e)
+            errors << getMessage("server.error.cantBindPort", locale)
+        }
+
+    }
+
 }

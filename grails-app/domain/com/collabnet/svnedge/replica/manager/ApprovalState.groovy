@@ -35,7 +35,10 @@ public enum ApprovalState {
     NOT_FOUND("NOT_FOUND"),
 
     // an attempt to register the replica with the master failed
-    REGISTRATION_FAILED("REGISTRATION_FAILED")
+    REGISTRATION_FAILED("REGISTRATION_FAILED"),
+
+    // this replica has been removed by the master
+    REMOVED("REMOVED")
 
     String name
 

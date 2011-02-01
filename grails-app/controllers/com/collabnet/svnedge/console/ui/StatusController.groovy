@@ -82,6 +82,13 @@ class StatusController {
             ctfUrl = ctfServer.getWebAppUrl()
         }
 
+        // if this is a "reverted" replica, add a flash message and then delete 
+        // ReplicaConfiguration
+        if (currentReplica?.approvalState == ApprovalState.REMOVED) {
+            flash.warn = message(code: 'replica.error.removed')
+            currentReplica.delete()
+        }
+
         boolean isStarted = lifecycleService.isStarted()
         params.max = 
             Math.min( params.max ? params.max.toInteger() : 10,  100)
