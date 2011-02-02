@@ -236,11 +236,12 @@ class RepoController {
         def exitStatus = Integer.parseInt(result[0]) 
 
         if (exitStatus != 0) {
-            def err = result[2].split(":")
-            if (err.length == 4) {
+            def err = result[2].split(": ")
+            if (err.length == 3) {
+                def line = err[1].split(":")
                 flash.error = message(code:
                   'repository.action.saveAuthorization.validate.failure.lineno',
-                   args: [err[2], err[3]])
+                   args: [line[line.length-1], err[2]])
             } else {
                 flash.error = message(code:
                   'repository.action.saveAuthorization.validate.failure.nolineno',
