@@ -20,7 +20,7 @@
       </div>
       <g:if test="${currentReplica.svnMasterUrl}">
          <div class="ImageListParent">
-           <strong><g:message code="status.page.replica.location" /></strong> <a href="${currentReplica.svnMasterUrl}" target="_blank">${currentReplica.svnMasterUrl}</a>
+           <strong><g:message code="status.page.replica.location" /></strong> ${currentReplica.svnMasterUrl}
          </div>
       </g:if>
     </g:if>
