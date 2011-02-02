@@ -628,6 +628,9 @@ LDAPVerifyServerCert Off
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
+            if (masterSVNURI?.startsWith("https")) {
+                conf += "   SSLProxyEngine on \n"
+            }
             conf += "   SVNMasterURI ${masterSVNURI}"
         }
         conf += """
