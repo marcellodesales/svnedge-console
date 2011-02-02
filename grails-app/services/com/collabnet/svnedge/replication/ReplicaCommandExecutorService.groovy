@@ -19,6 +19,7 @@ package com.collabnet.svnedge.replication
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.Semaphore
 
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
@@ -47,8 +48,6 @@ import org.springframework.context.ApplicationContextAware
 public class ReplicaCommandExecutorService extends AbstractSvnEdgeService 
         implements ApplicationContextAware {
 
-    boolean transactional = true
-
     ApplicationContext applicationContext
 
     def commandLineService
@@ -56,8 +55,25 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     def operatingSystemService
     def securityService
     def svnRepoService
+    def backgroundService
 
+    /**
+     * The directory where the logs are located.
+     */
     def cmdExecLogsDir
+    /**
+     * The thread pool semaphore that controls how many permitted commands
+     * can be executed at the same time.
+     */
+    Semaphore reposSemaphore
+    /**
+     * The default name of the replica server category.
+     */
+    private static final String REPLICA_COMMAND_CATEGORY = "replicaServer"
+
+    // TODO: The number of repositories being updated in parallel. This should
+    // be retrieved from the ReplicaConfiguration bean.
+    def maxRepositoriesBeingUpdated = 2;
 
     def bootStrap = { dataDir ->
         cmdExecLogsDir = new File(dataDir + "/logs")
@@ -66,6 +82,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         if (Server.getServer().mode == ServerMode.REPLICA) {
             new FetchReplicaCommandsJob().start()
         }
+        setupExecutorPool(maxRepositoriesBeingUpdated)
     }
 
     /**
@@ -78,6 +95,30 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
             throw new IllegalStateException(msg)
         }
         return replica
+    }
+
+    /**
+     * Setups up a new value for the total number of permits available in the
+     * Semaphore that controls the concurrent number of repositories updating.
+     * @param newMaxRepositoriesBeingUpdated the new max number. 
+     */
+    def setupExecutorPool(int newMaxRepositoriesBeingUpdated) {
+        if (!reposSemaphore) {
+            reposSemaphore = new Semaphore(newMaxRepositoriesBeingUpdated)
+        } else {
+            if (newMaxRepositoriesBeingUpdated == maxRepositoriesBeingUpdated) {
+                return
+            }
+            def availablePermits = reposSemaphore.availablePermits()
+            def usedPermits = newMaxRepositoriesBeingUpdated - availablePermits
+            reposSemaphore = new Semaphore(newMaxRepositoriesBeingUpdated)
+            if (newMaxRepositoriesBeingUpdated > maxRepositoriesBeingUpdated) {
+                reposSemaphore.reducePermits(usedPermits)
+
+            } else if (availablePermits >= newMaxRepositoriesBeingUpdated) {
+                reposSemaphore.reducePermits(newMaxRepositoriesBeingUpdated)
+            } // do not reduce in case there are available permits
+        }
     }
 
     /**
@@ -97,11 +138,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
             ctfUrl, userSessionId, masterSystemId, locale)
 
-        log.debug("Retrieved " + (queuedCommands ? queuedCommands.size() : 0) + 
-                  " commands for execution")
-        //execute each of them
-        executeCommands(queuedCommands, ctfUrl, userSessionId, masterSystemId,
-            locale)
+        // schedule each of them for execution
+        this.scheduleCommands(queuedCommands, ctfUrl, userSessionId,
+            masterSystemId, locale)
     }
 
     /**
@@ -124,14 +163,72 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
             ctfServer.baseUrl, userSessionId, replica.systemId, locale)
 
-        //execute each of them
-        executeCommands(queuedCommands, ctfServer.baseUrl, userSessionId, 
+        // schedule each of them for execution
+        this.scheduleCommands(queuedCommands, ctfServer.baseUrl, userSessionId,
             replica.systemId, locale)
     }
 
-    def executeCommands(queuedCommands, ctfUrl, userSessionId, masterSystemId,
-            locale) {
+    /**
+     * @return a new Map of categorized commands by repositoryPath or 
+     * REPLICA_COMMAND_CATEGORY.
+     */
+    def makeCommandsCategory(queuedCommands) {
+        // map grouping the tasks by granularity (repoName or replica server)
+        return queuedCommands.groupBy{
+            it.repoName == null ? REPLICA_COMMAND_CATEGORY : it.repoName
+        }
+    }
 
+    /**
+     * Schedules the commands to be executed in parallel. There is a semaphore
+     * for the max of repository groups that can be executed in parallel.
+     * Replica server commands are serially executed in parallel as they
+     * arrive.
+     */
+    def scheduleCommands(queuedCommands, ctfServerbaseUrl, userSessionId,
+                    replicaId, locale) {
+
+        if (queuedCommands.size() == 0) {
+            log.debug("No commands to be scheduled for execution...")
+            return
+        }
+
+        log.debug("Categorizing the following commands: " + queuedCommands)
+        // map grouping the tasks by granularity (repoName or replica server)
+        def cmdCategoryQueues = makeCommandsCategory(queuedCommands)
+        log.debug("Scheduling the following categorized commands: " +
+            queuedCommands)
+
+        // execute all cmd categories in parallel (replica, repo1, repo2, ...)
+        cmdCategoryQueues.each { commandCategory, commandsList ->
+            if (!commandCategory.equals(REPLICA_COMMAND_CATEGORY)) {
+                // try to get a permission from the semaphore to execute
+                // repository commands in parallel.
+                reposSemaphore.acquire()
+            }
+            // execute the command using the background service.
+            backgroundService.execute("Commands Queue for $commandCategory", {
+                executeCommands(commandCategory, commandsList, ctfServerbaseUrl,
+                    userSessionId, replicaId, locale)
+                })
+        }
+    }
+
+    /**
+     * Execute the queue of commands serially for a given category.
+     * @param commandCategory is the repositoryPath or the String defined on
+     * REPLICA_COMMAND_CATEGORY.
+     * @param queuedCommands is the queue of commands to be executed.
+     * @param ctfUrl
+     * @param userSessionId
+     * @param masterSystemId
+     * @param locale
+     */
+    def executeCommands(commandCategory, queuedCommands, ctfUrl, userSessionId,
+            masterSystemId, locale) {
+
+        log.debug("Executing ${queuedCommands.size()} commands" +
+            " for $commandCategory")
         //execute each command, having them being updated with status
         for(command in queuedCommands) {
             def commandWithResult = processCommandRequest(command)
@@ -148,6 +245,10 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                     remoteError)
                 //TODO: Add the error to the error list to guarantee delivery.
             }
+        }
+        if (!commandCategory.equals(REPLICA_COMMAND_CATEGORY)) {
+            // release the permit of the repository category semaphore
+            reposSemaphore.release()
         }
     }
 
