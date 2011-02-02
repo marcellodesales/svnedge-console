@@ -28,6 +28,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 class CtfCredentialCommand {
     String ctfUsername
@@ -95,6 +96,9 @@ class ServerController {
                 } else {
                     flash.message = message(code: 
                         "server.action.revert.success")
+                    // since we have a success flash message, we can delete the
+                    // ReplicaConfiguration, which signals a duplicate message
+                    ReplicaConfiguration.getCurrentConfig()?.delete(flush:true);
                     redirect(controller: "status", action: "index")
                 }
             } catch (CtfAuthenticationException wrongCredentials) {
