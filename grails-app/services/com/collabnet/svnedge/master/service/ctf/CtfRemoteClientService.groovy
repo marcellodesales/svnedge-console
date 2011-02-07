@@ -100,32 +100,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         ApprovalState.APPROVED.getName()
     }
 
-    def getSoapUrl(ctfBaseUrl) {
-        (ctfBaseUrl.charAt(ctfBaseUrl.length() - 1) == '/') ?
-        ctfBaseUrl + "ce-soap50/services" :
-        ctfBaseUrl + "/ce-soap50/services"
-    }
-
     public ICollabNetSoap cnSoap(ctfBaseUrl) {
-        if(ctfBaseUrl) {
-            (ICollabNetSoap) ClientSoapStubFactory.getSoapStub(
-                ICollabNetSoap.class, this.getSoapUrl(ctfBaseUrl));
-        } else {
-            CtfServer ctf = CtfServer.getServer()
-            (ICollabNetSoap) ClientSoapStubFactory
-                .getSoapStub(ICollabNetSoap.class, ctf.soapUrl());
-        }
+        return (ICollabNetSoap) ClientSoapStubFactory.getSoapStub(
+            ICollabNetSoap.class, ctfBaseUrl ?: CtfServer.getServer().baseUrl)
     }
 
     public IScmAppSoap makeScmSoap(url) {
-        CtfServer ctf = CtfServer.getServer()
-        if (url) {
-            (IScmAppSoap) ClientSoapStubFactory
-                .getSoapStub(IScmAppSoap.class, this.getSoapUrl(url));
-        } else {
-            (IScmAppSoap) ClientSoapStubFactory
-            .getSoapStub(IScmAppSoap.class, ctf.soapUrl());
-        }
+        return (IScmAppSoap) ClientSoapStubFactory.getSoapStub(
+            IScmAppSoap.class, url ?: CtfServer.getServer().baseUrl)
     }
 
     private String authzBaseUrl() {

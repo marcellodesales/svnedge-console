@@ -28,7 +28,7 @@
 # development, they will remain None.
 #
 
-def index(req):
+def index(req, header_html = None):
   #########################################################################
   #
   # Adjust sys.path to include our library directory
@@ -41,7 +41,6 @@ def index(req):
   SVN_LIBRARY_DIR = None
   LIBRARY_DIR = None
   CONF_PATHNAME = None
-  CSVN_HOME_DIR = None
   CSVN_HOME_DIR = env["CSVN_HOME"]
   if CSVN_HOME_DIR:
     SVN_LIBRARY_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR,
@@ -67,6 +66,9 @@ def index(req):
 
   server = sapi.ModPythonServer(req)
   cfg = viewvc.load_config(CONF_PATHNAME, server)
+  if header_html:
+    cfg.general.header_html = header_html
+
   try:
     viewvc.main(server, cfg)
   finally:

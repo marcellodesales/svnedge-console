@@ -136,10 +136,6 @@ class Request:
           app_server_root_url = app_server_root_url
       self.cfg.general.csvn_app_server_root_url = app_server_root_url
 
-      # Get the SF_HEADER stuff
-      ctf_header = re.sub(r'%[0-9A-Fa-f][0-9A-Fa-f]', jigger_sf_header,
-          string.replace(os.environ.get('SF_HEADER'), "+", " "))
-      self.cfg.general.banner_header = ctf_header
     else:
       self.cfg.general.csvn_app_server_root_url = 'app_server_root_url'
       # open the web page and read it into a variable
@@ -149,7 +145,7 @@ class Request:
       # urlOpener = urllib2.build_opener()
       # page = urlOpener.open("http://localhost:8080/csvn/repo/banner")
       # banner = page.read()
-      self.cfg.general.banner_header = ''
+      self.cfg.general.header_html = ''
 
     ### -- End TeamForge customizations to 'cfg' --
     
@@ -1472,7 +1468,7 @@ def common_template_data(request, revision=None, mime_type=None):
     'where' : request.server.escape(request.where),
 
     # added for TeamForge
-    'banner_header': cfg.general.banner_header,
+    'banner_header': cfg.general.header_html,
     'testmode' : cfg.general.ctf_testmode,
     'app_server_root_url': cfg.general.csvn_app_server_root_url,
     'servermode': cfg.general.csvn_servermode,
@@ -1566,15 +1562,6 @@ def common_template_data(request, revision=None, mime_type=None):
                                                  'file_match': 'exact'},
                                          escape=1)
   return data
-
-def jigger_sf_header(matchObject):
-  return unhexlify(matchObject.group()[1:])
-
-def unhexlify(s):
-  array = []
-  for i in range(0, len(s), 2):
-    array.append(chr(string.atoi(s[i:i+2], 16)))
-  return string.join(array, '')
 
 def retry_read(src, reqlen=CHUNK_SIZE):
   while 1:
