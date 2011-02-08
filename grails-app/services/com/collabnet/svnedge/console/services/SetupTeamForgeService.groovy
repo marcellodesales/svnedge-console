@@ -54,12 +54,11 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     def commandLineService
     def operatingSystemService
     def authenticationManager
+    def csvnAuthenticationProvider
     def ctfAuthenticationProvider
     def ctfRemoteClientService
     def securityService
     def svnRepoService
-    def daoAuthenticationProvider
-    def anonymousAuthenticationProvider
     def discoveryService
     def userAccountService
 
@@ -829,8 +828,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             ctfServer.delete()
         }
 
-        authenticationManager.providers = [daoAuthenticationProvider, 
-                anonymousAuthenticationProvider]
+        authenticationManager.providers = [csvnAuthenticationProvider]
     }
 
     private void undoLocalRepositoriesDependencies(Server server, errors, 

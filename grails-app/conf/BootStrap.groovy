@@ -144,7 +144,7 @@ class BootStrap {
             log.error ("Failed to intitialize PackagesUpdateService: " + e.getMessage(), e)
         }
 
-        if (server.mode == ServerMode.MANAGED) {
+        if (server.managedByCtf()) {
             log.info("Changing auth to use CTF")
             authenticationManager.providers = [ctfAuthenticationProvider]
         }

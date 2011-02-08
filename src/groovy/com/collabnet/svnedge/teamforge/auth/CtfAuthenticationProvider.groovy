@@ -50,6 +50,6 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
     }
 
     boolean supports(Class authentication) {
-        return Server.getServer().mode == ServerMode.MANAGED
+        return Server.getServer().managedByCtf()
     }
 } 

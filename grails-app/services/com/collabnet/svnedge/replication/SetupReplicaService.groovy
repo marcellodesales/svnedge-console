@@ -48,7 +48,10 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def discoveryService
     def replicaCommandExecutorService
     def networkingService
-
+    def authenticationManager    
+    def csvnAuthenticationProvider
+    def ctfAuthenticationProvider
+    
     def bootStrap = {
         log.debug("Bootrastrapping the Setup Replica service")
     }
@@ -141,7 +144,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         serverConfService.backupAndOverwriteHttpdConf()
         serverConfService.writeConfigFiles()
         setupTeamForgeService.restartServer()
-
+        authenticationManager.providers = [ctfAuthenticationProvider]
+        
         log.info("starting FetchReplicaCommandsJob")
         new FetchReplicaCommandsJob().start()
         log.info("Resuming replica jobs")
@@ -265,6 +269,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         serverConfService.restoreHttpdConfFromBackup()
         serverConfService.writeConfigFiles()
         discoveryService.serverUpdated()
+        authenticationManager.providers = [csvnAuthenticationProvider]
+            
         try {
             lifecycleService.restartServer();
         }
