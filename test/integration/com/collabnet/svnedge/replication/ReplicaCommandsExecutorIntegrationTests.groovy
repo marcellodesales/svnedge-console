@@ -124,6 +124,16 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                    result['exception'], result['exception'])
         assertTrue("Processing a command should return a true succeeded.",
                    result['succeeded'])
+
+        // verify the database records
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(
+            REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+
+        // verify the file-system state
+        File repoDir = new File(repoParentDir, REPO_NAME)
+        assertTrue("Repository directory should exist: " + 
+            repoDir.getCanonicalPath(), repoDir.exists())
     }
 
     /**
@@ -138,6 +148,17 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         def command = [code: 'repoAdd', id: 0, params: cmdParams]
         def result = replicaCommandExecutorService.processCommandRequest(
             command)
+
+        // verify that the database records exist
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(
+            REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+
+        // verify the directory exists in the file-system 
+        File repoDir = new File(repoParentDir, REPO_NAME)
+        assertTrue("Repository directory should exist: " + 
+            repoDir.getCanonicalPath(), repoDir.exists())
+
         // then remove
         command = [code: 'repoRemove', id: 0, params: cmdParams]
         result = replicaCommandExecutorService.processCommandRequest(command)
@@ -149,6 +170,16 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                    result['exception'], result['exception'])
         assertTrue("Processing a command should return a true succeeded.",
                    result['succeeded'])
+
+        // verify that the database record was removed, but on removed state
+        repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        assertNotNull("The repo should exist.", repo)
+        assertEquals("The repo's status should be REMOVED.",
+            RepoStatus.REMOVED, repo.getStatus())
+
+        // verify that the directory was removed from the file-system.
+        assertFalse("Repository directory should not exist: " + 
+            repoDir.getCanonicalPath(), repoDir.exists())
     }
 
     /**
@@ -181,46 +212,53 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             "command update", this.rConf.description, newDescription)
     }
 
-    void testAddReplicatedRepository() {
-        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+    void testAddRemoveReAddRepoOnDatabase() {
+        def cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
 
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        // add first
+        def command = [code: 'repoAdd', id: 0, params: cmdParams]
+        def result = replicaCommandExecutorService.processCommandRequest(
+            command)
+
+        // verify that the database records exist
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(
+            REPO_NAME))
         assertNotNull("The repo should exist.", repo)
-        
+
+        // verify the directory exists in the file-system
         File repoDir = new File(repoParentDir, REPO_NAME)
-        assertTrue("Repository directory should exist: " + repoDir.getCanonicalPath(), repoDir.exists())
-    }
+        assertTrue("Repository directory should exist: " +
+            repoDir.getCanonicalPath(), repoDir.exists())
 
-    void testRemoveReplicatedRepository() {
-        // create first
-        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
-        
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
-        assertNotNull("The repo should exist.", repo)
-        replicaCommandExecutorService.removeReplicatedRepository(REPO_NAME)
+        // then remove
+        command = [code: 'repoRemove', id: 0, params: cmdParams]
+        result = replicaCommandExecutorService.processCommandRequest(command)
+        assertNotNull("Processing a command should not return null.", result)
+        if (result['exception']) {
+            println result['exception']
+        }
+        assertNull("Processing a command should not return an exception.\n" +
+                   result['exception'], result['exception'])
+        assertTrue("Processing a command should return a true succeeded.",
+                   result['succeeded'])
+
+        // verify that the database record was removed, but on removed state
         repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
         assertNotNull("The repo should exist.", repo)
         assertEquals("The repo's status should be REMOVED.",
-                     RepoStatus.REMOVED, repo.getStatus())
+            RepoStatus.REMOVED, repo.getStatus())
 
-        File repoDir = new File(repoParentDir, REPO_NAME)
-        assertFalse("Repository directory should not exist: " + repoDir.getCanonicalPath(), repoDir.exists())
-    }
-    
-    void testAddRemoveReAddRepoOnDatabase() {
-        // create first
-        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
+        // verify that the directory was removed from the file-system.
+        assertFalse("Repository directory should not exist: " +
+            repoDir.getCanonicalPath(), repoDir.exists())
 
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
-        assertNotNull("The repo should exist.", repo)
-        // removed
-        replicaCommandExecutorService.removeReplicatedRepository(REPO_NAME)
-        repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
-        assertNotNull("The repo should exist.", repo)
-        // add again
-        try {
-            replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
-        } catch (Exception e) {
+        // try to re-add the same repository
+        command = [code: 'repoAdd', id: 0, params: cmdParams]
+        result = replicaCommandExecutorService.processCommandRequest(command)
+        if (result['exception']) {
+            println result['exception']
             fail("Should be able to re-add a removed repository.")
         }
         repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
@@ -228,37 +266,46 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testSyncReplicatedRepository() {
-        replicaCommandExecutorService.addReplicatedRepository(REPO_NAME)
-        
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
+        def cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
+
+        // add first
+        def command = [code: 'repoAdd', id: 0, params: cmdParams]
+        def result = replicaCommandExecutorService.processCommandRequest(
+            command)
+
+        def repo = ReplicatedRepository.findByRepo(Repository.findByName(
+            REPO_NAME))
         assertNotNull("The repo should exist.", repo)
-        
+
         File repoDir = new File(repoParentDir, REPO_NAME)
-        assertTrue("Repository directory should exist: " + repoDir.getCanonicalPath(), repoDir.exists())
-        
+        assertTrue("Repository directory should exist: " + 
+            repoDir.getCanonicalPath(), repoDir.exists())
+
         File wcDir = createTestDir("wc")
-        
-        ReplicaConfiguration replicaConfig = ReplicaConfiguration.getCurrentConfig()
+
+        def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + REPO_NAME
-        
+
         def ctfServer = CtfServer.getServer()
         def username = ctfServer.ctfUsername
         def password = securityService.decrypt(ctfServer.ctfPassword)
-        def command = [ConfigUtil.svnPath(), "co", masterRepoUrl, wcDir.canonicalPath,
+        command = [ConfigUtil.svnPath(), "co", masterRepoUrl, wcDir.canonicalPath,
             "--username", username, "--password", password,
             "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
         commandLineService.execute(command.toArray(new String[0]))
-        
+
         File dotSvn = new File(wcDir, ".svn")
         assertTrue("Working copy missing .svn folder", dotSvn.exists())
-        
+
         def testFile = File.createTempFile("sync-test", ".txt", wcDir)
         String filename = testFile.name
         testFile.text = "This is a test file"
         command = [ConfigUtil.svnPath(), "add", testFile.canonicalPath,
             "--non-interactive"]
         commandLineService.execute(command.toArray(new String[0]))
-        
+
         command = [ConfigUtil.svnPath(), "ci", testFile.canonicalPath,
             "--username", username, "--password", password,
             "--non-interactive", "-m", "Test commit"]
@@ -271,10 +318,18 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             "--non-interactive", "--no-auth-cache"]
         commandLineService.execute(command.toArray(new String[0]))
         File testFile2 = new File(wcDir2, filename)
-        assertFalse("Test file should not exist yet: " + testFile2.canonicalPath, testFile2.exists())
-        
-        replicaCommandExecutorService.syncReplicatedRepository(REPO_NAME)
-        
+        assertFalse("Test file should not exist yet: " + 
+            testFile2.canonicalPath, testFile2.exists())
+
+        cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
+
+        // execute svn sync
+        command = [code: 'repoSync', id: 0, params: cmdParams]
+        result = replicaCommandExecutorService.processCommandRequest(
+            command)
+
         boolean fileExists = false
         for (int i = 0; i < 30 && !fileExists; i++) {
             command = [ConfigUtil.svnPath(), "up", wcDir2.canonicalPath,
@@ -286,44 +341,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                 Thread.sleep(1000)
             }
         }
-        assertTrue("Test file should exist: " + testFile2.canonicalPath, fileExists)
-    }
-    
-    //TODO: Enable these tests when Replication is
-    void skip_testCreateRepoOnFS() {
-        def replicaDir = File.createTempFile("repo-test", null)
-        log.info("replicaDir = " + replicaDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        replicaDir.delete()
-        replicaDir.mkdir()
-        replicaDir.deleteOnExit()
-        svnNotificationService.svnReplicaParentPath = replicaDir
-            .getCanonicalPath()
-        def repoName = "testproject"
-        svnNotificationService.addRepositoryOnDatabase(repoName)
-        svnNotificationService.createRepositoryOnFileSystem(repoName)
-        def repoDir = new File(replicaDir.getCanonicalPath() + "/" + repoName)
-        assertTrue("The repo directory should exist.", repoDir.exists())
-        def repo = ReplicatedRepository.findByRepo(Repository.findByName(repoName))
-        log.info("Repo status msg: " + repo.getStatusMsg())
-        assertTrue("The repository should have OK status.",
-                   repo.status.equals(RepoStatus.OK))
-        def defaultMaster = svnNotificationService.getMaster()
-        def masterUUID = svnNotificationService.getMasterUUID(defaultMaster,
-                                                              repoName)
-        def replicaUUID = null
-
-        try {
-            def replicaUUIDFile = replicaDir.getCanonicalPath() +
-                                  "/" + repoName + "/db/uuid"
-            new File(replicaUUIDFile).withReader { reader ->
-                replicaUUID = reader.readLine()
-            }
-        } catch (Exception e) {
-            fail("Not able to read the replica's UUID file.")
-        }
-        assertEquals("UUID of replica repo and Master repo should be same.",
-                     masterUUID, replicaUUID)
+        assertTrue("Test file should exist: " + testFile2.canonicalPath, 
+            fileExists)
     }
 
     private File createTestDir(String prefix) {

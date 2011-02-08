@@ -35,22 +35,23 @@ public class RepoAddCommand extends AbstractReplicaCommand {
     def constraints() {
         def repoName = getRepoName()
         log.debug("Acquiring the replica commands executor service...")
-        def svn = getService("replicaCommandExecutorService")
-        // do we want to check anything here?
+        if (!this.params["repoName"]) {
+            throw new IllegalArgumentException("The repo path is missing.")
+        }
     }
 
     def execute() {
-        log.debug("Acquiring the command executor service...")
-        def rceService = getService("replicaCommandExecutorService")
-
         def repoName = getRepoName()
-        rceService.addReplicatedRepository(repoName)
+
+        log.debug("Creating a new repository on the database...")
+        addRepositoryOnDatabase(repoName)
+
+        log.debug("Creating a new repository on the file system...")
+        createRepositoryOnFileSystem(repoName)
     }
 
     def undo() {
         log.debug("Acquiring the command executor service...")
-        def rceService = getService("replicaCommandExecutorService")
-        def repoName = getRepoName()
-        rceService.removeReplicatedRepository(repoName)
+        removeReplicatedRepository(getRepoName())
     }
 }

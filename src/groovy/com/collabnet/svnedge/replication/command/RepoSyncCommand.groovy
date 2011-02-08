@@ -21,7 +21,9 @@ import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.context.ApplicationContext
 import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.console.Server;
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.teamforge.CtfServer;
 /**
  * This command uses svnsync to update the given repository 
  */
@@ -33,14 +35,25 @@ public class RepoSyncCommand extends AbstractReplicaCommand {
         def repoName = getRepoName()
         log.debug("Acquiring the replica commands executor service...")
         def svn = getService("replicaCommandExecutorService")
-        // do we want to check anything here?
+        if (!this.params.repoName) {
+            throw new IllegalArgumentException("The repo path must be provided")
+        }
     }
 
     def execute() {
-        log.debug("Acquiring the command executor service...")
-        def rceService = getService("replicaCommandExecutorService")
         def repoName = getRepoName()
-        rceService.syncReplicatedRepository(repoName)
+
+        log.debug("Synchronizing repo: " + repoName)
+        def commandLineService = getService("commandLineService")
+        def syncRepoURI = commandLineService.createSvnFileURI(
+                new File(Server.getServer().repoParentDir, repoName))
+        def ctfServer = CtfServer.getServer()
+        def username = ctfServer.ctfUsername
+        def securityService = getService("securityService")
+        def password = securityService.decrypt(ctfServer.ctfPassword)
+        def repo = Repository.findByName(repoName)
+        def replRepo = ReplicatedRepository.findByRepo(repo)
+        execSvnSync(replRepo, System.currentTimeMillis(), username, password, syncRepoURI)
     }
 
     def undo() {

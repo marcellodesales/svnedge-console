@@ -51,12 +51,9 @@ public class RepoRemoveCommand extends AbstractReplicaCommand {
     }
 
     def execute() {
-        log.debug("Acquiring the command executor service...")
-        def rceService = getService("replicaCommandExecutorService")
-
         def repoName = getRepoName()
         log.debug("Removing the repository '"+ repoName + "'")
-        rceService.removeReplicatedRepository(repoName)
+        removeReplicatedRepository(repoName)
     }
 
     def undo() {
