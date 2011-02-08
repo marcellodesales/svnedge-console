@@ -10,10 +10,6 @@ import org.springframework.context.ApplicationListener
 
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
 
-import com.collabnet.svnedge.replication.command.events.ReplicaCommandEvent;
-import com.collabnet.svnedge.replication.command.events.CommandTerminatedEvent;
-import com.collabnet.svnedge.replication.command.events.NewCommandsQueuedEvent;
-
 class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
 
     /**
@@ -33,6 +29,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      * The execution mutex is a map [category, commandID]
      */
     Map<String, String> executionMutex
+    /**
+     * The command ID index to speed up the offer method.
+     */
+    Set<String> commandIdIndex
 
     /**
      * Bootstraps the service
@@ -47,6 +47,7 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
     void cleanCommands() {
         queuedCommands = Collections.synchronizedList(new LinkedList<Map>())
         executionMutex = Collections.synchronizedMap(new LinkedHashMap<String, String>())
+        commandIdIndex = Collections.synchronizedSet(new LinkedHashSet<String>())
     }
 
     /**
@@ -149,6 +150,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
                 executionMutex.remove(categoryKey)
             }
         }
+        // removes the command ID from the index.
+        synchronized(commandIdIndex) {
+            commandIdIndex.remove(finishedCommandId)
+        }
     }
 
     /**
@@ -217,7 +222,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
         }
         synchronized(queuedCommands) {
             for (command in newCommands) {
-                queuedCommands << command
+                if (!commandIdIndex.contains(command.id)) {
+                    queuedCommands << command
+                    commandIdIndex << command.id
+                }
             }
         }
     }

@@ -239,4 +239,47 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
         assertEquals "The executing commands must be empty", 0,
             replicaCommandSchedulerService.getExecutingCommandsSize()
     }
+
+    void testOfferExistingCommands() {
+        // commands may be re-sent from the master in case there is no ack
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandSchedulerService.offer(remotecmdexecs)
+        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
+        def executingCommands = []
+        while (schledCmd) {
+            executingCommands << schledCmd
+            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
+        }
+        println "Executing commands: $executingCommands"
+        // first step executing 4 commands for the 4 categories
+        assertEquals "The queued commands must be empty", 6,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "The executing commands must be empty", 4,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+
+        // repeated commands can't be offered until they are terminated.
+        replicaCommandSchedulerService.offer(remotecmdexecs)
+        assertEquals "The queued commands must be empty", 6,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "The executing commands must be empty", 4,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+
+        // terminating the execution of 2 command
+        replicaCommandSchedulerService.removeTerminatedCommand(
+            executingCommands[0].id)
+        replicaCommandSchedulerService.removeTerminatedCommand(
+            executingCommands[2].id)
+        println "Terminating commands: $executingCommands[0] and $executingCommands[2]"
+        assertEquals "The queued commands must be empty", 6,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "The executing commands must be empty", 2,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+
+        // Only terminated commands are offered again. 2 out of 10 are re-added.
+        replicaCommandSchedulerService.offer(remotecmdexecs)
+        assertEquals "The queued commands must be empty", 8,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "The executing commands must be empty", 2,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+    }
 }
