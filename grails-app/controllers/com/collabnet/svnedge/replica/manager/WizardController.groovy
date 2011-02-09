@@ -192,7 +192,7 @@ class WizardController {
                     svnNotificationService.getReplicaParentDirPath(),
                 svnSyncStatusFilePath : 
                     svnNotificationService.getSyncStatusFilePath(),
-                svnSyncRate : svnNotificationService.getSvnSyncRate(),
+                svnSyncRate : svnNotificationService.getCommandPollRate(),
                 uploadErrorsRate : uploadErrorsService.uploadErrorsRate,
                 uploadErrorRate : uploadErrorsService.getUploadErrorsRate()]
         }
