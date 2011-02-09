@@ -29,6 +29,7 @@ import com.collabnet.svnedge.teamforge.CtfServer
 
 import grails.util.GrailsUtil
 
+import java.net.URL
 import java.util.Calendar
 import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.replication.ReplicaConfiguration
@@ -452,14 +453,31 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so"""
 <VirtualHost *:${server.port}>
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
+"""
+
+        String contextPath = "/svn"
+        if (server.mode == ServerMode.REPLICA) {
+            def replicaConfig = ReplicaConfiguration.getCurrentConfig()
+            String masterSVNURI = replicaConfig.svnMasterUrl
+            if (masterSVNURI) {
+                contextPath = new URL(masterSVNURI).path
+                if (contextPath.endsWith("/")) {
+                    contextPath = contextPath.substring(0, contextPath.length() - 1)
+                }
+            }
+            conf += "<Location " + contextPath + ">"
+        } else {
+            conf += """
 # Work around authz and SVNListParentPath issue
-RedirectMatch ^(/svn)\$ \$1/
-<Location /svn/>
+RedirectMatch ^(${contextPath})\$ \$1/
+<Location ${contextPath}/>"""
+        }
+        conf += """   
    DAV svn
    SVNParentPath "${server.repoParentDir}"
    SVNReposName "CollabNet Subversion Repository"
 """
-        conf += ctfMode ? getCtfSvnHttpdConf(server) : 
+        conf += ctfMode ? getCtfSvnHttpdConf(server, contextPath) : 
             getSVNHttpdConf(server)
         conf += "</Location>\n\n"
 
@@ -621,7 +639,7 @@ LDAPVerifyServerCert Off
         version
     }
 
-    private def getCtfSvnHttpdConf(server) {
+    private def getCtfSvnHttpdConf(server, contextPath) {
         def appHome = ConfigUtil.appHome()
         def ctfServer = CtfServer.getServer()
         def conf = ""
@@ -648,7 +666,7 @@ LDAPVerifyServerCert Off
         conf += """']+sys.path"
    # Provide variables to sfauth.py
    PythonOption svn.root.path "${escapePath(server.repoParentDir)}"
-   PythonOption svn.root.uri /svn
+   PythonOption svn.root.uri ${contextPath}
    PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    # Allows these operations to be disallowed higher up,
    # then enabled here for this Location

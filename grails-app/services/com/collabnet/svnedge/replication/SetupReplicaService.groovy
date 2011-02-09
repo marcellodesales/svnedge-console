@@ -80,6 +80,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         def server = Server.getServer()
 
+        // SVNContextPath is ignored by CTF (artf5374).  Leaving for now until the CTF
+        // changes are reflected in the latest builds
         def names = [ "HostName", "HostPort", "HostSSL", "ConsolePort",
             "ViewVCContextPath", "SVNContextPath" ]
 
