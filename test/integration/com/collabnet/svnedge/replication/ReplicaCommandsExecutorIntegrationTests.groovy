@@ -229,6 +229,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
         cmdParams = [:]
         cmdParams["commandPollPeriod"] = "3"
+        cmdParams["commandConcurrencyLong"] = "5"
+        cmdParams["commandConcurrencyShort"] = "15"
 
         // add first
         command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
@@ -246,6 +248,12 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         assertTrue("The poll rate should have been updated " +
             "${this.rConf.commandPollRate} <> ${cmdParams.commandPollPeriod}",
             this.rConf.commandPollRate == cmdParams["commandPollPeriod"].toInteger())
+        assertTrue("The max number of long-running commands must be changed" +
+            "${this.rConf.maxLongRunningCmds} <> ${cmdParams.commandConcurrencyLong}",
+            this.rConf.maxLongRunningCmds == cmdParams["commandConcurrencyLong"].toInteger())
+        assertTrue("The max number of short-running commands must be changed" +
+            "${this.rConf.maxLongRunningCmds} <> ${cmdParams.commandConcurrencyLong}",
+            this.rConf.maxShortRunningCmds == cmdParams["commandConcurrencyShort"].toInteger())
 
         fetchCommandsJobTrigger = jobsAdminService.getTrigger(
             FetchReplicaCommandsJob.TRIGGER_NAME,
@@ -274,6 +282,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                   result['succeeded'])
 
        cmdParams["commandPollPeriod"] = "-1"
+       cmdParams["commandConcurrencyLong"] = "-50"
+       cmdParams["commandConcurrencyShort"] = "-11"
 
        // update the properties
        command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]

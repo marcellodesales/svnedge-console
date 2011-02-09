@@ -44,7 +44,9 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
 
         // Verify if the parameter "scmUrl" exists.
         if (!this.params["name"] && !this.params["description"] && 
-                !this.params.commandPollPeriod) {
+                !this.params.commandPollPeriod && 
+                !this.params.commandConcurrencyLong && 
+                !this.params.commandConcurrencyShort) {
             throw new IllegalStateException("The command does not have any " +
                 "of the required parameters.")
         }
@@ -85,6 +87,22 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
                     , e.getCause())
                 throw new IllegalStateException(e.getCause())
             }
+        }
+
+        // update the max number of long-running commands property
+        def maxLongRunningCmds = this.params.commandConcurrencyLong
+        if (maxLongRunningCmds && maxLongRunningCmds.toInteger() > 0 && 
+                maxLongRunningCmds.toInteger() != replica.maxLongRunningCmds) {
+
+            replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
+        }
+
+        // update the max number of short-running commands property
+        def maxShortRunningCmds = this.params.commandConcurrencyShort
+        if (maxShortRunningCmds && maxShortRunningCmds.toInteger() > 0 && 
+                maxShortRunningCmds.toInteger() != replica.maxShortRunningCmds) {
+
+            replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
         }
 
         log.debug("Trying to flush the saved replica properties...")

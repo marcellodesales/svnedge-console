@@ -52,12 +52,22 @@ public class ReplicaConfiguration {
      * The pool rate in seconds.
      */
     Integer commandPollRate = 1
+    /**
+     * The max number of long-running commands such as svnsync.
+     */
+    Integer maxLongRunningCmds = 2
+    /**
+     * The max number of short-running commands such as the props updates
+     */
+    Integer maxShortRunningCmds = 10
 
     static constraints = {
         svnMasterUrl(nullable:true)
         systemId(nullable:false)
         description(nullable:false)
         commandPollRate(nullable:false)
+        maxLongRunningCmds(nullable:false)
+        maxShortRunningCmds(nullable:false)
     }
 
     /**
