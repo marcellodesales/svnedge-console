@@ -17,43 +17,51 @@
  */
 package com.collabnet.svnedge.replication
 
-
 import com.collabnet.svnedge.replica.manager.ApprovalState
 
 /**
- * This stores the replication configuration
+ * This stores the replication configuration.
  */
 public class ReplicaConfiguration {
 
-    // server with which to sync
+    /**
+     * The URL of the Master SVN
+     */
     String svnMasterUrl
-
-    // simple title or name
+    /**
+     * The name of the replica.
+     */
     String name
-
-    // description (eg, location)
+    /**
+     * The description of the replica: location, purpose, etc.
+     */
     String description
+    /**
+     * The message for the admin TODO: NOT NECESSARY
+     */
     String message
-
-    // the id assigned by CTF to this replica
+    /**
+     * the id assigned by CTF to this replica server
+     */
     String systemId
-    
-    // defines how often the svn sync should be done (in minutes).
-    Integer svnSyncRate
-    
-    // state is relative to the current master.  
+    /**
+     * state is relative to the current master.
+     */
     ApprovalState approvalState
-
+    /**
+     * The pool rate in seconds.
+     */
+    Integer commandPollRate = 1
 
     static constraints = {
         svnMasterUrl(nullable:true)
         systemId(nullable:false)
         description(nullable:false)
+        commandPollRate(nullable:false)
     }
 
     /**
-     * pseudo singleton provider
-     * @return
+     * @return pseudo singleton provider
      */
     static ReplicaConfiguration getCurrentConfig() {
         def replicaConfigRows = ReplicaConfiguration.list()

@@ -20,10 +20,14 @@ package com.collabnet.svnedge.replication.command
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.springframework.context.ApplicationContext
+
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ApprovalState;
+import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replication.ReplicaConfiguration;
+import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.replication.command.events.MaxParallelReposUpdateEvent
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 /**
  * This command updates the state of the replica server, changing the name and
@@ -44,9 +48,10 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
         }
 
         // Verify if the parameter "scmUrl" exists.
-        if (!this.params["name"] || !this.params["description"]) {
-            throw new IllegalStateException("The command does not have the " +
-                "required parameter 'name' or 'description'.")
+        if (!this.params["name"] && !this.params["description"] && 
+                !this.params.commandPollPeriod) {
+            throw new IllegalStateException("The command does not have any " +
+                "of the required parameters.")
         }
     }
 
@@ -54,14 +59,44 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
         log.debug("Acquiring the replica configuration instance...")
 
         def replica = ReplicaConfiguration.getCurrentConfig()
-        replica.name = this.params.name
-        replica.description = this.params.description
+
+        // update the name property
+        if (this.params.name) {
+            replica.name = this.params.name
+        }
+
+        // update the description property
+        if (this.params.description) {
+            replica.description = this.params.description
+        }
+
+        // update the command pool rate
+        def poolRate = this.params.commandPollPeriod
+        if (poolRate && poolRate.toInteger() > 0 && 
+                poolRate.toInteger() != replica.commandPollRate) {
+
+            replica.commandPollRate = poolRate.toInteger()
+
+            // reschedule the job with the updated rate
+            def jobsAdminService = getService("jobsAdminService")
+            try {
+                def interval = poolRate.toInteger() * 1000L
+                jobsAdminService.rescheduleJob(
+                    FetchReplicaCommandsJob.TRIGGER_NAME,
+                    FetchReplicaCommandsJob.TRIGGER_GROUP, interval)
+
+            } catch (Exception e) {
+                log.error("Tried to reschedule the trigger and nothing happened"
+                    , e.getCause())
+                throw new IllegalStateException(e.getCause())
+            }
+        }
 
         log.debug("Trying to flush the saved replica properties...")
         replica.save(flush:true)
-   }
+    }
 
-   def undo() {
-       log.error("Execute failed... Undoing the command...")
+    def undo() {
+       log.error("Execute failed... Nothing to undo...")
     }
 }

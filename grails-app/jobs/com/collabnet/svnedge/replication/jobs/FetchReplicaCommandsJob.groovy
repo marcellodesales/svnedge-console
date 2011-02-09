@@ -22,9 +22,10 @@ import org.quartz.Trigger
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.services.JobsAdminService
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.replication.ReplicaConfiguration;
 
 /**
- * Fetch the replica commands from the server.
+ * Fetch the replica commands from the Master server.
  * 
  * @author Marcello de Sales (mdesales@collab.net)
  *
@@ -32,12 +33,22 @@ import com.collabnet.svnedge.console.ServerMode
 class FetchReplicaCommandsJob {
 
     def replicaCommandExecutorService
-    static boolean isStarted = false
 
-    static def name = 
+    def static final JOB_NAME = 
         "com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob"
-    static def group = JobsAdminService.REPLICA_GROUP
-    static def triggerGroup = group + "_Triggers"
+
+    def static final JOB_GROUP_NAME = JobsAdminService.REPLICA_GROUP
+
+    def static final TRIGGER_GROUP = JOB_GROUP_NAME + "_Triggers"
+
+    def static final TRIGGER_NAME = "FetchReplicaCommandsTrigger"
+
+    def static final INITIAL_DELAY_SEC = 2
+
+    /**
+     * If the job has been started.
+     */
+    static boolean isStarted = false
 
     // avoid re-entrance in case jobs are delayed. This will prevent multiple
     // calls to the Master.
@@ -51,12 +62,13 @@ class FetchReplicaCommandsJob {
     }
 
     /** 
-     * Schedule repeating trigger on 5 minute interval
+     * Schedule with the current command pool rate from the 
+     * ReplicaConfiguration.
      */
-   void start() {
+    void start() {
         if (!isStarted) {
-            schedule(createTrigger("FetchReplicaCommandsTrigger", 
-                     1 * 60000L, 20000L))
+            def triggerInstance = makeTrigger()
+            schedule(triggerInstance)
             isStarted = true
             log.info("Started FetchReplicaCommandsJob")
         } else {
@@ -65,30 +77,40 @@ class FetchReplicaCommandsJob {
     }
 
     /** 
-     * Create an infinitely repeating simple trigger with the given name
-     * and interval.
+     * Create an infinitely repeating simple trigger with the current
+     * replica server commandPoolRate with a delay of 3 seconds
      */
-    private Trigger createTrigger(triggerName, interval, startDelay) {
-        def trigger = new SimpleTrigger(triggerName, triggerGroup, 
-                                        SimpleTrigger.REPEAT_INDEFINITELY, 
-                                        interval)
-        trigger.setJobName(name)
-        trigger.setJobGroup(group)
+    def Trigger makeTrigger() {
+        def replica = ReplicaConfiguration.getCurrentConfig()
+        return makeTrigger(replica.commandPollRate)
+    }
+
+    /** 
+     * Create an infinitely repeating simple trigger with the current
+     * replica server commandPoolRate with a delay of INITIAL_DELAY_SEC seconds
+     */
+    def static Trigger makeTrigger(commandPollInterval) {
+        def interval = commandPollInterval * 1000L
+        def startDelay = INITIAL_DELAY_SEC * 1000L
+        def trigger = new SimpleTrigger(TRIGGER_NAME, TRIGGER_GROUP, 
+            SimpleTrigger.REPEAT_INDEFINITELY, interval)
+        trigger.setJobName(JOB_NAME)
+        trigger.setJobGroup(JOB_GROUP_NAME)
         trigger.setStartTime(new Date(System.currentTimeMillis() + startDelay))
         return trigger
     }
 
+    /**
+     * Called by the quartzService once it is read to be fired.
+     */
     def execute() {
         def server = Server.getServer()
         if (server.mode == ServerMode.REPLICA) {
-            doExecute()
+            log.info("Checking for replication commands")
+            replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
+
         } else {
             log.debug("Skipping fetch of replication commands")
         }
-    }
-
-    private def doExecute() {
-        log.info("Checking for replication commands")
-        replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
     }
 }

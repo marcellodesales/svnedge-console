@@ -39,7 +39,7 @@ class SvnNotificationService {
     def svnsync
     def svnadmin
     //sync rate in mintes
-    def svnSyncRate
+    def commandPollRate
     def replicaHostName
     def recentMasterTimeStamp
 
@@ -60,7 +60,7 @@ class SvnNotificationService {
         svn = svnPath
         svnadmin = svnAdminPath
         svnsync = svnSyncPath
-        svnSyncRate = syncRate
+        commandPollRate = syncRate
         svnReplicaParentPath = repoDirectoryPath
         def repoDirFile = new File(repoDirectoryPath)
 
@@ -89,10 +89,6 @@ class SvnNotificationService {
         return Master.getDefaultMaster()
     }
 
-    def getSvnSyncRate() {
-        return svnSyncRate
-    }
-
     def getReplicaParentDirPath() {
         return svnReplicaParentPath
     }
@@ -100,7 +96,6 @@ class SvnNotificationService {
     def getSyncStatusFilePath() {
         return getReplicaParentDirPath() + "/" + LAST_UPDATE_FILE
     }
-
 
     private def execCommandWithOutput(command, repo) {
         return execCommandWithResults(command, repo)[1]

@@ -302,6 +302,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
 
         } catch (CommandExecutionException ceex) {
             command['exception'] = ceex
+            log.debug(ceex)
             log.error("The command failed: " + command)
             logReplicaCommandExecution("RUN-FAILED", command, ceex)
         }

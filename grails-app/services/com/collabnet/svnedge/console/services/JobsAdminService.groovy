@@ -75,7 +75,7 @@ class JobsAdminService {
                 description:executingContext.getJobDetail().getDescription()] 
         return jobDetail
     }
-    
+
     def getTriggerDetailsFromInstance(trigger) {
         def nextFireTime = ""
         try {
@@ -236,6 +236,30 @@ class JobsAdminService {
     def resumeGroup(groupName) {
         log.info("Resuming jobs in group ${groupName}")
         quartzScheduler.resumeTriggerGroup(groupName + "_Triggers")
+    }
+
+    /**
+     * Reschedules the running job, by deleting the existing trigger with the 
+     * given name and rescheduling the new one.
+     * @param updateTriggerName is the name of an existing trigger.
+     * @param triggerGroup the name of the trigger group.
+     * @param newInterval is the new trigger interval to be used in the trigger.
+     */
+    def rescheduleJob(updateTriggerName, triggerGroupName, newInterval) {
+        log.debug("Attempting reschedule the trigger ${updateTriggerName}")
+        def triggerNames = quartzScheduler.getTriggerNames(triggerGroupName)
+        for (triggerName in triggerNames) {
+            if (triggerName != updateTriggerName) {
+                continue
+            }
+            def trigger = getTrigger(triggerName, triggerGroupName)
+            log.debug("Found trigger object ${trigger}")
+            trigger.setRepeatInterval(newInterval)
+            log.debug("Updated trigger with new interval of ${newInterval}")
+            quartzScheduler.rescheduleJob(triggerName, triggerGroupName, 
+                trigger);
+            log.debug("Rescheduled the job for the trigger ${newInterval}")
+        }
     }
 
     // reschedule unscheduled trigger (which should be associated with a job)

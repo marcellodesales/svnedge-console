@@ -20,13 +20,15 @@ package com.collabnet.svnedge.replication
 
 import java.io.File;
 
-import com.collabnet.svnedge.replica.manager.ApprovalState;
+import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replica.manager.RepoStatus
-import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.teamforge.CtfServer
+import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 
 import grails.test.*
@@ -36,6 +38,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     def replicaCommandExecutorService
     def commandLineService
     def securityService
+    def jobsAdminService
     def grailsApplication
     def config
 
@@ -50,7 +53,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             rConf = new ReplicaConfiguration(svnMasterUrl: null, 
                 name: "Test Replica", description: "Super replica", 
                 message: "Auto-approved", systemId: "replica1001", 
-                svnSyncRate: 5, approvalState: ApprovalState.APPROVED)
+                commandPollRate: 5, approvalState: ApprovalState.APPROVED)
             this.rConf.save()
         }
         // Setup a test repository parent
@@ -80,7 +83,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         ctfServer.ctfPassword = "n3TEQWKEjpY="
         ctfServer.save()
     }
-    
+
     private def makeCtfBaseUrl() {
         def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
         def ctfHost = config.svnedge.ctfMaster.domainName
@@ -210,7 +213,77 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             "update", this.rConf.name, newName)
         assertEquals("The description should have been changed with the " +
             "command update", this.rConf.description, newDescription)
+
+        // start the fetch job with the default properties as the poll rate
+        // will be updated (commandPollPeriod)
+        new FetchReplicaCommandsJob().start()
+        log.info("Resuming replica jobs")
+        jobsAdminService.resumeGroup(REPLICA_GROUP)
+
+        def fetchCommandsJobTrigger = jobsAdminService.getTrigger(
+            FetchReplicaCommandsJob.TRIGGER_NAME,
+            FetchReplicaCommandsJob.TRIGGER_GROUP)
+        def fetchDetails = jobsAdminService.getTriggerDetailsFromInstance(
+            fetchCommandsJobTrigger)
+        println "The first details of the fetch: ${fetchDetails}"
+
+        cmdParams = [:]
+        cmdParams["commandPollPeriod"] = "3"
+
+        // add first
+        command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
+        result = replicaCommandExecutorService.processCommandRequest(
+            command)
+
+        if (result['exception']) {
+            println result['exception']
+            fail("The command should be updated with the command poll params")
+        }
+        assertTrue("Processing a command should return a true succeeded.",
+                   result['succeeded'])
+
+        this.rConf = ReplicaConfiguration.getCurrentConfig()
+        assertTrue("The poll rate should have been updated " +
+            "${this.rConf.commandPollRate} <> ${cmdParams.commandPollPeriod}",
+            this.rConf.commandPollRate == cmdParams["commandPollPeriod"].toInteger())
+
+        fetchCommandsJobTrigger = jobsAdminService.getTrigger(
+            FetchReplicaCommandsJob.TRIGGER_NAME,
+            FetchReplicaCommandsJob.TRIGGER_GROUP)
+        def updatedFetchDetails = jobsAdminService.getTriggerDetailsFromInstance(
+            fetchCommandsJobTrigger)
+        assertNotNull "The updated trigger should not be null", 
+            updatedFetchDetails
     }
+
+    /**
+    * Test processing the replica props update command.
+    */
+   void testProcessReplicaPropsUpdateCommandIncorrectParams() {
+       def cmdParams = [:]
+
+       // add first
+       def command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
+       def result = replicaCommandExecutorService.processCommandRequest(
+           command)
+
+       assertNotNull("Processing the props update with emtpy values on name " +
+           "and description should throw an exception", result['exception'])
+       println result['exception']
+       assertFalse("Processing wrong command should return succeeded=false.",
+                  result['succeeded'])
+
+       cmdParams["commandPollPeriod"] = "-1"
+
+       // update the properties
+       command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
+
+       assertNotNull("Processing the props update with wrong parameters for " +
+           " the polling params should throw exception.", result['exception'])
+       println result['exception']
+       assertFalse("Processing wrong command should return succeeded=false.",
+                  result['succeeded'])
+   }
 
     void testAddRemoveReAddRepoOnDatabase() {
         def cmdParams = [:]
@@ -310,7 +383,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             "--username", username, "--password", password,
             "--non-interactive", "-m", "Test commit"]
         commandLineService.execute(command.toArray(new String[0]))
-        
+
         def repoUri = commandLineService.createSvnFileURI(repoDir)
         File wcDir2 = createTestDir("wc2")
         command = [ConfigUtil.svnPath(), "co", repoUri, wcDir2.canonicalPath,

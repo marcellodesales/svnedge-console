@@ -36,7 +36,6 @@ import com.collabnet.svnedge.console.Repository
 class SetupReplicaService  extends AbstractSvnEdgeService {
 
     boolean transactional = true
-    public static String DEFAULT_SYNC_RATE = 5 // minutes for polling interval
 
     def ctfRemoteClientService
     def setupTeamForgeService
@@ -112,7 +111,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         rc.message = replicaInfo.message
         rc.approvalState = ApprovalState.PENDING
         rc.systemId = systemId
-        rc.svnSyncRate = DEFAULT_SYNC_RATE
 
         def ctfServer = CtfServer.getServer() 
         if (!ctfServer) {
