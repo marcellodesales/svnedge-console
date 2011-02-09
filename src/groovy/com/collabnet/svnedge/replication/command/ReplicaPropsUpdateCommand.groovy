@@ -18,14 +18,9 @@
 package com.collabnet.svnedge.replication.command
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.context.ApplicationContext
 
-import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.replica.manager.ApprovalState
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replication.ReplicaConfiguration
-import com.collabnet.svnedge.replication.command.events.MaxParallelReposUpdateEvent
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
