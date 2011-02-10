@@ -465,6 +465,9 @@ LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
                     contextPath = contextPath.substring(0, contextPath.length() - 1)
                 }
             }
+            if (server.useSsl) {
+                conf += "SSLProxyEngine on\n"
+            }
             conf += "<Location " + contextPath + ">"
         } else {
             conf += """
@@ -646,9 +649,6 @@ LDAPVerifyServerCert Off
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
-            if (masterSVNURI?.startsWith("https")) {
-                conf += "   SSLProxyEngine on \n"
-            }
             conf += "   SVNMasterURI ${masterSVNURI}"
         }
         conf += """
