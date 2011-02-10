@@ -68,7 +68,8 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
             replicaCommandSchedulerService.getExecutingCommandsSize()
 
         def categories = replicaCommandSchedulerService.getCategorizedCommandQueues().keySet()
-        assertTrue categories.containsAll(["replicaServer", "repo1", "repo2", "repo3"])
+        assertTrue categories.containsAll(
+            ["replicaServer", "repo1", "repo2", "repo3"])
 
         def cat = "replicaServer"
         def cmd = replicaCommandSchedulerService.getNextCommandFromCategory(cat)
@@ -269,7 +270,8 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
             executingCommands[0].id)
         replicaCommandSchedulerService.removeTerminatedCommand(
             executingCommands[2].id)
-        println "Terminating commands: $executingCommands[0] and $executingCommands[2]"
+        println "Terminating commands: $executingCommands[0] and " +
+            "$executingCommands[2]"
         assertEquals "The queued commands must be empty", 6,
             replicaCommandSchedulerService.getQueuedCommandsSize()
         assertEquals "The executing commands must be empty", 2,
@@ -282,4 +284,171 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
         assertEquals "The executing commands must be empty", 2,
             replicaCommandSchedulerService.getExecutingCommandsSize()
     }
+
+    void testOfferBadValues() {
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandSchedulerService.offer([])
+        assertEquals "Offering no commands should not change the size of " +
+            "queued commands", 0,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "Offering no commands should not change the size of " +
+            "executing commands", 0, 
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+
+        replicaCommandSchedulerService.offer(null)
+        assertEquals "Offering null should not change the size of " +
+            "queued commands", 0,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+        assertEquals "Offering null should not change the size of " +
+            "executing commands", 0, 
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+    }
+
+    void testAddBadValuesToMutex() {
+        replicaCommandSchedulerService.cleanCommands()
+        try {
+            replicaCommandSchedulerService.addCommandToCategoryMutex("r1", null)
+            fail("Offering null command to the mutex should throw an exception")
+
+        } catch (Exception e) {
+            assertEquals "Offering to the mutex should not change the " +
+                "size of executing commands", 0,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+        }
+
+        try {
+            replicaCommandSchedulerService.addCommandToCategoryMutex(null,"cmd")
+            fail("Offering null category to the mutex should throw exception")
+
+        } catch (Exception e) {
+            assertEquals "Offering null to the mutex should not change the " +
+                "size of executing commands", 0,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+        }
+    }
+
+    void testIsThereCommandRunningWithBadValues() {
+        try {
+            replicaCommandSchedulerService.isThereCommandRunning("")
+            fail("Verifying empty values should throw an exception")
+
+        } catch (Exception e) {
+            println e
+        }
+        try {
+            replicaCommandSchedulerService.isThereCommandRunning(null)
+            fail("Verifying empty values should throw an exception")
+
+        } catch (Exception e) {
+            println e
+        }
+    }
+
+    void testRemoveQueuedCommandsNonExistingOnes() {
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
+        assertEquals "Offering 3 commands should have changed the size of " +
+            "queued commands", 3,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+
+        try {
+            replicaCommandSchedulerService.removeQueuedCommand(null)
+            fail("Removing empty queued commands should throw an exception")
+
+        } catch (Exception e) {
+            assertEquals "Removing a null value should not have changed " +
+                "the size of queued commands", 3,
+                replicaCommandSchedulerService.getQueuedCommandsSize()
+        }
+
+        try {
+            replicaCommandSchedulerService.removeQueuedCommand("")
+            fail("Removing empty queued commands should throw an exception")
+
+        } catch (Exception e) {
+            assertEquals "Removing an empty value should not have changed " +
+                "the size of queued commands", 3,
+                replicaCommandSchedulerService.getQueuedCommandsSize()
+        }
+
+        replicaCommandSchedulerService.removeQueuedCommand("NonExisting")
+        assertEquals "Removing an empty value should not have changed " +
+            "the size of queued commands", 3,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+    }
+
+    void testRemoveTerminatedCommandsWithBadValues() {
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
+        assertEquals "Offering 3 commands should have changed the size of " +
+            "queued commands", 3,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+
+        // schedule all the 3 different commands
+        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
+        while (schledCmd) {
+            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
+        }
+
+        try {
+            replicaCommandSchedulerService.removeTerminatedCommand(null)
+            fail("Removing empty executing commands should throw an exception")
+
+        } catch (Exception e) {
+            assertEquals "Removing a null value should not have changed " +
+                "the size of executing commands", 3,
+                replicaCommandSchedulerService.getExecutingCommandsSize()
+        }
+
+        try {
+            replicaCommandSchedulerService.removeTerminatedCommand("")
+            fail("Removing empty executing commands should throw an exception")
+
+        } catch (Exception e) {
+            assertEquals "Removing an empty value should not have changed " +
+                "the size of executing commands", 3,
+                replicaCommandSchedulerService.getExecutingCommandsSize()
+        }
+
+        replicaCommandSchedulerService.removeTerminatedCommand("NonExisting")
+        assertEquals "Removing an empty value should not have changed " +
+            "the size of executing commands", 3,
+            replicaCommandSchedulerService.getExecutingCommandsSize()
+    }
+
+    void testGetCategoriesWithBadValues() {
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
+        assertEquals "Offering 3 commands should have changed the size of " +
+            "queued commands", 3,
+            replicaCommandSchedulerService.getQueuedCommandsSize()
+
+        try {
+            replicaCommandSchedulerService.getNextCommandFromCategory("")
+            fail("Getting the next command from an empty category should " +
+                "throw an exception.")
+
+        } catch (Exception e) {
+            println e
+        }
+
+        try {
+            replicaCommandSchedulerService.getNextCommandFromCategory(null)
+            fail("Getting the next command from a null category should " +
+                "throw an exception.")
+
+        } catch (Exception e) {
+            println e
+        }
+
+        try {
+            replicaCommandSchedulerService.getNextCommandFromCategory("repoxxx")
+            fail("Getting the next command from a non-existing category " +
+                "should throw an exception.")
+
+        } catch (Exception e) {
+            println e
+        }
+    }
+
 }

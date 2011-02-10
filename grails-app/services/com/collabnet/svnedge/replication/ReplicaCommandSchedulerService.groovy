@@ -10,6 +10,20 @@ import org.springframework.context.ApplicationListener
 
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
 
+/**
+* The ReplicaCommandSchedulerService provides a scheduler responsible for:
+* <ul><li>Maintaining the list of received tasks (replica commands) to be 
+* executed;
+* <li>Generating a Priority Queue for each of the categories of commands: 
+* commands for each repository or for the replica server.
+* <li>Selecting which command from the queue can be executed due to the type of
+* the command and the availability.</li><ul>
+*
+* Each category can only have one command being executed at the same time and,
+* therefore, a mutex map maintains such "flag" for each of the categories.
+*
+* @author Marcello de Sales (mdesales@collab.net)
+*/
 class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
 
     /**
@@ -92,14 +106,6 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
     }
 
     /**
-     * @param category is the name of the repo or "replicaServer".
-     * @return the command ID of the command executing for the given category.
-     */
-    def getExecutingCommand(category) {
-        return executionMutex[category]
-    }
-
-    /**
      * @param category is the name of the category or 
      * @return if there is a command running in the given category.
      */
@@ -115,6 +121,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      * @param queuedCommandId is the ID of the command to be removed.
      */
     def synchronized void removeQueuedCommand(queuedCommandId) {
+        if (!queuedCommandId) {
+            throw new IllegalArgumentException("The queue command ID must " +
+                "be provided.")
+        }
         // removes from the queued commands
         synchronized (queuedCommands) {
             def foundAt = -1
@@ -136,7 +146,8 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      */
     def synchronized void removeTerminatedCommand(finishedCommandId) {
         if (!finishedCommandId) {
-            return
+            throw new IllegalArgumentException("The finished command ID must " +
+                "be provided.")
         }
         // removes from the category mutex
         synchronized (executionMutex) {
@@ -195,7 +206,7 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      */
     def synchronized getNextCommandFromCategory(category) {
         if (!category) {
-            return
+            throw new IllegalArgumentException("The category must be provided.")
         }
         // map grouping the tasks by granularity (repoName or replica server)
         synchronized(queuedCommands) {
@@ -208,6 +219,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
                     (b.id.replace(COMMAND_ID_PREFIX,"") as Integer)
                 }
               ] as Comparator
+            if (!categorizedQueuedCommands[category]) {
+                throw new IllegalArgumentException("The category $category " +
+                    "does not exist")
+            }
             return categorizedQueuedCommands[category].sort(idComparator)[0]
         }
     }
