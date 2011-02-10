@@ -51,7 +51,7 @@ public class ReplicaConfiguration {
     /**
      * The pool rate in seconds.
      */
-    Integer commandPollRate = 1
+    Integer commandPollRate = 5
     /**
      * The max number of long-running commands such as svnsync.
      */

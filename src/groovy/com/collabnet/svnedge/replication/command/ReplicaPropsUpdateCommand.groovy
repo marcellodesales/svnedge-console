@@ -21,8 +21,6 @@ import org.apache.log4j.Logger
 
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.replication.ReplicaConfiguration
-import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
-import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 /**
  * This command updates the state of the replica server, changing the name and
@@ -53,60 +51,7 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
     }
 
     def execute() {
-        log.debug("Acquiring the replica configuration instance...")
-
-        def replica = ReplicaConfiguration.getCurrentConfig()
-
-        // update the name property
-        if (this.params.name) {
-            replica.name = this.params.name
-        }
-
-        // update the description property
-        if (this.params.description) {
-            replica.description = this.params.description
-        }
-
-        // update the command pool rate
-        def poolRate = this.params.commandPollPeriod
-        if (poolRate && poolRate.toInteger() > 0 && 
-                poolRate.toInteger() != replica.commandPollRate) {
-
-            replica.commandPollRate = poolRate.toInteger()
-
-            // reschedule the job with the updated rate
-            def jobsAdminService = getService("jobsAdminService")
-            try {
-                def interval = poolRate.toInteger() * 1000L
-                jobsAdminService.rescheduleJob(
-                    FetchReplicaCommandsJob.TRIGGER_NAME,
-                    FetchReplicaCommandsJob.TRIGGER_GROUP, interval)
-
-            } catch (Exception e) {
-                log.error("Tried to reschedule the trigger and nothing happened"
-                    , e.getCause())
-                throw new IllegalStateException(e.getCause())
-            }
-        }
-
-        // update the max number of long-running commands property
-        def maxLongRunningCmds = this.params.commandConcurrencyLong
-        if (maxLongRunningCmds && maxLongRunningCmds.toInteger() > 0 && 
-                maxLongRunningCmds.toInteger() != replica.maxLongRunningCmds) {
-
-            replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
-        }
-
-        // update the max number of short-running commands property
-        def maxShortRunningCmds = this.params.commandConcurrencyShort
-        if (maxShortRunningCmds && maxShortRunningCmds.toInteger() > 0 && 
-                maxShortRunningCmds.toInteger() != replica.maxShortRunningCmds) {
-
-            replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
-        }
-
-        log.debug("Trying to flush the saved replica properties...")
-        replica.save(flush:true)
+        updateProps()
     }
 
     def undo() {

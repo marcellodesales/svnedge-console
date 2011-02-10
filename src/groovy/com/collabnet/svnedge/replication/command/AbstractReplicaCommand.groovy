@@ -25,7 +25,9 @@ import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replica.manager.RepoStatus
 import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 import com.collabnet.svnedge.teamforge.CtfServer
+import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 /**
  * Defines the Abstract Action Command to be executed by the Action Commands
@@ -464,5 +466,65 @@ public abstract class AbstractReplicaCommand {
                           + "${repoName}")
             }
         }
+    }
+
+    /**
+     * Updates replica configuration with non-null values of command parameters.
+     * Used by ReplicaApprove and ReplicaPropsUpdate commands
+     */
+    protected def updateProps() {
+        log.debug("Acquiring the replica configuration instance...")
+
+        def replica = ReplicaConfiguration.getCurrentConfig()
+
+        // update the name property
+        if (this.params.name) {
+            replica.name = this.params.name
+        }
+
+        // update the description property
+        if (this.params.description) {
+            replica.description = this.params.description
+        }
+
+        // update the command pool rate
+        def poolRate = this.params.commandPollPeriod
+        if (poolRate && poolRate.toInteger() > 0 && 
+                poolRate.toInteger() != replica.commandPollRate) {
+
+            replica.commandPollRate = poolRate.toInteger()
+
+            // reschedule the job with the updated rate
+            def jobsAdminService = getService("jobsAdminService")
+            try {
+                def interval = poolRate.toInteger() * 1000L
+                jobsAdminService.rescheduleJob(
+                    FetchReplicaCommandsJob.TRIGGER_NAME,
+                    FetchReplicaCommandsJob.TRIGGER_GROUP, interval)
+
+            } catch (Exception e) {
+                log.error("Tried to reschedule the trigger and nothing happened", e)
+                throw new IllegalStateException(e)
+            }
+        }
+
+        // update the max number of long-running commands property
+        def maxLongRunningCmds = this.params.commandConcurrencyLong
+        if (maxLongRunningCmds && maxLongRunningCmds.toInteger() > 0 && 
+                maxLongRunningCmds.toInteger() != replica.maxLongRunningCmds) {
+
+            replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
+        }
+
+        // update the max number of short-running commands property
+        def maxShortRunningCmds = this.params.commandConcurrencyShort
+        if (maxShortRunningCmds && maxShortRunningCmds.toInteger() > 0 && 
+                maxShortRunningCmds.toInteger() != replica.maxShortRunningCmds) {
+
+            replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
+        }
+
+        log.debug("Trying to flush the saved replica properties...")
+        replica.save(flush:true)
     }
 }

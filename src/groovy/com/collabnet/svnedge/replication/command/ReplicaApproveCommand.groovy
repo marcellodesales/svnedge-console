@@ -66,6 +66,8 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand {
         log.debug("Updating replica with master URL: " + url + 
             " and masterId: " + masterId)
         replicaService.updateServerAfterApproval(url, masterId)
+        log.debug("Executing propUpdate command during approval")
+        updateProps()
    }
 
    def undo() {
