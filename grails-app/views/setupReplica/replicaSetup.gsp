@@ -66,7 +66,7 @@
             <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="svnMasterURL">
                 <ul><g:eachError bean="${cmd}" field="svnMasterURL">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
             </td>
@@ -87,7 +87,7 @@
             <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="name">
                 <ul><g:eachError bean="${cmd}" field="name">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
             </td>
@@ -108,7 +108,7 @@
             <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="description">
                 <ul><g:eachError bean="${cmd}" field="description">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
             </td>
@@ -129,7 +129,7 @@
             <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="message">
                 <ul><g:eachError bean="${cmd}" field="message">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                 </g:eachError></ul>
               </g:hasErrors>
             </td>

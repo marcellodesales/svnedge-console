@@ -28,7 +28,7 @@
             <div class="errorMessage">
               <ul>
               <g:each in="${con.errors.globalErrors}">
-                  <li><g:message error="${it}" /></li>
+                  <li><g:message error="${it}" encodeAs="HTML" /></li>
               </g:each>
               </ul>
             </div>
@@ -59,7 +59,7 @@
           <td class="errors" colspan="2">
              <g:hasErrors bean="${con}" field="ctfProject">
                <ul><g:eachError bean="${con}" field="ctfProject">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                </g:eachError></ul>
              </g:hasErrors>
           </td>
@@ -92,7 +92,7 @@
           <td class="errors" colspan="2">
              <g:hasErrors bean="${con}" field="repoPrefix">
                <ul><g:eachError bean="${con}" field="repoPrefix">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
                </g:eachError></ul>
              </g:hasErrors>
           </td>

@@ -139,9 +139,9 @@ class FullConversionToTeamForgeFunctionalTests
         assertStatus 200
 
         assertContentDoesNotContain("Error related to project name")
-        assertContentContains(getMessage(
+        assertContentContains(encodeAsHTML(getMessage(
             "setupTeamForge.action.updateProject.initialCreation", 
-            [this.createdProjectName]))
+            [this.createdProjectName])))
 
         // Step 4: choose the users name information.
         def usersButton = 
@@ -236,8 +236,8 @@ class FullConversionToTeamForgeFunctionalTests
             click continueButton
         }
         assertStatus 200
-        assertContentContains(getMessage(
-            "ctfRemoteClientService.host.unknown.error", [ctfHost]))
+        assertContentContains(encodeAsHTML(getMessage(
+            "ctfRemoteClientService.host.unknown.error", [ctfHost])))
 
         // Step 4: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -275,8 +275,8 @@ class FullConversionToTeamForgeFunctionalTests
             click continueButton
         }
         assertStatus 200
-        assertContentContains(getMessage("ctfRemoteClientService.auth.error",
-            [this.getTestCtfUrl()]))
+        assertContentContains(encodeAsHTML(getMessage("ctfRemoteClientService.auth.error",
+            [this.getTestCtfUrl()])))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -359,8 +359,8 @@ class FullConversionToTeamForgeFunctionalTests
             click continueButton
         }
         assertStatus 200
-        assertContentContains(
-            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl]))
+        assertContentContains(encodeAsHTML(
+            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl])))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()

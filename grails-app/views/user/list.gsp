@@ -25,9 +25,9 @@
             <tbody>
             <g:each in="${userInstanceList}" status="i" var="person">
                 <tr class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
-                    <td><g:link action="edit" id="${person.id}">${person.username?.encodeAsHTML()}</g:link></td>
-                    <td>${person.realUserName?.encodeAsHTML()}</td>
-                    <td>${person.description?.encodeAsHTML()}</td>
+                    <td><g:link action="edit" id="${person.id}">${person.username}</g:link></td>
+                    <td>${person.realUserName}</td>
+                    <td>${person.description}</td>
                 </tr>
             </g:each>
             <tr class="ContainerFooter">

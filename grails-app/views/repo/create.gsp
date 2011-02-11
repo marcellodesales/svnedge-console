@@ -26,7 +26,7 @@
                 <input type="text" id="name" name="name" value="${fieldValue(bean:repo,field:'name')}"/>
                 <g:hasErrors bean="${repo}" field="name">
                   <ul><g:eachError bean="${repo}" field="name">
-                      <li><g:message error="${it}"/></li>
+                      <li><g:message error="${it}" encodeAs="HTML"/></li>
                   </g:eachError></ul>
                 </g:hasErrors>
             </td>

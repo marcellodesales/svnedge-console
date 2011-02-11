@@ -66,7 +66,7 @@
          <td class="errors" colspan="2">
             <g:hasErrors bean="${con}" field="ctfURL">
               <ul><g:eachError bean="${con}" field="ctfURL">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
             </g:hasErrors>
          </td>
@@ -88,7 +88,7 @@
          <td class="errors" colspan="2">
            <g:hasErrors bean="${con}" field="ctfUsername">
               <ul><g:eachError bean="${con}" field="ctfUsername">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
            </g:hasErrors>
          </td>
@@ -108,7 +108,7 @@
          <td class="errors" colspan="2">
             <g:hasErrors bean="${con}" field="ctfPassword">
               <ul><g:eachError bean="${con}" field="ctfPassword">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
             </g:hasErrors>
          </td>

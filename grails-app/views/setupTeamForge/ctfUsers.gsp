@@ -55,7 +55,7 @@
                     value="true" checked="${wizardBean.assignMembership}"/>
             <g:message code="setupTeamForge.page.ctfUsers.importUsers.assignMembership" /></label>&nbsp;&nbsp;
             <em>
-               <g:message code="setupTeamForge.page.ctfUsers.importUsers.addMembershipTo" args="${wizardBean.ctfProject ? [1, wizardBean.ctfProject] : [2]}"/>
+               <g:message code="setupTeamForge.page.ctfUsers.importUsers.addMembershipTo" args="${wizardBean.ctfProject ? [1, wizardBean.ctfProject] : [2]}" encodeAs="HTML"/>
             </em>
           <p>
           <g:if  test="${existingUsers.size() == 0}">

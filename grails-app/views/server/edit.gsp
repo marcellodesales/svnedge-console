@@ -218,7 +218,7 @@ $('bindInstructions').hide();
         <td>&nbsp;</td>
         <td colspan="2" width="100%" valign="top" class="errors">
           <ul><g:eachError bean="${server}" field="hostname">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -248,7 +248,7 @@ $('bindInstructions').hide();
         <td>&nbsp;</td>
         <td colspan="2" width="100%" valign="top" class="errors">
           <ul><g:eachError bean="${server}" field="port">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -269,7 +269,7 @@ $('bindInstructions').hide();
         <td>&nbsp;</td>
         <td colspan="2" width="100%" valign="top" class="errors">
           <ul><g:eachError bean="${server}" field="repoParentDir">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -322,7 +322,7 @@ $('bindInstructions').hide();
                   value="${server.adminName}"/>
               <g:hasErrors bean="${server}" field="adminName">
                  <ul><g:eachError bean="${server}" field="adminName">
-                      <li><g:message error="${it}"/></li>
+                      <li><g:message error="${it}" encodeAs="HTML"/></li>
                   </g:eachError></ul>
               </g:hasErrors>
           </td>
@@ -337,7 +337,7 @@ $('bindInstructions').hide();
                   value="${server.adminEmail}"/>
               <g:hasErrors bean="${server}" field="adminEmail">
                   <ul><g:eachError bean="${server}" field="adminEmail">
-                      <li><g:message error="${it}"/></li>
+                      <li><g:message error="${it}" encodeAs="HTML"/></li>
                   </g:eachError></ul>
               </g:hasErrors>
           </td>
@@ -351,7 +351,7 @@ $('bindInstructions').hide();
                   value="${server.adminAltContact}"/>
               <g:hasErrors bean="${server}" field="adminAltContact">
                   <ul><g:eachError bean="${server}" field="adminAltContact">
-                      <li><g:message error="${it}"/></li>
+                      <li><g:message error="${it}" encodeAs="HTML"/></li>
                   </g:eachError></ul>
               </g:hasErrors>
           </td>

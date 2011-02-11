@@ -47,7 +47,7 @@ class LoginFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
     void testFailLogin() {
         login "marcello", "xyzt"
-        assertContentContains getMessage("user.credential.incorrect", 
-            ["marcello"] as String[])
+        assertContentContains encodeAsHTML(getMessage("user.credential.incorrect", 
+            ["marcello"] as String[]))
     }
 }

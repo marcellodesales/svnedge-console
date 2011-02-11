@@ -133,7 +133,7 @@
         <td></td>
         <td colspan="2" class="errors">
            <ul><g:eachError bean="${server}" field="ldapEnabled">
-             <li><g:message error="${it}"/></li>
+             <li><g:message error="${it}" encodeAs="HTML"/></li>
            </g:eachError></ul>
         </td>
       </tr>
@@ -174,7 +174,7 @@
           <input size="30" type="text" id="ldapServerHost" name="ldapServerHost" value="${fieldValue(bean:server,field:'ldapServerHost')}"/>
           <g:hasErrors bean="${server}" field="ldapServerHost">
               <ul><g:eachError bean="${server}" field="ldapServerHost">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
           </g:hasErrors>
         </td>
@@ -187,7 +187,7 @@
           <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" value="${fieldValue(bean:server,field:'ldapServerPort')}"/>
           <g:hasErrors bean="${server}" field="ldapServerPort">
               <ul><g:eachError bean="${server}" field="ldapServerPort">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
           </g:hasErrors>
 
@@ -279,7 +279,7 @@
           <g:textField size="6" name="authHelperPort" value="${fieldValue(bean:server,field:'authHelperPort')}"/>
           <g:hasErrors bean="${server}" field="authHelperPort">
               <ul><g:eachError bean="${server}" field="authHelperPort">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
           </g:hasErrors>
         </td>

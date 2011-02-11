@@ -96,7 +96,7 @@
          <td></td>
          <td class="errors" colspan="2">
               <ul><g:eachError bean="${ctfCredentials}" field="ctfUsername">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
          </td>
       </tr>
@@ -116,7 +116,7 @@
          <td></td>
          <td class="errors" colspan="2">
               <ul><g:eachError bean="${ctfCredentials}" field="ctfPassword">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
          </td>
       </tr>

@@ -66,7 +66,7 @@
                              field="name">
                             <ul><g:eachError bean="${replicaInstance}" 
                                field="name">
-                              <li><g:message error="${it}"/>
+                              <li><g:message error="${it}" encodeAs="HTML"/>
                               </li>
                             </g:eachError></ul>
                           </g:hasErrors>
@@ -86,7 +86,7 @@
                              field="locationName">
                             <ul><g:eachError bean="${replicaInstance}" 
                                field="locationName">
-                              <li><g:message error="${it}"/></li>
+                              <li><g:message error="${it}" encodeAs="HTML"/></li>
                             </g:eachError></ul>
                           </g:hasErrors>
                         </td>
@@ -109,14 +109,14 @@
                              field="latitude">
                             <ul><g:eachError bean="${replicaInstance}" 
                                field="latitude">
-                              <li><g:message error="${it}"/></li>
+                              <li><g:message error="${it}" encodeAs="HTML"/></li>
                             </g:eachError></ul>
                           </g:hasErrors>
                           <g:hasErrors bean="${replicaInstance}" 
                              field="longitude">
                             <ul><g:eachError bean="${replicaInstance}" 
                                field="longitude">
-                              <li><g:message error="${it}"/></li>
+                              <li><g:message error="${it}" encodeAs="HTML"/></li>
                             </g:eachError></ul>
                           </g:hasErrors>
                         </td>

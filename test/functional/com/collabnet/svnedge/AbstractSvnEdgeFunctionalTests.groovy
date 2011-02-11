@@ -32,6 +32,7 @@ import functionaltestplugin.FunctionalTestCase
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.GrailsApplication;
+import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
 
 /**
  * This is the basic implementation of functional tests for the SvnEdge.
@@ -230,5 +231,9 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
                fail(tarFileDoesNotExist.getMessage())
             }
         }
+    }
+    
+    protected String encodeAsHTML(String s) {
+        return HTMLCodec.encode(s)
     }
 }

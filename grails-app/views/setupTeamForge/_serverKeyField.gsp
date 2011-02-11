@@ -7,7 +7,7 @@
               value="${fieldValue(bean:con,field:'serverKey')}"/>
           <g:hasErrors bean="${con}" field="serverKey">
               <g:eachError bean="${con}" field="serverKey">
-                  <li><g:message error="${it}"/></li>
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError>
           </g:hasErrors>
           <div class="errorMessage"><g:message code="setupTeamForge.page.error.additional" /></div>

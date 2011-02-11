@@ -19,25 +19,25 @@
 
                 <tr class="prop">
                     <td valign="top" class="name"><g:message code="user.username.label"/></td>
-                    <td valign="top" class="value">${userInstance.username?.encodeAsHTML()}</td>
+                    <td valign="top" class="value">${userInstance.username}</td>
                 </tr>
 
                 <%-- only showing fullname and email for editable (local db) users --%>
                 <g:if test="${editable}">
                 <tr class="prop">
                     <td valign="top" class="name"><g:message code="user.realUserName.label"/></td>
-                    <td valign="top" class="value">${userInstance.realUserName?.encodeAsHTML()}</td>
+                    <td valign="top" class="value">${userInstance.realUserName}</td>
                 </tr>
 
                 <tr class="prop">
                     <td valign="top" class="name"><g:message code="user.email.label"/></td>
-                    <td valign="top" class="value">${userInstance.email?.encodeAsHTML()}</td>
+                    <td valign="top" class="value">${userInstance.email}</td>
                 </tr>
                 </g:if>
 
                 <tr class="prop">
                     <td valign="top" class="name"><g:message code="user.description.label"/></td>
-                    <td valign="top" class="value">${userInstance.description?.encodeAsHTML()}</td>
+                    <td valign="top" class="value">${userInstance.description}</td>
                 </tr>
 
                 <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">

@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>CollabNet Subversion Edge <g:message code="logs.page.show.title" args="${[params.fileName]}"/></title>
+  <title>CollabNet Subversion Edge <g:message code="logs.page.show.title" args="${[params.fileName]}" encodeAs="HTML"/></title>
 </head>
 
 <content tag="title">
@@ -58,7 +58,7 @@ if (params.highlight) {
     </g:if>
   <g:else>
     <tr class="ItemListNoData">
-        <td colspan="3"><g:message code="logs.page.show.header.fileNotFound" args="${[params.fileName]}"/></td>
+        <td colspan="3"><g:message code="logs.page.show.header.fileNotFound" args="${[params.fileName]}" encodeAs="HTML"/></td>
       </tr>
   </g:else>
    

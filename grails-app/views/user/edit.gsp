@@ -26,7 +26,7 @@
                     <tr class="prop">
                         <td valign="top" class="name"><g:message code="user.username.label"/></td>
                         <td class="value">
-                            ${userInstance.username?.encodeAsHTML()}
+                            ${userInstance.username}
             </td>
             <td width="100%" >
                            <div id="passwd_change_link"><a href="#" onclick="showPasswdFields()"><g:message code="user.page.edit.passwdchange"/></a></div>
@@ -47,7 +47,7 @@
         <td>&nbsp;</td>
         <td colspan="2" width="100%" class="errors">
           <ul><g:eachError bean="${userInstance}" field="passwd">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -63,7 +63,7 @@
                     <tr class="prop">
                         <td valign="top" class="name"><label for="realUserName"><g:message code="user.realUserName.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'realUserName','errors')}">
-                            <input type="text" id="realUserName" name="realUserName" value="${userInstance.realUserName?.encodeAsHTML()}"/>
+                            <input type="text" id="realUserName" name="realUserName" value="${userInstance.realUserName}"/>
                         </td>
                     </tr>
     <g:hasErrors bean="${userInstance}" field="realUserName">
@@ -71,7 +71,7 @@
         <td>&nbsp;</td>
         <td colspan="2" width="100%" class="errors">
           <ul><g:eachError bean="${userInstance}" field="realUserName">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -80,7 +80,7 @@
                     <tr class="prop">
                         <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
-                            <input type="text" id="email" name="email" value="${userInstance?.email?.encodeAsHTML()}"/>
+                            <input type="text" id="email" name="email" value="${userInstance?.email}"/>
                         </td>
                     </tr>
     <g:hasErrors bean="${userInstance}" field="email">
@@ -88,7 +88,7 @@
         <td>&nbsp;</td>
         <td colspan="2" width="100%" class="errors">
           <ul><g:eachError bean="${userInstance}" field="email">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -97,7 +97,7 @@
                     <tr class="prop">
                         <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/></label></td>
                         <td class="value ${hasErrors(bean:userInstance,field:'description','errors')}">
-                            <input type="text" id="description" name="description" value="${userInstance.description?.encodeAsHTML()}"/>
+                            <input type="text" id="description" name="description" value="${userInstance.description}"/>
                         </td>
                     </tr>
     <g:hasErrors bean="${userInstance}" field="description">
@@ -105,7 +105,7 @@
         <td>&nbsp;</td>
         <td colspan="2" width="100%" class="errors">
           <ul><g:eachError bean="${userInstance}" field="description">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>
@@ -135,7 +135,7 @@
         <td>&nbsp;</td>
         <td colspan="2" width="100%" class="errors">
           <ul><g:eachError bean="${userInstance}" field="authorities">
-              <li><g:message error="${it}"/></li>
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
           </g:eachError></ul>
         </td>
       </tr>

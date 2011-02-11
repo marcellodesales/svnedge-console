@@ -126,8 +126,8 @@ class FreshConversionToTeamForgeFunctionalTests
             click button
         }
         assertStatus 200
-        assertContentContains(
-            getMessage("ctfRemoteClientService.host.unknown.error", [ctfHost]))
+        assertContentContains(encodeAsHTML(
+            getMessage("ctfRemoteClientService.host.unknown.error", [ctfHost])))
 
         // Step 4: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -164,8 +164,8 @@ class FreshConversionToTeamForgeFunctionalTests
             click button
         }
         assertStatus 200
-        assertContentContains(getMessage("ctfRemoteClientService.auth.error",
-            [this.getTestCtfUrl()]))
+        assertContentContains(encodeAsHTML(getMessage("ctfRemoteClientService.auth.error",
+            [this.getTestCtfUrl()])))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
@@ -248,8 +248,8 @@ class FreshConversionToTeamForgeFunctionalTests
             click continueButton
         }
         assertStatus 200
-        assertContentContains(
-            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl]))
+        assertContentContains(encodeAsHTML(
+            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl])))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()
