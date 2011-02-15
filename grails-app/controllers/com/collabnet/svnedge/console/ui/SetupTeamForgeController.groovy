@@ -76,7 +76,7 @@ class SetupTeamForgeController {
             errorCause = savedCon.errorMessage
             def msg = message(code: 
                 "setupTeamForge.action.ctfInfo.ctfConnection.error")
-            generalError = msg + " '${savedCon.ctfURL}'"
+            generalError = msg + " '${savedCon.ctfURL.encodeAsHTML()}'"
             session[WIZARD_BEAN_KEY] = null
         }
         [isFreshInstall: setupTeamForgeService.isFreshInstall(), con: con, 
@@ -101,7 +101,7 @@ class SetupTeamForgeController {
             def msg = authExcp.getMessage()
            if (authExcp instanceof MalformedURLException) {
                 msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
-                    args: [con.ctfURL])
+                    args: [con.ctfURL.encodeAsHTML()])
 
            } else if (authExcp instanceof UnknownHostException) {
                 msg = message(code: 'ctfRemoteClientService.host.unknown.error',
@@ -110,11 +110,11 @@ class SetupTeamForgeController {
            } else if (authExcp instanceof NoRouteToHostException) {
                 msg = message(code: 
                     'ctfRemoteClientService.host.unreachable.error',
-                    args: [con.ctfURL])
+                    args: [con.ctfURL.encodeAsHTML()])
 
            } else if (authExcp instanceof CtfAuthenticationException) {
                msg = message(code: 'ctfRemoteClientService.auth.error',
-                   args: [con.ctfURL])
+                   args: [con.ctfURL.encodeAsHTML()])
            }
            log.debug("Can't confirm TeamForge credentials: " + authExcp)
            con.errorMessage = msg
@@ -155,17 +155,20 @@ class SetupTeamForgeController {
                 if (unfixableRepoNames.size() <= 10) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposList",
-                        [unfixableRepoNames].toArray())
+                        [unfixableRepoNames].toArray(), 
+                        "Invalid repository names must be fixed.")
                 } else {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposSample",
                         [unfixableRepoNames.size(), 
-                         unfixableRepoNames[0..<10]].toArray())
+                         unfixableRepoNames[0..<10]].toArray(), 
+                        "Many invalid repository names must be fixed.")
                 }
                 if (!duplicatedReposIgnoringCase) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDiscover",
-                            ["discover"].toArray())
+                            ["discover"].toArray(), 
+                        "Use discover repositories after fixing.")
                 }
             }
 
@@ -173,16 +176,19 @@ class SetupTeamForgeController {
                 if (duplicatedReposIgnoringCase.size() <= 10) {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDupeList",
-                        [duplicatedReposIgnoringCase].toArray())
+                        [duplicatedReposIgnoringCase].toArray(), 
+                        "Potential duplicate repository names must be fixed.")
                 } else {
                     conversionObject.errors.reject(
                         "ctfConversion.ctfProject.invalidReposDupeSample",
                         [duplicatedReposIgnoringCase.size(), 
-                         duplicatedReposIgnoringCase[0..<10]].toArray())
+                         duplicatedReposIgnoringCase[0..<10]].toArray(), 
+                        "Many potential duplicate repository names must be fixed.")
                 }
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposDiscover",
-                        ["discover"].toArray())
+                        ["discover"].toArray(), 
+                        "Use discover repositories after fixing.")
             }
 
             if (containsUpperCaseRepos || 
@@ -213,18 +219,19 @@ class SetupTeamForgeController {
                 [longRepoPath].toArray(), longRepoPath)
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposLongPathDiscover",
-                        ["discover"].toArray())
+                        ["discover"].toArray(),
+                        "Use discover repositories after fixing.")
             def parentDir = Server.getServer().repoParentDir
             def length = parentDir.length()
             if (length > pathLimit) {
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposTooLongParentPath",
-                [parentDir].toArray())
+                [parentDir].toArray(), parentDir)
 
             } else if (length > (pathLimit - Repository.NAME_MAX_LENGTH)) {
                 conversionObject.errors.reject(
                     "ctfConversion.ctfProject.invalidReposLongParentPath",
-                [parentDir, length].toArray())
+                [parentDir, length].toArray(), parentDir)
             }
         }
 
@@ -483,23 +490,23 @@ class SetupTeamForgeController {
         } catch (MalformedURLException malformedUrl) {
             // Just display the error on the form
             def msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
-                args: [con.ctfURL])
+                args: [con.ctfURL.encodeAsHTML()])
             con.errorMessage = msg
             redirect(action: 'ctfInfo')
 
         } catch (UnknownHostException unknownHost) {
             // Just display the error on the form
-            con.errorMessage = unknownHost.message
+            con.errorMessage = unknownHost.message.encodeAsHTML()
             redirect(action: 'ctfInfo')
 
         } catch (NoRouteToHostException noRouteToServer) {
             // Just display the error on the form
-            con.errorMessage = noRouteToServer.message
+            con.errorMessage = noRouteToServer.message.encodeAsHTML()
             redirect(action: 'ctfInfo')
 
         } catch (CtfAuthenticationException wrongCredentials) {
             // Just display the error on the form
-            con.errorMessage = wrongCredentials.message
+            con.errorMessage = wrongCredentials.message.encodeAsHTML()
             redirect(action: 'ctfInfo')
 
         } catch (CantBindPortException cantConvertScm) {

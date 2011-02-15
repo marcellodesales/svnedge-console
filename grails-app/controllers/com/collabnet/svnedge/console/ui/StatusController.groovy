@@ -49,10 +49,8 @@ class StatusController {
     static allowedMethods = [start:'POST', stop:'POST']
 
     def getUpdateMessage() {
-        def msg = message(code: 'packagesUpdate.status.updates.available')
-        def download = message(code:'packagesUpdate.status.updates.forDownload')
-        return msg.replace(download,
-            "<a href='/csvn/packagesUpdate/available'>${download}</a>")
+        return message(code: 'packagesUpdate.status.updates.available.download', 
+            args: ['/csvn/packagesUpdate/available'])
     }
 
     def index = {
@@ -102,7 +100,7 @@ class StatusController {
            if (this.packagesUpdateService.hasBeenBootstraped()) {
                if (this.packagesUpdateService.areThereUpdatesAvailable()) {
                    if (!flash.error) {
-                       flash.warn = getUpdateMessage()
+                       flash.unfiltered_warn = getUpdateMessage()
                    }
                }
                //system restart has priority over the updates

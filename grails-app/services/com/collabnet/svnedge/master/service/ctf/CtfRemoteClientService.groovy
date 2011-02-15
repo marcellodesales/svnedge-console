@@ -128,8 +128,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(e)
             if (e.faultString.contains("Error logging in.")) {
                 def msg = getMessage("ctfRemoteClientService.auth.error", 
-                    [ctfUrl], locale)
-                log.error(msg)
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.info(msg)
                 throw new CtfAuthenticationException(msg)
             } else if (e.faultString.contains("SSLHandshakeException")) {
                 def msg = getMessage("ctfRemoteClientService.ssl.error", 
@@ -141,23 +141,23 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new UnknownHostException(getMessage(
-                    "ctfRemoteClientService.host.unknown.error", [hostname], 
+                    "ctfRemoteClientService.host.unknown.error", [hostname.encodeAsHTML()], 
                     locale))
 
             } else if (e.detail instanceof NoRouteToHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new NoRouteToHostException(getMessage(
-                    "ctfRemoteClientService.host.unreachable.error", [hostname],
+                    "ctfRemoteClientService.host.unreachable.error", [hostname.encodeAsHTML()],
                     locale))
             } else {
                 def msg = getMessage("ctfRemoteClientService.auth.error",
-                    [ctfUrl], locale)
+                    [ctfUrl.encodeAsHTML()], locale)
                 log.error(msg, e)
                 throw new RemoteMasterException(ctfUrl, msg, e)
             }
         } catch (Exception otherErrors) {
             throw new MalformedURLException(getMessage(
-                "ctfRemoteClientService.host.malformedUrl", [ctfUrl], locale))
+                "ctfRemoteClientService.host.malformedUrl", [ctfUrl.encodeAsHTML()], locale))
         }
     }
 

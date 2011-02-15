@@ -37,9 +37,9 @@
 
           <g:if test="${connectionErrors && errorCause}">
             <div class="errorMessage">
-                ${generalError}.
+                <%=generalError%>
                 <ul>
-                    <li><g:message code="ctfConversion.form.ctfInfo.noconnection"/> ${errorCause}</li>
+                    <li><g:message code="ctfConversion.form.ctfInfo.noconnection"/> <%=errorCause%></li>
                 </ul>
             </div>
           </g:if>

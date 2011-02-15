@@ -248,8 +248,8 @@ class FreshConversionToTeamForgeFunctionalTests
             click continueButton
         }
         assertStatus 200
-        assertContentContains(encodeAsHTML(
-            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl])))
+        assertContentContains(
+            getMessage("ctfRemoteClientService.host.malformedUrl", [badUrl]))
 
         // Step 3: Verify the attempt to convert did not succeed.
         assertConversionDidNotSucceeded()

@@ -193,23 +193,41 @@
             <g:if test="${flash.message}">
                 <div class="greenText">${flash.message}</div>
             </g:if>
+            <g:elseif test="${flash.unfiltered_message}">
+                <div class="greenText"><%=flash.unfiltered_message%></div>
+            </g:elseif>
             <g:if test="${flash.warn}">
                 <div class="warningText">${flash.warn}</div>
             </g:if>
+            <g:elseif test="${flash.unfiltered_warn}">
+                <div class="warningText"><%=flash.unfiltered_warn%></div>
+            </g:elseif>
             <g:if test="${flash.error}">
                 <div class="errorMessage">${flash.error}</div>
             </g:if>
+            <g:elseif test="${flash.unfiltered_error}">
+                <div class="errorMessage"><%=flash.unfiltered_error%></div>
+            </g:elseif>
       </div>
       <div class="requestmessages"> 
             <g:if test="${request['message']}">
                 <div class="greenText">${request['message']}</div>
             </g:if>
+            <g:elseif test="${request['unfiltered_message']}">
+                <div class="greenText"><%=request['unfiltered_message']%></div>
+            </g:elseif>
             <g:if test="${request['warn']}">
                 <div class="warningText">${request['warn']}</div>
             </g:if>
+            <g:elseif test="${request['unfiltered_warn']}">
+                <div class="warningText"><%=request['unfiltered_warn']%></div>
+            </g:elseif>
             <g:if test="${request['error']}">
                 <div class="errorMessage">${request['error']}</div>
             </g:if>
+            <g:elseif test="${request['unfiltered_error']}">
+                <div class="errorMessage"><%=request['unfiltered_error']%></div>
+            </g:elseif>
       </div>
 
       <div id="main">

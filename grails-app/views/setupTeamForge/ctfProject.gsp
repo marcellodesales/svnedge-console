@@ -28,7 +28,7 @@
             <div class="errorMessage">
               <ul>
               <g:each in="${con.errors.globalErrors}">
-                  <li><g:message error="${it}" encodeAs="HTML" /></li>
+                  <li><g:message error="${it}" /></li>
               </g:each>
               </ul>
             </div>

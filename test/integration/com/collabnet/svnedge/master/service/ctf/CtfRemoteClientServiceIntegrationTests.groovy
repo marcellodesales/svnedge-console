@@ -160,13 +160,13 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
                                                               "internal/", "")
         println ("Roles Paths admin/internal/ = $response")
         assertEquals("Result MUST be in the format x:x when called without " +
-                "accessType.", 0, response.tokenize(":").size())
+                "accessType.", 2, response.tokenize(":").size())
 
         response = ctfRemoteClientService.getRolePaths("admin", "internal/", 
                 null)
         println ("Roles Paths admin/exsy1006/internal/ = $response")
         assertEquals("Result MUST be in the format x:x when called without " +
-                "accessType.", 0, response.tokenize(":").size())
+                "accessType.", 2, response.tokenize(":").size())
     }
 
     void testGetRolePathsWithAccessType() {
