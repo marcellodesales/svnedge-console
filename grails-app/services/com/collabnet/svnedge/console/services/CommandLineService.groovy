@@ -149,21 +149,15 @@ class CommandLineService {
         p.out.close()
         Integer exitStatus = null
         boolean isPassword = false
-        while (null == exitStatus && !isPassword) {
-            try {
-                String match = error.toString().find(PASSWORD_PATTERN)
-                if (null == match) {
-                    match = output.toString().find(PASSWORD_PATTERN)
-                }
-                isPassword = (null != match)
-                exitStatus = p.exitValue()
-            } catch (IllegalThreadStateException e) {
-                Thread.sleep(100)
-                log.debug("testForPassword error=" + error + " out=" + output +
-                          " isPassword? " + isPassword)
+        try {
+            exitStatus = p.waitFor()
+            isPassword = PASSWORD_PATTERN.matcher(error).find()
+            if (!isPassword) {
+                isPassword = PASSWORD_PATTERN.matcher(output).find()
             }
-        }
-        if (null == exitStatus) {
+        } catch (InterruptedException e) {
+            log.debug("Interrupted testForPassword error=" + error + " out=" + output +
+                    " isPassword? " + isPassword)
             p.destroy()
         }
         log.debug("testForPassword command: " + command + " result=" + exitStatus)
