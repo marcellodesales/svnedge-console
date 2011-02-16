@@ -172,7 +172,7 @@
         <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
         <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
           width="102" height="31" alt="Powered by CollabNet" border="0"/></a></div>
-        &#169; <g:message code="layout.page.trademark" args="2010" />
+        &#169; 2011 <g:message code="layout.page.trademark" />
       </div>
     </div>
     <!-- SourceForge content-area end -->
