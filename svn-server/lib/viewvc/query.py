@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*-python-*-
 #
-# Copyright (C) 1999-2009 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2010 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -312,11 +312,7 @@ def is_forbidden(cfg, cvsroot_name, module):
     
 def build_commit(server, cfg, desc, files, cvsroots, viewvc_link):
     ob = _item(num_files=len(files), files=[])
-    
-    if desc:
-        ob.log = string.replace(server.escape(desc), '\n', '<br />')
-    else:
-        ob.log = '&nbsp;'
+    ob.log = desc and string.replace(server.escape(desc), '\n', '<br />') or ''
 
     for commit in files:
         repository = commit.GetRepository()
@@ -350,9 +346,10 @@ def build_commit(server, cfg, desc, files, cvsroots, viewvc_link):
         except:
             raise Exception, str([directory, commit.GetFile()])
 
-        ## if we couldn't find the cvsroot path configured in the 
-        ## viewvc.conf file, then don't make the link
-        if cvsroot_name:
+        ## If we couldn't find the cvsroot path configured in the
+        ## viewvc.conf file, or we don't have a VIEWVC_LINK, then
+        ## don't make the link.
+        if cvsroot_name and viewvc_link:
             flink = '[%s] <a href="%s/%s?root=%s">%s</a>' % (
                     cvsroot_name, viewvc_link, urllib.quote(file),
                     cvsroot_name, file)
@@ -435,22 +432,22 @@ def main(server, cfg, viewvc_link):
         commits = [ ]
         query = 'skipped'
 
+    docroot = cfg.options.docroot
+    if docroot is None and viewvc_link:
+        docroot = viewvc_link + '/' + viewvc.docroot_magic_path
+        
     data = ezt.TemplateData({
       'cfg' : cfg,
       'address' : cfg.general.address,
       'vsn' : viewvc.__version__,
-      'repository' : server.escape(form_data.repository, 1),
-      'branch' : server.escape(form_data.branch, 1),
-      'directory' : server.escape(form_data.directory, 1),
-      'file' : server.escape(form_data.file, 1),
-      'who' : server.escape(form_data.who, 1),
-      'docroot' : cfg.options.docroot is None \
-                  and viewvc_link + '/' + viewvc.docroot_magic_path \
-                  or cfg.options.docroot,
-
+      'repository' : server.escape(form_data.repository),
+      'branch' : server.escape(form_data.branch),
+      'directory' : server.escape(form_data.directory),
+      'file' : server.escape(form_data.file),
+      'who' : server.escape(form_data.who),
+      'docroot' : docroot,
       'sortby' : form_data.sortby,
       'date' : form_data.date,
-
       'query' : query,
       'commits' : commits,
       'num_commits' : len(commits),

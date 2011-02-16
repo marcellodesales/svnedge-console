@@ -18,10 +18,9 @@ import os
 import string
 import re
 import tempfile
-import popen2
 import time
 import urllib
-from svn_repos import Revision, SVNChangedPath, _datestr_to_date, _compare_paths, _path_parts, _cleanup_path, _rev2optrev, _fix_subversion_exception
+from svn_repos import Revision, SVNChangedPath, _datestr_to_date, _compare_paths, _path_parts, _cleanup_path, _rev2optrev, _fix_subversion_exception, _split_revprops
 from svn import core, delta, client, wc, ra
 
 
@@ -52,6 +51,29 @@ def get_directory_props(ra_session, path, rev):
     props = ra.svn_ra_get_dir(ra_session, path, rev)
   return props
 
+def client_log(url, start_rev, end_rev, log_limit, cross_copies,
+               cb_func, ctx):
+  try:
+    client.svn_client_log4([url], start_rev, start_rev, end_rev,
+                           log_limit, 1, not cross_copies, 0, None,
+                           cb_func, ctx)
+  except NameError:
+    # Wrap old svn_log_message_receiver_t interface with a
+    # svn_log_entry_t one.
+    def cb_convert(paths, revision, author, date, message, pool):
+      class svn_log_entry_t:
+        pass
+      log_entry = svn_log_entry_t()
+      log_entry.changed_paths = paths
+      log_entry.revision = revision
+      log_entry.revprops = { core.SVN_PROP_REVISION_LOG : message,
+                             core.SVN_PROP_REVISION_AUTHOR : author,
+                             core.SVN_PROP_REVISION_DATE : date,
+                             }
+      cb_func(log_entry, pool)
+    client.svn_client_log2([url], start_rev, end_rev, log_limit,
+                           1, not cross_copies, cb_convert, ctx)
+
 ### END COMPATABILITY CODE ###
 
 
@@ -68,7 +90,11 @@ class LogCollector:
     self.show_all_logs = show_all_logs
     self.lockinfo = lockinfo
     
-  def add_log(self, paths, revision, author, date, message, pool):
+  def add_log(self, log_entry, pool):
+    paths = log_entry.changed_paths
+    revision = log_entry.revision
+    msg, author, date, revprops = _split_revprops(log_entry.revprops)
+    
     # Changed paths have leading slashes
     changed_paths = paths.keys()
     changed_paths.sort(lambda a, b: _compare_paths(a, b))
@@ -88,8 +114,8 @@ class LogCollector:
           if change.copyfrom_path:
             this_path = change.copyfrom_path + self.path[len(changed_path):]
     if self.show_all_logs or this_path:
-      entry = Revision(revision, _datestr_to_date(date), author, message, None,
-                       self.lockinfo, self.path[1:], None, None)
+      entry = Revision(revision, date, author, msg, None, self.lockinfo,
+                       self.path[1:], None, None)
       self.logs.append(entry)
     if this_path:
       self.path = this_path
@@ -157,7 +183,7 @@ class RemoteSubversionRepository(vclib.Repository):
     # Setup the client context baton, complete with non-prompting authstuffs.
     # TODO: svn_cmdline_setup_auth_baton() is mo' better (when available)
     core.svn_config_ensure(self.config_dir)
-    self.ctx = client.svn_client_ctx_t()
+    self.ctx = client.svn_client_create_context()
     self.ctx.auth_baton = core.svn_auth_open([
       client.svn_client_get_simple_provider(),
       client.svn_client_get_username_provider(),
@@ -252,7 +278,7 @@ class RemoteSubversionRepository(vclib.Repository):
       if not vclib.check_path_access(self, entry_path_parts, entry.kind, rev):
         continue
       dirent = dirents[entry.name]
-      entry.date, entry.author, entry.log, changes = \
+      entry.date, entry.author, entry.log, revprops, changes = \
                   self.revinfo(dirent.created_rev)
       entry.rev = str(dirent.created_rev)
       entry.size = dirent.size
@@ -283,9 +309,8 @@ class RemoteSubversionRepository(vclib.Repository):
     log_limit = 0
     if limit:
       log_limit = first + limit
-    client.svn_client_log2([url], _rev2optrev(rev), _rev2optrev(1),
-                           log_limit, 1, not cross_copies,
-                           lc.add_log, self.ctx)
+    client_log(url, _rev2optrev(rev), _rev2optrev(1), log_limit,
+               cross_copies, lc.add_log, self.ctx)
     revs = lc.logs
     revs.sort()
     prev = None
@@ -337,7 +362,7 @@ class RemoteSubversionRepository(vclib.Repository):
     if not cached_info:
       cached_info = self._revinfo_raw(rev)
       self._revinfo_cache[rev] = cached_info
-    return cached_info[0], cached_info[1], cached_info[2], cached_info[3]
+    return tuple(cached_info)
     
   def rawdiff(self, path_parts1, rev1, path_parts2, rev2, type, options={}):
     p1 = self._getpath(path_parts1)
@@ -352,7 +377,7 @@ class RemoteSubversionRepository(vclib.Repository):
     args = vclib._diff_args(type, options)
 
     def _date_from_rev(rev):
-      date, author, msg, changes = self.revinfo(rev)
+      date, author, msg, revprops, changes = self.revinfo(rev)
       return date
     
     try:
@@ -417,29 +442,54 @@ class RemoteSubversionRepository(vclib.Repository):
     return revisions[0]
     
   def _revinfo_raw(self, rev):
-    # return 5-tuple (date, author, message, changes)
+    # return 5-tuple (date, author, msg, revprops, changes)
     optrev = _rev2optrev(rev)
     revs = []
 
-    def _log_cb(changed_paths, revision, author,
-                datestr, message, pool, retval=revs):
-      date = _datestr_to_date(datestr)
+    def _log_cb(log_entry, pool, retval=revs):
+      ### Subversion 1.5 and earlier didn't offer the 'changed_paths2'
+      ### hash, and in Subversion 1.6, it's offered but broken.
+      try: 
+        changed_paths = log_entry.changed_paths2
+        paths = (changed_paths or {}).keys()
+      except:
+        changed_paths = log_entry.changed_paths
+        paths = (changed_paths or {}).keys()
+      paths.sort(lambda a, b: _compare_paths(a, b))
+      revision = log_entry.revision
+      msg, author, date, revprops = _split_revprops(log_entry.revprops)
       action_map = { 'D' : vclib.DELETED,
                      'A' : vclib.ADDED,
                      'R' : vclib.REPLACED,
                      'M' : vclib.MODIFIED,
                      }
-      paths = (changed_paths or {}).keys()
-      paths.sort(lambda a, b: _compare_paths(a, b))
       changes = []
       found_readable = found_unreadable = 0
       for path in paths:
-        pathtype = None
         change = changed_paths[path]
-        action = action_map.get(change.action, vclib.MODIFIED)
+        ### svn_log_changed_path_t (which we might get instead of the
+        ### svn_log_changed_path2_t we'd prefer) doesn't have the
+        ### 'node_kind' member.        
+        pathtype = None
+        if hasattr(change, 'node_kind'):
+          if change.node_kind == core.svn_node_dir:
+            pathtype = vclib.DIR
+          elif change.node_kind == core.svn_node_file:
+            pathtype = vclib.FILE
+        ### svn_log_changed_path2_t only has the 'text_modified' and
+        ### 'props_modified' bits in Subversion 1.7 and beyond.  And
+        ### svn_log_changed_path_t is without.
+        text_modified = props_modified = 0
+        if hasattr(change, 'text_modified'):
+          if change.text_modified == core.svn_tristate_true:
+            text_modified = 1
+        if hasattr(change, 'props_modified'):
+          if change.props_modified == core.svn_tristate_true:
+            props_modified = 1
         ### Wrong, diddily wrong wrong wrong.  Can you say,
         ### "Manufacturing data left and right because it hurts to
         ### figure out the right stuff?"
+        action = action_map.get(change.action, vclib.MODIFIED)
         if change.copyfrom_path and change.copyfrom_rev:
           is_copy = 1
           base_path = change.copyfrom_path
@@ -462,21 +512,21 @@ class RemoteSubversionRepository(vclib.Repository):
               base_path = None
               base_rev = None
           changes.append(SVNChangedPath(path, revision, pathtype, base_path,
-                                        base_rev, action, is_copy, 0, 0))
+                                        base_rev, action, is_copy,
+                                        text_modified, props_modified))
           found_readable = 1
         else:
           found_unreadable = 1
 
       if found_unreadable:
-        message = None
+        msg = None
         if not found_readable:
           author = None
           date = None
-      revs.append([date, author, message, changes])
+      revs.append([date, author, msg, revprops, changes])
 
-    client.svn_client_log([self.rootpath], optrev, optrev,
-                          1, 0, _log_cb, self.ctx)
-    return revs[0][0], revs[0][1], revs[0][2], revs[0][3]
+    client_log(self.rootpath, optrev, optrev, 1, 0, _log_cb, self.ctx)
+    return tuple(revs[0])
 
   ##--- custom --##
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*-python-*-
 #
-# Copyright (C) 1999-2008 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2010 The ViewCVS Group. All Rights Reserved.
 # Copyright (C) 2000 Curt Hagenlocher <curt@hagenlocher.org>
 #
 # By using this file, you agree to the terms and conditions set forth in
@@ -32,8 +32,8 @@ import os
 import re
 import time
 import math
-import cgi
 import vclib
+import sapi
 
 # If kconv module exists, character code conversion is enabled.
 try:
@@ -157,7 +157,7 @@ def htmlify(html):
   # if kconv module exists, convert Japanese character code to utf-8
   if multibyte == 1:
     html = toutf8(html)
-  html = cgi.escape(html)
+  html = sapi.escape(html)
   return html
 
 def main():

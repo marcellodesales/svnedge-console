@@ -14,7 +14,7 @@
 #
 # -----------------------------------------------------------------------
 
-__version__ = '1.1.4'
+__version__ = '1.1.8'
 
 # this comes from our library; measure the startup time
 import debug
@@ -24,7 +24,6 @@ debug.t_start('imports')
 # standard modules that we know are in the path or builtin
 import sys
 import os
-import cgi
 import gzip
 import mimetypes
 import re
@@ -324,7 +323,8 @@ class Request:
         self.roottype = 'cvs'
       else:
         raise debug.ViewVCException(
-          'The root "%s" has an unknown type (%s).' % (self.rootname, type),
+          'The root "%s" has an unknown type ("%s").  Expected "cvs" or "svn".'
+          % (self.rootname, type),
           "500 Internal Server Error")
       
     # If this is using an old-style 'rev' parameter, redirect to new hotness.
@@ -485,7 +485,8 @@ class Request:
     action = self.server.escape(urllib.quote(url, _URL_SAFE_CHARS))
     hidden_values = []
     for name, value in params.items():
-      hidden_values.append(_item(name=name, value=value))
+      hidden_values.append(_item(name=self.server.escape(name),
+                                 value=self.server.escape(value)))
     return action, hidden_values
 
   def get_link(self, view_func=None, where=None, pathtype=None, params=None):
@@ -963,29 +964,41 @@ def get_view_template(cfg, view_name, language="en"):
 
   return template
 
-def get_writeready_server_file(request, content_type=None, encoding=None):
+def get_writeready_server_file(request, content_type=None, encoding=None,
+                               content_length=None):
   """Return a file handle to a response body stream, after outputting
   any queued special headers (on REQUEST.server) and (optionally) a
   'Content-Type' header whose value is CONTENT_TYPE and character set
-  is ENCODING.  After this is called, it is too late to add new
-  headers to the response."""
+  is ENCODING.
+
+  If CONTENT_LENGTH is provided and compression is not in use, also
+  generate a 'Content-Length' header for this response.
+
+  After this function is called, it is too late to add new headers to
+  the response."""
+
   if request.gzip_compress_level:
     request.server.addheader('Content-Encoding', 'gzip')
+  elif content_length is not None:
+    request.server.addheader('Content-Length', content_length)
+  
   if content_type and encoding:
     request.server.header("%s; charset=%s" % (content_type, encoding))
   elif content_type:
     request.server.header(content_type)
   else:
     request.server.header()
+
   if request.gzip_compress_level:
     fp = gzip.GzipFile('', 'wb', request.gzip_compress_level,
                        request.server.file())
   else:
     fp = request.server.file()
+  
   return fp
   
 def generate_page(request, view_name, data, content_type=None):
-  server_fp = get_writeready_server_file(request)
+  server_fp = get_writeready_server_file(request, content_type)
   template = get_view_template(request.cfg, view_name, request.language)
   template.generate(server_fp, data)
 
@@ -1160,8 +1173,7 @@ def htmlify(html):
   if multibyte == 1:
     html = toutf8(html)
 
-  return html and cgi.escape(html) or html
-
+  return html and sapi.escape(html) or html
 
 # Matches URLs
 _re_rewrite_url = re.compile('((http|https|ftp|file|svn|svn\+ssh)'
@@ -1172,8 +1184,10 @@ _re_rewrite_url = re.compile('((http|https|ftp|file|svn|svn\+ssh)'
 _re_rewrite_email = re.compile('([-a-zA-Z0-9_.\+]+)@'
                                '(([-a-zA-Z0-9]+\.)+[A-Za-z]{2,4})')
 
+# Matches revision references
+_re_rewrite_svnrevref = re.compile(r'\b(r|rev #?|revision #?)([0-9]+)\b')
 
-class HtmlFormatter:
+class ViewVCHtmlFormatter:
   """Format a string as HTML-encoded output with customizable markup
   rules, for example turning strings that look like URLs into anchor links.
 
@@ -1194,8 +1208,8 @@ class HtmlFormatter:
     """
     s = mobj.group(0)
     trunc_s = maxlen and s[:maxlen] or s
-    return '<a href="%s">%s</a>' % (cgi.escape(s),
-                                    cgi.escape(trunc_s)), \
+    return '<a href="%s">%s</a>' % (sapi.escape(s),
+                                    sapi.escape(trunc_s)), \
            len(trunc_s)
 
   def format_email(self, mobj, userdata, maxlen=0):
@@ -1239,6 +1253,25 @@ class HtmlFormatter:
       trunc_s = mobj.group(1)[:maxlen]
       return self._entity_encode(trunc_s), len(trunc_s)
 
+  def format_svnrevref(self, mobj, userdata, maxlen=0):
+    """Return a 2-tuple containing:
+         - the text represented by MatchObject MOBJ, formatted as an
+           linkified URL to a ViewVC Subversion revision view, with no
+           more than MAXLEN characters in the non-HTML-tag portions.
+           If MAXLEN is 0, there is no maximum.
+         - the number of characters returned.
+
+       USERDATA is a function that accepts a revision reference
+       and returns a URL to that revision.
+    """
+    s = mobj.group(0)
+    revref = mobj.group(2)
+    trunc_s = maxlen and s[:maxlen] or s
+    revref_url = userdata(revref)
+    return '<a href="%s">%s</a>' % (sapi.escape(revref_url),
+                                    sapi.escape(trunc_s)), \
+           len(trunc_s)
+
   def format_text(self, s, unused, maxlen=0):
     """Return a 2-tuple containing:
          - the text S, HTML-escaped, containing no more than MAXLEN
@@ -1246,7 +1279,7 @@ class HtmlFormatter:
          - the number of characters returned.
     """   
     trunc_s = maxlen and s[:maxlen] or s
-    return cgi.escape(trunc_s), len(trunc_s)
+    return sapi.escape(trunc_s), len(trunc_s)
   
   def add_formatter(self, regexp, conv, userdata=None):
     """Register a formatter which finds instances of strings matching
@@ -1340,7 +1373,7 @@ def _ctf_format_objid(mobj, userdata, maxlen=0):
     trunc_s = maxlen and s[:maxlen] or s
     return '<a href="%s%s">%s</a>' % (go_url, s, trunc_s), len(trunc_s)
     
-def format_log(log, cfg, maxlen=0, htmlize=1):
+def format_log(request, log, maxlen=0, htmlize=1):
   if not log:
     return log
 
@@ -1348,9 +1381,17 @@ def format_log(log, cfg, maxlen=0, htmlize=1):
   if multibyte == 1:
     log = toutf8(log)
 
+  cfg = request.cfg
   if htmlize:
-    lf = HtmlFormatter()
+    lf = ViewVCHtmlFormatter()
     lf.add_formatter(_re_rewrite_url, lf.format_url)
+    if request.roottype == 'svn':
+      def revision_to_url(rev):
+        return request.get_url(view_func=view_revision,
+                               params={'revision': rev},
+                               escape=1)
+      lf.add_formatter(_re_rewrite_svnrevref, lf.format_svnrevref,
+                       revision_to_url)
     if cfg.options.mangle_email_addresses == 2:
       lf.add_formatter(_re_rewrite_email, lf.format_email_truncated)
     elif cfg.options.mangle_email_addresses == 1:
@@ -1438,9 +1479,9 @@ def common_template_data(request, revision=None, mime_type=None):
   data = ezt.TemplateData({
     'annotate_href' : None,
     'cfg' : cfg,
-    'docroot' : (cfg.options.docroot is None \
+    'docroot' : cfg.options.docroot is None \
                 and request.script_name + '/' + docroot_magic_path \
-                or cfg.options.docroot),
+                or cfg.options.docroot,
     'download_href' : None,
     'download_text_href' : None,
     'graph_href': None,
@@ -1580,7 +1621,7 @@ def copy_stream(src, dst, htmlize=0):
     if not chunk:
       break
     if htmlize:
-      chunk = htmlify(chunk)
+      chunk = sapi.escape(chunk)
     dst.write(chunk)
 
 class MarkupPipeWrapper:
@@ -1631,7 +1672,7 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
   blame_source = []
   if blame_data:
     for i in blame_data:
-      i.text = cgi.escape(i.text)
+      i.text = sapi.escape(i.text)
       i.diff_href = None
       if i.prev_rev:
         i.diff_href = request.get_url(view_func=view_diff,
@@ -1695,7 +1736,7 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
         if not line:
           break
         line_no = line_no + 1
-        line = cgi.escape(string.expandtabs(line, cfg.options.tabsize))
+        line = sapi.escape(string.expandtabs(line, cfg.options.tabsize))
         item = vclib.Annotation(line, line_no, None, None, None, None)
         item.diff_href = None
         lines.append(item)
@@ -1760,9 +1801,8 @@ def get_itemprops(request, path_parts, rev):
   propnames = itemprops.keys()
   propnames.sort()
   props = []
-  has_binary_props = 0
   for name in propnames:
-    value = format_log(itemprops[name], request.cfg)
+    value = format_log(request, itemprops[name])
     undisplayable = ezt.boolean(0)
     # skip non-utf8 property names
     try:
@@ -1879,7 +1919,7 @@ def markup_or_annotate(request, is_annotate):
     data['date'] = make_time_string(entry.date, cfg)
     data['author'] = entry.author
     data['changed'] = entry.changed
-    data['log'] = format_log(entry.log, cfg)
+    data['log'] = format_log(request, entry.log)
     data['size'] = entry.size
 
     if entry.date is not None:
@@ -1912,12 +1952,18 @@ def view_markup(request):
   if 'markup' not in request.cfg.options.allowed_views:
     raise debug.ViewVCException('Markup view is disabled',
                                 '403 Forbidden')
+  if request.pathtype != vclib.FILE:
+    raise debug.ViewVCException('Unsupported feature: markup view on '
+                                'directory', '400 Bad Request')
   markup_or_annotate(request, 0)
 
 def view_annotate(request):
   if 'annotate' not in request.cfg.options.allowed_views:
     raise debug.ViewVCException('Annotation view is disabled',
                                  '403 Forbidden')
+  if request.pathtype != vclib.FILE:
+    raise debug.ViewVCException('Unsupported feature: annotate view on '
+                                'directory', '400 Bad Request')
   markup_or_annotate(request, 1)
 
 def revcmp(rev1, rev2):
@@ -2105,8 +2151,8 @@ def view_directory(request):
       row.date = make_time_string(file.date, cfg)
       row.ago = html_time(request, file.date)
     if cfg.options.show_logs:
-      row.log = format_log(file.log, cfg)
-      row.short_log = format_log(file.log, cfg,
+      row.log = format_log(request, file.log)
+      row.short_log = format_log(request, file.log,
                                  maxlen=cfg.options.short_log_len)
     row.lockinfo = file.lockinfo
     row.anchor = request.server.escape(file.name)
@@ -2194,7 +2240,7 @@ def view_directory(request):
     'entries' : rows,
     'sortby' : sortby,
     'sortdir' : sortdir,
-    'search_re' : htmlify(search_re),
+    'search_re' : request.server.escape(search_re),
     'dir_pagestart' : None,
     'sortby_file_href' :   request.get_url(params={'sortby': 'file',
                                                    'sortdir': None},
@@ -2489,7 +2535,7 @@ def view_log(request):
     entry.ago = None
     if rev.date is not None:
       entry.ago = html_time(request, rev.date, 1)
-    entry.log = format_log(rev.log or '', cfg)
+    entry.log = format_log(request, rev.log or '')
     entry.size = rev.size
     entry.lockinfo = rev.lockinfo
     entry.branch_point = None
@@ -2871,7 +2917,6 @@ def view_doc(request):
     raise debug.ViewVCException('Static file "%s" not available (%s)'
                                  % (document, str(v)), '404 Not Found')
 
-  request.server.addheader('Content-Length', content_length)
   if document[-3:] == 'png':
     mime_type = 'image/png'
   elif document[-3:] == 'jpg':
@@ -2882,7 +2927,8 @@ def view_doc(request):
     mime_type = 'text/css'
   else: # assume HTML:
     mime_type = None
-  copy_stream(fp, get_writeready_server_file(request, mime_type))
+  copy_stream(fp, get_writeready_server_file(request, mime_type,
+                                             content_length=content_length))
   fp.close()
 
 def rcsdiff_date_reformat(date_str, cfg):
@@ -2935,7 +2981,7 @@ class DiffSource:
     hr_breakable = self.cfg.options.hr_breakable
     
     # in the code below, "\x01" will be our stand-in for "&". We don't want
-    # to insert "&" because it would get escaped by htmlify().  Similarly,
+    # to insert "&" because it would get escaped by sapi.escape().  Similarly,
     # we use "\x02" as a stand-in for "<br>"
   
     if hr_breakable > 1 and len(text) > hr_breakable:
@@ -2945,7 +2991,7 @@ class DiffSource:
       text = string.replace(text, '  ', ' \x01nbsp;')
     else:
       text = string.replace(text, ' ', '\x01nbsp;')
-    text = htmlify(text)
+    text = sapi.escape(text)
     text = string.replace(text, '\x01', '&')
     text = string.replace(text, '\x02',
                           '<span style="color:red">\</span><br />')
@@ -3326,7 +3372,7 @@ def view_diff(request):
       else:
         changes = DiffSource(fp, cfg)
     else:
-      raw_diff_fp = MarkupPipeWrapper(fp, htmlify(headers), None, 1)
+      raw_diff_fp = MarkupPipeWrapper(fp, request.server.escape(headers), None, 1)
 
   no_format_params = request.query_dict.copy()
   no_format_params['diff_format'] = None
@@ -3336,7 +3382,7 @@ def view_diff(request):
   fvi = get_file_view_info(request, path_left, rev1)
   left = _item(date=make_time_string(log_entry1.date, cfg),
                author=log_entry1.author,
-               log=format_log(log_entry1.log, cfg),
+               log=format_log(request, log_entry1.log),
                size=log_entry1.size,
                ago=ago1,
                path=path_left,
@@ -3352,7 +3398,7 @@ def view_diff(request):
   fvi = get_file_view_info(request, path_right, rev2)
   right = _item(date=make_time_string(log_entry2.date, cfg),
                 author=log_entry2.author,
-                log=format_log(log_entry2.log, cfg),
+                log=format_log(request, log_entry2.log),
                 size=log_entry2.size,
                 ago=ago2,
                 path=path_right,
@@ -3573,7 +3619,7 @@ def download_tarball(request):
 
 
 def view_revision(request):
-  if request.roottype == "cvs":
+  if request.roottype != "svn":
     raise debug.ViewVCException("Revision view not supported for CVS "
                                 "repositories at this time.",
                                 "400 Bad Request")
@@ -3592,9 +3638,29 @@ def view_revision(request):
     return
 
   # Fetch the revision information.
-  date, author, msg, changes = request.repos.revinfo(rev)
+  date, author, msg, revprops, changes = request.repos.revinfo(rev)
   date_str = make_time_string(date, cfg)
 
+  # Fix up the revprops list (rather like get_itemprops()).
+  propnames = revprops.keys()
+  propnames.sort()
+  props = []
+  for name in propnames:
+    value = format_log(request, revprops[name])
+    undisplayable = ezt.boolean(0)
+    # skip non-utf8 property names
+    try:
+      unicode(name, 'utf8')
+    except:
+      continue
+    # note non-utf8 property values
+    try:
+      unicode(value, 'utf8')
+    except:
+      value = None
+      undisplayable = ezt.boolean(1)
+    props.append(_item(name=name, value=value, undisplayable=undisplayable))
+  
   # Sort the changes list by path.
   def changes_sort_by_path(a, b):
     return cmp(a.path_parts, b.path_parts)
@@ -3709,7 +3775,8 @@ def view_revision(request):
     'rev' : str(rev),
     'author' : author,
     'date' : date_str,
-    'log' : format_log(msg, cfg),
+    'log' : format_log(request, msg),
+    'properties' : props,
     'ago' : date is not None and html_time(request, date, 1) or None,
     'changes' : changes,
     'prev_href' : prev_rev_href,
@@ -3878,7 +3945,7 @@ def english_query(request):
     ret.append('on all branches ')
   comment = request.query_dict.get('comment', '')
   if comment:
-    ret.append('with comment <i>%s</i> ' % htmlify(comment))
+    ret.append('with comment <i>%s</i> ' % request.server.escape(comment))
   if who:
     ret.append('by <em>%s</em> ' % request.server.escape(who))
   date = request.query_dict.get('date', 'hours')
@@ -4066,8 +4133,8 @@ def build_commit(request, files, max_files, dir_strip, format):
     commit.log = None
     commit.short_log = None
   else:
-    commit.log = format_log(desc, cfg, 0, format != 'rss')
-    commit.short_log = format_log(desc, cfg, cfg.options.short_log_len,
+    commit.log = format_log(request, desc, 0, format != 'rss')
+    commit.short_log = format_log(request, desc, cfg.options.short_log_len,
                                   format != 'rss')
   commit.author = request.server.escape(author)
   commit.rss_date = make_rss_time_string(date, request.cfg)
@@ -4374,8 +4441,8 @@ def expand_root_parents(cfg):
     pos = string.rfind(pp, ':')
     if pos < 0:
       raise debug.ViewVCException(
-        "The path '%s' in 'root_parents' does not include a "
-        "repository type." % (pp))
+        'The path "%s" in "root_parents" does not include a '
+        'repository type.  Expected "cvs" or "svn".' % (pp))
 
     repo_type = string.strip(pp[pos+1:])
     pp = os.path.normpath(string.strip(pp[:pos]))
@@ -4390,8 +4457,9 @@ def expand_root_parents(cfg):
       cfg.general.svn_roots.update(roots)
     else:
       raise debug.ViewVCException(
-        "The path '%s' in 'root_parents' has an unrecognized "
-        "repository type." % (pp))
+        'The path "%s" in "root_parents" has an unrecognized '
+        'repository type ("%s").  Expected "cvs" or "svn".'
+        % (pp, repo_type))
 
 def find_root_in_parents(cfg, rootname, roottype):
   """Return the rootpath for configured ROOTNAME of ROOTTYPE."""

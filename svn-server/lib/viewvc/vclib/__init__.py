@@ -14,10 +14,7 @@
 such as CVS.
 """
 
-import os
-import popen
 import string
-import time
 import types
 
 
@@ -183,8 +180,10 @@ class Repository:
 
     rev is the revision of the item to return information about
     
-    Return value is a 4-tuple containing the date, author, log
-    message, and a list of ChangedPath items representing paths changed
+    Return value is a 5-tuple containing: the date, author, log
+    message, a list of ChangedPath items representing paths changed,
+    and a dictionary mapping property names to property values for
+    properties stored on an item.
 
     Raise vclib.UnsupportedFeature if the version control system
     doesn't support a global revision concept.
@@ -321,6 +320,9 @@ class NonTextualFileContents(Error):
 # ======================================================================
 # Implementation code used by multiple vclib modules
 
+import popen
+import os
+import time
 
 def _diff_args(type, options):
   """generate argument list to pass to diff or rcsdiff"""
@@ -366,57 +368,65 @@ class _diff_fp:
     if info1 and info2:
       args.extend(["-L", self._label(info1), "-L", self._label(info2)])
     args.extend([temp1, temp2])
+    #self.fp = popen.popen(diff_cmd, args, "r")
+    self.fp = self._get_diff_fp(diff_cmd, args)
+
+  def _get_diff_fp(self, diff_cmd, args):
+    ### Edge Customization: Try to deal with non-GNU 'diff' binaries
+    ### by falling back to difflib when possible.
 
     try:
-        # Solaris diff does not support -v and also doesn't work with viewvc
-        import subprocess
-        retcode = subprocess.call([diff_cmd, "-v"])
-        if retcode:
-            raise
-        self.fp = popen.popen(diff_cmd, args, "r")
+      # Solaris diff does not support -v and also doesn't work with viewvc
+      import subprocess
+      retcode = subprocess.call([diff_cmd, "-v"])
+      if retcode:
+        raise
+      return popen.popen(diff_cmd, args, "r")
     except:
-        import sys
+      # Assume this is a problem finding 'diff'
+      import sys
 
-        py_ver = sys.version_info[:2]
+      # For Python 2.3+, we can use the difflib
+      py_ver = sys.version_info[:2]
+      if py_ver[0] < 2 or (py_ver[0] == 2 and py_ver[1] < 3):
+        raise
 
-        # For Python 2.3+, we can use the difflib
-        if py_ver[0] < 2 or (py_ver[0] == 2 and py_ver[1] < 3):
-            raise
+      import difflib, StringIO
 
-        # Assume this is a problem finding 'diff'
-        import difflib, StringIO
+      file1 = open(self.temp1, "r")
+      file2 = open(self.temp2, "r")
 
-        self.fp = StringIO.StringIO()
-        file1 = open(self.temp1, "r")
-        file2 = open(self.temp2, "r")
+      if diff_opts.count("--side-by-side"):
+        import debug
+        raise debug.ViewVCException('GNU diff is required for side-by-side '
+                                    'option', '400 Bad Request')
+      elif diff_opts.count("-c"):
+        diff_lines = difflib.context_diff(file1.readlines(),
+                                          file2.readlines(), 
+                                          self._label(info1),
+                                          self._label(info2))
+      else:
+        num_lines = 3
+        if diff_opts.count("--unified=15"):
+          num_lines = 15
+        elif diff_opts.count("--unified=-1"):
+          num_lines = 1000000
+        diff_lines = difflib.unified_diff(file1.readlines(),
+                                          file2.readlines(), 
+                                          self._label(info1),
+                                          self._label(info2), 
+                                          n=num_lines)
 
-        if diff_opts.count("--side-by-side"):
-            import debug
-            raise debug.ViewVCException('GNU diff is required for side-by-side option',
-                                        '400 Bad Request')
-        elif diff_opts.count("-c"):
-            diff_lines = difflib.context_diff(file1.readlines(), file2.readlines(), 
-                                              self._label(info1), self._label(info2))
-        else:
-            num_lines = 3
-            if diff_opts.count("--unified=15"):
-                num_lines = 15
-            elif diff_opts.count("--unified=-1"):
-                num_lines = 1000000
+      file1.close()
+      file2.close()
 
-            diff_lines = difflib.unified_diff(file1.readlines(), file2.readlines(), 
-                                              self._label(info1), self._label(info2), 
-                                              n=num_lines)
-
-        file1.close()
-        file2.close()
-
-        for line in diff_lines:
-            self.fp.write(line)
-
-        self.fp.write("\n")
-        self.fp.seek(0, 0)
-
+      diff_fp = StringIO.StringIO()
+      for line in diff_lines:
+        diff_fp.write(line)
+      diff_fp.write("\n")
+      diff_fp.seek(0, 0)
+      return diff_fp
+  
   def read(self, bytes):
     return self.fp.read(bytes)
 
