@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2010 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -14,7 +14,7 @@
 #
 # -----------------------------------------------------------------------
 
-__version__ = '1.1.8'
+__version__ = '1.1.9'
 
 # this comes from our library; measure the startup time
 import debug
@@ -92,10 +92,6 @@ _sticky_vars = [
   'system',
   'root',
   ]
-
-# number of extra pages of information on either side of the current
-# page to fetch (see dir_pagesize/log_pagesize configuration option)
-EXTRA_PAGES = 3
 
 # for reading/writing between a couple descriptors
 CHUNK_SIZE = 8192
@@ -1663,6 +1659,21 @@ class MarkupPipeWrapper:
     if self.posttext:
       ctx.fp.write(self.posttext)
 
+_re_rewrite_escaped_url = re.compile('((http|https|ftp|file|svn|svn\+ssh)'
+                                     '(://[-a-zA-Z0-9%.~:_/]+)'
+                                     '((\?|\&amp;amp;|\&amp;|\&)'
+                                     '([-a-zA-Z0-9%.~:_]+)=([-a-zA-Z0-9%.~:_])+)*'
+                                     '(#([-a-zA-Z0-9%.~:_]+)?)?)')
+
+def markup_escaped_urls(s):
+  # Return a copy of S with all URL references -- which are expected
+  # to be already HTML-escaped -- wrapped in <a href=""></a>.
+  def _url_repl(match_obj):
+    url = match_obj.group(0)
+    unescaped_url = string.replace(url, "&amp;amp;", "&amp;")
+    return "<a href=\"%s\">%s</a>" % (unescaped_url, url)
+  return re.sub(_re_rewrite_escaped_url, _url_repl, s)
+
 def markup_stream_pygments(request, cfg, blame_data, fp, filename,
                            mime_type, encoding):
   # Determine if we should use Pygments to highlight our output.
@@ -1726,6 +1737,7 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
         def __getitem__(self, idx):
           item = self.blame_source.__getitem__(idx)
           item.text = string.expandtabs(item.text, self.tabsize)
+          item.text = markup_escaped_urls(item.text)
           return item
       return BlameSourceTabsizeWrapper(blame_source, cfg.options.tabsize)
     else:
@@ -1737,6 +1749,7 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
           break
         line_no = line_no + 1
         line = sapi.escape(string.expandtabs(line, cfg.options.tabsize))
+        line = markup_escaped_urls(line)
         item = vclib.Annotation(line, line_no, None, None, None, None)
         item.diff_href = None
         lines.append(item)
@@ -1754,6 +1767,7 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
       self.line_no = 0
     def write(self, buf):
       ### FIXME:  Don't bank on write() being called once per line
+      buf = markup_escaped_urls(buf)
       if self.has_blame_data:
         self.blame_data[self.line_no].text = buf
       else:
@@ -2038,9 +2052,16 @@ def view_roots(request):
       href = request.get_url(view_func=view_directory,
                              where='', pathtype=vclib.DIR,
                              params={'root': rootname}, escape=1)
+      lastmod = allroots[rootname][2]
       roots.append(_item(name=request.server.escape(rootname),
                          type=allroots[rootname][1],
                          path=allroots[rootname][0],
+                         author=lastmod and lastmod.author or None,
+                         ago=lastmod and lastmod.ago or None,
+                         date=lastmod and lastmod.date or None,
+                         log=lastmod and lastmod.log or None,
+                         short_log=lastmod and lastmod.short_log or None,
+                         rev=lastmod and lastmod.rev or None,
                          href=href))
 
   data = common_template_data(request)
@@ -2381,10 +2402,11 @@ def paging(data, key, pagestart, local_name, pagesize):
   # Slice
   return data[key][pagestart:pageend]
 
-def paging_sws(data, key, pagestart, local_name, pagesize, offset):
+def paging_sws(data, key, pagestart, local_name, pagesize,
+               extra_pages, offset):
   """Implement sliding window-style paging."""
   # Create the picklist
-  last_requested = pagestart + (EXTRA_PAGES * pagesize)
+  last_requested = pagestart + (extra_pages * pagesize)
   picklist = data['picklist'] = []
   has_more = ezt.boolean(0)
   for i in range(0, len(data[key]), pagesize):
@@ -2513,9 +2535,9 @@ def view_log(request):
   first = last = 0
   if cfg.options.log_pagesize:
     log_pagestart = int(request.query_dict.get('log_pagestart', 0))
-    first = log_pagestart - min(log_pagestart,
-                                (EXTRA_PAGES * cfg.options.log_pagesize))
-    last = log_pagestart + ((EXTRA_PAGES + 1) * cfg.options.log_pagesize) + 1
+    total = cfg.options.log_pagesextra * cfg.options.log_pagesize
+    first = log_pagestart - min(log_pagestart, total)
+    last = log_pagestart + (total + cfg.options.log_pagesize) + 1
   show_revs = request.repos.itemlog(request.path_parts, request.pathrev,
                                     sortby, first, last - first, options)
 
@@ -2776,7 +2798,8 @@ def view_log(request):
       request.get_form(params={'log_pagestart': None})
     data['log_pagestart'] = int(request.query_dict.get('log_pagestart',0))
     data['entries'] = paging_sws(data, 'entries', data['log_pagestart'],
-                                 'rev', cfg.options.log_pagesize, first)
+                                 'rev', cfg.options.log_pagesize,
+                                 cfg.options.log_pagesextra, first)
 
   generate_page(request, "log", data)
 
@@ -4415,11 +4438,26 @@ def list_roots(request):
   for root in cfg.general.svn_roots.keys():
     auth = setup_authorizer(cfg, request, request.username, root)
     try:
-      vclib.svn.SubversionRepository(root, cfg.general.svn_roots[root], auth,
-                                     cfg.utilities, cfg.options.svn_config_dir)
+      repos = vclib.svn.SubversionRepository(root, cfg.general.svn_roots[root],
+                                             auth, cfg.utilities,
+                                             cfg.options.svn_config_dir)
+      lastmod = None
+      if cfg.options.show_roots_lastmod:
+        try:
+          repos.open()
+          youngest_rev = repos.youngest
+          date, author, msg, revprops, changes = repos.revinfo(youngest_rev)
+          date_str = make_time_string(date, cfg)
+          ago = html_time(request, date)
+          log = format_log(request, msg)
+          short_log = format_log(request, msg, maxlen=cfg.options.short_log_len)
+          lastmod = _item(ago=ago, author=author, date=date_str, log=log,
+                          short_log=short_log, rev=str(youngest_rev))
+        except:
+          lastmod = None
     except vclib.ReposNotFound:
       continue
-    allroots[root] = [cfg.general.svn_roots[root], 'svn']
+    allroots[root] = [cfg.general.svn_roots[root], 'svn', lastmod]
 
   # Add the viewable CVS roots
   for root in cfg.general.cvs_roots.keys():
@@ -4429,7 +4467,7 @@ def list_roots(request):
                                cfg.utilities, cfg.options.use_rcsparse)
     except vclib.ReposNotFound:
       continue
-    allroots[root] = [cfg.general.cvs_roots[root], 'cvs']
+    allroots[root] = [cfg.general.cvs_roots[root], 'cvs', None]
     
   return allroots
 

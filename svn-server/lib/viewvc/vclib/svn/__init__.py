@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2008 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -15,6 +15,7 @@
 import os
 import os.path
 import re
+import urllib
 
 _re_url = re.compile('^(http|https|file|svn|svn\+[^:]+)://')
 
@@ -23,8 +24,20 @@ def canonicalize_rootpath(rootpath):
     import svn.core
     return svn.core.svn_path_canonicalize(rootpath)
   except:
+    if os.name == 'posix':
+      rootpath_lower = rootpath.lower()
+      if rootpath_lower in ['file://localhost',
+                            'file://localhost/',
+                            'file://',
+                            'file:///'
+                            ]:
+        return '/'
+      if rootpath_lower.startswith('file://localhost/'):
+        return os.path.normpath(urllib.unquote(rootpath[16:]))
+      elif rootpath_lower.startswith('file:///'):
+        return os.path.normpath(urllib.unquote(rootpath[7:]))
     if re.search(_re_url, rootpath):
-      return rootpath[-1] == '/' and rootpath[:-1] or rootpath
+      return rootpath.rstrip('/')
     return os.path.normpath(rootpath)
 
 

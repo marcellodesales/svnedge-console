@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2010 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -420,6 +420,7 @@ class Config:
     self.options.template_dir = "templates"
     self.options.docroot = None
     self.options.show_subdir_lastmod = 0
+    self.options.show_roots_lastmod = 0
     self.options.show_logs = 1
     self.options.show_log_in_markup = 1
     self.options.cross_copies = 1
@@ -433,6 +434,7 @@ class Config:
     self.options.use_re_search = 0
     self.options.dir_pagesize = 0
     self.options.log_pagesize = 0
+    self.options.log_pagesextra = 3
     self.options.limit_changes = 100
 
     self.templates.diff = None

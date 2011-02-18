@@ -470,6 +470,14 @@ docroot = __CSVN_VIEWVC_DOCROOT__
 ##
 #show_subdir_lastmod = 0
 
+## show_roots_lastmod: In the root listing view, show the most recent
+## modifications made to the root.  (Subversion roots only.)
+##
+## NOTE: Enabling this feature will significantly reduce the
+## performance of the root listing view.
+##
+#show_roots_lastmod = 0
+
 ## show_logs: Show the most recent log entry in directory listings.
 ##
 #show_logs = 1
@@ -546,6 +554,26 @@ use_localtime = 1
 ## the entire revision log.  Set to 0 to disable pagination.
 ##
 log_pagesize = 100
+
+## log_pagesextra: Maximum number of extra pages (based on
+## log_pagesize) of revision log data to fetch and present to the user
+## as additional options for display.  Revision log information
+## "beyond" this window is still accessible, but must be navigated to
+## in multiple steps.
+##
+## Example:
+## log_pagesize = 100
+## log_pagesextra = 3
+##
+## For a versioned file with 1000 revisions, the above settings would
+## present to the user the first 100 of those 1000 revisions, with
+## links to three additional pages (the 200-299th revisions, 300-399th
+## revisions, and 400-499th revisions) plus a link to the 500th
+## revision.  Following these links slides the display "window",
+## showing the requested set of revisions plus links to three
+## additional pages beyond those, and so on.
+##
+#log_pagesextra = 3
 
 ## limit_changes: Maximum number of changed paths shown per commit in
 ## the Subversion revision view and in query results. This is not a

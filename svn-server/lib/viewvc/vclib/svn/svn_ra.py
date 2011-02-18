@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2009 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -57,7 +57,7 @@ def client_log(url, start_rev, end_rev, log_limit, cross_copies,
     client.svn_client_log4([url], start_rev, start_rev, end_rev,
                            log_limit, 1, not cross_copies, 0, None,
                            cb_func, ctx)
-  except NameError:
+  except AttributeError:
     # Wrap old svn_log_message_receiver_t interface with a
     # svn_log_entry_t one.
     def cb_convert(paths, revision, author, date, message, pool):
@@ -203,6 +203,10 @@ class RemoteSubversionRepository(vclib.Repository):
     self.youngest = ra.svn_ra_get_latest_revnum(self.ra_session)
     self._dirent_cache = { }
     self._revinfo_cache = { }
+
+    # See if a universal read access determination can be made.
+    if self.auth and self.auth.check_universal_access(self.name) == 1:
+      self.auth = None
     
   def rootname(self):
     return self.name
