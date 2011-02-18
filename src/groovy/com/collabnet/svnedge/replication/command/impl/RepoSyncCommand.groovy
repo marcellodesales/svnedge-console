@@ -15,19 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.context.ApplicationContext
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server;
+import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
+import com.collabnet.svnedge.replication.command.LongRunningCommand
+import com.collabnet.svnedge.teamforge.CtfServer
+
 /**
- * This command uses svnsync to update the given repository 
+ * This command uses svnsync to update the given repository
+ * 
+ * @author John Mcnally (jmcnally@collab.net)
  */
-public class RepoSyncCommand extends AbstractReplicaCommand {
+public class RepoSyncCommand extends AbstractRepositoryCommand 
+        implements LongRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -53,7 +57,8 @@ public class RepoSyncCommand extends AbstractReplicaCommand {
         def password = securityService.decrypt(ctfServer.ctfPassword)
         def repo = Repository.findByName(repoName)
         def replRepo = ReplicatedRepository.findByRepo(repo)
-        execSvnSync(replRepo, System.currentTimeMillis(), username, password, syncRepoURI)
+        execSvnSync(replRepo, System.currentTimeMillis(), username, password, 
+            syncRepoURI)
     }
 
     def undo() {

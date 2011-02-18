@@ -132,7 +132,7 @@ class BootStrap {
         try {
             setupTeamForgeService.bootStrap(appHome)
             setupReplicaService.bootStrap()
-            replicaCommandExecutorService.bootStrap(ConfigUtil.dataDirPath())
+            replicaCommandExecutorService.bootStrap()
             replicaCommandSchedulerService.bootStrap()
 
         } catch (Exception e) {

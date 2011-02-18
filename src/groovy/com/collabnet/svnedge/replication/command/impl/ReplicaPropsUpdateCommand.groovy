@@ -15,21 +15,29 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.replication.command.impl
+
 
 import org.apache.log4j.Logger
 
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.replication.command.AbstractReplicaCommand 
+import com.collabnet.svnedge.replication.command.ShortRunningCommand 
+import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
+import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 
 /**
  * This command updates the state of the replica server, changing the name and
  * description of the replica server.
  * 
+ * @author John Mcnally (jmcnally@collab.net)
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
+public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand 
+        implements ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -48,13 +56,39 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand {
             throw new IllegalStateException("The command does not have any " +
                 "of the required parameters.")
         }
+
+        if (this.params.commandPollPeriod && 
+                this.params.commandPollPeriod.toInteger() < 1) {
+            throw new IllegalArgumentException("The fetch rate must be a " +
+                "positive integer")
+        }
+        if (this.params.commandConcurrencyLong && 
+                this.params.commandConcurrencyLong.toInteger() < 1) {
+            throw new IllegalArgumentException("The max number of " +
+                "long-running commands must be a positive integer")
+        }
+        if (this.params.commandConcurrencyShort && 
+                this.params.commandConcurrencyShort.toInteger() < 1) {
+            throw new IllegalArgumentException("The max number of " +
+                "short-running commands must be a positive integer")
+        }
     }
 
     def execute() {
+        log.debug("Acquiring the replica configuration instance...")
+
+        logExecution("EXECUTE-updateProps")
         updateProps()
+
+        logExecution("EXECUTE-updateFetchRate")
+        updateFetchRate()
+
+        logExecution("EXECUTE-updateExecutorPoolSizes")
+        updateExecutorPoolSizes()
     }
 
     def undo() {
-       log.error("Execute failed... Nothing to undo...")
+       log.debug("Execute failed... Nothing to undo...")
+       logExecution("UNDO-terminated")
     }
 }

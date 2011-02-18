@@ -87,6 +87,8 @@ svnedge {
         }
     }
 
+    logsDirPath = svn.dataDirPath + "/logs"
+
     svn.repositoriesParentPath = svn.dataDirPath + "/repositories"
     svn.confDirPath = svn.dataDirPath + "/conf"
     // in minutes
@@ -99,6 +101,7 @@ svnedge {
         password = "admin"
         port = 80
         systemId = "exsy1002"
+        replicaId = "replica1044"
     }
     
     replica {
@@ -204,6 +207,7 @@ environments {
                 }
             }
 
+            logsDirPath = svn.dataDirPath + "/logs"
             svn.repositoriesParentPath = svn.dataDirPath + "/repositories"
             svn.confDirPath = svn.dataDirPath + "/conf"
             // in minutes

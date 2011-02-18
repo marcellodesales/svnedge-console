@@ -15,24 +15,25 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.context.ApplicationContext
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ApprovalState;
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replication.ReplicaConfiguration;
+
+import com.collabnet.svnedge.replica.manager.ApprovalState
+import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
+import com.collabnet.svnedge.replication.command.ShortRunningCommand
 
 /**
  * This command updates the state of the replica server with the URL of the
  * Master repository after the Master has approved this server as a replica
  * 
+ * @author John Mcnally (jmcnally@collab.net)
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class ReplicaApproveCommand extends AbstractReplicaCommand {
+public class ReplicaApproveCommand extends AbstractReplicaCommand 
+        implements ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
@@ -45,7 +46,7 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand {
             throw new IllegalStateException("The replica is already approved " +
                 "with the id '${replica.systemId}'")
         }
-        
+
         // Verify if the necessary parameters exists.
         if (!this.params["scmUrl"]) {
             throw new IllegalStateException("The command does not have the " +
@@ -55,22 +56,33 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand {
             throw new IllegalStateException("The command does not have the " +
                 "required parameter 'masterId'.")
         }
+        logExecution("CONSTRAINTS-verified")
     }
 
     def execute() {
         log.debug("Acquiring the replica setup service...")
-        def replicaService = getService("setupReplicaService")
 
         def url = this.params["scmUrl"]
         def masterId = this.params["masterId"]
         log.debug("Updating replica with master URL: " + url + 
             " and masterId: " + masterId)
+
+        logExecution("EXECUTE-updateServerAfterApproval")
+        def replicaService = getService("setupReplicaService")
         replicaService.updateServerAfterApproval(url, masterId)
-        log.debug("Executing propUpdate command during approval")
+
+        logExecution("EXECUTE-updateProps")
         updateProps()
+
+        logExecution("EXECUTE-updateFetchRate")
+        updateFetchRate()
+
+        logExecution("EXECUTE-updateExecutorPoolSizes")
+        updateExecutorPoolSizes()
    }
 
    def undo() {
-       log.warn("Execute failed... Undoing the command (doesn't do anything)...")
+       log.debug("Execute failed... Nothing to undo...")
+       logExecution("UNDO-terminated")
     }
 }

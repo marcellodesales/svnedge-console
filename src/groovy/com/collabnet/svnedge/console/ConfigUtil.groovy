@@ -100,6 +100,12 @@ public final class ConfigUtil {
         return new File(appHome(), "data").absolutePath
     }
 
+    def static logsDirPath() {
+        return getConfig().svnedge.logsDirPath ? 
+            getConfig().logsDirPath : 
+            new File(dataDirPath(), "logs").absolutePath
+    }
+
     def static viewvcTemplateDir() {
         return getConfig().svnedge.svn.viewvcTemplatesPath ? 
             getConfig().svnedge.svn.viewvcTemplatesPath : 

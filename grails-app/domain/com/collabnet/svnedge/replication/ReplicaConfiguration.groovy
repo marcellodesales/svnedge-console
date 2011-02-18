@@ -37,10 +37,6 @@ public class ReplicaConfiguration {
      */
     String description
     /**
-     * The message for the admin TODO: NOT NECESSARY
-     */
-    String message
-    /**
      * the id assigned by CTF to this replica server
      */
     String systemId

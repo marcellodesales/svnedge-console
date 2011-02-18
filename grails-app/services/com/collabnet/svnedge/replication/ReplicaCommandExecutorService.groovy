@@ -17,24 +17,30 @@
  */
 package com.collabnet.svnedge.replication
 
-import java.io.File;
-import java.util.List;
+import grails.util.GrailsUtil
+
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
 
-import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.ConfigUtil;
-import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
-import com.collabnet.svnedge.replica.manager.RepoStatus
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
+import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
 import com.collabnet.svnedge.replication.command.CommandExecutionException
-import com.collabnet.svnedge.replication.command.CommandNotImplementedException
+import com.collabnet.svnedge.replication.command.LongRunningCommand
+import com.collabnet.svnedge.replication.command.ShortRunningCommand
+import com.collabnet.svnedge.replication.command.event.AppliedExecutorSemaphoresUpdateEvent
+import com.collabnet.svnedge.replication.command.event.CommandReadyForExecutionEvent
+import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
+import com.collabnet.svnedge.replication.command.event.LongRunningCommandQueuedEvent
+import com.collabnet.svnedge.replication.command.event.NoCommandsRunningUpdateSemaphoresEvent
+import com.collabnet.svnedge.replication.command.event.ShortRunningCommandQueuedEvent
+import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
+import com.collabnet.svnedge.replication.command.handler.CommandExecutorHandler
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
-import com.collabnet.svnedge.teamforge.CtfServer;
 
-import org.springframework.context.ApplicationContext
-import org.springframework.context.ApplicationContextAware
+import org.springframework.context.ApplicationListener
 
 /**
  * The ReplicaCommandExecutiorService is responsible for retrieving the
@@ -46,299 +52,275 @@ import org.springframework.context.ApplicationContextAware
  * @author Marcello de Sales (mdesales@collab.net)
  */
 public class ReplicaCommandExecutorService extends AbstractSvnEdgeService 
-        implements ApplicationContextAware {
+        implements ApplicationListener<ReplicaCommandsExecutionEvent> {
 
-    ApplicationContext applicationContext
+    static transactional = false
 
-    def commandLineService
     def ctfRemoteClientService
-    def operatingSystemService
-    def securityService
-    def svnRepoService
     def backgroundService
+    def bgThreadManager
+    def replicaCommandSchedulerService
 
-    /**
-     * The directory where the logs are located.
-     */
-    def cmdExecLogsDir
-    /**
-     * The thread pool semaphore that controls how many permitted commands
-     * can be executed at the same time.
-     */
-    Semaphore reposSemaphore
     /**
      * The default name of the replica server category.
      */
     private static final String REPLICA_COMMAND_CATEGORY = "replicaServer"
+    /**
+     * The thread pool semaphore that controls the number of permitted
+     * long-running commands can be executed at the same time.
+     */
+    Semaphore longRunningSemaphore
+    /**
+     * The thread pool semaphore that controls the number of permitted
+     * short-running commands can be executed at the same time.
+     */
+    Semaphore shortRunningSemaphore
+    /**
+     * The blocking queue of long-running scheduled commands
+     */
+    BlockingQueue<LongRunningCommand> longRunningScheduledCommands
+    /**
+     * The blocking queue of short-running scheduled commands
+     */
+    BlockingQueue<ShortRunningCommand> shortRunningScheduledCommands
 
-    // TODO: The number of repositories being updated in parallel. This should
-    // be retrieved from the ReplicaConfiguration bean.
-    def maxRepositoriesBeingUpdated = 2;
-
-    def bootStrap = { dataDir ->
-        cmdExecLogsDir = new File(dataDir + "/logs")
-        log.debug("Commands execution will be logged to " + cmdExecLogsDir)
-
+    def bootStrap = {
         if (Server.getServer().mode == ServerMode.REPLICA) {
             new FetchReplicaCommandsJob().start()
         }
-        setupExecutorPool(maxRepositoriesBeingUpdated)
-    }
+        // initialize the queues
+        longRunningScheduledCommands = new LinkedBlockingQueue<LongRunningCommand>()
+        shortRunningScheduledCommands = new LinkedBlockingQueue<ShortRunningCommand>()
+        // initialize the semaphores
+        updateLongRunningSemaphore(2, 0)
+        updateShortRunningSemaphore(10, 0)
 
-    /**
-     * @return The current replica configuration.
-     */
-    private ReplicaConfiguration getCurrentReplica() {
-        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
-        if (!replica) {
-            def msg = getMessage("filter.probihited.mode.replica", locale)
-            throw new IllegalStateException(msg)
+        // initialize the long-running command executor handler.
+        def longRunningHandler = 
+            new CommandExecutorHandler<LongRunningCommand>(
+                LongRunningCommand.class, this, longRunningScheduledCommands)
+        if (GrailsUtil.environment != "test") {
+            // execute the runnable executor using the background service.
+            bgThreadManager.queueRunnable(longRunningHandler)
         }
-        return replica
+
+        // initialize the short-running command executor handler.
+        def shortRunningHandler = 
+            new CommandExecutorHandler<ShortRunningCommand>(
+                ShortRunningCommand.class, this, shortRunningScheduledCommands)
+        if (GrailsUtil.environment != "test") {
+            // execute the runnable executor using the background service.
+            bgThreadManager.queueRunnable(shortRunningHandler)
+        }
     }
 
     /**
      * Setups up a new value for the total number of permits available in the
-     * Semaphore that controls the concurrent number of repositories updating.
-     * @param newMaxRepositoriesBeingUpdated the new max number. 
+     * Semaphore that controls the concurrent number commands executing.
+     * @param semaphore is a given semaphore
+     * @param newPermits the new number of permits
+     * @param oldPermits the old number of permits
      */
-    def setupExecutorPool(int newMaxRepositoriesBeingUpdated) {
-        if (!reposSemaphore) {
-            reposSemaphore = new Semaphore(newMaxRepositoriesBeingUpdated)
+    def updateLongRunningSemaphore(newPermits, oldPermits) {
+        if (!longRunningSemaphore) {
+            longRunningSemaphore = new Semaphore(newPermits)
+
         } else {
-            if (newMaxRepositoriesBeingUpdated == maxRepositoriesBeingUpdated) {
+            if (newPermits < 1) {
+                // permits must be positive integers
                 return
             }
-            def availablePermits = reposSemaphore.availablePermits()
-            def usedPermits = newMaxRepositoriesBeingUpdated - availablePermits
-            reposSemaphore = new Semaphore(newMaxRepositoriesBeingUpdated)
-            if (newMaxRepositoriesBeingUpdated > maxRepositoriesBeingUpdated) {
-                reposSemaphore.reducePermits(usedPermits)
-
-            } else if (availablePermits >= newMaxRepositoriesBeingUpdated) {
-                reposSemaphore.reducePermits(newMaxRepositoriesBeingUpdated)
-            } // do not reduce in case there are available permits
-        }
-    }
-
-    /**
-     * Retrieves and executes the commands executions from the replica 
-     * identified by the masterSystemId, managed by the given TeamForge URL.
-     * @param ctfUrl is the CTF URL
-     * @param userSessionId is a valid session ID
-     * @param masterSystemId is the master external system.
-     * @param locale is the local
-     */
-    def retrieveAndExecuteReplicaCommands(ctfUrl, userSessionId, masterSystemId,
-            locale) {
-
-        ReplicaConfiguration replica = getCurrentReplica()
-
-        //receive the commands from ctf
-        def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
-            ctfUrl, userSessionId, masterSystemId, locale)
-
-        // schedule each of them for execution
-        this.scheduleCommands(queuedCommands, ctfUrl, userSessionId,
-            masterSystemId, locale)
-    }
-
-    /**
-     * @return boolean if the local cache contains the given username and 
-     * password as a key. 
-     * @throws RemoteAccessException if the communication fails with the remote
-     * Master host for any reason.
-     */
-    def retrieveAndExecuteReplicaCommands(){
-
-        def locale = Locale.getDefault()
-        ReplicaConfiguration replica = getCurrentReplica()
-
-        def ctfServer = CtfServer.getServer()
-        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
-        def userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
-            ctfServer.ctfUsername, ctfPassword, locale)
-
-        //receive the commands from ctf
-        def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
-            ctfServer.baseUrl, userSessionId, replica.systemId, locale)
-
-        // schedule each of them for execution
-        this.scheduleCommands(queuedCommands, ctfServer.baseUrl, userSessionId,
-            replica.systemId, locale)
-    }
-
-    /**
-     * @return a new Map of categorized commands by repositoryPath or 
-     * REPLICA_COMMAND_CATEGORY.
-     */
-    def makeCommandsCategory(queuedCommands) {
-        // map grouping the tasks by granularity (repoName or replica server)
-        return queuedCommands.groupBy{
-            it.repoName == null ? REPLICA_COMMAND_CATEGORY : it.repoName
-        }
-    }
-
-    /**
-     * Schedules the commands to be executed in parallel. There is a semaphore
-     * for the max of repository groups that can be executed in parallel.
-     * Replica server commands are serially executed in parallel as they
-     * arrive.
-     */
-    def scheduleCommands(queuedCommands, ctfServerbaseUrl, userSessionId,
-                    replicaId, locale) {
-
-        if (queuedCommands.size() == 0) {
-            log.debug("No commands to be scheduled for execution...")
-            return
-        }
-
-        log.debug("Categorizing the following commands: " + queuedCommands)
-        // map grouping the tasks by granularity (repoName or replica server)
-        def cmdCategoryQueues = makeCommandsCategory(queuedCommands)
-
-        log.debug("Scheduling the following categorized commands: " +
-            queuedCommands)
-
-        // execute all cmd categories in parallel (replica, repo1, repo2, ...)
-        cmdCategoryQueues.each { commandCategory, commandsList ->
-            if (!commandCategory.equals(REPLICA_COMMAND_CATEGORY)) {
-                // try to get a permission from the semaphore to execute
-                // repository commands in parallel.
-                reposSemaphore.acquire()
+            if (newPermits == oldPermits) {
+                // no changes to the number of permits
+                return
             }
-            // execute the command using the background service.
-            backgroundService.execute("Commands Queue for $commandCategory", {
-                executeCommands(commandCategory, commandsList, ctfServerbaseUrl,
-                    userSessionId, replicaId, locale)
+            synchronized(longRunningSemaphore) {
+                def availablePermits = longRunningSemaphore.availablePermits()
+                def usedPermits = oldPermits - availablePermits
+                longRunningSemaphore = new Semaphore(newPermits)
+                if (newPermits > oldPermits) {
+                    longRunningSemaphore.reducePermits(usedPermits)
+
+                } else {  // newpermits < oldPermits
+                    if (usedPermits > newPermits) {
+                        longRunningSemaphore.drainPermits()
+
+                    } else {
+                        longRunningSemaphore.reducePermits(usedPermits)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Setups up a new value for the total number of permits available in the
+     * Semaphore that controls the concurrent number commands executing.
+     * @param semaphore is a given semaphore
+     * @param newPermits the new number of permits
+     * @param oldPermits the old number of permits
+     */
+    def updateShortRunningSemaphore(newPermits, oldPermits) {
+        if (!shortRunningSemaphore) {
+            shortRunningSemaphore = new Semaphore(newPermits)
+
+        } else {
+            if (newPermits < 1) {
+                // permits must be positive integers
+                return
+            }
+            if (newPermits == oldPermits) {
+                // no changes to the number of permits
+                return
+            }
+            synchronized(shortRunningSemaphore) {
+                def availablePermits = shortRunningSemaphore.availablePermits()
+                def usedPermits = oldPermits - availablePermits
+                shortRunningSemaphore = new Semaphore(newPermits)
+                if (newPermits > oldPermits) {
+                    shortRunningSemaphore.reducePermits(usedPermits)
+
+                } else {  // newpermits < oldPermits
+                    if (usedPermits > newPermits) {
+                        // Drain all permits there would not be any permit
+                        shortRunningSemaphore.drainPermits()
+
+                    } else {
+                        shortRunningSemaphore.reducePermits(usedPermits)
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * The event handler of all {@link ReplicaCommandsExecutionEvent} to 
+     * process the different events.
+     * @param executionEvent is the instance of an execution event.
+     */
+    void onApplicationEvent(ReplicaCommandsExecutionEvent executionEvent) {
+        switch(executionEvent) {
+            case LongRunningCommandQueuedEvent:
+                def queuedCommand = executionEvent.queuedCommand
+                log.debug "LongRunningCommandQueuedEvent: $queuedCommand"
+                longRunningScheduledCommands.offer(queuedCommand)
+                break
+
+            case ShortRunningCommandQueuedEvent:
+                def queuedCommand = executionEvent.queuedCommand
+                log.debug "ShortRunningCommandQueuedEvent: $queuedCommand"
+                shortRunningScheduledCommands.offer(queuedCommand)
+                break
+
+            case CommandReadyForExecutionEvent:
+                def commandToExecute = executionEvent.commandToExecute
+                log.debug "CommandReadyForExecutionEvent: $commandToExecute"
+                // Execute the command in parallel
+                backgroundService.execute("Executing ${commandToExecute}", {
+                    executeCommand(commandToExecute)
                 })
+                break
+
+            case CommandTerminatedEvent:
+                def terminatedCommand = executionEvent.terminatedCommand
+                log.debug "CommandTerminatedEvent: ${terminatedCommand}"
+                switch(terminatedCommand) {
+                    case LongRunningCommand:
+                        longRunningSemaphore.release()
+                        break
+
+                    case ShortRunningCommand:
+                        shortRunningSemaphore.release()
+                        break
+                }
+                // Report the results in parallel
+                backgroundService.execute("Command Report ${terminatedCommand}",
+                    { reportTerminatedCommandResults(terminatedCommand) })
+                break
+
+            case NoCommandsRunningUpdateSemaphoresEvent:
+                log.debug("NoCommandsRunningEvent: updating the " +
+                    "semaphores and counting down the latch")
+                log.debug("MaxNumberCommandsRunningUpdatedEvent: updating " +
+                    "the executor semaphores")
+                def maxChangesEvent = executionEvent.maxNumberCommandsRunningUpdatedEvent
+                if (maxChangesEvent.newMaxLongRunningCmds != -1) {
+                    updateLongRunningSemaphore(
+                        maxChangesEvent.newMaxLongRunningCmds,
+                        maxChangesEvent.oldMaxLongRunningCmds)
+                }
+                if (maxChangesEvent.newMaxShortRunningCmds != -1) {
+                    updateShortRunningSemaphore(
+                        maxChangesEvent.newMaxShortRunningCmds,
+                        maxChangesEvent.oldMaxShortRunningCmds)
+                }
+                publishEvent(new AppliedExecutorSemaphoresUpdateEvent(this))
+                break
         }
     }
 
     /**
-     * Execute the queue of commands serially for a given category.
-     * @param commandCategory is the repositoryPath or the String defined on
-     * REPLICA_COMMAND_CATEGORY.
-     * @param queuedCommands is the queue of commands to be executed.
-     * @param ctfUrl
-     * @param userSessionId
-     * @param masterSystemId
-     * @param locale
+     * Executes the command instance after acquiring the related permit from
+     * the related semaphore.
+     * @param commandInstance is the command instance.
      */
-    def executeCommands(commandCategory, queuedCommands, ctfUrl, userSessionId,
-            masterSystemId, locale) {
+    def executeCommand(commandInstance) {
+        def selectedSemaphore = null
+        switch(commandInstance) {
+            case LongRunningCommand:
+                selectedSemaphore = longRunningSemaphore
+                break
 
-        log.debug("Executing ${queuedCommands.size()} commands" +
-            " for $commandCategory")
-        //execute each command, having them being updated with status
-        for(command in queuedCommands) {
-            def commandWithResult = processCommandRequest(command)
-
-            try {
-                //upload the commands results back to ctf
-                ctfRemoteClientService.uploadCommandResult(ctfUrl,
-                    userSessionId, masterSystemId, commandWithResult.id,
-                    commandWithResult.succeeded, locale)
-                log.debug("Command successfully acknowledged: " + command)
-
-            } catch (Exception remoteError) {
-                log.error("Error while acknowledging the command: " + command, 
-                    remoteError)
-                //TODO: Add the error to the error list to guarantee delivery.
-            }
+            case ShortRunningCommand:
+                selectedSemaphore = shortRunningSemaphore
+                break
         }
-        if (!commandCategory.equals(REPLICA_COMMAND_CATEGORY)) {
-            // release the permit of the repository category semaphore
-            reposSemaphore.release()
-        }
+        def numPermits = selectedSemaphore.availablePermits()
+        log.debug "Number of semaphore's permits: $numPermits. Trying " +
+            "to acquire..."
+        selectedSemaphore.acquire()
+
+        log.debug "Permit acquired... Executing the command lifecycle..."
+        commandLifecycleExecutor(commandInstance)
     }
 
     /**
-     * @param command is a map instance with the following properties:
-     * <li>commands['id'] = the identification of the command
-     * <li>commands['code'] = the code of the command, which is necessary to 
-     * load a command class called "CodeCommand".
-     * <li>commands['params'] = a list of parameters, each of them with a 
-     * a name property (commands['params'].name) and the list of values as
-     * commands['params'].values.
-     * 
-     * @return the updated value of the command with the following properties:
-     * 
-     * <li>command['succeeded'] = the status of the command, which is a boolean
-     * value that determines if the command executed successfully or not.
-     * <li>command['exception'] = the exception that happened during the
-     * execution of the command, if any.
-     * 
+     * Closure used to execute a command. When the execution is finished, 
+     * the event {@link CommandTerminatedEvent} is fired.
+     * @param commandInstance an instance of {@link AbstractReplicaCommand}
      */
-    def processCommandRequest(command) {
-        def commandPackage = "com.collabnet.svnedge.replication.command"
-
-        def className = command['code'].capitalize() + "Command"
-
-        def classObject = null
+    def commandLifecycleExecutor(commandExec) {
         try {
-            logReplicaCommandExecution("LOAD", command, null)
-            classObject = getClass().getClassLoader().loadClass(
-                    "$commandPackage.$className")
-
-        } catch (ClassNotFoundException clne) {
-            command['exception'] = 
-                new CommandNotImplementedException(clne, className)
-            command['succeeded'] = false
-            logReplicaCommandExecution("LOAD-FAILED", command, clne)
-            return command
-        }
-        log.debug("Instantiating the class for the command " + command)
-        def commandInstance = classObject.newInstance();
-        log.debug("Class " + commandInstance)
-
-        commandInstance.init(command['params'], applicationContext)
-        log.debug("Initialized the parameters " + command['params'])
-        try {
-            logReplicaCommandExecution("RUN", command, null)
-            commandInstance.run()
-            log.debug("Command successfully run: " + command)
-            logReplicaCommandExecution("RUN-SUCCESSED", command, null)
+            AbstractReplicaCommand.logExecution("RUN", commandExec)
+            commandExec.run()
+            log.debug("Command successfully run: " + commandExec)
+            AbstractReplicaCommand.logExecution("RUN-SUCCESSED", commandExec)
 
         } catch (CommandExecutionException ceex) {
-            command['exception'] = ceex
-            log.debug(ceex)
-            log.error("The command failed: " + command)
-            logReplicaCommandExecution("RUN-FAILED", command, ceex)
+            log.error("The command failed", ceex)
+            AbstractReplicaCommand.logExecution("RUN-FAILED", commandExec, ceex)
         }
-        command['succeeded'] = commandInstance.succeeded
-        return command
+        publishEvent(new CommandTerminatedEvent(this, commandExec))
     }
 
     /**
-     * Logs the execution of a command into the file 
-     * "data/logs/replica_cmds_YYYY_MM_DD.log".
-     * @param executionStep is a TOKEN of the execution step
-     * @param command is the instance of a replica command execution.
-     * @param exception is an optional execution thrown.
+     * Reports the termination of a command back to the CTF Replica Manager
+     * @param terminatedCommand is the terminated command Instance.
      */
-    def logReplicaCommandExecution(executionStep, command, exception) {
-        def now = new Date()
-        //creates the file for the current day
-        def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
-            ".log"
+    def reportTerminatedCommandResults(terminatedCommand) {
+        def executionContext = terminatedCommand.context
+        try {
+            //upload the commands results back to ctf
+            ctfRemoteClientService.uploadCommandResult(
+                executionContext.ctfBaseUrl, executionContext.userSessionId,
+                executionContext.replicaSystemId, terminatedCommand.id,
+                terminatedCommand.succeeded, executionContext.locale)
+            log.debug("Result successfully acknowledged: " + terminatedCommand)
 
-        new File(cmdExecLogsDir, logName).withWriterAppend("UTF-8") {
-
-            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', now)
-
-            def logEntry = timeToken + " " + executionStep + "-" + command.id +
-                " " + command
-            it.write(logEntry + "\n")
-
-            if (exception) {
-                def sw = new StringWriter();
-                def pw = new PrintWriter(sw, true);
-                exception.printStackTrace(pw);
-                pw.flush();
-                sw.flush();
-                it.write(sw.toString() + "\n")
-            }
+        } catch (Exception remoteError) {
+            log.error("Error while acknowledging the command: " +
+                 "$terminatedCommand", remoteError)
+            //TODO: Guarantee of delivery missing.
         }
     }
 }

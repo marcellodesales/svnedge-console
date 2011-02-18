@@ -15,16 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.replication.command.impl
 
-import com.collabnet.svnedge.replica.manager.ApprovalState
-import com.collabnet.svnedge.replication.ReplicaConfiguration
 import org.apache.log4j.Logger
+
+import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
+import com.collabnet.svnedge.replication.command.ShortRunningCommand
 
 /**
  * This command reverts the state of the SvnEdge instance to standalone mode
+ * 
+ * @author Geoffrey
  */
-public class ReplicaUnregisterCommand extends AbstractReplicaCommand {
+public class ReplicaUnregisterCommand extends AbstractReplicaCommand 
+        implements ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 

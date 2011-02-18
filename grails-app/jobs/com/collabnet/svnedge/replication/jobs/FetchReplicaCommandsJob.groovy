@@ -17,22 +17,35 @@
  */
 package com.collabnet.svnedge.replication.jobs
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+import com.collabnet.svnedge.console.ConfigUtil;
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.services.JobsAdminService
 import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.replication.ReplicaConfiguration;
+import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.replication.command.CommandsExecutionContext
+import com.collabnet.svnedge.teamforge.CtfServer;
 
 /**
- * Fetch the replica commands from the Master server.
+ * Fetch the replica commands from the Replica manager server.
  * 
  * @author Marcello de Sales (mdesales@collab.net)
- *
  */
-class FetchReplicaCommandsJob {
+class FetchReplicaCommandsJob implements ApplicationContextAware {
 
-    def replicaCommandExecutorService
+    // avoid re-entrance in case jobs are delayed. This will prevent multiple
+    // calls to the Master.
+    def concurrent = false
+
+    def backgroundService
+    def securityService
+    def ctfRemoteClientService
+    def replicaCommandSchedulerService
 
     def static final JOB_NAME = 
         "com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob"
@@ -45,14 +58,7 @@ class FetchReplicaCommandsJob {
 
     def static final INITIAL_DELAY_SEC = 2
 
-    /**
-     * If the job has been started.
-     */
-    static boolean isStarted = false
-
-    // avoid re-entrance in case jobs are delayed. This will prevent multiple
-    // calls to the Master.
-    def concurrent = false
+    def config = ConfigurationHolder.config
 
     static triggers = { 
         // See artf4934 static method doesn't compile correctly on 64 bit boxes
@@ -61,28 +67,35 @@ class FetchReplicaCommandsJob {
         //repeatInterval:  5 * 60000
     }
 
+    /**
+     * If the job has been started.
+     */
+    static boolean isStarted = false
+    /**
+     * Taking advantage of the grails injection to write the 
+     * setApplicationContext method from the attribute.
+     */
+    ApplicationContext applicationContext
+    /**
+     * The locale of the replica command execution.
+     */
+    CommandsExecutionContext executionContext
+
     /** 
      * Schedule with the current command pool rate from the 
      * ReplicaConfiguration.
      */
     void start() {
         if (!isStarted) {
-            def triggerInstance = makeTrigger()
+            def replica = ReplicaConfiguration.getCurrentConfig()
+            def triggerInstance = makeTrigger(replica.commandPollRate)
             schedule(triggerInstance)
             isStarted = true
             log.info("Started FetchReplicaCommandsJob")
+
         } else {
             log.debug("FetchReplicaCommandsJob is already started")
         }
-    }
-
-    /** 
-     * Create an infinitely repeating simple trigger with the current
-     * replica server commandPoolRate with a delay of 3 seconds
-     */
-    def Trigger makeTrigger() {
-        def replica = ReplicaConfiguration.getCurrentConfig()
-        return makeTrigger(replica.commandPollRate)
     }
 
     /** 
@@ -105,12 +118,57 @@ class FetchReplicaCommandsJob {
      */
     def execute() {
         def server = Server.getServer()
-        if (server.mode == ServerMode.REPLICA) {
-            log.info("Checking for replication commands")
-            replicaCommandExecutorService.retrieveAndExecuteReplicaCommands()
-
-        } else {
+        if (server.mode != ServerMode.REPLICA) {
             log.debug("Skipping fetch of replication commands")
+            return
+        }
+        log.debug("Checking for replica commands...")
+
+        def locale = Locale.getDefault()
+        def ctfServer = CtfServer.getServer()
+        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
+
+        def userSessionId
+        try {
+            userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
+                ctfServer.ctfUsername, ctfPassword, locale)
+
+        } catch (Exception cantConnectCtfMaster) {
+            log.error "Can't retrieve queued commands: The CTF server " +
+                "${ctfServer.baseUrl} is unreachable...", cantConnectCtfMaster
+            return
+        }
+
+        def executionContext = new CommandsExecutionContext()
+        executionContext.appContext = applicationContext
+        executionContext.userSessionId = userSessionId
+        executionContext.ctfBaseUrl = ctfServer.baseUrl
+        executionContext.locale = locale
+        executionContext.logsDir = new File(config.svnedge.logsDirPath + "")
+        def replica = ReplicaConfiguration.getCurrentConfig()
+        executionContext.replicaSystemId = replica.systemId
+
+        log.debug("Command Execution Context: $executionContext")
+        try {
+            //receive the commands from ctf
+            def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
+                executionContext.ctfBaseUrl, executionContext.userSessionId,
+                executionContext.replicaSystemId, executionContext.locale)
+
+            if (queuedCommands && queuedCommands.size() > 0) {
+                log.debug("There are ${queuedCommands.size()} commands queued...")
+                // execute the command using the background service.
+                replicaCommandSchedulerService.offer(queuedCommands,
+                        executionContext)
+
+            } else {
+                log.debug("No queued commands for this replica...")
+            }
+
+        } catch (Exception replicaManagerError) {
+            log.error("There was a problem while trying to fetch queued " + 
+                "commands", replicaManagerError)
         }
     }
+
 }

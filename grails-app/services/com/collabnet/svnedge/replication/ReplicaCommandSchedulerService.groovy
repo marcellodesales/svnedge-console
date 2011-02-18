@@ -1,44 +1,77 @@
+/*
+ * CollabNet Subversion Edge
+ * Copyright (C) 2011, CollabNet Inc. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.collabnet.svnedge.replication
 
+import grails.util.GrailsUtil
 
-import java.util.LinkedList
 import java.util.Collections
+
+import java.util.concurrent.BlockingQueue
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.SynchronousQueue
 
 import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationListener
 
+import static com.collabnet.svnedge.master.service.ctf.CtfRemoteClientService.COMMAND_ID_PREFIX
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
+import com.collabnet.svnedge.replication.command.event.AppliedExecutorSemaphoresUpdateEvent
+import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
+import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
+import com.collabnet.svnedge.replication.command.event.NoCommandsRunningUpdateSemaphoresEvent
+import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
+import com.collabnet.svnedge.replication.command.handler.CommandsSchedulerHandler
 
 /**
-* The ReplicaCommandSchedulerService provides a scheduler responsible for:
-* <ul><li>Maintaining the list of received tasks (replica commands) to be 
-* executed;
-* <li>Generating a Priority Queue for each of the categories of commands: 
-* commands for each repository or for the replica server.
-* <li>Selecting which command from the queue can be executed due to the type of
-* the command and the availability.</li><ul>
-*
-* Each category can only have one command being executed at the same time and,
-* therefore, a mutex map maintains such "flag" for each of the categories.
-*
-* @author Marcello de Sales (mdesales@collab.net)
-*/
-class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
+ * The ReplicaCommandSchedulerService provides a scheduler responsible for:
+ * <ul><li>Maintaining a blocking queue of received tasks (replica commands) 
+ * to be executed;
+ * <li>Generating a Priority Queue for each of the group of commands: 
+ * commands for each repository or for the replica server.
+ * <li>Selecting which command from the queue can be executed based on the type
+ * of the command and the capacity of the executor.</li><ul>
+ *
+ * Each group can only have one command being executed at the same time and,
+ * therefore, a mutex map maintains such "flag" for each category.
+ *
+ * @author Marcello de Sales (mdesales@collab.net)
+ */
+class ReplicaCommandSchedulerService extends AbstractSvnEdgeService 
+        implements ApplicationContextAware, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
+    def bgThreadManager
+
+    ApplicationContext applicationContext
     /**
      * The command category for the replica server.
      */
     private static final String REPLICA_COMMAND_CATEGORY = "replicaServer"
     /**
-     * The prefix of the command ids.
+     * To avoid spring events to be fired more than once.
      */
-    private static final String COMMAND_ID_PREFIX = "cmdexec"
+    static transactional = false
     /**
      * This is the list of commands received from the master.
      * [cmd[id:"cmd1001", code:"addRepo"], ...]
      */
-    LinkedList<Map> queuedCommands
+    BlockingQueue<Map<String, String>> queuedCommands
     /**
      * The execution mutex is a map [category, commandID]
      */
@@ -47,21 +80,123 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      * The command ID index to speed up the offer method.
      */
     Set<String> commandIdIndex
+    /**
+     * The scheduler executor synchronizer
+     */
+    BlockingQueue<Boolean> schedulerSynchronizer
+    /**
+     * Binary latch used to update the instance semaphore once the number of
+     * permits have been updated.
+     */
+    CountDownLatch updatedSemaphoresGate
+    /**
+     * The event triggered with the new instances of the semaphores.
+     */
+    MaxNumberCommandsRunningUpdatedEvent semaphoreUpdatedEvent
 
     /**
      * Bootstraps the service
      */
     def bootStrap = {
+        log.info("Bootstrapping the replica command scheduler")
         cleanCommands()
+        schedulerSynchronizer = new SynchronousQueue<Boolean>()
+        if (GrailsUtil.environment != "test") {
+            // execute the command using the background service.
+            bgThreadManager.queueRunnable(new CommandsSchedulerHandler(this, 
+                queuedCommands, schedulerSynchronizer))
+        }
     }
 
     /**
      * Initializes all the data structures for the queued commands.
      */
     void cleanCommands() {
-        queuedCommands = Collections.synchronizedList(new LinkedList<Map>())
-        executionMutex = Collections.synchronizedMap(new LinkedHashMap<String, String>())
-        commandIdIndex = Collections.synchronizedSet(new LinkedHashSet<String>())
+        queuedCommands = new LinkedBlockingQueue<Map<String, String>>()
+        executionMutex = Collections.synchronizedMap(
+            new LinkedHashMap<String, String>())
+        commandIdIndex = Collections.synchronizedSet(
+            new LinkedHashSet<String>())
+    }
+
+    /**
+     * Offer new commands to the current queue.
+     * @param remoteCommandsMaps the set of commands received from the remote
+     * master.
+     * @param executionContext is the execution context with all the information
+     * related to the communication with the Replica manager (TeamForge server).
+     */
+    def offer(remoteCommandsMaps, executionContext) {
+        if (!remoteCommandsMaps || remoteCommandsMaps == []) {
+            return
+        }
+        log.debug "New commands offered: $remoteCommandsMaps"
+        log.debug "Commands Execution Context: $executionContext"
+
+        def previousSize = queuedCommands.size()
+        for (commandMap in remoteCommandsMaps) {
+            if (!commandIdIndex.contains(commandMap.id)) {
+                try {
+                    commandMap["context"] = executionContext
+                    log.debug "Queueing new command $commandMap"
+                    queuedCommands.offer(commandMap)
+                    commandIdIndex << commandMap.id
+
+                } catch (Exception invalidCommand) {
+                    log.error("The remote command $commandMap is invalid.",
+                        invalidCommand)
+                }
+            }
+        }
+        // semaphores updating in the executor service from previous offer...
+        // waiting until the semaphores are completely changed...
+        // See the AppliedExecutorSemaphoresUpdateEvent handler
+        if (updatedSemaphoresGate) {
+            log.debug("Permits updated... Waiting for the updated " +
+                "semaphore...")
+            updatedSemaphoresGate.await()
+            semaphoresWereUpdated()
+        }
+        // synchronize with the scheduler as new commands were offered.
+        schedulerSynchronizer.offer(new Boolean(true))
+    }
+
+    /**
+     * Setting up the event that captures the number of permits for the
+     * semaphores.
+     * @param semaphoresUpdated is an instance of the event
+     * MaxNumberCommandsRunningUpdatedEvent with the changed values.
+     */
+    def setSemaphoresUpdatedEvent(semaphoresUpdated) {
+        log.debug("MaxNumberCommandsRunningUpdatedEvent: Closing " +
+            "the gate (count-down latch) until semaphores are updated.")
+        semaphoreUpdatedEvent = semaphoresUpdated
+        updatedSemaphoresGate = new CountDownLatch(1)
+    }
+
+    /**
+     * @return if the semaphore's permits have been changed through the command
+     * that changed the max number of long-running and short-running commands.
+     */
+    def hasSemaphoresUpdated() {
+        return semaphoreUpdatedEvent != null
+    }
+
+    /**
+     * @return the instance of the MaxNumberCommandsRunningUpdatedEvent holding
+     * the old and new values of the permits for the semaphores.
+     */
+    def getSemaphoresUpdatedEvent() {
+        return semaphoreUpdatedEvent
+    }
+
+    /**
+     * Removing the references to the updated semaphore gate and the
+     * semaphore updated event.
+     */
+    def semaphoresWereUpdated() {
+        updatedSemaphoresGate = null
+        semaphoreUpdatedEvent = null
     }
 
     /**
@@ -85,7 +220,6 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      */
     def synchronized void scheduleCommandForExecution(category, command) {
         addCommandToCategoryMutex(category, command.id)
-        removeQueuedCommand(command.id)
     }
 
     /**
@@ -114,30 +248,6 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
             throw new IllegalArgumentException("The category must be provided")
         }
         return executionMutex[category] != null
-    }
-
-    /**
-     * Removes the given command ID from the queued commands list
-     * @param queuedCommandId is the ID of the command to be removed.
-     */
-    def synchronized void removeQueuedCommand(queuedCommandId) {
-        if (!queuedCommandId) {
-            throw new IllegalArgumentException("The queue command ID must " +
-                "be provided.")
-        }
-        // removes from the queued commands
-        synchronized (queuedCommands) {
-            def foundAt = -1
-            for (int i = 0; i < queuedCommands.size(); i++) {
-                if (queuedCommands.get(i).id == queuedCommandId) {
-                    foundAt = i
-                    break
-                }
-            }
-            if (foundAt != -1) {
-                queuedCommands.remove(foundAt)
-            }
-        }
     }
 
     /**
@@ -173,14 +283,15 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      * REPLICA_COMMAND_CATEGORY.
      */
     def getCommandCategory(cmd) {
-        return cmd.repoName == "null" ? REPLICA_COMMAND_CATEGORY : cmd.repoName
+        return !cmd.repoName ? REPLICA_COMMAND_CATEGORY : cmd.repoName
     }
 
     /**
      * @param category the repository name.
      * @param command the command object.
-     * @return if the given command is the next to be executed. That is, if the
-     * given command is the first command to be executed given the command ID.
+     * @return if the given command is the next to be executed for the given
+     * category. That is, if no other command in the given category is being
+     * executed.
      */
     def synchronized isCommandNextForCategory(category, command) {
         return getNextCommandFromCategory(category).id == command.id
@@ -192,11 +303,20 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
      */
     def synchronized getCategorizedCommandQueues() {
         // map grouping the tasks by granularity (repoName or replica server)
-        synchronized(queuedCommands) {
-            return queuedCommands.groupBy{ cmd ->
-                getCommandCategory(cmd)
+        return queuedCommands.groupBy{ cmd -> getCommandCategory(cmd) }
+    }
+
+    /**
+     * @return an instance of Comparator that compares attribute "id" from 
+     * the elements of a list/queue of maps.
+     */
+    def makeQueuedCommandsIdComparator() {
+        return [
+            compare: {a,b-> 
+                (a.id.replace(COMMAND_ID_PREFIX,"") as Integer) -
+                    (b.id.replace(COMMAND_ID_PREFIX,"") as Integer)
             }
-        }
+          ] as Comparator
     }
 
     /**
@@ -209,60 +329,50 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService {
             throw new IllegalArgumentException("The category must be provided.")
         }
         // map grouping the tasks by granularity (repoName or replica server)
-        synchronized(queuedCommands) {
-            def categorizedQueuedCommands = getCategorizedCommandQueues()
-            // compares the value of the keys "id" from the list of maps
-            // removing the prefix.
-            def idComparator= [
-                compare: {a,b-> 
-                    (a.id.replace(COMMAND_ID_PREFIX,"") as Integer) -
-                    (b.id.replace(COMMAND_ID_PREFIX,"") as Integer)
-                }
-              ] as Comparator
-            if (!categorizedQueuedCommands[category]) {
-                throw new IllegalArgumentException("The category $category " +
-                    "does not exist")
-            }
-            return categorizedQueuedCommands[category].sort(idComparator)[0]
+        def categorizedQueuedCommands = getCategorizedCommandQueues()
+        // compares the value of the keys "id" from the list of maps
+        // removing the prefix.
+        def idComparator = makeQueuedCommandsIdComparator()
+        if (!categorizedQueuedCommands[category]) {
+            throw new IllegalArgumentException("The category $category " +
+                "does not exist")
         }
+        // returns the head of the category queue
+        return categorizedQueuedCommands[category].sort(idComparator)[0]
     }
 
     /**
-     * Offer new commands to the current queue.
-     * @param newCommands the set of commands received from the remote master.
+     * Handles the spring events related to the ApplicationListener.
+     * @param executionEvent is the instance of an execution event.
      */
-    def synchronized offer(newCommands) {
-        if (!newCommands || newCommands == []) {
-            return
-        }
-        synchronized(queuedCommands) {
-            for (command in newCommands) {
-                if (!commandIdIndex.contains(command.id)) {
-                    queuedCommands << command
-                    commandIdIndex << command.id
+    void onApplicationEvent(ReplicaCommandsExecutionEvent executionEvent) {
+        switch(executionEvent) {
+            case CommandTerminatedEvent:
+                def terminatedCommand = executionEvent.terminatedCommand
+                log.debug("CommandTerminatedEvent: $terminatedCommand")
+                removeTerminatedCommand(terminatedCommand.id)
+                synchronized(executionMutex) {
+                    if (executionMutex.size() == 0) {
+                        // after executing all commands, verify if there were
+                        // changes in the semaphores after handing the event 
+                        if (hasSemaphoresUpdated()) {
+                            log.debug "The updated semaphore gate is active. " +
+                                "Publish NoCommandsRunningUpdateSemaphoresEvent"
+                            def ev = getSemaphoresUpdatedEvent()
+                            publishEvent(
+                                new NoCommandsRunningUpdateSemaphoresEvent(this,
+                                    ev))
+                        }
+                    }
                 }
-            }
+                break
+
+            case AppliedExecutorSemaphoresUpdateEvent:
+                log.debug("AppliedExecutorSemaphoresUpdateEvent: semaphores " +
+                    "were updated... Open the gate...")
+                updatedSemaphoresGate.countDown()
+                semaphoresWereUpdated()
+                break
         }
     }
-
-   /**
-    * The next command from the list for a given index.
-    * @param commandIndex is the index in the list.
-    * @return the command in the given position in the list. If the
-    * commandIndex is null, the first element of the list is returned.
-    */
-   def synchronized scheduleNextCommand() {
-       synchronized(queuedCommands) {
-           for(int i=0; i < getQueuedCommandsSize(); i++) {
-               def command = queuedCommands.get(i)
-               def category = getCommandCategory(command)
-               if (isCommandNextForCategory(category, command) &&
-                       !isThereCommandRunning(category)) {
-                   scheduleCommandForExecution(category, command)
-                   return command
-               }
-           }
-       }
-       return null
-   }
 }

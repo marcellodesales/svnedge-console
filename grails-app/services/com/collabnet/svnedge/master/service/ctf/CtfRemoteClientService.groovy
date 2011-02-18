@@ -77,6 +77,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     private static String ROLE_USER = "ROLE_USER"
     private static String ROLE_ADMIN = "ROLE_ADMIN"
+    /**
+     * The prefix of the command ids.
+     */
+    public static final String COMMAND_ID_PREFIX = "cmdexec"
 
     def securityService
     def networkingService
@@ -98,6 +102,15 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     def getReplicaApprovalState() {
         ApprovalState.APPROVED.getName()
+    }
+
+    /**
+     * @return the URL to the CTF server based on the configuration.
+     */
+    private makeCtfBaseUrl(useSsl, hostname, port) {
+        def ctfProto = useSsl ? "https://" : "http://"
+        def ctfPort = port == 80 ? "" : ":" + port
+        return ctfProto + hostname + ctfPort
     }
 
     public ICollabNetSoap cnSoap(ctfBaseUrl) {
@@ -865,14 +878,24 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                         }
                         cmdParams << param
                     }
+                    queuedCmd.repoName = cmd.repositoryName
                     // TODO: the repository name should be defined in the params
                     // TODO: Remove the repositoryName property when removed
-                    cmdParams['repoName'] = cmd.repositoryName
+                    if (cmd.repositoryName) {
+                        cmdParams['repoName'] = cmd.repositoryName
+                    }
                     queuedCmd.params = cmdParams
                     cmdsList << queuedCmd
                 }
             }
-            return cmdsList
+            def idComparator = [
+                   compare: {a,b->
+                       (a.id.replace(COMMAND_ID_PREFIX,"") as Integer) -
+                           (b.id.replace(COMMAND_ID_PREFIX,"") as Integer)
+                   }
+                 ] as Comparator
+            // sort the received commands by ID before returning.
+            return cmdsList.sort(idComparator)
 
         } catch (LoginFault e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],

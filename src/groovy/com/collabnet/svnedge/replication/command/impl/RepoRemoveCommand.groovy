@@ -15,19 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
-
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replica.manager.RepoStatus
+package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
 
+import com.collabnet.svnedge.console.Repository 
+import com.collabnet.svnedge.replica.manager.ReplicatedRepository 
+import com.collabnet.svnedge.replica.manager.RepoStatus 
+import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
+import com.collabnet.svnedge.replication.command.ShortRunningCommand
+
 /**
- * This action removes the repository from the filesystem, sets the
+ * This action removes the repository from the file-system, sets the
  * repository status to REMOVED, and disables sync for the repository.
+ * 
+ * @author John Mcnally (jmcnally@collab.net)
  */
-public class RepoRemoveCommand extends AbstractReplicaCommand {
+public class RepoRemoveCommand extends AbstractRepositoryCommand 
+        implements ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 

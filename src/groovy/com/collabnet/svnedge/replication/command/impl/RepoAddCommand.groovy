@@ -15,20 +15,23 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.context.ApplicationContext
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+
+import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
+import com.collabnet.svnedge.replication.command.LongRunningCommand
+
+
 /**
  * This command adds a repository into the system, by using the svn service.
  * 
+ * @author John Mcnally (jmcnally@collab.net)
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class RepoAddCommand extends AbstractReplicaCommand {
+public class RepoAddCommand extends AbstractRepositoryCommand 
+        implements LongRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 

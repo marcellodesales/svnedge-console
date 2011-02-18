@@ -26,6 +26,12 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replica.manager.RepoStatus
+import com.collabnet.svnedge.replication.command.AbstractCommand;
+import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
+import com.collabnet.svnedge.replication.command.impl.ReplicaPropsUpdateCommand;
+import com.collabnet.svnedge.replication.command.impl.RepoAddCommand;
+import com.collabnet.svnedge.replication.command.impl.RepoRemoveCommand;
+import com.collabnet.svnedge.replication.command.impl.RepoSyncCommand;
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 import com.collabnet.svnedge.teamforge.CtfServer
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
@@ -46,7 +52,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     def EXSY_ID = "exsy9876"
     def rConf
     File repoParentDir
-        
+    CommandsExecutionContext executionContext
+
     public ReplicaCommandsExecutorIntegrationTests() {
         this.rConf = ReplicaConfiguration.getCurrentConfig()
         if (!this.rConf) {
@@ -71,17 +78,20 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         Server server = Server.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.save()
-        
+
         // delete the repo directory for the repo we are adding.
         def repoFileDir = new File(repoParentDir, REPO_NAME)
         repoFileDir.deleteDir()
-        
-        CtfServer ctfServer = CtfServer.getServer()    
+
+        CtfServer ctfServer = CtfServer.getServer()
         ctfServer.baseUrl = makeCtfBaseUrl()
         ctfServer.mySystemId = EXSY_ID
         ctfServer.ctfUsername = "admin"
         ctfServer.ctfPassword = "n3TEQWKEjpY="
         ctfServer.save()
+
+        executionContext = new CommandsExecutionContext()
+        executionContext.appContext = grailsApplication.mainContext
     }
 
     private def makeCtfBaseUrl() {
@@ -93,40 +103,32 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     }
 
     /**
-     * Test processing a bad command.
-     */
-    void testProcessBadCommand() {
-        def badCommand = [code: 'Notacommand', id: 0, params: []]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            badCommand)
-        assertNotNull("Processing a bad command should not return null.", 
-                      result)
-        assertNotNull("Processing a bad command should return an exception.", 
-                      result['exception'])
-        assertFalse("Processing a bad command should return a false succeeded.",
-                    result['succeeded'])
-    }
-
-    /**
      * Test processing a good add command.
      */
     void testProcessAddCommand() {
+        def classLoader = getClass().getClassLoader()
+
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
-        def command = [code: 'repoAdd', id: 0, params: cmdParams]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            command)
-        assertNotNull("Processing a command should not return null.", 
-                      result)
-        if (result['exception']) {
-            println result['exception']
+        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(getClass().getClassLoader(),
+            commandMap)
+        assertTrue "The command instance is incorrect", 
+            command instanceof RepoAddCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertNotNull("Processing a command should not return null.", command)
+        if (command.executionException) {
+            println command.executionException
         }
         assertNull("Processing a command should not return an exception.\n" + 
-                   result['exception'], result['exception'])
+                   command.executionException, command.executionException)
         assertTrue("Processing a command should return a true succeeded.",
-                   result['succeeded'])
+                   command.succeeded)
 
         // verify the database records
         def repo = ReplicatedRepository.findByRepo(Repository.findByName(
@@ -143,14 +145,20 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Test processing a good remove command.
      */
     void testProcessRemoveCommand() {
+        def classLoader = getClass().getClassLoader()
+
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def command = [code: 'repoAdd', id: 0, params: cmdParams]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoAddCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
 
         // verify that the database records exist
         def repo = ReplicatedRepository.findByRepo(Repository.findByName(
@@ -163,16 +171,23 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // then remove
-        command = [code: 'repoRemove', id: 0, params: cmdParams]
-        result = replicaCommandExecutorService.processCommandRequest(command)
-        assertNotNull("Processing a command should not return null.", result)
-        if (result['exception']) {
-            println result['exception']
+        commandMap = [code: 'repoRemove', id: 0, params: cmdParams, 
+            context: executionContext]
+
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoRemoveCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertNotNull("Processing a command should not return null.", command)
+        if (command.executionException) {
+            println command.executionException
         }
         assertNull("Processing a command should not return an exception.\n" + 
-                   result['exception'], result['exception'])
+                   command.executionException, command.executionException)
         assertTrue("Processing a command should return a true succeeded.",
-                   result['succeeded'])
+                   command.succeeded)
 
         // verify that the database record was removed, but on removed state
         repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
@@ -189,6 +204,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Test processing the replica props update command.
      */
     void testProcessReplicaPropsUpdateCommand() {
+        def classLoader = getClass().getClassLoader()
+
         def newName = "Updated Replica Name"
         def newDescription = "Description Updated"
         def cmdParams = [:]
@@ -196,17 +213,22 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["description"] = newDescription
 
         // add first
-        def command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        def commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof ReplicaPropsUpdateCommand
 
-        if (result['exception']) {
-            println result['exception']
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertNotNull("Processing a command should not return null.", command)
+        if (command.executionException) {
+            println command.executionException
         }
         assertNull("Processing a command should not return an exception.\n" + 
-                   result['exception'], result['exception'])
+                   command.executionException, command.executionException)
         assertTrue("Processing a command should return a true succeeded.",
-                   result['succeeded'])
+                   command.succeeded)
 
         this.rConf = ReplicaConfiguration.getCurrentConfig()
         assertEquals("The name should have been changed with the command " +
@@ -233,16 +255,22 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["commandConcurrencyShort"] = "15"
 
         // add first
-        command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
-        result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+            context: executionContext]
 
-        if (result['exception']) {
-            println result['exception']
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof ReplicaPropsUpdateCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertNotNull("Processing a command should not return null.", command)
+        if (command.executionException) {
+            println command.executionException
             fail("The command should be updated with the command poll params")
         }
         assertTrue("Processing a command should return a true succeeded.",
-                   result['succeeded'])
+                   command.succeeded)
 
         this.rConf = ReplicaConfiguration.getCurrentConfig()
         assertTrue("The poll rate should have been updated " +
@@ -264,46 +292,74 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             updatedFetchDetails
     }
 
-    /**
+   /**
     * Test processing the replica props update command.
     */
-   void testProcessReplicaPropsUpdateCommandIncorrectParams() {
-       def cmdParams = [:]
+    void testProcessReplicaPropsUpdateCommandIncorrectParams() {
+        def classLoader = getClass().getClassLoader()
 
-       // add first
-       def command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
-       def result = replicaCommandExecutorService.processCommandRequest(
-           command)
+        def cmdParams = [:]
 
-       assertNotNull("Processing the props update with emtpy values on name " +
-           "and description should throw an exception", result['exception'])
-       println result['exception']
-       assertFalse("Processing wrong command should return succeeded=false.",
-                  result['succeeded'])
+        // add first
+        def commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof ReplicaPropsUpdateCommand
 
-       cmdParams["commandPollPeriod"] = "-1"
-       cmdParams["commandConcurrencyLong"] = "-50"
-       cmdParams["commandConcurrencyShort"] = "-11"
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertFalse("Processing empty params should return succeeded=false.",
+            command.succeeded)
+        assertNotNull("Processing the props update with emtpy values on name " +
+            "and description should throw an exception",
+            command.executionException)
+        println command.executionException
+
+        cmdParams = [:]
+        cmdParams["commandPollPeriod"] = "-1"
+        cmdParams["commandConcurrencyLong"] = "-50"
+        cmdParams["commandConcurrencyShort"] = "-11"
 
        // update the properties
-       command = [code: 'replicaPropsUpdate', id: 0, params: cmdParams]
+       commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+           context: executionContext]
 
-       assertNotNull("Processing the props update with wrong parameters for " +
-           " the polling params should throw exception.", result['exception'])
-       println result['exception']
-       assertFalse("Processing wrong command should return succeeded=false.",
-                  result['succeeded'])
-   }
+       command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof ReplicaPropsUpdateCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertFalse("Processing wrong command should return succeeded=false.",
+            command.succeeded)
+        assertNotNull("Processing the props update with negative values " +
+            "should throw an exception", command.executionException)
+        println command.executionException
+    }
 
     void testAddRemoveReAddRepoOnDatabase() {
+        def classLoader = getClass().getClassLoader()
+
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def command = [code: 'repoAdd', id: 0, params: cmdParams]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoAddCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertTrue("Processing a command should return a true succeeded.",
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
+            fail("The command repoAdd should have worked.")
+        }
 
         // verify that the database records exist
         def repo = ReplicatedRepository.findByRepo(Repository.findByName(
@@ -316,16 +372,20 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // then remove
-        command = [code: 'repoRemove', id: 0, params: cmdParams]
-        result = replicaCommandExecutorService.processCommandRequest(command)
-        assertNotNull("Processing a command should not return null.", result)
-        if (result['exception']) {
-            println result['exception']
-        }
-        assertNull("Processing a command should not return an exception.\n" +
-                   result['exception'], result['exception'])
+        commandMap = [code: 'repoRemove', id: 0, params: cmdParams, 
+            context: executionContext]
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoRemoveCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
         assertTrue("Processing a command should return a true succeeded.",
-                   result['succeeded'])
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
+            fail("The command should be updated with the command poll params")
+        }
 
         // verify that the database record was removed, but on removed state
         repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
@@ -338,25 +398,47 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // try to re-add the same repository
-        command = [code: 'repoAdd', id: 0, params: cmdParams]
-        result = replicaCommandExecutorService.processCommandRequest(command)
-        if (result['exception']) {
-            println result['exception']
+        commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+            context: executionContext]
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoAddCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertTrue("Processing a command should return a true succeeded.",
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
             fail("Should be able to re-add a removed repository.")
         }
+
         repo = ReplicatedRepository.findByRepo(Repository.findByName(REPO_NAME))
         assertTrue("The repository should be enabled.", repo.getEnabled())
     }
 
     void testSyncReplicatedRepository() {
+        def classLoader = getClass().getClassLoader()
+
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def command = [code: 'repoAdd', id: 0, params: cmdParams]
-        def result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoAddCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertTrue("Processing a command should return a true succeeded.",
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
+            fail("Should be able to add a repository for sync.")
+        }
 
         def repo = ReplicatedRepository.findByRepo(Repository.findByName(
             REPO_NAME))
@@ -409,9 +491,20 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // execute svn sync
-        command = [code: 'repoSync', id: 0, params: cmdParams]
-        result = replicaCommandExecutorService.processCommandRequest(
-            command)
+        commandMap = [code: 'repoSync', id: 0, params: cmdParams,
+            context: executionContext]
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof RepoSyncCommand
+
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertTrue("Processing a command should return a true succeeded.",
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
+            fail("Should be able to sync a command.")
+        }
 
         boolean fileExists = false
         for (int i = 0; i < 30 && !fileExists; i++) {

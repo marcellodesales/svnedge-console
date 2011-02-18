@@ -26,6 +26,7 @@ import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
+import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.Repository
@@ -110,7 +111,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         // rc.svnMasterUrl is now provided by approval command 
         rc.name = replicaInfo.name
         rc.description = replicaInfo.description
-        rc.message = replicaInfo.message
         rc.approvalState = ApprovalState.PENDING
         rc.systemId = systemId
 
@@ -145,7 +145,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         serverConfService.writeConfigFiles()
         setupTeamForgeService.restartServer()
         authenticationManager.providers = [ctfAuthenticationProvider]
-        
+
         log.info("starting FetchReplicaCommandsJob")
         new FetchReplicaCommandsJob().start()
         log.info("Resuming replica jobs")

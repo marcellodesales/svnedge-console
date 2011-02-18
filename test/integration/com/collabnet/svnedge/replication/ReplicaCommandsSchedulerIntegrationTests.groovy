@@ -21,6 +21,7 @@ package com.collabnet.svnedge.replication
 import com.collabnet.svnedge.replication.ReplicaCommandSchedulerService;
 
 import grails.test.*
+import static com.collabnet.svnedge.master.service.ctf.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
 
@@ -30,27 +31,38 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
 
     def ReplicaCommandsSchedulerIntegrationTests() {
         remotecmdexecs << [id:'cmdexec1001', repoName:'repo1', code:'repoSync']
-        remotecmdexecs << [id:'cmdexec1009', repoName:'null', code:'replicaPause', 
+        remotecmdexecs << [id:'cmdexec1009', repoName:null, code:'replicaPause', 
             params:[until:'2011-01-22']]
         remotecmdexecs << [id:'cmdexec1002', repoName:'repo1', code:'repoUpdateProp']
         remotecmdexecs << [id:'cmdexec1006', repoName:'repo2', code:'repoUpdateProp']
-        remotecmdexecs << [id:'cmdexec1004', repoName:'null', code:'replicaUpdateProp'
+        remotecmdexecs << [id:'cmdexec1004', repoName:null, code:'replicaUpdateProp'
             , params:[name:'Replica Brisbane']]
-        remotecmdexecs << [id:'cmdexec1000', repoName:'null', code:'replicaApprove', 
+        remotecmdexecs << [id:'cmdexec1000', repoName:null, code:'replicaApprove', 
             params:[name:'replica title', desc:'super replica']]
         remotecmdexecs << [id:'cmdexec1007', repoName:'repo3', code:'repoSync']
-        remotecmdexecs << [id:'cmdexec1008', repoName:'null', code:'replicaUpdateProp'
+        remotecmdexecs << [id:'cmdexec1008', repoName:null, code:'replicaUpdateProp'
             , params:[maxReplicacmdexecs:3, maxRepositorycmdexecs: 10]]
         remotecmdexecs << [id:'cmdexec1005', repoName:'repo2', code:'repoSync']
         remotecmdexecs << [id:'cmdexec1003', repoName:'repo3', code:'repoSync']
+        sortRemoteCommands(remotecmdexecs)
     }
-    
+
     protected void setUp() {
         super.setUp()
     }
 
     protected void tearDown() {
         super.tearDown()
+    }
+
+    def sortRemoteCommands(commands) {
+        def idComparator = [
+        compare: {a,b->
+            (a.id.replace(COMMAND_ID_PREFIX,"") as Integer) -
+                (b.id.replace(COMMAND_ID_PREFIX,"") as Integer)
+        }
+        ] as Comparator
+        commands.sort(idComparator)
     }
 
     void testInitialState() {
@@ -61,15 +73,15 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testOffer() {
-        replicaCommandSchedulerService.offer(remotecmdexecs)
+        replicaCommandSchedulerService.offer(remotecmdexecs, null)
         assertEquals "The size is incorrect", 10,
             replicaCommandSchedulerService.getQueuedCommandsSize()
         assertEquals "The size is incorrect", 0,
             replicaCommandSchedulerService.getExecutingCommandsSize()
 
         def categories = replicaCommandSchedulerService.getCategorizedCommandQueues().keySet()
-        assertTrue categories.containsAll(
-            ["replicaServer", "repo1", "repo2", "repo3"])
+        assertTrue categories.containsAll(["replicaServer", "repo1", "repo2", 
+            "repo3"])
 
         def cat = "replicaServer"
         def cmd = replicaCommandSchedulerService.getNextCommandFromCategory(cat)
@@ -100,194 +112,28 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
             replicaCommandSchedulerService.isThereCommandRunning(cat)
     }
 
-    void testSchedulingFirstCommandsAllCategory() {
-        replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs)
-        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-
-        assertEquals "The size is incorrect", 9,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The size is incorrect", 1,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-        assertEquals "The next command should be the first one", "cmdexec1001",
-            schledCmd.id
-        assertEquals "The next command category is repo1", "repo1",
-            schledCmd.repoName
-
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        assertEquals "The size is incorrect", 8,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The size is incorrect", 2,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-        assertEquals "The next command should be the second one", "cmdexec1000",
-            schledCmd.id
-        assertEquals "The next command category is replica server", "null",
-            schledCmd.repoName
-
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        assertEquals "The size is incorrect", 7,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The size is incorrect", 3,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-        assertEquals "The next command should be the second one", "cmdexec1005",
-            schledCmd.id
-        assertEquals "The next command category is repo1", "repo2",
-            schledCmd.repoName
-
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        assertEquals "The size is incorrect", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The size is incorrect", 4,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-        assertEquals "The next command should be the second one", "cmdexec1003",
-            schledCmd.id
-        assertEquals "The next command category is repo1", "repo3",
-            schledCmd.repoName
-    }
-
-    void testExecuteAllCommands() {
-        replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs)
-        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        def executingCommands = []
-        while (schledCmd) {
-            executingCommands << schledCmd
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
+    def scheduleNextCommand() {
+        if (remotecmdexecs.size() == 0) {
+            return null
         }
-        println "Executing commands: $executingCommands"
-        // first step executing 4 commands for the 4 categories
-        assertEquals "The queued commands must be empty", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 4,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
+        def iterator = remotecmdexecs.iterator()
+        def nextCommand = iterator.next()
+        assertNotNull "The next command must be not null", nextCommand
 
-        // terminating the execution of 4 commands
-        executingCommands.reverse().each { command ->
-            println(command)
-            replicaCommandSchedulerService.removeTerminatedCommand(command.id)
-        }
-        println "Terminated commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 0,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
+        def category = replicaCommandSchedulerService.getCommandCategory(
+            nextCommand)
+        assertNotNull "The category should not be null", category
 
-        executingCommands = []
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        while (schledCmd) {
-            executingCommands << schledCmd
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        }
-        println "Executing commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 2,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 4,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        executingCommands.reverse().each { command ->
-            println(command)
-            replicaCommandSchedulerService.removeTerminatedCommand(command.id)
-        }
-        println "Terminated commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 2,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 0,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        executingCommands = []
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        while (schledCmd) {
-            executingCommands << schledCmd
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        }
-        // since 2 replica commands can't be executing at the same time
-        println "Executing commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 1,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 1,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        executingCommands.reverse().each { command ->
-            println(command)
-            replicaCommandSchedulerService.removeTerminatedCommand(command.id)
-        }
-        println "Terminated commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 1,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 0,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-            
-        executingCommands = []
-        schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        while (schledCmd) {
-            executingCommands << schledCmd
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        }
-        // the last command to be executing 
-        println "Executing commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 0,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 1,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        executingCommands.reverse().each { command ->
-            println(command)
-            replicaCommandSchedulerService.removeTerminatedCommand(command.id)
-        }
-        println "Terminated commands: $executingCommands"
-        assertEquals "The queued commands must be empty", 0,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 0,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-    }
-
-    void testOfferExistingCommands() {
-        // commands may be re-sent from the master in case there is no ack
-        replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs)
-        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        def executingCommands = []
-        while (schledCmd) {
-            executingCommands << schledCmd
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        }
-        println "Executing commands: $executingCommands"
-        // first step executing 4 commands for the 4 categories
-        assertEquals "The queued commands must be empty", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 4,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        // repeated commands can't be offered until they are terminated.
-        replicaCommandSchedulerService.offer(remotecmdexecs)
-        assertEquals "The queued commands must be empty", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 4,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        // terminating the execution of 2 command
-        replicaCommandSchedulerService.removeTerminatedCommand(
-            executingCommands[0].id)
-        replicaCommandSchedulerService.removeTerminatedCommand(
-            executingCommands[2].id)
-        println "Terminating commands: $executingCommands[0] and " +
-            "$executingCommands[2]"
-        assertEquals "The queued commands must be empty", 6,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 2,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-
-        // Only terminated commands are offered again. 2 out of 10 are re-added.
-        replicaCommandSchedulerService.offer(remotecmdexecs)
-        assertEquals "The queued commands must be empty", 8,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-        assertEquals "The executing commands must be empty", 2,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
+        replicaCommandSchedulerService.scheduleCommandForExecution(category, 
+            nextCommand)
+        // remove the command (as the scheduler handler)
+        iterator.remove()
+        return nextCommand
     }
 
     void testOfferBadValues() {
         replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer([])
+        replicaCommandSchedulerService.offer([], null)
         assertEquals "Offering no commands should not change the size of " +
             "queued commands", 0,
             replicaCommandSchedulerService.getQueuedCommandsSize()
@@ -295,7 +141,7 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
             "executing commands", 0, 
             replicaCommandSchedulerService.getExecutingCommandsSize()
 
-        replicaCommandSchedulerService.offer(null)
+        replicaCommandSchedulerService.offer(null, null)
         assertEquals "Offering null should not change the size of " +
             "queued commands", 0,
             replicaCommandSchedulerService.getQueuedCommandsSize()
@@ -344,81 +190,9 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
         }
     }
 
-    void testRemoveQueuedCommandsNonExistingOnes() {
-        replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
-        assertEquals "Offering 3 commands should have changed the size of " +
-            "queued commands", 3,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-
-        try {
-            replicaCommandSchedulerService.removeQueuedCommand(null)
-            fail("Removing empty queued commands should throw an exception")
-
-        } catch (Exception e) {
-            assertEquals "Removing a null value should not have changed " +
-                "the size of queued commands", 3,
-                replicaCommandSchedulerService.getQueuedCommandsSize()
-        }
-
-        try {
-            replicaCommandSchedulerService.removeQueuedCommand("")
-            fail("Removing empty queued commands should throw an exception")
-
-        } catch (Exception e) {
-            assertEquals "Removing an empty value should not have changed " +
-                "the size of queued commands", 3,
-                replicaCommandSchedulerService.getQueuedCommandsSize()
-        }
-
-        replicaCommandSchedulerService.removeQueuedCommand("NonExisting")
-        assertEquals "Removing an empty value should not have changed " +
-            "the size of queued commands", 3,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-    }
-
-    void testRemoveTerminatedCommandsWithBadValues() {
-        replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
-        assertEquals "Offering 3 commands should have changed the size of " +
-            "queued commands", 3,
-            replicaCommandSchedulerService.getQueuedCommandsSize()
-
-        // schedule all the 3 different commands
-        def schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        while (schledCmd) {
-            schledCmd = replicaCommandSchedulerService.scheduleNextCommand()
-        }
-
-        try {
-            replicaCommandSchedulerService.removeTerminatedCommand(null)
-            fail("Removing empty executing commands should throw an exception")
-
-        } catch (Exception e) {
-            assertEquals "Removing a null value should not have changed " +
-                "the size of executing commands", 3,
-                replicaCommandSchedulerService.getExecutingCommandsSize()
-        }
-
-        try {
-            replicaCommandSchedulerService.removeTerminatedCommand("")
-            fail("Removing empty executing commands should throw an exception")
-
-        } catch (Exception e) {
-            assertEquals "Removing an empty value should not have changed " +
-                "the size of executing commands", 3,
-                replicaCommandSchedulerService.getExecutingCommandsSize()
-        }
-
-        replicaCommandSchedulerService.removeTerminatedCommand("NonExisting")
-        assertEquals "Removing an empty value should not have changed " +
-            "the size of executing commands", 3,
-            replicaCommandSchedulerService.getExecutingCommandsSize()
-    }
-
     void testGetCategoriesWithBadValues() {
         replicaCommandSchedulerService.cleanCommands()
-        replicaCommandSchedulerService.offer(remotecmdexecs[2..4])
+        replicaCommandSchedulerService.offer(remotecmdexecs[2..4], null)
         assertEquals "Offering 3 commands should have changed the size of " +
             "queued commands", 3,
             replicaCommandSchedulerService.getQueuedCommandsSize()
