@@ -609,8 +609,9 @@ class LocalSubversionRepository(vclib.Repository):
       ### TeamForge customization: See if we can bypass expensive changed-paths
       ### lookups.
       if self.auth and hasattr(self.auth, 'check_global_access'):
-        if self.auth.check_global_access(self.rootname()) and not include_changed_paths:
-          return date, author, msg, None
+        if self.auth.check_global_access(self.rootname()) \
+           and not include_changed_paths:
+          return date, author, msg, revprops, None
   
       # If we get here, then we either need the changed paths because we
       # were asked for them, or we need them to do authorization checks.
