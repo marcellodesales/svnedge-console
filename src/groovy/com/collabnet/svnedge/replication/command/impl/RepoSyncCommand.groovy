@@ -22,16 +22,14 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
-import com.collabnet.svnedge.replication.command.LongRunningCommand
+import com.collabnet.svnedge.replication.command.ShortRunningCommand
 import com.collabnet.svnedge.teamforge.CtfServer
 
 /**
  * This command uses svnsync to update the given repository
- * 
- * @author John Mcnally (jmcnally@collab.net)
  */
 public class RepoSyncCommand extends AbstractRepositoryCommand 
-        implements LongRunningCommand {
+        implements ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 
