@@ -1198,7 +1198,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
     }
 
-    public def restartServer() {
+    public def restartServer() throws CantBindPortException {
         def result = -1;
         if (lifecycleService.isStarted()) {
             result = lifecycleService.gracefulRestartServer()

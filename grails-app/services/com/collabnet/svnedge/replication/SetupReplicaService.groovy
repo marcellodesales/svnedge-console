@@ -75,7 +75,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      * @param conversion the CtfConversionBean holding connection info
      */
     public void registerReplica(ReplicaConversionBean replicaInfo) 
-            throws RemoteMasterException, ReplicaConversionException {
+            throws RemoteMasterException, ReplicaConversionException,
+                CantBindPortException {
 
         log.debug("Attempting replica conversion...")
 
@@ -230,8 +231,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         Server server = Server.getServer()
         File idFile = new File(server.repoParentDir, ".scm.properties")
         idFile.text = "external_system_id=" + scmMasterId
-
-        setupTeamForgeService.restartServer()
      }
 
 

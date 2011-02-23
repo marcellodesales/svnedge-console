@@ -19,6 +19,7 @@ package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
 
+import com.collabnet.svnedge.console.CantBindPortException;
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.replication.ReplicaConfiguration
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
@@ -79,6 +80,16 @@ public class ReplicaApproveCommand extends AbstractReplicaCommand
 
         logExecution("EXECUTE-updateExecutorPoolSizes")
         updateExecutorPoolSizes()
+        try {
+            def setupTeamForgeService = getService("setupTeamForgeService")
+            setupTeamForgeService.restartServer()
+
+        } catch (CantBindPortException cantRestartServer) {
+            log.error("Although the registration succeeded, there was an " +
+                "error restarting the apache/subversion server",
+                cantRestartServer)
+            logExecution("EXECUTE-restartserver", cantRestartServer)
+        }
    }
 
    def undo() {

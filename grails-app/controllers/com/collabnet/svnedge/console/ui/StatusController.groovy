@@ -72,8 +72,14 @@ class StatusController {
                       || currentReplica.approvalState == ApprovalState
                       .REGISTRATION_FAILED) {
                flash.error = message(code: 'replica.error.cantRegister')
+
+            } else if (currentReplica.approvalState == ApprovalState.APPROVED &&
+                    lifecycleService.hasFailedToRestart()) {
+
+                flash.error = message(
+                    code: 'replica.error.registration.serverCantRestart')
             }
-            
+
             ctfUrl = ctfServer.getWebAppUrl()
         }
         else if (server.mode == ServerMode.MANAGED) {

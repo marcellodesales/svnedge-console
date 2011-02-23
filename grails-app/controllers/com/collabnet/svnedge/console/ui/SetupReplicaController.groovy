@@ -79,6 +79,10 @@ class SetupReplicaController {
      * Collect CTF credentials 
      */
     def ctfInfo = {
+        def conversion = getConversionBean()
+        if (conversion?.registrationError) {
+            flash.error = conversion.registrationError
+        }
         [cmd: getCtfConnectionCommand()]
     }
 
@@ -174,7 +178,7 @@ class SetupReplicaController {
                         ]
             }
             catch (Exception e) {
-                log.error("Unable to register replica", e)
+                log.error("Unable to register replica: " + e.getMessage())
             }
         }
         
@@ -192,11 +196,9 @@ class SetupReplicaController {
         def repoName
         def userName
         def input = getReplicaInfoCommand()
-        
+        // copy input params to the conversion bean
+        ReplicaConversionBean bean = getConversionBean(input)
         try {
-            // copy input params to the conversion bean
-            ReplicaConversionBean bean = getConversionBean(input)
-
             // register the replica
             setupReplicaService.registerReplica(bean)
 
@@ -210,14 +212,19 @@ class SetupReplicaController {
                     ctfUsername: getCtfConnectionCommand().ctfUsername,
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
                     ]
-            
+
         } catch (Exception e) {
-            log.error("Unable to register replica", e)
-            flash.error = message(code: 'ctfRemoteClientService.createExternalSystem.error') + " " + e.message
+            log.error("Unable to register replica: " + (e.getMessage() ?: 
+                e.getCause().getMessage()))
+            def msg = message(code: 'replica.error.registration') + " " +
+                (e.getMessage() ?: e.getCause().getMessage())
+            bean.registrationError = msg
+            forward(action: 'ctfInfo')
         }
 
         // return to input view with errors
-        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
+        render([view: "replicaSetup", model: [cmd: input, 
+            integrationServers: getIntegrationServers()]])
     }
 
     /**

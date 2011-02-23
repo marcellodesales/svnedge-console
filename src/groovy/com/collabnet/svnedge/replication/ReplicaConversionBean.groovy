@@ -29,6 +29,7 @@ class ReplicaConversionBean {
     String name
     String description
     String message
+    String registrationError
     
     CtfConnectionBean ctfConn
 }

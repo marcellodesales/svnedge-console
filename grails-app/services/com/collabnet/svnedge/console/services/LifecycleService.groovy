@@ -46,6 +46,32 @@ class LifecycleService {
     private Boolean isHttpdBindSuidCache
     private Boolean isSolarisDefaultPortCache
 
+    /**
+     * If the server has failed to restart since the last attempt.
+     */
+    def restartFailed
+
+    /**
+     * @return if the server has failed to restart
+     */
+    def hasFailedToRestart() {
+        return restartFailed
+    }
+
+    /**
+     * @return if the server has failed restarting since last attempt.
+     */
+    def serverHasFailedToRestart() {
+        restartFailed = true
+    }
+
+    /**
+     * @return if the server has successfully restarted since last attempt.
+     */
+    def serverHasSuccessfullyRestarted() {
+        restartFailed = false
+    }
+
     private boolean isWindows() {
         return operatingSystemService.isWindows()
     }
@@ -339,6 +365,7 @@ root@${server.hostname}
         // Look for port-bind issue
         if (exitStatus == 1 && error?.contains("could not bind")) {
                 clearCachedResults()
+                serverHasFailedToRestart()
                 throw new CantBindPortException(server.port)
 
         } else if (exitStatus == 0) {
@@ -352,15 +379,19 @@ root@${server.hostname}
                          "Process returned " +
                          "but httpd.pid file did not appear within " +
                          MAX_SERVER_WAIT_TIME + " seconds.")
+                serverHasFailedToRestart()
+
             } else {
                 log.debug("Server " + startOrStop + " attempt successful" +
                           " using " + ConfigUtil.httpdPath())
+                serverHasSuccessfullyRestarted()
             }
         } else {
             clearCachedResults()
             log.warn("Server " + startOrStop + 
                      " attempt failed with code=" + exitStatus)
             log.warn("Output: " + commandResponse[1])
+            serverHasFailedToRestart()
         }
         return exitStatus
     }
