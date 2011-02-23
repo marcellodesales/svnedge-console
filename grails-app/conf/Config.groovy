@@ -297,7 +297,8 @@ log4j = {
            'org.codehaus.groovy.grails.plugins', // plugins
            'org.codehaus.groovy.grails.orm.hibernate', // hibernate integration
            'org.springframework',
-           'org.hibernate'
+           'org.hibernate',
+           'grails.plugin.springevents'
 
     warn   'org.mortbay.log',
            'org.apache',
