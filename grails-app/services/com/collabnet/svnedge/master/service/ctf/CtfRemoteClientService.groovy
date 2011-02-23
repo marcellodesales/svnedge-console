@@ -139,29 +139,39 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
         } catch (AxisFault e) {
             GrailsUtil.deepSanitize(e)
-            if (e.faultString.contains("Error logging in.")) {
+            if (e.faultString.contains("password was set by an admin")) {
+                def msg = getMessage("ctfRemoteClientService.auth.needschange",
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.info(msg)
+                throw new CtfAuthenticationException(msg, 
+                    "ctfRemoteClientService.auth.needschange")
+
+            } else if (e.faultString.contains("Error logging in.")) {
                 def msg = getMessage("ctfRemoteClientService.auth.error", 
                     [ctfUrl.encodeAsHTML()], locale)
                 log.info(msg)
-                throw new CtfAuthenticationException(msg)
+                throw new CtfAuthenticationException(msg, 
+                    "ctfRemoteClientService.auth.error")
+
             } else if (e.faultString.contains("SSLHandshakeException")) {
                 def msg = getMessage("ctfRemoteClientService.ssl.error", 
-                    ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"], 
-                    locale)
+                    ["http://help.collab.net/index.jsp?topic=/csvn/action/" +
+                        "csvntotf_ssl.html"], locale)
                 log.warn(msg)
-                throw new CtfAuthenticationException(msg)
+                throw new CtfAuthenticationException(msg,
+                    "ctfRemoteClientService.ssl.error")
 
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new UnknownHostException(getMessage(
-                    "ctfRemoteClientService.host.unknown.error", [hostname.encodeAsHTML()], 
-                    locale))
+                    "ctfRemoteClientService.host.unknown.error", 
+                    [hostname.encodeAsHTML()], locale))
 
             } else if (e.detail instanceof NoRouteToHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new NoRouteToHostException(getMessage(
-                    "ctfRemoteClientService.host.unreachable.error", [hostname.encodeAsHTML()],
-                    locale))
+                    "ctfRemoteClientService.host.unreachable.error", 
+                    [hostname.encodeAsHTML()], locale))
             } else {
                 def msg = getMessage("ctfRemoteClientService.auth.error",
                     [ctfUrl.encodeAsHTML()], locale)
@@ -170,7 +180,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         } catch (Exception otherErrors) {
             throw new MalformedURLException(getMessage(
-                "ctfRemoteClientService.host.malformedUrl", [ctfUrl.encodeAsHTML()], locale))
+                "ctfRemoteClientService.host.malformedUrl", 
+                [ctfUrl.encodeAsHTML()], locale))
         }
     }
 
@@ -641,12 +652,23 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             scmSoap.deleteExternalSystemReplica(sessionId, replicaConfig.systemId)
         }
         catch (LoginFault e) {
-            def errorMsg = getMessage(
-                     "ctfRemoteClientService.auth.error", [ctfUrl],
-                     locale)
-            log.error(errorMsg, e)
-            errors << errorMsg
-            throw new CtfAuthenticationException(errorMsg)
+            GrailsUtil.deepSanitize(e)
+            if (e.faultString.contains("password was set by an admin")) {
+                def msg = getMessage("ctfRemoteClientService.auth.needschange",
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.error(msg)
+                errors << msg
+                throw new CtfAuthenticationException(msg, 
+                    "ctfRemoteClientService.auth.needschange")
+
+            } else if (e.faultString.contains("Error logging in.")) {
+                def msg = getMessage("ctfRemoteClientService.auth.error", 
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.error(msg)
+                errors << msg
+                throw new CtfAuthenticationException(msg, 
+                    "ctfRemoteClientService.auth.error")
+            }
         }
         catch (AxisFault e) {
             def errorMsg = getMessage(

@@ -121,8 +121,8 @@ class SetupReplicaController {
                         [input.ctfURL] as Object[], 'no route')
             }
             catch (CtfAuthenticationException e) {
-                input.errors.rejectValue('ctfUsername', 'ctfRemoteClientService.auth.error',
-                        [input.ctfUsername] as Object[], 'bad credentials')
+                input.errors.rejectValue('ctfUsername', e.messageKey,
+                        [input.ctfURL] as Object[], 'bad credentials')
             }
             catch (RemoteMasterException e) {
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.noReplicaSupport.error',

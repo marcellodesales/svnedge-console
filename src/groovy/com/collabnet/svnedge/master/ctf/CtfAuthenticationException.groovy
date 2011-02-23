@@ -33,6 +33,10 @@ class CtfAuthenticationException extends RemoteMasterException {
      * The session ID used to authenticate with CTF.
      */
     def sessionId
+    /**
+     * The key to the messages.properties used.
+     */
+    def messageKey
 
     /**
      * Creates a new exception with the given sessionId during the
@@ -48,6 +52,17 @@ class CtfAuthenticationException extends RemoteMasterException {
 
         super(hostname, message, cause)
         this.sessionId = sessionId
+    }
+
+    /**
+     * Creates a new exception with the message and the key to the originating
+     * messages.property key.
+     * @param message the message retrieved from the messages.properties.
+     * @param key the key of the originating message if needed.
+     */
+    public CtfAuthenticationException(String message, String key) {
+        super(message, null)
+        this.messageKey = key
     }
 
     /**

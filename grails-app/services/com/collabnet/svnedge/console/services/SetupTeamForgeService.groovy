@@ -937,7 +937,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         } else {
             def msg = getMessage("setupTeamForge.integration.ctf.auth.failed",
                 locale)
-            throw new CtfAuthenticationException(msg)
+            throw new CtfAuthenticationException(msg, 
+                "setupTeamForge.integration.ctf.auth.failed")
         }
     }
 
