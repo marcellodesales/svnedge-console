@@ -345,6 +345,21 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         }
     }
 
+    Ant.echo(message: "Deleting remaining python compiled artifacts from " +
+        "${distDir}")
+    def deleteSuffixedArtifacts
+    // Define closure
+    deleteSuffixedArtifacts = { 
+        it.eachDir(deleteSuffixedArtifacts)
+        it.eachFile {
+            if (it.name.contains(".pyc")) {
+                Ant.echo(message: "Deleting ${it.canonicalPath}")
+                it.delete()
+            }
+        }
+    }
+    deleteSuffixedArtifacts( new File("${distDir}") )
+
     event("StatusFinal", ["Distribution directory created successfully: " +
                   "${distDir}"])
 }
