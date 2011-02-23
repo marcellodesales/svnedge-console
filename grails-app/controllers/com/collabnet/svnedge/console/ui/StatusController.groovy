@@ -44,6 +44,7 @@ class StatusController {
     def statisticsService
     def lifecycleService
     def packagesUpdateService
+    def setupReplicaService
 
     // start and stop actions use POST requests
     static allowedMethods = [start:'POST', stop:'POST']
@@ -74,10 +75,12 @@ class StatusController {
                flash.error = message(code: 'replica.error.cantRegister')
 
             } else if (currentReplica.approvalState == ApprovalState.APPROVED &&
-                    lifecycleService.hasFailedToRestart()) {
+                    setupReplicaService.hasRegistrationErrors()) {
 
                 flash.error = message(
                     code: 'replica.error.registration.serverCantRestart')
+                // clear the message until the user has restarted.
+                setupReplicaService.clearRegistrationError()
             }
 
             ctfUrl = ctfServer.getWebAppUrl()

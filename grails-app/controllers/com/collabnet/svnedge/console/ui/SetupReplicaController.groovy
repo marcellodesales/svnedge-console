@@ -23,6 +23,7 @@ import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.teamforge.CtfConversionBean
 import com.collabnet.svnedge.replica.manager.ReplicaConfig
 import com.collabnet.svnedge.master.RemoteMasterException
+import com.collabnet.svnedge.console.CantBindPortException;
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
@@ -212,6 +213,18 @@ class SetupReplicaController {
                     ctfUsername: getCtfConnectionCommand().ctfUsername,
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"
                     ]
+
+        } catch (CantBindPortException cantBind) {
+            setupReplicaService.serverCantRestartAfterRegistration()
+            def error = cantBind.getMessage() ?: cantBind.getCause().getMessage()
+            flash.message = message(code: 'setupReplica.action.confirm.success')
+            flash.error = message(
+                code: 'replica.error.registration.serverCantRestart')
+            server = Server.getServer()
+            return [ctfURL: getCtfConnectionCommand().ctfURL,
+                    ctfUsername: getCtfConnectionCommand().ctfUsername,
+                    svnReplicaCheckout: "svn co ${server.svnURL()}${repoName}" +
+                        " ${repoName} --username=${userName}"]
 
         } catch (Exception e) {
             log.error("Unable to register replica: " + (e.getMessage() ?: 

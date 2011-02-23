@@ -51,9 +51,35 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def authenticationManager    
     def csvnAuthenticationProvider
     def ctfAuthenticationProvider
-    
+
+    /**
+     * Defines if there was any problems during the registration
+     */
+    def replicaRegistrationFailed
+
     def bootStrap = {
         log.debug("Bootrastrapping the Setup Replica service")
+    }
+
+    /**
+     * @return returns if there were errors during the registration process.
+     */
+    def hasRegistrationErrors() {
+        return replicaRegistrationFailed
+    }
+
+    /**
+     * Sets the status of the error of the registation.
+     */
+    def serverCantRestartAfterRegistration() {
+        replicaRegistrationFailed = true
+    }
+
+    /**
+     * Clears the registration error.
+     */
+    def clearRegistrationError() {
+        replicaRegistrationFailed = false
     }
 
     /**
@@ -144,13 +170,15 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         serverConfService.backupAndOverwriteHttpdConf()
         serverConfService.writeConfigFiles()
-        setupTeamForgeService.restartServer()
+        
         authenticationManager.providers = [ctfAuthenticationProvider]
 
         log.info("starting FetchReplicaCommandsJob")
         new FetchReplicaCommandsJob().start()
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
+
+        setupTeamForgeService.restartServer()
     }
 
     /**
