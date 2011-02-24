@@ -671,12 +671,22 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         }
         catch (AxisFault e) {
-            def errorMsg = getMessage(
-                     "ctfRemoteClientService.general.error", [e.getMessage()],
-                     locale)
-            log.error(errorMsg, e)
-            errors << errorMsg
-            throw new RemoteMasterException(ctfUrl, errorMsg, e)
+            if (e.faultCode.toString().contains("PermissionDeniedFault")) {
+                def msg = getMessage("ctfRemoteClientService.permission.error", 
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.error(msg)
+                errors << msg
+                throw new CtfAuthenticationException(msg, 
+                    "ctfRemoteClientService.permission.error")
+            }
+            else { 
+                def errorMsg = getMessage(
+                         "ctfRemoteClientService.general.error", [e.getMessage()],
+                         locale)
+                log.error(errorMsg, e)
+                errors << errorMsg
+                throw new RemoteMasterException(ctfUrl, errorMsg, e)
+            }
         }
     }
 
