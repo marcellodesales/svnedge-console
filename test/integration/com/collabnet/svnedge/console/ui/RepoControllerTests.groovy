@@ -28,6 +28,9 @@ class RepoControllerTests extends ControllerUnitTestCase {
 
     def repoNameNew = "integration_test_new_repo"
     def repoNameExisting = "integration_test_existing_repo"
+    
+    def repoNew 
+    def repoExisting 
 
     protected void setUp() {
 
@@ -35,12 +38,16 @@ class RepoControllerTests extends ControllerUnitTestCase {
         // mock the i18n "message" map available to controller
         controller.metaClass.messageSource = [getMessage: { errors, locale -> return "message" }]
         controller.metaClass.message = { it -> return "message" }
-
+        
+        repoNew = new Repository(name: repoNameNew)
+        repoExisting = new Repository(name: repoNameExisting)
+        
+       
         // make sure the supposedly new repo is not in the way
-        svnRepoService.deleteRepository(new Repository(name: repoNameNew))
+        svnRepoService.archivePhysicalRepository(repoNew)
 
         // make sure the supposedly existing repo is in the way
-        svnRepoService.createRepository(new Repository(name: repoNameExisting), false)
+        svnRepoService.createRepository(repoExisting, false)
 
     }
 
@@ -48,8 +55,8 @@ class RepoControllerTests extends ControllerUnitTestCase {
         super.tearDown()
 
         // cleanup repo
-        svnRepoService.deleteRepository(new Repository(name: repoNameNew))
-        svnRepoService.deleteRepository(new Repository(name: repoNameExisting))
+        svnRepoService.archivePhysicalRepository(repoNew)
+        svnRepoService.archivePhysicalRepository(repoExisting)
 
     }
 

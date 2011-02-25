@@ -154,8 +154,8 @@ class RepoController {
         def repo = Repository.get( params.id )
         if(repo) {
             try {
-                repo.delete(flush:true)
-                def msg = svnRepoService.deleteRepository(repo)
+                svnRepoService.archivePhysicalRepository(repo)
+                def msg = svnRepoService.removeRepository(repo)
                 flash.message = msg
                 redirect(action:list)
             }

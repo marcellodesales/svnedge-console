@@ -216,7 +216,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
     /**
      * Revert from managed replica mode to standalone. This method will notify
-     * the Ctf instance.
+     * the CTF Master using the provided credentials
      * @param ctfUsername
      * @param ctfPassword
      * @param errors collection
@@ -288,9 +288,10 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             replicaConfig.save(flush:true)
         }
 
-        // delete all repos
+        // delete all database and filesystem artifacts
         Repository.list().each {
-            svnRepoService.deleteRepository(it)
+            svnRepoService.archivePhysicalRepository(it)
+            svnRepoService.removeRepository(it)
         }
 
         serverConfService.restoreHttpdConfFromBackup()

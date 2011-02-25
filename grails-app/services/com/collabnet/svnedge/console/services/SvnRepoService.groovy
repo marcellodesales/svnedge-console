@@ -27,6 +27,7 @@ import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
 import java.util.regex.Pattern
+import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -371,7 +372,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * Moves the repository contents to an inaccessible location to be
      * archived or otherwise further processing
      */
-    def deleteRepository(Repository repo) {
+    def archivePhysicalRepository(Repository repo) {
         Server server = lifecycleService.getServer()
         File repoToDelete = new File(this.getRepositoryHomePath(repo))
         File f = new File(new File(server.repoParentDir).getParentFile(), 
@@ -385,7 +386,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             repoArchiveLocation = new File(f, repo.name + "." + (++count))
         }
         repoToDelete.renameTo(repoArchiveLocation)
-        return "Delete repository " + repo.name + " new location is " +
+        return "Moved repository " + repo.name + " new location is " +
                 repoArchiveLocation.getAbsolutePath()
     }
 
@@ -405,8 +406,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
             repo.removeFromStatValues(it)
             it.delete()
         }
+        
+        // delete FK'd ReplicatedRepository
+        def replicatedRepos = ReplicatedRepository.findAllByRepo(repo)
+        replicatedRepos.each() {
+           it.delete()
+        } 
 
-        // delete the repo
+        // delete the repo entity
         repo.delete()
      }
 

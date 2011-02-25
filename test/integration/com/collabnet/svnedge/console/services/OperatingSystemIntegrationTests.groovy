@@ -96,7 +96,8 @@ class OperatingSystemIntegrationTests extends GrailsUnitTestCase {
         assertEquals("The number of default directories for SVN is incorrect",
             10, numberDirs)
 
-        svnRepoService.deleteRepository(newRepo)
+        svnRepoService.archivePhysicalRepository(newRepo)
+        svnRepoService.removeRepository(newRepo)
 
         /*
            $ /usr/lib/jvm/java-6-openjdk/bin/java 

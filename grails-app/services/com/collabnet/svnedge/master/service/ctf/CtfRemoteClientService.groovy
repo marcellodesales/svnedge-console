@@ -644,12 +644,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     def deleteReplica(ctfUsername, ctfPassword, errors, locale) throws CtfAuthenticationException, RemoteMasterException {
 
         def ctfUrl = CtfServer.getServer().baseUrl
+        def replicaConfig = ReplicaConfiguration.getCurrentConfig()
+        def replicaId = replicaConfig.systemId
         try {
-            def replicaConfig = ReplicaConfiguration.getCurrentConfig()
-
             def sessionId = login(ctfUrl, ctfUsername, ctfPassword, locale)
             def scmSoap = this.makeScmSoap(ctfUrl)
-            scmSoap.deleteExternalSystemReplica(sessionId, replicaConfig.systemId)
+            scmSoap.deleteExternalSystemReplica(sessionId, replicaId)
         }
         catch (LoginFault e) {
             GrailsUtil.deepSanitize(e)
@@ -678,6 +678,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 errors << msg
                 throw new CtfAuthenticationException(msg, 
                     "ctfRemoteClientService.permission.error")
+            }
+            else if (e.faultString.contains("No such object: ${replicaId}")) {
+                // this fault suggests that the replica server was already removed on the CTF side but not yet reverted
+                // to standalone mode here
+                log.warn("Attempting to delete, but this replica does not exist on the CTF master -- already deleted?")
             }
             else { 
                 def errorMsg = getMessage(
