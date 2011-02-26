@@ -19,6 +19,8 @@ package com.collabnet.svnedge.replica.manager
 
 import com.collabnet.svnedge.console.Repository
 import grails.test.*
+import com.collabnet.svnedge.replication.RepoStatus
+import com.collabnet.svnedge.replication.ReplicatedRepository
 
 class RepositoryIntegrationTests extends GrailsUnitTestCase {
     protected void setUp() {

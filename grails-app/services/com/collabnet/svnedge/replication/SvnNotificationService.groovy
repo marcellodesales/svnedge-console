@@ -20,11 +20,8 @@ package com.collabnet.svnedge.replication
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import org.apache.commons.lang.StringEscapeUtils
-
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replica.manager.RepoStatus
+
 import com.collabnet.svnedge.replica.manager.Master
 
 class SvnNotificationService {

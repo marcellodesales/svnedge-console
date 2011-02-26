@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console.ui
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replication.ReplicatedRepository
 import com.collabnet.svnedge.console.Server
 
 /**

@@ -20,7 +20,7 @@ package com.collabnet.svnedge.replication.command.impl
 import org.apache.log4j.Logger
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replication.ReplicatedRepository
 import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
 import com.collabnet.svnedge.replication.command.ShortRunningCommand
 import com.collabnet.svnedge.teamforge.CtfServer

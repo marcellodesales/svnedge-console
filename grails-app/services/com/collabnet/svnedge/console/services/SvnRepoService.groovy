@@ -22,12 +22,10 @@ import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.ServerMode
 
-import org.springframework.transaction.annotation.Transactional
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
-import java.util.regex.Pattern
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replication.ReplicatedRepository
 
 class SvnRepoService extends AbstractSvnEdgeService {
 

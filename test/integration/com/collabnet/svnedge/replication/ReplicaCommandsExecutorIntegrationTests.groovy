@@ -17,15 +17,11 @@
  */
 package com.collabnet.svnedge.replication
 
-
-import java.io.File;
-
 import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replica.manager.RepoStatus
+
 import com.collabnet.svnedge.replication.command.AbstractCommand;
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
 import com.collabnet.svnedge.replication.command.impl.ReplicaPropsUpdateCommand;

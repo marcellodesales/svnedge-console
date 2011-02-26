@@ -22,7 +22,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
+import com.collabnet.svnedge.replication.ReplicatedRepository
 
 class SvnRepoServiceTests extends GrailsUnitTestCase {
 

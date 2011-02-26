@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.manager
+package com.collabnet.svnedge.replication
 
 import com.collabnet.svnedge.console.Repository
 

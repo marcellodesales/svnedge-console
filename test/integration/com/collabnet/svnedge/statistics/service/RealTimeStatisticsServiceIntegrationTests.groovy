@@ -19,12 +19,9 @@ package com.collabnet.svnedge.statistics.service
 
 import grails.test.*
 
-import com.collabnet.svnedge.replica.service.CacheManagementService
-
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
-import com.collabnet.svnedge.replica.manager.RepoStatus
-
+import com.collabnet.svnedge.replication.ReplicatedRepository
+import com.collabnet.svnedge.replication.RepoStatus
 
 class RealTimeStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     def realTimeStatisticsService

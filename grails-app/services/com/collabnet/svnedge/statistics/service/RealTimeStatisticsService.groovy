@@ -18,10 +18,8 @@
 package com.collabnet.svnedge.statistics.service
 
 import com.collabnet.svnedge.replica.event.UserCacheEvent
-import com.collabnet.svnedge.replica.service.CacheManagementService
-import com.collabnet.svnedge.replica.manager.ReplicatedRepository
 
-import java.net.InetAddress
+import com.collabnet.svnedge.replication.ReplicatedRepository
 
 /**
  * Service for getting up-to-date statistics values.

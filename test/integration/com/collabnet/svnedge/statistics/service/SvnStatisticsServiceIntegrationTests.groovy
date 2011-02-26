@@ -21,7 +21,7 @@ import grails.test.*
 
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.SvnLog
-import com.collabnet.svnedge.replica.manager.RepoStatus
+
 import com.collabnet.svnedge.statistics.StatValue
 
 class SvnStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
