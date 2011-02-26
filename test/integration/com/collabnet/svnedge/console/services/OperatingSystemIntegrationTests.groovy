@@ -97,7 +97,6 @@ class OperatingSystemIntegrationTests extends GrailsUnitTestCase {
             10, numberDirs)
 
         svnRepoService.archivePhysicalRepository(newRepo)
-        svnRepoService.removeRepository(newRepo)
 
         /*
            $ /usr/lib/jvm/java-6-openjdk/bin/java 
