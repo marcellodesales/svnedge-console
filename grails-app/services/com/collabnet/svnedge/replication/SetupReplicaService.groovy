@@ -288,9 +288,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             replicaConfig.save(flush:true)
         }
 
-        // delete all database and filesystem artifacts
+        // delete all database and filesystem artifacts for Repositories
         Repository.list().each {
-            svnRepoService.archivePhysicalRepository(it)
+            svnRepoService.deletePhysicalRepository(it) 
             svnRepoService.removeRepository(it)
         }
 

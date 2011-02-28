@@ -369,6 +369,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
     /**
      * Moves the repository contents to an inaccessible location to be
      * archived or otherwise further processing
+     * @param repo whose folder to move
+     * @return String message about the new location
      */
     def archivePhysicalRepository(Repository repo) {
         Server server = lifecycleService.getServer()
@@ -386,6 +388,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
         repoToDelete.renameTo(repoArchiveLocation)
         return "Moved repository " + repo.name + " new location is " +
                 repoArchiveLocation.getAbsolutePath()
+    }        
+    
+         
+    /**
+     * Deletes the repository contents from the file system
+     * @param repo
+     * @return boolean indicating success or failure
+     */
+    def deletePhysicalRepository(Repository repo) {
+        File repoToDelete = new File(this.getRepositoryHomePath(repo))
+        return repoToDelete.deleteDir();
     }
 
    /**
