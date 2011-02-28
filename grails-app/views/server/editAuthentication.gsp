@@ -184,7 +184,8 @@
           <label for="name"><g:message code="server.ldapServerPort.label" /></label>
         </td>
         <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerPort','errors')}">
-          <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" value="${fieldValue(bean:server,field:'ldapServerPort')}"/>
+          <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" 
+                  value="${params.ldapServerPort ?: server.ldapServerPort}"/>
           <g:hasErrors bean="${server}" field="ldapServerPort">
               <ul><g:eachError bean="${server}" field="ldapServerPort">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
@@ -276,7 +277,8 @@
           <label for="authHelperPort"><g:message code="server.authHelperPort.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'authHelperPort','errors')}">
-          <g:textField size="6" name="authHelperPort" value="${fieldValue(bean:server,field:'authHelperPort')}"/>
+          <input size="6" type="text" id="authHelperPort" name="authHelperPort" 
+              value="${params.authHelperPort ?: server.authHelperPort}"/>
           <g:hasErrors bean="${server}" field="authHelperPort">
               <ul><g:eachError bean="${server}" field="authHelperPort">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
