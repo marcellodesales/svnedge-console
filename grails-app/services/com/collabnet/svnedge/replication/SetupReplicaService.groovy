@@ -162,6 +162,12 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         rc.save(flush:true)
         ctfServer.save(flush:true)
         server.save(flush:true)
+        
+        // move any existing Repositories out of the way
+        Repository.list().each {
+            svnRepoService.archivePhysicalRepository(it) 
+            svnRepoService.removeRepository(it)
+        }
 
         log.info("Rewriting server config and restarting")
         // setupTeamForgeService.installIntegrationServer(replicaInfo)

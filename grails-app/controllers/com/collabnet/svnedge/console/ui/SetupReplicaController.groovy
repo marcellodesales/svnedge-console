@@ -169,7 +169,8 @@ class SetupReplicaController {
                         cmd.masterExternalSystemId = scmServer.id
                         break
                     }
-                }
+                }                            
+                flash.warn=message(code: 'setupReplica.page.localReposDelete.warning')
                 return [ctfURL: getCtfConnectionCommand().ctfURL,
                         ctfUsername: getCtfConnectionCommand().ctfUsername,
                         selectedScmServer: selectedScm,
