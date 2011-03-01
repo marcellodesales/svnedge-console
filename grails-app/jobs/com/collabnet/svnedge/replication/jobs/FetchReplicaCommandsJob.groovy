@@ -46,6 +46,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     def securityService
     def ctfRemoteClientService
     def replicaCommandSchedulerService
+    def commandResultDeliveryService
 
     def static final JOB_NAME = 
         "com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob"
@@ -134,8 +135,9 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
                 ctfServer.ctfUsername, ctfPassword, locale)
 
         } catch (Exception cantConnectCtfMaster) {
-            log.error "Can't retrieve queued commands: The CTF server " +
-                "${ctfServer.baseUrl} is unreachable...", cantConnectCtfMaster
+            log.error "Can't retrieve queued commands from the CTF replica " +
+                "manager ${ctfServer.baseUrl}: " + cantConnectCtfMaster.getMessage()
+            commandResultDeliveryService.stopDelivering()
             return
         }
 
@@ -147,6 +149,10 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
         executionContext.logsDir = new File(config.svnedge.logsDirPath + "")
         def replica = ReplicaConfiguration.getCurrentConfig()
         executionContext.replicaSystemId = replica.systemId
+
+        // As the fetch job can retrieve commands, there is communication.
+        // Signal the delivery service to deliver any pending responses.
+        commandResultDeliveryService.restartDelivering(executionContext)
 
         log.debug("Command Execution Context: $executionContext")
         try {

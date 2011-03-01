@@ -172,6 +172,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 throw new NoRouteToHostException(getMessage(
                     "ctfRemoteClientService.host.unreachable.error", 
                     [hostname.encodeAsHTML()], locale))
+
             } else {
                 def msg = getMessage("ctfRemoteClientService.auth.error",
                     [ctfUrl.encodeAsHTML()], locale)
@@ -943,32 +944,34 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         } catch (AxisFault e) {
              String faultMsg = e.faultString
 
-            // this code doesn't do anything except silently swallow the error
-            // so commenting out
-//             if (faultMsg.contains("The parameter type/value") &&
-//                faultMsg.contains("is invalid for the adapter type")) {
-//                // No such object: The parameter type/value
-//                //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
-//                // is invalid for the adapter type 'Subversion'
-//                def typeValue = faultMsg.split("'")[1].split("=")
-//                def paramType = typeValue[0]
-//                def paramValue = typeValue[1]
-//                GrailsUtil.deepSanitize(e)
-//            }
-//            else
+           if (e.detail instanceof NoRouteToHostException) {
+                // server started without connection, recovered, and lost again
+                // Network is unreachable
+                def hostname = new URL(ctfUrl).host
+                throw new NoRouteToHostException(getMessage(
+                    "ctfRemoteClientService.host.unreachable.error", 
+                    [hostname.encodeAsHTML()], locale))
 
-            if (faultMsg.contains("Session is invalid or timed out")) {
+           } else if (e.detail instanceof UnknownHostException) {
+                 def hostname = new URL(ctfUrl).host
+                 throw new UnknownHostException(getMessage(
+                     "ctfRemoteClientService.host.unknown.error",
+                     [hostname.encodeAsHTML()], locale))
+
+           } else if (faultMsg.contains("Session is invalid or timed out")) {
                 throw new CtfSessionExpiredException(ctfUrl, userSessionId,
                     getMessage("ctfRemoteClientService.remote.sessionExpired",
                     locale), e)
-            }
-            else if (faultMsg.contains("No such object: ${replicaServerId}")) {
-                // this fault indicates that the replica server no longer exists on
-                // the ctf instance (deleted) -- will respond by creating and executing the unregister command
-                log.error "This replica is no longer supported by the CTF master; reverting to standalone mode"
+
+            } else if (faultMsg.contains("No such object: ${replicaServerId}")) {
+                // this fault indicates that the replica server no longer exists
+                // on the ctf instance (deleted) -- will respond by creating 
+                // and executing the unregister command
+                log.error "This replica is no longer supported by the CTF " +
+                    "master; reverting to standalone mode"
                 return [[code: "replicaUnregister"]]
-            }
-            else {
+
+            } else {
                  def generalMsg = getMessage(
                      "ctfRemoteClientService.general.error", [e.getMessage()],
                      locale)
@@ -976,8 +979,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 throw new RemoteMasterException(ctfUrl, generalMsg, e)
             }
 
-        }
-          catch (Exception e) {
+        } catch (Exception e) {
              GrailsUtil.deepSanitize(e)
              // also no session, but log this one as it indicates a problem
              if (!(e instanceof LoginFault)) {
@@ -1037,12 +1039,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
          } catch (Exception e) {
             GrailsUtil.deepSanitize(e)
             // also no session, but log this one as it indicates a problem
-            if (!(e instanceof LoginFault)) {
-                def generalMsg = getMessage(
-                    "ctfRemoteClientService.uploadCommandResult.error", locale)
-                log.error(generalMsg, e)
-                throw new RemoteMasterException(ctfUrl, generalMsg, e)
-            }
+            def generalMsg = getMessage(
+                "ctfRemoteClientService.uploadCommandResult.error", locale)
+            log.error(generalMsg)
+            throw new RemoteMasterException(ctfUrl, generalMsg, e)
         }
     }
 }

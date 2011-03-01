@@ -56,6 +56,7 @@ class BootStrap {
     def setupReplicaService
     def replicaCommandExecutorService
     def replicaCommandSchedulerService
+    def commandResultDeliveryService
     def logManagementService
 
     // Alternate auth mechanism for CTF mode
@@ -134,6 +135,7 @@ class BootStrap {
             setupReplicaService.bootStrap()
             replicaCommandExecutorService.bootStrap()
             replicaCommandSchedulerService.bootStrap()
+            commandResultDeliveryService.bootStrap()
 
         } catch (Exception e) {
             log.error ("Failed to intitialize SetupTeamForgeService: " + e.getMessage(), e)

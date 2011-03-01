@@ -135,20 +135,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 return
             }
             synchronized(longRunningSemaphore) {
-                def availablePermits = longRunningSemaphore.availablePermits()
-                def usedPermits = oldPermits - availablePermits
                 longRunningSemaphore = new Semaphore(newPermits)
-                if (newPermits > oldPermits) {
-                    longRunningSemaphore.reducePermits(usedPermits)
-
-                } else {  // newpermits < oldPermits
-                    if (usedPermits > newPermits) {
-                        longRunningSemaphore.drainPermits()
-
-                    } else {
-                        longRunningSemaphore.reducePermits(usedPermits)
-                    }
-                }
             }
         }
     }
@@ -174,21 +161,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 return
             }
             synchronized(shortRunningSemaphore) {
-                def availablePermits = shortRunningSemaphore.availablePermits()
-                def usedPermits = oldPermits - availablePermits
                 shortRunningSemaphore = new Semaphore(newPermits)
-                if (newPermits > oldPermits) {
-                    shortRunningSemaphore.reducePermits(usedPermits)
-
-                } else {  // newpermits < oldPermits
-                    if (usedPermits > newPermits) {
-                        // Drain all permits there would not be any permit
-                        shortRunningSemaphore.drainPermits()
-
-                    } else {
-                        shortRunningSemaphore.reducePermits(usedPermits)
-                    }
-                }
             }
         }
     }
@@ -233,9 +206,6 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                         shortRunningSemaphore.release()
                         break
                 }
-                // Report the results in parallel
-                backgroundService.execute("Command Report ${terminatedCommand}",
-                    { reportTerminatedCommandResults(terminatedCommand) })
                 break
 
             case NoCommandsRunningUpdateSemaphoresEvent:
@@ -297,30 +267,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
             AbstractReplicaCommand.logExecution("RUN-SUCCESSED", commandExec)
 
         } catch (CommandExecutionException ceex) {
-            log.error("The command failed", ceex)
+            log.error("The command failed: " + ceex.getMessage())
             AbstractReplicaCommand.logExecution("RUN-FAILED", commandExec, ceex)
         }
         publishEvent(new CommandTerminatedEvent(this, commandExec))
-    }
-
-    /**
-     * Reports the termination of a command back to the CTF Replica Manager
-     * @param terminatedCommand is the terminated command Instance.
-     */
-    def reportTerminatedCommandResults(terminatedCommand) {
-        def executionContext = terminatedCommand.context
-        try {
-            //upload the commands results back to ctf
-            ctfRemoteClientService.uploadCommandResult(
-                executionContext.ctfBaseUrl, executionContext.userSessionId,
-                executionContext.replicaSystemId, terminatedCommand.id,
-                terminatedCommand.succeeded, executionContext.locale)
-            log.debug("Result successfully acknowledged: " + terminatedCommand)
-
-        } catch (Exception remoteError) {
-            log.error("Error while acknowledging the command: " +
-                 "$terminatedCommand", remoteError)
-            //TODO: Guarantee of delivery missing.
-        }
     }
 }

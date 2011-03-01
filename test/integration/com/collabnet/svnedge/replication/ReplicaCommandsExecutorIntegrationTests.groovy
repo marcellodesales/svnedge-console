@@ -23,6 +23,7 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 
 import com.collabnet.svnedge.replication.command.AbstractCommand;
+import com.collabnet.svnedge.replication.command.CommandResult;
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
 import com.collabnet.svnedge.replication.command.impl.ReplicaPropsUpdateCommand;
 import com.collabnet.svnedge.replication.command.impl.RepoAddCommand;
@@ -487,7 +488,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // execute svn sync
-        commandMap = [code: 'repoSync', id: 0, params: cmdParams,
+        commandMap = [code: 'repoSync', id: "cmdSync011", params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -515,6 +516,18 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         }
         assertTrue("Test file should exist: " + testFile2.canonicalPath, 
             fileExists)
+        println "Waiting until the command has terminated result..."
+        def commandResult
+        int counter = 0
+        while(counter++ < 3) {
+            commandResult = CommandResult.findWhere(commandId:"cmdSync011")
+            if (commandResult.transmitted) {
+                break
+            } else {
+                println "Command result not transmitted yet..."
+                Thread.sleep(1000)
+            }
+        }
     }
 
     private File createTestDir(String prefix) {

@@ -212,12 +212,12 @@ abstract class AbstractCommand {
         } catch (Throwable t) {
             succeeded = false
             executionException = t
-            log.error("Failed to execute command...", t)
+            log.error("Failed to execute command: " + t.getMessage())
             if (t.cause) {
                 executionException = t.cause
                 logExecution("EXECUTION-EXCEPTION", t.cause)
-                log.error("Failed to execute command: ${t.getMessage()}", t)
-
+            } else {
+                logExecution("EXECUTION-EXCEPTION", t)
             }
         }
 

@@ -57,6 +57,7 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
         implements ApplicationContextAware, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     def bgThreadManager
+    def commandResultDeliveryService
 
     ApplicationContext applicationContext
     /**
@@ -132,6 +133,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
         }
         log.debug "New commands offered: $remoteCommandsMaps"
         log.debug "Commands Execution Context: $executionContext"
+
+        // register new commands and remove the existing ones.
+        commandResultDeliveryService.registerClearExistingCommands(
+            remoteCommandsMaps)
 
         def previousSize = queuedCommands.size()
         for (commandMap in remoteCommandsMaps) {
@@ -262,9 +267,11 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
         // removes from the category mutex
         synchronized (executionMutex) {
             def categoryKey = null
-            executionMutex.each{ category, commandId ->
-                if (commandId.equals(finishedCommandId)) {
-                    categoryKey = category
+            // execution mutex = [category: commandId]
+            for (index in executionMutex){
+                if (index.value.equals(finishedCommandId)) {
+                    categoryKey = index.key
+                    break
                 }
             }
             if (categoryKey) {
