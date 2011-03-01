@@ -162,7 +162,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
                 executionContext.replicaSystemId, executionContext.locale)
 
             if (queuedCommands && queuedCommands.size() > 0) {
-                log.debug("There are ${queuedCommands.size()} commands queued...")
+                log.debug("There are ${queuedCommands.size()} commands queued.")
                 // execute the command using the background service.
                 replicaCommandSchedulerService.offer(queuedCommands,
                         executionContext)
@@ -173,7 +173,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         } catch (Exception replicaManagerError) {
             log.error("There was a problem while trying to fetch queued " + 
-                "commands", replicaManagerError)
+                "commands: " + replicaManagerError.getMessage())
         }
     }
 

@@ -890,9 +890,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * name, if any.
      * @throws RemoteMasterException if any error occurs during the method
      * call.
+     * @throws NoRouteToHostException if the server started without connection,
+     * acquired connection, and then lost it in the middle of execution.
+     * @throws UnknownHostException if the server started with connectivity but
+     * is unable to the host due to proxy, etc.
      */
     def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId, locale)
-            throws RemoteMasterException {
+            throws RemoteMasterException, NoRouteToHostException, 
+            UnknownHostException {
 
         try {
             def scmSoap = this.makeScmSoap(ctfUrl)

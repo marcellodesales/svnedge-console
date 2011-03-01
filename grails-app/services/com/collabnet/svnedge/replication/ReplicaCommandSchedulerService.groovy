@@ -377,8 +377,10 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
             case AppliedExecutorSemaphoresUpdateEvent:
                 log.debug("AppliedExecutorSemaphoresUpdateEvent: semaphores " +
                     "were updated... Open the gate...")
-                updatedSemaphoresGate.countDown()
-                semaphoresWereUpdated()
+                if (updatedSemaphoresGate) {
+                    updatedSemaphoresGate.countDown()
+                    semaphoresWereUpdated()
+                }
                 break
         }
     }
