@@ -61,6 +61,7 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     protected void setUp() {
+        CommandResult.executeUpdate("delete CommandResult")
         assertEquals "No commands must exist", 0, CommandResult.count()
     }
 
