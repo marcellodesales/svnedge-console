@@ -974,7 +974,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 // and executing the unregister command
                 log.error "This replica is no longer supported by the CTF " +
                     "master; reverting to standalone mode"
-                return [[code: "replicaUnregister"]]
+                // create a random Id, since this command does not have a CTF-generated ID
+                def cmdId = Math.round(Math.random() * 10000)
+                return [[id: cmdId, code: "replicaUnregister"]]
 
             } else {
                  def generalMsg = getMessage(

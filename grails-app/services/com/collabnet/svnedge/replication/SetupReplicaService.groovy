@@ -299,6 +299,10 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             svnRepoService.deletePhysicalRepository(it) 
             svnRepoService.removeRepository(it)
         }
+        File idFile = new File(server.repoParentDir, ".scm.properties")
+        if (idFile.exists()) {
+            idFile.delete()
+        }
 
         serverConfService.restoreHttpdConfFromBackup()
         serverConfService.writeConfigFiles()
