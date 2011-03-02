@@ -20,6 +20,7 @@ package com.collabnet.svnedge.console.ui
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.replication.ReplicaConfiguration
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.CantBindPortException
