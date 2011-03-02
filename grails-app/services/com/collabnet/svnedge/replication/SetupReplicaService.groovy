@@ -190,7 +190,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      * update the TeamForge credentials on file
      * @param ctfConn
      */
-    public void updateCtfConnection(CtfConnectionBean ctfConn) {
+    public void updateCtfConnection(CtfConnectionBean ctfConn) throws 
+        CtfAuthenticationException, RemoteMasterException,
+        UnknownHostException, NoRouteToHostException, MalformedURLException {
 
         // confirm that new credentials are legit
         confirmCtfConnection(ctfConn)
