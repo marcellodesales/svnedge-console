@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.jobs
 
-import com.collabnet.svnedge.statistics.service.AbstractStatisticsService
 
 import org.quartz.JobDataMap
 import org.quartz.SimpleTrigger

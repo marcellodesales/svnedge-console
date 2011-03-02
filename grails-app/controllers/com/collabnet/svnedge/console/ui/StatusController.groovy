@@ -24,9 +24,6 @@ import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
 
-import com.collabnet.svnedge.replica.manager.Master
-import com.collabnet.svnedge.replica.manager.ReplicaConfig
-
 import java.text.SimpleDateFormat
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.teamforge.ApprovalState;

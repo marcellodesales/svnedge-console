@@ -17,9 +17,8 @@
  */
 package com.collabnet.svnedge.replica.service
 
+import com.collabnet.svnedge.replication.auth.cache.ProxyCache 
 import grails.test.*
-
-import com.collabnet.svnedge.replica.cache.ProxyCache
 
 class CacheMananagementOauthIntegrationTests extends GrailsUnitTestCase {
 

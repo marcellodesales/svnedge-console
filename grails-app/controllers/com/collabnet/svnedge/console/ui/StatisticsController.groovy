@@ -23,8 +23,6 @@ import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.statistics.Category
 import com.collabnet.svnedge.statistics.StatGroup
-import com.collabnet.svnedge.statistics.Unit
-import com.collabnet.svnedge.replica.event.UserCacheEvent
 
 import java.text.SimpleDateFormat
 
@@ -44,11 +42,8 @@ class StatisticsController {
     private static int NUM_YLABELS = 10
 
     def operatingSystemService
-    def userCacheStatisticsService
     def networkStatisticsService
-    def latencyStatisticsService
     def fileSystemStatisticsService
-    def svnStatisticsService
 
     def colors = ["#3333FF", "#FF0033", "#33CC33", "#CC99FF"]
 
@@ -68,29 +63,15 @@ class StatisticsController {
 
     def graphList() {
         return [
-        [statgroup: "UserCache", 
-            graphName: message(code: 
-                "statistics.graph.leftNav.usersCache.chart"), 
-            graphData: "USER_CACHE_PIE_CHART"],
-        [statgroup: "UserCache", 
-            graphName: message(code: 
-                "statistics.graph.leftNav.usersCache.chart"), 
-            graphData: "USER_CACHE_LINE_CHART"],
         [statgroup: "NetworkThroughput", 
             graphName: message(code: 
                 "statistics.graph.leftNav.throughput.chart"),
             graphData: "BYTE_RATE_CHART"],
-        [statgroup: "Latency", 
-            graphName: message(code: 
-                "statistics.graph.leftNav.master.latency.chart"),
-            graphData: "LATENCY_CHART"],
         [statgroup: "FileSystem", 
             graphName: message(code: 
                 "statistics.graph.leftNav.diskSpace.chart"),
             graphData: "DISKSPACE_CHART"]
-        /*[statgroup: "SvnRepoHits",
-            graphName: "SVN hits by Repository",
-            graphData: "SVN_HITS_BY_REPO"]*/]
+        ]
     }
 
     @Secured(['ROLE_USER'])
@@ -145,115 +126,6 @@ class StatisticsController {
         }
         def timespans = this.getTimespans()
         timespans[index]
-    }
-
-    def USER_CACHE_PIE_CHART = {
-        render getUserCachePieChart()
-    }
-
-    def getUserCachePieChart = { 
-        def ts = getTimespan()
-        def cacheTypes = UserCacheEvent.CACHE_TYPES.collect { it.type }
-        def start = new Date(System.currentTimeMillis() 
-                             - 1000 * Long.valueOf(ts.seconds))
-        def now = new Date()
-        def getTotal = { cacheType, eventType ->
-            userCacheStatisticsService.getTotal(cacheType, eventType, start, 
-                                                now)
-        }
-        def totalHits = cacheTypes.collect { getTotal(it, UserCacheEvent.HIT)}
-            .sum()
-        def totalMisses = cacheTypes.collect { getTotal(it, 
-                                                        UserCacheEvent.MISS)}
-            .sum()
-        PieChart pc = new PieChart().setAnimate(true).setStartAngle(35)
-            .setBorder(2).addSlice(totalHits, 
-                message(code: "statistics.graph.usersCache.slice.hits"))
-            .addSlice(totalMisses, 
-                message(code: "statistics.graph.usersCache.slice.misses"))
-            .setTooltip("#val# of #total#<br>#percent#")
-        pc.setGradientFill(true)
-        Chart c = new Chart(message(code: "statistics.graph.userCache.title") +
-            " " + ts.title)
-            .addElements(pc)
-        c.setBackgroundColour("#FFFFFF")
-        c
-    }
-
-    def USER_CACHE_LINE_CHART = {
-        render getUserCacheLineChart()
-    }
-
-    def getUserCacheLineChart = {
-        Chart c
-        def ts = getTimespan()
-        def lines = []
-        UserCacheEvent.CACHE_TYPES.eachWithIndex{ cacheType, index ->
-            def colorIndex = index % colors.size()
-            lines << [ cacheType: cacheType.type, title: cacheType.name + 
-                    " Cache", color: colors[colorIndex]]
-        }
-
-        def start = new Date(System.currentTimeMillis() 
-                             - 1000 * Long.valueOf(ts.seconds))
-        def now = new Date()
-        
-        def hitRateMaps = lines.collect {
-            userCacheStatisticsService.getHitRates(it.cacheType, start, now)
-        }
-
-        def timeValues = hitRateMaps.inject(new TreeSet()) { treeset, map ->
-            treeset.addAll(map.keySet())
-            treeset
-        }
-
-        def lcValues = hitRateMaps.collect { map ->
-            timeValues.collect {
-                def val = map.get(it)
-                if (val == 0) {
-                    0
-                } else if (!val) {
-                    null
-                } else if (val.equals(Double.NaN)) {
-                    null
-                } else {
-                    val * 100
-                }
-            }
-        }
-
-        def minValue = 0
-        def maxValue = 100
-
-        if (!timeValues) {
-            def noData = message(code: "statistics.graph.noDataYet")
-            c = new Chart(message(
-                code: "statistics.graph.userCache.title.noData",
-                args: [ts.title, noData]))
-        } else {
-
-            def lineCharts = []
-            lcValues.eachWithIndex { lcValue, index ->
-                def lc = new LineChart().addValues(lcValue)
-                lc.setColour(lines[index].color)
-                lc.setDotSize(3)
-                lc.setTooltip(lines[index].title + "<br>#x_label#<br>#val# %")
-                lc.setText(lines[index].title)
-                lineCharts << lc
-            }
-            c = new Chart(message(code: "statistics.graph.userCache.hit.title",
-                args: [ts.title])).addElements(lineCharts)
-
-            addXAxis(c, timeValues, ts.pattern)
-
-            c.setLegend(new Legend())
-        }
-
-        addYAxis(c, minValue, maxValue, false)
-        
-        c.setBackgroundColour("#FFFFFF")
-        log.debug("c = " + c)
-        c
     }
 
     def BYTE_RATE_CHART = {
@@ -332,56 +204,6 @@ class StatisticsController {
         c.setBackgroundColour("#FFFFFF")
         log.debug("c = " + c)
         c  
-    }
-
-    def LATENCY_CHART = {
-        render getLatencyChart()
-    }
-
-    def getLatencyChart = {
-        Chart c
-        def ts = getTimespan()
-        def start = new Date(System.currentTimeMillis() 
-                             - 1000 * Long.valueOf(ts.seconds))
-        def now = new Date()
- 
-        def line = [type: "Latency", color: colors[0], 
-            title: message(code: "statistics.graph.latency.title")]
-        def chartData = latencyStatisticsService
-            .getChartValues(start.getTime(), now.getTime())
-
-        if (!chartData) {
-            def noData = message(code: "statistics.graph.noDataYet")
-            c = new Chart(message(
-                code: "statistics.graph.latency.replica.title.noData",
-                args: [ts.title, noData]))
-        } else {
-            c = new Chart(message(code:"statistics.graph.latency.replica.title",
-                args: [ts.title]))
-            def minValue = 0
-            def maxValue = 0
-            def latValues = chartData.keySet().collect {
-                def val = chartData[it][line['type']]
-                maxValue = Math.max(maxValue, val ?: 0)
-                val
-            }
-            def lc = new LineChart().addValues(latValues)
-            lc.setColour(line.color)
-            lc.setDotSize(3)
-            lc.setTooltip(line.title + "<br>#x_label#<br>#val# " + 
-                message(code:"general.measurement.milliseconds.short"))
-            lc.setText(line.title)
-            c.addElements(lc)
-
-            addXAxis(c, chartData.keySet(), ts.pattern)
-            
-            c.setLegend(new Legend())
-            
-            addYAxis(c, minValue, maxValue)            
-        }
-
-        c.setBackgroundColour("#FFFFFF")
-        c
     }
 
     def DISKSPACE_CHART = {
@@ -470,71 +292,7 @@ class StatisticsController {
             
             c.setLegend(new Legend())
             
-            addYAxis(c, minValue, maxValue)                                
-        }
-
-        c.setBackgroundColour("#FFFFFF")
-        c
-    }
-
-    def SVN_HITS_BY_REPO = {
-        render getSvnHitsByRepoChart()
-    }
-
-    def getSvnHitsByRepoChart = {
-        Chart c
-        def ts = getTimespan()
-        def start = new Date(System.currentTimeMillis() 
-                             - 1000 * Long.valueOf(ts.seconds))
-        def now = new Date()
- 
-        def lines = []
-        Repository.list(sort:"name", order:"asc").eachWithIndex { repo, i ->
-            def colorIndex = i % colors.size()
-            lines << [type: repo.getName(), color: colors[colorIndex],
-                title: repo.getName()]
-        }
-
-        def chartData = svnStatisticsService
-            .getChartValues(start.getTime(), now.getTime())
-        
-
-        if (!chartData) {
-            def noData = message(code: "statistics.graph.noDataYet")
-            c = new Chart(message(code: "statistics.graph.space.repos.noData",
-                args: [ts.title, noData]))
-        } else {
-            c = new Chart(message(code: "statistics.graph.space.repos", 
-                args: [ts.title]))
-            def minValue = 0
-            def maxValue = 0
-
-            def valueSets = lines.collect {
-                def values = chartData.keySet().collect { key ->
-                                   chartData.get(key)[it.type]
-                }
-                maxValue = Math.max(maxValue, values.max()?: 0)
-                values
-            }
-
-            def lineCharts = [] 
-            lines.eachWithIndex { line, index ->
-                def lineChart = new LineChart()
-                    .addValues(valueSets[index])
-                lineChart.setColour(line.color)
-                lineChart.setDotSize(3)
-                lineChart.setTooltip(line.title + "<br>#x_label#<br>#val#")
-                lineChart.setText(line.title)
-                lineCharts << lineChart
-            } 
-
-            c = c.addElements(lineCharts)
-
-            addXAxis(c, chartData.keySet(), ts.pattern)
-            
-            c.setLegend(new Legend())
-            
-            addYAxis(c, minValue, maxValue)            
+            addYAxis(c, minValue, maxValue)
         }
 
         c.setBackgroundColour("#FFFFFF")

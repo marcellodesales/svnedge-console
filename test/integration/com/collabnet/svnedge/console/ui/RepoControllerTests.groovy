@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.ui
 
 import grails.test.*
+
 import com.collabnet.svnedge.console.Repository
 
 class RepoControllerTests extends ControllerUnitTestCase {

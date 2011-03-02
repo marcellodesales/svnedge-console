@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.replica.cache
 
+import com.collabnet.svnedge.replication.auth.cache.SimpleCacheKey 
 import grails.test.*
 
 class SimpleKeyTests extends GrailsUnitTestCase {

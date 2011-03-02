@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.statistics.service
 
-import com.collabnet.svnedge.replica.event.UserCacheEvent
 
 import com.collabnet.svnedge.replication.ReplicatedRepository
 
@@ -25,11 +24,9 @@ import com.collabnet.svnedge.replication.ReplicatedRepository
  * Service for getting up-to-date statistics values.
  */
 class RealTimeStatisticsService {
-    def userCacheStatisticsService
+
     def networkStatisticsService
-    def cacheManagementService
     def fileSystemStatisticsService
-    def latencyStatisticsService
 
     boolean transactional = true
 
@@ -41,38 +38,6 @@ class RealTimeStatisticsService {
      */
     Date getTimestampFileSystemData() {
         return new Date()
-    }
-
-    /**
-     * Returns the number of users currently stored in the user cache.
-     * @return number of users cached (int).
-     */
-    def getNumUsersCached() {
-        return cacheManagementService?.getAuthenticationCacheSize()
-    }
-
-    /** 
-     * Returns the percentage of hits (vs. misses) for the user cache (for
-     * the past day)
-     * @return the percentage (float value between 0 and 1) of cache hits. 
-     */
-    def getUserCachePercentageHit() {
-        def now = new Date()
-        def getTotal = { cacheType, eventType ->
-            userCacheStatisticsService.getTotal(cacheType, eventType, now - 1, 
-                                                now)
-        }
-        def totalHits = UserCacheEvent.CACHE_TYPES.collect { 
-            getTotal(it.type, UserCacheEvent.HIT)
-        }.sum()
-        def totalMisses = UserCacheEvent.CACHE_TYPES.collect { 
-            getTotal(it.type, UserCacheEvent.MISS)
-        }.sum()
-        // avoid death by divide by zero error
-        if ((totalHits + totalMisses) == 0) {
-            return 0
-        }
-        return totalHits.floatValue() / (totalHits + totalMisses)
     }
 
     /**
@@ -164,14 +129,5 @@ class RealTimeStatisticsService {
             timeIntervalOut = throughput[1][1] / 1000
         }
         return [throughputIn, timeIntervalIn, throughputOut, timeIntervalOut]
-    }
-
-    /**
-     * Returns the latency from the given hostname (or the default master if
-     * hostname is unset).
-     * @return the latency in ms.
-     */
-    def getLatency(hostname) {
-        latencyStatisticsService.getLatency(hostname)
     }
 }

@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.statistics.service
 
-import com.collabnet.svnedge.replica.event.ReplicaEvent
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.util.StatisticsTime
 import com.collabnet.svnedge.jobs.ConsolidateStatJob
@@ -27,7 +26,7 @@ import com.collabnet.svnedge.statistics.StatAction
 import com.collabnet.svnedge.statistics.StatValue
 import com.collabnet.svnedge.statistics.Statistic
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder;
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.quartz.SchedulerException
 
 abstract class AbstractStatisticsService {

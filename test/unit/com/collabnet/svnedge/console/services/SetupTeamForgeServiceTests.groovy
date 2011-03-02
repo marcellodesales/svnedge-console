@@ -21,6 +21,7 @@ import java.util.Random
 import grails.test.GrailsUnitTestCase
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.collabnet.svnedge.teamforge.CtfConversionBean
+import com.collabnet.svnedge.teamforge.SetupTeamForgeService;
 
 class SetupTeamForgeServiceTests extends GrailsUnitTestCase {
     def setupTeamForgeService

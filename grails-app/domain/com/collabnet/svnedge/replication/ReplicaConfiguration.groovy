@@ -17,8 +17,7 @@
  */
 package com.collabnet.svnedge.replication
 
-import com.collabnet.svnedge.teamforge.ApprovalState;
-
+import com.collabnet.svnedge.teamforge.ApprovalState
 
 /**
  * This stores the replication configuration.

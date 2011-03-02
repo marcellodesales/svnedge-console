@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.replica.cache.oauth
 
+
+import com.collabnet.svnedge.replication.auth.cache.CTFUserAuthorizationKey 
 import grails.test.*
 
 class CTFUserAuthorizationKeyTests extends GrailsUnitTestCase {

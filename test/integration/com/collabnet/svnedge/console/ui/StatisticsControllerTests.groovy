@@ -22,20 +22,14 @@ import grails.test.*
 class StatisticsControllerTests extends AbstractSvnEdgeControllerTests {
     
     def operatingSystemService
-    def userCacheStatisticsService
     def networkStatisticsService
     def fileSystemStatisticsService
-    def latencyStatisticsService
-    def svnStatisticsService
 
     protected void setUp() {
         super.setUp()
         controller.operatingSystemService = operatingSystemService
-        controller.userCacheStatisticsService = userCacheStatisticsService
         controller.networkStatisticsService = networkStatisticsService
         controller.fileSystemStatisticsService = fileSystemStatisticsService
-        controller.latencyStatisticsService = latencyStatisticsService
-        controller.svnStatisticsService = svnStatisticsService
     }
 
     protected void tearDown() {
@@ -51,28 +45,10 @@ class StatisticsControllerTests extends AbstractSvnEdgeControllerTests {
         assertNotNull("The timespan should not be null.", timespan)
     }
 
-    void testUserCachePieChart() {
-        def pieChart = controller.getUserCachePieChart()
-        assertNotNull("The user cache pie chart should not be null.", 
-                      pieChart)
-    }
-
-    void testUserCacheLineChart() {
-        def lineChart = controller.getUserCacheLineChart()
-        assertNotNull("The user cache line chart should not be null.", 
-                      lineChart)
-    }
-
     void testByteRateChart() {
         def rateChart = controller.getByteRateChart()
         assertNotNull("The byte rate line chart should not be null.", 
                       rateChart)
-    }
-
-    void testLatencyChart() {
-        def latencyChart = controller.getLatencyChart()
-        assertNotNull("The latency chart should not be null.",
-                      latencyChart)
     }
 
     void testDiskpaceChart() {
@@ -81,11 +57,4 @@ class StatisticsControllerTests extends AbstractSvnEdgeControllerTests {
                       diskspaceChart)
     }
 
-    void testSvnHitsChart() {
-        /* SVN charts feature is removed for 1.0 release. */
-        return
-        def svnHitsChart = controller.getSvnHitsByRepoChart()
-        assertNotNull("The svn hits chart should not be null.",
-                      svnHitsChart)
-    }
 }

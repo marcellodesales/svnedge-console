@@ -18,12 +18,10 @@
 package com.collabnet.svnedge.replication
 
 
-import com.collabnet.svnedge.replication.command.event.ConnectivityWithReplicaManagerRestoredEvent;
-import com.collabnet.svnedge.replication.command.CommandResult
+import com.collabnet.svnedge.replication.command.CommandResult 
+import grails.test.GrailsUnitTestCase;
 
-import static com.collabnet.svnedge.master.service.ctf.CtfRemoteClientService.COMMAND_ID_PREFIX
-
-import grails.test.*
+import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
 

@@ -17,18 +17,15 @@
  */
 package com.collabnet.svnedge.console.ui
 
-import java.net.NetworkInterface
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException;
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.CantBindPortException
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException
 
 class CtfCredentialCommand {
     String ctfUsername

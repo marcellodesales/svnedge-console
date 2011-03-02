@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.replica.cache.auth
 
 import com.collabnet.svnedge.replica.cache.*
+import com.collabnet.svnedge.replication.auth.cache.ProxyCache 
 
 import grails.test.*
 

@@ -35,25 +35,6 @@ class RealTimeStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
-    void testNumUsersCached() {
-        def numUsersCached = realTimeStatisticsService.getNumUsersCached()
-        assertNotNull("The number of users cached should not be null.", 
-                      numUsersCached)
-        assertTrue("The number of users cached should be positive.", 
-                   numUsersCached >= 0)
-    }
-
-    void testUserCachePercentageHit() {
-        def cachedPer = realTimeStatisticsService.getUserCachePercentageHit()
-        assertNotNull("The user cache percentage should not be null.", 
-                      cachedPer)
-        assertTrue("The user cache percentage should be greater than or " +
-                       "equal to zero.", cachedPer >= 0)
-        assertTrue("The user cache percentage should be less than or " +
-                       "equal to one.", cachedPer <= 1)
-    }
-
-    
     void testReposStatus() {
         // load up a couple of repos with various status
         new ReplicatedRepository(repo: new Repository(name: "testrepo1").save(), 
@@ -118,12 +99,5 @@ class RealTimeStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
         assertNotNull("The throughput should not be null.", throughput)
         assertEquals("The throughput should contain 4 values.", 4, 
                      throughput.size())
-    }
-
-    void testLatency() {
-        def latency = realTimeStatisticsService.
-            getLatency("www.cu082.cubit.sp.collab.net")
-        assertNotNull("The latency should not be null.", latency)
-        assertTrue("The latency should be positive.", latency >= 0)
     }
 }

@@ -28,7 +28,8 @@ import com.collabnet.svnedge.statistics.Unit
 
 import org.quartz.SchedulerException
 import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.statistics.StatAction
+
+import com.collabnet.svnedge.statistics.service.AbstractStatisticsService
 
 /**
  * Service for getting and storing filesystem statistics.

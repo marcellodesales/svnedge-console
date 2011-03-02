@@ -15,15 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.master.service.ctf
+package com.collabnet.svnedge.teamforge
 
 import java.util.Locale;
 
 import grails.test.*
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException
 
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 

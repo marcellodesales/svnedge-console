@@ -21,8 +21,8 @@ import java.util.Locale;
 
 import grails.test.*
 
-import com.collabnet.svnedge.replica.cache.ProxyCache
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.replication.auth.cache.ProxyCache 
 import com.collabnet.svnedge.teamforge.CtfServer
 
 class CacheManagementUserInfoIntegrationTests extends GrailsUnitTestCase {
