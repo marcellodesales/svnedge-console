@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.replication
 
-import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
@@ -30,6 +29,7 @@ import com.collabnet.svnedge.replication.command.impl.RepoAddCommand;
 import com.collabnet.svnedge.replication.command.impl.RepoRemoveCommand;
 import com.collabnet.svnedge.replication.command.impl.RepoSyncCommand;
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.teamforge.ApprovalState;
 import com.collabnet.svnedge.teamforge.CtfServer
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
 

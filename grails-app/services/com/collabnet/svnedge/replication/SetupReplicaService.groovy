@@ -21,11 +21,10 @@ import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.master.RemoteMasterException
+import com.collabnet.svnedge.teamforge.ApprovalState
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
-import com.collabnet.svnedge.replica.manager.ApprovalState
 import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
 import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
 import com.collabnet.svnedge.console.CantBindPortException

@@ -26,10 +26,10 @@ import com.collabnet.svnedge.console.CantBindPortException
 
 import com.collabnet.svnedge.replica.manager.Master
 import com.collabnet.svnedge.replica.manager.ReplicaConfig
-import com.collabnet.svnedge.replica.manager.ApprovalState
 
 import java.text.SimpleDateFormat
 import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.teamforge.ApprovalState;
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.replication.ReplicaConfiguration;
 

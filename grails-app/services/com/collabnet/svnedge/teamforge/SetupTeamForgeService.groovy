@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console.services
+package com.collabnet.svnedge.teamforge
+
 
 import java.net.URL;
 import java.net.URLEncoder;
@@ -33,9 +34,9 @@ import com.collabnet.ce.soap50.webservices.cemain.ICollabNetSoap
 import com.collabnet.ce.soap50.webservices.scm.IScmAppSoap
 import com.collabnet.ce.soap50.webservices.cemain.ProjectSoapDO
 import com.collabnet.ce.soap50.webservices.cemain.UserSoapDO
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
 import com.collabnet.svnedge.master.RemoteAndLocalConversationException
 import com.collabnet.svnedge.master.RemoteMasterException
+import com.collabnet.svnedge.replication.CtfAuthenticationException;
 import com.collabnet.svnedge.teamforge.CtfConversionBean
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository

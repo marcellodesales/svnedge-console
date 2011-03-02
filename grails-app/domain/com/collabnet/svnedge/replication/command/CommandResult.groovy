@@ -17,7 +17,6 @@
 */
 package com.collabnet.svnedge.replication.command
 
-
 /**
  * The Command Result registers the result of a given Abstract Command of
  * whether it succeeded or failed.

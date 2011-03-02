@@ -20,10 +20,10 @@ package com.collabnet.svnedge.replication.command.impl
 import org.apache.log4j.Logger
 
 import com.collabnet.svnedge.console.CantBindPortException;
-import com.collabnet.svnedge.replica.manager.ApprovalState
 import com.collabnet.svnedge.replication.ReplicaConfiguration
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
 import com.collabnet.svnedge.replication.command.ShortRunningCommand
+import com.collabnet.svnedge.teamforge.ApprovalState;
 
 /**
  * This command updates the state of the replica server with the URL of the
