@@ -20,11 +20,7 @@ package com.collabnet.svnedge.teamforge
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
-import com.collabnet.svnedge.teamforge.CtfConversionBean
-import com.collabnet.svnedge.replica.manager.ReplicaConfig
-import com.collabnet.svnedge.master.RemoteMasterException
-import com.collabnet.svnedge.console.CantBindPortException;
+import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.teamforge.CtfConnectionBean

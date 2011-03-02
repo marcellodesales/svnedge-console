@@ -22,8 +22,6 @@ import java.text.SimpleDateFormat
 import org.quartz.Trigger
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.replica.jobs.CheckStateJob
-import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 class JobsAdminService {

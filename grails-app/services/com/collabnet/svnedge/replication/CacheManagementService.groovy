@@ -15,22 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.service
+package com.collabnet.svnedge.replication
 
 import org.springframework.remoting.RemoteAccessException
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger
 
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.replica.cache.ProxyCache
-import com.collabnet.svnedge.replica.cache.auth.UserAuthenticationKey
-import com.collabnet.svnedge.replica.manager.Master
-import com.collabnet.svnedge.replica.manager.ReplicaConfig
 
-import com.collabnet.svnedge.replica.event.AsyncEventListenerService
-import com.collabnet.svnedge.replica.event.UserCacheEvent
+import com.collabnet.svnedge.replication.auth.cache.ProxyCache
 
 /**
  * The cache management manages the cache structures for the user 
@@ -42,7 +33,6 @@ public class CacheManagementService {
     boolean transactional = true
     
     def ctfRemoteClientService
-    def asyncEventListenerService
 
     /** The authentication cache */
     ProxyCache authCache = [:]
@@ -56,11 +46,8 @@ public class CacheManagementService {
     /** The user role cache */
     ProxyCache roleCache = [:]
 
-    /** The default Master instance */
-    def defaultMaster
-    
-    /** The current ReplicaConfig instance */
-    def currentConfig
+    def negativeExpirationRate
+    def positiveExpirationRate
 
     /** The roles */
     public static String ROLE_USER = "ROLE_USER"
@@ -69,10 +56,9 @@ public class CacheManagementService {
     public static String PERM_USER = "view"
     public static String PERM_ADMIN = "admin"
     
-    def bootStrap = { initialMaster ->
-        defaultMaster = initialMaster
-        currentConfig = ReplicaConfig.getCurrentConfig()
-        asyncEventListenerService.bootStrap()
+    def bootStrap = { negativeRate, positiveRate ->
+        negativeExpirationRate = negativeRate
+        positiveExpirationRate = positiveRate
     }
 
     /**
@@ -92,8 +78,7 @@ public class CacheManagementService {
      */
     def authenticateUser(username, password) {
         def cacheKey = ProxyCache.newAuthKey(username, password)
-        def cacheValue = getValueFromCache(authCache, cacheKey, username, 
-                                           UserCacheEvent.AUTHN)
+        def cacheValue = getValueFromCache(authCache, cacheKey, username)
         if (!cacheValue) {
             def gUser
             try {
@@ -143,8 +128,7 @@ public class CacheManagementService {
      */
     def getUserRoles(username) {
         def cacheKey = ProxyCache.newSimpleKey(username)
-        def cacheValue = getValueFromCache(roleCache, cacheKey, username, 
-                                           UserCacheEvent.ROLE)
+        def cacheValue = getValueFromCache(roleCache, cacheKey, username)
         if (!cacheValue) {
             log.warn("getUserRoles was called for a user that was not authenticated: " + username)
             cacheValue = buildRoleCache(username, new String[0])
@@ -167,21 +151,13 @@ public class CacheManagementService {
      * Closure for getting a value from a cache.  Returns null if the 
      * value is expired or not present.
      */
-    def getValueFromCache = { cache, key, username, cacheType ->
+    def getValueFromCache = { cache, key, username ->
         if (!cache.hasKeyValueExpired(key)) {
             log.debug("$key on local cache; not expired")
-            asyncEventListenerService.
-                fireEvent(new UserCacheEvent(username, 
-                                             cacheType, 
-                                             UserCacheEvent.HIT));
             return cache[key]
         } else {
             log.debug("$key NOT on local cache or has expired: " 
                       + "verifying on master host")
-            asyncEventListenerService.
-                fireEvent(new UserCacheEvent(username, 
-                                             cacheType, 
-                                             UserCacheEvent.MISS));
             return null
         }
     }
@@ -200,16 +176,16 @@ public class CacheManagementService {
         if (responseValue instanceof Exception) {
             log.debug("Creating a short-term cache value for exception")
             return ProxyCache.newValueExpiresInSeconds(
-                currentConfig.negativeExpirationRate, 1)
+                negativeExpirationRate, 1)
         }
         if (responseValue) {
             log.debug("Creating a long-term cache value for response")
             return ProxyCache.newValueExpiresInMinutes(
-                currentConfig.positiveExpirationRate, responseValue)
+                positiveExpirationRate, responseValue)
         } else {
             log.debug("Creating a short-term cache value for response")
             return ProxyCache.newValueExpiresInSeconds(
-                    currentConfig.negativeExpirationRate, responseValue)
+                    negativeExpirationRate, responseValue)
         }
     }
 
@@ -219,8 +195,7 @@ public class CacheManagementService {
      */
     def getUserInfo(username) {
         def cacheKey = ProxyCache.newSimpleKey(username)
-        def cacheValue = getValueFromCache(userInfoCache, cacheKey, username, 
-                                           UserCacheEvent.INFO)
+        def cacheValue = getValueFromCache(userInfoCache, cacheKey, username)
         
         if (!cacheValue) {
             log.warn("getUserInfo was called for a user that was not authenticated: " + username)
@@ -259,8 +234,7 @@ public class CacheManagementService {
      */
     String getPathRoles(username, repoPath, accessType) {
         def cacheKey = ProxyCache.newCTFOauthKey(username, repoPath, accessType)
-        def cacheValue = getValueFromCache(oauthCache, cacheKey, username, 
-                                           UserCacheEvent.AUTHZ)
+        def cacheValue = getValueFromCache(oauthCache, cacheKey, username)
 
         if (!cacheValue) {
             try {

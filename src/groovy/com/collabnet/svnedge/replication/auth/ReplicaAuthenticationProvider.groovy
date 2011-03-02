@@ -15,10 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.auth
-
-import com.collabnet.svnedge.replica.service.CacheManagementService
-import com.collabnet.svnedge.replica.service.auth.ReplicaUserDetailsService
+package com.collabnet.svnedge.replication.auth
 
 import org.apache.log4j.Logger
 
@@ -26,8 +23,6 @@ import org.springframework.security.providers.AuthenticationProvider
 import org.springframework.security.Authentication
 import org.springframework.security.AuthenticationException
 import org.springframework.security.BadCredentialsException
-import org.springframework.security.GrantedAuthority
-import org.springframework.security.GrantedAuthorityImpl
 import com.collabnet.svnedge.console.Server
 
 class ReplicaAuthenticationProvider implements AuthenticationProvider {

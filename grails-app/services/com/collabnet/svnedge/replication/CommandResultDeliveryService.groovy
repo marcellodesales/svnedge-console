@@ -18,12 +18,13 @@
 package com.collabnet.svnedge.replication
 
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
-import com.collabnet.svnedge.master.RemoteMasterException
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext
 import com.collabnet.svnedge.replication.command.CommandResult
 import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
 import com.collabnet.svnedge.replication.command.event.ConnectivityWithReplicaManagerRestoredEvent
 import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
+import com.collabnet.svnedge.teamforge.RemoteMasterException
+import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 import org.springframework.context.ApplicationListener
 

@@ -93,7 +93,6 @@ class DiscoveryService {
             def params = [:]
             params[SvnEdgeCsvnServiceKey.TEAMFORGE_PATH] = tfPath
             params[SvnEdgeCsvnServiceKey.CONTEXT_PATH] = path
-            params[SvnEdgeCsvnServiceKey.SERVER_MODE] = server.mode
 
             register.registerService(port, SvnEdgeServiceType.CSVN, params);
 

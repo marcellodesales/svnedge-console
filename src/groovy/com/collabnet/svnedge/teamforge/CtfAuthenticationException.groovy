@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.master.ctf
+package com.collabnet.svnedge.teamforge
 
-import com.collabnet.svnedge.master.RemoteMasterException
+
 
 /**
  * The authentication exception occurs when the credentials provided to the

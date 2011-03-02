@@ -15,17 +15,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.auth
+package com.collabnet.svnedge.teamforge
 
-//TODO: we may want to include more info, like email address, etc.
-class ReplicaUser {
-    def realUserName
 
-    public ReplicaUser(realUserName) {
-        this.realUserName = realUserName
-    }
+import com.collabnet.svnedge.teamforge.RemoteMasterException;
 
-    public String getRealUserName() {
-        return this.realUserName
+/**
+ * Some scenarios of communications between the Master server and this local
+ * one requires the exchange of information through SOAP calls or HTTP requests
+ * from both parties. This exception must be thrown when there is an error
+ * during this communication. The details can be found on the error message.
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
+ *
+ */
+class RemoteAndLocalConversationException extends RemoteMasterException {
+
+    /**
+     * Creates a new exception with the given hostname.
+     * @param msg is the error message.
+     */
+    public RemoteAndLocalConversationException(String hostname, String msg) {
+        super(hostname, msg, null)
     }
 }

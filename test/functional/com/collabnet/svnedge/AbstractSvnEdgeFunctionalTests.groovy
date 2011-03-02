@@ -20,13 +20,13 @@ package com.collabnet.svnedge
 import java.util.Locale;
 
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.services.SetupTeamForgeService;
 import com.collabnet.svnedge.console.util.FileDownloaderCategory;
 import com.collabnet.svnedge.console.util.UntarCategory;
 
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode;
 import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.teamforge.SetupTeamForgeService;
 
 import functionaltestplugin.FunctionalTestCase
 import org.codehaus.groovy.grails.commons.ConfigurationHolder

@@ -20,8 +20,6 @@ package com.collabnet.svnedge.teamforge
 
 import org.springframework.security.GrantedAuthority
 import org.springframework.security.GrantedAuthorityImpl
-import org.springframework.remoting.RemoteAccessException
-import org.springframework.beans.factory.InitializingBean
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import grails.util.GrailsUtil
@@ -34,30 +32,20 @@ import com.collabnet.ce.soap50.types.SoapNamedValues;
 import com.collabnet.ce.soap50.fault.IllegalArgumentFault;
 import com.collabnet.ce.soap50.fault.InvalidSessionFault;
 import com.collabnet.ce.soap50.fault.LoginFault
-import com.collabnet.ce.soap50.fault.NoSuchObjectFault
 import com.collabnet.ce.soap50.fault.ObjectAlreadyExistsFault;
 import com.collabnet.ce.soap50.fault.PermissionDeniedFault;
 import com.collabnet.ce.soap50.fault.SystemFault;
 import com.collabnet.ce.soap50.fault.UserLimitExceededFault;
-import com.collabnet.svnedge.master.RemoteMasterException
-import com.collabnet.svnedge.master.RemoteAndLocalConversationException
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
 import com.collabnet.svnedge.teamforge.CtfServer
 
-import java.net.NoRouteToHostException;
-import java.net.UnknownHostException;
+import java.net.NoRouteToHostException
+import java.net.UnknownHostException
 import java.net.MalformedURLException
-import java.util.Locale;
-import java.util.regex.Pattern
 
-im
-import com.collabnet.svnedge.replication.CtfAuthenticationException;
-import com.collabnet.svnedge.replication.CtfSessionExpiredException;
-port com.collabnet.svnedge.replication.ReplicaConversionBean
-import com.collabnet.svnedge.teamforge.CtfConnectionBean
-import com.collabnet.svnedge.replica.manager.ReplicaConfig
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException
+import com.collabnet.svnedge.teamforge.CtfSessionExpiredException
 import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 /**

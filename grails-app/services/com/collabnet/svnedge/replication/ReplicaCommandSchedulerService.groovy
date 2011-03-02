@@ -30,7 +30,7 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationListener
 
-import static com.collabnet.svnedge.master.service.ctf.CtfRemoteClientService.COMMAND_ID_PREFIX
+import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
 import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
 import com.collabnet.svnedge.replication.command.event.AppliedExecutorSemaphoresUpdateEvent
 import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent

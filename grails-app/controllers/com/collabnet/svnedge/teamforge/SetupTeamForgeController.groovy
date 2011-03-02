@@ -17,17 +17,14 @@
  */
 package com.collabnet.svnedge.teamforge
 
-
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.master.RemoteMasterException
-import com.collabnet.svnedge.master.RemoteAndLocalConversationException
-import com.collabnet.svnedge.master.ctf.CtfSessionExpiredException;
-import com.collabnet.svnedge.master.ctf.CtfAuthenticationException
+import com.collabnet.svnedge.teamforge.CtfSessionExpiredException
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException
 import com.collabnet.svnedge.teamforge.CtfConversionBean;
 
 import java.net.MalformedURLException;

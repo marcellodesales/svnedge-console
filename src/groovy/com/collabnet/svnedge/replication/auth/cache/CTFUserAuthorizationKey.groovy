@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.cache.oauth
+package com.collabnet.svnedge.replication.auth.cache
 
-import com.collabnet.svnedge.replica.cache.AbstractCacheKey
+
 
 /**
  * The CTF User Authorization key is related to the parameters used to the

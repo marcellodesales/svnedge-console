@@ -15,29 +15,18 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 import grails.util.GrailsUtil
 
-import java.net.URL
-
 import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.security.Role
-import com.collabnet.svnedge.replica.manager.Master
-import com.collabnet.svnedge.replica.manager.ReplicaConfig
-import com.collabnet.svnedge.teamforge.CtfServer
-
-import org.codehaus.groovy.grails.commons.ApplicationAttributes 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
-import org.springframework.core.io.ResourceLoader
+import com.collabnet.svnedge.replication.ReplicaConfig;
 
 /**
  * Regular BootStrap for Grails.
  */
 class BootStrap {
 
+    def backgroundService
     //####### Services that are always instantiated #############
     def operatingSystemService
     def networkingService
@@ -58,17 +47,16 @@ class BootStrap {
     def replicaCommandSchedulerService
     def commandResultDeliveryService
     def logManagementService
+    def cacheManagementService
 
     // Alternate auth mechanism for CTF mode
     def authenticationManager
     def ctfAuthenticationProvider
 
     // Replication-related services for future CTF versions
-    def replicationBootstrapService
     def jobsAdminService
-    
     def grailsApplication
-    
+
     def init = { servletContext ->
 
         def config = grailsApplication.config
@@ -167,14 +155,17 @@ class BootStrap {
         }
 
         if (GrailsUtil.environment == "test") {
-            log.info("Bootstrapping replication Services...")
-            replicationBootstrapService.bootstrap(config, servletContext, 
-                server)
+            log.info("Bootstrapping cacheManagementService...")
+            def negative = config.svnedge.replica.cache.negativeExpirationRate
+            def positive = config.svnedge.replica.cache.positiveExpirationRate
+            cacheManagementService.bootStrap(negative, positive)
         }
 
         log.info("Bootstrapping discoveryService...")
         try {
-            discoveryService.bootStrap(config)
+            backgroundService.execute("Starting Discovery Service", {
+                discoveryService.bootStrap(config)
+            })
         } catch (Exception e) {
             log.error ("Failed to intitialize DiscoveryService: " + e.getMessage(), e)
         }

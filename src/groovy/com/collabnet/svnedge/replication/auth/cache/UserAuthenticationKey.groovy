@@ -15,15 +15,10 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replica.cache.auth
+package com.collabnet.svnedge.replication.auth.cache
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import sun.misc.BASE64Encoder;
-import sun.misc.CharacterEncoder;
-
-import com.collabnet.svnedge.replica.cache.AbstractCacheKey
+import java.security.MessageDigest 
+import sun.misc.BASE64Encoder 
 
 /**
  * The UserAuthenticationKey is used to identify an authentication cache key

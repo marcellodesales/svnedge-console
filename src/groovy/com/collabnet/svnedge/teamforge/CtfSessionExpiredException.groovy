@@ -15,9 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.collabnet.svnedge.master.ctf
-
-import com.collabnet.svnedge.master.RemoteMasterException
+package com.collabnet.svnedge.teamforge
 
 /**
 * When the sessionId from the user expires during the execution of SOAP calls
