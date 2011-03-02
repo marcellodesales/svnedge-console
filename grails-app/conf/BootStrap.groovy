@@ -19,7 +19,6 @@
 import grails.util.GrailsUtil
 
 import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.replication.ReplicaConfig;
 
 /**
  * Regular BootStrap for Grails.
