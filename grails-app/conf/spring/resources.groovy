@@ -17,7 +17,7 @@
  */
 // Place your Spring DSL code here
 beans = {
-    ReplicaAuthenticationProvider(com.collabnet.svnedge.replica.auth.ReplicaAuthenticationProvider) {
+    ReplicaAuthenticationProvider(com.collabnet.svnedge.replication.auth.ReplicaAuthenticationProvider) {
         cacheManagementService = ref("cacheManagementService")
         replicaUserDetailsService = ref("replicaUserDetailsService")
     }
