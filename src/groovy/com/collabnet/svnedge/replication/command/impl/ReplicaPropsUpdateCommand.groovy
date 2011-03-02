@@ -43,7 +43,7 @@ public class ReplicaPropsUpdateCommand extends AbstractReplicaCommand
 
     def constraints() {
         def replica = ReplicaConfiguration.getCurrentConfig()
-        if (replica.approvalState != ApprovalState.APPROVED) {
+        if (!replica.approvalState.equals(ApprovalState.APPROVED)) {
             throw new IllegalStateException("The replica needs to be " +
                 "approved before updating its properties.")
         }
