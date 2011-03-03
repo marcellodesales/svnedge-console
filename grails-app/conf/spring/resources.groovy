@@ -17,12 +17,12 @@
  */
 // Place your Spring DSL code here
 beans = {
-    ReplicaAuthenticationProvider(com.collabnet.svnedge.replication.auth.ReplicaAuthenticationProvider) {
+    ReplicaAuthenticationProvider(com.collabnet.svnedge.replication.security.ReplicaAuthenticationProvider) {
         cacheManagementService = ref("cacheManagementService")
         replicaUserDetailsService = ref("replicaUserDetailsService")
     }
 
-    ctfAuthenticationProvider(com.collabnet.svnedge.teamforge.auth.CtfAuthenticationProvider) {
+    ctfAuthenticationProvider(com.collabnet.svnedge.teamforge.security.CtfAuthenticationProvider) {
         ctfRemoteClientService = ref("ctfRemoteClientService")
     }
 
@@ -31,7 +31,7 @@ beans = {
     }
 
     // use the db-based statistics service
-    statisticsService(com.collabnet.svnedge.statistics.service.LastCollectedStatisticsService) { bean ->
+    statisticsService(com.collabnet.svnedge.statistics.LastCollectedStatisticsService) { bean ->
         bean.autowire = 'byName'
     }
 

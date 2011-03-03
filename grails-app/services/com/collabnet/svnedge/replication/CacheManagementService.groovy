@@ -21,41 +21,60 @@ import org.springframework.remoting.RemoteAccessException
 
 import com.collabnet.svnedge.console.security.User
 
-import com.collabnet.svnedge.replication.auth.cache.ProxyCache
+import com.collabnet.svnedge.replication.security.cache.ProxyCache
 
 /**
  * The cache management manages the cache structures for the user 
  * authentication and the file system artifacts.
- * @author mdesales
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
  */
 public class CacheManagementService {
 
     boolean transactional = true
-    
+
     def ctfRemoteClientService
-
-    /** The authentication cache */
-    ProxyCache authCache = [:]
-
-    /** The main users Cache instance as a TreeMap */
+    /** 
+     * The user role
+     */
+    public static final String ROLE_USER = "ROLE_USER"
+    /**
+     * The admin role
+     */
+    public static final String ROLE_ADMIN = "ROLE_ADMIN"
+    /**
+     * The View permission
+     */
+    public static final String PERM_USER = "view"
+    /**
+     * The admin permission 
+     */
+    public static final String PERM_ADMIN = "admin"
+    /**
+     * The authentication cache.
+     */
+    ProxyCache authCache = [:] 
+    /**
+     * The main users Cache instance as a TreeMap
+     */
     ProxyCache oauthCache = [:]
-
-    /** The user details cache */
-    ProxyCache userInfoCache = [:] 
-
-    /** The user role cache */
+    /**
+     * The user details cache
+     */
+    ProxyCache userInfoCache = [:]
+    /** 
+     * The user role cache 
+     */
     ProxyCache roleCache = [:]
-
+    /**
+     * Negative expiration timeout rate for the cache to go stale.
+     */
     def negativeExpirationRate
+    /**
+     * Negative expiration timeout rate for the cache to go stale.
+     */
     def positiveExpirationRate
 
-    /** The roles */
-    public static String ROLE_USER = "ROLE_USER"
-    public static String ROLE_ADMIN = "ROLE_ADMIN"
-
-    public static String PERM_USER = "view"
-    public static String PERM_ADMIN = "admin"
-    
     def bootStrap = { negativeRate, positiveRate ->
         negativeExpirationRate = negativeRate
         positiveExpirationRate = positiveRate
@@ -63,7 +82,7 @@ public class CacheManagementService {
 
     /**
      * Authenticate a given user without specifying the type of Master.
-     * @param params is the parameters used by to authenticate
+     * @param params is the parameters used to authenticate
      * @return the expected value from a CTF authentication call.
      */
     def authenticateUser(params) {
@@ -72,8 +91,8 @@ public class CacheManagementService {
 
     /**
      * Authenticate a given user without specifying the type of Master.
-     * @username for the user
-     * @password for the user.
+     * @param username is the username for the user
+     * @param password is the password for the user.
      * @return the expected value from a CTF authentication call.
      */
     def authenticateUser(username, password) {
@@ -82,15 +101,18 @@ public class CacheManagementService {
         if (!cacheValue) {
             def gUser
             try {
-                try {
-                    gUser = ctfRemoteClientService
-                        .authenticateUser(username, password)
-                } catch (Exception e) {
-                    log.error("SOAP Fault from Master CEE trying to " + 
-                        "authenticate user: " + username, e) 
-                    throw new RemoteAccessException(e.getMessage())
-                }
-                cacheValue = buildCacheValue(gUser ? Boolean.TRUE : Boolean.FALSE)
+                gUser = ctfRemoteClientService.authenticateUser(username, 
+                    password)
+
+            } catch (Exception e) {
+                log.error("SOAP Fault from Master trying to " + 
+                    "authenticate user: " + username, e) 
+                throw new RemoteAccessException(e.getMessage())
+            }
+            try {
+                cacheValue = buildCacheValue(gUser ? Boolean.TRUE : 
+                    Boolean.FALSE)
+
             } catch (Exception e) {
                 cacheValue = buildCacheValue(e)
             }
@@ -101,12 +123,11 @@ public class CacheManagementService {
             def roles = new String[0]
             if (gUser) {
                 buildUserInfoCache(username, gUser.domainClass)
-                roles = gUser.authorities
-                    .collect({ it.authority }).toArray(roles)
+                roles = gUser.authorities.collect({ it.authority }).toArray(
+                    roles)
             }
             buildRoleCache(username, roles)
         }
-       
         return cacheValue.responseValue
     }
 
@@ -116,26 +137,31 @@ public class CacheManagementService {
      * @return the expected value from a CTF authorization call.
      */
     def authorizeUser(params) {
-        return getPathRoles(params.username, params.repoPath, 
-            params.accessType)
+        return getPathRoles(params.username, params.repoPath, params.accessType)
     }
 
     /**
      * Get roles for a user, including domain roles.
-     *
-     * @username the user to get roles for.
+     * @param username the user to get roles for.
      * @return a String[] of the user's roles.
      */
     def getUserRoles(username) {
         def cacheKey = ProxyCache.newSimpleKey(username)
         def cacheValue = getValueFromCache(roleCache, cacheKey, username)
         if (!cacheValue) {
-            log.warn("getUserRoles was called for a user that was not authenticated: " + username)
+            log.warn("getUserRoles was called for a user that was not " +
+                "authenticated: " + username)
             cacheValue = buildRoleCache(username, new String[0])
         }
         cacheValue.responseValue
     }
 
+    /**
+     * Builds the role cache for a given user.
+     * @param username is the username to cache.
+     * @param roles is the roles to be cached.
+     * @return the cached value.
+     */
     private def buildRoleCache(username, roles) {
         def cacheKey = ProxyCache.newSimpleKey(username)
         def cacheValue = buildCacheValue(roles)
@@ -144,12 +170,12 @@ public class CacheManagementService {
         roleCache[cacheKey] = cacheValue
         log.debug("Cache size after insert=" + getRoleCacheSize())
         log.debug("$cacheKey cached as $cacheValue")
-        cacheValue
+        return cacheValue
     }
 
     /**
-     * Closure for getting a value from a cache.  Returns null if the 
-     * value is expired or not present.
+     * Closure for getting a value from a cache.
+     * @return null if the value is expired or not present.
      */
     def getValueFromCache = { cache, key, username ->
         if (!cache.hasKeyValueExpired(key)) {
@@ -196,18 +222,24 @@ public class CacheManagementService {
     def getUserInfo(username) {
         def cacheKey = ProxyCache.newSimpleKey(username)
         def cacheValue = getValueFromCache(userInfoCache, cacheKey, username)
-        
+
         if (!cacheValue) {
-            log.warn("getUserInfo was called for a user that was not authenticated: " + username)
-            cacheValue = buildUserInfoCache(username, 
-                new User(username: username, 
-                         realUserName: "Unauthenticated", 
-                         email: username + "@example.com"))
+            log.warn("getUserInfo was called for a user that was not " +
+                "authenticated: " + username)
+            cacheValue = buildUserInfoCache(username,
+                new User(username: username, realUserName: "Unauthenticated",
+                    email: username + "@example.com"))
         }
 
         return cacheValue.responseValue 
     }
 
+    /**
+     * Builds the user Info in cache.
+     * @param username is the username
+     * @param user
+     * @return
+     */
     private def buildUserInfoCache(username, user) {
         def cacheKey = ProxyCache.newSimpleKey(username)
         def cacheValue
@@ -238,10 +270,10 @@ public class CacheManagementService {
 
         if (!cacheValue) {
             try {
-                def masterOauthResponseValue = authorizeOnMasterCTF(username, 
-                                                                    repoPath, 
-                                                                    accessType)
+                def masterOauthResponseValue = authorizeOnMasterCTF(username,
+                    repoPath, accessType)
                 cacheValue = buildCacheValue(masterOauthResponseValue)
+
             } catch (Exception e) {
                 cacheValue = buildCacheValue(e)
             }
@@ -249,7 +281,6 @@ public class CacheManagementService {
             oauthCache[cacheKey] = cacheValue
             log.debug("$cacheKey cached as $cacheValue")
         }
-
         return cacheValue.responseValue
     }
 
@@ -263,15 +294,16 @@ public class CacheManagementService {
      */
     private String authorizeOnMasterCTF(username, repoPath, accessType){
         try {
-            def remoteResponse = ctfRemoteClientService?.
-                getRolePaths(username, repoPath, accessType)
+            def remoteResponse = ctfRemoteClientService?.getRolePaths(username,
+                repoPath, accessType)
             return remoteResponse
+
         } catch (Exception e) {
             log.warn("SOAP Fault from Master CTF trying to authorize user", e)
             throw new RemoteAccessException(e.getMessage())
         }
     }
-    
+
     /**
      * @return the current list of users on the Cache.
      */

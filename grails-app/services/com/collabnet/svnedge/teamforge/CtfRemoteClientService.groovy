@@ -37,7 +37,7 @@ import com.collabnet.ce.soap50.fault.PermissionDeniedFault;
 import com.collabnet.ce.soap50.fault.SystemFault;
 import com.collabnet.ce.soap50.fault.UserLimitExceededFault;
 import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.services.AbstractSvnEdgeService;
+import com.collabnet.svnedge.console.AbstractSvnEdgeService;
 import com.collabnet.svnedge.teamforge.CtfServer
 
 import java.net.NoRouteToHostException

@@ -25,8 +25,8 @@ import com.collabnet.svnedge.replication.ReplicaConfiguration
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand 
 import com.collabnet.svnedge.replication.command.ShortRunningCommand 
 import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
-import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
-import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
+import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
+import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 
 /**
  * This command updates the state of the replica server, changing the name and

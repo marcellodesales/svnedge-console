@@ -17,8 +17,8 @@
 */
 package com.collabnet.svnedge.teamforge
 
-import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.console.AbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 

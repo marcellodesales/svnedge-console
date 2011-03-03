@@ -17,10 +17,6 @@
  */
 package com.collabnet.svnedge.console.pkgsupdate;
 
-/*
- * Copyright 2010 CollabNet, Inc. All rights reserved.
- */
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -28,7 +24,7 @@ import java.net.NoRouteToHostException;
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import com.collabnet.svnedge.console.services.PackagesUpdateService;
+import com.collabnet.svnedge.console.PackagesUpdateService;
 import com.collabnet.svnedge.console.util.FileDownloaderCategory;
 import com.collabnet.svnedge.console.util.UntarCategory;
 import com.collabnet.svnedge.console.pkgsupdate.PackageInfo;

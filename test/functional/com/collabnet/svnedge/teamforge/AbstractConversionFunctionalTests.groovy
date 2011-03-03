@@ -21,8 +21,8 @@ import java.util.Locale;
 
 import groovy.lang.MetaClass;
 
-import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests;
-import com.collabnet.svnedge.AdminLoggedInAbstractSvnEdgeFunctionalTests;
+import com.collabnet.svnedge.console.AbstractSvnEdgeFunctionalTests;
+import com.collabnet.svnedge.console.AdminLoggedInAbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.Repository;
 import com.collabnet.svnedge.console.Server;
 import com.collabnet.svnedge.console.security.User;

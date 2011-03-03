@@ -18,8 +18,8 @@
 package com.collabnet.svnedge.console
 
 import com.collabnet.svnedge.teamforge.CtfServer
-import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
 
 /**
  * Defines the svn server and console. 

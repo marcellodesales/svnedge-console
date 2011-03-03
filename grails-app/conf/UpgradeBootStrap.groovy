@@ -19,8 +19,8 @@ import com.collabnet.svnedge.statistics.Statistic
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.SchemaVersion
-import com.collabnet.svnedge.console.services.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.console.services.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.statistics.StatAction
 import groovy.sql.Sql
 

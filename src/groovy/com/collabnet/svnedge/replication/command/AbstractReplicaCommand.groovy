@@ -19,9 +19,9 @@ package com.collabnet.svnedge.replication.command
 
 import com.collabnet.svnedge.replication.ReplicaConfiguration
 import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
-import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
 import com.collabnet.svnedge.teamforge.CtfServer
-import static com.collabnet.svnedge.console.services.JobsAdminService.REPLICA_GROUP
+import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 
 /**
  * Defines the Abstract Replica Server Command. That is, a command that is used

@@ -25,7 +25,7 @@ import java.util.concurrent.Semaphore
 
 import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
+import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
 import com.collabnet.svnedge.replication.command.CommandExecutionException
 import com.collabnet.svnedge.replication.command.LongRunningCommand
@@ -38,7 +38,7 @@ import com.collabnet.svnedge.replication.command.event.NoCommandsRunningUpdateSe
 import com.collabnet.svnedge.replication.command.event.ShortRunningCommandQueuedEvent
 import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
 import com.collabnet.svnedge.replication.command.handler.CommandExecutorHandler
-import com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob
+import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
 
 import org.springframework.context.ApplicationListener
 

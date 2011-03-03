@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console.services;
 
 import grails.test.GrailsUnitTestCase;
 
-import com.collabnet.svnedge.console.CantBindPortException;
+import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.ConfigUtil

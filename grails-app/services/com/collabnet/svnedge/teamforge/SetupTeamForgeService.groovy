@@ -29,13 +29,7 @@ import java.util.zip.ZipOutputStream;
 
 import grails.util.GrailsUtil
 
-import com.collabnet.ce.soap50.webservices.ClientSoapStubFactory
-import com.collabnet.ce.soap50.webservices.cemain.ICollabNetSoap
-import com.collabnet.ce.soap50.webservices.scm.IScmAppSoap
-import com.collabnet.ce.soap50.webservices.cemain.ProjectSoapDO
-import com.collabnet.ce.soap50.webservices.cemain.UserSoapDO
 import com.collabnet.svnedge.teamforge.CtfAuthenticationException
-import com.collabnet.svnedge.teamforge.CtfConversionBean
 import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.Repository
@@ -43,7 +37,7 @@ import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.CantBindPortException
-import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
+import com.collabnet.svnedge.console.AbstractSvnEdgeService
 
 class SetupTeamForgeService extends AbstractSvnEdgeService {
 

@@ -17,7 +17,7 @@
  */
 package com.collabnet.svnedge.replication
 
-import com.collabnet.svnedge.console.services.AbstractSvnEdgeService
+import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext
 import com.collabnet.svnedge.replication.command.CommandResult
 import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent

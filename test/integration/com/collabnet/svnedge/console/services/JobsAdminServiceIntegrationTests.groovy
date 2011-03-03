@@ -19,7 +19,9 @@ package com.collabnet.svnedge.console.services
 
 import grails.test.*
 
-import com.collabnet.svnedge.jobs.LogRotateJob
+import com.collabnet.svnedge.console.JobsAdminService;
+import com.collabnet.svnedge.console.LogRotateJob
+import com.collabnet.svnedge.replication.FetchReplicaCommandsJob;
 
 class JobsAdminServiceIntegrationTests extends GrailsUnitTestCase {
     
@@ -63,12 +65,6 @@ class JobsAdminServiceIntegrationTests extends GrailsUnitTestCase {
         def paused = jobsAdminService.getPausedGroups()
         assertTrue("LogRotate/Maintenance triggers should be paused.",
                    paused.contains(LogRotateJob.group))
-
-        // check that there is still a trigger
-        def triggers = jobsAdminService.getTriggers(LogRotateJob.name, 
-                                                    LogRotateJob.group)
-        assertEquals("There should be one trigger for the job.", 1, 
-                     triggers.size())
 
         // attempt to resume it
         try {

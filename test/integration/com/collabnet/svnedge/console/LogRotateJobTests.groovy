@@ -26,7 +26,7 @@ class LogRotateJobTests extends GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
         LogRotateJob = grailsApplication.mainContext
-            .getBean("com.collabnet.svnedge.jobs.LogRotateJob")
+            .getBean("com.collabnet.svnedge.console.LogRotateJob")
     }
 
     protected void tearDown() {

@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console.services;
 
+import com.collabnet.svnedge.console.NetworkingService;
+
 import grails.test.GrailsUnitTestCase;
 
 class NetworkingServiceTests extends GrailsUnitTestCase {

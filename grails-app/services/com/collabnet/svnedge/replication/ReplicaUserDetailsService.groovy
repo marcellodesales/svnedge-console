@@ -18,7 +18,7 @@
 package com.collabnet.svnedge.replication
 
 
-import com.collabnet.svnedge.replication.auth.ReplicaUserDetails;
+import com.collabnet.svnedge.replication.security.ReplicaUserDetails;
 
 import org.springframework.security.userdetails.UserDetailsService
 
