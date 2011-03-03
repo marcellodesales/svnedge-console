@@ -1037,7 +1037,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             GrailsUtil.deepSanitize(e)
             // also no session, but log this one as it indicates a problem
             def generalMsg = getMessage(
-                "ctfRemoteClientService.uploadCommandResult.error", locale)
+                "ctfRemoteClientService.uploadCommandResult.error", [commandId,
+                    succeeded, replicaServerId], locale) + e.getMessage()
             log.error(generalMsg)
             throw new RemoteMasterException(ctfUrl, generalMsg, e)
         }
