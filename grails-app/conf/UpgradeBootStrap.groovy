@@ -15,14 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.SchemaVersion
+import com.collabnet.svnedge.console.SchemaVersion 
+import com.collabnet.svnedge.console.Server 
+import com.collabnet.svnedge.console.ServerMode 
 import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
-import com.collabnet.svnedge.statistics.StatAction
-import groovy.sql.Sql
+import com.collabnet.svnedge.statistics.Statistic 
 
 /**
  * Bootstrap script for handling any special conditions associated with upgrades

@@ -15,19 +15,33 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller.admin
 
 
-/**
- * Logout Controller (Example).
- */
-class LogoutController {
+import grails.test.*
 
-    /**
-     * Index action. Redirects to the Spring security logout uri.
-     */
-    def index = {
-        // TODO  put any pre-logout code here
-        redirect(uri: '/j_spring_security_logout')
+class JobsAdminControllerTests extends ControllerUnitTestCase {
+    def jobsAdminService
+
+    protected void setUp() {
+        super.setUp()
+        controller.jobsAdminService = jobsAdminService
     }
+
+    protected void tearDown() {
+        super.tearDown()
+    }
+
+    void testIndex() {
+        controller.index()
+    }
+
+    void testShow() {
+        controller.show()
+    }
+
+    void testUpdateJobs() {
+        controller.updateJobs()
+    }
+
 }

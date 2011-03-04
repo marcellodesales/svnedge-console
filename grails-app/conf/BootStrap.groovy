@@ -16,9 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import com.collabnet.svnedge.console.ConfigUtil 
 import grails.util.GrailsUtil
 
-import com.collabnet.svnedge.console.ConfigUtil
 
 /**
  * Regular BootStrap for Grails.

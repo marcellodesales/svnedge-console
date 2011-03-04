@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.teamforge
+package com.collabnet.svnedge.controller.integration
 
 
+import com.collabnet.svnedge.console.CantBindPortException 
+import com.collabnet.svnedge.console.Repository 
+import com.collabnet.svnedge.console.Server 
+import com.collabnet.svnedge.replication.ReplicaConversionBean 
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
+import com.collabnet.svnedge.teamforge.CtfConnectionBean 
+import com.collabnet.svnedge.teamforge.CtfServer 
+import com.collabnet.svnedge.teamforge.RemoteMasterException 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.console.CantBindPortException
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.teamforge.CtfConnectionBean
-import com.collabnet.svnedge.replication.ReplicaConversionBean
 import org.springframework.beans.BeanUtils
-import com.collabnet.svnedge.teamforge.CtfServer
 
 
 class CtfConnectionCommand {

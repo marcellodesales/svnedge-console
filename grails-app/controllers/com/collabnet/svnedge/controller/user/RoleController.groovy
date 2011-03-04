@@ -15,11 +15,13 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller.user
+
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.console.security.Role 
+import com.collabnet.svnedge.console.security.User 
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
 class RoleController {

@@ -15,18 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller.admin
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.replication.ReplicaConfiguration
-import com.collabnet.svnedge.teamforge.CtfServer
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.CantBindPortException
+
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException
+
+import com.collabnet.svnedge.console.CantBindPortException 
+import com.collabnet.svnedge.console.ConfigUtil 
+import com.collabnet.svnedge.console.Server 
+import com.collabnet.svnedge.console.ServerMode 
+import com.collabnet.svnedge.replication.ReplicaConfiguration 
+import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
+import com.collabnet.svnedge.teamforge.CtfServer 
 
 class CtfCredentialCommand {
     String ctfUsername

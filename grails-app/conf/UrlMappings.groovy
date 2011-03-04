@@ -25,14 +25,21 @@ class UrlMappings {
             }
         }
         "/$controller/$action?/$id?"{
-	      constraints {
-			 // apply constraints here
-		   }
-	    }
-    "/" {
-          controller = "status"
-          action = "index"
-      }
-	  "500"(view:'/error')
-	}
+            constraints {
+                // apply constraints here
+            }
+        }
+        "/wiki/$action?"{
+            controller = "wiki"
+            action = "process"
+            constraints {
+                // apply constraints here
+            }
+        }
+        "/" {
+            controller = "status"
+            action = "index"
+        }
+        "500"(view:'/error')
+    }
 }

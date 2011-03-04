@@ -15,18 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
-
+package com.collabnet.svnedge.controller
 
 import org.codehaus.groovy.grails.plugins.springsecurity.RedirectUtils
-import org.grails.plugins.springsecurity.service.AuthenticateService
 
 import org.springframework.security.AuthenticationTrustResolverImpl
 import org.springframework.security.DisabledException
 import org.springframework.security.context.SecurityContextHolder as SCH
 import org.springframework.security.ui.AbstractProcessingFilter
 import org.springframework.security.ui.webapp.AuthenticationProcessingFilter
-import com.collabnet.svnedge.console.Server;
 
 /**
  * Login Controller (Example).

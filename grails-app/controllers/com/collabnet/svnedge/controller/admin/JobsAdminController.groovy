@@ -15,7 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller.admin
+
+
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 

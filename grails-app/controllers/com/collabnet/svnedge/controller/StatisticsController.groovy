@@ -15,21 +15,19 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.statistics.Category
-import com.collabnet.svnedge.statistics.StatGroup
-
+import com.collabnet.svnedge.console.Repository 
+import com.collabnet.svnedge.console.Server 
+import com.collabnet.svnedge.statistics.Category;
+import com.collabnet.svnedge.statistics.StatGroup 
 import java.text.SimpleDateFormat
 
 import jofc2.model.Chart
 import jofc2.model.elements.LineChart
 import jofc2.model.elements.Legend
-import jofc2.model.elements.PieChart
 import jofc2.model.axis.Label
 import jofc2.model.axis.XAxis
 import jofc2.model.axis.YAxis

@@ -15,12 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.controller
 
+import com.collabnet.svnedge.console.Repository 
+import com.collabnet.svnedge.console.Server 
+import com.collabnet.svnedge.replication.ReplicatedRepository 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.replication.ReplicatedRepository
-import com.collabnet.svnedge.console.Server
 
 /**
  * Command class for 'saveAuthorization' action provides validation
