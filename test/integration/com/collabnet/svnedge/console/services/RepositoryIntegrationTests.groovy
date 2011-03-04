@@ -17,11 +17,10 @@
  */
 package com.collabnet.svnedge.console.services
 
-
-import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.domain.integration.RepoStatus 
 import grails.test.*
-import com.collabnet.svnedge.replication.RepoStatus
-import com.collabnet.svnedge.replication.ReplicatedRepository
 
 class RepositoryIntegrationTests extends GrailsUnitTestCase {
     protected void setUp() {

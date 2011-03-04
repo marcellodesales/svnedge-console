@@ -15,11 +15,11 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.domain
 
-import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.domain.integration.CtfServer 
 
 /**
  * Defines the svn server and console. 

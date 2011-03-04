@@ -17,9 +17,8 @@
  */
 package com.collabnet.svnedge.console.services
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.SvnLog
-
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.SvnLog 
 import grails.test.*
 
 class SvnLogServiceIntegrationTests extends GrailsUnitTestCase {

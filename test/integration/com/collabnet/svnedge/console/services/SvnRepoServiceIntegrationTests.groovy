@@ -18,13 +18,12 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.GrailsUnitTestCase
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.CommandLineService;
 import com.collabnet.svnedge.console.LifecycleService;
 import com.collabnet.svnedge.console.SvnRepoService;
-
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 

@@ -17,15 +17,14 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.util.ConfigUtil;
 
-import com.collabnet.svnedge.statistics.StatValue
-import com.collabnet.svnedge.statistics.Statistic
-
-import com.collabnet.svnedge.replication.ReplicatedRepository
 
 class SvnRepoService extends AbstractSvnEdgeService {
 

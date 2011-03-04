@@ -17,17 +17,17 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.StatCollectJob
-import com.collabnet.svnedge.statistics.Category
-import com.collabnet.svnedge.statistics.StatGroup
-import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.statistics.StatValue
-import com.collabnet.svnedge.statistics.StatisticType
-import com.collabnet.svnedge.statistics.Unit
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.StatGroup 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.statistics.StatisticType 
+import com.collabnet.svnedge.domain.statistics.Unit 
 
 import org.quartz.SchedulerException
-import com.collabnet.svnedge.console.Repository
 
 /**
  * Service for getting and storing filesystem statistics.

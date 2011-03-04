@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.statistics
+package com.collabnet.svnedge.domain.statistics
+
 
 /**
  * This class contains information about when a statistic group's data

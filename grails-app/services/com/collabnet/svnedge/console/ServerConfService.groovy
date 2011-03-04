@@ -20,19 +20,17 @@ package com.collabnet.svnedge.console
 import org.apache.commons.io.FileUtils
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.teamforge.CtfServer
 
 import grails.util.GrailsUtil
 
 import java.net.URL
 import java.util.Calendar
 import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
-import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 class ServerConfService {
 

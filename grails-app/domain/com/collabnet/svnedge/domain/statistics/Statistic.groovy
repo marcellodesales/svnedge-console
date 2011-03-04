@@ -15,20 +15,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.statistics
+package com.collabnet.svnedge.domain.statistics
+
 
 /**
- * This is a collection of statistic groups.  It's for high-level grouping.
- * For example, you might have a category called "System" that contains groups
- * for CPU, memory, disk space, etc.  or a category called "Svn Requests" that 
- * keeps track of number of users making svn requests, number of svn request
- * made, read/write requests, etc. 
+ * Basic conceptual unit of statistic capturing.  For example, "Free Disk 
+ * Space" or "Number of users doing svn up".
  */
-class Category {
+class Statistic {
+    // short name
     String name
-    static hasMany = [ groups: StatGroup ]
+    // title for a legend
+    String title
+    StatisticType type
+    static belongsTo = [ group: StatGroup ]
+    static hasMany = [ statValues: StatValue ]
 
     static constraints = {
-        name(blank:false)
+        name(blank:false, unique:true)
+        title(blank:false)
+        type(nullable:false)
+    }
+
+    String toString() {
+        "{" + super.toString() + ":: " +
+        "name=" + name + "; " +
+        "title=" + title + "; " +
+        "type=" + type  + "}"
     }
 }
+
+enum StatisticType { GAUGE, COUNTER }

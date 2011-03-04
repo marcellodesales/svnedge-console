@@ -17,7 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
-import grails.test.GrailsUnitTestCase
+import com.collabnet.svnedge.domain.Repository 
+import grails.test.GrailsUnitTestCase;
 
 /**
  * Unit tests for Repository domain object

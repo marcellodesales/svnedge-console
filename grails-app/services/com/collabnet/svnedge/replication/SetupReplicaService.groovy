@@ -17,18 +17,19 @@
  */
 package com.collabnet.svnedge.replication
 
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
-import com.collabnet.svnedge.teamforge.ApprovalState
 import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
-import com.collabnet.svnedge.teamforge.CtfServer
 import com.collabnet.svnedge.teamforge.CtfConnectionBean
 import com.collabnet.svnedge.teamforge.RemoteMasterException
 import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
 import com.collabnet.svnedge.console.CantBindPortException
-import com.collabnet.svnedge.console.Repository
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.ApprovalState 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 
 /**
  * This service handles replication-related functionality

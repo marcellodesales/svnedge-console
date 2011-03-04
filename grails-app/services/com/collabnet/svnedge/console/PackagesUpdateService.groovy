@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.console;
 
-import com.collabnet.svnedge.console.ConfigUtil
 import com.collabnet.svnedge.console.pkgsupdate.PackageInfo;
 import com.collabnet.svnedge.console.pkgsupdate.PackagesUpdateProgressTracker;
 import com.collabnet.svnedge.console.pkgsupdate.PackagesUpdateSecurityPolicy 
@@ -42,6 +41,7 @@ import org.springframework.beans.factory.InitializingBean
 import org.cometd.Client
 import org.mortbay.cometd.ChannelImpl
 import com.collabnet.svnedge.console.PackagesUpdateJob
+import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
  * The Packages Update service is responsible for managing the updates of the

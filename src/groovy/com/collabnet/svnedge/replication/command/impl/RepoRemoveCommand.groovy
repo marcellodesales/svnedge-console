@@ -19,9 +19,9 @@ package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
 
-import com.collabnet.svnedge.console.Repository 
-import com.collabnet.svnedge.replication.ReplicatedRepository 
-import com.collabnet.svnedge.replication.RepoStatus 
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.domain.integration.RepoStatus 
 import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
 import com.collabnet.svnedge.replication.command.ShortRunningCommand
 

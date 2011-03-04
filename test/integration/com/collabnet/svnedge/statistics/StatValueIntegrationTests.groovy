@@ -17,8 +17,14 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.Repository
-import grails.test.*
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.StatGroup 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.statistics.StatisticType 
+import com.collabnet.svnedge.domain.statistics.Unit 
+import grails.test.GrailsUnitTestCase;
 
 class StatValueIntegrationTests extends GrailsUnitTestCase {
     def stat

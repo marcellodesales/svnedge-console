@@ -17,10 +17,8 @@
 */
 package com.collabnet.svnedge.console.services
 
-import com.collabnet.svnedge.console.Repository;
-
+import com.collabnet.svnedge.domain.Repository 
 import grails.test.GrailsUnitTestCase;
-import groovy.lang.MetaClass;
 
 /**
  * Tests the Operating System service class.

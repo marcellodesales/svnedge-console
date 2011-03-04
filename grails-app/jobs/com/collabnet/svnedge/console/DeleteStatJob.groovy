@@ -17,9 +17,9 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.statistics.StatGroup
-import com.collabnet.svnedge.statistics.StatAction
 
+import com.collabnet.svnedge.domain.statistics.StatAction 
+import com.collabnet.svnedge.domain.statistics.StatGroup 
 import org.quartz.JobDataMap
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger

@@ -21,12 +21,12 @@ import java.util.Locale;
 
 import groovy.lang.MetaClass;
 
-import com.collabnet.svnedge.console.AbstractSvnEdgeFunctionalTests;
 import com.collabnet.svnedge.console.AdminLoggedInAbstractSvnEdgeFunctionalTests;
-import com.collabnet.svnedge.console.Repository;
-import com.collabnet.svnedge.console.Server;
-import com.collabnet.svnedge.console.security.User;
-import com.collabnet.svnedge.statistics.StatValue;
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.statistics.StatValue 
 
 /**
 * This is an abstract class for the conversion process that provides the 

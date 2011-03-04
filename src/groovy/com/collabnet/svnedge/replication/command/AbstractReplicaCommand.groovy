@@ -17,10 +17,11 @@
  */
 package com.collabnet.svnedge.replication.command
 
-import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.integration.CtfServer;
 import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
 import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
-import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.domain.integration.CtfServer
 import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 
 /**

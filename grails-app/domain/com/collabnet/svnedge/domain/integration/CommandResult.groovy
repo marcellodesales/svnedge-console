@@ -15,7 +15,9 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.domain.integration
+
+
 
 /**
  * The Command Result registers the result of a given Abstract Command of

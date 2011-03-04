@@ -15,30 +15,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.statistics
+package com.collabnet.svnedge.domain.statistics
+
 
 /**
- * Represents a datatype's unit.  For instance, a datatype like "bytes" might
- * have min:0, max: null (unbounded), formatter: method that can turn large 
- * numbers of bytes in K, M, G, etc.
+ * This is a collection of statistic groups.  It's for high-level grouping.
+ * For example, you might have a category called "System" that contains groups
+ * for CPU, memory, disk space, etc.  or a category called "Svn Requests" that 
+ * keeps track of number of users making svn requests, number of svn request
+ * made, read/write requests, etc. 
  */
-class Unit {
+class Category {
     String name
-    /* min and max are Integers, with null implying unbounded.
-     * Assuming we won't need Floats here, but that may need to be changed 
-     * later.
-     */
-    Integer minValue
-    Integer maxValue
-    /* This will be a String that references a method somehwere.
-     * If it's null, than no formatting will be done.
-     */ 
-    String formatter
-    
+    static hasMany = [ groups: StatGroup ]
+
     static constraints = {
-        name(blank:false, unique:true)
-        minValue(nullable:true)
-        maxValue(nullable:true)
-        formatter(nullable:true)
+        name(blank:false)
     }
 }

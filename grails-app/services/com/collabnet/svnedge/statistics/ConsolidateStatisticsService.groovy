@@ -17,10 +17,9 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.statistics.StatAction
-import com.collabnet.svnedge.statistics.StatGroup
-import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.domain.statistics.StatAction 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
 
 /**
  * The class handles consolidating data from smaller intervals into 

@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.collabnet.svnedge.console.Server 
-import com.collabnet.svnedge.console.ServerMode 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
 import grails.util.GrailsUtil
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder

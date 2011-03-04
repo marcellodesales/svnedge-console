@@ -21,7 +21,8 @@ import java.util.Locale;
 
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import com.collabnet.svnedge.teamforge.CtfServer
+
+import com.collabnet.svnedge.domain.integration.CtfServer;
 
 class CacheMananagementAuthIntegrationTests extends GrailsUnitTestCase {
 

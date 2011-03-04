@@ -17,11 +17,10 @@
  */
 package com.collabnet.svnedge.controller.user
 
-
+import com.collabnet.svnedge.domain.Role 
+import com.collabnet.svnedge.domain.User 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.console.security.Role 
-import com.collabnet.svnedge.console.security.User 
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
 class RoleController {

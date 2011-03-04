@@ -17,8 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.security.Role
+import com.collabnet.svnedge.domain.Role 
+import com.collabnet.svnedge.domain.User;
 
 /**
  * This class provides User and Role management services and bootstraps the security context
@@ -144,8 +144,6 @@ class UserAccountService extends AbstractSvnEdgeService {
                 break
 
         }
-
-
     }
 
     /**

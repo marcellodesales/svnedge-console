@@ -17,9 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.SvnLog
-
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.SvnLog 
 import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 

@@ -24,8 +24,9 @@ import org.springframework.security.userdetails.*
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 
 import org.apache.commons.logging.LogFactory
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.domain.Role 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.User
 
 import org.apache.commons.httpclient.HttpClient
 import org.apache.commons.httpclient.methods.GetMethod

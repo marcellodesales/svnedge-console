@@ -15,33 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.statistics
+package com.collabnet.svnedge.domain.statistics
+
 
 /**
- * Basic conceptual unit of statistic capturing.  For example, "Free Disk 
- * Space" or "Number of users doing svn up".
+ * This class represents a time interval.  It contains both a human-readable
+ * name and seconds.  It can be used to represent when Statistics data is
+ * collected, consolidated, or deleted.
  */
-class Statistic {
-    // short name
+class Interval {
     String name
-    // title for a legend
-    String title
-    StatisticType type
-    static belongsTo = [ group: StatGroup ]
-    static hasMany = [ statValues: StatValue ]
-
+    long seconds
+    
     static constraints = {
-        name(blank:false, unique:true)
-        title(blank:false)
-        type(nullable:false)
-    }
-
-    String toString() {
-        "{" + super.toString() + ":: " +
-        "name=" + name + "; " +
-        "title=" + title + "; " +
-        "type=" + type  + "}"
+        name(blank:false, nullable:false)
+        seconds(min: 0L, notEqual: 0L)
     }
 }
-
-enum StatisticType { GAUGE, COUNTER }

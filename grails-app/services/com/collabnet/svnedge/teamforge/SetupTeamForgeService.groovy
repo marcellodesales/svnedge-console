@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.teamforge
 
-
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.HttpURLConnection;
@@ -30,14 +29,14 @@ import java.util.zip.ZipOutputStream;
 import grails.util.GrailsUtil
 
 import com.collabnet.svnedge.teamforge.CtfAuthenticationException
-import com.collabnet.svnedge.teamforge.CtfServer
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.security.User
+import com.collabnet.svnedge.util.ConfigUtil;
 import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.integration.CtfServer 
 
 class SetupTeamForgeService extends AbstractSvnEdgeService {
 

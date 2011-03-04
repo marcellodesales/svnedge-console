@@ -17,15 +17,11 @@
  */
 package com.collabnet.svnedge.controller.admin
 
-
-
-
-
-import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.integration.CtfServer 
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import java.io.File
-import com.collabnet.svnedge.teamforge.CtfServer;
 
 class ServerControllerTests extends ControllerUnitTestCase {
 

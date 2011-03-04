@@ -17,13 +17,12 @@
  */
 package com.collabnet.svnedge.teamforge.security
 
+import com.collabnet.svnedge.domain.Server 
 import org.springframework.security.providers.AuthenticationProvider
 import org.springframework.security.Authentication
 import org.springframework.security.AuthenticationException
 import org.springframework.security.BadCredentialsException
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
 
 class CtfAuthenticationProvider implements AuthenticationProvider {
 

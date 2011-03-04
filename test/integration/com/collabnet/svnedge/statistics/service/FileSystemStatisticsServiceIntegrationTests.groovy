@@ -19,7 +19,7 @@ package com.collabnet.svnedge.statistics.service
 
 import grails.test.*
 
-import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.domain.statistics.StatValue
 
 class FileSystemStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     def fileSystemStatisticsService

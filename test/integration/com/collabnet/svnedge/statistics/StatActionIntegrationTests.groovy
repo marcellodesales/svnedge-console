@@ -17,6 +17,12 @@
  */
 package com.collabnet.svnedge.statistics
 
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.Interval 
+import com.collabnet.svnedge.domain.statistics.StatAction 
+import com.collabnet.svnedge.domain.statistics.StatGroup 
+import com.collabnet.svnedge.domain.statistics.Unit 
+
 import grails.test.*
 
 class StatActionIntegrationTests extends GrailsUnitTestCase {

@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.teamforge
 
-
 import org.springframework.security.GrantedAuthority
 import org.springframework.security.GrantedAuthorityImpl
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
@@ -36,9 +35,11 @@ import com.collabnet.ce.soap50.fault.ObjectAlreadyExistsFault;
 import com.collabnet.ce.soap50.fault.PermissionDeniedFault;
 import com.collabnet.ce.soap50.fault.SystemFault;
 import com.collabnet.ce.soap50.fault.UserLimitExceededFault;
-import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.AbstractSvnEdgeService;
-import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.integration.ApprovalState 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
@@ -46,7 +47,6 @@ import java.net.MalformedURLException
 
 import com.collabnet.svnedge.teamforge.CtfAuthenticationException
 import com.collabnet.svnedge.teamforge.CtfSessionExpiredException
-import com.collabnet.svnedge.replication.ReplicaConfiguration
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 

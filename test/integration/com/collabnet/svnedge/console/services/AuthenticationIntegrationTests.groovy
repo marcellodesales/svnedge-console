@@ -17,17 +17,15 @@
  */
 package com.collabnet.svnedge.console.services
 
-
 import java.util.Locale;
 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.CtfServer 
 import grails.test.*
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.springframework.security.providers.UsernamePasswordAuthenticationToken
 import org.springframework.security.BadCredentialsException
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.teamforge.CtfServer
 
 class AuthenticationIntegrationTests extends GrailsUnitTestCase {
 

@@ -18,11 +18,10 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.*
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.teamforge.CtfServer
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
  * this test class validates the configuration files being modified

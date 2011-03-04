@@ -17,13 +17,10 @@
  */
 package com.collabnet.svnedge.controller.user
 
-
-import com.collabnet.svnedge.console.security.Role 
-import com.collabnet.svnedge.console.security.User 
+import com.collabnet.svnedge.domain.Role 
+import com.collabnet.svnedge.domain.User 
 import org.codehaus.groovy.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
-
-
 
 /**
  * User controller.

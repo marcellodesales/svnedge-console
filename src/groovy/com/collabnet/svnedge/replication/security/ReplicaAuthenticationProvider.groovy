@@ -17,13 +17,13 @@
  */
 package com.collabnet.svnedge.replication.security
 
+import com.collabnet.svnedge.domain.Server 
 import org.apache.log4j.Logger
 
 import org.springframework.security.providers.AuthenticationProvider
 import org.springframework.security.Authentication
 import org.springframework.security.AuthenticationException
 import org.springframework.security.BadCredentialsException
-import com.collabnet.svnedge.console.Server
 
 class ReplicaAuthenticationProvider implements AuthenticationProvider {
     Logger log = Logger.getLogger(this.getClass())

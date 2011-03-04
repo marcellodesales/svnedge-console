@@ -17,14 +17,14 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.util.StatisticsTime
 import com.collabnet.svnedge.console.ConsolidateStatJob
 import com.collabnet.svnedge.console.DeleteStatJob
-import com.collabnet.svnedge.statistics.Interval
-import com.collabnet.svnedge.statistics.StatAction
-import com.collabnet.svnedge.statistics.StatValue
-import com.collabnet.svnedge.statistics.Statistic
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.statistics.Interval 
+import com.collabnet.svnedge.domain.statistics.StatAction 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.util.StatisticsTime 
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.quartz.SchedulerException

@@ -17,9 +17,9 @@
  */
 package com.collabnet.svnedge.controller
 
-import com.collabnet.svnedge.console.Repository 
-import com.collabnet.svnedge.console.Server 
-import com.collabnet.svnedge.replication.ReplicatedRepository 
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 /**

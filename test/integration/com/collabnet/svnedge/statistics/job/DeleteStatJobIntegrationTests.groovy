@@ -17,21 +17,20 @@
  */
 package com.collabnet.svnedge.statistics.job
 
-
 import grails.test.GrailsUnitTestCase;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobListener;
 
 import com.collabnet.svnedge.console.DeleteStatJob;
-import com.collabnet.svnedge.statistics.Category;
-import com.collabnet.svnedge.statistics.Interval;
-import com.collabnet.svnedge.statistics.StatAction;
-import com.collabnet.svnedge.statistics.StatGroup;
-import com.collabnet.svnedge.statistics.StatValue;
-import com.collabnet.svnedge.statistics.Statistic;
-import com.collabnet.svnedge.statistics.StatisticType 
-import com.collabnet.svnedge.statistics.Unit;
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.Interval 
+import com.collabnet.svnedge.domain.statistics.StatAction 
+import com.collabnet.svnedge.domain.statistics.StatGroup 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.statistics.StatisticType 
+import com.collabnet.svnedge.domain.statistics.Unit 
 
 class DeleteStatJobIntegrationTests extends GrailsUnitTestCase 
     implements JobListener {

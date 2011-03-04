@@ -18,14 +18,13 @@
 package com.collabnet.svnedge.statistics
 
 import com.collabnet.svnedge.console.StatCollectJob
-import com.collabnet.svnedge.statistics.StatGroup
-import com.collabnet.svnedge.statistics.Category
-import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.statistics.StatValue
-import com.collabnet.svnedge.statistics.StatisticType
-import com.collabnet.svnedge.statistics.Unit
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.StatGroup 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.statistics.StatisticType 
+import com.collabnet.svnedge.domain.statistics.Unit 
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.quartz.SchedulerException
 
 class NetworkStatisticsService extends AbstractStatisticsService {

@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.domain.integration
 
-import com.collabnet.svnedge.teamforge.ApprovalState
 
 /**
  * This stores the replication configuration.

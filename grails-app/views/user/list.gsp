@@ -33,7 +33,7 @@
             <tr class="ContainerFooter">
                        <td colspan="5">
                        <div class="paginateButtons">
-                <g:paginate total="${com.collabnet.svnedge.console.security.User.count()}" />
+                <g:paginate total="${userInstanceTotal}" />
             </div>
                        </td>
                     </tr>

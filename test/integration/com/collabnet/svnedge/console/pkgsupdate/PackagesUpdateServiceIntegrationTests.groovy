@@ -18,17 +18,13 @@
 package com.collabnet.svnedge.console.pkgsupdate;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.NoRouteToHostException;
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import com.collabnet.svnedge.console.PackagesUpdateService;
-import com.collabnet.svnedge.console.util.FileDownloaderCategory;
-import com.collabnet.svnedge.console.util.UntarCategory;
 import com.collabnet.svnedge.console.pkgsupdate.PackageInfo;
-import com.collabnet.svnedge.console.pkgsupdate.PackagesUpdateProgressTracker;
+import com.collabnet.svnedge.util.FileDownloaderCategory 
+import com.collabnet.svnedge.util.UntarCategory 
 import com.sun.pkg.client.Image;
 
 import grails.test.*

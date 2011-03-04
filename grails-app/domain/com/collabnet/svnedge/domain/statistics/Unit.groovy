@@ -15,19 +15,31 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.statistics
+package com.collabnet.svnedge.domain.statistics
+
 
 /**
- * This class represents a time interval.  It contains both a human-readable
- * name and seconds.  It can be used to represent when Statistics data is
- * collected, consolidated, or deleted.
+ * Represents a datatype's unit.  For instance, a datatype like "bytes" might
+ * have min:0, max: null (unbounded), formatter: method that can turn large 
+ * numbers of bytes in K, M, G, etc.
  */
-class Interval {
+class Unit {
     String name
-    long seconds
+    /* min and max are Integers, with null implying unbounded.
+     * Assuming we won't need Floats here, but that may need to be changed 
+     * later.
+     */
+    Integer minValue
+    Integer maxValue
+    /* This will be a String that references a method somehwere.
+     * If it's null, than no formatting will be done.
+     */ 
+    String formatter
     
     static constraints = {
-        name(blank:false, nullable:false)
-        seconds(min: 0L, notEqual: 0L)
+        name(blank:false, unique:true)
+        minValue(nullable:true)
+        maxValue(nullable:true)
+        formatter(nullable:true)
     }
 }

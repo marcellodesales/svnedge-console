@@ -21,9 +21,9 @@ security {
     
     active = true
 
-	loginUserDomainClass = "com.collabnet.svnedge.console.security.User"
-	authorityDomainClass = "com.collabnet.svnedge.console.security.Role"
-    
+    loginUserDomainClass = "com.collabnet.svnedge.domain.User"
+    authorityDomainClass = "com.collabnet.svnedge.domain.Role"
+
     useRequestMapDomainClass = false
     useControllerAnnotations = true
    

@@ -20,11 +20,11 @@ package com.collabnet.svnedge.console
 import java.io.File;
 import grails.util.GrailsUtil;
 
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.CantBindPortException
-import com.collabnet.svnedge.console.security.User;
-import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 enum Command {START, STOP, GRACEFUL}
 

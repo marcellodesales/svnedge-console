@@ -18,12 +18,12 @@
 package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.replication.ReplicatedRepository
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import com.collabnet.svnedge.replication.command.AbstractRepositoryCommand
 import com.collabnet.svnedge.replication.command.ShortRunningCommand
-import com.collabnet.svnedge.teamforge.CtfServer
 
 /**
  * This command uses svnsync to update the given repository

@@ -18,12 +18,12 @@
 package com.collabnet.svnedge.console
 
 
+import com.collabnet.svnedge.domain.Server 
 import org.quartz.JobDataMap
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import com.collabnet.svnedge.console.Server
 
 /**
  * This job calls the collectData method on a statistics service on a regular

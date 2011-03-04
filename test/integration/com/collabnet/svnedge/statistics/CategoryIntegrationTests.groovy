@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.statistics
 
+import com.collabnet.svnedge.domain.statistics.Category;
+
 import grails.test.*
 
 class CategoryIntegrationTests extends GrailsUnitTestCase {

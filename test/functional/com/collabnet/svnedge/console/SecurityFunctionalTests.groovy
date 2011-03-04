@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.console
 
-
-
 class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
     void testAdminAuthority() {

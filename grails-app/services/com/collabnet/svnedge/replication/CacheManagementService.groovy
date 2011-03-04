@@ -19,8 +19,8 @@ package com.collabnet.svnedge.replication
 
 import org.springframework.remoting.RemoteAccessException
 
-import com.collabnet.svnedge.console.security.User
 
+import com.collabnet.svnedge.domain.User 
 import com.collabnet.svnedge.replication.security.cache.ProxyCache
 
 /**

@@ -19,9 +19,8 @@ package com.collabnet.svnedge.replication.security.cache
 
 import grails.test.*
 
-
+import com.collabnet.svnedge.domain.integration.CtfServer;
 import com.collabnet.svnedge.replication.security.cache.ProxyCache 
-import com.collabnet.svnedge.teamforge.CtfServer
 
 
 class CacheManagementRoleIntegrationTests extends GrailsUnitTestCase {

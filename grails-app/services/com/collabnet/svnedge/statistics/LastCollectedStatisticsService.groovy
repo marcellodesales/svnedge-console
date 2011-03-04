@@ -17,9 +17,9 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.statistics.Statistic
-import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.statistics.StatValue 
+import com.collabnet.svnedge.domain.statistics.Statistic 
 
 /**
  * Service for getting most-recent persisted statistics values. By extending

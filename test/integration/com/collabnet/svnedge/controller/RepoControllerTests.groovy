@@ -17,15 +17,12 @@
  */
 package com.collabnet.svnedge.controller
 
-
-
 import grails.test.*
 
-import com.collabnet.svnedge.console.Repository
 import com.collabnet.svnedge.controller.AuthzRulesCommand 
+import com.collabnet.svnedge.domain.Repository 
 
 class RepoControllerTests extends ControllerUnitTestCase {
-
 
     def svnRepoService
     def serverConfService

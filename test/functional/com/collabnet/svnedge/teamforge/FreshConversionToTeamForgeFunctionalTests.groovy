@@ -17,10 +17,10 @@
 */
 package com.collabnet.svnedge.teamforge
 
-import com.collabnet.svnedge.console.security.User
 import com.collabnet.svnedge.console.AbstractSvnEdgeFunctionalTests;
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
+import com.collabnet.svnedge.domain.User;
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 

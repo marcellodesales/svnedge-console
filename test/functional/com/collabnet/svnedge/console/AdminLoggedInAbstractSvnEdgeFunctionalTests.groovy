@@ -17,16 +17,15 @@
 */
 package com.collabnet.svnedge.console
 
-
 import java.util.Locale;
 
-import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.util.FileDownloaderCategory;
-import com.collabnet.svnedge.console.util.UntarCategory;
+import com.collabnet.svnedge.util.FileDownloaderCategory;
+import com.collabnet.svnedge.util.UntarCategory;
 
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode;
-import com.collabnet.svnedge.teamforge.CtfServer;
+import com.collabnet.svnedge.domain.User;
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode;
+import com.collabnet.svnedge.domain.integration.CtfServer;
 import com.collabnet.svnedge.teamforge.SetupTeamForgeService;
 
 import functionaltestplugin.FunctionalTestCase

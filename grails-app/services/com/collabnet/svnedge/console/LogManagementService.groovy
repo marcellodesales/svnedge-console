@@ -21,9 +21,9 @@ import java.io.FileNotFoundException;
 
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.LogRotateJob
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
  * This service offers methods for configuring Apache and Console

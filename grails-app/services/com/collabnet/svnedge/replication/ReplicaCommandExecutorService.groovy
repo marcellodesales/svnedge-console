@@ -23,9 +23,9 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.Semaphore
 
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
 import com.collabnet.svnedge.replication.command.CommandExecutionException
 import com.collabnet.svnedge.replication.command.LongRunningCommand

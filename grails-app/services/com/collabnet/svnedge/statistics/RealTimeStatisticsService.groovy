@@ -17,8 +17,8 @@
  */
 package com.collabnet.svnedge.statistics
 
-
-import com.collabnet.svnedge.replication.ReplicatedRepository
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import java.util.Date;
 
 /**
  * Service for getting up-to-date statistics values.

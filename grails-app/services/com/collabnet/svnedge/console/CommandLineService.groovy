@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console
 
 import java.util.regex.Pattern;
 
-import com.collabnet.svnedge.console.ConfigUtil
+import com.collabnet.svnedge.util.ConfigUtil;
 
 class CommandLineService {
 

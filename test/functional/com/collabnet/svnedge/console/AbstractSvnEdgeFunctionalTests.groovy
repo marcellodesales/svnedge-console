@@ -17,23 +17,14 @@
 */
 package com.collabnet.svnedge.console
 
-
-import java.util.Locale;
-
-import com.collabnet.svnedge.console.security.User
-import com.collabnet.svnedge.console.util.FileDownloaderCategory;
-import com.collabnet.svnedge.console.util.UntarCategory;
-
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode;
-import com.collabnet.svnedge.teamforge.CtfServer;
-import com.collabnet.svnedge.teamforge.SetupTeamForgeService;
-
-import functionaltestplugin.FunctionalTestCase
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.util.FileDownloaderCategory 
+import com.collabnet.svnedge.util.UntarCategory 
+import functionaltestplugin.FunctionalTestCase;
+import org.codehaus.groovy.grails.commons.ApplicationHolder 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder 
+import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec 
 
 /**
  * This is the basic implementation of functional tests for the SvnEdge.

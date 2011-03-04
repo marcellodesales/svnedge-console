@@ -19,10 +19,9 @@ package com.collabnet.svnedge.statistics.service
 
 import grails.test.*
 
-import com.collabnet.svnedge.console.Repository
-import com.collabnet.svnedge.console.SvnLog
-
-import com.collabnet.svnedge.statistics.StatValue
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.SvnLog 
+import com.collabnet.svnedge.domain.statistics.StatValue
 
 class SvnStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     def svnStatisticsService

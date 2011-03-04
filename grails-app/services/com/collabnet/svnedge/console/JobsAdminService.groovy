@@ -17,13 +17,15 @@
  */
 package com.collabnet.svnedge.console
 
-import org.quartz.JobDetail
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
 import java.text.SimpleDateFormat
 import org.quartz.Trigger
-import com.collabnet.svnedge.console.Server
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.replication.ReplicaConfiguration
 
+/**
+ * Manages the jobs in the console
+ * @author Marcello de Sales (mdesales@collabn.net)
+ */
 class JobsAdminService {
     public static def REPLICA_GROUP = "Replica"
 

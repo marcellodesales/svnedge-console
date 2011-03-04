@@ -17,12 +17,11 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.console.Server
-
 import com.collabnet.svnedge.discovery.SvnEdgeBonjourRegister
 import com.collabnet.svnedge.discovery.mdns.SvnEdgeCsvnServiceKey
 import com.collabnet.svnedge.discovery.mdns.SvnEdgeHttpServiceKey
 import com.collabnet.svnedge.discovery.mdns.SvnEdgeServiceType
+import com.collabnet.svnedge.domain.Server 
 
 import java.net.InetAddress
 

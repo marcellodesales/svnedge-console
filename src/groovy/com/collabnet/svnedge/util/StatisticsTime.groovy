@@ -1,4 +1,5 @@
-package com.collabnet.svnedge.console.util;
+package com.collabnet.svnedge.util
+;
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder;
 

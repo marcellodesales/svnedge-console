@@ -18,9 +18,9 @@
 package com.collabnet.svnedge.console
 
 import java.util.Date
-import java.util.Calendar
-import com.collabnet.svnedge.console.ConfigUtil
-import com.collabnet.svnedge.console.Server
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.util.ConfigUtil;
+
 import org.quartz.CronTrigger
 
 class LogRotateJob {

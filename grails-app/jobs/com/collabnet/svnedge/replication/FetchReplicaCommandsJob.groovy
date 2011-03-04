@@ -23,13 +23,12 @@ import org.quartz.Trigger
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.collabnet.svnedge.console.ConfigUtil;
-import com.collabnet.svnedge.console.Server
 import com.collabnet.svnedge.console.JobsAdminService
-import com.collabnet.svnedge.console.ServerMode
-import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.replication.command.CommandsExecutionContext
-import com.collabnet.svnedge.teamforge.CtfServer;
 
 /**
  * Fetch the replica commands from the Replica manager server.

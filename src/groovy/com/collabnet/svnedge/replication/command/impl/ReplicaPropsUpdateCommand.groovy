@@ -20,8 +20,8 @@ package com.collabnet.svnedge.replication.command.impl
 
 import org.apache.log4j.Logger
 
-import com.collabnet.svnedge.teamforge.ApprovalState
-import com.collabnet.svnedge.replication.ReplicaConfiguration
+import com.collabnet.svnedge.domain.integration.ApprovalState 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.replication.command.AbstractReplicaCommand 
 import com.collabnet.svnedge.replication.command.ShortRunningCommand 
 import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent

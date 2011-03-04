@@ -19,10 +19,10 @@ package com.collabnet.svnedge.controller
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
-import com.collabnet.svnedge.console.Repository 
-import com.collabnet.svnedge.console.Server 
-import com.collabnet.svnedge.statistics.Category;
-import com.collabnet.svnedge.statistics.StatGroup 
+import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.statistics.Category;
+import com.collabnet.svnedge.domain.statistics.StatGroup 
 import java.text.SimpleDateFormat
 
 import jofc2.model.Chart
