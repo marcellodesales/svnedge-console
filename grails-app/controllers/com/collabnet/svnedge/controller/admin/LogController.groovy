@@ -17,14 +17,12 @@
  */
 package com.collabnet.svnedge.controller.admin
 
-
-
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
-import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 

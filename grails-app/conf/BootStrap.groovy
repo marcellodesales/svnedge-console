@@ -67,7 +67,8 @@ class BootStrap {
         try {
             logManagementService.bootstrap()
         } catch (Exception e) {
-            log.error ("Failed to intitialize LogManagementService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize LogManagementService: " + 
+                e.getMessage(), e)
         }
 
         def env = GrailsUtil.environment
@@ -80,26 +81,30 @@ class BootStrap {
         try {
             operatingSystemService.bootstrap(appHome)
         } catch (Exception e) {
-            log.error ("Failed to intitialize OperatingSystemService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize OperatingSystemService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Network Information services...")
         try {
             networkingService.bootStrap()
         } catch (Exception e) {
-            log.error ("Failed to intitialize NetworkingService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize NetworkingService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Statistics services...")
         try {
             networkStatisticsService.bootStrap()
         } catch (Exception e) {
-            log.error ("Failed to intitialize NetworkStatisticsService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize NetworkStatisticsService: " + 
+                e.getMessage(), e)
         }
         try {
             fileSystemStatisticsService.bootStrap()
         } catch (Exception e) {
-            log.error ("Failed to intitialize FileSystemStatisticsService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize FileSystemStatisticsService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Servers...")
@@ -107,14 +112,16 @@ class BootStrap {
         try {
             server = lifecycleService.bootstrapServer(config)
         } catch (Exception e) {
-            log.error ("Failed to intitialize Server instance: " + e.getMessage(), e)
+            log.error ("Failed to intitialize Server instance: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping the ServerConfigService...")
         try {
             serverConfService.bootstrap(server)
         } catch (Exception e) {
-            log.error ("Failed to intitialize ServerConfService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize ServerConfService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrap integration server configuration...")
@@ -126,14 +133,16 @@ class BootStrap {
             commandResultDeliveryService.bootStrap()
 
         } catch (Exception e) {
-            log.error ("Failed to intitialize SetupTeamForgeService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize SetupTeamForgeService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping packagesUpdateService...")
         try {
             packagesUpdateService.bootstrap(config)
         } catch (Exception e) {
-            log.error ("Failed to intitialize PackagesUpdateService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize PackagesUpdateService: " + 
+                e.getMessage(), e)
         }
 
         if (server.managedByCtf()) {
@@ -145,7 +154,8 @@ class BootStrap {
         try {
             userAccountService.bootStrap(GrailsUtil.environment)
         } catch (Exception e) {
-            log.error ("Failed to intitialize UserAccountService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize UserAccountService: " + 
+                e.getMessage(), e)
         }
 
         // If the svn server is configured to start with the console app,
@@ -167,14 +177,16 @@ class BootStrap {
                 discoveryService.bootStrap(config)
             })
         } catch (Exception e) {
-            log.error ("Failed to intitialize DiscoveryService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize DiscoveryService: " + 
+                e.getMessage(), e)
         }
         
         log.info("Bootstrapping jobsAdminService...")
         try {
             jobsAdminService.bootStrap()
         } catch (Exception e) {
-            log.error ("Failed to intitialize JobsAdminService: " + e.getMessage(), e)
+            log.error ("Failed to intitialize JobsAdminService: " + 
+                e.getMessage(), e)
         }
     }
 

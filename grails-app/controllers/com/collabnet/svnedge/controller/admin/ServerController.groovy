@@ -22,12 +22,12 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
-import com.collabnet.svnedge.console.CantBindPortException 
+import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
+import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.util.ConfigUtil;
 
 class CtfCredentialCommand {

@@ -20,15 +20,15 @@ package com.collabnet.svnedge.controller.integration
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
-import com.collabnet.svnedge.console.CantBindPortException 
+import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
-import com.collabnet.svnedge.teamforge.CtfConversionBean 
-import com.collabnet.svnedge.teamforge.CtfSessionExpiredException 
-import com.collabnet.svnedge.teamforge.RemoteAndLocalConversationException 
-import com.collabnet.svnedge.teamforge.RemoteMasterException 
-import com.collabnet.svnedge.teamforge.SetupTeamForgeService 
+import com.collabnet.svnedge.integration.CtfAuthenticationException;
+import com.collabnet.svnedge.integration.CtfConversionBean;
+import com.collabnet.svnedge.integration.CtfSessionExpiredException;
+import com.collabnet.svnedge.integration.RemoteAndLocalConversationException;
+import com.collabnet.svnedge.integration.RemoteMasterException;
+import com.collabnet.svnedge.integration.SetupTeamForgeService;
 
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException

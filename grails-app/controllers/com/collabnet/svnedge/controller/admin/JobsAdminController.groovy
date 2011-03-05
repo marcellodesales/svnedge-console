@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.controller.admin
 
-
-
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])

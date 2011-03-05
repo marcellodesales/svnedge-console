@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel 
+import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel 
 import com.collabnet.svnedge.domain.SchemaVersion 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
@@ -56,34 +56,31 @@ class UpgradeBootStrap {
 
     private def release1_1_0() {
 
-        log.info("Applying 1.1.0 updates if necessary")
-        
-        if (isSchemaCurrent(1,1,0)) {     
+        if (isSchemaCurrent(1,1,0)) {
             // result found at version, assume this is applied
-            log.info("Schema is current for 1.1.0 release")
             return
         }
-         
+
+        log.info("Applying 1.1.0 updates")
+
         def server = Server.getServer()
         if (server) {
-
             log.info("Initializing new fields on Server instance")
             server.mode = ServerMode.STANDALONE
             server.consoleLogLevel = ConsoleLogLevel.WARN
             server.apacheLogLevel =  ApacheLogLevel.WARN
             server.save()
-
         }
-        
-        SchemaVersion v = new SchemaVersion(major : 1, minor : 1, revision : 0, 
-                description: "1.1.0 added Server fields: mode, consoleLogLevel, apacheLogLevel")
+
+        SchemaVersion v = new SchemaVersion(major : 1, minor : 1, revision : 0,
+            description: "1.1.0 added Server fields: mode, consoleLogLevel, " +
+                "apacheLogLevel")
         v.save()
     }
 
     def void release1_2_0() {
 
         if (isSchemaCurrent(1,2,0)) {
-            log.info("Schema is current for 1.2.0 release")
             return
         }
 
@@ -104,21 +101,21 @@ class UpgradeBootStrap {
                     "(WinBytesIn -> BytesIn), (WinBytesOut -> BytesOut).")
         v.save()
     }
-    
-    
+
     def void release1_3_1() {
 
         if (isSchemaCurrent(1,3,1)) {
-            log.info("Schema is current for 1.3.1 release")
             return
         }
 
         log.info("Applying 1.3.1 updates")
 
-        Server.executeUpdate("UPDATE Server s SET s.ldapEnabledConsole = s.ldapEnabled")
-            
+        Server.executeUpdate("UPDATE Server s SET s.ldapEnabledConsole = " +
+            "s.ldapEnabled")
+
         SchemaVersion v = new SchemaVersion(major : 1, minor : 3, revision : 1,
-                description: "1.3.1 updated Server adding field 'ldapEnabledConsole'.")
+            description: "1.3.1 updated Server adding field " +
+                "'ldapEnabledConsole'.")
         v.save()
     }
 }

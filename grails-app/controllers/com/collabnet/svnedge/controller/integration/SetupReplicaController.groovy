@@ -17,15 +17,14 @@
  */
 package com.collabnet.svnedge.controller.integration
 
-
-import com.collabnet.svnedge.console.CantBindPortException 
+import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.replication.ReplicaConversionBean 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
-import com.collabnet.svnedge.teamforge.CtfConnectionBean 
-import com.collabnet.svnedge.teamforge.RemoteMasterException 
+import com.collabnet.svnedge.integration.CtfAuthenticationException;
+import com.collabnet.svnedge.integration.CtfConnectionBean;
+import com.collabnet.svnedge.integration.RemoteMasterException;
+import com.collabnet.svnedge.integration.ReplicaConversionBean 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 import org.springframework.beans.BeanUtils

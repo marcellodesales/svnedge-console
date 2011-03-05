@@ -17,12 +17,7 @@
  */
 package com.collabnet.svnedge.controller.admin
 
-
-
 import grails.converters.JSON
-import java.net.NoRouteToHostException
-import java.net.UnknownHostException
-import java.net.ConnectException
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.codehaus.groovy.grails.commons.ConfigurationHolder

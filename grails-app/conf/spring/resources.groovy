@@ -17,16 +17,16 @@
  */
 // Place your Spring DSL code here
 beans = {
-    ReplicaAuthenticationProvider(com.collabnet.svnedge.replication.security.ReplicaAuthenticationProvider) {
+    ReplicaAuthenticationProvider(com.collabnet.svnedge.integration.security.ReplicaAuthenticationProvider) {
         cacheManagementService = ref("cacheManagementService")
         replicaUserDetailsService = ref("replicaUserDetailsService")
     }
 
-    ctfAuthenticationProvider(com.collabnet.svnedge.teamforge.security.CtfAuthenticationProvider) {
+    ctfAuthenticationProvider(com.collabnet.svnedge.integration.security.CtfAuthenticationProvider) {
         ctfRemoteClientService = ref("ctfRemoteClientService")
     }
 
-    csvnAuthenticationProvider(com.collabnet.svnedge.console.security.CsvnAuthenticationProvider) {
+    csvnAuthenticationProvider(com.collabnet.svnedge.security.CsvnAuthenticationProvider) {
         daoAuthenticationProvider = ref("daoAuthenticationProvider")
     }
 
