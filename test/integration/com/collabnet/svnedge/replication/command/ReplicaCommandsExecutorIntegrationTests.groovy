@@ -33,7 +33,7 @@ import com.collabnet.svnedge.integration.command.impl.ReplicaPropsUpdateCommand
 import com.collabnet.svnedge.integration.command.impl.RepoAddCommand
 import com.collabnet.svnedge.integration.command.impl.RepoRemoveCommand
 import com.collabnet.svnedge.integration.command.impl.RepoSyncCommand
-import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
+import static com.collabnet.svnedge.admin.JobsAdminService.REPLICA_GROUP
 
 import grails.test.*
 

@@ -15,8 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel 
-import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel 
+import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel 
 import com.collabnet.svnedge.domain.SchemaVersion 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 

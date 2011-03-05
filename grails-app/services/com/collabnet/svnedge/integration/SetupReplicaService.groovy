@@ -23,7 +23,7 @@ import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.integration.CtfAuthenticationException 
 import com.collabnet.svnedge.integration.CtfConnectionBean
 import com.collabnet.svnedge.integration.RemoteMasterException
-import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
+import static com.collabnet.svnedge.admin.JobsAdminService.REPLICA_GROUP
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 

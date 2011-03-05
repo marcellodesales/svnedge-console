@@ -17,7 +17,7 @@
  */
 package com.collabnet.svnedge.integration
 
-import com.collabnet.svnedge.console.JobsAdminService 
+import com.collabnet.svnedge.admin.JobsAdminService 
 
 /**
  * The Cache Flusher job will run everyday at 00:00. 

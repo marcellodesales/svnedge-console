@@ -23,7 +23,7 @@ import org.quartz.Trigger
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.collabnet.svnedge.console.JobsAdminService 
+import com.collabnet.svnedge.admin.JobsAdminService 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
