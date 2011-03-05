@@ -22,7 +22,7 @@ import java.util.Locale;
 import grails.test.*
 
 import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException
+import com.collabnet.svnedge.integration.CtfAuthenticationException 
 
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 

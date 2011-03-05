@@ -21,7 +21,7 @@ import grails.test.ControllerUnitTestCase
 import org.springframework.security.providers.dao.UserCache
 import org.grails.plugins.springsecurity.service.AuthenticateService
 
-import com.collabnet.svnedge.LifecycleService;
+import com.collabnet.svnedge.console.LifecycleService;
 import com.collabnet.svnedge.domain.Role;
 import com.collabnet.svnedge.domain.User;
 

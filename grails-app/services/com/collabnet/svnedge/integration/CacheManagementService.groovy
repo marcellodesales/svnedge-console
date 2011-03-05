@@ -15,13 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration
 
 import org.springframework.remoting.RemoteAccessException
 
-
 import com.collabnet.svnedge.domain.User 
-import com.collabnet.svnedge.replication.security.cache.ProxyCache
+import com.collabnet.svnedge.integration.security.cache.ProxyCache
 
 /**
  * The cache management manages the cache structures for the user 

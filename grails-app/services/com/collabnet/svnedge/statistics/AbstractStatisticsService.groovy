@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.ConsolidateStatJob
-import com.collabnet.svnedge.console.DeleteStatJob
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 

@@ -16,10 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.collabnet.svnedge.services
-;
 
-import com.collabnet.svnedge.console.NetworkingService;
-
+import com.collabnet.svnedge.console.NetworkingService 
 import grails.test.GrailsUnitTestCase;
 
 class NetworkingServiceTests extends GrailsUnitTestCase {

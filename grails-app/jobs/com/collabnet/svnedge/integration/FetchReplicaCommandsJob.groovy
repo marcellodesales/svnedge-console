@@ -23,7 +23,7 @@ import org.quartz.Trigger
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import com.collabnet.svnedge.admin.JobsAdminService 
+import com.collabnet.svnedge.console.JobsAdminService 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
@@ -119,7 +119,6 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     def execute() {
         def server = Server.getServer()
         if (server.mode != ServerMode.REPLICA) {
-            log.debug("Skipping fetch of replication commands")
             return
         }
         log.debug("Checking for replica commands...")

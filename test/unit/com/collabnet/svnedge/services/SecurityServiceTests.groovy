@@ -16,14 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.collabnet.svnedge.services
-;
 
 import java.util.Random
+import com.collabnet.svnedge.console.SecurityService 
 import grails.test.GrailsUnitTestCase
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import com.collabnet.svnedge.console.SecurityService;
-import com.collabnet.svnedge.teamforge.CtfConversionBean
 
 class SecurityServiceTests extends GrailsUnitTestCase {
 

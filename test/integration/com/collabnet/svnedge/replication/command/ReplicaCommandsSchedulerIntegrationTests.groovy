@@ -19,7 +19,7 @@ package com.collabnet.svnedge.replication.command
 
 
 import grails.test.*
-import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
+import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
 

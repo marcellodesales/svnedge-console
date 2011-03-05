@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.teamforge
+package com.collabnet.svnedge.integration
 
 import java.net.URL;
 import java.net.URLEncoder;
@@ -28,9 +28,8 @@ import java.util.zip.ZipOutputStream;
 
 import grails.util.GrailsUtil
 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException
+import com.collabnet.svnedge.CantBindPortException 
 import com.collabnet.svnedge.util.ConfigUtil;
-import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 

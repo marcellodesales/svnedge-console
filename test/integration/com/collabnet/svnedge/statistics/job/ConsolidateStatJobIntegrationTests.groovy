@@ -19,7 +19,6 @@ package com.collabnet.svnedge.statistics.job
 
 import grails.test.*
 
-import com.collabnet.svnedge.console.ConsolidateStatJob
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 
@@ -28,6 +27,7 @@ import com.collabnet.svnedge.domain.statistics.StatValue
 import com.collabnet.svnedge.domain.statistics.Statistic 
 import com.collabnet.svnedge.domain.statistics.StatisticType 
 import com.collabnet.svnedge.domain.statistics.Unit 
+import com.collabnet.svnedge.statistics.ConsolidateStatJob 
 
 import org.quartz.JobListener
 import org.quartz.JobExecutionContext

@@ -17,13 +17,6 @@
  */
 package com.collabnet.svnedge.replication.command
 
-import com.collabnet.svnedge.replication.command.AbstractCommand;
-import com.collabnet.svnedge.replication.command.CommandsExecutionContext;
-import com.collabnet.svnedge.replication.command.impl.ReplicaPropsUpdateCommand;
-import com.collabnet.svnedge.replication.command.impl.RepoAddCommand;
-import com.collabnet.svnedge.replication.command.impl.RepoRemoveCommand;
-import com.collabnet.svnedge.replication.command.impl.RepoSyncCommand;
-import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
 import com.collabnet.svnedge.util.ConfigUtil 
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
@@ -33,6 +26,13 @@ import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.integration.RepoStatus 
 import com.collabnet.svnedge.domain.integration.ApprovalState;
 import com.collabnet.svnedge.domain.integration.CtfServer
+import com.collabnet.svnedge.integration.FetchReplicaCommandsJob
+import com.collabnet.svnedge.integration.command.AbstractCommand
+import com.collabnet.svnedge.integration.command.CommandsExecutionContext
+import com.collabnet.svnedge.integration.command.impl.ReplicaPropsUpdateCommand
+import com.collabnet.svnedge.integration.command.impl.RepoAddCommand
+import com.collabnet.svnedge.integration.command.impl.RepoRemoveCommand
+import com.collabnet.svnedge.integration.command.impl.RepoSyncCommand
 import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 
 import grails.test.*

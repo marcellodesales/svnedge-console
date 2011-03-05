@@ -17,8 +17,8 @@
  */
 package com.collabnet.svnedge.domain
 
-import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.console.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.domain.integration.CtfServer 
 
 /**

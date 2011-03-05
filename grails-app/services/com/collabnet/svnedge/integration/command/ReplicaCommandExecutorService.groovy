@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration.command
 
 import grails.util.GrailsUtil
 
@@ -26,19 +26,15 @@ import java.util.concurrent.Semaphore
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
-import com.collabnet.svnedge.replication.command.AbstractReplicaCommand
-import com.collabnet.svnedge.replication.command.CommandExecutionException
-import com.collabnet.svnedge.replication.command.LongRunningCommand
-import com.collabnet.svnedge.replication.command.ShortRunningCommand
-import com.collabnet.svnedge.replication.command.event.AppliedExecutorSemaphoresUpdateEvent
-import com.collabnet.svnedge.replication.command.event.CommandReadyForExecutionEvent
-import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
-import com.collabnet.svnedge.replication.command.event.LongRunningCommandQueuedEvent
-import com.collabnet.svnedge.replication.command.event.NoCommandsRunningUpdateSemaphoresEvent
-import com.collabnet.svnedge.replication.command.event.ShortRunningCommandQueuedEvent
-import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
-import com.collabnet.svnedge.replication.command.handler.CommandExecutorHandler
-import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
+import com.collabnet.svnedge.integration.FetchReplicaCommandsJob 
+import com.collabnet.svnedge.integration.command.event.AppliedExecutorSemaphoresUpdateEvent 
+import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent 
+import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent 
+import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent 
+import com.collabnet.svnedge.integration.command.event.NoCommandsRunningUpdateSemaphoresEvent 
+import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent 
+import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent 
+import com.collabnet.svnedge.integration.command.handler.CommandExecutorHandler 
 
 import org.springframework.context.ApplicationListener
 

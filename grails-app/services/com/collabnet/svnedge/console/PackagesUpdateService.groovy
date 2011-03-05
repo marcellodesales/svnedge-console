@@ -17,19 +17,17 @@
  */
 package com.collabnet.svnedge.console;
 
-import com.collabnet.svnedge.console.pkgsupdate.PackageInfo;
-import com.collabnet.svnedge.console.pkgsupdate.PackagesUpdateProgressTracker;
-import com.collabnet.svnedge.console.pkgsupdate.PackagesUpdateSecurityPolicy 
-import com.collabnet.svnedge.console.pkgsupdate.HttpProxyAuth;
-
-import grails.util.GrailsUtil
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+import com.collabnet.svnedge.admin.PackagesUpdateJob 
+import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth 
+import com.collabnet.svnedge.admin.pkgsupdate.PackageInfo 
+import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateProgressTracker 
+import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateSecurityPolicy 
 import com.sun.pkg.client.Image
 import com.sun.pkg.client.Image.FmriState
 import com.sun.pkg.client.Image.ImagePlan
@@ -40,8 +38,6 @@ import java.util.HashSet
 import org.springframework.beans.factory.InitializingBean
 import org.cometd.Client
 import org.mortbay.cometd.ChannelImpl
-import com.collabnet.svnedge.console.PackagesUpdateJob
-import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
  * The Packages Update service is responsible for managing the updates of the

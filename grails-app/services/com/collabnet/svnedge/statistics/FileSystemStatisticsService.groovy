@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.statistics
 
-import com.collabnet.svnedge.console.StatCollectJob
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.statistics.Category;

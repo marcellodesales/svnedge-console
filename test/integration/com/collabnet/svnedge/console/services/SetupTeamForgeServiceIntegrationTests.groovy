@@ -24,7 +24,7 @@ import java.util.Locale;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
-import com.collabnet.svnedge.teamforge.CtfConversionBean;
+import com.collabnet.svnedge.integration.CtfConversionBean 
 
 class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
 

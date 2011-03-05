@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.controller.admin
 
-
 import com.collabnet.svnedge.util.ConfigUtil;
 
 import grails.test.*
@@ -29,7 +28,7 @@ class LogRotateJobTests extends GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
         LogRotateJob = grailsApplication.mainContext
-            .getBean("com.collabnet.svnedge.console.LogRotateJob")
+            .getBean("com.collabnet.svnedge.admin.LogRotateJob")
     }
 
     protected void tearDown() {

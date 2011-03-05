@@ -17,11 +17,8 @@
  */
 package com.collabnet.svnedge.console.services
 
+import com.collabnet.svnedge.admin.LogRotateJob 
 import grails.test.*
-
-import com.collabnet.svnedge.console.JobsAdminService;
-import com.collabnet.svnedge.console.LogRotateJob
-import com.collabnet.svnedge.replication.FetchReplicaCommandsJob;
 
 class JobsAdminServiceIntegrationTests extends GrailsUnitTestCase {
     

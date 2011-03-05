@@ -15,11 +15,12 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration
 
 
-import com.collabnet.svnedge.replication.security.ReplicaUserDetails;
 
+
+import com.collabnet.svnedge.integration.security.ReplicaUserDetails 
 import org.springframework.security.userdetails.UserDetailsService
 
 import org.springframework.security.GrantedAuthority

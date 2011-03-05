@@ -24,7 +24,7 @@ import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import com.collabnet.svnedge.domain.integration.CtfServer;
-import com.collabnet.svnedge.replication.security.cache.ProxyCache 
+import com.collabnet.svnedge.integration.security.cache.ProxyCache 
 
 class CacheManagementUserInfoIntegrationTests extends GrailsUnitTestCase {
 

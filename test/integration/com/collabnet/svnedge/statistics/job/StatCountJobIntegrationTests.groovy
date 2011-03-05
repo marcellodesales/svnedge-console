@@ -22,7 +22,6 @@ import grails.test.GrailsUnitTestCase;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobListener;
 
-import com.collabnet.svnedge.console.StatCountJob;
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 
@@ -31,6 +30,7 @@ import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.domain.statistics.StatisticType 
 import com.collabnet.svnedge.domain.statistics.Unit 
 import com.collabnet.svnedge.statistics.AbstractStatisticsService 
+import com.collabnet.svnedge.statistics.StatCountJob 
 
 class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobListener {
     def quartzScheduler

@@ -17,11 +17,10 @@
  */
 package com.collabnet.svnedge.services
 
-
 import grails.test.*
-import com.collabnet.svnedge.console.CommandLineService;
-import com.collabnet.svnedge.console.LifecycleService;
-import com.collabnet.svnedge.console.SvnRepoService;
+import com.collabnet.svnedge.console.CommandLineService 
+import com.collabnet.svnedge.console.LifecycleService 
+import com.collabnet.svnedge.console.SvnRepoService 
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 

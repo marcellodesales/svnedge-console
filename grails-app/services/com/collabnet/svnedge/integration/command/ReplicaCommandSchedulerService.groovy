@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration.command
+
 
 import grails.util.GrailsUtil
 
@@ -30,14 +31,14 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationListener
 
-import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
-import com.collabnet.svnedge.replication.command.event.AppliedExecutorSemaphoresUpdateEvent
-import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
-import com.collabnet.svnedge.replication.command.event.MaxNumberCommandsRunningUpdatedEvent
-import com.collabnet.svnedge.replication.command.event.NoCommandsRunningUpdateSemaphoresEvent
-import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
-import com.collabnet.svnedge.replication.command.handler.CommandsSchedulerHandler
+import com.collabnet.svnedge.integration.command.event.AppliedExecutorSemaphoresUpdateEvent 
+import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent 
+import com.collabnet.svnedge.integration.command.event.MaxNumberCommandsRunningUpdatedEvent 
+import com.collabnet.svnedge.integration.command.event.NoCommandsRunningUpdateSemaphoresEvent 
+import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent 
+import com.collabnet.svnedge.integration.command.handler.CommandsSchedulerHandler 
+import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 /**
  * The ReplicaCommandSchedulerService provides a scheduler responsible for:

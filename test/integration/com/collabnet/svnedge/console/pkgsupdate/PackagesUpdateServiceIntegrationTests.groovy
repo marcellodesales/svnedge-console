@@ -20,9 +20,8 @@ package com.collabnet.svnedge.console.pkgsupdate;
 import java.io.FileNotFoundException;
 import java.net.NoRouteToHostException;
 
-
-import com.collabnet.svnedge.console.PackagesUpdateService;
-import com.collabnet.svnedge.console.pkgsupdate.PackageInfo;
+import com.collabnet.svnedge.admin.pkgsupdate.PackageInfo 
+import com.collabnet.svnedge.console.PackagesUpdateService 
 import com.collabnet.svnedge.util.FileDownloaderCategory 
 import com.collabnet.svnedge.util.UntarCategory 
 import com.sun.pkg.client.Image;

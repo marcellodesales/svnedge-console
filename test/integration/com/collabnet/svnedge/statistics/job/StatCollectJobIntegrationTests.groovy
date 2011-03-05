@@ -17,10 +17,9 @@
  */
 package com.collabnet.svnedge.statistics.job
 
-
+import com.collabnet.svnedge.statistics.StatCollectJob 
 import grails.test.*
 
-import com.collabnet.svnedge.console.StatCollectJob
 import org.quartz.JobListener
 import org.quartz.JobExecutionContext
 

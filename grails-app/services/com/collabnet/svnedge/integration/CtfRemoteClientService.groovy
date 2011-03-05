@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.teamforge
+package com.collabnet.svnedge.integration
+
 
 import org.springframework.security.GrantedAuthority
 import org.springframework.security.GrantedAuthorityImpl
@@ -45,8 +46,6 @@ import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 import java.net.MalformedURLException
 
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException
-import com.collabnet.svnedge.teamforge.CtfSessionExpiredException
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 

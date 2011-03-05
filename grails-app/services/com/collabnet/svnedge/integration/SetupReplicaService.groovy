@@ -15,15 +15,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration
 
+
+import com.collabnet.svnedge.CantBindPortException 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
-import com.collabnet.svnedge.teamforge.CtfAuthenticationException 
-import com.collabnet.svnedge.teamforge.CtfConnectionBean
-import com.collabnet.svnedge.teamforge.RemoteMasterException
+import com.collabnet.svnedge.integration.CtfAuthenticationException 
+import com.collabnet.svnedge.integration.CtfConnectionBean
+import com.collabnet.svnedge.integration.RemoteMasterException
 import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
-import com.collabnet.svnedge.replication.FetchReplicaCommandsJob
-import com.collabnet.svnedge.console.CantBindPortException
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 

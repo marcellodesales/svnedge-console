@@ -22,7 +22,7 @@ import com.collabnet.svnedge.integration.command.event.MaxNumberCommandsRunningU
 import com.collabnet.svnedge.integration.FetchReplicaCommandsJob
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.domain.integration.CtfServer
-import static com.collabnet.svnedge.admin.JobsAdminService.REPLICA_GROUP
+import static com.collabnet.svnedge.console.JobsAdminService.REPLICA_GROUP
 
 /**
  * Defines the Abstract Replica Server Command. That is, a command that is used

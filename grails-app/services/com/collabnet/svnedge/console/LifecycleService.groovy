@@ -20,7 +20,7 @@ package com.collabnet.svnedge.console
 import java.io.File;
 import grails.util.GrailsUtil;
 
-import com.collabnet.svnedge.console.CantBindPortException
+import com.collabnet.svnedge.CantBindPortException 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.User 
 import com.collabnet.svnedge.domain.integration.CtfServer 

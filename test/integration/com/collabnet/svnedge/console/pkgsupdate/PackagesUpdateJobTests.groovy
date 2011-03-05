@@ -31,7 +31,7 @@ class PackagesUpdateJobTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         this.packagesUpdateJob = grailsApplication.mainContext.getBean(
-                "com.collabnet.svnedge.console.PackagesUpdateJob")
+                "com.collabnet.svnedge.admin.PackagesUpdateJob")
     }
 
     void testExecution() {

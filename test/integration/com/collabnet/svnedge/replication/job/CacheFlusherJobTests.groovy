@@ -29,7 +29,7 @@ class CacheFlusherJobTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         cacheFlusherJob = grailsApplication.mainContext.getBean(
-                "com.collabnet.svnedge.replication.CacheFlusherJob")
+                "com.collabnet.svnedge.integration.CacheFlusherJob")
         cacheManagementService.flushAllCache() 
     }
 

@@ -15,16 +15,16 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication
+package com.collabnet.svnedge.integration.command
 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.integration.CommandResult 
-import com.collabnet.svnedge.replication.command.CommandsExecutionContext
-import com.collabnet.svnedge.replication.command.event.CommandTerminatedEvent
-import com.collabnet.svnedge.replication.command.event.ConnectivityWithReplicaManagerRestoredEvent
-import com.collabnet.svnedge.replication.command.event.ReplicaCommandsExecutionEvent
-import com.collabnet.svnedge.teamforge.RemoteMasterException
-import static com.collabnet.svnedge.teamforge.CtfRemoteClientService.COMMAND_ID_PREFIX
+import com.collabnet.svnedge.integration.command.CommandsExecutionContext
+import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
+import com.collabnet.svnedge.integration.command.event.ConnectivityWithReplicaManagerRestoredEvent
+import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent
+import com.collabnet.svnedge.integration.RemoteMasterException
+import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 import org.springframework.context.ApplicationListener
 
