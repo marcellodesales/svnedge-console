@@ -25,7 +25,6 @@ import grails.test.*
 
 class RealTimeStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     def realTimeStatisticsService
-    def cacheManagementService
 
     protected void setUp() {
         super.setUp()

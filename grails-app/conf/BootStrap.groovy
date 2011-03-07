@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
 
 import grails.util.GrailsUtil
 
@@ -47,7 +47,6 @@ class BootStrap {
     def replicaCommandSchedulerService
     def commandResultDeliveryService
     def logManagementService
-    def cacheManagementService
 
     // Alternate auth mechanism for CTF mode
     def authenticationManager
@@ -162,13 +161,6 @@ class BootStrap {
         // start it now
         if (server && server.defaultStart && !lifecycleService.isStarted()) {
             lifecycleService.startServer()
-        }
-
-        if (GrailsUtil.environment == "test") {
-            log.info("Bootstrapping cacheManagementService...")
-            def negative = config.svnedge.replica.cache.negativeExpirationRate
-            def positive = config.svnedge.replica.cache.positiveExpirationRate
-            cacheManagementService.bootStrap(negative, positive)
         }
 
         log.info("Bootstrapping discoveryService...")

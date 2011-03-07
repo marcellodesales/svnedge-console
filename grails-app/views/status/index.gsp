@@ -71,26 +71,6 @@
     </div>
     </g:form>
 
-    <g:if test="${server.replica}">
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.replica.name" /> </strong> ${currentReplica.getName()}
-      </div>
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.replica.location" /></strong> ${currentReplica.getLocationName()}
-      </div>
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.replica.master_hostname" /></strong> ${defaultMaster.hostName}
-      </div>
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.replica.master_ssl" /></strong> 
-        <g:if test="${defaultMaster.sslEnabled}">
-            <g:message code="status.page.replica.master_ssl.yes" />
-        </g:if>
-        <g:else>
-            <g:message code="status.page.replica.master_ssl.no" />
-        </g:else>
-      </div>
-    </g:if>
     </content>
 
     <div class="dialog">

@@ -32,11 +32,6 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
     // any injected beans need to be set explicitly there
     def ctfRemoteClientService
 
-    // Directly using the ctf service for now.  The console should not
-    // have that much traffic.  If it started providing auth for 
-    // svn/viewvc, caching would make more sense
-    //def cacheManagementService
-
     Authentication authenticate(Authentication authentication) 
         throws AuthenticationException {
         GrailsUser gUser = ctfRemoteClientService.authenticateUser(

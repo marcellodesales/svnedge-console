@@ -19,6 +19,7 @@ package com.collabnet.svnedge.controller
 
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
@@ -56,7 +57,7 @@ class RepoController {
         }
         def server = Server.getServer()
         def repoList
-        if (server.replica) {
+        if (server.mode == ServerMode.REPLICA) {
             if (params.sort == "name") {
                 repoList = ReplicatedRepository.listSortedByName(params)
             } else {
@@ -67,7 +68,7 @@ class RepoController {
         }
         [ repositoryInstanceList: repoList,
           repositoryInstanceTotal: Repository.count(),
-          server: server, isReplica: server.replica ]
+          server: server, isReplica: server.mode == ServerMode.REPLICA ]
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
@@ -171,7 +172,6 @@ class RepoController {
             redirect(action:list)
         }
     }
-
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def updatePermissions = {

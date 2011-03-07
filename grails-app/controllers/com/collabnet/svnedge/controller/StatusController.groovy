@@ -195,24 +195,6 @@ class StatusController {
             model << [label: message(code: 'status.page.status.space.avail'),
                  value: freeRepo]
         }
-        if (server.replica) {
-            model << [label: message(code: 'status.page.status.master_latency'),
-                value:  operatingSystemService.truncate(
-                    statisticsService.getLatency(), 2) + " " +
-                    message(code: 'general.measurement.milliseconds.short')]
-            model << [label: message(
-                code: 'status.page.status.users_cache.number'),
-                value: statisticsService.getNumUsersCached()]
-            model << [label: message(
-                code: 'status.page.status.users_cache.timeout'),
-                value: currentConfig.positiveExpirationRate + " " + 
-                    message(code: 'general.measurement.minutes')]
-            model << [label: message(
-                code: 'status.page.status.users_cache.percent'),
-                value: operatingSystemService.truncate(
-                    statisticsService.getUserCachePercentageHit() *
-                        100, 2) + " %"]
-        }
         return model
    }
 

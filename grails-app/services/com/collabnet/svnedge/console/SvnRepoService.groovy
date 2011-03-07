@@ -25,7 +25,6 @@ import com.collabnet.svnedge.domain.statistics.StatValue
 import com.collabnet.svnedge.domain.statistics.Statistic 
 import com.collabnet.svnedge.util.ConfigUtil;
 
-
 class SvnRepoService extends AbstractSvnEdgeService {
 
     // service dependencies
@@ -509,7 +508,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def server = lifecycleService.getServer()
         def buffer = new StringBuilder()
         if (repoStatus.size() == 0) {
-            if (server.replica) {
+            if (server.mode == ServerMode.REPLICA) {
                 return getMessage("repository.status.notAdded", locale)
             } else {
                 def num = Repository.list().size()
