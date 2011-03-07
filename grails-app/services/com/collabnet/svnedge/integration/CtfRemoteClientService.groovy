@@ -24,6 +24,8 @@ import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import grails.util.GrailsUtil
 import org.apache.axis.AxisFault
+import com.collabnet.ce.soap60.webservices.ClientSoapStubFactory as ClientSoapStubFactory60
+import com.collabnet.ce.soap60.webservices.scm.IScmAppSoap as IScmAppSoap60
 import com.collabnet.ce.soap50.webservices.ClientSoapStubFactory
 import com.collabnet.ce.soap50.webservices.cemain.ICollabNetSoap
 import com.collabnet.ce.soap50.webservices.cemain.UserSoapDO
@@ -110,6 +112,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     public IScmAppSoap makeScmSoap(url) {
         return (IScmAppSoap) ClientSoapStubFactory.getSoapStub(
             IScmAppSoap.class, url ?: CtfServer.getServer().baseUrl)
+    }
+
+    public IScmAppSoap60 makeScmSoap60(url) {
+        return (IScmAppSoap60) ClientSoapStubFactory60.getSoapStub(
+            IScmAppSoap60.class, url ?: CtfServer.getServer().baseUrl)
     }
 
     private String authzBaseUrl() {
@@ -511,7 +518,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
    def getReplicableScmExternalSystemList(ctfUrl, sessionId, locale) throws
           RemoteMasterException {
        try {
-           def lt = this.makeScmSoap(ctfUrl).getReplicableScmExternalSystemList(
+           def lt = this.makeScmSoap60(ctfUrl).getReplicableScmExternalSystemList(
                sessionId).dataRows
            def scmList = []
            if (lt && lt.length > 0) {
@@ -575,7 +582,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             throws RemoteMasterException { 
 
         try {
-            def scmSoap = this.makeScmSoap(ctfUrl)
+            def scmSoap = this.makeScmSoap60(ctfUrl)
             def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
                 masterSystemId, name, description, comment, replicaProps)
 
@@ -638,7 +645,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         def replicaId = replicaConfig.systemId
         try {
             def sessionId = login(ctfUrl, ctfUsername, ctfPassword, locale)
-            def scmSoap = this.makeScmSoap(ctfUrl)
+            def scmSoap = this.makeScmSoap60(ctfUrl)
             scmSoap.deleteExternalSystemReplica(sessionId, replicaId)
         }
         catch (LoginFault e) {
@@ -889,7 +896,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             UnknownHostException {
 
         try {
-            def scmSoap = this.makeScmSoap(ctfUrl)
+            def scmSoap = this.makeScmSoap60(ctfUrl)
             def queuedCommands = scmSoap.getReplicaQueuedCommands(userSessionId,
                 replicaServerId)
 
@@ -1003,7 +1010,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             succeeded, locale) throws RemoteMasterException {
 
         try {
-            def scmSoap = this.makeScmSoap(ctfUrl)
+            def scmSoap = this.makeScmSoap60(ctfUrl)
             scmSoap.uploadCommandResult(userSessionId, replicaServerId,
                 commandId, succeeded)
 
