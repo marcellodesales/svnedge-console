@@ -45,7 +45,8 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
     def execute() {
         def repoName = getRepoName()
 
-        log.debug("Synchronizing repo: " + repoName)
+        log.debug("Synchronizing repo: " + repoName + " for revision " +
+            this.params.revision)
         def commandLineService = getService("commandLineService")
         def syncRepoURI = commandLineService.createSvnFileURI(
                 new File(Server.getServer().repoParentDir, repoName))
