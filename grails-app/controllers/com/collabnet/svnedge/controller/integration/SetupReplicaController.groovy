@@ -148,10 +148,6 @@ class SetupReplicaController {
      */
     def confirm = { ReplicaInfoCommand input -> 
 
-        def server
-        def repoName
-        def userName
-        
         if (!input.hasErrors()) {
             
             try {
@@ -215,7 +211,6 @@ class SetupReplicaController {
 
         } catch (CantBindPortException cantBind) {
             setupReplicaService.serverCantRestartAfterRegistration()
-            def error = cantBind.getMessage() ?: cantBind.getCause().getMessage()
             flash.message = message(code: 'setupReplica.action.confirm.success')
             flash.error = message(
                 code: 'replica.error.registration.serverCantRestart')

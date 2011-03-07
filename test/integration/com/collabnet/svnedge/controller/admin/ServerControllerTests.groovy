@@ -61,7 +61,6 @@ class ServerControllerTests extends ControllerUnitTestCase {
     
     private def defaultParams() {
         def params = controller.params
-        Server server = lifecycleService.getServer()
         params.hostname = "localhost"
         params.port = "80"
         params.repoParentDir = "/tmp"

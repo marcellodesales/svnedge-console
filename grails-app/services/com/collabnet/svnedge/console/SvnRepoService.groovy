@@ -55,9 +55,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
          "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
         ]
 
-        Server server = lifecycleService.getServer()
-        def repoPath = this.getRepositoryHomePath(repo)
-
         def feature = ""
 
         if (fsFormat <=1) {
@@ -80,7 +77,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      *
      */
     def getReposUUID(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def uuid = ""
@@ -103,7 +99,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      *
      */
     def getReposFsType(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def fsType = "FSFS"
@@ -124,7 +119,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return fsType
     }
 
-
     /**
      * Returns repository fs format
      *
@@ -132,7 +126,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return repository fs format integer.
      */
     def getReposFsFormat(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         // As per the Subversion FS design docs, Svn asssumes fsformat as 1
@@ -163,7 +156,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return Boolean
      */
     def getReposRepSharing(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def repSharing = true
@@ -203,7 +195,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return repository format integer.
      */
     def getReposFormat(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def repoFormat = 0
@@ -232,7 +223,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      *         return -1.
      */
     def getReposSharding(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
         def sharded = -1
 
@@ -273,7 +263,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return revision number.
      */
     def findHeadRev(Repository repo) {
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def f = new File(new File(repoPath, "db/current").canonicalPath)
@@ -298,8 +287,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return revision number.
      */
     def findMinPackedRev(Repository repo) {
-
-        Server server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         def f = new File(new File(repoPath, "db/min-unpacked-rev").canonicalPath)
@@ -371,7 +358,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return String message about the new location
      */
     def archivePhysicalRepository(Repository repo) {
-        Server server = lifecycleService.getServer()
+        def server = lifecycleService.getServer()
         File repoToDelete = new File(this.getRepositoryHomePath(repo))
         File f = new File(new File(server.repoParentDir).getParentFile(), 
             "deleted-repos")
@@ -386,9 +373,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         repoToDelete.renameTo(repoArchiveLocation)
         return "Moved repository " + repo.name + " new location is " +
                 repoArchiveLocation.getAbsolutePath()
-    }        
-    
-         
+    }
+
     /**
      * Deletes the repository contents from the file system
      * @param repo
@@ -541,7 +527,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
       * @return boolean indicator
       */
     boolean validateRepositoryPermissions(Repository repo) {
-        def server = lifecycleService.getServer()
         def repoPath = this.getRepositoryHomePath(repo)
 
         //Sometimes ls -ld output coloumns are separated by double space.

@@ -117,7 +117,6 @@ class ServerConfService {
         def tempDataDir = new File(appHome, "temp-data")
         if (tempDataDir.exists()) {
             log.info("Bootstrapping the temporary data directory...")
-            def dataDir = new File(appHome, "data")
             //The data exists, it's a possible update. Copy each
             //existing ones, maintaining the version .new-1, .new-2, ...
             boolean recur = true
@@ -206,36 +205,32 @@ class ServerConfService {
         String libDir = new File(appHome, "lib").absolutePath
         File pythonBindingDir = new File(libDir, "svn-python")
         if (pythonBindingDir.exists()) {
-            String[] result1 = commandLineService
-               .executeWithOutput("rm", "-rf", pythonBindingDir.absolutePath)
+            commandLineService.executeWithOutput("rm", "-rf", 
+                pythonBindingDir.absolutePath)
         }
         File actualPythonBindingDir = new File(libDir,
             "svn-python${getPythonVersion()}")
-        String[] result2 = commandLineService
-            .executeWithOutput("ln", "-s", actualPythonBindingDir.absolutePath,
-                               pythonBindingDir.absolutePath)
+        commandLineService.executeWithOutput("ln", "-s", 
+            actualPythonBindingDir.absolutePath, pythonBindingDir.absolutePath)
 
         File modpyLibDir = new File(libDir, "mod_python")
         if (modpyLibDir.exists()) {
-            String[] result5 = commandLineService
-                .executeWithOutput("rm", "-rf", modpyLibDir.absolutePath)
+            commandLineService.executeWithOutput("rm", "-rf", 
+                modpyLibDir.absolutePath)
         }
         File actualModpyLibDir = new File(libDir,
             "mod_python${getPythonVersion()}")
-        String[] result6 = commandLineService
-            .executeWithOutput("ln", "-s", actualModpyLibDir.absolutePath,
-                               modpyLibDir.absolutePath)
+        commandLineService.executeWithOutput("ln", "-s", 
+            actualModpyLibDir.absolutePath, modpyLibDir.absolutePath)
 
         File swigPythonLibPath = new File(libDir, "libsvn_swig_py-1.so.0.0.0")
         File actualSwigPythonLibPath = new File(libDir, 
             "libsvn_swig_py-1.so.0.0.0${getPythonVersion()}")
-        String[] result3 = commandLineService
-            .executeWithOutput("ln", "-sf",actualSwigPythonLibPath.absolutePath,
-                               swigPythonLibPath.absolutePath)
+        commandLineService.executeWithOutput("ln", "-sf",
+            actualSwigPythonLibPath.absolutePath, swigPythonLibPath.absolutePath)
         File swigPythonLibPath1 = new File(libDir, "libsvn_swig_py-1.so.0")
-        String[] result4 = commandLineService
-            .executeWithOutput("ln", "-sf", swigPythonLibPath.absolutePath,
-                               swigPythonLibPath1.absolutePath)
+        commandLineService.executeWithOutput("ln", "-sf", 
+            swigPythonLibPath.absolutePath, swigPythonLibPath1.absolutePath)
     }
     
     private def conditionalWriteHttpdConf() {
@@ -642,7 +637,6 @@ LDAPVerifyServerCert Off
 
     private def getCtfSvnHttpdConf(server, contextPath) {
         def appHome = ConfigUtil.appHome()
-        def ctfServer = CtfServer.getServer()
         def conf = ""
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
@@ -924,7 +918,6 @@ ${extraconf}
      */
     private void archiveFile(File f) {
         if (f.exists()) {
-            def name = f.name
             int i = 1
             File archiveFile = null
             while (!archiveFile || archiveFile.exists()) {

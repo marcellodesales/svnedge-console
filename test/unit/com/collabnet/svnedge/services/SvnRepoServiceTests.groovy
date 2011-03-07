@@ -379,8 +379,8 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         assertEquals ("One repository expected at startup", 1, Repository.count())
 
         // create a new repo "externally" / out of band
-        def repoOnDisk1 = createMockRepo("existingRepoFile", false)
-        
+        createMockRepo("existingRepoFile", false)
+
         // run the sync method
         svc.syncRepositories()
         assertEquals ("Two repositories expected after sync", 2, Repository.count())

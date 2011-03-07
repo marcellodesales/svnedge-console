@@ -104,8 +104,6 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
      * Test processing a good add command.
      */
     void testProcessAddCommand() {
-        def classLoader = getClass().getClassLoader()
-
         def cmdParams = [:]
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID

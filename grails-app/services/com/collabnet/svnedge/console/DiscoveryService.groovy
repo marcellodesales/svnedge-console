@@ -61,9 +61,6 @@ class DiscoveryService {
         def serviceName = config.svnedge.mdns.serviceName
         serviceName = serviceName as String
         def hostAddr = networkingService.ipAddress
-        def port = config.svnedge.mdns.port
-        def path = config.grails.app.context
-        def tfPath = config.svnedge.mdns.teamForgeRegistrationPath
 
         try {
             register = SvnEdgeBonjourRegister.getInstance(

@@ -375,7 +375,6 @@ abstract class AbstractStatisticsService {
                                       Long interval) {
         def map = new TreeMap()
         def idealStart = idealStartTime(interval, startTime)
-        def points = ((endTime - idealStart) / interval)
         // seed the map with emptiness
         for (long time = idealStart; time < endTime; time += interval) {
             map[time] = [:]

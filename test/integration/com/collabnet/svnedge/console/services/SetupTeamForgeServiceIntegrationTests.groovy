@@ -108,7 +108,7 @@ class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
         setupTeamForgeService.addReposToProjects(conversionData)
         
         // cleanup - TODO Delete repos 
-        def url = "/sf/scm/do/selectRepository/projects." + projectName + "/scm"
+        //def url = "/sf/scm/do/selectRepository/projects." + projectName + "/scm"
         /*
         def conn = setupTeamForgeService.openPostUrl(url + ";jsessionid=" + 
          need to login?   conversionData.webSessionId,

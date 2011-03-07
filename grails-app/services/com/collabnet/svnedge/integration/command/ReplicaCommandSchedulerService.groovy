@@ -139,7 +139,6 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
         commandResultDeliveryService.registerClearExistingCommands(
             remoteCommandsMaps)
 
-        def previousSize = queuedCommands.size()
         for (commandMap in remoteCommandsMaps) {
             if (!commandIdIndex.contains(commandMap.id)) {
                 try {

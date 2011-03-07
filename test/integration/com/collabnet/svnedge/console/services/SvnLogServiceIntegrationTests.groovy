@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.console.services
 
-import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.SvnLog 
 import grails.test.*
 
@@ -51,7 +50,6 @@ class SvnLogServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
-        def repo = new Repository(name: repoName).save()
         logFile = File.createTempFile("/tmp", "svnlog")
         println "created ${logFile.getCanonicalPath()}"
         svnLogService.svnLogFile = logFile.getCanonicalPath()

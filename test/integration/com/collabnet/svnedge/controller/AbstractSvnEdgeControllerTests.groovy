@@ -19,11 +19,9 @@ package com.collabnet.svnedge.controller
 
 import java.io.FileInputStream;
 import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.Properties;
 
 import grails.test.ControllerUnitTestCase;
-import groovy.lang.MetaClass;
 
 /**
  * The abstract SvnEdge controller tests contains basic methods used

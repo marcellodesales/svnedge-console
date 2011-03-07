@@ -158,7 +158,6 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
             -1, lifecycleService.startServer()
         File sslkeyfile = new File(confDir, "server.key")
         assertTrue "server.key was not found", sslkeyfile.exists()
-        File sslcrtfile = new File(confDir, "server.crt")
         assertTrue "server.crt was not found", sslkeyfile.exists()
 
         status = lifecycleService.stopServer()

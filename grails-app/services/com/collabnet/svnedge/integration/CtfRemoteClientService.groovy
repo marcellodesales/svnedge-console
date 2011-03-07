@@ -1027,9 +1027,6 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 // No such object: The parameter type/value
                 //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
                 // is invalid for the adapter type 'Subversion'
-                def typeValue = faultMsg.split("'")[1].split("=")
-                def paramType = typeValue[0]
-                def paramValue = typeValue[1]
                 GrailsUtil.deepSanitize(e)
     
                 if (faultMsg.contains("Session is invalid or timed out")) {

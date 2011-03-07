@@ -445,7 +445,6 @@ root@${server.hostname}
         if (!server)
             return server
         File repoParentFile = new File(server.repoParentDir)
-        def repoParentDir = repoParentFile.absolutePath
         def mkdirs = {
             if (!it.exists()) {
                 it.mkdirs()

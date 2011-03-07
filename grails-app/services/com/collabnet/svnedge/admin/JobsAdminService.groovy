@@ -160,7 +160,7 @@ class JobsAdminService {
     }
 
     def getJobExecutionDetails(context) {
-        def execDetails = [fireTime: FORMATTER.format(context.getFireTime()),
+        return [fireTime: FORMATTER.format(context.getFireTime()),
                 ranTime: context.getJobRunTime(), 
                 nextFireTime: FORMATTER.format(context.getNextFireTime()),
                 prevFireTime: FORMATTER.format(context.getPreviousFireTime()),

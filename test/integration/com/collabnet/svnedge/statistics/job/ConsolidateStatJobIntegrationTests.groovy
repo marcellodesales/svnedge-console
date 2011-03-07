@@ -62,8 +62,6 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
         consolidateStatJob = new ConsolidateStatJob()
-        def now = new Date().getTime()
-        def interval = statGroup.getRawInterval() * 1000
         quartzScheduler.start()
         quartzScheduler.addGlobalJobListener(this)
         // make sure our job is unpaused

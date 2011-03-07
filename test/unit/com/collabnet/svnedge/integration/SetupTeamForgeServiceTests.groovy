@@ -17,13 +17,9 @@
  */
 package com.collabnet.svnedge.integration
 
-;
-
-import java.util.Random
 import grails.test.GrailsUnitTestCase
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
-import com.collabnet.svnedge.integration.CtfConversionBean;
 import com.collabnet.svnedge.integration.SetupTeamForgeService;
 
 class SetupTeamForgeServiceTests extends GrailsUnitTestCase {

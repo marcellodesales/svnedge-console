@@ -57,7 +57,7 @@ class SecurityServiceTests extends GrailsUnitTestCase {
 
     void testMaxLessThanMin() {
         try {
-            String password = securityService.generatePassword(10, 1)
+            securityService.generatePassword(10, 1)
             fail("Minimum password length was greater than maximum.")
         } catch (IllegalArgumentException e) {
             // expected

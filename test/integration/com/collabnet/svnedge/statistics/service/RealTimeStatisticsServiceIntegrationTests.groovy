@@ -72,6 +72,8 @@ class RealTimeStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue("The space used by the repositories should not be " +
                    "negative.", repoUsed >= 0)
         def systemUsed = realTimeStatisticsService.getSystemUsedDiskspace()
+        assertNotNull("The system disk space should not be null.",
+            systemUsed)
     }
 
     void testSystemUsedDiskspace() {

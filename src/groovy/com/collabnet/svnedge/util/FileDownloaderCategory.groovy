@@ -189,7 +189,6 @@ final class FileDownloaderCategory {
         def finishedAt
         def startedAt
         try {
-            def fileName = extractFileName(fromUrl)
             startedAt = System.currentTimeMillis()
             def conn = fromUrl.openConnection()
             def fileSize = conn.getContentLength() //content-length header

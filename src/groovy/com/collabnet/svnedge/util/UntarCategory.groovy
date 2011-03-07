@@ -17,11 +17,9 @@
 */
 package com.collabnet.svnedge.util
 
-
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.PrintStream;
-import java.net.URL
 import java.util.zip.GZIPInputStream
 import org.apache.tools.tar.TarInputStream
 

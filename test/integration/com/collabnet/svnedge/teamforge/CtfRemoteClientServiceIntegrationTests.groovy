@@ -42,8 +42,6 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
         def adminUsername = config.svnedge.ctfMaster.username
         def adminPassword = config.svnedge.ctfMaster.password
 
-        def adminSessionId = ctfRemoteClientService.login(ctfUrl,
-            adminUsername, adminPassword, Locale.getDefault())
         if (!CtfServer.getServer()) {
             CtfServer s = new CtfServer(baseUrl: ctfUrl, mySystemId: "exsy1000",
                     internalApiKey: "testApiKey",

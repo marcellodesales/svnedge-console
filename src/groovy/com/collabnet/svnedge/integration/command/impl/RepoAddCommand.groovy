@@ -36,7 +36,6 @@ public class RepoAddCommand extends AbstractRepositoryCommand
     private Logger log = Logger.getLogger(getClass())
 
     def constraints() {
-        def repoName = getRepoName()
         log.debug("Acquiring the replica commands executor service...")
         if (!this.params["repoName"]) {
             throw new IllegalArgumentException("The repo path is missing.")

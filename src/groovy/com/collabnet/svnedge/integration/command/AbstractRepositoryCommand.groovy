@@ -186,7 +186,6 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
      */
     private def getMasterUUID(masterRepoUrl, username, password, repoName) {
         def uuid = null
-        def retVal = 1
         def command = [ConfigUtil.svnPath(), "info", masterRepoUrl,
             "--username", username,"--password", password,
             "--non-interactive", "--no-auth-cache"] //"--config-dir=/tmp"

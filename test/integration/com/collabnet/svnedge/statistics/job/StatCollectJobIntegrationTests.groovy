@@ -50,7 +50,6 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase
             this.wait(20000)
         }
         quartzScheduler.standby()
-        def now = new Date().getTime()
         // make sure the stat values appear
         def values = networkStatisticsService.getCurrentThroughput()
         assertNotNull("The bytesIn value should not be null.", values[0])

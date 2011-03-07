@@ -24,7 +24,6 @@ import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
 import com.collabnet.svnedge.integration.command.event.ConnectivityWithReplicaManagerRestoredEvent
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent
 import com.collabnet.svnedge.integration.RemoteMasterException
-import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
 
 import org.springframework.context.ApplicationListener
 

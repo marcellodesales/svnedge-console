@@ -17,10 +17,8 @@
 */
 package com.collabnet.svnedge.console
 
-import org.hyperic.sigar.DirUsage
 import org.hyperic.sigar.OperatingSystem
 import org.hyperic.sigar.Sigar
-import org.hyperic.sigar.cmd.Du
 
 import java.lang.reflect.Field
 import grails.util.GrailsUtil

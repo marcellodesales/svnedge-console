@@ -22,16 +22,13 @@ import java.text.DecimalFormat
 import grails.converters.JSON
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 
-import org.apache.commons.collections.map.HashedMap
 import org.apache.log4j.Logger
 
 import org.cometd.Client
 import org.cometd.Channel
-import org.mortbay.cometd.ChannelImpl
 
 import com.sun.pkg.client.Fmri
 import com.sun.pkg.client.ImagePlanProgressTracker
-import com.sun.pkg.client.Manifest
 import com.sun.pkg.client.Action
 
 /**
@@ -213,7 +210,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      */
     private void publishStatusMessage(message) {
         this.publishPercentageMessage()
-        def writer = new StringWriter();
         def response = [phase: this.currentPhase,
                         statusMessage: message
                        ]
@@ -233,7 +229,6 @@ class PackagesUpdateProgressTracker extends ImagePlanProgressTracker {
      *  
      */
     private void publishPercentageMessage() {
-        def writer = new StringWriter();
         def response = [overallPercentage: this.overallPercentage]
         def jsonRes = (response as JSON).toString()
         log.debug("Percentage JSON: " + jsonRes)

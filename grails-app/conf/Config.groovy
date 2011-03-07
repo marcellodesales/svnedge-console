@@ -281,6 +281,10 @@ environments {
             // Commenting out to not output to svnedge.log
             warn 'grails.app'
         }
+        codenarc {
+            reportName = 'CodeNarcReport.xml'
+            reportType = 'xml'
+        }
     }
 }
 
@@ -314,7 +318,6 @@ log4j = {
 }
 
 codenarc {
-    reportName = 'CodeNarcReport.xml'
-    reportType = 'xml'
-    // any further settings like maxPriority1Violations=0
+    reportName = 'target/test-reports/CodeNarcReport.html'
+    reportType = 'html'
 }

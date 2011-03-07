@@ -32,7 +32,7 @@ class HttpProxyAuthTests extends GrailsUnitTestCase {
     void testProxyAuthCreationWithNullURL() {
         def url = null
         try {
-            def proxyAuth = HttpProxyAuth.newInstance(url)
+            HttpProxyAuth.newInstance(url)
             fail("No proxy auth can be created with a null URL")
         } catch (Exception e) {
             assertTrue(e instanceof IllegalArgumentException)

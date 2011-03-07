@@ -16,15 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.collabnet.svnedge.admin
-;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
-
-import com.collabnet.svnedge.admin.PackagesUpdateJob 
+ 
 import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth 
 import com.collabnet.svnedge.admin.pkgsupdate.PackageInfo 
 import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateProgressTracker 
@@ -504,7 +502,6 @@ public final class PackagesUpdateService implements InitializingBean {
      */
     private String retrieveImageOriginUrl() {
         def csvnImage = this.getCSvnImage()
-        def origin = null
         for (line in csvnImage.lines) {
             if (line.contains("origin")) {
                 this.originURL = line.replace(" ", "").split("=")[1]

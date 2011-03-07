@@ -17,10 +17,7 @@
  */
 package com.collabnet.svnedge.integration.security
 
-
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
-import org.springframework.security.userdetails.User;
 import org.springframework.security.Authentication
 import org.springframework.security.GrantedAuthority
 

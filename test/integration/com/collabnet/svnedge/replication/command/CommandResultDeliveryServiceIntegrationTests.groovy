@@ -157,13 +157,11 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
     void testNoCommandresultDuplicationNorChanges() {
         def command = remotecmdexecs[0]
 
-        def cmdResult = commandResultDeliveryService.makePersistedCommandResult(
-            command.id)
+        commandResultDeliveryService.makePersistedCommandResult(command.id)
         assertEquals "There must have a command result added", 1, 
             CommandResult.count()
 
-        def newResult = commandResultDeliveryService.makePersistedCommandResult(
-            command.id)
+        commandResultDeliveryService.makePersistedCommandResult(command.id)
         assertEquals "Two comands can't be created with the same ID", 1, 
             CommandResult.count()
     }

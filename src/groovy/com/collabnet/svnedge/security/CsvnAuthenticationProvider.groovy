@@ -38,8 +38,6 @@ import org.apache.commons.httpclient.UsernamePasswordCredentials
 import org.apache.commons.httpclient.auth.AuthScope
 import org.apache.commons.httpclient.Header
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.apache.commons.httpclient.params.HttpConnectionParams
-import org.apache.commons.httpclient.params.HttpParams
 
 /**
  * This class implements the SvnEdge Console authentication logic. If the Svn

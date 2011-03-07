@@ -22,7 +22,6 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.statistics.Category;
-import com.collabnet.svnedge.domain.statistics.StatGroup 
 import java.text.SimpleDateFormat
 
 import jofc2.model.Chart
@@ -74,8 +73,6 @@ class StatisticsController {
 
     @Secured(['ROLE_USER'])
     def index = {
-        def statGroups = StatGroup.list(sort: "name")
-        def statGroupNames = statGroups.collect{ it.getTitle() }
         def isReplica = Server.getServer().replica
         def initialGraph = null
         def statData = Category.list().collect { category ->

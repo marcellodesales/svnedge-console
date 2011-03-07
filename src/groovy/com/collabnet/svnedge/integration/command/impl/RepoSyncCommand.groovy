@@ -34,9 +34,7 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
     private Logger log = Logger.getLogger(getClass())
 
     def constraints() {
-        def repoName = getRepoName()
         log.debug("Acquiring the replica commands executor service...")
-        def svn = getService("replicaCommandExecutorService")
         if (!this.params.repoName) {
             throw new IllegalArgumentException("The repo path must be provided")
         }
