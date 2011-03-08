@@ -110,14 +110,12 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         // SVNContextPath is ignored by CTF (artf5374).  Leaving for now until the CTF
         // changes are reflected in the latest builds
-        def names = [ "HostName", "HostPort", "HostSSL", "ConsolePort",
-            "ViewVCContextPath", "SVNContextPath" ]
-
-        def values = [ server.getHostname(), server.getPort(),
-            server.getUseSsl(), Server.getConsolePort(),
-              Server.getViewvcBasePath(), Server.getSvnBasePath()];
-
-        def props = ctfRemoteClientService.makeSoapNamedValues(names, values)
+	def props = ["HostName": server.getHostname(),
+                     "HostPort": server.getPort(), 
+                     "HostSSL": server.getUseSsl(), 
+                     "ConsolePort": Server.getConsolePort(),
+                     "ViewVCContextPath": Server.getViewvcBasePath(), 
+                     "SVNContextPath": Server.getSvnBasePath()]
 
         String systemId = ctfRemoteClientService.addExternalSystemReplica(
             replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 

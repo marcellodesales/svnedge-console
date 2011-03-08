@@ -30,6 +30,7 @@ import com.collabnet.ce.soap50.webservices.ClientSoapStubFactory
 import com.collabnet.ce.soap50.webservices.cemain.ICollabNetSoap
 import com.collabnet.ce.soap50.webservices.cemain.UserSoapDO
 import com.collabnet.ce.soap50.webservices.scm.IScmAppSoap;
+import com.collabnet.ce.soap60.types.SoapNamedValues as SoapNamedValues60;
 import com.collabnet.ce.soap50.types.SoapNamedValues;
 import com.collabnet.ce.soap50.fault.IllegalArgumentFault;
 import com.collabnet.ce.soap50.fault.InvalidSessionFault;
@@ -567,7 +568,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     * client.
     * @param title is the title of the new external system
     * @param description is the description of the new external system
-    * @param csvnProps is an instance of SoapNamedValues with the parameters
+    * @param replicaProps is an instance of SoapNamedValues with the parameters
     * to the service.
     *
     * @return the String value of the system ID
@@ -584,7 +585,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         try {
             def scmSoap = this.makeScmSoap60(ctfUrl)
             def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
-                masterSystemId, name, description, comment, replicaProps)
+                masterSystemId, name, description, comment, 
+                makeSoapNamedValues60(replicaProps))
 
             return replicaId
 
@@ -627,6 +629,31 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
              throw new RemoteMasterException(ctfUrl, generalMsg, e)
          }
    }
+
+    /**
+     * Creates a new instance of SoapNamedValues based on the array lists
+     * @param names are the name of the properties
+     * @param values are the values for each of the properties
+     * @return a new instance of SoapNamedValues
+     */
+    private SoapNamedValues60 makeSoapNamedValues60(props) {
+        def soapNamedValues = new SoapNamedValues60()
+	String[] names, values
+	if (!props) {
+	    names = values = new String[0]
+        } else {
+            names = new String[props.size()]
+            values = new String[props.size()]
+	    int i = 0;
+            for (def entry: props.entrySet()) {
+                names[i] = entry.key
+                values[i++] = String.valueOf(entry.value) 
+            }
+        }
+        soapNamedValues.setNames(names);
+        soapNamedValues.setValues(values);
+        return soapNamedValues
+    }
 
     /**
      * Deletes this replica from the CTF system with the supplied credentials
@@ -874,7 +901,6 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         soapNamedValues.setValues(values);
         return soapNamedValues
     }
-
     /**
      * Retrieves the queued commands from the CTF server identified by the
      * ctfUrl for the given replicaServerId.
