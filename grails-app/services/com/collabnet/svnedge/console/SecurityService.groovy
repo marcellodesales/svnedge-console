@@ -60,6 +60,18 @@ class SecurityService {
         sb.toString()
     }
 
+    /**
+     * generates a random password using letters, numbers, and underscore only
+     * @param length number of characters for the password
+     * @return the random password
+     */
+    String generateAlphaNumericPassword(int length) {
+        def pool = ['a'..'z','A'..'Z',0..9,'_'].flatten()
+        Random rand = new Random(System.currentTimeMillis())
+
+        def randomString = (0..length).collect { pool[rand.nextInt(pool.size())] }
+        return randomString.join()
+    }
 
     /**
      * Encrypts and base-64 encodes a clear-text input

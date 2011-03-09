@@ -218,7 +218,7 @@
           <label for="name"><g:message code="server.ldapAuthBindPassword.label" /></label>
         </td>
         <td class="value ${hasErrors(bean:server,field:'ldapAuthBindPassword','errors')}">
-          <input size="30" type="password" id="ldapAuthBindPassword" name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}"/>
+          <g:passwordFieldWithChangeNotification name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}" size="30"/>
         </td>
         <td class="ItemDetailValue">
           <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>

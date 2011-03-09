@@ -175,8 +175,15 @@ class ServerController {
             }
         }
         
-        // copy form params to the entity and validate
-        server.properties = params
+        // copy form params to the entity, excluding ldapAuth password
+        bindData(server, params, ['ldapAuthBindPassword'])
+
+        // if a new password has been input, copy to
+        // the server entity
+        if (params['ldapAuthBindPassword_changed'] == 'true') {
+            server.ldapAuthBindPassword = params['ldapAuthBindPassword']
+        }                                       
+
         //In editAuthentication UI repoParentDir does not exist in Params.
         if (params.repoParentDir != null) {
           // canonicalize repo parent dir (esp to remove trailing "/" or "\"

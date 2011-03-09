@@ -20,6 +20,8 @@ import com.collabnet.svnedge.domain.Server
 
 class CsvnTagLib {
 
+     def securityService
+
     /**
      * this custom tag will format the "size" input (bytes from file.length) into
      * a human-readable string (eg, "17.5 KB")
@@ -46,7 +48,32 @@ class CsvnTagLib {
         if (request.scheme == 'http' && Server.getServer().useSslConsole) {
             def port = System.getProperty("jetty.ssl.port", "4434")
             def sslUrl = "https://${request.serverName}${port != "443" ? ":" + port : ""}${request.forwardURI}"
-            out << "<meta http-equiv=\"refresh\" content=\"0;url=${sslUrl}\"/>"
+          out << "<meta http-equiv=\"refresh\" content=\"0;url=${sslUrl}\"/>"
         }
     }
+
+    /**
+     * this custom tag will create a password field like the standard input tag,
+     * but the "value" will be replaced with a same-length placeholder. A hidden
+     * field by the same name (+ '_changed') will indicate a user edit
+     */
+    def passwordFieldWithChangeNotification = { attrs ->
+
+      String fieldName = attrs.name ?: ""
+      String fieldValue = attrs.value ?: ""
+      String size = attrs.size ?: ""
+      def fieldValueLength = fieldValue?.length()
+      String pwdToken = (fieldValueLength) ? securityService.generateAlphaNumericPassword(fieldValueLength) : ""
+
+      out << """
+        <input type="hidden" name="${fieldName}_changed" id="${fieldName}_changed" value="false"/>
+        <input type="password" name="${fieldName}" id="${fieldName}" value="${pwdToken}" size="${size}"/>
+        <script>
+        \$('${fieldName}').observe('change', function(event){
+            \$('${fieldName}_changed').value = 'true'
+        })
+       </script>
+       """
+    }
+
 }
