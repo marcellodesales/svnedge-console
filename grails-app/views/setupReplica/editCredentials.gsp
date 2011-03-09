@@ -16,7 +16,7 @@
   - along with this program.  If not, see <http://www.gnu.org/licenses/>.
   --}%
 
-<%@ page import="com.collabnet.svnedge.console.ServerMode" %>
+<%@ page import="com.collabnet.svnedge.domain.ServerMode" %>
 <html>
 <head>
   %{--

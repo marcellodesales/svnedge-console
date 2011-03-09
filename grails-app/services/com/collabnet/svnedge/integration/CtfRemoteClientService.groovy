@@ -739,7 +739,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         } finally {
             if (sessionId) {
-                ctfRemoteClientService.logoff60(ctfUrl, ctfUsername, sessionId)
+                logoff60(ctfUrl, ctfUsername, sessionId)
             }
         }
     }

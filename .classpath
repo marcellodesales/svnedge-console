@@ -16,6 +16,7 @@
 	<classpathentry kind="lib" path="lib/pkg-client.jar"/>
 	<classpathentry kind="lib" path="lib/jmdns.jar"/>
 	<classpathentry kind="lib" path="lib/sf_soap50_sdk.jar"/>
+	<classpathentry kind="lib" path="lib/sf_soap60_sdk.jar"/>
 	<classpathentry kind="lib" path="lib/axis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-discovery.jar"/>
 	<classpathentry kind="lib" path="lib/FastInfoset.jar"/>
