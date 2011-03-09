@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.integration
 
 
+import org.mortbay.log.Log;
 import org.springframework.security.GrantedAuthority
 import org.springframework.security.GrantedAuthorityImpl
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
@@ -25,12 +26,14 @@ import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import grails.util.GrailsUtil
 import org.apache.axis.AxisFault
 import com.collabnet.ce.soap60.webservices.ClientSoapStubFactory as ClientSoapStubFactory60
+import com.collabnet.ce.soap60.webservices.cemain.ICollabNetSoap as ICollabNetSoap60
 import com.collabnet.ce.soap60.webservices.scm.IScmAppSoap as IScmAppSoap60
+import com.collabnet.ce.soap60.fault.LoginFault as LoginFault60
+import com.collabnet.ce.soap60.types.SoapNamedValues as SoapNamedValues60;
 import com.collabnet.ce.soap50.webservices.ClientSoapStubFactory
 import com.collabnet.ce.soap50.webservices.cemain.ICollabNetSoap
 import com.collabnet.ce.soap50.webservices.cemain.UserSoapDO
 import com.collabnet.ce.soap50.webservices.scm.IScmAppSoap;
-import com.collabnet.ce.soap60.types.SoapNamedValues as SoapNamedValues60;
 import com.collabnet.ce.soap50.types.SoapNamedValues;
 import com.collabnet.ce.soap50.fault.IllegalArgumentFault;
 import com.collabnet.ce.soap50.fault.InvalidSessionFault;
@@ -110,6 +113,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             ICollabNetSoap.class, ctfBaseUrl ?: CtfServer.getServer().baseUrl)
     }
 
+    private ICollabNetSoap60 cnSoap60(ctfBaseUrl) {
+        return (ICollabNetSoap60) ClientSoapStubFactory60.getSoapStub(
+            ICollabNetSoap60.class, ctfBaseUrl ?: CtfServer.getServer().baseUrl)
+    }
+
     public IScmAppSoap makeScmSoap(url) {
         return (IScmAppSoap) ClientSoapStubFactory.getSoapStub(
             IScmAppSoap.class, url ?: CtfServer.getServer().baseUrl)
@@ -127,7 +135,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             "/integration/servlet/ScmPermissionsProxyServlet?"
     }
 
-    public String makeLogin(ICollabNetSoap cnSoap, ctfUrl, username, password, 
+    public String makeLogin(def cnSoap, ctfUrl, username, password, 
             locale) throws CtfAuthenticationException, RemoteMasterException, 
            UnknownHostException, NoRouteToHostException, MalformedURLException {
 
@@ -206,6 +214,18 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         return makeLogin(cnSoap(ctfUrl), ctfUrl, username, password, locale)
     }
 
+    public String login60(ctfUrl, username, password, locale) {
+        return makeLogin(cnSoap60(ctfUrl), ctfUrl, username, password, locale)
+    }
+
+    public void logoff60(ctfUrl, username, sessionId) {
+        try {
+            cnSoap60(ctfUrl).logoff(username, sessionId)
+        } catch (Exception e) {
+            log.warn("Logging off from session " + sessionId + " failed.", e)
+        }
+    }
+    
     /**
      * Authenticate against the CTF server.
      * WARNING: if the CTF master's admin pw is default, this may
@@ -590,7 +610,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
             return replicaId
 
-        } catch (LoginFault e) {
+        } catch (LoginFault60 e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
                 locale)
             log.error("Unable to create external system: " + msg, e)
@@ -670,12 +690,13 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         def ctfUrl = CtfServer.getServer().baseUrl
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def replicaId = replicaConfig.systemId
+        def sessionId
         try {
-            def sessionId = login(ctfUrl, ctfUsername, ctfPassword, locale)
+            sessionId = login60(ctfUrl, ctfUsername, ctfPassword, locale)
             def scmSoap = this.makeScmSoap60(ctfUrl)
             scmSoap.deleteExternalSystemReplica(sessionId, replicaId)
         }
-        catch (LoginFault e) {
+        catch (LoginFault60 e) {
             GrailsUtil.deepSanitize(e)
             if (e.faultString.contains("password was set by an admin")) {
                 def msg = getMessage("ctfRemoteClientService.auth.needschange",
@@ -715,6 +736,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 log.error(errorMsg, e)
                 errors << errorMsg
                 throw new RemoteMasterException(ctfUrl, errorMsg, e)
+            }
+        } finally {
+            if (sessionId) {
+                ctfRemoteClientService.logoff60(ctfUrl, ctfUsername, sessionId)
             }
         }
     }
@@ -962,7 +987,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             // sort the received commands by ID before returning.
             return cmdsList.sort(idComparator)
 
-        } catch (LoginFault e) {
+        } catch (LoginFault60 e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
                 locale)
             log.error("Unable to create external system: " + msg, e)
@@ -1040,7 +1065,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             scmSoap.uploadCommandResult(userSessionId, replicaServerId,
                 commandId, succeeded)
 
-        } catch (LoginFault e) {
+        } catch (LoginFault60 e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
                 locale)
             log.error("Unable to create external system: " + msg, e)

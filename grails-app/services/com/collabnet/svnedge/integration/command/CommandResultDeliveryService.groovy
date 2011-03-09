@@ -19,6 +19,7 @@ package com.collabnet.svnedge.integration.command
 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.integration.CommandResult 
+import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
 import com.collabnet.svnedge.integration.command.event.ConnectivityWithReplicaManagerRestoredEvent
@@ -40,6 +41,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
 
     def ctfRemoteClientService
     def backgroundService
+    def securityService
     def bgThreadManager
 
     /**
@@ -238,10 +240,29 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
     def transmitCommandResult(execContext, cmdResult) 
             throws RemoteMasterException {
 
-        //upload the commands results back to ctf
-        ctfRemoteClientService.uploadCommandResult(execContext.ctfBaseUrl,
-            execContext.userSessionId, execContext.replicaSystemId, 
-            cmdResult.commandId, cmdResult.succeeded, execContext.locale)
+        def locale = Locale.getDefault()
+        def ctfServer = CtfServer.getServer()
+        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
+        
+        def sessionId
+        try {
+            sessionId = ctfRemoteClientService.login60(ctfServer.baseUrl,
+                    ctfServer.ctfUsername, ctfPassword, locale)
+            //upload the commands results back to ctf
+            ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
+                sessionId, execContext.replicaSystemId, 
+                cmdResult.commandId, cmdResult.succeeded, execContext.locale)
+        } catch (Exception cantConnectCtfMaster) {
+            log.error "Can't deliver command results from the CTF replica " +
+                    "manager ${ctfServer.baseUrl}: " + cantConnectCtfMaster.getMessage()
+            stopDelivering()
+            return
+        } finally {
+            if (sessionId) {
+                ctfRemoteClientService.logoff60(ctfServer.baseUrl,
+                    ctfServer.ctfUsername, sessionId)
+            }
+        }
     }
 
     /**

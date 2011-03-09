@@ -129,7 +129,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         def userSessionId
         try {
-            userSessionId = ctfRemoteClientService.login(ctfServer.baseUrl,
+            userSessionId = ctfRemoteClientService.login60(ctfServer.baseUrl,
                 ctfServer.ctfUsername, ctfPassword, locale)
 
         } catch (Exception cantConnectCtfMaster) {
@@ -172,6 +172,11 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
         } catch (Exception replicaManagerError) {
             log.error("There was a problem while trying to fetch queued " + 
                 "commands: " + replicaManagerError.getMessage())
+        } finally {
+            if (userSessionId) {
+                ctfRemoteClientService.logoff60(ctfServer.baseUrl, 
+                    ctfServer.ctfUsername, userSessionId)
+            }
         }
     }
 
