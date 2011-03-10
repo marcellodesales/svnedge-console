@@ -40,6 +40,11 @@ class ServerControllerTests extends ControllerUnitTestCase {
             return "message" }]
         controller.metaClass.message = { it -> return "message" }
 
+        // mock the bindData method
+        controller.metaClass.bindData = { obj, params, excludes ->
+            obj.properties = params
+        }
+
         this.config = grailsApplication.config
         controller.lifecycleService = lifecycleService
         controller.networkingService = networkingService
