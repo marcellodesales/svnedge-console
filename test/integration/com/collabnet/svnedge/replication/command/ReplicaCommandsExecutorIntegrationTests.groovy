@@ -65,6 +65,11 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         repoParentDir = createTestDir("repo")
     }
 
+    protected void tearDown() {
+        super.tearDown()
+        repoParentDir.deleteDir()
+    }
+
     protected void setUp() {
         super.setUp()
 
@@ -527,6 +532,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
                 Thread.sleep(1000)
             }
         }
+        wcDir.deleteDir()
+        wcDir2.deleteDir()
     }
 
     private File createTestDir(String prefix) {

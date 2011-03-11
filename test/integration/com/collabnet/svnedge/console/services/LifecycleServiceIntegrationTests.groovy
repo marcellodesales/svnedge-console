@@ -29,7 +29,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     def serverConfService
     def csvnAuthenticationProvider
     boolean initialStarted
-    def repoParentDir 
+    def repoParentDir
 
     protected void setUp() {
         super.setUp()
@@ -48,6 +48,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void tearDown() {
         super.tearDown()
+        repoParentDir.deleteDir()
     }
 
     void testStartAndStopServer() {
@@ -136,6 +137,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         } finally {
             ConfigUtil.confDirPath = origConfDirPath
         }
+        confDir.deleteDir()
     }
 
     void testSSLInstance() {
@@ -167,6 +169,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         server.useSsl = false
         server.save()
         ConfigUtil.confDirPath = origConfDirPath
+        confDir.deleteDir()
     }
 
     void testLDAPAuth() {
@@ -252,6 +255,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         server.ldapSearchScope = ""
 
         server.save()
+        confDir.deleteDir()
     }
     
     void testAuthHelper() {

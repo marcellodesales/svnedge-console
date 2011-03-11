@@ -54,6 +54,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void tearDown() {
         super.tearDown()
+        repoParentDir.deleteDir()
     }
 
 
@@ -97,6 +98,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             }
             assertTrue "Expected '" + d + "' directory not found", b
         }
+        wcDir.deleteDir()
     }
 
       private File createTestDir(String prefix) {
@@ -109,6 +111,4 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         testDir.deleteOnExit()
         return testDir
     }
-
-
 }
