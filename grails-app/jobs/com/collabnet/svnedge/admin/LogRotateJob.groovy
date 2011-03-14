@@ -28,6 +28,7 @@ class LogRotateJob {
 
     def lifecycleService
     def serverConfService
+    def configUtil
     static def name = "com.collabnet.svnedge.jobs.LogRotateJob"
     static def group = "Maintenance"
     private static boolean isStarted = false
@@ -53,18 +54,18 @@ class LogRotateJob {
         }
     }
 
-    def pruneLog(olderThanToday) {
-        def dataDir = ConfigUtil.dataDirPath()
+    def pruneLog(daysToKeep) {
+        def dataDir = configUtil.dataDirPath()
         def dataDirObj = new File(dataDir, "logs")
         Date today = new Date()
-        Date oldday = new Date(today.getTime() - olderThanToday*1440*60000)
-        long oldDayTimeStamp = oldday.getTime()
+        Date lastDayToKeep = today - ((int) daysToKeep)
+        long pruningTimestamp = lastDayToKeep.getTime()
         String[] entries = dataDirObj.listFiles()
         for (int i = 0; i < entries.length; i++) {
             String entry = entries[i]
             def entryObj = new File(entry)
             long lastModified = entryObj.lastModified()
-            if (lastModified < oldDayTimeStamp) {
+            if (lastModified < pruningTimestamp) {
                 if (entryObj.delete() == false) {
                     log.info("Pruning: ${entry} failed.")
                 }

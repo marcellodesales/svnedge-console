@@ -29,4 +29,8 @@ beans = {
     statisticsService(com.collabnet.svnedge.statistics.LastCollectedStatisticsService) { bean ->
         bean.autowire = 'byName'
     }
+
+    configUtil(com.collabnet.svnedge.util.ConfigUtil) {
+        bean.autowire = 'byName'
+    }
 }

@@ -23,7 +23,9 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * The configuration utility class is used during the bootstrap and services
- * that needs the values from the configuration as shortcuts.
+ * that needs the values from the configuration as shortcuts. It can be used
+ * via static methods or as spring bean 'configUtil' (where test mocking is
+ * needed)
  * 
  * @author Marcello de Sales (mdesales@collab.net)
  *
