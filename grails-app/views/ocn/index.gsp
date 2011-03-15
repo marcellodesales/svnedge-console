@@ -6,7 +6,7 @@
   </head>
   <body>
 
-  ${ocnContent}
-   
+  <%= ocnContent %>
+
   </body>
 </html>
