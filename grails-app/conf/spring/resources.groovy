@@ -30,7 +30,7 @@ beans = {
         bean.autowire = 'byName'
     }
 
-    configUtil(com.collabnet.svnedge.util.ConfigUtil) {
+    configUtil(com.collabnet.svnedge.util.ConfigUtil) { bean ->
         bean.autowire = 'byName'
     }
 }
