@@ -1,4 +1,4 @@
-<%@ page import="com.collabnet.svnedge.console.security.Role" %>
+<%@ page import="com.collabnet.svnedge.domain.Role" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
