@@ -124,6 +124,9 @@ class SetupReplicaController {
                         [input.ctfURL] as Object[], 'no route')
             }
             catch (CtfAuthenticationException e) {
+                // FIXME: note we're hardcoding ctfURL as the argument used
+                // in the msg.  We may want to consider adding the param array
+                // to the exceptions themselves, so they can be used here.
                 input.errors.rejectValue('ctfUsername', e.messageKey,
                         [input.ctfURL] as Object[], 'bad credentials')
             }
