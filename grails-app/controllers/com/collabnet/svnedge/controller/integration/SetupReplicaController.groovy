@@ -200,6 +200,7 @@ class SetupReplicaController {
         try {
             // register the replica
             setupReplicaService.registerReplica(bean)
+            session.setAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY, null)
 
             // prepare confirmation data
             server = Server.getServer()
