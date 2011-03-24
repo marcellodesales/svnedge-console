@@ -23,6 +23,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConnectionBean;
+import com.collabnet.svnedge.integration.CtfSessionExpiredException;
 import com.collabnet.svnedge.integration.RemoteMasterException;
 import com.collabnet.svnedge.integration.ReplicaConversionBean 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
@@ -130,7 +131,13 @@ class SetupReplicaController {
                 input.errors.rejectValue('ctfUsername', e.messageKey,
                         [input.ctfURL] as Object[], 'bad credentials')
             }
+            catch (CtfSessionExpiredException e) {
+                session.setAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY, null)
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.remote.sessionExpired',
+                        [input.ctfURL] as Object[], 'ctf session expired')
+            }
             catch (RemoteMasterException e) {
+                session.setAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY, null)
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.noReplicaSupport.error',
                         [input.ctfURL] as Object[], 'older ctf')
             }
