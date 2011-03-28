@@ -154,10 +154,16 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         log.debug("Command Execution Context: $executionContext")
         try {
+            def runningOrScheduledCmds = commandResultDeliveryService.
+                 getUnacknowledgedExecutingCommandResults()
+             log.debug "Currently running/scheduled commands: " + 
+                 runningOrScheduledCmds ?: "None"
+
             //receive the commands from ctf
             def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
                 executionContext.ctfBaseUrl, executionContext.userSessionId,
-                executionContext.replicaSystemId, executionContext.locale)
+                executionContext.replicaSystemId, runningOrScheduledCmds,
+                executionContext.locale)
 
             if (queuedCommands && queuedCommands.size() > 0) {
                 log.debug("There are ${queuedCommands.size()} commands queued.")

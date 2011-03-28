@@ -124,6 +124,14 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
     }
 
     /**
+     * @return the current command results that haven't been transmitted. That
+     * means, all of the results that are still either scheduled or executing.
+     */
+    def synchronized getUnacknowledgedExecutingCommandResults() {
+        return CommandResult.findAllWhere(transmitted: false)
+    }
+
+    /**
      * The event handler of all {@link ReplicaCommandsExecutionEvent} to 
      * process the different events.
      * @param executionEvent is the instance of an execution event.

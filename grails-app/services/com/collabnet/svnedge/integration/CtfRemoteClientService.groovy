@@ -932,6 +932,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @param ctfUrl is the url of the CTF system.
      * @param userSessionId is sessionID of the default user to call the soap.
      * @param replicaServerId is ID of the replica server.
+     * @param runningCommands is the list of command results that haven't beent
+     * transmitted yet. Those commands will avoid the replica manager send the
+     * already executing commands and also to NOT count as a retransmission.
      * @param locale is the locale defined for error messages.
      * @return List of replica command execution with Id, command and repository
      * name, if any.
@@ -942,14 +945,18 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @throws UnknownHostException if the server started with connectivity but
      * is unable to the host due to proxy, etc.
      */
-    def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId, locale)
-            throws RemoteMasterException, NoRouteToHostException, 
-            UnknownHostException {
+    def getReplicaQueuedCommands(ctfUrl, userSessionId, replicaServerId, 
+            runningCommands, locale) throws RemoteMasterException, 
+            NoRouteToHostException, UnknownHostException {
 
         try {
+            def runningCommandIds = []
+            for (cmd in runningCommands) {
+                runningCommandIds << cmd.commandId
+            }
             def scmSoap = this.makeScmSoap60(ctfUrl)
             def queuedCommands = scmSoap.getReplicaQueuedCommands(userSessionId,
-                replicaServerId)
+                replicaServerId, runningCommandIds as String[])
 
             def cmdsList = []
             if (queuedCommands && queuedCommands.mDataRows.length > 0) {

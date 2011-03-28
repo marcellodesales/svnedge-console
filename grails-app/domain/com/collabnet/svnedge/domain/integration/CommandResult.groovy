@@ -17,8 +17,6 @@
 */
 package com.collabnet.svnedge.domain.integration
 
-
-
 /**
  * The Command Result registers the result of a given Abstract Command of
  * whether it succeeded or failed.
@@ -52,7 +50,7 @@ class CommandResult {
      */
     Date lastUpdated
     /**
-     * Defines if the command has been transmitted or not.
+     * Defines if the command result has been transmitted or not.
      */
     Boolean transmitted = false
 
