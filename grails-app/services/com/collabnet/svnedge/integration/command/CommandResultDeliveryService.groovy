@@ -230,9 +230,9 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 "must be provided must be saved")
         }
         commandResult.succeeded = succeededResult
+        commandResult = commandResult.merge()
         commandResult.save(flush:true)
     }
-    
 
     /**
      * Transmits the given succeeded result related the given commandId using
@@ -283,6 +283,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 "must be provided must be saved")
         }
         cmdResult.transmitted = true
+        cmdResult = cmdResult.merge()
         cmdResult.save(flush:true)
     }
 }

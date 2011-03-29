@@ -59,17 +59,27 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
     def addRepositoryOnDatabase(repoName) {
         def repoRecord = Repository.findByName(repoName)
         if (repoRecord) {
-            def repo = ReplicatedRepository.findByRepo(repoRecord)
-            repo.enabled = true;
-            repo.status = RepoStatus.NOT_READY_YET
-            repo.statusMsg = null
-            repo.save()
+            def repoReplica = ReplicatedRepository.findByRepo(repoRecord)
+            if (repoReplica) {
+                repoReplica.enabled = true;
+                repoReplica.status = RepoStatus.NOT_READY_YET
+                repoReplica.statusMsg = null
+                repoReplica.save()
+
+            } else {
+                repoReplica = new ReplicatedRepository(repo: repoRecord,
+                    lastSyncTime: -1, lastSyncRev:-1, enabled: true, 
+                    status: RepoStatus.NOT_READY_YET)
+                repoReplica.save(flush:true)
+            }
+
         } else {
             Repository repository = new Repository(name:repoName)
             repository.save()
-            new ReplicatedRepository(repo: repository, 
-                lastSyncTime: -1, lastSyncRev:-1, enabled: true, 
-                status: RepoStatus.NOT_READY_YET).save(flush:true)
+            ReplicatedRepository repoReplica = new ReplicatedRepository(
+                repo: repository, lastSyncTime: -1, lastSyncRev:-1,
+                enabled: true, status: RepoStatus.NOT_READY_YET)
+            repoReplica.save(flush:true)
         }
     }
 
@@ -115,6 +125,9 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 throw new IllegalStateException(msg)
             }
         }
+        replRepo.status = RepoStatus.OK
+        replRepo.statusMsg = null
+        replRepo.save()
     }
 
     /**

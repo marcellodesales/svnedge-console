@@ -22,6 +22,7 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.domain.integration.RepoStatus
 import com.collabnet.svnedge.integration.command.AbstractRepositoryCommand 
 import com.collabnet.svnedge.integration.command.ShortRunningCommand 
 
@@ -37,6 +38,22 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
         log.debug("Acquiring the replica commands executor service...")
         if (!this.params.repoName) {
             throw new IllegalArgumentException("The repo path must be provided")
+        }
+        def repoName = getRepoName()
+        def repoRecord = Repository.findByName(repoName)
+        if (!repoRecord) {
+            throw new IllegalArgumentException("There is no replicated " +
+                "repository called '${repoName}'.")
+        }
+        def repo = ReplicatedRepository.findByRepo(repoRecord)
+        if (!repo) {
+            throw new IllegalStateException("The replication process for " +
+                "the repository '${repoName}' hasn't been finished to " +
+                "execute svn sync.")
+        }
+        if (repo.status != RepoStatus.OK) {
+            throw new IllegalStateException("The replicated repository " +
+                "'${repoName}' is not in the OK state.")
         }
     }
 
@@ -59,6 +76,6 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
     }
 
     def undo() {
-        log.debug("Can't undo an svnsync")
+        log.debug("Nothing to undo for an svnsync command")
     }
 }
