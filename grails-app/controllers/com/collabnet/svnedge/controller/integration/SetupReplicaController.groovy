@@ -158,6 +158,7 @@ class SetupReplicaController {
      */
     def confirm = { ReplicaInfoCommand input -> 
 
+        def scmList = getIntegrationServers()
         if (!input.hasErrors()) {
             
             try {
@@ -165,7 +166,6 @@ class SetupReplicaController {
                 def cmd = getReplicaInfoCommand()
                 BeanUtils.copyProperties(input, cmd)
 
-                def scmList = getIntegrationServers()
                 def selectedScm = null
                 for (scmServer in scmList) {
                     if (scmServer.id == input.masterExternalSystemId) {
@@ -189,7 +189,7 @@ class SetupReplicaController {
         }
         
         // return to input view with errors
-        render([view: "replicaSetup", model: [cmd: input, integrationServers: getIntegrationServers()]])
+        render([view: "replicaSetup", model: [cmd: input, integrationServers: scmList]])
     }
     
 
