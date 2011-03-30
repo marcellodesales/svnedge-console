@@ -324,6 +324,6 @@ codenarc {
 
 backgroundThread {
 	queueSize = 1000 // Maximum number of tasks to queue up
-	threadCount = 60 // Number of threads processing background tasks.
+	threadCount = 20 // Number of threads processing background tasks.
 	tasksPerDrain = 100 // See Note
 }
