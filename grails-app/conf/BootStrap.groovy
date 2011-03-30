@@ -126,7 +126,7 @@ class BootStrap {
         log.info("Bootstrap integration server configuration...")
         try {
             setupTeamForgeService.bootStrap(appHome)
-            setupReplicaService.bootStrap()
+            setupReplicaService.bootStrap(appHome)
             replicaCommandExecutorService.bootStrap()
             replicaCommandSchedulerService.bootStrap()
             commandResultDeliveryService.bootStrap()

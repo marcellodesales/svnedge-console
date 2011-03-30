@@ -94,14 +94,14 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
        log.debug("Setting system property '${APP_HOME_VAR}'='" +
                  "${System.properties[APP_HOME_VAR]}'")
 
-        updateIntegrationScripts(appHome)
+        updateIntegrationScripts(appHome, ServerMode.MANAGED)
         updateTeamForgeProperties(appHome)
    }
    
-   private void updateIntegrationScripts(appHome) {
+   public void updateIntegrationScripts(String appHome, ServerMode mode) {
        def server = Server.getServer()
        // In ctf mode, confirm that the integration scripts are up-to-date
-       if (server && server.mode == ServerMode.MANAGED) {
+       if (server && server.mode == mode) {
            File libDir = new File(appHome, "lib")
            File zipFile = new File(libDir, INTEGRATION_SCRIPTS_ZIP)
            File integrationDir = new File(libDir, "integration")

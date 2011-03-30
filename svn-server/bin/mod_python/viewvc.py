@@ -27,8 +27,9 @@
 # These values will be set during the installation process. During
 # development, they will remain None.
 #
+import urllib2
 
-def index(req, header_html = None):
+def index(req, java_session = None):
   #########################################################################
   #
   # Adjust sys.path to include our library directory
@@ -66,10 +67,26 @@ def index(req, header_html = None):
 
   server = sapi.ModPythonServer(req)
   cfg = viewvc.load_config(CONF_PATHNAME, server)
-  if header_html:
-    cfg.general.header_html = header_html
 
+  if java_session and cfg.general.csvn_servermode == 'MANAGED':
+    cfg.general.header_html = _get_sf_header(env, java_session)
+  else:
+    cfg.general.header_html = ''
+    
   try:
     viewvc.main(server, cfg)
   finally:
     server.close()
+
+def _get_sf_header(env, java_session):
+  return_to_url = env['CTF_RETURN_TO_URL']
+  ctf_url = env['CTF_BASE_URL']
+  
+  """ Calls the topInclude url to get the header contents of CTF. """
+  top_include_url = '%s/sfmain/do/topInclude/%s;jsessionid=%s?base=%s&returnTo=%s&helpTopicId=26' % (ctf_url, env['CTF_PROJECT_PATH'], java_session, ctf_url[0:ctf_url.rfind('/')], return_to_url)
+
+  return urllib2.urlopen(top_include_url).read().strip()
+
+# _get_sf_header()
+
+

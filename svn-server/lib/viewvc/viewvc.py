@@ -122,7 +122,7 @@ class Request:
     except AttributeError:
       servermode = "STANDALONE"
       self.cfg.general.csvn_servermode = servermode
-    if servermode == "MANAGED":
+    if servermode == "MANAGED" or servermode == "REPLICA":
       app_server_root_url = self.cfg.general.csvn_app_server_root_url
       if len(app_server_root_url) > 0:
         if app_server_root_url.endswith("localhost"):
@@ -130,17 +130,18 @@ class Request:
         else:
           app_server_root_url = app_server_root_url
       self.cfg.general.csvn_app_server_root_url = app_server_root_url
+      self.proj_path = server.getenv('CTF_PROJECT_PATH')
 
     else:
       self.cfg.general.csvn_app_server_root_url = 'app_server_root_url'
       # open the web page and read it into a variable
-      import urllib2
+      #import urllib2
       # it would be nice to show csvn console banner, but will need
       # auth sharing before doing this
       # urlOpener = urllib2.build_opener()
       # page = urlOpener.open("http://localhost:8080/csvn/repo/banner")
       # banner = page.read()
-      self.cfg.general.header_html = ''
+      self.proj_path = ''
 
     ### -- End TeamForge customizations to 'cfg' --
     
@@ -1396,7 +1397,7 @@ def format_log(request, log, maxlen=0, htmlize=1):
       lf.add_formatter(_re_rewrite_email, lf.format_email)
 
     # TeamForge customization: add ID formatter
-    if cfg.general.csvn_servermode == "MANAGED":
+    if cfg.general.csvn_servermode == "MANAGED" or cfg.general.csvn_servermode == "REPLICA":
       go_url = cfg.general.csvn_app_server_root_url + '/sf/go/'
       lf.add_formatter(_re_ctf_objid, _ctf_format_objid, go_url)
     
@@ -1508,6 +1509,7 @@ def common_template_data(request, revision=None, mime_type=None):
     'banner_header': cfg.general.header_html,
     'testmode' : cfg.general.ctf_testmode,
     'app_server_root_url': cfg.general.csvn_app_server_root_url,
+    'project_url': cfg.general.csvn_app_server_root_url + "/sf/scm/do/listRepositories/" + request.proj_path + "/scm",
     'servermode': cfg.general.csvn_servermode,
   })
 

@@ -1,8 +1,8 @@
 [# setup page definitions]
-[is servermode "MANAGED"]
-  [define page_title]Index of /[where][end]
-[else]
+[is servermode "STANDALONE"]
   [define page_title]Index of:[end]
+[else]
+  [define page_title]Index of /[where][end]
 [end]
   [define help_href][docroot]/help_[if-any where]dir[else]root[end]view.html[end]
 [# end]
@@ -147,7 +147,7 @@
 [end]
 [for entries]
   [define file_click_href][if-any entries.prefer_markup][entries.view_href][else][entries.download_href][end][end]
-  [define click_href][is entries.pathtype "dir"][entries.view_href][else][is servermode "MANAGED"][is testmode "1"][entries.log_href][else][file_click_href][end][else][file_click_href][end][end][end]
+  [define click_href][is entries.pathtype "dir"][entries.view_href][else][is servermode "STANDALONE"][file_click_href][else][is testmode "1"][entries.log_href][else][file_click_href][end][end][end][end]
   <tr class="vc_row_[if-index entries even]even[else]odd[end]">
     <td [if-any click_href]onclick="jumpTo('[click_href]')"[end]>
     [if-any click_href]<a name="[entries.anchor]" href="[click_href]" title="[is entries.pathtype "dir"]View Directory Contents[else][if-any entries.prefer_markup]View[else]Download[end] File Contents[end]">[end]

@@ -57,8 +57,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      */
     def replicaRegistrationFailed
 
-    def bootStrap = {
+    def bootStrap = { appHome ->
         log.debug("Bootrastrapping the Setup Replica service")
+        setupTeamForgeService.updateIntegrationScripts(appHome, ServerMode.REPLICA)
     }
 
     /**
