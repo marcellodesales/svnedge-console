@@ -106,7 +106,7 @@ class SetupReplicaController {
                 BeanUtils.copyProperties(input, cmd)
                 
                 // fetch available external systems (error if none available)
-                externalSystems = getIntegrationServers()
+                externalSystems = fetchIntegrationServers()
                 if (!externalSystems) {
                     input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.externalSystems.error',
                         [input.ctfURL] as Object[], 'no replicable masters')
@@ -158,7 +158,7 @@ class SetupReplicaController {
      */
     def confirm = { ReplicaInfoCommand input -> 
 
-        def scmList = getIntegrationServers()
+        def scmList = fetchIntegrationServers()
         if (!input.hasErrors()) {
             
             try {
@@ -242,7 +242,7 @@ class SetupReplicaController {
 
         // return to input view with errors
         render([view: "replicaSetup", model: [cmd: input, 
-            integrationServers: getIntegrationServers()]])
+            integrationServers: fetchIntegrationServers()]])
     }
 
     /**
@@ -298,7 +298,7 @@ class SetupReplicaController {
         render([view: "editCredentials", model: [cmd: input]])
     }
 
-    private List getIntegrationServers() throws RemoteMasterException {
+    private List fetchIntegrationServers() throws RemoteMasterException {
 
         CtfConnectionBean conn = getConversionBean().ctfConn
         return setupReplicaService.getIntegrationServers(conn)
