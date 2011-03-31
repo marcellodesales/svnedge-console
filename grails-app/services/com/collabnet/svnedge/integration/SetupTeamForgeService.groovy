@@ -715,6 +715,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         // exceptions occurred before server configuration changes.
         if (exception) {
             undoServerMode(server)
+            restartServer()
         }
 
         if (errors && !exception) {
