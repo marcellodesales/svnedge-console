@@ -102,7 +102,7 @@ class LogManagementService {
     List<File> getLogFiles() {
         def files = Arrays.asList (new File(
                 ConfigUtil.dataDirPath() + "/logs").listFiles(
-                {file -> !file.isDirectory() } as FileFilter))
+                {file -> !file.isDirectory() && !file.name.endsWith('.lck') } as FileFilter))
 
         return files
     }
