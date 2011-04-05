@@ -1359,17 +1359,29 @@ class ViewVCHtmlFormatter:
 
 # Custom TeamForge ID formatter.  (Keep this regexp in sync with
 # WikiTranslator.OBJECT_KEY_PATTERN)
-_re_ctf_objid = re.compile(r'\b(artf|cmmt|doc|frs|news|post|report|task' +
-                           r'|forum|pkg|rel|docr|docf|topc|tracker|user' +
-                           r'|proj|reps|taskgrp|wiki|page|srch|plan)' + 
-                           r'[0-9]{4,}\b',
-                           re.IGNORECASE)
+
+_ctf_objid = '((artf|cmmt|doc|frs|news|post|report|task' \
+             + '|forum|pkg|rel|docr|docf|topc|tracker|user' \
+             + '|proj|plan|reps|taskgrp|wiki|page|srch)[0-9]{4,}' \
+             + os.environ.get('INTEGRATED_APP_PREFIXES', '') + ')'
+
+_re_ctf_objid = re.compile(_ctf_objid)
+_re_ctf_objlist = re.compile('\[[ ]*(' + _ctf_objid + '[, ]*)+\]')
+
 def _ctf_format_objid(mobj, userdata, maxlen=0):
     go_url = userdata
     s = mobj.group(0)
     trunc_s = maxlen and s[:maxlen] or s
     return '<a href="%s%s">%s</a>' % (go_url, s, trunc_s), len(trunc_s)
-    
+
+def _ctf_format_objlist(mobj, userdata, maxlen=0):
+    s = mobj.group(0)
+    go_url = userdata
+    lf = ViewVCHtmlFormatter()
+    lf.add_formatter(_re_ctf_objid, _ctf_format_objid, userdata)
+    out, out_len, truncated = lf.get_result(s, maxlen)
+    return out, out_len
+     
 def format_log(request, log, maxlen=0, htmlize=1):
   if not log:
     return log
@@ -1399,7 +1411,7 @@ def format_log(request, log, maxlen=0, htmlize=1):
     # TeamForge customization: add ID formatter
     if cfg.general.csvn_servermode == "MANAGED" or cfg.general.csvn_servermode == "REPLICA":
       go_url = cfg.general.csvn_app_server_root_url + '/sf/go/'
-      lf.add_formatter(_re_ctf_objid, _ctf_format_objid, go_url)
+      lf.add_formatter(_re_ctf_objlist, _ctf_format_objlist, go_url)
     
     log, log_len, truncated = lf.get_result(log, maxlen)
     return log + (truncated and '&hellip;' or '')
@@ -1793,6 +1805,23 @@ def make_time_string(date, cfg):
   """
   if date is None:
     return None
+
+  # If time zone contains strings like GMT+10:00, GMT-12:45, the 
+  # pluses and minuses in that should be interchanged as python calculates 
+  # time zone with respect to GMT
+  ctfTimeZone = os.environ.get('CTF_TIMEZONE', '')
+  if ctfTimeZone != '':
+    plus = re.escape('+')
+    minus = re.escape('-')
+    searchString = re.escape(ctfTimeZone)
+    if re.search(plus, searchString):
+      ctfTimeZone = ctfTimeZone.replace('+', '-')
+    elif re.search(minus, searchString):
+      ctfTimeZone = ctfTimeZone.replace('-', '+')
+    os.environ['TZ'] = ctfTimeZone
+    time.tzset()
+    return time.ctime(date) + ' ' + time.tzname[0]
+
   if cfg.options.use_localtime:
     localtime = time.localtime(date)
     return time.asctime(localtime) + ' ' + time.tzname[localtime[8]]
