@@ -80,7 +80,6 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue("allowed_views should equal ${views}",
             validateProperty(confFile, "allowed_views", views ))
 
-
         // now regen conf in managed mode
         server.setMode(ServerMode.MANAGED)
 
@@ -99,6 +98,19 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
             validateProperty(confFile, "allowed_views", views ))
 
 
+    }
+
+    void testSvnViewvcHttpdConf() {
+        serverConfService.writeConfigFiles();
+
+        def confFile = new File(ConfigUtil.confDirPath(), "svn_viewvc_httpd.conf")
+	def content = confFile.text
+
+	def ctfConfFileName = "ctf_httpd.conf"
+	assertTrue("Missing include of ctf_httpd.conf", content.indexOf(ctfConfFileName) > 0)
+
+        confFile = new File(ConfigUtil.confDirPath(), ctfConfFileName)
+	assertTrue("Missing ctf_httpd.conf", confFile.exists())
     }
 
 
