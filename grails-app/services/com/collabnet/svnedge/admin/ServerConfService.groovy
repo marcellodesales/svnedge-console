@@ -333,7 +333,11 @@ class ServerConfService {
 
         File f = new File(confDirPath(), "svn_access_file")
         if (f.canWrite()) {
-            f.write content.trim()
+
+            def linedAccessRules = content.split("\r\n")
+            def accessrule = linedAccessRules.join('\n') 
+
+            f.write accessrule.trim()
             return true
         }
         else {
@@ -350,7 +354,11 @@ class ServerConfService {
         f.deleteOnExit()
 
         if (f.canWrite()) {
-            f.write content.trim()
+
+            def linedAccessRules = content.split("\r\n")
+            def accessrule = linedAccessRules.join('\n')
+
+            f.write accessrule.trim()
         }
 
         def output = commandLineService.execute(
