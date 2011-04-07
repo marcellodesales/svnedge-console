@@ -466,11 +466,16 @@ Include "${confDirPath}/ctf_httpd.conf"
         if (server.mode == ServerMode.REPLICA) {
             conf += """
 LoadModule proxy_module lib/modules/mod_proxy.so
-LoadModule proxy_http_module lib/modules/mod_proxy_http.so"""
+LoadModule proxy_http_module lib/modules/mod_proxy_http.so
+"""
         }
-        conf += """
 
-<VirtualHost *:${server.port}>
+        boolean isLdapLoginEnabled = isLdapLoginEnabled(server)
+        if (isLdapLoginEnabled) {
+            conf += "<VirtualHost *:${server.port}>"
+        }
+
+        conf += """
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
 """
@@ -533,9 +538,10 @@ ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
         conf += ctfMode ? getCtfViewVCHttpdConf(server) : 
             getViewVCHttpdConf(server)
         conf += "</Location>\n"
-        conf += "</VirtualHost>\n\n"
-        if (server.mode == ServerMode.STANDALONE && server.ldapEnabled && server.ldapEnabledConsole) {
+        if (isLdapLoginEnabled) {
             conf += """
+</VirtualHost>
+
 #
 # auth helper endpoint for use by SvnEdge
 #        
@@ -552,12 +558,16 @@ ${getAuthBasic(server)}
     
     private def getAuthHelperListen(server) {
         def conf = ""
-        if (server.mode == ServerMode.STANDALONE && server.ldapEnabled && server.ldapEnabledConsole) {
+        if (isLdapLoginEnabled(server)) {
             conf += "Listen ${csvnAuthenticationProvider.getAuthHelperPort(server, true)}"
         }
         conf
     }
     
+    private boolean isLdapLoginEnabled(Server server) {
+        return server.mode == ServerMode.STANDALONE && server.ldapEnabled && server.ldapEnabledConsole
+    }
+
     private def getDefaultHttpdSnippets() {
         def conf = ""
         if (isWindows() == false) {
