@@ -369,9 +369,9 @@ class _diff_fp:
       args.extend(["-L", self._label(info1), "-L", self._label(info2)])
     args.extend([temp1, temp2])
     #self.fp = popen.popen(diff_cmd, args, "r")
-    self.fp = self._get_diff_fp(diff_cmd, args)
+    self.fp = self._get_diff_fp(diff_cmd, info1, info2, args)
 
-  def _get_diff_fp(self, diff_cmd, args):
+  def _get_diff_fp(self, diff_cmd, info1, info2, args):
     ### Edge Customization: Try to deal with non-GNU 'diff' binaries
     ### by falling back to difflib when possible.
 
@@ -396,21 +396,22 @@ class _diff_fp:
       file1 = open(self.temp1, "r")
       file2 = open(self.temp2, "r")
 
-      if diff_opts.count("--side-by-side"):
+      if '--side-by-side' in args:
         import debug
         raise debug.ViewVCException('GNU diff is required for side-by-side '
                                     'option', '400 Bad Request')
-      elif diff_opts.count("-c"):
+      elif '-c' in args:
         diff_lines = difflib.context_diff(file1.readlines(),
                                           file2.readlines(), 
                                           self._label(info1),
                                           self._label(info2))
       else:
-        num_lines = 3
-        if diff_opts.count("--unified=15"):
+        if '--unified=15' in args:
           num_lines = 15
-        elif diff_opts.count("--unified=-1"):
+        elif '--unified=-1' in args:
           num_lines = 1000000
+        else:
+          num_lines = 3
         diff_lines = difflib.unified_diff(file1.readlines(),
                                           file2.readlines(), 
                                           self._label(info1),
