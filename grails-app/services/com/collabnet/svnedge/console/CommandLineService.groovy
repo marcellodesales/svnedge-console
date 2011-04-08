@@ -72,7 +72,7 @@ class CommandLineService {
      *
      * @param command vararg list of command and arguments
      * @param env Map environment
-     * @param input input to provide to teh command
+     * @param input input to provide to the command
      * @param quiet when true, most logging is suppressed (for security, eg)
      * @return String[] of exit code, out, and err
      */

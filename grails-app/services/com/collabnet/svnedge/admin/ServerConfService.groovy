@@ -340,7 +340,7 @@ class ServerConfService {
     boolean writeSvnAccessFile(String content) {
 
         File f = new File(confDirPath(), "svn_access_file")
-        if (f.canWrite()) {
+        if (!f.exists() || f.canWrite()) {
 
             def linedAccessRules = content.split("\r\n")
             def accessrule = linedAccessRules.join('\n') 
