@@ -211,6 +211,7 @@
         </td>
         <td class="ItemDetailValue">
           <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
+          <i><strong><g:message code="server.page.editAuthentication.anonymBindsNotAllowed.example" /></strong></i>
         </td>
       </tr>
       <tr>
