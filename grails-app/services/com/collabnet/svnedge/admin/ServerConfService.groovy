@@ -326,7 +326,7 @@ class ServerConfService {
 
         File f = new File(confDirPath(), "svn_access_file")
         if (f.exists()) {
-            return f.text
+            return f.getText("UTF-8")
         }
         else {
             return DEFAULT_SVN_ACCESS
@@ -341,11 +341,7 @@ class ServerConfService {
 
         File f = new File(confDirPath(), "svn_access_file")
         if (!f.exists() || f.canWrite()) {
-
-            def linedAccessRules = content.split("\r\n")
-            def accessrule = linedAccessRules.join('\n') 
-
-            f.write accessrule.trim()
+            f.setText(content.replace("\r\n", "\n").trim(), "UTF-8")
             return true
         }
         else {
@@ -362,11 +358,7 @@ class ServerConfService {
         f.deleteOnExit()
 
         if (f.canWrite()) {
-
-            def linedAccessRules = content.split("\r\n")
-            def accessrule = linedAccessRules.join('\n')
-
-            f.write accessrule.trim()
+            f.setText(content.replace("\r\n", "\n").trim(), "UTF-8")
         }
 
         def output = commandLineService.execute(
