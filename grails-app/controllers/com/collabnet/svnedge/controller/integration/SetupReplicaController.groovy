@@ -22,6 +22,7 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
+import com.collabnet.svnedge.integration.CtfConnectionException
 import com.collabnet.svnedge.integration.CtfConnectionBean;
 import com.collabnet.svnedge.integration.CtfSessionExpiredException;
 import com.collabnet.svnedge.integration.RemoteMasterException;
@@ -29,6 +30,7 @@ import com.collabnet.svnedge.integration.ReplicaConversionBean
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 import org.springframework.beans.BeanUtils
+import javax.net.ssl.SSLHandshakeException
 
 
 class CtfConnectionCommand {
@@ -83,7 +85,7 @@ class SetupReplicaController {
         if (conversion?.registrationError) {
             flash.error = conversion.registrationError
         }
-        [cmd: getCtfConnectionCommand()]
+        [cmd: getCtfConnectionCommand(), encodeMessageHtml: true]
     }
 
     /**
@@ -92,6 +94,7 @@ class SetupReplicaController {
     def replicaSetup = { CtfConnectionCommand input ->
 
         def externalSystems;
+        boolean encodeMessageHtml = true
         
         if (!input.hasErrors()) {
 
@@ -124,6 +127,20 @@ class SetupReplicaController {
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.unreachable.error',
                         [input.ctfURL] as Object[], 'no route')
             }
+            catch (SSLHandshakeException e) {
+                def msg = message(code:"ctfRemoteClientService.ssl.error", args:
+                    ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"])
+                log.warn(msg)
+                input.errors.rejectValue("ctfURL", "ctfRemoteClientService.ssl.error",
+                       ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"] as Object[], msg )
+                // we want to display url in the error message for this field, so override the message encoding
+                encodeMessageHtml = false
+            }
+            catch (CtfConnectionException e) {
+                // some other problem connecting to the CTF instance
+                input.errors.rejectValue('ctfURL', e.messageKey,
+                        [input.ctfURL] as Object[], 'bad url')
+            }
             catch (CtfAuthenticationException e) {
                 // FIXME: note we're hardcoding ctfURL as the argument used
                 // in the msg.  We may want to consider adding the param array
@@ -145,7 +162,7 @@ class SetupReplicaController {
 
         if (input.hasErrors()) {
             // return to input view with errors
-            render([view: "ctfInfo", model: [cmd: input]])
+            render([view: "ctfInfo", model: [cmd: input, encodeMessageHtml: encodeMessageHtml]])
             return
         }
 

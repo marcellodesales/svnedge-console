@@ -35,7 +35,8 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.User 
-import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.CtfServer
+import javax.net.ssl.SSLHandshakeException
 
 class SetupTeamForgeService extends AbstractSvnEdgeService {
 
@@ -326,9 +327,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * for the conversionData object.  If unable to connect, conversionData.errorMessage may contain
      * useful information
      */
-    boolean confirmConnection(conversionData) throws CtfAuthenticationException,
-        RemoteMasterException, UnknownHostException, NoRouteToHostException, 
-            MalformedURLException {
+    boolean confirmConnection(conversionData) throws CtfAuthenticationException, RemoteMasterException,
+           UnknownHostException, NoRouteToHostException, MalformedURLException,
+           SSLHandshakeException, CtfConnectionException {
 
         def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
         conversionData.userSessionId = ctfRemoteClientService.login(

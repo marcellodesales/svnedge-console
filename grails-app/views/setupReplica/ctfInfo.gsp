@@ -63,7 +63,14 @@
             <td class="errors" colspan="2">
               <g:hasErrors bean="${cmd}" field="ctfURL">
                 <ul><g:eachError bean="${cmd}" field="ctfURL">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
+                  <li>
+                    <g:if test="${encodeMessageHtml == false}">
+                      <g:message error="${it}"/>
+                    </g:if>
+                    <g:else>
+                      <g:message error="${it}" encodeAs="HTML"/>
+                    </g:else>
+                  </li>
                 </g:eachError></ul>
               </g:hasErrors>
             </td>

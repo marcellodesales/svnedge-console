@@ -29,7 +29,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.ApprovalState 
 import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+import javax.net.ssl.SSLHandshakeException
 
 /**
  * This service handles replication-related functionality
@@ -86,9 +87,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     /**
      * Confirms the ctf connection
      */
-    public void confirmCtfConnection(CtfConnectionBean ctfConn) throws 
-            CtfAuthenticationException, RemoteMasterException,
-            UnknownHostException, NoRouteToHostException, MalformedURLException {
+    public void confirmCtfConnection(CtfConnectionBean ctfConn) throws CtfAuthenticationException,
+            RemoteMasterException, UnknownHostException, NoRouteToHostException, MalformedURLException,
+            SSLHandshakeException, CtfConnectionException {
         // attempt connection -- throws exception on failure
         log.debug("Verifying CTF connection")
         setupTeamForgeService.confirmConnection(ctfConn)

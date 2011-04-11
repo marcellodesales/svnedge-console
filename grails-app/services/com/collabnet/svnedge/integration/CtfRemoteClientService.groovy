@@ -51,6 +51,7 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 import java.net.MalformedURLException
+import javax.net.ssl.SSLHandshakeException
 
 
 /**
@@ -137,7 +138,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     public String makeLogin(def cnSoap, ctfUrl, username, password, 
             locale) throws CtfAuthenticationException, RemoteMasterException, 
-           UnknownHostException, NoRouteToHostException, MalformedURLException {
+           UnknownHostException, NoRouteToHostException, MalformedURLException,
+           SSLHandshakeException, CtfConnectionException {
 
         try {
             return cnSoap.login(username, password)
@@ -159,12 +161,15 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     "ctfRemoteClientService.auth.error")
 
             } else if (e.faultString.contains("SSLHandshakeException")) {
-                def msg = getMessage("ctfRemoteClientService.ssl.error", 
-                    ["http://help.collab.net/index.jsp?topic=/csvn/action/" +
-                        "csvntotf_ssl.html"], locale)
-                log.warn(msg)
-                throw new CtfAuthenticationException(msg,
-                    "ctfRemoteClientService.ssl.error")
+                // catch axis fault of this type and rethrow as underlying exception
+                throw new SSLHandshakeException(e.getMessage())
+
+            } else if (e.faultString.contains("(301)Moved Permanently")) {
+                def msg = getMessage("ctfRemoteClientService.service.redirect.error",
+                    [ctfUrl.encodeAsHTML()], locale)
+                log.info(msg)
+                throw new CtfConnectionException(msg,
+                    "ctfRemoteClientService.service.redirect.error")
 
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
@@ -196,7 +201,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @param password is the password.
      * @return the User Session ID from the CTF server. 
      */
-    public String login(username, password, locale) {
+    public String login(username, password, locale) throws CtfAuthenticationException, RemoteMasterException,
+           UnknownHostException, NoRouteToHostException, MalformedURLException,
+           SSLHandshakeException {
         return makeLogin(cnSoap(), CtfServer.server.baseUrl, username, password,
             locale)
     }
@@ -210,11 +217,15 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @throws CtfAuthenticationException in case the login is incorrect
      * @throws RemoteMasterException in case any other exception occurs
      */
-    public String login(ctfUrl, username, password, locale) {
+    public String login(ctfUrl, username, password, locale) throws CtfAuthenticationException, RemoteMasterException, 
+           UnknownHostException, NoRouteToHostException, MalformedURLException,
+           SSLHandshakeException {
         return makeLogin(cnSoap(ctfUrl), ctfUrl, username, password, locale)
     }
 
-    public String login60(ctfUrl, username, password, locale) {
+    public String login60(ctfUrl, username, password, locale) throws CtfAuthenticationException, RemoteMasterException,
+           UnknownHostException, NoRouteToHostException, MalformedURLException,
+           SSLHandshakeException {
         return makeLogin(cnSoap60(ctfUrl), ctfUrl, username, password, locale)
     }
 
