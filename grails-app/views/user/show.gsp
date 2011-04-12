@@ -65,11 +65,11 @@
                 <input type="hidden" name="id" value="${userInstance.id}" />
                 <g:if test="${editable}">
                   <span class="button"><g:actionSubmit action="edit" class="edit" value="${message(code:'user.page.edit.button.edit')}" /></span>
+                </g:if> 
                   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
                     <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
                     <span class="button"><g:actionSubmit action="delete" class="delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" /></span>
                   </g:ifAnyGranted>
-                </g:if> 
             </g:form>
         </div>
 
