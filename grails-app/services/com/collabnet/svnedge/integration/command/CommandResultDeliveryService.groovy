@@ -205,12 +205,12 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             // attempt to deliver the result to the Replica manager
             transmitCommandResult(commandContext, commandResult)
 
-            // save the result transmitted state
-            saveTransmittedCommandResult(commandResult)
-
             def succeeded = commandResult.succeeded ? "SUCEEDED" : "FAILED"
             log.debug("Result successfully acknowledged the command " +
                 "${commandResult.commandId} -> ${succeeded}.")
+
+            // remove the command result as it has been transmitted.
+            deleteTransmittedResults(commandResult)
 
         } catch (Exception remoteError) {
             log.error("Error while acknowledging the command " +
@@ -277,13 +277,12 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
      * Sets the transmitted value to true.
      * @param cmdResult is the command result object.
      */
-    def saveTransmittedCommandResult(CommandResult cmdResult) {
+    def deleteTransmittedResults(CommandResult cmdResult) {
         if (!cmdResult) {
             throw new IllegalArgumentException("The command result instance " +
                 "must be provided must be saved")
         }
-        cmdResult.transmitted = true
         cmdResult = cmdResult.merge()
-        cmdResult.save(flush:true)
+        cmdResult.delete()
     }
 }

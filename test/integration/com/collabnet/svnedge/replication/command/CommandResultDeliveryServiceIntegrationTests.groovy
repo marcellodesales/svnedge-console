@@ -127,28 +127,14 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
             println "U: " + persistedResult.lastUpdated
         }
 
-        // connection with replica manager (TF) open, transmit them
+        // connection with replica manager (TF) open, remove them
         persistedResults.each{ cmdResult ->
-            commandResultDeliveryService.saveTransmittedCommandResult(cmdResult)
+            commandResultDeliveryService.deleteTransmittedResults(cmdResult)
         }
 
         // verify the changed values, specially the transmitted and succeeded
-        println "Results transmitted... verifying results"
-        remotecmdexecs.eachWithIndex{ command, i ->
-            def persistedResult = CommandResult.findByCommandId(command.id)
-            def result = persistedResult.commandId.hashCode()
-            assertNotNull "The command result must exist by Id", persistedResult
-            assertEquals "The command ID must be the same", command.id,
-                persistedResult.commandId
-            assertEquals "The command result must be maintained",
-                (result + i) % 2 == 0, persistedResult.succeeded
-            assertTrue "The transmitted value must be true",
-                persistedResult.transmitted
-            assertNotNull "The command result must have a Date created",
-                persistedResult.dateCreated
-            assertNotNull "The command result must have a last Updated after " +
-                "the update", persistedResult.lastUpdated
-        }
+        println "Results transmitted... verify no commands are available"
+        assertEquals "All commands should have been removed", 0, CommandResult.count()
     }
 
     /**
@@ -214,14 +200,14 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         try {
-            commandResultDeliveryService.saveTransmittedCommandResult(null)
+            commandResultDeliveryService.deleteTransmittedResults(null)
             fail("Should not be able to save command result with transmitted " +
                 "value with null object")
         } catch (Exception e) {
             
         }
         try {
-            commandResultDeliveryService.saveTransmittedCommandResult("")
+            commandResultDeliveryService.deleteTransmittedResults("")
             fail("Should not be able to save command result with transmitted " +
                 "value with empty object")
         } catch (Exception e) {
