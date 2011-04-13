@@ -1,36 +1,92 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-        "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>CollabNet Subversion Edge</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="www/viewvc/docroot/styles.css" type="text/css" />
+    <link rel="stylesheet" href="www/viewvc/docroot/csvn_installer.css" type="text/css" />
+    <link rel="shortcut icon" href="www/viewvc/docroot/images/branding/favicon.ico" />
     <script type="text/javascript">
 
         var pingUrl = "http://localhost:3343/csvn/images/project/project-homeicon.gif";
-        var timeoutId = window.setTimeout("consolePing()", 5000);
+        var timeoutId = window.setTimeout("consolePing()", 0);
+        var phaseId = 0;
+        var phaseLoadTime = 3000;
+        var totalSeconds = 0;
 
         function consolePing() {
             var image = new Image();
             var uniqueUrl = pingUrl + "?s=" + Math.random();
+            writeActivity();
 
             // if we load image, set status ok and stop  pinging
             image.onload = function() {
 
                 if (this.height > 0)  {
                     setStatusOk();
-                    window.clearTimeout(timeoutId)
-                }
-                else {
+                    window.clearTimeout(timeoutId);
+
+                } else if (phaseId < 100) {
+                    // write some outputs based on the application server every 1 seconds...
+                    timeoutId = window.setTimeout('writeActivity()', phaseLoadTime);
+
+                } else {
                     // if we fail to load image, try again in 5 seconds
-                    timeoutId = window.setTimeout('consolePing()', 5000)
+                    timeoutId = window.setTimeout('consolePing()', 5000);
                 }
             }
             // if we fail to load image, try again in 5 seconds
             image.onerror = function() {
+                if (totalSeconds > 60) {
+                    setStatusServerMightBeDown()
 
-                timeoutId = window.setTimeout('consolePing()', 5000)
+                } else {
+                    timeoutId = window.setTimeout('consolePing()', 5000);
+                }
             }
             image.src = uniqueUrl;
-       }
+        }
+
+        function writeActivity()  {
+            switch(phaseId) {
+            case 0: 
+                document.getElementById("consoleLink").innerHTML = 'Initializing application server...';
+                phaseId += 25;
+                phaseLoadTime = 2000;
+                totalSeconds += 2;
+                break;
+
+            case 25: 
+                document.getElementById("consoleLink").innerHTML = 'Loading Subversion Edge server configuration...';
+                phaseId += 25;
+                phaseLoadTime = 3000;
+                totalSeconds += 3;
+                break;
+
+            case 50:
+                document.getElementById("consoleLink").innerHTML = 'Preparing users space...';
+                phaseId+=25;
+                phaseLoadTime = 5000;
+                totalSeconds += 5;
+                break;
+
+            case 75:
+                document.getElementById("consoleLink").innerHTML = 'Preparing repositories space...';
+                phaseId+=25;
+                phaseLoadTime = 5000;
+                totalSeconds += 5;
+                break;
+
+            case 100:
+                document.getElementById("consoleLink").innerHTML = 'Finishing to load application server...';
+                totalSeconds += 5;
+                break;
+
+            default:
+                totalSeconds += 5;
+                break;
+            }
+        }
 
         // set the link active
         function setStatusOk() {
@@ -39,68 +95,120 @@
             linkElement.style.textDecoration = 'underline';
             linkElement.style.color = 'green';
             linkElement.innerHTML = 'Ready';
+            linkElement.href='http://localhost:3343/csvn';
+
+            document.getElementById('spinner').style.display = 'none';
+            document.getElementById('serverLink').href='http://localhost:3343/csvn';
+            document.getElementById('serverStatusImg').src='www/viewvc/docroot/images/branding/database-up-icon-hi.png';
+        }
+
+        // set the link active
+        function setStatusServerMightBeDown() {
+            document.getElementById("consoleLink").innerHTML = 'Subversion Edge console not started... Check log file \"data\\logs\\console.log\" for details...';
+            document.getElementById('spinner').style.display = 'none';
         }
 
     </script>
     <style>
 h1, h2, h3, p, td {
-	font-family: Arial, Helvetica, sans-serif
+font-family: Arial, Helvetica, sans-serif
 }
 
 h1 {
-	color: #0066CC
+color: #0066CC
 }
 
 .body {
-	margin-left: 2em;
-	margin-top: 2em;
-	width:  800px;
+margin-left: 2em;
+margin-top: 2em;
+width:  800px;
 }
 
-#loginTable {
-	width:200px;
-	background-color:silver;
-	margin-top:1em;
-}
-    
     </style>
 </head>
 <body>
-<div class="body">
-    <h1>CollabNet Subversion Edge</h1>
-
-    <p>Console Status:
-    <span id="consoleIndicator">
-        <a id="consoleLink" href="http://localhost:3343/csvn" style="text-decoration:none; color:red;">Not Ready</a>
-    </span>
-    </p>
-
-    <p>
-        Welcome to CollabNet Subversion Edge. The link above will indicate when the management console is ready 
-		to use. At that time, follow the link to the login page (<a href="http://localhost:3343/csvn">http://localhost:3343/csvn</a>).
-    </p>
-    <p>
-        When first installed, Subversion Edge can be managed with the default administrator account. Use this login to
-        sign in, but be sure to change the password.
-    </p>
-    <p>
-     <table id="loginTable">
-        <tr>
-            <td>User name:</td>
-            <td><b>admin</b></td>
-        </tr>
-        <tr>
-            <td>Password:</td>
-            <td><b>admin</b></td>
-        </tr>
-        </table>
-     </p>
-     
-     <p>Edit your password by clicking the "Logged in as" username that appears in the uppper right corner of the
-     console screen. You'll also see a help icon there that always links to contextually
-	 relevant documentation.</p>
-	 
-	<p>Thank you for installing CollabNet Subversion Edge.</p>
+<div id="vc_header">
+  <div id="vc_masthead">
+    <div id="vc_logo">
+       <img src="www/viewvc/docroot/images/branding/CSVN-Logo.png" alt="CollabNet Subversion Edge" width="272" height="25" />
+    </div>
+  </div>
 </div>
+  
+<div class="body">
+
+  <table class="Container" id="tracker_summary_table_id">
+     <tbody><tr class="ContainerHeader">
+       <td width="95%">
+          Console Status:
+          <span id="consoleIndicator">
+           <a id="consoleLink" style="text-decoration:none; color:red;">Not Ready</a>
+          </span>
+       </td>
+       <td align="right"><img src="www/viewvc/docroot/images/roller.gif" height="28" width="28" id="spinner" align="middle" alt="Subversion Edge Console is loading..." /></td>
+     </tr>
+     <tr>
+       <td class="ContainerBody" colspan="2">
+         <table class="CategoryListTable">
+           <tbody>
+             <tr>
+               <td class="CategoryListBody" width="10%">
+                 <br />
+                 <a id="serverLink"><img src="www/viewvc/docroot/images/branding/database-down-icon-hi.png" width="200" height="200" id="serverStatusImg" alt="Subversion Edge Console is loading..." /></a>
+              
+               </td>
+
+             <td class="ContainerBodyWithPaddedBorder" width="90%">
+                     <p>
+                         Welcome to CollabNet Subversion Edge. The link above will indicate when the management console is ready 
+                         to use. At that time, follow the link to the login page (<a href="http://localhost:3343/csvn">http://localhost:3343/csvn</a>).
+                     </p>
+                     <p>
+                         When first installed, Subversion Edge can be managed with the default administrator account. Use this login to
+                         sign in, but be sure to change the password.
+                     </p>
+                     <p>
+                      <table style="width:200px; background-color:silver; margin-top:1em;">
+                         <tr>
+                             <td>User name:</td>
+                             <td><b>admin</b></td>
+                         </tr>
+                         <tr>
+                             <td>Password:</td>
+                             <td><b>admin</b></td>
+                         </tr>
+                         </table>
+                     </p>
+                      
+                      <p>Edit your password by clicking the "Logged in as" username that appears in the uppper right corner of the
+                      console screen. You'll also see a help icon there that always links to contextually
+                  relevant documentation.</p>
+                  
+                 <p>Thank you for installing CollabNet Subversion Edge.</p>
+             </td>
+           </tr>
+         </tbody></table>
+       </td>
+     </tr>
+   </tbody></table>
+</div>
+
+<br/><br/><br/>
+<center>
+<hr width="99%" size="2" style="border:none; border-top:1px silver solid; height: 1px;" />
+<table width="99%">
+<tr>
+    <td width="114"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
+     <img width="102" height="31" alt="Powered by CollabNet" border="0" src="www/viewvc/docroot/images/branding/poweredbylogo.gif"/></a>
+    </td>
+    <td>
+     &copy; 2011 CollabNet. CollabNet is a registered trademark of <a href="http://www.collab.net/?cid=csvnedgeL">CollabNet, Inc.</a>
+     <br />
+     <a href="http://subversion.apache.org">Apache Subversion</a> is a trademark of the <a href="http://www.apache.org/">Apache Software Foundation</a>.<br />
+     Subversion and the Apache Subversion logo are registered trademarks of the <a href="http://www.apache.org/">Apache Software Foundation</a>.
+    </td>
+</tr>
+</table>
+</center>
 </body>
 </html>
