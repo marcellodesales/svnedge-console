@@ -4,15 +4,14 @@
     <title>CollabNet Subversion Edge</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link rel="stylesheet" href="www/viewvc/docroot/styles.css" type="text/css" />
-    <link rel="stylesheet" href="www/viewvc/docroot/csvn_installer.css" type="text/css" />
+    <link rel="stylesheet" href="www/viewvc/docroot/styles_new.css" type="text/css" />
     <link rel="shortcut icon" href="www/viewvc/docroot/images/branding/favicon.ico" />
     <script type="text/javascript">
 
         var pingUrl = "http://localhost:3343/csvn/images/project/project-homeicon.gif";
         var timeoutId = window.setTimeout("consolePing()", 0);
-        var phaseId = 0;
-        var phaseLoadTime = 3000;
         var totalSeconds = 0;
+        var phaseId = 0;
 
         function consolePing() {
             var image = new Image();
@@ -26,85 +25,74 @@
                     setStatusOk();
                     window.clearTimeout(timeoutId);
 
-                } else if (phaseId < 100) {
+                } else if (phaseId <= 60) {
                     // write some outputs based on the application server every 1 seconds...
-                    timeoutId = window.setTimeout('writeActivity()', phaseLoadTime);
+                    timeoutId = window.setTimeout('writeActivity()', 1000);
 
                 } else {
-                    // if we fail to load image, try again in 5 seconds
-                    timeoutId = window.setTimeout('consolePing()', 5000);
+                    // if we fail to load image, try again in 3 seconds
+                    timeoutId = window.setTimeout('consolePing()', 1000);
                 }
             }
-            // if we fail to load image, try again in 5 seconds
+            // if we fail to load image, try again in 3 seconds
             image.onerror = function() {
-                if (totalSeconds > 60) {
+                if (totalSeconds >= 59) {
                     setStatusServerMightBeDown()
 
                 } else {
-                    timeoutId = window.setTimeout('consolePing()', 5000);
+                    timeoutId = window.setTimeout('consolePing()', 1000);
                 }
             }
             image.src = uniqueUrl;
+            ++totalSeconds;
         }
 
         function writeActivity()  {
             switch(phaseId) {
             case 0: 
-                document.getElementById("consoleLink").innerHTML = 'Initializing application server...';
+                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts';
                 phaseId += 25;
-                phaseLoadTime = 2000;
-                totalSeconds += 2;
                 break;
 
             case 25: 
-                document.getElementById("consoleLink").innerHTML = 'Loading Subversion Edge server configuration...';
+                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts.';
                 phaseId += 25;
-                phaseLoadTime = 3000;
-                totalSeconds += 3;
                 break;
 
             case 50:
-                document.getElementById("consoleLink").innerHTML = 'Preparing users space...';
-                phaseId+=25;
-                phaseLoadTime = 5000;
-                totalSeconds += 5;
+                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts..';
+                phaseId += 25;
                 break;
 
             case 75:
-                document.getElementById("consoleLink").innerHTML = 'Preparing repositories space...';
-                phaseId+=25;
-                phaseLoadTime = 5000;
-                totalSeconds += 5;
-                break;
-
-            case 100:
-                document.getElementById("consoleLink").innerHTML = 'Finishing to load application server...';
-                totalSeconds += 5;
-                break;
-
-            default:
-                totalSeconds += 5;
+                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts...';
+                phaseId = 0;
                 break;
             }
         }
 
         // set the link active
         function setStatusOk() {
-
             var linkElement = document.getElementById("consoleLink");
             linkElement.style.textDecoration = 'underline';
             linkElement.style.color = 'green';
             linkElement.innerHTML = 'Ready';
-            linkElement.href='http://localhost:3343/csvn';
+            linkElement.style.fontWeight = 'bold';
+            linkElement.href = 'http://localhost:3343/csvn';
 
             document.getElementById('spinner').style.display = 'none';
-            document.getElementById('serverLink').href='http://localhost:3343/csvn';
-            document.getElementById('serverStatusImg').src='www/viewvc/docroot/images/branding/database-up-icon-hi.png';
+            document.getElementById('serverLink').href = 'http://localhost:3343/csvn';
+            document.getElementById('serverStatusImg').src = 'www/viewvc/docroot/images/branding/database-up-icon-hi.png';
         }
 
         // set the link active
         function setStatusServerMightBeDown() {
-            document.getElementById("consoleLink").innerHTML = 'Subversion Edge console not started... Check log file \"data\\logs\\console.log\" for details...';
+            var consoleLink = document.getElementById("consoleLink");
+            consoleLink.innerHTML = 'Console not started. Read troubleshooting information at the Subversion Edge wiki.';
+            consoleLink.href = 'https://ctf.open.collab.net/sf/go/wiki1981';
+            consoleLink.target = '_csvn_win_help';
+            consoleLink.style.fontWeight = 'bold';
+            consoleLink.style.textDecoration = 'underline';
             document.getElementById('spinner').style.display = 'none';
         }
 
@@ -142,7 +130,7 @@ width:  800px;
        <td width="95%">
           Console Status:
           <span id="consoleIndicator">
-           <a id="consoleLink" style="text-decoration:none; color:red;">Not Ready</a>
+           <a id="consoleLink" style="text-decoration:none; color:red;">Checking if the server starts...</a>
           </span>
        </td>
        <td align="right"><img src="www/viewvc/docroot/images/roller.gif" height="28" width="28" id="spinner" align="middle" alt="Subversion Edge Console is loading..." /></td>
