@@ -50,22 +50,22 @@
         function writeActivity()  {
             switch(phaseId) {
             case 0: 
-                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts';
+                document.getElementById("consoleLink").innerHTML = 'Waiting for console to complete startup';
                 phaseId += 25;
                 break;
 
             case 25: 
-                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts.';
+                document.getElementById("consoleLink").innerHTML = 'Waiting for console to complete startup.';
                 phaseId += 25;
                 break;
 
             case 50:
-                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts..';
+                document.getElementById("consoleLink").innerHTML = 'Waiting for console to complete startup..';
                 phaseId += 25;
                 break;
 
             case 75:
-                document.getElementById("consoleLink").innerHTML = 'Checking if the console starts...';
+                document.getElementById("consoleLink").innerHTML = 'Waiting for console to complete startup...';
                 phaseId = 0;
                 break;
             }
@@ -130,7 +130,7 @@ width:  800px;
        <td width="95%">
           Console Status:
           <span id="consoleIndicator">
-           <a id="consoleLink" style="text-decoration:none; color:red;">Checking if the server starts...</a>
+           <a id="consoleLink" style="text-decoration:none; color:red;">Waiting for console to complete startup...</a>
           </span>
        </td>
        <td align="right"><img src="www/viewvc/docroot/images/roller.gif" height="28" width="28" id="spinner" align="middle" alt="Subversion Edge Console is loading..." /></td>
