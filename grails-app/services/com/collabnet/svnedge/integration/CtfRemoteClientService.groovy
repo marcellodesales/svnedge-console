@@ -1041,7 +1041,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     "master; reverting to standalone mode"
                 // create a virtual command to unregister the replica
                 def id = Math.round(Math.random() * 10000)
-                return [[id: id, code: "replicaUnregister"]]
+                return [[id: COMMAND_ID_PREFIX + id, code: "replicaUnregister"]]
 
             } else {
                  def generalMsg = getMessage(
