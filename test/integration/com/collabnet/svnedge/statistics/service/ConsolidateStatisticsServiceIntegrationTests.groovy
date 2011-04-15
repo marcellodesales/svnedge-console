@@ -26,6 +26,7 @@ import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.domain.statistics.StatisticType 
 import com.collabnet.svnedge.domain.statistics.Unit 
 import grails.test.*
+import com.collabnet.svnedge.domain.Repository
 
 class ConsolidateStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     def statGroup
@@ -84,52 +85,130 @@ class ConsolidateStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
     void testConsolidation() {
         // test consolidation w/ no data
         try {
-           consolidateStatisticsService.consolidate(statGroup) 
+           consolidateStatisticsService.consolidate(statGroup)
         } catch (Exception e) {
             fail("Got exception while doing empty consolidation:" + e)
         }
         // add data points at the lowest interval
-        new StatValue(timestamp: 0, interval: 1000, minValue: 0, maxValue: 0, 
-                      averageValue: 0, lastValue: 0, derived: false, 
+        new StatValue(timestamp: 0, interval: 1000, minValue: 0, maxValue: 0,
+                      averageValue: 0, lastValue: 0, derived: false,
                       uploaded: false, statistic: stat).save()
-        new StatValue(timestamp: 1000, interval: 1000, minValue: 1, 
-                      maxValue: 1, 
-                      averageValue: 1, lastValue: 1, derived: false, 
+        new StatValue(timestamp: 1000, interval: 1000, minValue: 1,
+                      maxValue: 1,
+                      averageValue: 1, lastValue: 1, derived: false,
                       uploaded: false, statistic: stat).save()
-        new StatValue(timestamp: 2000, interval: 1000, minValue: 8, 
-                      maxValue: 8, 
-                      averageValue: 8, lastValue: 8, derived: false, 
+        new StatValue(timestamp: 2000, interval: 1000, minValue: 8,
+                      maxValue: 8,
+                      averageValue: 8, lastValue: 8, derived: false,
                       uploaded: false, statistic: stat).save()
-        new StatValue(timestamp: 3000, interval: 1000, minValue: 3, 
-                      maxValue: 3, 
-                      averageValue: 3, lastValue: 3, derived: false, 
+        new StatValue(timestamp: 3000, interval: 1000, minValue: 3,
+                      maxValue: 3,
+                      averageValue: 3, lastValue: 3, derived: false,
                       uploaded: false, statistic: stat).save()
-        new StatValue(timestamp: 4000, interval: 1000, minValue: 6, 
-                      maxValue: 6, 
-                      averageValue: 6, lastValue: 6, derived: false, 
+        new StatValue(timestamp: 4000, interval: 1000, minValue: 6,
+                      maxValue: 6,
+                      averageValue: 6, lastValue: 6, derived: false,
                       uploaded: false, statistic: stat).save()
         def values1sec = StatValue.findAllByStatisticAndInterval(stat, 1000)
-        assertEquals("The size of the 1-sec values should be 5.", 5, 
+        assertEquals("The size of the 1-sec values should be 5.", 5,
                      values1sec.size())
         consolidateStatisticsService.consolidate(statGroup)
         // after consolidation, there should be 2 new StatValues for 2-sec
         // and 1 new StatValue for 4-sec.
         def values2sec = StatValue.findAllByStatisticAndInterval(stat, 2000)
         def values4sec = StatValue.findAllByStatisticAndInterval(stat, 4000)
-        assertEquals("The size of the 2-sec values should be 2.", 2, 
+        assertEquals("The size of the 2-sec values should be 2.", 2,
                      values2sec.size())
-        assertEquals("The size of the 4-sec values should be 1.", 1, 
+        assertEquals("The size of the 4-sec values should be 1.", 1,
                      values4sec.size())
         def value4sec = values4sec[0]
         assertEquals("The min value should be 0.", 0, value4sec.getMinValue())
         assertEquals("The max value should be 8.", 8, value4sec.getMaxValue())
-        assertEquals("The avg value should be 3.", 3, 
+        assertEquals("The avg value should be 3.", 3,
                      value4sec.getAverageValue())
-        assertEquals("The last value should be 3.", 3, 
+        assertEquals("The last value should be 3.", 3,
                      value4sec.getLastValue())
-        assertEquals("The interval should be 4000.", 4000, 
+        assertEquals("The interval should be 4000.", 4000,
                      value4sec.getInterval())
         assertTrue("Derived should be true.", value4sec.getDerived())
         assertEquals("The timestamp should be 0.", 0, value4sec.getTimestamp())
+    }
+
+    /**
+     * tests consolidation by repository
+     */
+    void testConsolidationForRepository() {
+
+        Repository r1 = new Repository(name: 'testRepo1')
+        Repository r2 = new Repository(name: 'testRepo2')
+        r1.save()
+        r2.save()
+
+        // add data points for repo1
+        new StatValue(timestamp: 0, interval: 1000, minValue: 0, maxValue: 0,
+                      averageValue: 0, lastValue: 0, derived: false,
+                      uploaded: false, statistic: stat, repo: r1).save()
+        new StatValue(timestamp: 1000, interval: 1000, minValue: 8,
+                      maxValue: 8,
+                      averageValue: 8, lastValue: 8, derived: false,
+                      uploaded: false, statistic: stat, repo: r1).save()
+
+        // add data points for repo2
+        new StatValue(timestamp: 0, interval: 1000, minValue: 4, 
+                      maxValue: 4,
+                      averageValue: 4, lastValue: 4, derived: false,
+                      uploaded: false, statistic: stat, repo: r2).save()
+        new StatValue(timestamp: 1000, interval: 1000, minValue: 6,
+                      maxValue: 6,
+                      averageValue: 6, lastValue: 6, derived: false,
+                      uploaded: false, statistic: stat, repo: r2).save()
+
+        def values1sec = StatValue.findAllByStatisticAndInterval(stat, 1000)
+        assertEquals("The size of the 1-sec values should be 4.", 4,
+                     values1sec.size())
+        // before consolidation, there should be no StatValues for 2-sec
+        // interval
+        def values2sec = StatValue.findAllByStatisticAndInterval(stat, 2000)
+        assertEquals("The size of the 2-sec values should be 0.", 0,
+                     values2sec.size())
+
+        consolidateStatisticsService.consolidate(statGroup)
+
+        // after consolidation, there should be StatValues for 2-sec
+        // interval
+        values2sec = StatValue.findAllByStatisticAndInterval(stat, 2000)
+        assertEquals("The size of the 2-sec values should be 2.", 2,
+                     values2sec.size())
+
+        def consolidatedRepo1 = StatValue.withCriteria {
+           and {
+              eq('statistic', stat)
+              eq('interval', 2000L)
+              eq('repo', r1)
+              eq('derived', true)
+           }
+        }
+        assertEquals("The size of the 2-sec interval values for repo 1 should be 1.", 1,
+                     consolidatedRepo1.size())
+        def consolidatedRepo2 = StatValue.withCriteria {
+           and {
+              eq('statistic', stat)
+              eq('interval', 2000L)
+              eq('repo', r2)
+              eq('derived', true)
+           }
+        }
+        assertEquals("The size of the 2-sec interval values for repo 2 should be 1.", 1,
+                     consolidatedRepo2.size())
+
+        assertEquals("The min value for repo 1 should be 0.", 0, consolidatedRepo1[0].getMinValue())
+        assertEquals("The max value for repo 1 should be 8.", 8, consolidatedRepo1[0].getMaxValue())
+        assertEquals("The avg value for repo 1 should be 4.", 4,
+                     consolidatedRepo1[0].getAverageValue())
+
+        assertEquals("The min value for repo 2 should be 4.", 4, consolidatedRepo2[0].getMinValue())
+        assertEquals("The max value for repo 2 should be 5.", 6, consolidatedRepo2[0].getMaxValue())
+        assertEquals("The avg value for repo 2 should be 5.", 5,
+                     consolidatedRepo2[0].getAverageValue())
     }
 }

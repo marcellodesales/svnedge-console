@@ -19,7 +19,8 @@ package com.collabnet.svnedge.statistics
 
 import com.collabnet.svnedge.domain.statistics.StatAction 
 import com.collabnet.svnedge.domain.statistics.StatValue 
-import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.statistics.Statistic
+import com.collabnet.svnedge.domain.Repository
 
 /**
  * The class handles consolidating data from smaller intervals into 
@@ -86,52 +87,81 @@ class ConsolidateStatisticsService {
                largeLastTime = lastLargeSV.getTimestamp() + largeInterval
             }
             while ((largeLastTime + largeInterval) <= smallLastTime) {
-                def min = null
-                def max = null
-                def avg = null
-                def avgSum = null
-                def avgCnt = 0
-                def last = null
-                def values = getStatValues(stat, largeLastTime, 
-                                           largeLastTime + largeInterval, 
-                                           smallInterval)
-                for (StatValue value: values) {
-                    if (min == null || value.getMinValue() < min) {
-                        min = value.getMinValue()
-                    }
-                    if (max == null || value.getMaxValue() > max) {
-                        max = value.getMaxValue()
-                    }
-                    if (avgSum == null) {
-                        avgSum = value.getAverageValue()
-                        avgCnt++
-                    } else if (value.getAverageValue() != null) {
-                        avgSum += value.getAverageValue()
-                        avgCnt++
-                    }
+
+                // first, consolidate general stats having no repository id
+                def values = getStatValues(stat, largeLastTime,
+                                           largeLastTime + largeInterval,
+                                           smallInterval, null)
+                def consolidatedStatValue = rollupStatValues(values)
+                consolidatedStatValue.timestamp = largeLastTime
+                consolidatedStatValue.interval = largeInterval
+                consolidatedStatValue.save()
+
+                // second, consolidate stats that *do* pertain to repository
+                Repository.list().each { it ->
+                    values = getStatValues(stat, largeLastTime,
+                                           largeLastTime + largeInterval,
+                                           smallInterval, it)
+                    consolidatedStatValue = rollupStatValues(values)
+                    consolidatedStatValue.repo = it
+                    consolidatedStatValue.timestamp = largeLastTime
+                    consolidatedStatValue.interval = largeInterval
+                    consolidatedStatValue.save()
                 }
-                if (avgCnt != 0) {
-                    avg = avgSum / (new Float(avgCnt))
-                }
-                // The values are in ascending order by time, so the last
-                // is the last value, if it exists.
-                if (values && values.size() > 0 && values[-1]) {
-                    last = values[-1].getLastValue()
-                }
-                // create the new StatValue with the data                
-                def consValue = new StatValue(timestamp: largeLastTime,
-                                              interval: largeInterval,
-                                              minValue: min,
-                                              maxValue: max,
-                                              averageValue: avg,
-                                              lastValue: last,
-                                              derived: true,
-                                              statistic: stat)
-                consValue.save()
                 largeLastTime += largeInterval
             }
-            
         }
+    }
+
+    /**
+     * Given a list of stat values, this method will average into a new
+     * consolidated value
+     * @param values the StatValues to average
+     * @return a new "consolidated" statvalue
+     */
+    private StatValue rollupStatValues(List values) {
+        def min = null
+        def max = null
+        def avg = null
+        def avgSum = null
+        def avgCnt = 0
+        def last = null
+        // assuming that the Statistic of the entire group is the same, so we can
+        // just grab the first 
+        def stat = (values) ? values.first().statistic : null
+
+        for (StatValue value: values) {
+            if (min == null || value.getMinValue() < min) {
+                min = value.getMinValue()
+            }
+            if (max == null || value.getMaxValue() > max) {
+                max = value.getMaxValue()
+            }
+            if (avgSum == null) {
+                avgSum = value.getAverageValue()
+                avgCnt++
+            } else if (value.getAverageValue() != null) {
+                avgSum += value.getAverageValue()
+                avgCnt++
+            }
+        }
+        if (avgCnt != 0) {
+            avg = avgSum / (new Float(avgCnt))
+        }
+        // The values should be in ascending order by time, so the last
+        // is the last value, if it exists.
+        if (values && values.size() > 0 && values[-1]) {
+            last = values[-1].getLastValue()
+        }
+        // create the new StatValue with the data
+        def consValue = new StatValue(minValue: min,
+                                      maxValue: max,
+                                      averageValue: avg,
+                                      lastValue: last,
+                                      derived: true,
+                                      statistic: stat)
+
+        return consValue
     }
 
     /**
@@ -171,7 +201,7 @@ class ConsolidateStatisticsService {
     /**
      * Get the StatValues between the startTime and endTime.
      */ 
-    def getStatValues(stat, startTime, endTime, interval) {
+    def getStatValues(stat, startTime, endTime, interval, repository) {
         def crit = StatValue.createCriteria()
         def values = crit.list {
             and {
@@ -180,6 +210,14 @@ class ConsolidateStatisticsService {
                 between('timestamp', startTime, endTime)
                 // we want between exclusive of endTime
                 lt('timestamp', endTime)
+                
+                // add repo restriction or explicit null
+                if (repository) {
+                    eq('repo', repository)
+                }
+                else {
+                    isNull('repo')
+                }
             }
             order('timestamp', 'asc')
         }
