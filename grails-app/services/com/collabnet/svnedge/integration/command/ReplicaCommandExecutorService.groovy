@@ -257,14 +257,14 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      */
     def commandLifecycleExecutor(commandExec) {
         try {
-            AbstractReplicaCommand.logExecution("RUN", commandExec)
+            AbstractReplicaCommand.logExecution("RUN-BEGIN", commandExec)
             commandExec.run()
             log.debug("Command successfully run: " + commandExec)
-            AbstractReplicaCommand.logExecution("RUN-SUCCESSED", commandExec)
+            AbstractReplicaCommand.logExecution("RUN-END-SUCCESS", commandExec)
 
         } catch (CommandExecutionException ceex) {
             log.error("The command failed: " + ceex.getMessage())
-            AbstractReplicaCommand.logExecution("RUN-FAILED", commandExec, ceex)
+            AbstractReplicaCommand.logExecution("RUN-END-FAILURE", commandExec, ceex)
         }
         publishEvent(new CommandTerminatedEvent(this, commandExec))
     }

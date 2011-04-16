@@ -20,6 +20,7 @@ package com.collabnet.svnedge.integration.command
 import java.util.Map
 
 import org.apache.log4j.Logger
+import grails.util.GrailsUtil
 
 /**
  * Defines the Abstract Command to be instantiated based on the map
@@ -129,7 +130,8 @@ abstract class AbstractCommand {
         def className = commandMap['code'].capitalize() + "Command"
         def classObject = null
         try {
-            logExecution("LOAD", commandMap, null)
+            log.debug("Instantiating command instance: ${className}")
+            //logExecution("LOAD", commandMap, null)
             classObject = classLoader.loadClass("$commandPackage.$className")
 
         } catch (ClassNotFoundException clne) {
@@ -199,13 +201,13 @@ abstract class AbstractCommand {
     public final void run() throws CommandExecutionException {
         try {
             log.debug("Verifying the constraints for the command...")
-            logExecution("BEFORE-CONSTAINTS")
+            //logExecution("BEFORE-CONSTAINTS")
             constraints()
-            logExecution("AFTER-CONSTAINTS")
+            //logExecution("AFTER-CONSTAINTS")
             log.debug("Constraints passed... executing the command...")
-            logExecution("BEFORE-EXECUTE")
+            //logExecution("BEFORE-EXECUTE")
             execute()
-            logExecution("AFTER-EXECUTE")
+            //logExecution("AFTER-EXECUTE")
             log.debug("Command execution was successful...")
             succeeded = true
 
@@ -238,7 +240,8 @@ abstract class AbstractCommand {
                     t.getMessage())
             }
         }
-        logExecution("END-RUN")
+        log.debug("Finished running command")
+        //logExecution("END-RUN")
 
         if (executionException || undoException) {
             log.debug("Preparing to throw the exceptions: ")
@@ -307,14 +310,14 @@ abstract class AbstractCommand {
 
             def timeToken = String.format('%tH:%<tM:%<tS,%<tL', now)
 
-            def logEntry = timeToken + " " + executionStep + "-" + command.id +
-                " " + command
+            def logEntry = "${timeToken} ${command.id} ${command.class.simpleName} " +
+                    "${executionStep} params: ${command.params}"
             it.write(logEntry + "\n")
 
             if (exception) {
                 def sw = new StringWriter();
                 def pw = new PrintWriter(sw, true);
-                exception.printStackTrace(pw);
+                GrailsUtil.deepSanitize(exception).printStackTrace(pw);
                 pw.flush();
                 sw.flush();
                 it.write(sw.toString() + "\n")

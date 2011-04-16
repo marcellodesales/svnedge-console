@@ -121,6 +121,9 @@ class CommandsSchedulerHandler implements Runnable {
                                 new ShortRunningCommandQueuedEvent(this, commandInstance))
                             break
                     }
+
+                    commandInstance.logExecution("QUEUED")
+
                     // start evaluating the commands from the beginning
                     break
                 }

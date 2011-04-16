@@ -94,6 +94,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         ctfServer.save()
 
         executionContext = new CommandsExecutionContext()
+        executionContext.logsDir = System.getProperty("java.io.tmpdir")
         executionContext.appContext = grailsApplication.mainContext
     }
 
