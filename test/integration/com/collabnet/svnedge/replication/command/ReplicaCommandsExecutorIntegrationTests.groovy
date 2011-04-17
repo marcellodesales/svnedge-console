@@ -68,6 +68,12 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     protected void tearDown() {
         super.tearDown()
         repoParentDir.deleteDir()
+
+        // delete any log files
+        def now = new Date()
+        def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
+            ".log"
+        new File(executionContext.logsDir, logName)?.delete()
     }
 
     protected void setUp() {

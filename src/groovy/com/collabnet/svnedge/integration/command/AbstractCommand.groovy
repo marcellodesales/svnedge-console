@@ -34,7 +34,7 @@ import grails.util.GrailsUtil
  */
 abstract class AbstractCommand {
 
-    private Logger log = Logger.getLogger(getClass())
+    private static Logger log = Logger.getLogger(getClass())
 
     /**
      * The command execution ID
@@ -201,9 +201,9 @@ abstract class AbstractCommand {
     public final void run() throws CommandExecutionException {
         try {
             log.debug("Verifying the constraints for the command...")
-            //logExecution("BEFORE-CONSTAINTS")
+            //logExecution("BEFORE-CONSTRAINTS")
             constraints()
-            //logExecution("AFTER-CONSTAINTS")
+            //logExecution("AFTER-CONSTRAINTS")
             log.debug("Constraints passed... executing the command...")
             //logExecution("BEFORE-EXECUTE")
             execute()
