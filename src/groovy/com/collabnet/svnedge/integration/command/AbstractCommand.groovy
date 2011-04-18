@@ -131,7 +131,6 @@ abstract class AbstractCommand {
         def classObject = null
         try {
             log.debug("Instantiating command instance: ${className}")
-            //logExecution("LOAD", commandMap, null)
             classObject = classLoader.loadClass("$commandPackage.$className")
 
         } catch (ClassNotFoundException clne) {
@@ -201,13 +200,9 @@ abstract class AbstractCommand {
     public final void run() throws CommandExecutionException {
         try {
             log.debug("Verifying the constraints for the command...")
-            //logExecution("BEFORE-CONSTRAINTS")
             constraints()
-            //logExecution("AFTER-CONSTRAINTS")
             log.debug("Constraints passed... executing the command...")
-            //logExecution("BEFORE-EXECUTE")
             execute()
-            //logExecution("AFTER-EXECUTE")
             log.debug("Command execution was successful...")
             succeeded = true
 
@@ -241,7 +236,6 @@ abstract class AbstractCommand {
             }
         }
         log.debug("Finished running command")
-        //logExecution("END-RUN")
 
         if (executionException || undoException) {
             log.debug("Preparing to throw the exceptions: ")
