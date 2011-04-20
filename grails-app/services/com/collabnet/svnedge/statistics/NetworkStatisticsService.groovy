@@ -359,7 +359,7 @@ class NetworkStatisticsService extends AbstractStatisticsService {
            def tFormatted = operatingSystemService.formatBytes(bytesTransmitted)
            log.debug("Network Interface: ${ifName}")
            log.debug("Bytes received: ${bytesReceived} (${rFormatted})")
-           log.debug("Bytes tranmitted: ${bytesTransmitted} (${tFormatted})")
+           log.debug("Bytes transmitted: ${bytesTransmitted} (${tFormatted})")
 
        } catch (Exception problemsNetworkIf) {
            log.error("An error occurred while capturing the Network " +
