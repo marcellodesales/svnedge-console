@@ -175,8 +175,9 @@ class ServerController {
             }
         }
         
-        // copy form params to the entity, excluding ldapAuth password
-        bindData(server, params, ['ldapAuthBindPassword'])
+        // copy form params to the entity, excluding ldapAuth password,
+        // ldapServerPort and port
+        bindData(server, params, ['ldapAuthBindPassword', 'ldapServerPort', 'port'])
 
         // if a new password has been input, copy to
         // the server entity
@@ -199,6 +200,17 @@ class ServerController {
                 "server.port.defaultValue.rejected")
         }
 
+        // if ldapServerPort is left empty, reject ldapServerPort
+        if (params['ldapServerPort'] == '') {
+            server.errors.rejectValue("ldapServerPort",
+                "server.ldapServerPort.blank")
+        }                                       
+
+        // if Port is left empty, reject port
+        if (params['port'] == '') {
+            server.errors.rejectValue("port",
+                "server.port.blank")
+        }                                       
         if(!server.hasErrors() && server.save(flush:true)) {
             if (lifecycleService.isStarted()) {
                 try {
