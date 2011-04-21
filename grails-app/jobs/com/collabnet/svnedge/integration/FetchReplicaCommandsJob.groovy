@@ -127,10 +127,12 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
         def ctfServer = CtfServer.getServer()
         def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
 
-        def userSessionId
+        def soapId, userSessionId
         try {
-            userSessionId = ctfRemoteClientService.login60(ctfServer.baseUrl,
+            soapId = ctfRemoteClientService.login60(ctfServer.baseUrl,
                 ctfServer.ctfUsername, ctfPassword, locale)
+            userSessionId = ctfRemoteClientService.cnSoap60(ctfServer.baseUrl)
+                .getUserSessionBySoapId(soapId)
 
         } catch (Exception cantConnectCtfMaster) {
             log.error "Can't retrieve queued commands from the CTF replica " +
@@ -160,6 +162,12 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
                  runningOrScheduledCmds ?: "None"
 
             //receive the commands from ctf
+            if (log.isDebugEnabled()) {
+                log.debug("Executing getReplicaQueuedCommands(" + 
+                executionContext.ctfBaseUrl + ", " +executionContext.userSessionId + ", " +
+                executionContext.replicaSystemId + ", " + runningOrScheduledCmds + ", " +
+                executionContext.locale + ")")
+            }
             def queuedCommands = ctfRemoteClientService.getReplicaQueuedCommands(
                 executionContext.ctfBaseUrl, executionContext.userSessionId,
                 executionContext.replicaSystemId, runningOrScheduledCmds,
@@ -179,9 +187,9 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
             log.error("There was a problem while trying to fetch queued " + 
                 "commands: " + replicaManagerError.getMessage())
         } finally {
-            if (userSessionId) {
+            if (soapId) {
                 ctfRemoteClientService.logoff60(ctfServer.baseUrl, 
-                    ctfServer.ctfUsername, userSessionId)
+                    ctfServer.ctfUsername, soapId)
             }
         }
     }

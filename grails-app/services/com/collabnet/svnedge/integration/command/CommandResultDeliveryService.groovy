@@ -252,10 +252,12 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
         def ctfServer = CtfServer.getServer()
         def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
         
-        def sessionId
+        def soapId
         try {
-            sessionId = ctfRemoteClientService.login60(ctfServer.baseUrl,
-                    ctfServer.ctfUsername, ctfPassword, locale)
+            soapId = ctfRemoteClientService.login60(ctfServer.baseUrl,
+                ctfServer.ctfUsername, ctfPassword, locale)
+            def sessionId = ctfRemoteClientService.cnSoap60(ctfServer.baseUrl)
+                .getUserSessionBySoapId(soapId)
             //upload the commands results back to ctf
             ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
                 sessionId, execContext.replicaSystemId, 
@@ -266,9 +268,9 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             stopDelivering()
             return
         } finally {
-            if (sessionId) {
+            if (soapId) {
                 ctfRemoteClientService.logoff60(ctfServer.baseUrl,
-                    ctfServer.ctfUsername, sessionId)
+                    ctfServer.ctfUsername, soapId)
             }
         }
     }

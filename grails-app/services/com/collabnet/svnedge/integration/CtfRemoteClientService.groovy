@@ -47,6 +47,7 @@ import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.domain.integration.ApprovalState 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.util.SoapClient
 
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
@@ -114,7 +115,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             ICollabNetSoap.class, ctfBaseUrl ?: CtfServer.getServer().baseUrl)
     }
 
-    private ICollabNetSoap60 cnSoap60(ctfBaseUrl) {
+    public ICollabNetSoap60 cnSoap60(ctfBaseUrl) {
         return (ICollabNetSoap60) ClientSoapStubFactory60.getSoapStub(
             ICollabNetSoap60.class, ctfBaseUrl ?: CtfServer.getServer().baseUrl)
     }
@@ -127,6 +128,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     public IScmAppSoap60 makeScmSoap60(url) {
         return (IScmAppSoap60) ClientSoapStubFactory60.getSoapStub(
             IScmAppSoap60.class, url ?: CtfServer.getServer().baseUrl)
+    }
+
+    private SoapClient makePrivateScmSoap60(ctfBaseUrl) {
+        return new SoapClient((ctfBaseUrl ?: CtfServer.getServer().baseUrl) + 
+                              "/ce-soap/services/ScmListener")
     }
 
     private String authzBaseUrl() {
@@ -232,6 +238,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     public void logoff60(ctfUrl, username, sessionId) {
         try {
             cnSoap60(ctfUrl).logoff(username, sessionId)
+        } catch (Exception e) {
+            log.warn("Logging off from session " + sessionId + " failed.", e)
+        }
+    }
+    
+    public void logoff(ctfUrl, username, sessionId) {
+        try {
+            cnSoap(ctfUrl).logoff(username, sessionId)
         } catch (Exception e) {
             log.warn("Logging off from session " + sessionId + " failed.", e)
         }
@@ -465,9 +479,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
         try {
            def scmSoap = this.makeScmSoap(ctfUrl)
-           def sessionId = scmSoap.addExternalSystem(userSessionId, adapterType,
-                   title, description, csvnProps)
-           return sessionId
+           return scmSoap.addExternalSystem(userSessionId, adapterType,
+               title, description, csvnProps)
+
         } catch (LoginFault e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
                 locale)
@@ -614,11 +628,11 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             throws RemoteMasterException { 
 
         try {
-            def scmSoap = this.makeScmSoap60(ctfUrl)
-            def replicaId = scmSoap.addExternalSystemReplica(userSessionId,
-                masterSystemId, name, description, comment, 
-                makeSoapNamedValues60(replicaProps))
-
+            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def replicaId = (String) soap.invoke("addExternalSystemReplica", [userSessionId,
+                masterSystemId, name, description, comment, replicaProps.HostName, 
+                replicaProps.ConsolePort as int, replicaProps.HostPort as int, 
+                replicaProps.HostSSL as boolean, replicaProps.ViewVCContextPath])
             return replicaId
 
         } catch (LoginFault60 e) {
@@ -701,11 +715,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         def ctfUrl = CtfServer.getServer().baseUrl
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def replicaId = replicaConfig.systemId
-        def sessionId
+        def soapId
         try {
-            sessionId = login60(ctfUrl, ctfUsername, ctfPassword, locale)
-            def scmSoap = this.makeScmSoap60(ctfUrl)
-            scmSoap.deleteExternalSystemReplica(sessionId, replicaId)
+            soapId = login60(ctfUrl, ctfUsername, ctfPassword, locale)
+            def sessionId = cnSoap60(ctfUrl).getUserSessionBySoapId(soapId)
+            def soap = this.makePrivateScmSoap60(ctfUrl)
+            soap.invoke("deleteExternalSystemReplica", [sessionId, replicaId])
         }
         catch (LoginFault60 e) {
             GrailsUtil.deepSanitize(e)
@@ -749,8 +764,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 throw new RemoteMasterException(ctfUrl, errorMsg, e)
             }
         } finally {
-            if (sessionId) {
-                logoff60(ctfUrl, ctfUsername, sessionId)
+            if (soapId) {
+                logoff60(ctfUrl, ctfUsername, soapId)
             }
         }
     }
@@ -965,35 +980,37 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             for (cmd in runningCommands) {
                 runningCommandIds << cmd.commandId
             }
-            def scmSoap = this.makeScmSoap60(ctfUrl)
-            def queuedCommands = scmSoap.getReplicaQueuedCommands(userSessionId,
-                replicaServerId, runningCommandIds as String[])
+            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def queuedCommands = (String[]) soap.invoke("getReplicaQueuedCommands", 
+                [userSessionId, replicaServerId, runningCommandIds as String[]])
 
             def cmdsList = []
-            if (queuedCommands && queuedCommands.mDataRows.length > 0) {
-                queuedCommands.mDataRows.each { cmd ->
-                    def queuedCmd = [:]
-                    queuedCmd.id = cmd.id
-                    queuedCmd.code = cmd.command
-                    // building the params, if any
-                    def paramNames = cmd.parameters.names
-                    def paramValues = cmd.parameters.values
-                    def cmdParams = [:]
-                    if (paramNames.length == paramValues.length) {
-                        def param = [:]
-                        for (int i = 0; i < paramNames.length; i++) {
-                            param[paramNames[i]] = paramValues[i]
+            if (queuedCommands && queuedCommands.length > 1) {
+                log.debug("Mapping queued commands: " + queuedCommands.toArrayString())
+                def keyMap = [id: 'id', command: 'code', repository_name: 'repoName']
+                def queuedCmd, cmdParams
+                for (int i = 0; i < queuedCommands.length - 1; i++) {
+                    def key = queuedCommands[i]
+                    if (key == ';') { 
+                        queuedCmd = [:]
+                        cmdParams = [:]
+                        queuedCmd.params = cmdParams
+                        cmdsList << queuedCmd
+                    } else {
+                        def value = queuedCommands[++i]
+                        if (key.startsWith('parameter.')) {
+                            def paramName = key.substring(10)
+                            cmdParams[paramName] = value
+                        } else {
+                            def mappedKey = keyMap.containsKey(key) ? keyMap[key] : key
+                            queuedCmd[mappedKey] = value
+                            // TODO: the repository name should be defined in the params
+                            // TODO: Remove the repositoryName property when removed
+                            if (mappedKey == 'repoName') {
+                                cmdParams[mappedKey] = value
+                            }
                         }
-                        cmdParams << param
                     }
-                    queuedCmd.repoName = cmd.repositoryName
-                    // TODO: the repository name should be defined in the params
-                    // TODO: Remove the repositoryName property when removed
-                    if (cmd.repositoryName) {
-                        cmdParams['repoName'] = cmd.repositoryName
-                    }
-                    queuedCmd.params = cmdParams
-                    cmdsList << queuedCmd
                 }
             }
             def idComparator = [
@@ -1079,9 +1096,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             succeeded, locale) throws RemoteMasterException {
 
         try {
-            def scmSoap = this.makeScmSoap60(ctfUrl)
-            scmSoap.uploadCommandResult(userSessionId, replicaServerId,
-                commandId, succeeded)
+            def soap = this.makePrivateScmSoap60(ctfUrl)
+            soap.invoke("uploadCommandResult", [userSessionId, replicaServerId, commandId, succeeded])
 
         } catch (LoginFault60 e) {
             def msg = getMessage("ctfRemoteClientService.auth.error", [ctfUrl],
@@ -1113,6 +1129,141 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     succeeded, replicaServerId], locale) + e.getMessage()
             log.error(generalMsg)
             throw new RemoteMasterException(ctfUrl, generalMsg, e)
+        }
+    }
+
+    def updateReplicaUser(userSessionId, newCtfUsername) {
+
+        def ctfServer = CtfServer.getServer()
+        def ctfUrl = ctfServer.baseUrl
+
+        def replicaServerId = ReplicaConfiguration.currentConfig.systemId
+        def soap = this.makePrivateScmSoap60(ctfUrl)
+        soap.invoke("updateReplicaUser", [userSessionId, replicaServerId, newCtfUsername])
+    }
+
+    private String encodeParameters(paramMap) {
+        StringBuilder buf = new StringBuilder();
+        for (def entry : paramMap.entrySet()) {
+            buf.append('&').append(URLEncoder.encode(entry.key))
+                .append('=').append(URLEncoder.encode(entry.value))
+        }
+        buf.substring(1)
+    }        
+    
+    private void writeParameters(paramMap, conn) {
+        conn.outputStream.withWriter "UTF-8", {
+            it << encodeParameters(paramMap)
+        }
+    }
+    
+    private HttpURLConnection openPostUrl(String url, def paramMap, boolean followRedirect) {
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestMethod("POST")
+        conn.setRequestProperty("Accept-Language", 'en');
+        conn.setRequestProperty("Content-Type", 
+            "application/x-www-form-urlencoded; charset=UTF-8");
+        conn.setInstanceFollowRedirects(followRedirect)
+        conn.setDoOutput(true)
+        conn.setUseCaches(false);
+        writeParameters(paramMap, conn)
+        return conn
+    }
+    
+    private void debugHeaders(conn) {
+        String headerfields = conn.getHeaderField(0);
+        log.debug headerfields
+        log.debug "---Start of headers---"
+        int i = 1;
+        while ((headerfields = conn.getHeaderField(i)) != null) {
+            String key = conn.getHeaderFieldKey(i);
+            log.debug(((key == null) ? "" : key + ": ") + headerfields)
+            i++;    
+        }
+    }
+
+    /**
+     * @param ctfUrl the main ctf url.
+     * @return a login URL for a given CTF URL
+     */
+    private String buildCtfLoginUrl(ctfUrl) {
+        return ctfUrl + "/sf/sfmain/do/login"
+    }
+
+    /**
+     * @param ctfUrl is a ctf url, containing the protocol + hostname + port
+     * @param ctfUsername is an existing username in the given ctfUrl
+     * @param ctfPassword is a password associated with the given username.
+     * @return Map with the keys [jsessionid, usessionid] after logging in
+     * into the given ctfUrl with the given ctfUsername and ctfPassword
+     */
+    public def getCtfSessionIds(ctfUrl, ctfUsername, ctfPassword) {
+        def requestParams = [username: ctfUsername, password: ctfPassword,
+             sfsubmit: "submit"]
+        def conn = openPostUrl(this.buildCtfLoginUrl(ctfUrl), requestParams, 
+                false)
+
+        this.debugHeaders(conn)
+
+        def headers = conn.headerFields
+        def cookieHeaders = headers.get("Set-Cookie")
+        if (!cookieHeaders) {
+            cookieHeaders = headers.get("set-cookie")
+        }
+        def sessionid = [jsessionid: null, usessionid: null]
+        if (cookieHeaders) {
+            cookieHeaders.each {
+                def cookies = HttpCookie.parse(it)
+                cookies.each { cookie ->
+                    if (cookie.name == 'sf_auth') {
+                        def v = cookie.value
+                        def amp = v.indexOf('&')
+                        sessionid.jsessionid = v.substring(amp + 1)
+                        sessionid.usessionid = v.substring(0, amp)
+                    }
+                }
+            }
+        } else {
+            log.debug "No cookies set in the response."
+        }
+        
+        conn.disconnect()
+        return sessionid
+    }
+
+    /**
+     * Deletes an external system in CTF using the Web UI
+     * 
+     * @param ctfUrl is the ctf url
+     * @param jsessionid is the jsessionid of a current opened session
+     * @param externalSystemId is the external system id to be removed
+     * @param errors is the collection of errors to be collected.
+     * 
+     * @return boolean if the system id has been deleted
+     */
+    private undoExternalSystemOnRemoteCtfServer(ctfUrl, jsessionid, 
+            externalSystemId, errors, locale) {
+
+        def delUrl = ctfUrl + "/sf/sfmain/do/selectSystems;jsessionid=" + 
+            jsessionid
+        def formParams = [sfsubmit: "delete", _listItem: externalSystemId]
+        def conn = openPostUrl(delUrl, formParams, true) // follow redirects
+
+        log.debug "response from deleting integration server"
+        debugHeaders(conn)
+
+        String page =  conn.inputStream.text
+        def systemId = page.find('value="(exsy' + externalSystemId + ')"', 
+                { match, id -> id })
+        def exceptionIndex = page.indexOf("A TeamForge system error has occurred")
+        if (systemId || exceptionIndex >= 0) {
+            log.warn "Delete from CTF did not succeed\n\n" + page
+            def msg = getMessage(
+                "setupTeamForge.integration.recovery.incomplete", locale)
+            errors << msg
+            return false
+        } else {
+            return true
         }
     }
 }

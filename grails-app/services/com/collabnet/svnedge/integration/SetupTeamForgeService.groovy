@@ -343,111 +343,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         getWebSessionId(conversionData)
     }
     
-    private String encodeParameters(paramMap) {
-        StringBuilder buf = new StringBuilder();
-        for (def entry : paramMap.entrySet()) {
-            buf.append('&').append(URLEncoder.encode(entry.key))
-                .append('=').append(URLEncoder.encode(entry.value))
-        }
-        buf.substring(1)
-    }        
-    
-    private void writeParameters(paramMap, conn) {
-        conn.outputStream.withWriter "UTF-8", {
-            it << encodeParameters(paramMap)
-        }
-    }
-    
-    protected HttpURLConnection openPostUrl(String url, def paramMap, boolean followRedirect) {
-        HttpURLConnection conn = 
-            (HttpURLConnection) new URL(url).openConnection();
-        conn.setRequestMethod("POST")
-        conn.setRequestProperty("Accept-Language", 'en');
-        conn.setRequestProperty("Content-Type", 
-            "application/x-www-form-urlencoded; charset=UTF-8");
-        conn.setInstanceFollowRedirects(followRedirect)
-        conn.setDoOutput(true)
-        conn.setUseCaches(false);
-        writeParameters(paramMap, conn)
-        conn
-    }
-    
-
-    /**
-     * @param ctfUrl is a ctf url, containing the protocol + hostname + port
-     * @param ctfUsername is an existing username in the given ctfUrl
-     * @param ctfPassword is a password associated with the given username.
-     * @return Map with the keys [jsessionid, usessionid] after logging in
-     * into the given ctfUrl with the given ctfUsername and ctfPassword
-     */
-    public def loginCtfWebapp(ctfUrl, ctfUsername, ctfPassword) {
-        return this.getCtfSessionIds(ctfUrl, ctfUsername, ctfPassword)
-    }
-
-    protected loginCtfWebapp(conversionData) {
-        return this.getCtfSessionIds(conversionData.ctfURL,
+    private loginCtfWebapp(conversionData) {
+        return ctfRemoteClientService.getCtfSessionIds(conversionData.ctfURL,
             conversionData.ctfUsername, conversionData.ctfPassword)
-    }
-
-    /**
-     * @param ctfUrl the main ctf url.
-     * @return a login URL for a given CTF URL
-     */
-    public String buildCtfLoginUrl(ctfUrl) {
-        return ctfUrl + "/sf/sfmain/do/login"
-    }
-
-    /**
-     * @param ctfUrl is a ctf url, containing the protocol + hostname + port
-     * @param ctfUsername is an existing username in the given ctfUrl
-     * @param ctfPassword is a password associated with the given username.
-     * @return Map with the keys [jsessionid, usessionid] after logging in
-     * into the given ctfUrl with the given ctfUsername and ctfPassword
-     */
-    private def getCtfSessionIds(ctfUrl, ctfUsername, ctfPassword) {
-        def requestParams = [username: ctfUsername, password: ctfPassword,
-             sfsubmit: "submit"]
-        def conn = openPostUrl(this.buildCtfLoginUrl(ctfUrl), requestParams, 
-                false)
-
-        this.debugHeaders(conn)
-
-        def headers = conn.headerFields
-        def cookieHeaders = headers.get("Set-Cookie")
-        if (!cookieHeaders) {
-            cookieHeaders = headers.get("set-cookie")
-        }
-        def sessionid = [jsessionid: null, usessionid: null]
-        if (cookieHeaders) {
-            cookieHeaders.each {
-                def cookies = HttpCookie.parse(it)
-                cookies.each { cookie ->
-                    if (cookie.name == 'sf_auth') {
-                        def v = cookie.value
-                        def amp = v.indexOf('&')
-                        sessionid.jsessionid = v.substring(amp + 1)
-                        sessionid.usessionid = v.substring(0, amp)
-                    }
-                }
-            }
-        } else {
-            log.debug "No cookies set in the response."
-        }
-        
-        /*
-        if (!sessionid.jsessionid) {
-            // Added this code when making a mistake wrt redirects. Shouldn't 
-            // be exercised, with followRedirect = false
-            String page =  conn.inputStream.text
-            jsessionid = page.find(~/jsessionid=(\w+)/, { match, id -> id })
-            if (!jsessionid) {
-                conn.disconnect()
-                throw new Exception("login didn't work")
-            }
-        }
-        */
-        conn.disconnect()
-        sessionid
     }
 
     /**
@@ -510,18 +408,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     
     protected def getViewVcUrl(server, useSsl) {
         getViewVcUrlPrefix(server, useSsl) + "/viewvc"
-    }
-
-    protected void debugHeaders(conn) {
-        String headerfields = conn.getHeaderField(0);
-        log.debug headerfields
-        log.debug "---Start of headers---"
-        int i = 1;
-        while ((headerfields = conn.getHeaderField(i)) != null) {
-            String key = conn.getHeaderFieldKey(i);
-            log.debug(((key == null) ? "" : key + ": ") + headerfields)
-            i++;    
-        }
     }
 
     protected void fixInvalidRepos(conversionData) {
@@ -859,42 +745,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     }
 
     /**
-     * Deletes an external system in CTF using the Web UI
-     * 
-     * @param ctfUrl is the ctf url
-     * @param jsessionid is the jsessionid of a current opened session
-     * @param externalSystemId is the external system id to be removed
-     * @param errors is the collection of errors to be collected.
-     * 
-     * @return boolean if the system id has been deleted
-     */
-    private undoExternalSystemOnRemoteCtfServer(ctfUrl, jsessionid, 
-            externalSystemId, errors, locale) {
-
-        def delUrl = ctfUrl + "/sf/sfmain/do/selectSystems;jsessionid=" + 
-            jsessionid
-        def formParams = [sfsubmit: "delete", _listItem: externalSystemId]
-        def conn = openPostUrl(delUrl, formParams, true) // follow redirects
-
-        log.debug "response from deleting integration server"
-        debugHeaders(conn)
-
-        String page =  conn.inputStream.text
-        def systemId = page.find('value="(exsy' + externalSystemId + ')"', 
-                { match, id -> id })
-        def exceptionIndex = page.indexOf("A TeamForge system error has occurred")
-        if (systemId || exceptionIndex >= 0) {
-            log.warn "Delete from CTF did not succeed\n\n" + page
-            def msg = getMessage(
-                "setupTeamForge.integration.recovery.incomplete", locale)
-            errors << msg
-            return false
-        } else {
-            return true
-        }
-    }
-
-    /**
      * Converts the current instance back to SvnEdge stand-alone. If the current
      * server is already converted, then the given admin username/password is
      * used to login to the ctfUrl currently installed.
@@ -912,7 +762,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         CtfServer ctfServer = CtfServer.getServer()
 
         if (ctfServer?.baseUrl) {
-            def sessionIds = this.loginCtfWebapp(ctfServer.baseUrl, ctfUsername,
+            def sessionIds = ctfRemoteClientService.getCtfSessionIds(ctfServer.baseUrl, ctfUsername,
                 ctfPassword)
             doRevertFromCtfMode(ctfServer.baseUrl, ctfServer.mySystemId,
                 sessionIds?.jsessionid, server, ctfServer, errors, locale)
@@ -924,7 +774,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         if (jsessionid) {
             this.undoServers(server, ctfServer, errors, locale)
             if (ctfUrl && exSystemId) {
-                this.undoExternalSystemOnRemoteCtfServer(
+                ctfRemoteClientService.undoExternalSystemOnRemoteCtfServer(
                     ctfUrl, jsessionid, exSystemId, errors, locale)
             }
             this.undoLocalRepositoriesDependencies(server, errors, locale)
