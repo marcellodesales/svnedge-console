@@ -130,7 +130,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             IScmAppSoap60.class, url ?: CtfServer.getServer().baseUrl)
     }
 
-    private SoapClient makePrivateScmSoap60(ctfBaseUrl) {
+    private SoapClient makeScmListenerClient(ctfBaseUrl) {
         return new SoapClient((ctfBaseUrl ?: CtfServer.getServer().baseUrl) + 
                               "/ce-soap/services/ScmListener")
     }
@@ -628,7 +628,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             throws RemoteMasterException { 
 
         try {
-            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def soap = this.makeScmListenerClient(ctfUrl)
             def replicaId = (String) soap.invoke("addExternalSystemReplica", [userSessionId,
                 masterSystemId, name, description, comment, replicaProps.HostName, 
                 replicaProps.ConsolePort as int, replicaProps.HostPort as int, 
@@ -719,7 +719,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         try {
             soapId = login60(ctfUrl, ctfUsername, ctfPassword, locale)
             def sessionId = cnSoap60(ctfUrl).getUserSessionBySoapId(soapId)
-            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def soap = this.makeScmListenerClient(ctfUrl)
             soap.invoke("deleteExternalSystemReplica", [sessionId, replicaId])
         }
         catch (LoginFault60 e) {
@@ -980,7 +980,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             for (cmd in runningCommands) {
                 runningCommandIds << cmd.commandId
             }
-            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def soap = this.makeScmListenerClient(ctfUrl)
             def queuedCommands = (String[]) soap.invoke("getReplicaQueuedCommands", 
                 [userSessionId, replicaServerId, runningCommandIds as String[]])
 
@@ -1096,7 +1096,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             succeeded, locale) throws RemoteMasterException {
 
         try {
-            def soap = this.makePrivateScmSoap60(ctfUrl)
+            def soap = this.makeScmListenerClient(ctfUrl)
             soap.invoke("uploadCommandResult", [userSessionId, replicaServerId, commandId, succeeded])
 
         } catch (LoginFault60 e) {
@@ -1138,7 +1138,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         def ctfUrl = ctfServer.baseUrl
 
         def replicaServerId = ReplicaConfiguration.currentConfig.systemId
-        def soap = this.makePrivateScmSoap60(ctfUrl)
+        def soap = this.makeScmListenerClient(ctfUrl)
         soap.invoke("updateReplicaUser", [userSessionId, replicaServerId, newCtfUsername])
     }
 
