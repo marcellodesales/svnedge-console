@@ -104,10 +104,14 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
         cleanCommands()
         schedulerSynchronizer = new SynchronousQueue<Boolean>()
         if (GrailsUtil.environment != "test") {
-            // execute the command using the background service.
-            bgThreadManager.queueRunnable(new CommandsSchedulerHandler(this, 
-                queuedCommands, schedulerSynchronizer))
+            startBackgroundHandlers()
         }
+    }
+
+    def startBackgroundHandlers() {
+        // execute the command using the background service.
+        bgThreadManager.queueRunnable(new CommandsSchedulerHandler(this,
+            queuedCommands, schedulerSynchronizer))
     }
 
     /**

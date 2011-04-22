@@ -293,16 +293,13 @@ abstract class AbstractCommand {
      * @param exception is an optional execution thrown.
      */
     def static logExecution(executionStep, command, exception) {
-        def now = new Date()
-        //creates the file for the current day
-        def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
-            ".log"
-        if (!command?.context?.logsDir) {
+        File log = getExecutionLogFile(command?.context)
+        if (!log) {
             return
         }
-        new File(command.context.logsDir, logName).withWriterAppend("UTF-8") {
+        log.withWriterAppend("UTF-8") {
 
-            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', now)
+            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', new Date())
 
             def logEntry = "${timeToken} ${command.id} ${command.class.simpleName} " +
                     "${executionStep} params: ${command.params}"
@@ -317,5 +314,16 @@ abstract class AbstractCommand {
                 it.write(sw.toString() + "\n")
             }
         }
+    }
+
+    static File getExecutionLogFile(CommandsExecutionContext ctx) {
+        def now = new Date()
+        //creates the file for the current day
+        def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
+            ".log"
+        if (!ctx?.logsDir) {
+            return null
+        }
+        return new File(ctx.logsDir, logName)
     }
 }

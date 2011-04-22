@@ -56,6 +56,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     def backgroundService
     def bgThreadManager
     def replicaCommandSchedulerService
+    def longRunningHandler
+    def shortRunningHandler
 
     /**
      * The default name of the replica server category.
@@ -92,22 +94,24 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         updateShortRunningSemaphore(10, 0)
 
         // initialize the long-running command executor handler.
-        def longRunningHandler = 
+        longRunningHandler =
             new CommandExecutorHandler<LongRunningCommand>(
                 LongRunningCommand.class, this, longRunningScheduledCommands)
-        if (GrailsUtil.environment != "test") {
-            // execute the runnable executor using the background service.
-            bgThreadManager.queueRunnable(longRunningHandler)
-        }
-
         // initialize the short-running command executor handler.
-        def shortRunningHandler = 
+        shortRunningHandler =
             new CommandExecutorHandler<ShortRunningCommand>(
                 ShortRunningCommand.class, this, shortRunningScheduledCommands)
+
         if (GrailsUtil.environment != "test") {
-            // execute the runnable executor using the background service.
-            bgThreadManager.queueRunnable(shortRunningHandler)
+            startBackgroundHandlers()
         }
+
+
+   }
+
+    def startBackgroundHandlers() {
+         bgThreadManager.queueRunnable(longRunningHandler)
+         bgThreadManager.queueRunnable(shortRunningHandler)
     }
 
     /**
