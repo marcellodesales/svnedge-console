@@ -21,10 +21,10 @@ import com.collabnet.svnedge.integration.command.AbstractCommand
 import org.apache.log4j.Logger
 
 /**
- * This command simulates a long running Replica command for testing purposes
+ * This command simulates a short running Replica command for testing purposes
  */
 public class MockShortRunningCommand extends AbstractCommand 
-        implements com.collabnet.svnedge.integration.command.LongRunningCommand {
+        implements com.collabnet.svnedge.integration.command.ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
 

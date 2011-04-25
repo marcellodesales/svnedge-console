@@ -58,21 +58,23 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
             rConf = new ReplicaConfiguration(svnMasterUrl: null,
                     name: "Test Replica", description: "Super replica",
                     message: "Auto-approved", systemId: "replica1001",
-                    commandPollRate: 5, approvalState: ApprovalState.APPROVED)
+                    approvalState: ApprovalState.APPROVED)
             this.rConf.save()
         }
 
         def server = Server.getServer()
         server.setMode(ServerMode.REPLICA)
         server.save()
-
-        CommandResult.list().each {
-            it.delete()
-        }
     }
 
     protected void setUp() {
         super.setUp()
+
+        // clear the command queue and history
+        replicaCommandSchedulerService.cleanCommands()
+        CommandResult.list().each {
+            it.delete()
+        }
 
         assertNotNull("The replica instance must exist", this.rConf)
         this.config = grailsApplication.config
@@ -86,16 +88,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         ctfServer.ctfPassword = "n3TEQWKEjpY="
         ctfServer.save()
 
-        // set the polling and concurrency properties for the test
-        def cmdParams = [:]
-        cmdParams["commandPollPeriod"] = "5"
-        cmdParams["commandConcurrencyLong"] = "2"
-        cmdParams["commandConcurrencyShort"] = "4"
-
-        def updatePropsCmd = [code: 'replicaPropsUpdate', id: 'cmdexec9701', params: cmdParams]
-        def remotecmdexecs = []
-        remotecmdexecs << updatePropsCmd
-
         // setup mocking of the remote Ctf server
         fetchReplicaCommandsJob = grailsApplication.mainContext.getBean('com.collabnet.svnedge.integration.FetchReplicaCommandsJob')
         ctfRemote = new Expando()
@@ -106,7 +98,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         ctfRemote.login60 = { p1, p2, p3, p4 -> "soapSessionId1001" }
         ctfRemote.cnSoap60 = { p1 -> cnSoap60 }
         ctfRemote.logoff60 = { p1, p2, p3 -> return }
-        ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> remotecmdexecs }
+        ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> [] }
 
         commandResultDeliveryService.restartDelivering = { p1 -> true}
         commandResultDeliveryService.stopDelivering = {-> true}
@@ -133,9 +125,8 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         // stop background threads
         bgThreadManager.stop()
 
-        // clear the command queue
+        // clear the command queue and history
         replicaCommandSchedulerService.cleanCommands()
-
         CommandResult.list().each {
             it.delete()
         }
@@ -152,7 +143,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         remotecmdexecs << [id: 'cmdexec9802', code: 'mockShortRunning']
         remotecmdexecs << [id: 'cmdexec9803', repoName: 'threadTestRepo2', code: 'mockLongRunning']
         remotecmdexecs << [id: 'cmdexec9804', repoName: 'threadTestRepo3', code: 'mockLongRunning']
-        remotecmdexecs << [id: 'cmdexec9805', repoName: 'threadTestRepo1', code: 'mokShortRunning']
+        remotecmdexecs << [id: 'cmdexec9805', repoName: 'threadTestRepo1', code: 'mockShortRunning']
         ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> remotecmdexecs }
 
         // clear the execution log
@@ -168,8 +159,8 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         assertEquals("commands from same repo should be sequential",
                 ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9805"));
 //      this assertion fails -- bug? the general category runs only after all the repo-related
-//        assertEquals("command for repo and general category should be parallel",
-//                ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec1001", "cmdexec1002"));
+        assertEquals("command for repo and general category should be parallel",
+                ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9802"));
         assertEquals("commands for distinct repos should run parallel within the concurrency limit",
                 ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9803"));
         assertEquals("commands for distinct repos should run sequential outside the concurrency limit",
@@ -239,10 +230,12 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         String hour = timeTokenizer.nextToken()
         String minutes = timeTokenizer.nextToken()
         String seconds = timeTokenizer.nextToken()
+        String millis = timeTokenizer.nextToken()
 
         cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hour))
         cal.set(Calendar.MINUTE, Integer.parseInt(minutes))
         cal.set(Calendar.SECOND, Integer.parseInt(seconds))
+        cal.set(Calendar.MILLISECOND, Integer.parseInt(millis))
 
         return cal.time
     }
