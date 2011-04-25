@@ -31,16 +31,16 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
 
     def CommandResultDeliveryServiceIntegrationTests() {
         remotecmdexecs << [id:'cmdexec1001', repoName:'repo1', code:'repoSync']
-        remotecmdexecs << [id:'cmdexec1009', repoName:null, code:'replicaPause',
+        remotecmdexecs << [id:'cmdexec1009', repoName:null, code:'replicaPropsUpdate',
             params:[until:'2011-01-22']]
-        remotecmdexecs << [id:'cmdexec1002', repoName:'repo1', code:'repoUpdateProp']
-        remotecmdexecs << [id:'cmdexec1006', repoName:'repo2', code:'repoUpdateProp']
-        remotecmdexecs << [id:'cmdexec1004', repoName:null, code:'replicaUpdateProp'
+        remotecmdexecs << [id:'cmdexec1002', repoName:'repo1', code:'repoSync']
+        remotecmdexecs << [id:'cmdexec1006', repoName:'repo2', code:'repoSync']
+        remotecmdexecs << [id:'cmdexec1004', repoName:null, code:'replicaPropsUpdate'
             , params:[name:'Replica Brisbane']]
         remotecmdexecs << [id:'cmdexec1000', repoName:null, code:'replicaApprove',
             params:[name:'replica title', desc:'super replica']]
         remotecmdexecs << [id:'cmdexec1007', repoName:'repo3', code:'repoSync']
-        remotecmdexecs << [id:'cmdexec1008', repoName:null, code:'replicaUpdateProp'
+        remotecmdexecs << [id:'cmdexec1008', repoName:null, code:'replicaPropsUpdate'
             , params:[maxReplicacmdexecs:3, maxRepositorycmdexecs: 10]]
         remotecmdexecs << [id:'cmdexec1005', repoName:'repo2', code:'repoSync']
         remotecmdexecs << [id:'cmdexec1003', repoName:'repo3', code:'repoSync']
