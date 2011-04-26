@@ -383,7 +383,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             params = ["username":username, "systemId":systemId, 
                       "repoPath":repoPath]
         def rolesPathRestUrl = authzBaseUrl() + buildParam(params)
-        return rolesPathRestUrl.toURL().text
+        def result = rolesPathRestUrl.toURL().text
+        log.debug("getScmPermissionForPath(${rolesPathRestUrl.toURL()}) " +
+            "RESPONSE = " + result)
+        return result
     }
 
     /**
@@ -399,8 +402,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     boolean clearCacheOnMasterCTF() {
         def params = [clearCache:true]
         def rolesPathRestUrl = authzBaseUrl() + buildParam(params)
-        return rolesPathRestUrl.toURL().text.trim() == 
-            "permissions cache cleared"
+        def result = rolesPathRestUrl.toURL().text.trim()
+        log.debug("clearCTFCache(${rolesPathRestUrl.toURL()}) " +
+            "RESPONSE = " + result)
+        return result == "permissions cache cleared"
     }
 
     def uploadStatistics(valuesByStats) {
