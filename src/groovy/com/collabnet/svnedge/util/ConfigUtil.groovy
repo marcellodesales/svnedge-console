@@ -80,6 +80,10 @@ public final class ConfigUtil {
             new File(appHome(), "bin/svn").absolutePath
     }
 
+    def static svnConfigDirPath() {
+        return new File(appHome(), "data/svn_client_config").absolutePath
+    }
+
     def static svnadminPath() {
         return getConfig().svnedge.svn.svnadminPath ? 
             getConfig().svnedge.svn.svnadminPath : 

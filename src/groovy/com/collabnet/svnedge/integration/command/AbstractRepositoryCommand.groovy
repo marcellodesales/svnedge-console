@@ -175,7 +175,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def command = [ConfigUtil.svnsyncPath(), "init", syncRepoURI, 
             masterRepoUrl,
             "--source-username", username, "--source-password", password,
-            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
+            "--non-interactive", "--no-auth-cache", "--config-dir",
+            ConfigUtil.svnConfigDirPath()]
 
         executeShellCommand(command, repo)
         log.info("Done initing the repo.")
@@ -201,7 +202,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def uuid = null
         def command = [ConfigUtil.svnPath(), "info", masterRepoUrl,
             "--username", username,"--password", password,
-            "--non-interactive", "--no-auth-cache"] //"--config-dir=/tmp"
+            "--non-interactive", "--no-auth-cache", "--config-dir",
+            ConfigUtil.svnConfigDirPath()]
         def output = executeShellCommand(command, null)
         int start = output.indexOf("Repository UUID: ") + 17
         if (start >= 17) {
@@ -230,7 +232,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 " master timestamp: ${masterTimestamp}...")
         def command = [ConfigUtil.svnsyncPath(), "sync", syncRepoURI,
             "--source-username", username, "--source-password", password,
-            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
+            "--non-interactive", "--no-auth-cache", "--config-dir",
+            ConfigUtil.svnConfigDirPath()]
         
         def revision = -1
         def retVal = 1

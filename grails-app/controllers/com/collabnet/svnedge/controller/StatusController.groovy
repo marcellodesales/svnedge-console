@@ -42,9 +42,12 @@ class StatusController {
     def lifecycleService
     def packagesUpdateService
     def setupReplicaService
+    def securityService
 
     // start and stop actions use POST requests
-    static allowedMethods = [start:'POST', stop:'POST']
+    static allowedMethods = [start:'POST', stop:'POST',
+                             showCertificate:'GET',
+                             acceptCertificate:'POST']
 
     def getUpdateMessage() {
         return message(code: 'packagesUpdate.status.updates.available.download', 
@@ -53,13 +56,68 @@ class StatusController {
 
     def index = {
         def server = Server.getServer()
+        prepareStatusViewModel(server)
+    }
+
+    def showCertificate = {
+        def server = Server.getServer()
+        prepareStatusViewModel(server)
+    }
+
+
+    /**
+     * Returns TRUE if server is in replica mode and the master is in SSL mode
+     */
+    boolean isReplicaOfSSLMaster(Server server,
+                                 ReplicaConfiguration replicaConfiguration) {
+        return server.mode == ServerMode.REPLICA &&
+                              replicaConfiguration?.svnMasterUrl[0..4] == 'https'
+    }
+
+    /**
+     * Persists the finger print since the certificate has been accepted
+     */
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
+    def acceptCertificate = {
+        def server = Server.getServer()
+        def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
+        params.each{ key, value -> 
+            if (params[key] instanceof String) {
+                params[key] = ((String)(params[key])).trim()
+            }
+        }
+
+        setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
+        redirect(action:'index')
+     }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
+    def update = {
+        def server = Server.getServer()
+        def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
+        params.each{ key, value -> 
+            if (params[key] instanceof String) {
+                params[key] = ((String)(params[key])).trim()
+            }
+        }
+        setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
+        redirect(action:'index')
+     }
+
+    private Map prepareStatusViewModel(Server server) {
         def ctfUrl
         def currentReplica = ReplicaConfiguration.getCurrentConfig()
         def ctfServer = CtfServer.getServer()
+        String certHostname
+        String certValidity
+        String certIssuer
+        String certFingerPrint
+        String acceptedFingerPrint = null
+
 
         if (server.mode == ServerMode.REPLICA) {
 
-            if(!currentReplica) {
+            if (!currentReplica) {
                flash.warn = message(code: 'replica.error.notStarted')
             }
             if (currentReplica.approvalState == ApprovalState.PENDING) {
@@ -81,6 +139,14 @@ class StatusController {
             }
 
             ctfUrl = ctfServer.getWebAppUrl()
+
+            /* get the certificate details of the master */
+            def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
+
+            certHostname = replicaDetails.hostname
+            certValidity = replicaDetails.validity
+            certIssuer = replicaDetails.issuer
+            certFingerPrint = replicaDetails.fingerprint
         }
         else if (server.mode == ServerMode.MANAGED) {
             ctfUrl = ctfServer.getWebAppUrl()
@@ -138,6 +204,16 @@ class StatusController {
            def msg = message(code: 'packagesUpdate.error.general')
            flash.error = msg + ":" + e.getMessage()
        }
+       if (currentReplica) {
+           acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
+
+           if (isReplicaOfSSLMaster(server, currentReplica) && certFingerPrint) {
+               if(acceptedFingerPrint != certFingerPrint) {
+                   flash.unfiltered_warn = message(code: 'status.page.certificate.accept',
+                       args: ['/csvn/status/showCertificate'])
+               }
+           }
+       }
 
        return [isStarted: isStarted,
                isDefaultPortAllowed: lifecycleService.isDefaultPortAllowed(),
@@ -148,8 +224,15 @@ class StatusController {
                perfStats: getPerfStats(currentReplica, server),
                softwareVersion: sfVersion,
                svnVersion: svnVer,
-               ctfUrl: ctfUrl
-               ]
+               ctfUrl: ctfUrl,
+               isReplicaOfSSLMaster:
+                   isReplicaOfSSLMaster(server, currentReplica),
+               acceptedCertFingerPrint : acceptedFingerPrint,
+               certHostname : certHostname,
+               certValidity : certValidity,
+               certIssuer : certIssuer,
+               certFingerPrint : certFingerPrint
+              ]
     }
 
     def getPerfStats(currentConfig, server) {

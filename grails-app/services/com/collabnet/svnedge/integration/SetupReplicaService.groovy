@@ -31,6 +31,7 @@ import com.collabnet.svnedge.domain.integration.ApprovalState
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import javax.net.ssl.SSLHandshakeException
+import com.collabnet.svnedge.util.ConfigUtil
 
 /**
  * This service handles replication-related functionality
@@ -52,6 +53,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def authenticationManager    
     def csvnAuthenticationProvider
     def ctfAuthenticationProvider
+    def commandLineService
 
     /**
      * Defines if there was any problems during the registration
@@ -334,4 +336,129 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
     }
 
+    def getCertDetailsOfMaster = {
+        def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
+
+        if (replicaConfiguration) {
+            def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
+
+            def ctfServer = CtfServer.getServer()
+            def username = ctfServer.ctfUsername
+            def password = securityService.decrypt(ctfServer.ctfPassword)
+
+            def isIssuerNotTrusted = checkIssuer(svnUrl, username, password)
+
+            if (isIssuerNotTrusted) {
+                def certDetails = getCertDetails(svnUrl, username, password)
+                return [hostname: certDetails.hostname,
+                        validity: certDetails.validity,
+                        issuer: certDetails.issuer,
+                        fingerprint: certDetails.fingerprint]
+            } else {
+                return [null, null, null, null]
+            }
+        } else {
+            return [null, null, null, null]
+        }
+    }
+
+    /**
+     * This function checks whether the issuer is trusted or not.
+     */
+    private def checkIssuer(String svnUrl, String username, String password) {
+       /*
+        * Command to check self-signed cert or not.
+        * It is non-interactive otherwise it may throw up either
+        * authentication challenge or cert verification message
+        */
+        def command = [ConfigUtil.svnPath(), "ls", svnUrl,
+                       "--non-interactive", "--username", username,
+                       "--password", password]
+        String[] commandOutput =
+            commandLineService.execute(command.toArray(new String[0]))
+
+        return commandOutput[2].find("issuer is not trusted")
+    }
+
+    def getCertDetails(String svnUrl, String username, String password) {
+
+        def command = [ConfigUtil.svnPath(), "ls", svnUrl,
+                       "--username", username, "--password", password]
+        String[] commandOutput =
+            commandLineService.execute(command.toArray(new String[0]),
+                                       [LANG:"en_US.utf8"])
+        String errorMessage = commandOutput[2]
+
+        if (errorMessage) {
+            def certificateDetails = parseCertificate(errorMessage)
+            return [hostname: certificateDetails.hostname,
+                    validity: certificateDetails.validity,
+                    issuer: certificateDetails.issuer,
+                    fingerprint: certificateDetails.fingerprint]
+        } else {
+            return [hostname: null, validity: null, issuer: null,
+                    fingerprint: null]
+        }
+    }
+
+    /**
+     * This function parses the raw certificate and returns the certificate
+     * credentials.
+     */
+    private def parseCertificate(String rawCertificate) {
+        if (rawCertificate.find("Certificate information:")) {
+            def certLines = rawCertificate.split("\n")
+            String hostname
+            String validity
+            String issuer
+            String fingerPrint
+            for (line in certLines) {
+                if(line.find("- Hostname:")) {
+                    def hostnameLine = line.split(" - Hostname: ")
+                    hostname = hostnameLine[1]
+                }
+                else if(line.find("- Valid:")) {
+                    def validLine = line.split(" - Valid: ")
+                    validity = validLine[1]
+                }
+                else if(line.find("- Issuer:")) {
+                    def issuerLine = line.split(" - Issuer: ")
+                    issuer = issuerLine[1]
+                }
+                else if(line.find("- Fingerprint:")) {
+                    def fingerPrintLine = line.split(" - Fingerprint: ")
+                    fingerPrint = fingerPrintLine[1]
+                }
+            }
+            return [hostname: hostname, validity: validity, issuer: issuer,
+                    fingerprint: fingerPrint]
+        }
+        else {
+            return [hostname: null, validity: null, issuer: null,
+                    fingerprint: null]
+        }
+    }
+
+    def saveCertificate(String currentlyAcceptedFingerPrint) {
+        def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
+        if (replicaConfiguration) {
+            def ctfServer = CtfServer.getServer()
+            def username = ctfServer.ctfUsername
+            def password = securityService.decrypt(ctfServer.ctfPassword)
+
+            def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
+            def certDetails = getCertDetails(svnUrl, username, password)
+            String currentFingerPrint = certDetails.fingerprint
+            if (currentFingerPrint == currentlyAcceptedFingerPrint) {
+                def command = [ConfigUtil.svnPath(), "--config-dir",
+                               ConfigUtil.svnConfigDirPath(), "ls", svnUrl,
+                               "--username", username, "--password", password]
+
+                String[] commandresponse =
+                    commandLineService.execute(command.toArray(new String[0]),
+                                               null, "p\n")
+                replicaConfiguration.acceptedCertFingerPrint = currentFingerPrint
+            }
+        }
+    }
 }

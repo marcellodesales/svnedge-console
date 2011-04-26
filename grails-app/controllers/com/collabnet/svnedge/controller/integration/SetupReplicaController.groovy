@@ -69,6 +69,7 @@ class SetupReplicaController {
 
     def setupReplicaService
     def authenticateService
+    def securityService
     
     /**
      * default view is actually the "TeamForge Mode" intro, so forward 
@@ -228,10 +229,24 @@ class SetupReplicaController {
 
             // prepare confirmation data
             server = Server.getServer()
+            def ctfServer = CtfServer.getServer()
             repoName = (Repository.list()) ? Repository.list()[0].name : "example"
             userName = authenticateService.principal().getUsername()
+            def ctfusername = ctfServer.ctfUsername
+            def ctfpassword = securityService.decrypt(ctfServer.ctfPassword)
+            def svnUrl = getCtfConnectionCommand().ctfURL + "/_junkrepos"
 
             flash.message = message(code: 'setupReplica.action.confirm.success')
+
+            def isIssuerUntrusted = setupReplicaService.checkIssuer(svnUrl,
+                                                                    ctfusername,
+                                                                    ctfpassword)
+            if (isIssuerUntrusted &&
+                    (getCtfConnectionCommand().ctfURL[0..4] == 'https')) {
+                flash.unfiltered_warn = message(code: 'status.page.certificate.accept',
+                    args: ['/csvn/status/showCertificate'])
+            }
+
             return [ctfURL: getCtfConnectionCommand().ctfURL,
                     ctfUsername: getCtfConnectionCommand().ctfUsername,
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName} ${repoName} --username=${userName}"

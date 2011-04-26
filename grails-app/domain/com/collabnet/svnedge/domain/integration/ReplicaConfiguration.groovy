@@ -56,8 +56,14 @@ public class ReplicaConfiguration {
      */
     Integer maxShortRunningCmds = 10
 
+    /**
+     * Fingerprint details
+     */
+    String acceptedCertFingerPrint
+
     static constraints = {
         svnMasterUrl(nullable:true)
+        acceptedCertFingerPrint(nullable:true)
         systemId(nullable:false)
         description(nullable:false)
         commandPollRate(nullable:false)
