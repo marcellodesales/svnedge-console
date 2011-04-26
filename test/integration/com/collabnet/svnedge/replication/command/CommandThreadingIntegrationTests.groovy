@@ -1,17 +1,17 @@
 /*
  * CollabNet Subversion Edge
  * Copyright (C) 2010, CollabNet Inc. All rights reserved.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -59,8 +59,11 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
                     name: "Test Replica", description: "Super replica",
                     message: "Auto-approved", systemId: "replica1001",
                     approvalState: ApprovalState.APPROVED)
-            this.rConf.save()
+
         }
+        rConf.maxLongRunningCmds = 2
+        rConf.maxShortRunningCmds = 2
+        rConf.save()
 
         def server = Server.getServer()
         server.setMode(ServerMode.REPLICA)
@@ -158,7 +161,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         // validate expectations in the execution log
         assertEquals("commands from same repo should be sequential",
                 ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9805"));
-//      this assertion fails -- bug? the general category runs only after all the repo-related
         assertEquals("command for repo and general category should be parallel",
                 ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9802"));
         assertEquals("commands for distinct repos should run parallel within the concurrency limit",
