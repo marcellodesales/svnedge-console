@@ -24,6 +24,7 @@ import com.collabnet.svnedge.integration.command.CommandsExecutionContext
 import grails.test.GrailsUnitTestCase
 import com.collabnet.svnedge.domain.integration.*
 import com.collabnet.svnedge.domain.ServerMode
+import org.junit.Ignore
 
 /**
  * This test case verifies command threading, blocking, etc in the
@@ -138,6 +139,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
     /**
      * Tests basic blocking and concurrency expectations
      */
+    @Ignore
     void testBasicBlockingAndConcurrency() {
 
         // mock commands from CTF
