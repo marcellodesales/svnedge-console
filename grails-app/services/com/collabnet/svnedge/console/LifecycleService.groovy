@@ -287,7 +287,6 @@ root@${server.hostname}
 	        //PYTHONPATH to locate mod_python.apache
             String modPythonLibDir = new File(ConfigUtil.appHome(), "lib")
                 .absolutePath
-            modPythonLibDir = modPythonLibDir
             env.put("PYTHONPATH", modPythonLibDir)
         }
 
