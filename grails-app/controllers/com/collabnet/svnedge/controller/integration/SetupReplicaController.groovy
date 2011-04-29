@@ -115,6 +115,13 @@ class SetupReplicaController {
                     input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.externalSystems.error',
                         [input.ctfURL] as Object[], 'no replicable masters')
                 }
+
+                // validate that svnedge is running ssl if the TF remote is
+                if (new URL(cmd.ctfURL).getProtocol() == "https" && !Server.getServer().useSsl) {
+                    input.errors.rejectValue('ctfURL', 'ctfConversion.svnedge.ssl.required',
+                        [input.ctfURL] as Object[], 'SvnEdge should be ssl in order to replicate an ssl master')
+                    encodeMessageHtml = false
+                }
             }
             catch (MalformedURLException e) {
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.host.malformedUrl',
