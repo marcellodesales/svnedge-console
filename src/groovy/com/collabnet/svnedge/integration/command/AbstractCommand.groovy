@@ -19,6 +19,7 @@ package com.collabnet.svnedge.integration.command
 
 import java.util.Map
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger
 import grails.util.GrailsUtil
 
@@ -78,11 +79,12 @@ abstract class AbstractCommand {
 
     @Override
     public String toString() {
+        def paramsList = "params=" + params ? params : "[]"
         if (!succeeded) {
-            return "${getClass().getSimpleName()}($id): params=${params}"
+            return "${getClass().getSimpleName()}($id): $paramsList"
         }
         return "${getClass().getSimpleName()}" +
-            "($id-${succeeded?'suceeded':'failed'}): params=${params}"
+            "($id-${succeeded?'suceeded':'failed'}): $paramsList"
     }
 
     @Override
@@ -155,6 +157,14 @@ abstract class AbstractCommand {
      * @param appCtx the application context used to acquire service instances.
      */
     def init(id, initialParameters, CommandsExecutionContext executionContext) {
+        if (id == null) {
+            throw new IllegalArgumentException("The command ID must be " +
+                "provided.")
+        }
+        if (executionContext == null) {
+            throw new IllegalArgumentException("The execution context must " +
+                "be provided.")
+        }
         this.context = executionContext
         this.id = id
         this.params = initialParameters
@@ -194,8 +204,8 @@ abstract class AbstractCommand {
      * the undo() method is executed to undo anything done. It's important to 
      * clean anything that changed the state of the system by the 'execute()' 
      * method.
-     * @throws CommandExecutionException if any Exception occurs while executing
-     * the methods 'contraints()' or 'execute()'.
+     * @throws CommandExecutionException if any Exception occurs while
+     * executing the methods 'constraints()' or 'execute()'.
      */
     public final void run() throws CommandExecutionException {
         try {
@@ -231,7 +241,7 @@ abstract class AbstractCommand {
             } catch (Throwable t) {
                 undoException = t
                 logExecution("UNDO-EXCEPTION", t)
-                log.error("Failed to undo the execution of the command: " + 
+                log.error("Failed to undo the execution of the command: " +
                     t.getMessage())
             }
         }
@@ -257,7 +267,7 @@ abstract class AbstractCommand {
     public getService(serviceName) {
         if (!context) {
             throw new IllegalStateException("The CommandsExecutionContext " +
-                "must be provided with the Grails Application Context property")
+                "must be provided with the Application Context property")
         }
         return context.appContext.getBean(serviceName)
     }
@@ -293,16 +303,31 @@ abstract class AbstractCommand {
      * @param exception is an optional execution thrown.
      */
     def static logExecution(executionStep, command, exception) {
-        File log = getExecutionLogFile(command?.context)
-        if (!log) {
-            return
+        File logFile = getExecutionLogFile(command?.context)
+        if (!logFile) {
+            def errorMsg = "Can't log replica commands: logs directory can't" +
+                " be determined with context ${command?.context}..."
+            log.error errorMsg
+            throw new IllegalStateException(errorMsg)
         }
-        log.withWriterAppend("UTF-8") {
+        if (!logFile.exists()) {
+            try {
+                FileUtils.touch(logFile);
+                log.debug "Created the empty log file " + logFile
+
+            } catch (Exception e) {
+                log.error "Can't create the replica command log file " +
+                    "$logFile: " + e.getMessage()
+                return
+            }
+        }
+        logFile.withWriterAppend("UTF-8") {
 
             def timeToken = String.format('%tH:%<tM:%<tS,%<tL', new Date())
 
-            def logEntry = "${timeToken} ${command.id} ${command.class.simpleName} " +
-                    "${executionStep} params: ${command.params}"
+            def logEntry = "${timeToken} ${command.id} " +
+                "${command.class.simpleName} ${executionStep} params: " +
+                    (command.params ? "${command.params}" : "[]")
             it.write(logEntry + "\n")
 
             if (exception) {
@@ -316,14 +341,19 @@ abstract class AbstractCommand {
         }
     }
 
-    static File getExecutionLogFile(CommandsExecutionContext ctx) {
+    /**
+     * @param ctxt the execution context.
+     * @return the File instance related to the log file for the command 
+     * execution.
+     */
+    static File getExecutionLogFile(CommandsExecutionContext ctxt) {
         def now = new Date()
         //creates the file for the current day
         def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
             ".log"
-        if (!ctx?.logsDir) {
+        if (!ctxt?.logsDir) {
             return null
         }
-        return new File(ctx.logsDir, logName)
+        return new File(ctxt.logsDir, logName)
     }
 }

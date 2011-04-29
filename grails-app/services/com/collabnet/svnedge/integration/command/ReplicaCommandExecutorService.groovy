@@ -105,10 +105,11 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         if (GrailsUtil.environment != "test") {
             startBackgroundHandlers()
         }
+    }
 
-
-   }
-
+    /**
+     * Starts the background handlers for the long-running and short-running commands.
+     */
     def startBackgroundHandlers() {
          bgThreadManager.queueRunnable(longRunningHandler)
          bgThreadManager.queueRunnable(shortRunningHandler)
@@ -261,14 +262,14 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      */
     def commandLifecycleExecutor(commandExec) {
         try {
-            AbstractReplicaCommand.logExecution("RUN-BEGIN", commandExec)
+            AbstractCommand.logExecution("RUN-BEGIN", commandExec)
             commandExec.run()
             log.debug("Command successfully run: " + commandExec)
-            AbstractReplicaCommand.logExecution("RUN-END-SUCCESS", commandExec)
+            AbstractCommand.logExecution("RUN-END-SUCCESS", commandExec)
 
         } catch (CommandExecutionException ceex) {
             log.error("The command failed: " + ceex.getMessage())
-            AbstractReplicaCommand.logExecution("RUN-END-FAILURE", commandExec, ceex)
+            AbstractCommand.logExecution("RUN-END-FAILURE", commandExec, ceex)
         }
         publishEvent(new CommandTerminatedEvent(this, commandExec))
     }
