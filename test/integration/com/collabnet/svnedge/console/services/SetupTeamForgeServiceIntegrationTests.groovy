@@ -53,7 +53,7 @@ class SetupTeamForgeServiceIntegrationTests extends GrailsUnitTestCase {
             Locale.getDefault())
 
         CtfConversionBean ctfProps = new CtfConversionBean(ctfURL: ctfURL, 
-            userSessionId: sessionId)
+            soapSessionId: sessionId)
 
         assertTrue "Project look should exist.", 
             setupTeamForgeService.projectExists(ctfProps, "look") == "look"

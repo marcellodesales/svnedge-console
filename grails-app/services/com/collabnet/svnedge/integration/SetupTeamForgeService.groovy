@@ -193,7 +193,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         throws RemoteMasterException {
 
         return ctfRemoteClientService.projectExists(conversionData.ctfURL,
-            conversionData.userSessionId, projectName, projectUrl(projectName),
+            conversionData.soapSessionId, projectName, projectUrl(projectName),
             conversionData.userLocale)
     }
 
@@ -208,7 +208,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         throws RemoteMasterException {
 
         def ctfProjectsList = ctfRemoteClientService.getProjectList(
-            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.ctfURL, conversionData.soapSessionId, 
             conversionData.userLocale)
         def projects = new HashSet(ctfProjectsList.dataRows.toList().collect {
             it.title })
@@ -302,7 +302,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      */
     List<List<String>> getCsvnUsersComparedToCtfUsers(conversionData) {
         def ctfRemoteUsers = ctfRemoteClientService.getUserList(
-            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.ctfURL, conversionData.soapSessionId, 
             conversionData.userLocale)
         def ctfUsers = new HashSet(ctfRemoteUsers.toList().collect { 
             it.userName })
@@ -330,14 +330,12 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     boolean confirmConnection(conversionData) throws CtfAuthenticationException, RemoteMasterException,
            UnknownHostException, NoRouteToHostException, MalformedURLException,
            SSLHandshakeException, CtfConnectionException {
-
         def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
-        conversionData.userSessionId = ctfRemoteClientService.login(
+        conversionData.soapSessionId = ctfRemoteClientService.login(
             conversionData.ctfURL, conversionData.ctfUsername,
             conversionData.ctfPassword, conversionData.userLocale)
         conversionData.apiVersion = ctfSoap.getApiVersion()
-        conversionData.appVersion = ctfSoap.getVersion(getUserSessionId(
-            conversionData))
+        conversionData.appVersion = ctfSoap.getVersion(conversionData.soapSessionId)
         // Calling this here because we may not keep the user's credentials
         // after this point and we'll need the web session id to revert
         getWebSessionId(conversionData)
@@ -372,10 +370,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         // SSL for integration and viewvc apps is based on Jetty's
         // configuration, not Apache/SVN (aka "server")
         def useSSL = conversionData.consoleSsl ? "true" : "false"
-        def names = [ "RequireApproval", "HostName", "HostPort", "HostSSL", 
-                "isCSVN", "ScmViewerUrl", "RepositoryBaseUrl", 
-                "RepositoryRootPath" ] 
-
         def repositoryPath = operatingSystemService.isWindows() ? 
             "/windows-scmroot" : server.repoParentDir
 
@@ -385,15 +379,14 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         if (svnUrl.endsWith("/")) {
             svnUrl =  svnUrl.substring(0, svnUrl.length() - 1) 
         }
-        def values = [ "false", server.hostname, "${appServerPort}", useSSL, 
-                "true", getViewVcUrl(server, server.useSsl), svnUrl,
-                repositoryPath ];
-        def props = ctfRemoteClientService.makeSoapNamedValues(names, values)
+        def props = [ RequireApproval: "false", HostName: server.hostname, 
+            HostPort: "${appServerPort}", HostSSL: useSSL,
+            isCSVN: "true", ScmViewerUrl: getViewVcUrl(server, server.useSsl), 
+            RepositoryBaseUrl: svnUrl,  RepositoryRootPath: repositoryPath] 
 
-        def uSessionId = getUserSessionId(conversionData)
         def systemId = ctfRemoteClientService.addExternalSystem(
-            conversionData.ctfURL, uSessionId, adapterType, title, description,
-            props, conversionData.userLocale)
+            conversionData.ctfURL, conversionData.soapSessionId, adapterType, title, 
+            description, props, conversionData.userLocale)
 
         return systemId
     }
@@ -478,7 +471,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def projectName = conversionData.ctfProject
         def projectPath = projectUrl(projectName)
         def projects = ctfRemoteClientService.getProjectList(
-            conversionData.ctfURL, conversionData.userSessionId, 
+            conversionData.ctfURL, conversionData.soapSessionId, 
             conversionData.userLocale)
         String projectId = null
         for (p in projects) {
@@ -495,7 +488,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 "' in CTF to hold existing repositories")
             def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
             //TODO: move this method call to ctfRemoteClientService
-            def p = ctfSoap.createProject(getUserSessionId(conversionData), 
+            def p = ctfSoap.createProject(conversionData.soapSessionId, 
                 projectPath, projectName, getMessage(
                     "setupTeamForge.integration.container.existed", 
                     conversionData.userLocale))
@@ -503,7 +496,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
         
         def systemId = conversionData.exSystemId
-        def uSessionId = getUserSessionId(conversionData)
         def scmSoap = ctfRemoteClientService.makeScmSoap(conversionData.ctfURL)
         boolean idRequiredOnCommit = false
         boolean hideMonitoringDetails = false
@@ -519,10 +511,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             File hooksDir = new File(repoDir, "hooks")
             archiveCurrentHooks(hooksDir)            
 
-            //TODO: move this method call to ctfRemoteClientService
-            scmSoap.createRepository2(uSessionId, projectId, systemId, 
-                repo.name, repo.name, desc, idRequiredOnCommit, 
-                hideMonitoringDetails, desc) 
+            ctfRemoteClientService.createRepository(conversionData.ctfURL, 
+                conversionData.soapSessionId, projectId, systemId, 
+                repo.name, desc, idRequiredOnCommit, hideMonitoringDetails) 
         }
         conversionData.ctfProjectId = projectId
     }
@@ -552,7 +543,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def exception = null
         try {
             if (this.isFreshInstall()) {
-                conversionData.userSessionId = ctfRemoteClientService.login(
+                conversionData.soapSessionId = ctfRemoteClientService.login(
                     conversionData.ctfURL, conversionData.ctfUsername, 
                     conversionData.ctfPassword, conversionData.userLocale)
             }
@@ -1013,7 +1004,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def userDO = null
         try {
             userDO = ctfRemoteClientService.createUser(conversionData.ctfURL,
-                getUserSessionId(conversionData), u.username, password, u.email,
+                conversionData.soapSessionId, u.username, password, u.email,
                 u.realUserName, isSuperUser, isRestrictedUser, conversionData.userLocale)
 
             if (userDO && conversionData.assignMembership) {
@@ -1021,7 +1012,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 def ctfSoap = ctfRemoteClientService.cnSoap(
                     conversionData.ctfURL)
                 ctfSoap.addProjectMember(
-                    getUserSessionId(conversionData), 
+                    conversionData.soapSessionId, 
                     conversionData.ctfProjectId,
                     userDO.username)
             }

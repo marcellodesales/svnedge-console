@@ -99,19 +99,11 @@ abstract class AbstractConversionFunctionalTests extends
     protected void removeProjectFromCtfServer() {
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
-        def cnSoap = ctfRemoteClientService.cnSoap(this.getTestCtfUrl())
-        def sessionId = cnSoap.login(username, password)
-
-        def projects = ctfRemoteClientService.getProjectList(
-            this.getTestCtfUrl(), sessionId, Locale.getDefault())
-        String projectId = null
-        for (p in projects) {
-            if (this.createdProjectName == p.title.toLowerCase()) {
-                projectId = p.id
-                break
-            }
-        }
-        cnSoap.deleteProject(sessionId, projectId)
+        def ctfUrl = this.getTestCtfUrl()
+        def sessionId = ctfRemoteClientService
+            .login(ctfUrl, username, password, Locale.getDefault())
+        ctfRemoteClientService.deleteProject(ctfUrl, sessionId, this.createdProjectName)
+        ctfRemoteClientService.logoff(ctfUrl, username, sessionId)
     }
 
     /**
@@ -416,7 +408,8 @@ abstract class AbstractConversionFunctionalTests extends
      * Edge server.
      */
     protected void assertUsersWereCreatedOnCtfServer() {
-        get(this.makeCtfUrl() + "/sf/sfmain/do/listUsersAdmin")
+        get(this.makeCtfUrl() + "/sf/sfmain/do/listUsersAdmin?_sortby=userDataList" + 
+            "(username)&_sorder=userDataList(asc)&_pagesize=100000")
         assertStatus 200
 
         User.list().each {

@@ -129,9 +129,9 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         def soapId, userSessionId
         try {
-            soapId = ctfRemoteClientService.login60(ctfServer.baseUrl,
+            soapId = ctfRemoteClientService.login(ctfServer.baseUrl,
                 ctfServer.ctfUsername, ctfPassword, locale)
-            userSessionId = ctfRemoteClientService.cnSoap60(ctfServer.baseUrl)
+            userSessionId = ctfRemoteClientService.cnSoap(ctfServer.baseUrl)
                 .getUserSessionBySoapId(soapId)
 
         } catch (Exception cantConnectCtfMaster) {
@@ -188,7 +188,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
                 "commands: " + replicaManagerError.getMessage())
         } finally {
             if (soapId) {
-                ctfRemoteClientService.logoff60(ctfServer.baseUrl, 
+                ctfRemoteClientService.logoff(ctfServer.baseUrl, 
                     ctfServer.ctfUsername, soapId)
             }
         }

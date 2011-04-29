@@ -264,7 +264,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     public List<Map<String, String>> getIntegrationServers(ctfConn) throws RemoteMasterException {
 
         return ctfRemoteClientService.getReplicableScmExternalSystemList(
-            ctfConn.ctfURL, ctfConn.userSessionId, ctfConn.userLocale)
+            ctfConn.ctfURL, ctfConn.soapSessionId, ctfConn.userLocale)
     }
 
     /**

@@ -117,7 +117,7 @@ class SetupTeamForgeController {
                msg = message(code: 'ctfRemoteClientService.auth.error',
                    args: [con.ctfURL.encodeAsHTML()])
            }
-           log.debug("Can't confirm TeamForge credentials: " + authExcp)
+           log.debug("Can't confirm TeamForge credentials: " + msg, authExcp)
            con.errorMessage = msg
            forward(action: 'ctfInfo')
            return

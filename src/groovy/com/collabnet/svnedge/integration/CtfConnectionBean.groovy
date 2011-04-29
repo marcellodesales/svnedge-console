@@ -30,6 +30,7 @@ class CtfConnectionBean {
     String serverKey
     String webSessionId
     String userSessionId
+    String soapSessionId
     Locale userLocale
     String apiVersion
     String appVersion     

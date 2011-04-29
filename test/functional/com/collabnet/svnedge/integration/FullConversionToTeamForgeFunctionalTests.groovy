@@ -128,7 +128,7 @@ class FullConversionToTeamForgeFunctionalTests
         assertContentContains(
             getMessage("setupTeamForge.page.ctfProject.name.label.tip"))
 
-        this.createdProjectName = "csvnproj" + new Random().nextInt(1000)
+        this.createdProjectName = "csvnproj" + new Random().nextInt(10000)
         def projButton = 
             getMessage("setupTeamForge.page.ctfProject.button.continue")
         // Step 3: provide the project name.
