@@ -177,18 +177,31 @@ class Server {
 
     /**
      * @return the port number of the console web application. That is, the
-     * Jetty Server port number. If useSslConsole == true, this will return
-     * the SSL port, else the standard port
+     * Jetty Server port number.
      */
     public static String getConsolePort() {
-        int portNumber = 8080;
-        def propertyName = (getServer().useSslConsole) ? "jetty.ssl.port" : "jetty.port"
+        return getConsolePort(false);
+    }
+
+    /**
+     * @param ssl if true returns the ssl port if available, else the standard port
+     * @return the port number of the console web application. That is, the
+     * Jetty Server port number.
+     */
+    public static String getConsolePort(boolean ssl) {
+        int portNumber = null;
+        def propertyName = ssl ? "jetty.ssl.port" : "jetty.port"
         if (System.getProperty(propertyName)) {
             try {
                 portNumber = Integer.parseInt(
                     System.getProperty(propertyName).trim())
             } catch (Exception e) {
             }
+        }
+        // if the property is not found, and ssl was not requested,
+        // provide the development port number
+        if (!portNumber && !ssl) {
+            portNumber = "8080"
         }
         return portNumber
     }

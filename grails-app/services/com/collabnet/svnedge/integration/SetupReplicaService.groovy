@@ -112,12 +112,17 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         def server = Server.getServer()
 
+        // if apache encryption is set, provide the console ssl port
+        // since we are not tracking a separate "consoleSsl" property
+        // in CTF (see OCN artf5894)
+        def consolePort = Server.getConsolePort(server.getUseSsl())
+
         // SVNContextPath is ignored by CTF (artf5374).  Leaving for now until the CTF
         // changes are reflected in the latest builds
 	def props = ["HostName": server.getHostname(),
                      "HostPort": server.getPort(), 
                      "HostSSL": server.getUseSsl(), 
-                     "ConsolePort": Server.getConsolePort(),
+                     "ConsolePort": consolePort,
                      "ViewVCContextPath": Server.getViewvcBasePath(), 
                      "SVNContextPath": Server.getSvnBasePath()]
 
