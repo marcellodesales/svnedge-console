@@ -34,7 +34,12 @@ import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_I
 
 class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
 
-    def config = ConfigurationHolder.config
+    def grailsApplication
+    def config
+
+    protected void setUp() {
+        this.config = grailsApplication.config
+    }
 
     void testGetExecutionLogFile() {
         def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', 
