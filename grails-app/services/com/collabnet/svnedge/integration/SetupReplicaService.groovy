@@ -380,7 +380,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
                        "--non-interactive", "--username", username,
                        "--password", password]
         String[] commandOutput =
-            commandLineService.execute(command.toArray(new String[0]))
+            commandLineService.execute(command.toArray(new String[0]), null, null, true)
 
         return commandOutput[2].find("issuer is not trusted")
     }
@@ -391,7 +391,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
                        "--username", username, "--password", password]
         String[] commandOutput =
             commandLineService.execute(command.toArray(new String[0]),
-                                       [LANG:"en_US.utf8"])
+                                       [LANG:"en_US.utf8"], null, true)
         String errorMessage = commandOutput[2]
 
         if (errorMessage) {
@@ -461,7 +461,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
                 String[] commandresponse =
                     commandLineService.execute(command.toArray(new String[0]),
-                                               null, "p\n")
+                                               null, "p\r\n", true)
                 replicaConfiguration.acceptedCertFingerPrint = currentFingerPrint
             }
         }
