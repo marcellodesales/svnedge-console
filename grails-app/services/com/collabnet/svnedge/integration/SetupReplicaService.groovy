@@ -378,7 +378,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         */
         def command = [ConfigUtil.svnPath(), "ls", svnUrl,
                        "--non-interactive", "--username", username,
-                       "--password", password]
+                       "--password", password, "--config-dir", ConfigUtil.svnConfigDirPath()]
         String[] commandOutput =
             commandLineService.execute(command.toArray(new String[0]), null, null, true)
 
@@ -388,7 +388,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def getCertDetails(String svnUrl, String username, String password) {
 
         def command = [ConfigUtil.svnPath(), "ls", svnUrl,
-                       "--username", username, "--password", password]
+                       "--username", username, "--password", password,
+                       "--config-dir", ConfigUtil.svnConfigDirPath()]
         String[] commandOutput =
             commandLineService.execute(command.toArray(new String[0]),
                                        [LANG:"en_US.utf8"], null, true)
@@ -450,6 +451,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             def ctfServer = CtfServer.getServer()
             def username = ctfServer.ctfUsername
             def password = securityService.decrypt(ctfServer.ctfPassword)
+            def lineEnd = System.getProperty("line.separator")
+            def acceptPermanently = "p" + lineEnd
 
             def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
             def certDetails = getCertDetails(svnUrl, username, password)
@@ -461,7 +464,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
                 String[] commandresponse =
                     commandLineService.execute(command.toArray(new String[0]),
-                                               null, "p\r\n", true)
+                                               null, acceptPermanently, true)
                 replicaConfiguration.acceptedCertFingerPrint = currentFingerPrint
             }
         }

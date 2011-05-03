@@ -207,7 +207,16 @@ class StatusController {
        if (currentReplica) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
 
-           if (isReplicaOfSSLMaster(server, currentReplica) && certFingerPrint) {
+           def ctfusername = ctfServer.ctfUsername
+           def ctfpassword = securityService.decrypt(ctfServer.ctfPassword)
+           def svnUrl = currentReplica.svnMasterUrl + "/_junkrepos"
+
+           def isIssuerUntrusted = setupReplicaService.checkIssuer(svnUrl,
+                                                                   ctfusername,
+                                                                   ctfpassword)
+
+           if (isReplicaOfSSLMaster(server, currentReplica) && certFingerPrint
+                   && isIssuerUntrusted) {
                if(acceptedFingerPrint != certFingerPrint) {
                    flash.unfiltered_warn = message(code: 'status.page.certificate.accept',
                        args: ['/csvn/status/showCertificate'])
