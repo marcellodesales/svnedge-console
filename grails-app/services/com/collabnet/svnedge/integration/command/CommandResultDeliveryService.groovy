@@ -42,7 +42,6 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
     def ctfRemoteClientService
     def backgroundService
     def securityService
-    def bgThreadManager
 
     /**
      * The delivery synchronizer, only to be open when there is connection to
@@ -144,7 +143,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 // save the result before attempting to deliver to remote manager
                 def commandResult = makePersistedCommandResult(terminatedCommand.id)
                 saveCommandResult(commandResult, terminatedCommand.succeeded)
-                synchronized(connectivityWithRemoteManagerOpen) {
+                synchronized(this) {
                     if (connectivityWithRemoteManagerOpen) {
                         // Report the results in parallel
                         backgroundService.execute("Report ${terminatedCommand}", { 

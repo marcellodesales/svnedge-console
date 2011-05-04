@@ -108,21 +108,17 @@ public abstract class AbstractReplicaCommand extends AbstractCommand {
         maxNumbersChanged["oldMaxShort"] = -1
         maxNumbersChanged["NewMaxShort"] = -1
         // update the max number of long-running commands property
+        maxNumbersChanged["oldMaxLong"] = replica.maxLongRunningCmds
         def maxLongRunningCmds = this.params.commandConcurrencyLong
-        if (maxLongRunningCmds && 
-                maxLongRunningCmds.toInteger() != replica.maxLongRunningCmds) {
-
-            maxNumbersChanged["oldMaxLong"] = replica.maxLongRunningCmds
+        if (maxLongRunningCmds) {
             maxNumbersChanged["NewMaxLong"] = maxLongRunningCmds.toInteger()
             replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
         }
-
+        
         // update the max number of short-running commands property
+        maxNumbersChanged["oldMaxShort"] = replica.maxShortRunningCmds
         def maxShortRunningCmds = this.params.commandConcurrencyShort
-        if (maxShortRunningCmds &&
-                maxShortRunningCmds.toInteger() != replica.maxShortRunningCmds) {
-
-            maxNumbersChanged["oldMaxShort"] = replica.maxShortRunningCmds
+        if (maxShortRunningCmds) {
             maxNumbersChanged["NewMaxShort"] = maxShortRunningCmds.toInteger()
             replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
         }

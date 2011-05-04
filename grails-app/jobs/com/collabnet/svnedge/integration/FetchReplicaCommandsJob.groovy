@@ -41,7 +41,6 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     // calls to the Master.
     def concurrent = false
 
-    def backgroundService
     def securityService
     def ctfRemoteClientService
     def replicaCommandSchedulerService

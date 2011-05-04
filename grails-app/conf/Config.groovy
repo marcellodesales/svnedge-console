@@ -325,5 +325,12 @@ codenarc {
 backgroundThread {
     queueSize = 1000 // Maximum number of tasks to queue up
     threadCount = 20 // Number of threads processing background tasks.
-    tasksPerDrain = 100 // See Note
+    tasksPerDrain = 1 // An available thread will only grab one task
+
+    // SvnEdge uses a background thread to start the discovery service,
+    // one for scheduling commands between long and short running queues,
+    // and two for processing the two command queues. At least one more is
+    // needed for sending command results, but a higher value here will reserve
+    // more threads for result processing
+    svnedgeReservedThreads = 5
 }
