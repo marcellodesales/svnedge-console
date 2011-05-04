@@ -209,7 +209,7 @@ class StatusController {
            def msg = message(code: 'packagesUpdate.error.general')
            flash.error = msg + ":" + e.getMessage()
        }
-       if (currentReplica) {
+       if (server.mode == ServerMode.REPLICA) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
 
            def ctfusername = ctfServer.ctfUsername
