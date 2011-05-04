@@ -22,6 +22,8 @@ package com.collabnet.svnedge.controller
 
 
 import grails.test.*
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 
 class StatusControllerTests extends AbstractSvnEdgeControllerTests {
 
@@ -44,13 +46,19 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
         controller.networkingService = networkingService
         controller.svnRepoService = svnRepoService
         controller.securityService = securityService
+
     }
 
     protected void tearDown() {
         super.tearDown()
     }
 
-    void testIndex() {
+    void testIndexStandalone() {
+
+        def server = Server.getServer()
+        server.mode = ServerMode.STANDALONE
+        server.save()
+
         controller.index()
     }
 
