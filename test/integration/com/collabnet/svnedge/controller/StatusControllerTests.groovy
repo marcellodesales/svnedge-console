@@ -57,7 +57,7 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
 
         def server = Server.getServer()
         server.mode = ServerMode.STANDALONE
-        server.save()
+        server.save(flush: true)
 
         controller.index()
     }
