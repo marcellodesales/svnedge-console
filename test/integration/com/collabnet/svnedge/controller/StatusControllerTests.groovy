@@ -32,6 +32,7 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
     def operatingSystemService
     def networkingService
     def svnRepoService
+    def securityService
 
     protected void setUp() {
         super.setUp()
@@ -42,6 +43,7 @@ class StatusControllerTests extends AbstractSvnEdgeControllerTests {
         controller.operatingSystemService = operatingSystemService
         controller.networkingService = networkingService
         controller.svnRepoService = svnRepoService
+        controller.securityService = securityService
     }
 
     protected void tearDown() {
