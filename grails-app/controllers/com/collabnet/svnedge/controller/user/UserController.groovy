@@ -92,21 +92,19 @@ class UserController {
            }
         }
 
-        def htaccessUpdated = 0
-        if (!userInstance.hasErrors()) {
-            htaccessUpdated = lifecycleService.setSvnAuth(userInstance, 
-                params.passwd)
+        // encode the passwd
+        if (params.passwd) {
+            userInstance.passwd = authenticateService.encodePassword(
+                    params.passwd)
         }
-        if (htaccessUpdated != 0 && userInstance.save()) {
-            // encode the passwd
-            if (params.passwd) {
-                userInstance.passwd = authenticateService.encodePassword(
-                        params.passwd)
-            }
+
+        if (!userInstance.hasErrors() && userInstance.save()) {
+
             // add to default security group if not already
             userInstance.addToAuthorities (Role.findByAuthority("ROLE_USER"))
 
             log.info("User created: " + userInstance.username)
+            lifecycleService.setSvnAuth(userInstance, params.passwd)
             flash.message = message(code: "default.created.message", 
                     args: [message(code: "user.label"),
                            userInstance.username])
@@ -116,12 +114,12 @@ class UserController {
             // discard session changes to User and Role
             userInstance.discard()
 
-            flash.error = "${message(code: 'default.errors.summary')} "
+            flash.error = "${message(code: 'default.errors.summary')}"
 
             Role.list().each {
                 it.discard()
             }
-
+            
             render(view: "create", model: [userInstance: userInstance, 
                     roleList : getRoleList(), 
                     authorizedRoleList : getAuthorizedRoleList()])
@@ -165,8 +163,9 @@ class UserController {
         else if (userAccountService.isLdapUser(userInstance)) {
             flash.warn = message(code: "user.page.edit.ldap.message")
             redirect(action: "show", params: [id : params.id])
-        }
-        else {
+
+       } else {
+
             boolean editingSelf = isRequestingSelf(params.id)
             return [userInstance: userInstance,
                     roleList : getRoleList(),
@@ -194,6 +193,7 @@ class UserController {
                     return
                 }
             }
+
 
             // only allow admins to adjust other users; anyone can edit self
             if(!canEdit(params.id)) {
@@ -385,6 +385,7 @@ class UserController {
         }
     }
 
+
     private boolean isRequestingSelf(String id) {
         def uname = authenticateService.principal().getUsername();
         def uid = User.findByUsername(uname)?.id?.toString()
@@ -419,6 +420,7 @@ class UserController {
 
         return false
     }
+
 
     private List<Role> getRoleList() {
 

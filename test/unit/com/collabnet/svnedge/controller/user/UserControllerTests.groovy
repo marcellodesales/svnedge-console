@@ -33,11 +33,9 @@ import com.collabnet.svnedge.domain.User;
  */
 class UserControllerTests extends ControllerUnitTestCase {
 
-
     User testUser
     User testAdmin
     User testAdminUsers
-
 
     protected void setUp() {
         super.setUp()
@@ -53,14 +51,11 @@ class UserControllerTests extends ControllerUnitTestCase {
         testAdmin.authorities = [Role.findByAuthority("ROLE_ADMIN")]
         mockDomain (User, [testUser, testAdmin])
 
-
         // mock the i18n "message" map available to controller
         controller.metaClass.message = { Map p -> return "foo" }
 
         // mock the bindData method
         controller.metaClass.bindData = { u, p, l -> u.properties = p }
-        
-
     }
 
     protected void tearDown() {
@@ -82,7 +77,6 @@ class UserControllerTests extends ControllerUnitTestCase {
         assertEquals("Expected redirect to user list when PASSING authority check", "list",
                 controller.redirectArgs["action"])
 
-
         // fail the authority check by default
         authenticateService.demand.ifAnyGranted() { 
             it == "ROLE_ADMIN"
@@ -101,10 +95,11 @@ class UserControllerTests extends ControllerUnitTestCase {
                 controller.redirectArgs["action"])
     }
 
-    void testSaveWithWrongPermissions() {
-        def authenticateService = mockFor(AuthenticateService)
+    void testSave() {
 
         // 1) test for validation failure
+        def authenticateService = mockFor(AuthenticateService)
+
         // expected security calls
         authenticateService.demand.ifNotGranted(2..2) {
             it == "ROLE_ADMIN,ROLE_ADMIN_USERS"
@@ -118,10 +113,6 @@ class UserControllerTests extends ControllerUnitTestCase {
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", model["userInstance"])
         assertTrue("Expected validation errors in model", model["userInstance"].hasErrors())
-    }
-
-    void testSaveWithMissingPassword() {
-        def authenticateService = mockFor(AuthenticateService)
 
         // 2) test again for validation failure, missing only passwd
         authenticateService = mockFor(AuthenticateService)
@@ -137,26 +128,12 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.params.passwd = ""
         controller.params.authorities = "2"
 
-        def model = controller.save()
+        model = controller.save()
 
         assertEquals("Expected render create when FAILING validation check", "create",
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", model["userInstance"])
         assertTrue("Expected validation errors in model", model["userInstance"].hasErrors())
-    }
-
-    void testSaveWithCorrectValues() {
-        runTestSaveValues("testUser2", "clearPassword", true)
-        runTestSaveValues("Co11@b_-net", "clearPassword", true)
-    }
-
-    void testSaveWithIncorrectValues() {
-        runTestSaveValues("&username-wrong", "clearPassword", false)
-        runTestSaveValues("p_user#!", "", false)
-    }
-
-    private void runTestSaveValues(username, password, pass) {
-        def authenticateService = mockFor(AuthenticateService)
 
         // 3) test for validation success and save success
         def lifecycleService = mockFor(LifecycleService)
@@ -177,26 +154,19 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.lifecycleService = lifecycleService.createMock();
  
         // test some params for a save
-        controller.params.username = username
+        controller.params.username = "testUser2"
         controller.params.realUserName = "test User 2"
         controller.params.email = "test@test.com"
-        controller.params.passwd = password
+        controller.params.passwd = "clearPassword"
         controller.params.authorities = "2"
 
-        def model = controller.save()
+        model = controller.save()
 
-        if (pass) {
-            assertEquals("Expected redirect to show when SUCCEEDING", "show",
-                controller.redirectArgs["action"])
+        assertEquals("Expected redirect to show when SUCCEEDING", "show",
+            controller.redirectArgs["action"])
 
-        } else {
-            assertEquals("Expected render create when FAILING validation check",
-                "create", controller.renderArgs["view"])
-            assertNotNull("Expected validation userInstance in model", 
-                model["userInstance"])
-            assertTrue("Expected validation errors in model", 
-                model["userInstance"].hasErrors())
-        }
+        assertEquals("Expected new user id in model", 3, redirectArgs["id"])
+        assertNotNull("Expected new user in the domain", User.get(3))
     }
 
     void testUpdate() {
@@ -211,7 +181,6 @@ class UserControllerTests extends ControllerUnitTestCase {
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", controller.renderArgs["model"]["userInstance"])
         assertTrue("Expected validation errors in model", controller.renderArgs["model"]["userInstance"].hasErrors())
-
 
         // 2) test CAN update my user
         def authenticateService = mockFor(AuthenticateService)
@@ -232,7 +201,7 @@ class UserControllerTests extends ControllerUnitTestCase {
         authenticateService.demand.encodePassword(1..1) {
             it
         }
-       
+
         lifecycleService.demand.setSvnAuth(1..1) {
             return true
         }
@@ -257,7 +226,6 @@ class UserControllerTests extends ControllerUnitTestCase {
         assertEquals("Expected redirect to show when SUCCEEDING", "show",
             controller.redirectArgs["action"])
         assertEquals("Expected new user id in model",1, redirectArgs["id"])
-
 
         // 3) test CANNOT update another user
         authenticateService = mockFor(AuthenticateService)
