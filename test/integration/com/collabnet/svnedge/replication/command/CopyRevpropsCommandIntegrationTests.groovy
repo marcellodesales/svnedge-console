@@ -138,12 +138,18 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         // create / update the reusable test file
         def testFileMaster = new File("copy-revprops-test.txt", wcMaster)
         boolean svnAdd = !testFileMaster.exists()
-        testFileMaster.text = "copy revprops test file: ${new Date()}"
 
         if (svnAdd) {
+            testFileMaster.text = "copy revprops test file: ${new Date()}"
             command = [ConfigUtil.svnPath(), "add", testFileMaster.canonicalPath,
                 "--non-interactive"]
             commandLineService.execute(command.toArray(new String[0]))
+        } else {
+            command = [ConfigUtil.svnPath(), "revert", testFileMaster.canonicalPath,
+                //"--username", username, "--password", password,
+                "--non-interactive", "--no-auth-cache"]
+            commandLineService.execute(command.toArray(new String[0]))
+            testFileMaster.text = "copy revprops test file: ${new Date()}"
         }
 
         // set a custom property
