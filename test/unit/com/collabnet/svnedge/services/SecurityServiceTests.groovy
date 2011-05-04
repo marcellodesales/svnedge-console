@@ -20,6 +20,7 @@ package com.collabnet.svnedge.services
 import java.util.Random
 import com.collabnet.svnedge.console.SecurityService 
 import grails.test.GrailsUnitTestCase
+import org.junit.Test
 
 
 class SecurityServiceTests extends GrailsUnitTestCase {
@@ -77,6 +78,22 @@ class SecurityServiceTests extends GrailsUnitTestCase {
         
         assertEquals("Plain text and decrypted should be equal", plainText, decrypted)
                 
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    void testEncryptBadInput() {
+
+        String plainText = null
+        String encrypted = securityService.encrypt(plainText)
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    void testDecryptBadInput() {
+
+        String cipherText = null
+        String clearText = securityService.decrypt(cipherText)
+
     }
     
 }

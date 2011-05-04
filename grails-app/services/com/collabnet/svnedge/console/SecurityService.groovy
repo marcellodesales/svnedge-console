@@ -77,8 +77,14 @@ class SecurityService {
      * Encrypts and base-64 encodes a clear-text input
      * @param input
      * @return encrypted
+     * @throws IllegalArgumentException for null input
      */
-    public String encrypt(String input)  {
+    public String encrypt(String input) throws IllegalArgumentException {
+
+        if (!input) {
+            throw new IllegalArgumentException("The input parameter cannot be null")
+        }
+
         // Get a cipher object.
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -101,8 +107,13 @@ class SecurityService {
      * Decrypts an encrypted and base-64 encoded input (created by <code>encrypt()</code> method)
      * @param encrypted text
      * @return clear text
+     * @throws IllegalArgumentException for null input
      */
-    public String decrypt(String encrypted) {
+    public String decrypt(String encrypted) throws IllegalArgumentException {
+
+        if (!encrypted) {
+            throw new IllegalArgumentException("The input parameter cannot be null")
+        }
 
         // Get a cipher object.
         Cipher cipher = Cipher.getInstance("DES/ECB/PKCS5Padding");

@@ -141,12 +141,17 @@ class StatusController {
             ctfUrl = ctfServer.getWebAppUrl()
 
             /* get the certificate details of the master */
-            def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
+            try {
+                def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
 
-            certHostname = replicaDetails.hostname
-            certValidity = replicaDetails.validity
-            certIssuer = replicaDetails.issuer
-            certFingerPrint = replicaDetails.fingerprint
+                certHostname = replicaDetails.hostname
+                certValidity = replicaDetails.validity
+                certIssuer = replicaDetails.issuer
+                certFingerPrint = replicaDetails.fingerprint
+            }
+            catch (Exception e) {
+                log.error("Fault encountered parsing the CTF SSL certificate", e)
+            }
         }
         else if (server.mode == ServerMode.MANAGED) {
             ctfUrl = ctfServer.getWebAppUrl()
