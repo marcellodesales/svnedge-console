@@ -209,7 +209,7 @@ class SetupReplicaController {
                         ]
             }
             catch (Exception e) {
-                log.error("Unable to register replica: " + e.getMessage())
+                log.error("Unable to register replica: " + e.getMessage(), e)
             }
         }
         
@@ -272,7 +272,7 @@ class SetupReplicaController {
 
         } catch (Exception e) {
             log.error("Unable to register replica: " + (e.getMessage() ?: 
-                e.getCause().getMessage()))
+                e.getCause().getMessage()), e)
             def msg = message(code: 'replica.error.registration') + " " +
                 (e.getMessage() ?: e.getCause().getMessage())
             bean.registrationError = msg

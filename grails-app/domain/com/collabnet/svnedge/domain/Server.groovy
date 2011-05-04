@@ -189,14 +189,10 @@ class Server {
      * Jetty Server port number.
      */
     public static String getConsolePort(boolean ssl) {
-        int portNumber = null;
+        String portNumber = null;
         def propertyName = ssl ? "jetty.ssl.port" : "jetty.port"
         if (System.getProperty(propertyName)) {
-            try {
-                portNumber = Integer.parseInt(
-                    System.getProperty(propertyName).trim())
-            } catch (Exception e) {
-            }
+            portNumber = System.getProperty(propertyName).trim()
         }
         // if the property is not found, and ssl was not requested,
         // provide the development port number
