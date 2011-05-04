@@ -99,15 +99,12 @@ class UserControllerTests extends ControllerUnitTestCase {
 
         assertEquals("Expected render user show when FAILING authority check", "showSelf",
                 controller.redirectArgs["action"])
-
-
     }
 
-    void testSave() {
-
-        // 1) test for validation failure
+    void testSaveWithWrongPermissions() {
         def authenticateService = mockFor(AuthenticateService)
 
+        // 1) test for validation failure
         // expected security calls
         authenticateService.demand.ifNotGranted(2..2) {
             it == "ROLE_ADMIN,ROLE_ADMIN_USERS"
@@ -121,7 +118,10 @@ class UserControllerTests extends ControllerUnitTestCase {
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", model["userInstance"])
         assertTrue("Expected validation errors in model", model["userInstance"].hasErrors())
+    }
 
+    void testSaveWithMissingPassword() {
+        def authenticateService = mockFor(AuthenticateService)
 
         // 2) test again for validation failure, missing only passwd
         authenticateService = mockFor(AuthenticateService)
@@ -137,13 +137,26 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.params.passwd = ""
         controller.params.authorities = "2"
 
-        model = controller.save()
+        def model = controller.save()
 
         assertEquals("Expected render create when FAILING validation check", "create",
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", model["userInstance"])
         assertTrue("Expected validation errors in model", model["userInstance"].hasErrors())
+    }
 
+    void testSaveWithCorrectValues() {
+        runTestSaveValues("testUser2", "clearPassword", true)
+        runTestSaveValues("Co11@b_-net", "clearPassword", true)
+    }
+
+    void testSaveWithIncorrectValues() {
+        runTestSaveValues("&username-wrong", "clearPassword", false)
+        runTestSaveValues("p_user#!", "", false)
+    }
+
+    private void runTestSaveValues(username, password, pass) {
+        def authenticateService = mockFor(AuthenticateService)
 
         // 3) test for validation success and save success
         def lifecycleService = mockFor(LifecycleService)
@@ -164,20 +177,26 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.lifecycleService = lifecycleService.createMock();
  
         // test some params for a save
-        controller.params.username = "testUser2"
+        controller.params.username = username
         controller.params.realUserName = "test User 2"
         controller.params.email = "test@test.com"
-        controller.params.passwd = "clearPassword"
+        controller.params.passwd = password
         controller.params.authorities = "2"
 
-        model = controller.save()
+        def model = controller.save()
 
-        assertEquals("Expected redirect to show when SUCCEEDING", "show",
-            controller.redirectArgs["action"])
+        if (pass) {
+            assertEquals("Expected redirect to show when SUCCEEDING", "show",
+                controller.redirectArgs["action"])
 
-        assertEquals("Expected new user id in model", 3, redirectArgs["id"])
-        assertNotNull("Expected new user in the domain", User.get(3))
-        
+        } else {
+            assertEquals("Expected render create when FAILING validation check",
+                "create", controller.renderArgs["view"])
+            assertNotNull("Expected validation userInstance in model", 
+                model["userInstance"])
+            assertTrue("Expected validation errors in model", 
+                model["userInstance"].hasErrors())
+        }
     }
 
     void testUpdate() {
@@ -254,7 +273,6 @@ class UserControllerTests extends ControllerUnitTestCase {
             false
         }
 
-
         controller.authenticateService = authenticateService.createMock()
         controller.lifecycleService = lifecycleService.createMock()
         controller.params.id = "2"   // NOT the id of user from authenticateService.principal()
@@ -269,11 +287,5 @@ class UserControllerTests extends ControllerUnitTestCase {
             controller.renderArgs["view"])
         assertNotNull("Expected validation userInstance in model", controller.renderArgs["model"]["userInstance"])
         assertTrue("Expected validation errors in model", controller.renderArgs["model"]["userInstance"].hasErrors())
-
-
-
-
     }
-
-
 }

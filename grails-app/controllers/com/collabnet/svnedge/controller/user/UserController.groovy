@@ -36,7 +36,6 @@ class UserController {
     org.hibernate.SessionFactory sessionFactory
 
     def index = {
-
         // redirect to full user management if has authority
         // else direct to Show view of principal
         if(authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_USERS")) {
@@ -45,18 +44,14 @@ class UserController {
         else {
             redirect(action: "showSelf", params: params)
         }
-
     }
 
     def showSelf = {
-
         def username = authenticateService.principal().getUsername()
         def userInstance = User.findByUsername(username)
         def editable = !userAccountService.isLdapUser(userInstance)
         render(view: "show", model: [userInstance: userInstance, editable: editable])
-
     }
-
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
     def list = {
@@ -97,12 +92,12 @@ class UserController {
            }
         }
 
-        def htaccessUpdated = -1
+        def htaccessUpdated = 0
         if (!userInstance.hasErrors()) {
             htaccessUpdated = lifecycleService.setSvnAuth(userInstance, 
                 params.passwd)
         }
-        if (htaccessUpdated == 0 && userInstance.save()) {
+        if (htaccessUpdated != 0 && userInstance.save()) {
             // encode the passwd
             if (params.passwd) {
                 userInstance.passwd = authenticateService.encodePassword(
@@ -172,7 +167,6 @@ class UserController {
             redirect(action: "show", params: [id : params.id])
         }
         else {
-
             boolean editingSelf = isRequestingSelf(params.id)
             return [userInstance: userInstance,
                     roleList : getRoleList(),
@@ -200,7 +194,6 @@ class UserController {
                     return
                 }
             }
-
 
             // only allow admins to adjust other users; anyone can edit self
             if(!canEdit(params.id)) {
@@ -392,7 +385,6 @@ class UserController {
         }
     }
 
-
     private boolean isRequestingSelf(String id) {
         def uname = authenticateService.principal().getUsername();
         def uid = User.findByUsername(uname)?.id?.toString()
@@ -427,7 +419,6 @@ class UserController {
 
         return false
     }
-
 
     private List<Role> getRoleList() {
 

@@ -114,26 +114,28 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         }
     }
 
-
-
     void testSetSvnAuth() {
-        def testusername = 'testuser'
+        runSetSvnAuth("testUser2", "anotherpass")
+        runSetSvnAuth("Co11@b_-net", "password")
+        runSetSvnAuth("cO11AB_-.net", "password")
+    }
+
+    private void runSetSvnAuth(testusername, password) {
         def confDir = createTestDir("conf")
         def origConfDirPath = ConfigUtil.confDirPath()
         try {
-        ConfigUtil.confDirPath = confDir.absolutePath
-
-        User u = new User(username: testusername, enabled: true)
-        lifecycleService.setSvnAuth(u, "mypassword")
-        File authFile = new File(confDir, "svn_auth_file")
-        assertTrue "auth file does not exist", authFile.exists()
-        assertTrue "testuser not found in auth file", 
-            authFile.getText().indexOf(testusername) >= 0
-
-
-        lifecycleService.removeSvnAuth(u)
-        assertTrue "testuser still in auth file when removed",
-            authFile.getText().indexOf(testusername) < 0
+            ConfigUtil.confDirPath = confDir.absolutePath
+ 
+            User u = new User(username: testusername, enabled: true)
+            lifecycleService.setSvnAuth(u, password)
+            File authFile = new File(confDir, "svn_auth_file")
+            assertTrue "auth file does not exist", authFile.exists()
+            assertTrue "testuser not found in auth file", 
+                authFile.getText().indexOf(testusername) >= 0
+    
+            lifecycleService.removeSvnAuth(u)
+            assertTrue "testuser still in auth file when removed",
+                authFile.getText().indexOf(testusername) < 0
         } finally {
             ConfigUtil.confDirPath = origConfDirPath
         }
