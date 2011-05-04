@@ -97,34 +97,36 @@ class UserController {
            }
         }
 
-        // encode the passwd
-        if (params.passwd) {
-            userInstance.passwd = authenticateService.encodePassword(
-                    params.passwd)
+        def htaccessUpdated = -1
+        if (!userInstance.hasErrors()) {
+            htaccessUpdated = lifecycleService.setSvnAuth(userInstance, 
+                params.passwd)
         }
-
-        if (!userInstance.hasErrors() && userInstance.save()) {
-
+        if (htaccessUpdated == 0 && userInstance.save()) {
+            // encode the passwd
+            if (params.passwd) {
+                userInstance.passwd = authenticateService.encodePassword(
+                        params.passwd)
+            }
             // add to default security group if not already
             userInstance.addToAuthorities (Role.findByAuthority("ROLE_USER"))
 
             log.info("User created: " + userInstance.username)
-            lifecycleService.setSvnAuth(userInstance, params.passwd)
             flash.message = message(code: "default.created.message", 
                     args: [message(code: "user.label"),
                            userInstance.username])
             redirect(action: "show", id: userInstance.id)
-        }
-        else {
+
+        } else {
             // discard session changes to User and Role
             userInstance.discard()
 
-            flash.error = "${message(code: 'default.errors.summary')}"
+            flash.error = "${message(code: 'default.errors.summary')} "
 
             Role.list().each {
                 it.discard()
             }
-            
+
             render(view: "create", model: [userInstance: userInstance, 
                     roleList : getRoleList(), 
                     authorizedRoleList : getAuthorizedRoleList()])
