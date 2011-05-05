@@ -132,38 +132,28 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         def password = securityService.decrypt(ctfServer.ctfPassword)
         command = [ConfigUtil.svnPath(), "co", masterRepoUrl, wcMaster.canonicalPath,
             "--username", username, "--password", password,
-            "--non-interactive", "--no-auth-cache"] // "--config-dir=/tmp"
-        commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive", "--no-auth-cache"] as String[]// "--config-dir=/tmp"
+        commandLineService.execute(command)
 
         // create / update the reusable test file
-        def testFileMaster = new File("copy-revprops-test.txt", wcMaster)
-        boolean svnAdd = !testFileMaster.exists()
-
-        if (svnAdd) {
-            testFileMaster.text = "copy revprops test file: ${new Date()}"
-            command = [ConfigUtil.svnPath(), "add", testFileMaster.canonicalPath,
-                "--non-interactive"]
-            commandLineService.execute(command.toArray(new String[0]))
-        } else {
-            command = [ConfigUtil.svnPath(), "revert", testFileMaster.canonicalPath,
-                //"--username", username, "--password", password,
-                "--non-interactive", "--no-auth-cache"]
-            commandLineService.execute(command.toArray(new String[0]))
-            testFileMaster.text = "copy revprops test file: ${new Date()}"
-        }
+        def testFileMaster = File.createTempFile("copy-revprops-test", ".txt", wcMaster)
+        testFileMaster.text = "This is a test file"
+        command = [ConfigUtil.svnPath(), "add", testFileMaster.canonicalPath,
+            "--non-interactive"] as String[]
+        commandLineService.execute(command)
 
         // set a custom property
         def propVal = "property initial value"
         command = [ConfigUtil.svnPath(), "propset", "propKey", propVal, testFileMaster.canonicalPath,
             "--username", username, "--password", password,
-            "--non-interactive"]
-        commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive"] as String[]
+        commandLineService.execute(command)
 
         // commit the test file & capture the revision number to alter later
         command = [ConfigUtil.svnPath(), "ci", testFileMaster.canonicalPath,
             "--username", username, "--password", password,
-            "--non-interactive", "-m", originalCommitMsg]
-        def result = commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive", "-m", originalCommitMsg] as String[]
+        def result = commandLineService.execute(command)
         def matcher = result =~ /Committed revision (\d+)/
         revNumberToAlter = matcher[0][1]
 
@@ -171,8 +161,8 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         File wcReplica = createTestDir("wcReplica")
         command = [ConfigUtil.svnPath(), "co", repoUri, wcReplica.canonicalPath,
             //"--username", username, "--password", password,
-            "--non-interactive", "--no-auth-cache"]
-        commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive", "--no-auth-cache"] as String[]
+        commandLineService.execute(command)
         File testFileReplica = new File(wcReplica, testFileMaster.name)
 
         cmdParams = [:]
@@ -196,8 +186,8 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         for (int i = 0; i < 30 && !fileExists; i++) {
             command = [ConfigUtil.svnPath(), "up", wcReplica.canonicalPath,
                 //"--username", username, "--password", password,
-                "--non-interactive", "--no-auth-cache"]
-            commandLineService.execute(command.toArray(new String[0]))
+                "--non-interactive", "--no-auth-cache"] as String[]
+            commandLineService.execute(command)
             fileExists = testFileReplica.exists()
             if (!fileExists) {
                 Thread.sleep(1000)
@@ -205,37 +195,83 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         }
         command = [ConfigUtil.svnPath(), "info", testFileReplica.canonicalPath,
             //"--username", username, "--password", password,
-            "--non-interactive", "--no-auth-cache"]
-        result = commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive", "--no-auth-cache"] as String[]
+        result = commandLineService.execute(command)
         matcher = result =~ /Revision: (\d+)/
         fileRevNumber = matcher[0][1]
 
         assertTrue("Replicated test file should exist: " + testFileReplica.canonicalPath, fileExists)
         assertEquals("Replicated test file should have expected rev number: ${revNumberToAlter}", revNumberToAlter, fileRevNumber)
 
-        // validate inital revprops
+        // validate inital revprops on replica
         command = [ConfigUtil.svnPath(), "propget", "svn:log", "--revprop", "-r", revNumberToAlter, testFileReplica.canonicalPath,
                //"--username", username, "--password", password,
-                "--non-interactive", "--no-auth-cache"]
-        def output = commandLineService.execute(command.toArray(new String[0]))
+                "--non-interactive", "--no-auth-cache"] as String[]
+        def output = commandLineService.execute(command)
         assertTrue("Test file should have the ORIGINAL commit message", output[1].contains(originalCommitMsg))
 
-        // update revprop and file
+        // update revprop on master
         command = [ConfigUtil.svnPath(), "propset", "-r", revNumberToAlter, "--revprop", "svn:log", updatedCommitMsg, 
                 testFileMaster.canonicalPath,
                 "--username", username, "--password", password,
-                "--non-interactive"]
-        commandLineService.execute(command.toArray(new String[0]))
+                "--non-interactive"] as String[]
+        commandLineService.execute(command)
 
         testFileMaster.text = "updating test file"
         command = [ConfigUtil.svnPath(), "ci", testFileMaster.canonicalPath,
             "--username", username, "--password", password,
-            "--non-interactive", "-m", originalCommitMsg]
-        result = commandLineService.execute(command.toArray(new String[0]))
+            "--non-interactive", "-m", originalCommitMsg] as String[]
+        result = commandLineService.execute(command)
         matcher = result =~ /Committed revision (\d+)/
         def nextRevNumber = matcher[0][1]
 
         assertNotSame("The file revision number should be updated", revNumberToAlter, nextRevNumber)
+
+        // execute svn sync
+        cmdParams = [:]
+        cmdParams["repoName"] = REPO_NAME
+        cmdParams["masterId"] = EXSY_ID
+
+        commandMap = [code: 'repoSync', id: "cmdSync011", params: cmdParams,
+            context: executionContext]
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        if (command.executionException) {
+            println command.executionException
+            fail("Should be able to sync a command.")
+        }
+
+        // validate the file is synced in the replica working copy
+        boolean fileRevUpdated = false
+        fileRevNumber = "-1"
+        for (int i = 0; i < 30 && !fileRevUpdated; i++) {
+            command = [ConfigUtil.svnPath(), "up", wcReplica.canonicalPath,
+               //"--username", username, "--password", password,
+               "--non-interactive", "--no-auth-cache"] as String[]
+            commandLineService.execute(command)
+
+            command = [ConfigUtil.svnPath(), "info", testFileReplica.canonicalPath,
+           //"--username", username, "--password", password,
+           "--non-interactive", "--no-auth-cache"] as String[]
+            result = commandLineService.execute(command)
+            matcher = result =~ /Revision: (\d+)/
+            fileRevNumber = matcher[0][1]
+
+            fileRevUpdated = fileRevNumber == nextRevNumber
+            if (!fileRevUpdated) {
+               Thread.sleep(1000)
+            }
+        }
+
+        assertTrue ("The replica working copy should receive the new revision", fileRevUpdated)
+
+        // validate revprops not updated
+        command = [ConfigUtil.svnPath(), "propget", "svn:log", "--revprop", "-r", revNumberToAlter, testFileReplica.canonicalPath,
+               //"--username", username, "--password", password,
+                "--non-interactive", "--no-auth-cache"] as String[]
+        output = commandLineService.execute(command)
+        assertTrue("Test file should still have the ORIGINAL commit message", output[1].contains(originalCommitMsg))
 
         // execute revprop sync command
         cmdParams = [:]
@@ -246,19 +282,31 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)
-        Thread.sleep(1000)
+        Thread.sleep(5000)
 
         // validate updated revprops
         command = [ConfigUtil.svnPath(), "up", wcReplica.canonicalPath,
                 //"--username", username, "--password", password,
-                "--non-interactive", "--no-auth-cache"]
-        commandLineService.execute(command.toArray(new String[0]))
+                "--non-interactive", "--no-auth-cache"] as String[]
+        commandLineService.execute(command)
         
         command = [ConfigUtil.svnPath(), "propget", "svn:log", "--revprop", "-r", revNumberToAlter, testFileReplica.canonicalPath,
                //"--username", username, "--password", password,
-                "--non-interactive", "--no-auth-cache"]
-        output = commandLineService.execute(command.toArray(new String[0]))
-        assertTrue("Test file should now have the UPDATED commit message", output[1].contains(updatedCommitMsg))
+                "--non-interactive", "--no-auth-cache"] as String[]
+        output = commandLineService.execute(command)
+
+        assertTrue("Test file at previous rev should now have the UPDATED commit message", output[1].contains(updatedCommitMsg))
+
+        // clean up test file
+        command = [ConfigUtil.svnPath(), "delete", testFileMaster.canonicalPath,
+            "--username", username, "--password", password,
+            "--non-interactive"] as String[]
+        output = commandLineService.execute(command)
+
+        command = [ConfigUtil.svnPath(), "ci", wcMaster,
+            "--username", username, "--password", password,
+            "--non-interactive", "-m", originalCommitMsg] as String[]
+        output = commandLineService.execute(command)
 
         wcMaster.deleteDir()
         wcReplica.deleteDir()
