@@ -39,15 +39,15 @@ class Repository {
     static hasMany = [ statValues: StatValue ]
 
     /**
-     * In the web UI we try to guide users to create CTF-compatible
-     * repo names, but we don't want to eliminate the ability to discover
-     * repos which are created with non-matching names, so this can't be
+     * In the web UI we try to guide users to create URL and command-line
+     * compatible repo names, but we don't want to eliminate the ability to 
+     * discover repos which are created with non-matching names, so this can't be
      * a constraint on the object
      */
-    boolean validateName() {
+    boolean validateName(regex=RECOMMENDED_NAME_PATTERN) {
         def b = name.length() <= NAME_MAX_LENGTH
         if (b) {
-            b = name.matches(RECOMMENDED_NAME_PATTERN)
+            b = name.matches(regex)
             if (!b) {
                 errors.rejectValue("name", "repository.name.matches.invalid")
             }

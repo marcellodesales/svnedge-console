@@ -222,6 +222,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         repoNames
     }
 
+    private static final def CTF_VALID_REPO_NAME = ~/[a-z][_a-z0-9\-]*/
     private static final def FIXABLE_REPO_NAME = ~/[_A-Za-z0-9]*/
     private static final def UPPER_CHAR = ~/[A-Z]/
 
@@ -242,7 +243,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def permissionsNotOk = []
         for (repo in repos) {
             def repoName = repo.name
-            if (!repo.validateName()) {
+            if (!repo.validateName(CTF_VALID_REPO_NAME)) {
                 if (repoName.matches(FIXABLE_REPO_NAME)) {
                     if (repoName.find(UPPER_CHAR)) {
                         containsUpperCaseRepos = true
