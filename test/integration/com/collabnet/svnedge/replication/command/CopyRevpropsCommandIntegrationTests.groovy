@@ -138,6 +138,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         // create / update the reusable test file
         def testFileMaster = File.createTempFile("copy-revprops-test", ".txt", wcMaster)
         testFileMaster.text = "This is a test file"
+        log.info("testFile = " + testFileMaster.canonicalPath)
         command = [ConfigUtil.svnPath(), "add", testFileMaster.canonicalPath,
             "--non-interactive"] as String[]
         commandLineService.execute(command)
@@ -154,6 +155,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             "--username", username, "--password", password,
             "--non-interactive", "-m", originalCommitMsg] as String[]
         def result = commandLineService.execute(command)
+        log.info ("Commit result in master WC: \n" + result)
         def matcher = result =~ /Committed revision (\d+)/
         revNumberToAlter = matcher[0][1]
 
@@ -197,6 +199,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             //"--username", username, "--password", password,
             "--non-interactive", "--no-auth-cache"] as String[]
         result = commandLineService.execute(command)
+        log.info ("Info result in replica WC: \n" + result)
         matcher = result =~ /Revision: (\d+)/
         fileRevNumber = matcher[0][1]
 
@@ -222,6 +225,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             "--username", username, "--password", password,
             "--non-interactive", "-m", originalCommitMsg] as String[]
         result = commandLineService.execute(command)
+        log.info ("Commit result in master WC: \n" + result)
         matcher = result =~ /Committed revision (\d+)/
         def nextRevNumber = matcher[0][1]
 
@@ -260,7 +264,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
             fileRevUpdated = fileRevNumber == nextRevNumber
             if (!fileRevUpdated) {
-               Thread.sleep(1000)
+               Thread.sleep(2000)
             }
         }
 
