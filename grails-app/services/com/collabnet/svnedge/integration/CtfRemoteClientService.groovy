@@ -937,11 +937,13 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     getMessage("ctfRemoteClientService.remote.sessionExpired",
                     locale), e)
 
-            } else if (faultMsg.contains("No such object: ${replicaServerId}")) {
+            } else if (faultMsg.contains("No such object: ${replicaServerId}") ||
+                    faultMsg.contains(
+                    "Invalid replica server object id: ${replicaServerId}")) {
                 // this fault indicates that the replica server no longer exists
                 // on the ctf instance (deleted) -- will respond by creating 
                 // and executing the unregister command
-                log.error "This replica is no longer supported by the CTF " +
+                log.warn "This replica is no longer supported by the CTF " +
                     "master; reverting to standalone mode"
                 // create a virtual command to unregister the replica
                 def id = Math.round(Math.random() * 10000)
