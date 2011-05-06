@@ -70,8 +70,12 @@ class StatusController {
      */
     boolean isReplicaOfSSLMaster(Server server,
                                  ReplicaConfiguration replicaConfiguration) {
-        return server.mode == ServerMode.REPLICA &&
-                              replicaConfiguration?.svnMasterUrl[0..4] == 'https'
+        if (server.mode != ServerMode.REPLICA || !replicaConfiguration || !replicaConfiguration?.svnMasterUrl) {
+            return false
+        }
+        else {
+            return replicaConfiguration.svnMasterUrl[0..4] == 'https'
+        }
     }
 
     /**
