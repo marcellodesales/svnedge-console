@@ -670,8 +670,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             soap.invoke("deleteExternalSystemReplica", [sessionId, replicaId])
         }
         catch (CtfAuthenticationException e) {
+            def msg = getMessage("ctfRemoteClientService.auth.error",
+                    [ctfUrl.encodeAsHTML()], locale)
+            log.error(msg)
             errors << msg
-            throw e
+            throw new CtfAuthenticationException(msg,
+                    "ctfRemoteClientService.auth.error")
         }
         catch (AxisFault e) {
             if (e.faultCode.toString().contains("PermissionDeniedFault")) {
