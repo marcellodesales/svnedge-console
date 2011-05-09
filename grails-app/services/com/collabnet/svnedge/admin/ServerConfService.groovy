@@ -471,6 +471,14 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
 """
+        if (isLdapLoginEnabled || ctfMode) {
+            conf += """
+# Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
+LoadModule rewrite_module lib/modules/mod_rewrite.so
+RewriteEngine on
+RewriteOptions inherit
+"""
+        }
 
         String contextPath = "/svn"
         if (server.mode == ServerMode.REPLICA) {
@@ -513,9 +521,6 @@ Alias /viewvc-static "${viewvcTemplateDirPath}/docroot"
 """
 
         conf += ctfMode ? """
-# Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
-LoadModule rewrite_module lib/modules/mod_rewrite.so
-RewriteEngine on
 RewriteRule ^/viewcvs(.*)\$ /viewvc\$1 [R,L]
 """ : """
 ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
