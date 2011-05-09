@@ -476,8 +476,11 @@ LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
 # Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
 LoadModule rewrite_module lib/modules/mod_rewrite.so
 RewriteEngine on
-RewriteOptions inherit
 """
+        }
+
+        if (isLdapLoginEnabled) {
+            conf += "RewriteOptions inherit\n"
         }
 
         String contextPath = "/svn"
