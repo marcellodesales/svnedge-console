@@ -159,7 +159,7 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 	// FIXME! "2" is the real expected value, but CTF is currently returning an empty
         // string.  
         assertEquals("Result MUST be in the format x:x when called without " +
-                "accessType.", 0, response.tokenize(":").size())
+                "accessType.", 2, response.tokenize(":").size())
 
         response = ctfRemoteClientService.getRolePaths("admin", "internal/", 
                 null)
@@ -167,7 +167,7 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 	// FIXME! "2" is the real expected value, but CTF is currently returning an empty
         // string.  
         assertEquals("Result MUST be in the format x:x when called without " +
-                "accessType.", 0, response.tokenize(":").size())
+                "accessType.", 2, response.tokenize(":").size())
     }
 
     void testGetRolePathsWithAccessType() {
