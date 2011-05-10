@@ -22,7 +22,10 @@ import java.util.Locale;
 import grails.test.*
 
 import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.integration.CtfAuthenticationException 
+import com.collabnet.svnedge.integration.CtfAuthenticationException
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+import com.collabnet.svnedge.integration.RemoteMasterException
+import org.junit.Test
 
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -188,4 +191,47 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue("Clear remote cache on a Master CTF must always be possible",
                 ctfRemoteClientService.clearCacheOnMasterCTF())
     }
+
+    @Test
+    void testDeleteReplica()  {
+
+        // mock the ReplicaConfiguration field used by the service method
+        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
+            new ReplicaConfiguration(systemId: "replica1001")
+        }
+        def username = config.svnedge.ctfMaster.username
+        def password = config.svnedge.ctfMaster.password
+
+        // although the replica does not exist, we expect this to succeed
+        ctfRemoteClientService.deleteReplica(username, password, [], Locale.defaultLocale)
+        assertTrue("The deleteReplica method should have succeeded", true)
+    }
+
+    @Test(expected=CtfAuthenticationException.class)
+    void testDeleteReplicaBadAuthentication()  {
+
+        // mock the ReplicaConfiguration field used by the service method
+        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
+            new ReplicaConfiguration(systemId: "replica1001")
+        }
+        def username = config.svnedge.ctfMaster.username
+
+        // provide faulty credentials, expect exception
+        ctfRemoteClientService.deleteReplica(username, "badPasssword!", [], Locale.defaultLocale)
+    }
+
+    @Test(expected=RemoteMasterException.class)
+    void testDeleteReplicaBadAuthorization()  {
+
+        // mock the ReplicaConfiguration field used by the service method
+        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
+            new ReplicaConfiguration(systemId: "replica1001")
+        }
+        def username = "DeleteReplicaTestUser"
+        def password = "admin"
+
+        // real user credentials, but lacking permission (Scm admin), should throw the expected exception
+        ctfRemoteClientService.deleteReplica(username, password, [], Locale.defaultLocale)
+    }
+
 }
