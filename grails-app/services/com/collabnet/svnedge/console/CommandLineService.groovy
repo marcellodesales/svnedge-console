@@ -17,9 +17,12 @@
  */
 package com.collabnet.svnedge.console
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue 
 import java.util.regex.Pattern;
 
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.RealTimeCommandLineListener;
+import com.collabnet.svnedge.util.ConfigUtil
 
 class CommandLineService {
 
@@ -27,11 +30,21 @@ class CommandLineService {
 
     def operatingSystemService
 
-    int executeWithStatus(String...command, Map<String, String> env=null, String input=null) {
-        return Integer.parseInt(execute(command, (Map<String, String>) env, input)[0])
+    /**
+     * The token for commands listeners waiting for the output.
+     */
+    public static final String COMMAND_TERMINATED = "0xdeadc0de"
+
+    int executeWithStatus(String...command, Map<String, String> env=null, 
+            String input=null) {
+
+        return Integer.parseInt(execute(command, (Map<String, String>) env, 
+            input)[0])
     }
 
-    String executeWithOutput(String...command, Map<String, String> env=null, String input=null) {
+    String executeWithOutput(String...command, Map<String, String> env=null, 
+            String input=null) {
+
         return execute(command, (Map<String, String>) env, input)[1]
     }
 
@@ -44,7 +57,8 @@ class CommandLineService {
      */
     int executeWithStatusQuietly(String...command, Map<String, String> env=null,
                           String input=null) {
-        return Integer.parseInt(execute(command, (Map<String, String>) env, input, true)[0])
+        return Integer.parseInt(execute(command, (Map<String, String>) env, 
+            input, true)[0])
     }
 
     /**
@@ -60,10 +74,10 @@ class CommandLineService {
     }
 
     /**
-     * this method will launch the input command and return immediately without waiting for result or output
+     * this method will launch the input command and return immediately without
+     * waiting for result or output
      */
     void executeDetached(String command)  {
-
         Runtime.getRuntime().exec(command)
         return
     }
@@ -76,7 +90,9 @@ class CommandLineService {
      * @param quiet when true, most logging is suppressed (for security, eg)
      * @return String[] of exit code, out, and err
      */
-    String[] execute(String... command, Map<String, String> env=null, String input=null, boolean quiet=false) {
+    String[] execute(String... command, Map<String, String> env=null, 
+            String input=null, boolean quiet=false) {
+
         Process p = startProcess(command, env, quiet)
         def output = new StringBuffer(512)
         def error = new StringBuffer(512)
@@ -116,7 +132,9 @@ class CommandLineService {
         "SSH_TTY", "LOGNAME", "LD_LIBRARY_PATH", "SSH_CONNECTION", 
         "SHELL", "PATH", "USER", "HOME", "PYTHONPATH"]) 
 
-    private Process startProcess(String... command, Map<String, String> addEnv, boolean quiet=false) {
+    private Process startProcess(String... command, Map<String, String> addEnv, 
+            boolean quiet=false) {
+
         ProcessBuilder pb = new ProcessBuilder(command)
         Map<String, String> env = pb.environment();
         if (null != addEnv) {
@@ -169,7 +187,7 @@ class CommandLineService {
         }
         isPassword
     }
-    
+
     /**
      * Creates a file: scheme URI which is usable by svn command line clients
      */
@@ -182,4 +200,40 @@ class CommandLineService {
         }
         return uri
     }
+
+    /**
+     * Executes the given command and outputs the lines to a blocking queue. The proper use will require the
+     * client to call commandLines.take(), as it will block waiting for a element in the queue.
+     * @param command an OS command execution.
+     * @param commandLines the queue waiting for the command.
+     */
+    void executeWithCommandLineListener(String command, BlockingQueue<String> commandLines) {
+        def execProcess = Runtime.getRuntime().exec(command)
+        def line
+        def th = Thread.start {
+            def reader = new InputStreamReader(execProcess.getInputStream())
+            while ((line = reader.readLine()) != null) {
+                commandLines.offer(line)
+            }
+            commandLines.offer(COMMAND_TERMINATED)
+            reader.close();
+        }
+    }
+
+    /**
+     * A Non-blocking method that executes the given command in the background
+     * and returns a listener reference to read the lines.
+     * @param command is the command to be executed.
+     * @return an instance of the {@link RealTimeCommandLineListener} to
+     * wait and navigate through the output lines.
+     * @throws IOException in case the command does not exist or any other OS
+     * error.
+     */
+    public RealTimeCommandLineListener executeAsync(String command) throws IOException {
+        def outputQueue = new LinkedBlockingQueue<String>()
+        def listener = new RealTimeCommandLineListener(outputQueue)
+        executeWithCommandLineListener(command, outputQueue)
+        return listener
+    }
+
 }
