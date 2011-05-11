@@ -252,7 +252,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                         }
                     }     
                     char firstChar = repoName.charAt(0)
-                    if (firstChar < ('a' as char) || 
+                    // uppercase characters are handled above, so don't treat
+                    // them as an invalid first character
+                    if (firstChar < ('A' as char) || 
                         firstChar > ('z' as char)) {
 
                         containsReposWithInvalidFirstChar = true
@@ -408,7 +410,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         def repos = Repository.list()
         for (repoDomain in repos) {
             def repo = repoDomain.name
-            if (!repoDomain.validateName()) {
+            if (!repoDomain.validateName(CTF_VALID_REPO_NAME)) {
                 if (repo.matches(FIXABLE_REPO_NAME)) {
                     def newRepo = repo
                     if (conversionData.lowercaseRepos) {
@@ -422,7 +424,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                     }
                     def newRepoDomain = new Repository(name:newRepo)
                     newRepoDomain.discard()
-                    if (newRepo == repo || !newRepoDomain.validateName()) {
+                    if (newRepo == repo || 
+                        !newRepoDomain.validateName(CTF_VALID_REPO_NAME)) {
                         def msg = getMessage(
                             "setupTeamForge.integration.ctfRepoName.invalid",
                             conversionData.userLocale)
