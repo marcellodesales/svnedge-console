@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.integration.command
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * The Commands Execution Context wraps up the details about the command 
@@ -38,10 +40,33 @@ final class CommandsExecutionContext {
      * The base URL of the CTF server.
      */
     def ctfBaseUrl
+    
     /**
      * The user's session ID retrieved during the initial connection.
      */
-    def userSessionId
+    private String userSessionId
+    
+    public synchronized String getUserSessionId() {
+        return userSessionId
+    }
+
+    public synchronized void setUserSessionId(String sessionId) {
+        userSessionId = sessionId
+    }
+
+    /**
+     * The soap session ID retrieved during the initial connection.
+     */
+    private String soapSessionId
+    
+    public synchronized String getSoapSessionId() {
+        return soapSessionId
+    }
+
+    public synchronized void setSoapSessionId(String sessionId) {
+        soapSessionId = sessionId
+    }
+    
     /**
      * The replica server ID.
      */
@@ -56,11 +81,15 @@ final class CommandsExecutionContext {
      */
     def logsDir
 
+    AtomicInteger activeCommands
+    
     @Override
     public String toString() {
         return "CommandsExecutionContext [locale=" + locale + ", ctfBaseUrl=" +
                ctfBaseUrl + ", userSessionId=" + userSessionId +
+               ", soapSessionId=" + soapSessionId +
                ", replicaSystemId=" + replicaSystemId + ", appContext=" +
-               appContext + ", logsDir=" + logsDir + "]";
+               appContext + ", logsDir=" + logsDir + ", activeCommands=" + 
+               activeCommands?.get().toString() ?: "null" + "]";
     }
 }

@@ -155,6 +155,8 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
                     log.error("The remote command $commandMap is invalid.",
                         invalidCommand)
                 }
+            } else {
+                executionContext.activeCommands.decrementAndGet()
             }
         }
         // semaphores updating in the executor service from previous offer...

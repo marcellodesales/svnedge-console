@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.integration.command
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.integration.CommandResult 
 import com.collabnet.svnedge.domain.integration.CtfServer
@@ -175,10 +177,11 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
      * during their delivery.
      * @param executionContext is the execution context of the commands.
      */
-    def reportPendingResultsAfterConnectivityRestored(executionContext) {
+    private def reportPendingResultsAfterConnectivityRestored(executionContext) {
         def commandResults = CommandResult.findAll(
             "from CommandResult as r where r.transmitted=false")
         if (commandResults && commandResults.size() > 0) {
+            executionContext.activeCommands = new AtomicInteger(commandResults.size())
             // Report all the command results in parallel
             log.debug("There are ${commandResults.size()} command " +
                 "result(s) to be delivered...")
@@ -247,14 +250,51 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
     def transmitCommandResult(execContext, cmdResult) 
             throws RemoteMasterException {
 
-        def locale = Locale.getDefault()
         def ctfServer = CtfServer.getServer()
-        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
-        
+        def soapId = execContext.soapSessionId
+        if (execContext.userSessionId) {
+            try { 
+                ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
+                    execContext.userSessionId, execContext.replicaSystemId,
+                    cmdResult.commandId, cmdResult.succeeded, execContext.locale)
+            } catch (Exception cantConnectCtfMaster) {
+                execContext.userSessionId = null
+                log.info "Could not deliver command result using existing session " +
+                    " will try logging in to ${ctfServer.baseUrl}: " + 
+                    cantConnectCtfMaster.getMessage()
+                try {
+                    ctfRemoteClientService.logoff(ctfServer.baseUrl,
+                        ctfServer.ctfUsername, soapId)
+                    soapId = null
+                } catch (Exception ignore) {
+                    log.warn("Exception trying to logoff soap session", e)
+                }
+                loginAndTransmitCommandResult(execContext, cmdResult, ctfServer)
+            } finally {
+                int activeCommands = execContext.activeCommands.decrementAndGet()
+                if (activeCommands == 0) {
+                    log.debug("Last command finished execution, logging off soap session")
+                    execContext.userSessionId = null
+                    if (soapId) {
+                        ctfRemoteClientService.logoff(ctfServer.baseUrl,
+                            ctfServer.ctfUsername, soapId)
+                    }
+                } else {
+                    log.debug(activeCommands + 
+                        " commands left to complete using the same context.")
+                }
+            }
+        } else {
+            loginAndTransmitCommandResult(execContext, cmdResult, ctfServer)
+        }
+    }
+
+    private void loginAndTransmitCommandResult(execContext, cmdResult, ctfServer) {
+        def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)        
         def soapId
         try {
             soapId = ctfRemoteClientService.login(ctfServer.baseUrl,
-                ctfServer.ctfUsername, ctfPassword, locale)
+                ctfServer.ctfUsername, ctfPassword, execContext.locale)
             def sessionId = ctfRemoteClientService.cnSoap(ctfServer.baseUrl)
                 .getUserSessionBySoapId(soapId)
             //upload the commands results back to ctf
@@ -262,8 +302,8 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 sessionId, execContext.replicaSystemId, 
                 cmdResult.commandId, cmdResult.succeeded, execContext.locale)
         } catch (Exception cantConnectCtfMaster) {
-            log.error "Can't deliver command results from the CTF replica " +
-                    "manager ${ctfServer.baseUrl}: " + cantConnectCtfMaster.getMessage()
+            log.error("Can't deliver command results from the CTF replica " +
+                    "manager ${ctfServer.baseUrl}", cantConnectCtfMaster)
             stopDelivering()
             return
         } finally {

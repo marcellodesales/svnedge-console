@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.integration
 
+import java.util.concurrent.atomic.AtomicInteger
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
@@ -126,6 +127,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
         def ctfServer = CtfServer.getServer()
         def ctfPassword = securityService.decrypt(ctfServer.ctfPassword)
 
+        boolean isCloseSoapSession = true
         def soapId, userSessionId
         try {
             soapId = ctfRemoteClientService.login(ctfServer.baseUrl,
@@ -142,6 +144,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         def executionContext = new CommandsExecutionContext()
         executionContext.appContext = applicationContext
+        executionContext.soapSessionId = soapId
         executionContext.userSessionId = userSessionId
         executionContext.ctfBaseUrl = ctfServer.baseUrl
         executionContext.locale = locale
@@ -173,10 +176,12 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
                 executionContext.locale)
 
             if (queuedCommands && queuedCommands.size() > 0) {
+                executionContext.activeCommands = new AtomicInteger(queuedCommands.size())
                 log.debug("There are ${queuedCommands.size()} commands queued.")
                 // execute the command using the background service.
                 replicaCommandSchedulerService.offer(queuedCommands,
                         executionContext)
+                isCloseSoapSession = false
 
             } else {
                 log.debug("No queued commands for this replica...")
@@ -186,7 +191,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
             log.error("There was a problem while trying to fetch queued " + 
                 "commands: " + replicaManagerError.getMessage())
         } finally {
-            if (soapId) {
+            if (isCloseSoapSession && soapId) {
                 ctfRemoteClientService.logoff(ctfServer.baseUrl, 
                     ctfServer.ctfUsername, soapId)
             }
