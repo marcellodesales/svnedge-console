@@ -21,7 +21,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue 
 import java.util.regex.Pattern;
 
-import com.collabnet.svnedge.util.RealTimeCommandLineListener;
+import com.collabnet.svnedge.util.CommandLineOutputListener;
 import com.collabnet.svnedge.util.ConfigUtil
 
 class CommandLineService {
@@ -229,9 +229,9 @@ class CommandLineService {
      * @throws IOException in case the command does not exist or any other OS
      * error.
      */
-    public RealTimeCommandLineListener executeAsync(String command) throws IOException {
+    public CommandLineOutputListener executeAsync(String command) throws IOException {
         def outputQueue = new LinkedBlockingQueue<String>()
-        def listener = new RealTimeCommandLineListener(outputQueue)
+        def listener = new CommandLineOutputListener(outputQueue)
         executeWithCommandLineListener(command, outputQueue)
         return listener
     }

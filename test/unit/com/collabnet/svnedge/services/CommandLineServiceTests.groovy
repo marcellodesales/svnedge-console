@@ -18,27 +18,23 @@
 package com.collabnet.svnedge.services
 
 import com.collabnet.svnedge.console.CommandLineService;
-import com.collabnet.svnedge.console.NetworkingService 
-import com.collabnet.svnedge.console.ReplicaServerStatusService;
-import com.collabnet.svnedge.util.RealTimeCommandLineListener;
 
 import grails.test.GrailsUnitTestCase;
 
 class CommandLineServiceTests extends GrailsUnitTestCase {
 
-    def realTimeCommandLineService
+    def commandLineService
 
     protected void setUp() {
         super.setUp()
 
-        realTimeCommandLineService = new ReplicaServerStatusService()
-        realTimeCommandLineService.commandLineService = new CommandLineService()
+        commandLineService = new CommandLineService()
     }
 
     void testExecuteSuccessfulCommand() {
         def cmd = "ping www.facebook.com -c 3"
         println "Executing command $cmd"
-        def outputListener = realTimeCommandLineService.execute(cmd)
+        def outputListener = commandLineService.executeAsync(cmd)
         assertNotNull "The outout listener must exist", outputListener
 
         def allLines = []
@@ -57,9 +53,9 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
 
         // execute the command in parallel
         println "Executing command $cmd"
-        def outputListener = realTimeCommandLineService.execute(cmd)
+        def outputListener = commandLineService.executeAsync(cmd)
         println "Executing command $cmd2"
-        def outputListener2 = realTimeCommandLineService.execute(cmd2)
+        def outputListener2 = commandLineService.executeAsync(cmd2)
 
         assertNotNull "The outout listener 1 must exist", outputListener
         assertNotNull "The outout listener 2 must exist", outputListener2
@@ -93,10 +89,10 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
             cmd1Domain2
     }
 
-    void testExecuteCommandWithListener() {
+    void testExecuteAsyncWithErrors() {
         def cmd = "wrongping www.google.com -c 3"
         try {
-            def outputListener = realTimeCommandLineService.execute(cmd)
+            def outputListener = commandLineService.executeAsync(cmd)
             fail "The command execution with a non-existing OS command must " +
                 "throw an exception"
 
