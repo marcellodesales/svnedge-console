@@ -99,9 +99,9 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         def cnSoap60 = new Expando()
 
         cnSoap60.getUserSessionBySoapId = { p1 -> "userSessionId1001" }
-        ctfRemote.login60 = { p1, p2, p3, p4 -> "soapSessionId1001" }
-        ctfRemote.cnSoap60 = { p1 -> cnSoap60 }
-        ctfRemote.logoff60 = { p1, p2, p3 -> return }
+        ctfRemote.login = { p1, p2, p3, p4 -> "soapSessionId1001" }
+        ctfRemote.cnSoap = { p1 -> cnSoap60 }
+        ctfRemote.logoff = { p1, p2, p3 -> return }
         ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> [] }
 
         commandResultDeliveryService.restartDelivering = { p1 -> true}
