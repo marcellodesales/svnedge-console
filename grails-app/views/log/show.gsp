@@ -4,6 +4,29 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
   <title>CollabNet Subversion Edge <g:message code="logs.page.show.title" args="${[params.fileName]}" encodeAs="HTML"/></title>
+  <g:javascript library="prototype" />
+  <g:javascript library="application" />
+  <g:javascript>
+
+    var logStreamer;
+    var tailLog = false
+    Event.observe(window, 'load', function() {
+
+    $('tailButton').observe('click', function(event){
+      tailLog = !tailLog;
+      if (tailLog) {
+          logStreamer  = new LogStreamer('${params.fileName}', '${fileSizeBytes}', $('fileContent'), $('fileContentDiv'))
+          logStreamer.start();
+          $('tailButton').update("<g:message code="logs.page.show.button.tailStop"/>");
+      }
+      else {
+          logStreamer.stop();
+          $('tailButton').update("<g:message code="logs.page.show.button.tail"/>");
+      }
+    })
+})
+
+</g:javascript>
 </head>
 
 <content tag="title">
@@ -21,13 +44,13 @@
     <tr class="ContainerHeader">
       <td><g:message code="logs.page.show.header.fileName" /> ${params.fileName} &nbsp;<g:message code="logs.page.show.header.size" /> ${fileSize} &nbsp;<g:message code="logs.page.show.header.lastModification" /> ${fileModification}</td>
     </tr>
-    <g:if test="${file}">  
+    <g:if test="${file}">
     <tr>
       <td>
         <!-- This is still in progress, need to look for grails ui component that does this gracefully  -->
-        <div style="width: 800px; height: 300px; overflow: auto;">
-<!-- Leave this left-justified so that spaces are not padded in the first line of the log -->        
-<pre>
+        <div style="width: 800px; height: 300px; overflow: auto;" id="fileContentDiv">
+<!-- Leave this left-justified so that spaces are not padded in the first line of the log -->
+<pre id="fileContent">
 <%
 if (params.highlight) {
    file.withReader { reader ->
@@ -53,7 +76,7 @@ if (params.highlight) {
 %>
 </pre>
         </div>
-      </td>    
+      </td>
     </tr>
     </g:if>
   <g:else>
@@ -65,6 +88,9 @@ if (params.highlight) {
   <tr class="ContainerFooter">
         <td >
           <div class="AlignRight">
+              <div class="Button"><div class="Middle">
+                <g:link id="tailButton" url="#" class="Button" onclick="return false"><g:message code="logs.page.show.button.tail" /></g:link>
+              </div></div>
               <div class="Button"><div class="Middle">                
                 <g:link target="_blank" action="show" params="[fileName : file.name, rawView : true]" class="Button"><g:message code="logs.page.show.button.viewRaw" /> &#133;</g:link>
               </div></div>

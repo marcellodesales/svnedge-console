@@ -134,7 +134,7 @@ class LogController {
             def logModifiedTime = requestFormatter.format(modifiedTime);
 
             render(view: view, contentType: contentType,
-                model: [ file: logFile, fileSize: logSize,
+                model: [ file: logFile, fileSize: logSize, fileSizeBytes: logFile.length(),
                     fileModification: logModifiedTime, dateTimeFormat:dtFormat])
 
         } catch (FileNotFoundException logDoesNotExist) {
@@ -145,4 +145,74 @@ class LogController {
         }
     }
 
+    /**
+     * returns a tail of the log file starting at the given index (param.startIndex). when used by polling updater,
+     * can be used for "live" log tail view
+     */
+    def tail = {
+        def logName = params.fileName
+        def startIndex = params.startIndex ? Long.parseLong(params.startIndex) : 0
+        if (!logName || logName.trim().equals("")) {
+            flash.error = message(code: 'logs.action.show.fileName.empty')
+            redirect(action: "list")
+            return
+        }
+        try {
+            def logFile = logManagementService.getLogFile(logName)
+
+            def logSize = operatingSystemService.formatBytes(logFile.length())
+            def modifiedTime = new Date(logFile.lastModified())
+            def currentLocale = RCU.getLocale(request)
+            def dtFormat = message(code: "default.dateTime.format.withZone")
+            def requestFormatter = new SimpleDateFormat(dtFormat,
+                currentLocale)
+            def logModifiedTime = requestFormatter.format(modifiedTime);
+
+            // fetch any new content after the startIndex
+            StringBuffer buffer = new StringBuffer();
+            FileInputStream fis = null
+            InputStreamReader isr = null
+            try {
+                fis = new FileInputStream(logFile)
+                isr = new InputStreamReader(fis, "UTF8")
+                isr.skip(startIndex)
+               
+                int ch;
+                while ((ch = isr.read()) > -1) {
+                    buffer.append((char)ch)
+                }
+                isr.close();
+                fis.close();
+
+            } catch (IOException e) {
+                log.error("unable to tail the logfile ${logName}", e)
+                if (isr != null) {
+                    isr.close()
+                }
+                if (fis != null) {
+                    fis.close()
+                }
+            }
+
+            render(contentType:"text/json") {
+                log(fileName: logName,
+                        lastModifiedTime: logModifiedTime,
+                        startIndex: startIndex,
+                        endIndex: startIndex + buffer.size(),
+                        content: buffer.toString())
+            }
+
+        } catch (FileNotFoundException logDoesNotExist) {
+            render(contentType:"text/json") {
+                log(fileName: logName,
+                        lastModifiedTime: 0,
+                        startIndex: 0,
+                        endIndex: 0,
+                        content: "",
+                        error: message(code: 'logs.page.show.header.fileNotFound',
+                                args:[logName])
+                )
+            }
+        }
+    }
 }
