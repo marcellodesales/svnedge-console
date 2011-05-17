@@ -3,6 +3,86 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main" />
     <title>CollabNet Subversion Edge</title>
+
+  <g:if test="${isReplicaMode}">
+      <g:javascript library="prototype" />
+      <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
+                djconfig="parseOnLoad: true, isDebug: false"></script>
+
+      <script type="text/javascript">
+        /**
+         * Author: Marcello de Sales (mdesales@collab.net)
+         * Date: May 16, 2011
+         */
+        dojo.require('dojox.cometd');
+        dojo.require("dijit.Dialog");
+
+        var statusCounterChannel = "/replica/status/counter";
+
+        var currentNumberCommands = ${replicaCommands.size()}
+
+        /**
+         * If there are commands running, then print the number and 
+         */
+        function updateUiCommandsRunning(numberOfCommands) {
+            if (numberOfCommands > 0) {
+                dojo.byId('spinner').style.display = '';
+                dojo.byId('commandsCount').innerHTML = numberOfCommands + " background commands are running.";
+
+            } else {
+                dojo.byId('spinner').style.display = 'none';
+                dojo.byId('commandsCount').innerHTML = "Replica server's up-to-date.";
+            }
+        }
+
+        /**
+         * Function instance that is used to initialize upgrade process. Namely,
+         * the dojox.cometd component, as well as the major UI objects for the 
+         * initial status.
+         */
+        var init = function() {
+            dojox.cometd.init('/csvn/plugins/cometd-0.1.5/cometd');
+            dojox.cometd.subscribe(statusCounterChannel, onMessage);
+
+            updateUiCommandsRunning(currentNumberCommands)
+        };
+        dojo.addOnLoad(init);
+
+        /**
+         * Function instance that is used to finish the upgrade process. It
+         * finishes the dojox.cometd components.
+         */
+        var destroy = function() {
+            dojox.cometd.unsubscribe(statusCounterChannel);
+            dojox.cometd.disconnect();
+        };
+        dojo.addOnUnload(destroy);
+
+        /**
+         * Callback function for the cometd client that receives the messages
+         * from the subscribed channels.
+         * @param m is the message object proxied by the cometd server from 
+         * one of the subscribed channels.
+         * @see init()
+         */
+        function onMessage(m) {
+            var c = m.channel;
+            var o = eval('('+m.data+')')
+            if (c == statusCounterChannel) {
+                updateUiCommandsRunning(o.total)
+            }
+        }
+
+    </script>
+
+    <style type="text/css">
+        @import "/csvn/plugins/cometd-0.1.5/dojo/resources/dojo.css";
+        .dijitDialogCloseIcon { display:none }
+    </style>
+    <link rel="stylesheet"
+        href="/csvn/plugins/cometd-0.1.5/dijit/themes/tundra/tundra.css" />
+    </g:if>
+
   </head>
   <body>
 
@@ -51,6 +131,12 @@
         <a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a>
       </div>
      </g:if>
+      <g:if test="${isReplicaMode}">
+        <div class="ImageListParent"><strong><g:message code="status.page.status.replication.activity" /></strong>
+        <img src="/csvn/images/replica_commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running.">
+             <div id="commandsCount">${!runningCommands ? "No comands running." : runningCommands.size()}</div>
+        </div>
+      </g:if>
    </g:if>
    <g:else>
       <div class="ImageListParent">
@@ -94,12 +180,12 @@
                   <td class="ItemDetailValue">${svnVersion}</td>
                 </tr>
             </g:if>
-                <g:each status="i" var="stat" in="${perfStats}">
-                  <tr class="prop, ${i % 2 == 0 ? 'EvenRow' : 'OddRow'}">
-                    <td class="ItemDetailName"><strong>${stat.label}</strong></td>
-                    <td class="ItemDetailValue">${stat.value ?: message(code:'status.page.status.noData')}</td>
-                  </tr>
-                </g:each>
+            <g:each status="i" var="stat" in="${perfStats}">
+              <tr class="prop, ${i % 2 == 0 ? 'EvenRow' : 'OddRow'}">
+                <td class="ItemDetailName"><strong>${stat.label}</strong></td>
+                <td class="ItemDetailValue">${stat.value ?: message(code:'status.page.status.noData')}</td>
+              </tr>
+            </g:each>
 
               </tbody>
             </table>

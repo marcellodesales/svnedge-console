@@ -23,6 +23,7 @@ import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.domain.integration.CommandResult 
 import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext
+import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
 import com.collabnet.svnedge.integration.command.event.ConnectivityWithReplicaManagerRestoredEvent
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent
@@ -85,14 +86,15 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
      * that has terminated.
      * @return The {@link CommandResult} instance for the command.
      */
-    def makePersistedCommandResult(commandId) {
-        if (!commandId) {
-            throw new IllegalArgumentException("The commandID must be provided")
+    def makePersistedCommandResult(command) {
+        if (!command || !command instanceof AbstractCommand) {
+            throw new IllegalArgumentException("The command must be provided")
         }
-        def cmdResult = CommandResult.findByCommandId(commandId)
+        def cmdResult = CommandResult.findByCommandId(command.id)
         if (!cmdResult) {
             cmdResult = new CommandResult()
-            cmdResult.commandId = commandId
+            cmdResult.commandId = command.id
+            cmdResult.commandCode = AbstractCommand.makeCodeName(command)
             // As Hibernate typically batches up SQL statements and executes
             // them at the end of the session, we need to flush in place.
             cmdResult.save(flush:true)
@@ -113,7 +115,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             def remoteCommand = iterator.next()
             if (!CommandResult.findByCommandId(remoteCommand.id)) {
                 // create the command result if it does not exist.
-               makePersistedCommandResult(remoteCommand.id)
+               makePersistedCommandResult(remoteCommand)
 
             } else {
                 // Discard the command as it already exists in the report
@@ -143,7 +145,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 def terminatedCommand = executionEvent.terminatedCommand
                 log.debug "CommandTerminatedEvent: ${terminatedCommand}"
                 // save the result before attempting to deliver to remote manager
-                def commandResult = makePersistedCommandResult(terminatedCommand.id)
+                def commandResult = makePersistedCommandResult(terminatedCommand)
                 saveCommandResult(commandResult, terminatedCommand.succeeded)
                 synchronized(this) {
                     if (connectivityWithRemoteManagerOpen) {
@@ -211,8 +213,11 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             log.debug("Result successfully acknowledged the command " +
                 "${commandResult.commandId} -> ${succeeded}.")
 
+            publishEvent(new CommandResultReportedEvent(this, commandResult))
+
             // remove the command result as it has been transmitted.
-            deleteTransmittedResults(commandResult)
+            // TODO: The command results should be removed after the day.
+            // deleteTransmittedResults(commandResult)
 
         } catch (Exception remoteError) {
             log.error("Error while acknowledging the command " +
@@ -301,11 +306,13 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             ctfRemoteClientService.uploadCommandResult(ctfServer.baseUrl,
                 sessionId, execContext.replicaSystemId, 
                 cmdResult.commandId, cmdResult.succeeded, execContext.locale)
+
         } catch (Exception cantConnectCtfMaster) {
             log.error("Can't deliver command results from the CTF replica " +
                     "manager ${ctfServer.baseUrl}", cantConnectCtfMaster)
             stopDelivering()
             return
+
         } finally {
             if (soapId) {
                 ctfRemoteClientService.logoff(ctfServer.baseUrl,

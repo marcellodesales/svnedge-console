@@ -1,19 +1,39 @@
 package com.collabnet.svnedge.console
 
-import java.util.concurrent.BlockingQueue;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import grails.converters.JSON;
 
 import org.cometd.Client;
 import org.mortbay.cometd.ChannelImpl;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationListener;
 
-import com.collabnet.svnedge.util.CommandLineOutputListener;
-import static com.collabnet.svnedge.console.CommandLineService.COMMAND_TERMINATED;
 
-public final class ReplicaServerStatusService implements InitializingBean {
+import com.collabnet.svnedge.domain.integration.CommandResult;
+import com.collabnet.svnedge.integration.command.AbstractCommand;
+import com.collabnet.svnedge.integration.command.CommandState;
+import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent;
+import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent;
+import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
+import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent;
+import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
+import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent;
+
+public final class ReplicaServerStatusService implements InitializingBean, 
+        ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     boolean transactional = false
+
     def commandLineService
     /**
      * Auto-wired Cometd bayeux server
@@ -26,11 +46,21 @@ public final class ReplicaServerStatusService implements InitializingBean {
     /**
      * The Bayeux publisher Status message progress channel
      */
-    private ChannelImpl commandLineChannel
+    private ChannelImpl commandStatusChannel
+    private ChannelImpl commandsCounterChannel
     /**
-     * The command output lines of a command that is requested to be executed.
+     * The current set of commands by the state.
      */
-    private BlockingQueue<String> commandOutputLines
+    private ConcurrentMap<CommandState, Set<AbstractCommand>> commandsByState
+    /**
+     * The current 
+     */
+    private ConcurrentMap<AbstractCommand, CommandState> allCommands
+
+    public ReplicaServerStatusService() {
+        commandsByState = new ConcurrentHashMap<CommandState, Set<AbstractCommand>>()
+        allCommands = new ConcurrentHashMap<AbstractCommand, CommandState>()
+    }
 
     def bootStrap = { 
     }
@@ -38,9 +68,12 @@ public final class ReplicaServerStatusService implements InitializingBean {
     // just like @PostConstruct
     void afterPropertiesSet() {
         this.bayeuxPublisherClient = this.bayeux.newClient(this.class.name)
-        def repoCommandLineChannel = "/csvn-repocommands/output-line"
+        def statusChannel = "/replica/status/all"
         def create = true
-        this.commandLineChannel = this.bayeux.getChannel(repoCommandLineChannel,
+        this.commandStatusChannel = this.bayeux.getChannel(statusChannel,
+            create)
+        def counterChannel = "/replica/status/counter"
+        this.commandsCounterChannel = this.bayeux.getChannel(counterChannel,
             create)
     }
 
@@ -49,26 +82,227 @@ public final class ReplicaServerStatusService implements InitializingBean {
      * Bayeux server with the following Json doc:
      * 
      *  {
-     *      commandOutputLine: string = a line of the command.
+     *     id: the id of the command.
+     *     code: the code of the command to differentiate the type of command.
+     *     state: the new state of the command.
+     *     succeeded: the result of the command, only shows if the command
+     *      terminated.
      *  }
      *  
      */
-    private void publishPercentageMessage(commandOutputLine) {
+    private void publishCommandTransition(AbstractCommand command, 
+           CommandState newState) {
+
         def writer = new StringWriter();
-        def response = [commandOutputLine: commandOutputLine]
-        def jsonRes = (response as JSON).toString()
-        log.debug("Command output line: " + jsonRes)
-        this.commandLineChannel.publish(this.bayeuxPublisherClient, jsonRes,
+        def cmdState = newState.toString()
+        def cmdCode = AbstractCommand.makeCodeName(command)
+
+        def resp = (newState == CommandState.REPORTED || 
+            newState == CommandState.TERMINATED) ? 
+                [id: command.id, code: cmdCode, state: cmdState, 
+                    succeeded: command.succeeded] :
+                [id: command.id, code: cmdCode, state: cmdState]
+
+        def jsonRes = (resp as JSON).toString()
+        log.debug("Command transition to publish: " + jsonRes)
+        this.commandStatusChannel.publish(this.bayeuxPublisherClient, jsonRes,
+            null)
+        def sizeCmdds = allCommands.size()
+        def tresp = [total : sizeCmdds]
+        def tjsonRes = (tresp as JSON).toString()
+        this.commandsCounterChannel.publish(this.bayeuxPublisherClient, tjsonRes,
             null)
     }
 
     /**
-     * The implemented method from the CommandLineOutputListener.
-     * @param commandOutputLine is the line of the output of the command.
+     * @return whether there are commands in either state (
+     * CommandState.SCHEDULED, RUNNING, TERMINATED, REPORTED...)
      */
-    void receiveCommandLineOutputLine(String ommandOutputLine) {
-        if (!commandOutputLine.equals(COMMAND_TERMINATED)) {
-            publishPercentageMessage(commandOutputLine)
+    public boolean areThereAnyCommands() {
+        return this.allCommands.size() > 0
+    }
+
+    /**
+     * @param state is the state of a command.
+     * @return whether there are commands in the given state.
+     */
+    public boolean areThereAnyCommands(CommandState state) {
+        def cmdsInState = this.commandsByState.get(state)
+        return cmdsInState && cmdsInState.size() > 0
+    }
+
+    /**
+     * @param commandId is the command Id.
+     * @return a given command with the given ID.
+     */
+    public AbstractCommand getCommand(String commandId) {
+        for(command in allCommands.keySet()) {
+            if (command.id.equals(commandId)) {
+                return command
+            }
+        }
+        return null
+    }
+
+    /**
+     * @param state the current state.
+     * @return the set of commands on the given state.
+     */
+    public Set<AbstractCommand> getCommands(CommandState state) {
+        Set<AbstractCommand> commandsInState = this.commandsByState.get(state)
+        Set<AbstractCommand> result = new LinkedHashSet<AbstractCommand>()
+        if (!commandsInState || commandsInState.size() == 0) {
+            return result
+        }
+        // as a concurrent hash set.
+        synchronized (commandsByState) {
+            Iterator<AbstractCommand> iter = commandsInState.iterator()
+            while(iter.hasNext()) {
+                result.add(iter.next())
+            }
+        }
+        return result
+    }
+
+    /**
+     * The getCommands for the state
+     * @param state is the set of commands.
+     * @return the commands for the given set of state.
+     */
+    public Set<AbstractCommand> getCommands(CommandState ... state) {
+        if (state != null && state.length > 0) {
+            Set<AbstractCommand> cmds = new LinkedHashSet<AbstractCommand>()
+            for (CommandState commandState : state) {
+                cmds.addAll(getCommands(commandState))
+            }
+            return cmds
+
+        } else {
+            return new LinkedHashSet<AbstractCommand>()
         }
     }
+
+    /**
+     * @return All the current commands running in all states.
+     */
+    public Set<AbstractCommand> getAllCommands() {
+        Set<AbstractCommand> allCommands = new LinkedHashSet<AbstractCommand>()
+        for (state in CommandState.values()) {
+            allCommands.addAll(getCommands(state))
+        }
+        return allCommands
+    }
+
+     /**
+      * Updates the command Maps for the commands.
+      * @param command is the command to be executed.
+      * @param state is the state of the command.
+      */
+    private void updateOrRemoveCommandState(AbstractCommand command, CommandState state) {
+        if (state == null) {
+            def commandState = allCommands.remove(command)
+
+            Set<AbstractCommand> commands = commandsByState.get(commandState)
+            if (commands && commands.size() > 0) {
+                synchronized (commands) {
+                    Iterator<AbstractCommand> iter = commands.iterator()
+                    while (iter.hasNext()) {
+                        def cmd = iter.next()
+                        if (cmd.id == command.id) {
+                            iter.remove()
+                            break
+                        }
+                    }
+                }
+            }
+
+        } else {
+            // override the state getting the previous value
+            def previousState = allCommands.put(command, state)
+
+            // command had not been registered before
+            if (!previousState) {
+                Set<AbstractCommand> commands = commandsByState.get(state)
+                if (!commands) {
+                    Set<AbstractCommand> newSet = Collections.synchronizedSet(
+                        new LinkedHashSet<AbstractCommand>())
+                    commands = commandsByState.putIfAbsent(state, newSet)
+                    if (!commands) {
+                        commands = newSet
+                    }
+                }
+                commands.add(command)
+
+            } else {
+                // remove from the previous state
+                Set<AbstractCommand> commands = commandsByState.get(previousState)
+                if (commands && commands.size() > 0) {
+                    synchronized (commands) {
+                        Iterator<AbstractCommand> iter = commands.iterator()
+                        while (iter.hasNext()) {
+                            def cmd = iter.next()
+                            if (cmd == command) {
+                                iter.remove()
+                                break
+                            }
+                        }
+                    }
+                }
+                Set<AbstractCommand> newStateCmds = commandsByState.get(state)
+                if (!newStateCmds) {
+                    Set<AbstractCommand> newSet = Collections.synchronizedSet(new LinkedHashSet<AbstractCommand>())
+                    newStateCmds = commandsByState.putIfAbsent(state, newSet)
+                    if (!newStateCmds) {
+                        newStateCmds = newSet
+                    }
+                }
+                newStateCmds.add(command)
+            }
+        }
+    }
+
+    /**
+     * The event handler of all {@link ReplicaCommandsExecutionEvent} to 
+     * process the different events.
+     * @param executionEvent is the instance of an execution event.
+     */
+    void onApplicationEvent(ReplicaCommandsExecutionEvent executionEvent) {
+        switch(executionEvent) {
+            case LongRunningCommandQueuedEvent:
+            case ShortRunningCommandQueuedEvent:
+                def scheduledCommand = executionEvent.queuedCommand
+                log.debug "Command scheduled: $scheduledCommand"
+                def state = CommandState.SCHEDULED
+                updateOrRemoveCommandState(scheduledCommand, state)
+                publishCommandTransition(scheduledCommand, state)
+                break;
+
+            case CommandReadyForExecutionEvent:
+                def commandToExecute = executionEvent.commandToExecute
+                log.debug "Command executing: $commandToExecute"
+                def state = CommandState.RUNNING
+                updateOrRemoveCommandState(commandToExecute, state)
+                publishCommandTransition(commandToExecute, state)
+                break
+
+            case CommandTerminatedEvent:
+                def terminatedCommand = executionEvent.terminatedCommand
+                log.debug "Command terminated: ${terminatedCommand}"
+                def state = CommandState.TERMINATED
+                updateOrRemoveCommandState(terminatedCommand, state)
+                publishCommandTransition(terminatedCommand, state)
+                break
+
+            case CommandResultReportedEvent:
+                def cmdResult = executionEvent.commandResult
+                def state = CommandState.REPORTED
+                def reportedCommand = AbstractCommand.makeCommand(cmdResult,
+                    state)
+                log.debug "Command reported: ${reportedCommand}"
+                updateOrRemoveCommandState(reportedCommand, null)
+                publishCommandTransition(reportedCommand, state)
+                break
+        }
+    }
+
 }

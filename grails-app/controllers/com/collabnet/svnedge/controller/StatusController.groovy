@@ -20,7 +20,6 @@ package com.collabnet.svnedge.controller
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
-
 import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
@@ -28,8 +27,8 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.ApprovalState 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
-import java.text.SimpleDateFormat
 
+import java.text.SimpleDateFormat
 
 @Secured(['ROLE_USER'])
 class StatusController {
@@ -42,6 +41,7 @@ class StatusController {
     def lifecycleService
     def packagesUpdateService
     def setupReplicaService
+    def replicaServerStatusService
     def securityService
 
     // start and stop actions use POST requests
@@ -213,6 +213,7 @@ class StatusController {
            def msg = message(code: 'packagesUpdate.error.general')
            flash.error = msg + ":" + e.getMessage()
        }
+       def runningCommands = []
        if (server.mode == ServerMode.REPLICA) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
 
@@ -231,6 +232,7 @@ class StatusController {
                        args: ['/csvn/status/showCertificate'])
                }
            }
+           runningCommands = replicaServerStatusService.getAllCommands()
        }
 
        return [isStarted: isStarted,
@@ -249,8 +251,8 @@ class StatusController {
                certHostname : certHostname,
                certValidity : certValidity,
                certIssuer : certIssuer,
-               certFingerPrint : certFingerPrint
-              ]
+               certFingerPrint : certFingerPrint, 
+               replicaCommands: runningCommands]
     }
 
     def getPerfStats(currentConfig, server) {

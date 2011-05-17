@@ -34,6 +34,10 @@ class CommandResult {
      */
     String commandId
     /**
+     * The code of the command. Basically it gives the class name of the command.
+     */
+    String commandCode
+    /**
      * If the command succeeded or not.
      */
     Boolean succeeded

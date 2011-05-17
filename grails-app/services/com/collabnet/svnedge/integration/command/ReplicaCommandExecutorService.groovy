@@ -174,11 +174,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
             longRunningSemaphore = new Semaphore(newPermits)
 
         } else {
-            if (newPermits < 1) {
+            if (newPermits < 1 || newPermits == oldPermits) {
                 // permits must be positive integers
-                return
-            }
-            if (newPermits == oldPermits) {
                 // no changes to the number of permits
                 return
             }
@@ -200,11 +197,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
             shortRunningSemaphore = new Semaphore(newPermits)
 
         } else {
-            if (newPermits < 1) {
+            if (newPermits < 1 || newPermits == oldPermits) {
                 // permits must be positive integers
-                return
-            }
-            if (newPermits == oldPermits) {
                 // no changes to the number of permits
                 return
             }
@@ -302,7 +296,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * @param commandInstance an instance of {@link AbstractReplicaCommand}
      */
     def commandLifecycleExecutor(commandExec) {
-        try {
+        try { 
             AbstractCommand.logExecution("RUN-BEGIN", commandExec)
             commandExec.run()
             log.debug("Command successfully run: " + commandExec)

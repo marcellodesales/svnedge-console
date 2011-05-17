@@ -17,6 +17,9 @@
  */
 package com.collabnet.svnedge.integration.command
 
+import com.collabnet.svnedge.domain.integration.CommandResult;
+
+import java.util.HashMap;
 import java.util.Map
 
 import org.apache.commons.io.FileUtils;
@@ -41,6 +44,10 @@ abstract class AbstractCommand {
      * The command execution ID
      */
     protected String id
+    /**
+     * The current state of the command.
+     */
+    protected CommandState state
     /**
      * The command execution ID
      */
@@ -68,6 +75,18 @@ abstract class AbstractCommand {
      * to communicate with the Replica Manager (TeamForge).
      */
     protected CommandsExecutionContext context
+    /**
+     * The view of the state transition from a given time command instance 
+     * transitions from since the command has been loaded, executed and 
+     * reported in nanoseconds precision.
+     */
+    protected Map<Long, CommandState> stateTimeTransitions
+    /**
+     * The view of the latest time of the state transition command instance 
+     * transitions from since the command has been loaded, executed and 
+     * reported in nanoseconds precision.
+     */
+    protected Map<CommandState, Long> stateTransitions
 
     /**
      * Constructs a new abstract replica command.
@@ -75,6 +94,19 @@ abstract class AbstractCommand {
     def AbstractCommand() {
         succeeded = false
         params = new HashMap<String, String>()
+        stateTransitions = new LinkedHashMap<CommandState, Long>();
+        stateTimeTransitions = new LinkedHashMap<Long, CommandState>();
+        makeTransitionToState(CommandState.SCHEDULED)
+    }
+
+    /**
+     * Makes a new transition state for this command.
+     */
+    public void makeTransitionToState(CommandState newState) {
+        this.state = newState
+        def time = System.nanoTime()
+        this.stateTransitions.put(newState, time)
+        this.stateTimeTransitions.put(time, newState)
     }
 
     @Override
@@ -91,16 +123,16 @@ abstract class AbstractCommand {
     public int hashCode() {
         final int prime = 31
         int result = 1
-        result = prime * result + ((id == null) ? 0 : id.hashCode())
+        def hash = this.id ? this.id.hashCode() : 0
+        result = prime * result + hash
         return result
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true
-        if (obj == null)
+        if (!obj) {
             return false
+        }
         if (getClass() != obj.getClass())
             return false
         AbstractCommand other = (AbstractCommand) obj
@@ -121,33 +153,84 @@ abstract class AbstractCommand {
      * @return an instance of Abstract Replica Command.
      */
     def static AbstractCommand makeCommand(classLoader, commandMap) {
-
-        def commandPackage = "com.collabnet.svnedge.integration.command.impl"
-
         if (!commandMap['code']) {
             throw new IllegalArgumentException("The name (code) of the " +
                 "command is missing.")
         }
-
-        def className = commandMap['code'].capitalize() + "Command"
         def classObject = null
         try {
-            log.debug("Instantiating command instance: ${className}")
-            classObject = classLoader.loadClass("$commandPackage.$className")
+            classObject = loadCommandClass(classLoader, commandMap['code'])
 
         } catch (ClassNotFoundException clne) {
             commandMap['exception'] = 
-                new CommandNotImplementedException(clne, className)
+                new CommandNotImplementedException(clne, commandMap['code'])
             commandMap['succeeded'] = false
             logExecution("LOAD-FAILED", commandMap, clne)
             return commandMap
         }
-        def commandInstance = classObject.newInstance();
+        def commandInstance = classObject.newInstance()
 
         commandInstance.init(commandMap.id, commandMap['params'], 
             commandMap.context)
 
         return commandInstance
+    }
+
+    /**
+     * @param result is the command result.
+     * @param state is the state to set in case the result does not have state
+     * @return a new instance of a command that has been executed.
+     */
+    public static AbstractCommand makeCommand(CommandResult result, 
+            CommandState state) {
+
+        def classLoader = result.getClass().getClassLoader()
+        def classObject = loadCommandClass(classLoader, result.commandCode)
+        def commandInstance = classObject.newInstance()
+        commandInstance.id = result.commandId
+        // result.succeeded is boolean, but it must be null when not reported.
+        if (result.succeeded != null) {
+            commandInstance.succeeded = result.succeeded
+            commandInstance.makeTransitionToState(state)
+
+        } else {
+            commandInstance.makeTransitionToState(state)
+        }
+        return commandInstance
+    }
+
+    /**
+     * Loads a command class by the command code.
+     */
+    def static loadCommandClass(classLoader, commandCode) 
+            throws ClassNotFoundException {
+
+        def className = commandCode.capitalize() + "Command"
+        log.debug("Instantiating command instance: ${className}")
+        def commandPackage = "com.collabnet.svnedge.integration.command.impl"
+        return classLoader.loadClass("$commandPackage.$className")
+    }
+
+    /**
+     *  Factory method to create the code name based on the name of the class of
+     *  a command.
+     * @param command is an abstract command.
+     * @return the name of the code. Ex. RepoAddCommand => repoAdd.
+     */
+    def static makeCodeName(command) {
+        if (command instanceof AbstractCommand) {
+            String className = command.getClass().getSimpleName()
+            // static classes
+            if (className.contains("\$")) {
+                className = className.substring(className.indexOf("\$") + 1).replace(
+                    "Command", "")
+            }
+            def firstChar = className.charAt(0).toString()
+            return className.replaceFirst(firstChar, firstChar.toLowerCase())
+        } else {
+            // the command instance is a map
+            return command["code"]
+        }
     }
 
     /**
@@ -208,6 +291,7 @@ abstract class AbstractCommand {
      * executing the methods 'constraints()' or 'execute()'.
      */
     public final void run() throws CommandExecutionException {
+        makeTransitionToState(CommandState.RUNNING)
         try {
             log.debug("Verifying the constraints for the command...")
             constraints()
@@ -227,6 +311,7 @@ abstract class AbstractCommand {
                 logExecution("EXECUTION-EXCEPTION", t)
             }
         }
+        makeTransitionToState(CommandState.TERMINATED)
 
         if (executionException) {
             try {
@@ -339,6 +424,14 @@ abstract class AbstractCommand {
                 it.write(sw.toString() + "\n")
             }
         }
+    }
+
+    /**
+     * When the command has been reported to CTF. Any object maintaining a 
+     * reference of this can verify which state this command is in.
+     */
+    public void setAsReported() {
+        makeTransitionToState(CommandState.REPORTED)
     }
 
     /**
