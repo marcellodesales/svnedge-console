@@ -179,10 +179,16 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
      * MaxNumberCommandsRunningUpdatedEvent with the changed values.
      */
     def setSemaphoresUpdatedEvent(semaphoresUpdated) {
-        log.debug("MaxNumberCommandsRunningUpdatedEvent: Closing " +
-            "the gate (count-down latch) until semaphores are updated.")
-        semaphoreUpdatedEvent = semaphoresUpdated
-        updatedSemaphoresGate = new CountDownLatch(1)
+        if (semaphoresUpdated.newMaxLongRunningCmds != semaphoresUpdated.oldMaxLongRunningCmds ||
+                semaphoresUpdated.newMaxShortRunningCmds != semaphoresUpdated.oldMaxShortRunningCmds) {
+            log.debug("MaxNumberCommandsRunningUpdatedEvent: Closing " +
+                "the gate (count-down latch) until semaphores are updated.")
+            semaphoreUpdatedEvent = semaphoresUpdated
+            updatedSemaphoresGate = new CountDownLatch(1)
+        } else {
+            log.debug("semaphoresUpdated event did not alter the queue sizes, so leaving current" +
+                      " semaphores in place")
+        }
     }
 
     /**

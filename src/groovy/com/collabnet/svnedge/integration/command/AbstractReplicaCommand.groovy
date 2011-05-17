@@ -100,38 +100,39 @@ public abstract class AbstractReplicaCommand extends AbstractCommand {
     def updateExecutorPoolSizes() {
         log.debug("Updating the Executor pool max number of long/short cmds...")
         def replica = ReplicaConfiguration.getCurrentConfig()
+        def oldMaxLong = replica.maxLongRunningCmds
+        def oldMaxShort = replica.maxShortRunningCmds
+        def newMaxLong = oldMaxLong
+        def newMaxShort = oldMaxShort
 
-        // update the max number of long/short running commands
-        def maxNumbersChanged = [:]
-        maxNumbersChanged["oldMaxLong"] = -1
-        maxNumbersChanged["NewMaxLong"] = -1
-        maxNumbersChanged["oldMaxShort"] = -1
-        maxNumbersChanged["NewMaxShort"] = -1
         // update the max number of long-running commands property
-        maxNumbersChanged["oldMaxLong"] = replica.maxLongRunningCmds
         def maxLongRunningCmds = this.params.commandConcurrencyLong
         if (maxLongRunningCmds) {
-            maxNumbersChanged["NewMaxLong"] = maxLongRunningCmds.toInteger()
-            replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
+            newMaxLong = maxLongRunningCmds.toInteger()
+            if (newMaxLong != oldMaxLong) {
+                replica.maxLongRunningCmds = maxLongRunningCmds.toInteger()
+            }
         }
         
         // update the max number of short-running commands property
-        maxNumbersChanged["oldMaxShort"] = replica.maxShortRunningCmds
         def maxShortRunningCmds = this.params.commandConcurrencyShort
         if (maxShortRunningCmds) {
-            maxNumbersChanged["NewMaxShort"] = maxShortRunningCmds.toInteger()
-            replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
+            newMaxShort = maxShortRunningCmds.toInteger()
+            if (newMaxShort != oldMaxShort) {
+                replica.maxShortRunningCmds = maxShortRunningCmds.toInteger()
+            }
         }
 
-        if (maxNumbersChanged.values().sum() > -4) {
+        if (oldMaxLong != newMaxLong || oldMaxShort != newMaxShort) {
             log.debug("Flushing the executor pool sizes...")
             replica.save(flush:true)
 
             def maxChangesEvent = new MaxNumberCommandsRunningUpdatedEvent(this,
-                maxNumbersChanged["oldMaxLong"], maxNumbersChanged["NewMaxLong"],
-                maxNumbersChanged["oldMaxShort"], maxNumbersChanged["NewMaxShort"])
+                oldMaxLong, newMaxLong, oldMaxShort, newMaxShort)
             def schedulerService = getService("replicaCommandSchedulerService")
             schedulerService.setSemaphoresUpdatedEvent(maxChangesEvent)
+        } else {
+            log.debug("ReplicaUpdateProps command did not alter either queue size.")
         }
     }
 }
