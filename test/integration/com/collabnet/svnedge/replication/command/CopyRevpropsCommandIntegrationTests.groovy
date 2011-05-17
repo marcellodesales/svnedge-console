@@ -69,11 +69,11 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         assertNotNull("The replica instance must exist", this.rConf)
         this.config = grailsApplication.config
         this.rConf.svnMasterUrl = makeCtfBaseUrl() + "/svn/repos"
-        this.rConf.save()
+        this.rConf.save(flush:true)
 
         Server server = Server.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
-        server.save()
+        server.save(flush:true)
 
         // delete the repo directory for the repo we are adding.
         def repoFileDir = new File(repoParentDir, REPO_NAME)
@@ -84,7 +84,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         ctfServer.mySystemId = EXSY_ID
         ctfServer.ctfUsername = "admin"
         ctfServer.ctfPassword = "n3TEQWKEjpY="
-        ctfServer.save()
+        ctfServer.save(flush:true)
 
         executionContext = new CommandsExecutionContext()
         executionContext.logsDir = System.getProperty("java.io.tmpdir")
@@ -112,6 +112,8 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // add and sync the repo
+        assertNotNull("ReplicaConfig must have svnMasterUrl from which to sync",
+                ReplicaConfiguration.getCurrentConfig().svnMasterUrl)
         def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
