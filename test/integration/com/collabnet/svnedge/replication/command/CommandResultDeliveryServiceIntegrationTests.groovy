@@ -73,7 +73,7 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
         // commands are received to be processed, and first scheduled.
         // the command result objects are created
         remotecmdexecs.each{ command ->
-            commandResultDeliveryService.makePersistedCommandResult(command.id)
+            commandResultDeliveryService.makePersistedCommandResult(command)
         }
         assertEquals "The number of persisted results must be the same as " +
             "the number of partial commands", remotecmdexecs.size(),
@@ -143,11 +143,11 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
     void testNoCommandresultDuplicationNorChanges() {
         def command = remotecmdexecs[0]
 
-        commandResultDeliveryService.makePersistedCommandResult(command.id)
+        commandResultDeliveryService.makePersistedCommandResult(command)
         assertEquals "There must have a command result added", 1, 
             CommandResult.count()
 
-        commandResultDeliveryService.makePersistedCommandResult(command.id)
+        commandResultDeliveryService.makePersistedCommandResult(command)
         assertEquals "Two comands can't be created with the same ID", 1, 
             CommandResult.count()
     }
