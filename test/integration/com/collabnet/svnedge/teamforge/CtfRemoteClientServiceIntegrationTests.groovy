@@ -26,6 +26,7 @@ import com.collabnet.svnedge.integration.CtfAuthenticationException
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.integration.RemoteMasterException
 import org.junit.Test
+import com.collabnet.svnedge.domain.integration.ApprovalState
 
 class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -51,6 +52,14 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
                     ctfUsername: adminUsername,
                    ctfPassword: adminPassword)
             s.save(flush:true)
+        }
+
+        if (!ReplicaConfiguration.getCurrentConfig()) {
+            ReplicaConfiguration rConf = new ReplicaConfiguration(svnMasterUrl: null,
+                name: "Test Replica", description: "Super replica",
+                message: "Auto-approved", systemId: "replica1001",
+                commandPollRate: 5, approvalState: ApprovalState.APPROVED)
+            rConf.save(flush:true)
         }
     }
     
@@ -195,10 +204,6 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
     @Test
     void testDeleteReplica()  {
 
-        // mock the ReplicaConfiguration field used by the service method
-        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
-            new ReplicaConfiguration(systemId: "replica1001")
-        }
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
 
@@ -210,10 +215,6 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
     @Test(expected=CtfAuthenticationException.class)
     void testDeleteReplicaBadAuthentication()  {
 
-        // mock the ReplicaConfiguration field used by the service method
-        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
-            new ReplicaConfiguration(systemId: "replica1001")
-        }
         def username = config.svnedge.ctfMaster.username
 
         // provide faulty credentials, expect exception
@@ -223,10 +224,6 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
     @Test(expected=RemoteMasterException.class)
     void testDeleteReplicaBadAuthorization()  {
 
-        // mock the ReplicaConfiguration field used by the service method
-        ReplicaConfiguration.metaClass.static.getCurrentConfig = {
-            new ReplicaConfiguration(systemId: "replica1001")
-        }
         def username = "DeleteReplicaTestUser"
         def password = "admin"
 
