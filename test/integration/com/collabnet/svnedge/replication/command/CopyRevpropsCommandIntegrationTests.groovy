@@ -114,7 +114,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         // add and sync the repo
         assertNotNull("ReplicaConfig must have svnMasterUrl from which to sync",
                 ReplicaConfiguration.getCurrentConfig().svnMasterUrl)
-        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
+        def commandMap = [code: 'repoAdd', id: "cmdexec1001", params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)

@@ -25,6 +25,8 @@ import java.util.Map
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger
 import grails.util.GrailsUtil
+import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.domain.integration.RepoStatus
 
 /**
  * Defines the Abstract Command to be instantiated based on the map
@@ -299,6 +301,7 @@ abstract class AbstractCommand {
             execute()
             log.debug("Command execution was successful...")
             succeeded = true
+            getCommandOutputFile().delete()
 
         } catch (Throwable t) {
             succeeded = false
@@ -448,5 +451,58 @@ abstract class AbstractCommand {
             return null
         }
         return new File(ctxt.logsDir, logName)
+    }
+
+    protected File getCommandOutputFile() {
+        File logDir = new File(ConfigUtil.dataDirPath(), "logs")
+        File tempLogDir = new File("temp", logDir)
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdir()
+        }
+        return new File("${this.id}.log", tempLogDir)
+    }
+
+    public void writeCommmandOutputFileHeading() {
+        def logEntry = "${new  Date()} ${this.id} " +
+                "${this.class.simpleName} params: " +
+                 (this.params ? "${this.params}" : "[]")
+        getCommandOutputFile().setText(logEntry +
+                "\nExecution output below\n----------------------\n")
+    }
+
+    /**
+     * Helper for executing shell commands for the ReplicaCommand heirarchy
+     * Stdout and Stderr are logged to "data/logs/temp/${command.id}.log"
+     * @param comand List of String command and args to execute
+     * @param repo which can be
+     * @return
+     */
+    protected String executeShellCommandWithLogging(command, repo = null) {
+        def msg
+        def retVal
+        def result
+        FileOutputStream fileOutput = new FileOutputStream(getCommandOutputFile(), true)
+        try {
+            def commandLineService = getService("commandLineService")
+            result = commandLineService.execute(command, fileOutput, fileOutput, null, null, true)
+            retVal = result[0]
+            msg = result[1]
+        } catch (Exception e) {
+            msg = "${command} failed: ${e.getMessage()}"
+        }
+        if (retVal != "0") {
+            if (!msg) {
+                msg = result[2]
+            }
+            log.warn(msg)
+            if (null != repo) {
+                repo.status = RepoStatus.ERROR
+                repo.statusMsg = msg
+                repo.save()
+            }
+            throw new IllegalStateException(msg)
+        }
+        fileOutput.close()
+        return msg
     }
 }

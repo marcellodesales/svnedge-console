@@ -91,21 +91,7 @@ public class CopyRevpropsCommand extends AbstractRepositoryCommand
                 "--non-interactive", "--no-auth-cache", "--config-dir",
                 ConfigUtil.svnConfigDirPath()]
 
-        def retVal = 1
-        def msg = "${command} failed. "
-        try {
-            def commandLineService = getService("commandLineService")
-            retVal = commandLineService.executeWithStatusQuietly(command.toArray(
-                new String[0]))
-
-        } catch (Exception e) {
-            retVal = -1
-            log.warn(msg, e)
-            msg += e.getMessage()
-        }
-        if (retVal != 0) {
-            log.error(msg)
-        }
+        executeShellCommandWithLogging(command)
         log.info("Done syncing repoPath '${repoPath}'.")
     }
 

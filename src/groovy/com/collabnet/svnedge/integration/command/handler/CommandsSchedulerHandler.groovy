@@ -123,6 +123,7 @@ class CommandsSchedulerHandler implements Runnable {
                     }
 
                     commandInstance.logExecution("QUEUED")
+                    commandInstance.writeCommmandOutputFileHeading()
 
                     // start evaluating the commands from the beginning
                     break

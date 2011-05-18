@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 
 import com.collabnet.svnedge.util.CommandLineOutputListener;
 import com.collabnet.svnedge.util.ConfigUtil
+import org.apache.commons.io.output.TeeOutputStream
 
 class CommandLineService {
 
@@ -234,6 +235,63 @@ class CommandLineService {
         def listener = new CommandLineOutputListener(outputQueue)
         executeWithCommandLineListener(command, outputQueue)
         return listener
+    }
+
+    /**
+     * Execute variant that takes output streams
+     * @param command list of command and arguments
+     * @param env Map environment (optional)
+     * @param input input to provide to the command (optional)
+     * @param quiet when true, most logging is suppressed (for secuurity, eg)
+     * @param output OutputStream to which to stream stdout
+     * @param error OutputStream to which to stream stderr
+     * @return String[] of exit code, out, and err
+     */
+    String[] execute(List command, OutputStream outputStream,
+            OutputStream errorStream, Map<String, String> env=null,
+            String input=null, Boolean quiet=false) {
+
+        Process p = startProcess(command as String[], env, quiet)
+        if (input) {
+            p.out.write(input.getBytes())
+        }
+        p.out.close()
+
+        // ByteArray stream to capture command output as returned by this method
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream()
+        ByteArrayOutputStream errorByteArray = new ByteArrayOutputStream()
+
+        // Optionally, streams provided by caller will also receive the process output
+        OutputStream stdout = (outputStream) ? new TeeOutputStream (outputByteArray, outputStream) : outputByteArray
+        OutputStream stderr = (errorStream) ? new TeeOutputStream (errorByteArray, errorStream) : errorByteArray
+
+        p.waitForProcessOutput(stdout, stderr)
+        def exitStatus = p.waitFor()
+        // logging command and output can be suppressed
+        String outString = new String(outputByteArray.toByteArray(), "UTF-8");
+        String errorString = new String(errorByteArray.toByteArray(), "UTF-8");
+        if (!quiet) {
+            log.debug("Command: " + command + " result=" + exitStatus)
+
+            if (outString.length() > 0) {
+                log.debug("Process output: " + outString)
+            }
+            if (errorString.length() > 0) {
+                if (exitStatus == 0) {
+                    // Some apps write to stderr even though they start normally,
+                    // e.g. httpd
+                    log.debug("Process err output: " + errorString)
+                } else {
+                    log.error("Exit status=" + exitStatus +
+                             " Process err output: " + errorString)
+                }
+            }
+        }
+        else {
+            // limited logging when requested
+            log.debug("Command '${command[0]}' executed with return code: " + exitStatus)
+        }
+        return [String.valueOf(exitStatus), outString, errorString] as String[]
     }
 
 }

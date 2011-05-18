@@ -154,9 +154,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             out.writeLine("#!/bin/bash\nexit 0;\n")
         }
         if (!isWindows()) {
-            def commandLineService = getService("commandLineService")
-            commandLineService.executeWithStatus("chmod", "755", 
-                dummyPreRevPropChangeScript)
+            executeShellCommandWithLogging(["chmod", "755",
+                dummyPreRevPropChangeScript])
         }
         log.info("Done changing the rev prop hooks.")
     }
@@ -178,7 +177,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
 
-        executeShellCommand(command, repo)
+        executeShellCommandWithLogging(command, repo)
         log.info("Done initing the repo.")
         repo.lastSyncRev = 0
 
@@ -187,7 +186,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         if (masterUUID) {
             command = [ConfigUtil.svnadminPath(), "setuuid", repoPath, 
                 masterUUID]
-            executeShellCommand(command, repo)
+            executeShellCommandWithLogging(command, repo)
             log.info("Done setting uuid ${masterUUID} of the repo as that " +
                 "of master.")
             execSvnSync(repo, System.currentTimeMillis(), username, password, 
@@ -204,10 +203,10 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--username", username,"--password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
-        def output = executeShellCommand(command, null)
-        int start = output.indexOf("Repository UUID: ") + 17
-        if (start >= 17) {
-            uuid = output.substring(start, output.indexOf("\n", start))
+        def output = executeShellCommandWithLogging(command, null)
+        def matcher = output =~ /Repository UUID: ([^\s]+)/
+        if (matcher && matcher[0][1]) {
+            uuid = matcher[0][1]
         } else {
             String msg = "Unable to get master UUID for repo: " + repoName
             log.warn(msg)
@@ -239,16 +238,11 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def retVal = 1
         def msg = "${command} failed. "
         try {
-            def commandLineService = getService("commandLineService")
-            String[] result = commandLineService.execute(command.toArray(
-                new String[0]))
-            retVal = Integer.parseInt(result[0])
-            msg += result[2]
-            def output = result[1]
-            if (output.length() > 0) {
-                def numBuffer = output.substring(
-                        output.lastIndexOf(' ') + 1, output.length() - 2)
-                revision = java.lang.Long.parseLong(numBuffer)
+            def output = executeShellCommandWithLogging(command, repo)
+            if (output) {
+                def matcher = output =~ /revision (\d+)/
+                revision = Long.parseLong(matcher[matcher.count - 1 ][1])
+                retVal = 0
             }
             if (retVal == 0 && revision == -1) {
                 revision = 0
@@ -274,31 +268,6 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         }
         log.info("Done syncing repo '${repo.repo.name}'.")
     }
-
-    private String executeShellCommand(command, repo) {
-        def retVal = 1
-        def msg
-        String[] result = null
-        try {
-            def commandLineService = getService("commandLineService")
-            result = commandLineService.execute(command.toArray(new String[0]))
-            retVal = Integer.parseInt(result[0])
-            msg = result[2]
-        } catch (Exception e) {
-            retVal = -1
-            msg = "${command} failed: ${e.getMessage()}"
-        }
-        if (retVal != 0) {
-            log.warn(msg)
-            if (null != repo) {
-                repo.status = RepoStatus.ERROR
-                repo.statusMsg = msg
-                repo.save()
-            }
-            throw new IllegalStateException(msg)
-        }
-        return result[1]
-    }   
 
     def removeReplicatedRepository(repoName) {
         def repoDir = new File(Server.getServer().repoParentDir, repoName)
