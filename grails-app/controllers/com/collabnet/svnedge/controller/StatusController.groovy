@@ -213,7 +213,7 @@ class StatusController {
            def msg = message(code: 'packagesUpdate.error.general')
            flash.error = msg + ":" + e.getMessage()
        }
-       def runningCommands = []
+       def runningCmdsSize = 0
        if (server.mode == ServerMode.REPLICA) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
 
@@ -232,7 +232,7 @@ class StatusController {
                        args: ['/csvn/status/showCertificate'])
                }
            }
-           runningCommands = replicaServerStatusService.getAllCommands()
+           runningCmdsSize = replicaServerStatusService.getAllCommandsSize()
        }
 
        return [isStarted: isStarted,
@@ -252,7 +252,7 @@ class StatusController {
                certValidity : certValidity,
                certIssuer : certIssuer,
                certFingerPrint : certFingerPrint, 
-               replicaCommands: runningCommands]
+               replicaCommandsSize: runningCmdsSize]
     }
 
     def getPerfStats(currentConfig, server) {

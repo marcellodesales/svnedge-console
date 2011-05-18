@@ -9,6 +9,9 @@
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
                 djconfig="parseOnLoad: true, isDebug: false"></script>
 
+      <g:set var="no_commands" value="${message(code:'status.page.status.replication.no_commands')}" />
+      <g:set var="commands_running" value="${message(code:'status.page.status.replication.commands_running')}" />
+
       <script type="text/javascript">
         /**
          * Author: Marcello de Sales (mdesales@collab.net)
@@ -17,9 +20,11 @@
         dojo.require('dojox.cometd');
         dojo.require("dijit.Dialog");
 
+        /** The counter cometd channel. */
         var statusCounterChannel = "/replica/status/counter";
 
-        var currentNumberCommands = ${replicaCommands.size()}
+        /** The current number of commands at the time the page loads. */
+        var currentNumberCommands = ${replicaCommandsSize}
 
         /**
          * If there are commands running, then print the number and 
@@ -27,11 +32,11 @@
         function updateUiCommandsRunning(numberOfCommands) {
             if (numberOfCommands > 0) {
                 dojo.byId('spinner').style.display = '';
-                dojo.byId('commandsCount').innerHTML = numberOfCommands + " background commands are running.";
+                dojo.byId('commandsCount').innerHTML = numberOfCommands + " ${commands_running}";
 
             } else {
                 dojo.byId('spinner').style.display = 'none';
-                dojo.byId('commandsCount').innerHTML = "Replica server's up-to-date.";
+                dojo.byId('commandsCount').innerHTML = "${no_commands}";
             }
         }
 
@@ -74,14 +79,7 @@
         }
 
     </script>
-
-    <style type="text/css">
-        @import "/csvn/plugins/cometd-0.1.5/dojo/resources/dojo.css";
-        .dijitDialogCloseIcon { display:none }
-    </style>
-    <link rel="stylesheet"
-        href="/csvn/plugins/cometd-0.1.5/dijit/themes/tundra/tundra.css" />
-    </g:if>
+   </g:if>
 
   </head>
   <body>
@@ -133,8 +131,8 @@
      </g:if>
       <g:if test="${isReplicaMode}">
         <div class="ImageListParent"><strong><g:message code="status.page.status.replication.activity" /></strong>
-        <img src="/csvn/images/replica_commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running.">
-             <div id="commandsCount">${!runningCommands ? "No comands running." : runningCommands.size()}</div>
+        <img src="/csvn/images/replica/commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running.">
+             <div id="commandsCount">${replicaCommandsSize == 0 ? "No comands running." : (replicaCommandsSize + " commands")}</div>
         </div>
       </g:if>
    </g:if>

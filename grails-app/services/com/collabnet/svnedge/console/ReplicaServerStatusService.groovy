@@ -94,14 +94,19 @@ public final class ReplicaServerStatusService implements InitializingBean,
            CommandState newState) {
 
         def writer = new StringWriter();
-        def cmdState = newState.toString()
+        def cmdState = newState.toString().toLowerCase()
         def cmdCode = AbstractCommand.makeCodeName(command)
 
-        def resp = (newState == CommandState.REPORTED || 
-            newState == CommandState.TERMINATED) ? 
-                [id: command.id, code: cmdCode, state: cmdState, 
-                    succeeded: command.succeeded] :
-                [id: command.id, code: cmdCode, state: cmdState]
+        def resp = [id: command.id, code: cmdCode, state: cmdState]
+
+        if (newState == CommandState.REPORTED || 
+                newState == CommandState.TERMINATED) {
+            resp << [succeeded: command.succeeded]
+
+        } else if (newState != CommandState.REPORTED) {
+            // terminated, running, scheduled commands show the parameters
+            resp << [params: command.params]
+        }
 
         def jsonRes = (resp as JSON).toString()
         log.debug("Command transition to publish: " + jsonRes)
@@ -180,6 +185,13 @@ public final class ReplicaServerStatusService implements InitializingBean,
         } else {
             return new LinkedHashSet<AbstractCommand>()
         }
+    }
+
+    /**
+     * @return The total size of commands.
+     */
+    public int getAllCommandsSize() {
+        return this.allCommands.size()
     }
 
     /**
