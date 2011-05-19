@@ -19,6 +19,7 @@ package com.collabnet.svnedge.controller.integration
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
+import grails.util.GrailsUtil
 
 import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Repository 
@@ -33,6 +34,7 @@ import com.collabnet.svnedge.integration.SetupTeamForgeService;
 import java.net.MalformedURLException;
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
+import javax.net.ssl.SSLHandshakeException
 
 @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
 class SetupTeamForgeController {
@@ -91,15 +93,22 @@ class SetupTeamForgeController {
         if(con.hasErrors()) {
             forward(action: 'ctfInfo')
         }
+        def msg = null
         try {
             setupTeamForgeService.confirmConnection(con)
             con.clearCredentials()
             redirect(action:'ctfProject')
             return
 
+        } catch (SSLHandshakeException e) {
+            msg = message(code:"ctfRemoteClientService.ssl.error", args:
+                ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"])
+            log.debug("SSL problem preventing authentication with CTF.", 
+                      GrailsUtil.deepSanitize(e))
+
         } catch (Exception authExcp) {
 
-            def msg = authExcp.getMessage()
+            msg = authExcp.getMessage()
            if (authExcp instanceof MalformedURLException) {
                 msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
                     args: [con.ctfURL.encodeAsHTML()])
@@ -117,10 +126,13 @@ class SetupTeamForgeController {
                msg = message(code: 'ctfRemoteClientService.auth.error',
                    args: [con.ctfURL.encodeAsHTML()])
            }
-           log.debug("Can't confirm TeamForge credentials: " + msg, authExcp)
+           log.debug("Can't confirm TeamForge credentials: " + msg,
+                     GrailsUtil.deepSanitize(authExcp))
+        }
+
+        if (msg) {
            con.errorMessage = msg
            forward(action: 'ctfInfo')
-           return
         }
     }
 
@@ -492,6 +504,12 @@ class SetupTeamForgeController {
             // Just display the error on the form
             def msg = message(code: 'ctfRemoteClientService.host.malformedUrl',
                 args: [con.ctfURL.encodeAsHTML()])
+            con.errorMessage = msg
+            redirect(action: 'ctfInfo')
+
+        } catch (SSLHandshakeException e) {
+            def msg = message(code:"ctfRemoteClientService.ssl.error", args:
+                ["http://help.collab.net/index.jsp?topic=/csvn/action/csvntotf_ssl.html"])
             con.errorMessage = msg
             redirect(action: 'ctfInfo')
 

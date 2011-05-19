@@ -25,6 +25,7 @@ import java.net.NoRouteToHostException
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import javax.net.ssl.SSLHandshakeException
 
 import grails.util.GrailsUtil
 
@@ -561,6 +562,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
 
         } catch (MalformedURLException malformedUrl) {
             exception = malformedUrl
+
+        } catch (SSLHandshakeException sslException) {
+            exception = sslException
 
         } catch (CantBindPortException cantRestartServer) {
             if (!this.isFreshInstall()) {

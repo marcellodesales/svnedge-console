@@ -1042,7 +1042,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         }
     }
     
-    private HttpURLConnection openPostUrl(String url, def paramMap, boolean followRedirect) {
+    private HttpURLConnection openPostUrl(String url, def paramMap, boolean followRedirect) 
+            throws SSLHandshakeException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestMethod("POST")
         conn.setRequestProperty("Accept-Language", 'en');
@@ -1082,7 +1083,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @return Map with the keys [jsessionid, usessionid] after logging in
      * into the given ctfUrl with the given ctfUsername and ctfPassword
      */
-    public def getCtfSessionIds(ctfUrl, ctfUsername, ctfPassword) {
+    public def getCtfSessionIds(ctfUrl, ctfUsername, ctfPassword) 
+            throws SSLHandshakeException {
         def requestParams = [username: ctfUsername, password: ctfPassword,
              sfsubmit: "submit"]
         def conn = openPostUrl(this.buildCtfLoginUrl(ctfUrl), requestParams, 

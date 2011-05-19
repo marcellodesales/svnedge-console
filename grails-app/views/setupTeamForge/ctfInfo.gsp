@@ -35,6 +35,9 @@
       <tr>
         <td class="ContainerBodyWithPaddedBorder">
 
+          <g:if test="${flash.errors}">
+            <g:render template="errorList"/>
+          </g:if> 
           <g:if test="${connectionErrors && errorCause}">
             <div class="errorMessage">
                 <%=generalError%>
