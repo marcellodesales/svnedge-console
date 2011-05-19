@@ -23,6 +23,7 @@ import grails.test.GrailsUnitTestCase;
 
 class CommandLineServiceTests extends GrailsUnitTestCase {
 
+    def isSolaris = System.getProperty("os.name").substring(0,3) == "Sun"
     def commandLineService
 
     protected void setUp() {
@@ -33,6 +34,9 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
 
     void testExecuteSuccessfulCommand() {
         def cmd = "ping www.facebook.com -c 3"
+        if (isSolaris) {
+            cmd = "ping -s www.facebook.com 56 3"
+        }
         println "Executing command $cmd"
         def outputListener = commandLineService.executeAsync(cmd)
         assertNotNull "The outout listener must exist", outputListener
@@ -51,6 +55,10 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
         def cmd = "ping www.google.com -c 3"
         def cmd2 = "ping www.collab.net -c 2"
 
+        if (isSolaris) {
+            cmd = "ping -s www.google.com 56 3"
+            cmd2 = "ping -s www.collab.net 56 2"
+        }
         // execute the command in parallel
         println "Executing command $cmd"
         def outputListener = commandLineService.executeAsync(cmd)
