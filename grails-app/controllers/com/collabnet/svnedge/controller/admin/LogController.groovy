@@ -122,8 +122,8 @@ class LogController {
         try {
             def logFile = logManagementService.getLogFile(logName)
 
-            def view = (params.rawView) ? "showRaw" : "show"
-            def contentType = (params.rawView) ? "text/plain" : "text/html"
+            def view = (params.view == 'raw') ? "showRaw" : "show"
+            def contentType = (params.view == 'raw') ? "text/plain" : "text/html"
 
             def logSize = operatingSystemService.formatBytes(logFile.length())
             def modifiedTime = new Date(logFile.lastModified())
@@ -160,7 +160,6 @@ class LogController {
         try {
             def logFile = logManagementService.getLogFile(logName)
 
-            def logSize = operatingSystemService.formatBytes(logFile.length())
             def modifiedTime = new Date(logFile.lastModified())
             def currentLocale = RCU.getLocale(request)
             def dtFormat = message(code: "default.dateTime.format.withZone")

@@ -8,11 +8,19 @@
   <g:javascript library="application" />
   <g:javascript>
 
+
+    Event.observe(window, 'load', function() {
+        $('tailButton').observe('click', toggleLogStreaming)
+
+        // allow initial state of tailing
+        if ('${params.view}' == 'tail') {
+            toggleLogStreaming()
+        }
+    })
+
     var logStreamer;
     var tailLog = false
-    Event.observe(window, 'load', function() {
-
-    $('tailButton').observe('click', function(event){
+    function toggleLogStreaming() {
       tailLog = !tailLog;
       if (tailLog) {
           logStreamer  = new LogStreamer('${params.fileName}', '${fileSizeBytes}', $('fileContent'), $('fileContentDiv'))
@@ -23,8 +31,7 @@
           logStreamer.stop();
           $('tailButton').update("<g:message code="logs.page.show.button.tail"/>");
       }
-    })
-})
+    }
 
 </g:javascript>
 </head>
@@ -92,7 +99,7 @@ if (params.highlight) {
                 <g:link id="tailButton" url="#" class="Button" onclick="return false"><g:message code="logs.page.show.button.tail" /></g:link>
               </div></div>
               <div class="Button"><div class="Middle">                
-                <g:link target="_blank" action="show" params="[fileName : file.name, rawView : true]" class="Button"><g:message code="logs.page.show.button.viewRaw" /> &#133;</g:link>
+                <g:link target="_blank" action="show" params="[fileName : file.name, view : 'raw']" class="Button"><g:message code="logs.page.show.button.viewRaw" /> &#133;</g:link>
               </div></div>
               <div class="Button"><div class="Middle">
                 <g:link action="list" class="Button"><g:message code="logs.page.show.button.return" /></g:link>

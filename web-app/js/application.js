@@ -33,12 +33,14 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
             parameters: {fileName: logStreamer.logData.log.fileName, startIndex: logStreamer.logData.log.endIndex },
             onSuccess: function(transport){
               logStreamer.logData = transport.responseText.evalJSON(true);
+//              appendText = (logStreamer.logData.log.error) ? "\n\n** " + logStreamer.logData.log.error + " **" : logStreamer.logData.log.content
+              appendText = logStreamer.logData.log.content
               if (Prototype.Browser.IE) {
-                var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" +  logStreamer.logData.log.content + "</PRE>"
+                var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" + appendText + "</PRE>"
                 logStreamer.contentElement.update(newContent);
               }
               else {
-                var newContent = logStreamer.contentElement.innerHTML + logStreamer.logData.log.content
+                var newContent = logStreamer.contentElement.innerHTML + appendText
                 logStreamer.contentElement.update(newContent) ;
               }
               logStreamer.scrollingElement.scrollTop = logStreamer.scrollingElement.scrollHeight;
