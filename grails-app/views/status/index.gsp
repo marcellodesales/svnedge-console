@@ -5,9 +5,8 @@
     <title>CollabNet Subversion Edge</title>
 
   <g:if test="${isReplicaMode}">
-      <g:javascript library="prototype" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
-                djconfig="parseOnLoad: true, isDebug: false"></script>
+                djconfig="parseOnLoad: false isDebug: false"></script>
 
       <g:set var="no_commands" value="${message(code:'status.page.status.replication.no_commands')}" />
       <g:set var="commands_running" value="${message(code:'status.page.status.replication.commands_running')}" />
@@ -131,7 +130,11 @@
      </g:if>
       <g:if test="${isReplicaMode}">
         <div class="ImageListParent"><strong><g:message code="status.page.status.replication.activity" /></strong>
-        <img src="/csvn/images/replica/commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running.">
+        <g:set var="imageRunning" value="none" />
+        <g:if test="${replicaCommandsSize > 0}">
+            <g:set var="imageRunning" value="" />
+        </g:if>
+        <img src="/csvn/images/replica/commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running." style="display:${imageRunning};">
              <div id="commandsCount">${replicaCommandsSize == 0 ? "No comands running." : (replicaCommandsSize + " commands")}</div>
         </div>
       </g:if>
