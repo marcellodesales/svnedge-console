@@ -6,7 +6,7 @@
 
   <g:if test="${isReplicaMode}">
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
-                djconfig="parseOnLoad: false isDebug: false"></script>
+                djconfig="parseOnLoad: false, isDebug: false"></script>
 
       <g:set var="no_commands" value="${message(code:'status.page.status.replication.no_commands')}" />
       <g:set var="commands_running" value="${message(code:'status.page.status.replication.commands_running')}" />
