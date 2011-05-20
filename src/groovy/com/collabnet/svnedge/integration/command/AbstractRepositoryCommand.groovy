@@ -254,7 +254,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             repo.status = RepoStatus.OUT_OF_DATE
             repo.statusMsg = msg
             repo.save()
-            throw new CommandExecutionException(msg, e)
+            throw new CommandExecutionException(this, e, null)
         }
     }
 
