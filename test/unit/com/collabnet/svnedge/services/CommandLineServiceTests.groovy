@@ -18,28 +18,33 @@
 package com.collabnet.svnedge.services
 
 import com.collabnet.svnedge.console.CommandLineService;
+import com.collabnet.svnedge.console.OperatingSystemService;
 
 import grails.test.GrailsUnitTestCase;
 
 class CommandLineServiceTests extends GrailsUnitTestCase {
 
-    def isSolaris = System.getProperty("os.name").substring(0,3) == "Sun"
     def commandLineService
+    def operatingSystemService
 
     protected void setUp() {
         super.setUp()
 
         commandLineService = new CommandLineService()
+        operatingSystemService = new OperatingSystemService()
     }
 
     void testExecuteSuccessfulCommand() {
         def cmd = "ping www.facebook.com -c 3"
-        if (isSolaris) {
+        if (operatingSystemService.isSolaris()) {
             cmd = "ping -s www.facebook.com 56 3"
+        }
+        if (operatingSystemService.isWindows()) {
+            cmd = "ping www.facebook.com -n 3"
         }
         println "Executing command $cmd"
         def outputListener = commandLineService.executeAsync(cmd)
-        assertNotNull "The outout listener must exist", outputListener
+        assertNotNull "The output listener must exist", outputListener
 
         def allLines = []
         def line
@@ -55,9 +60,13 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
         def cmd = "ping www.google.com -c 3"
         def cmd2 = "ping www.collab.net -c 2"
 
-        if (isSolaris) {
+        if (operatingSystemService.isSolaris()) {
             cmd = "ping -s www.google.com 56 3"
             cmd2 = "ping -s www.collab.net 56 2"
+        }
+        if (operatingSystemService.isWindows()) {
+            cmd = "ping www.google.com -n 3"
+            cmd2 = "ping www.collab.net -n 2"
         }
         // execute the command in parallel
         println "Executing command $cmd"
@@ -65,8 +74,8 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
         println "Executing command $cmd2"
         def outputListener2 = commandLineService.executeAsync(cmd2)
 
-        assertNotNull "The outout listener 1 must exist", outputListener
-        assertNotNull "The outout listener 2 must exist", outputListener2
+        assertNotNull "The output listener 1 must exist", outputListener
+        assertNotNull "The output listener 2 must exist", outputListener2
 
         def allLines = []
         def line
