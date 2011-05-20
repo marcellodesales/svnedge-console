@@ -234,39 +234,28 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
         
-        def revision = -1
-        def retVal = 1
         def msg = "${command} failed. "
         try {
             def output = executeShellCommandWithLogging(command, repo)
-            if (output) {
-                def matcher = output =~ /revision (\d+)/
-                revision = Long.parseLong(matcher[matcher.count - 1 ][1])
-                retVal = 0
-            }
-            if (retVal == 0 && revision == -1) {
-                revision = 0
-            }
-        } catch (Exception e) {
-            retVal = -1
-            log.warn(msg, e)
-            msg += e.getMessage()
-        }
-        if (retVal != 0) {
-            log.warn(msg)
-            repo.status = RepoStatus.ERROR
-            repo.statusMsg = msg
-            repo.save()
-        }
-        if (revision != -1) {
+            def matcher = output =~ /revision (\d+)/
+            def revision = Long.parseLong(matcher[matcher.count - 1 ][1])
             repo.status = RepoStatus.OK
             repo.statusMsg = null
             repo.lastSyncTime = masterTimestamp
-            if (revision)
+            if (revision > 0) {
                 repo.lastSyncRev = revision
+            }
             repo.save()
+            log.info("Done syncing repo '${repo.repo.name}'.")
         }
-        log.info("Done syncing repo '${repo.repo.name}'.")
+        catch (Exception e) {
+            log.warn(msg, e)
+            msg += e.getMessage()
+            repo.status = RepoStatus.OUT_OF_DATE
+            repo.statusMsg = msg
+            repo.save()
+            throw new CommandExecutionException(msg, e)
+        }
     }
 
     def removeReplicatedRepository(repoName) {

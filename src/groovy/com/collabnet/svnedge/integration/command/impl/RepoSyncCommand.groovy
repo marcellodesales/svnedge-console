@@ -51,9 +51,10 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
                 "the repository '${repoName}' hasn't been finished to " +
                 "execute svn sync.")
         }
-        if (repo.status != RepoStatus.OK) {
+        if (!(repo.status == RepoStatus.OK ||
+                repo.status == RepoStatus.OUT_OF_DATE)) {
             throw new IllegalStateException("The replicated repository " +
-                "'${repoName}' is not in the OK state.")
+                "'${repoName}' is not in the OK or OUT_OF_DATE state.")
         }
     }
 
