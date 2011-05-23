@@ -1,5 +1,5 @@
 CollabNet Subversion Edge - Solaris sparc/x86
-Version 1.4.0
+Version 2.0.0
 Release Date: unknown
 
 Contents
