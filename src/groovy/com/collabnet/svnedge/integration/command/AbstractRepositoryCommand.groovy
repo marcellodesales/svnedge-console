@@ -237,14 +237,15 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def msg = "${command} failed. "
         try {
             def output = executeShellCommandWithLogging(command, repo)
-            def matcher = output =~ /revision (\d+)/
-            def revision = Long.parseLong(matcher[matcher.count - 1 ][1])
+            // if there is output, scan for last "revision N" pattern
+            // if not, there are no new revisions to sync
+            if (output) {
+                def matcher = output =~ /revision (\d+)/
+                repo.lastSyncRev = Long.parseLong(matcher[matcher.count - 1 ][1])
+            }
             repo.status = RepoStatus.OK
             repo.statusMsg = null
             repo.lastSyncTime = masterTimestamp
-            if (revision > 0) {
-                repo.lastSyncRev = revision
-            }
             repo.save()
             log.info("Done syncing repo '${repo.repo.name}'.")
         }
