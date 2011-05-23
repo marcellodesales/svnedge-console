@@ -37,7 +37,7 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
     void testExecuteSuccessfulCommand() {
         def cmd = "ping www.facebook.com -c 3"
         if (operatingSystemService.isSolaris()) {
-            cmd = "ping -s www.facebook.com 56 3"
+            cmd = "/usr/sbin/ping -s www.facebook.com 56 3"
         }
         if (operatingSystemService.isWindows()) {
             cmd = "ping www.facebook.com -n 3"
@@ -61,8 +61,8 @@ class CommandLineServiceTests extends GrailsUnitTestCase {
         def cmd2 = "ping www.collab.net -c 2"
 
         if (operatingSystemService.isSolaris()) {
-            cmd = "ping -s www.google.com 56 3"
-            cmd2 = "ping -s www.collab.net 56 2"
+            cmd = "/usr/sbin/ping -s www.google.com 56 3"
+            cmd2 = "/usr/sbin/ping -s www.collab.net 56 2"
         }
         if (operatingSystemService.isWindows()) {
             cmd = "ping www.google.com -n 3"
