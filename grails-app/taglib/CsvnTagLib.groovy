@@ -17,7 +17,8 @@
  */
 
 import com.collabnet.svnedge.domain.Server
-
+import com.collabnet.svnedge.integration.command.AbstractCommand
+ 
 class CsvnTagLib {
 
      def securityService
@@ -74,6 +75,16 @@ class CsvnTagLib {
         })
        </script>
        """
+    }
+
+    /**
+     * Given 
+     * @param command
+     * @return the code name of the commad.
+     */
+    def makeCommandCodeName = { attrs ->
+        def className = attrs.className ?: ""
+        out << className ? AbstractCommand.makeCodeName(className).trim() : className.trim()
     }
 
 }

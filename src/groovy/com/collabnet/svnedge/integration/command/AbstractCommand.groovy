@@ -106,7 +106,7 @@ abstract class AbstractCommand {
      */
     public void makeTransitionToState(CommandState newState) {
         this.state = newState
-        def time = System.nanoTime()
+        def time = System.currentTimeMillis()
         this.stateTransitions.put(newState, time)
         this.stateTimeTransitions.put(time, newState)
     }
@@ -214,6 +214,23 @@ abstract class AbstractCommand {
     }
 
     /**
+     * Factory method to create the code based on the name of the class.
+     * @param command
+     * @return
+     */
+    def static makeCodeName(String simpleClassName) {
+        // static classes
+        if (simpleClassName.contains("\$")) {
+            simpleClassName = simpleClassName.substring(
+                simpleClassName.indexOf("\$") + 1)
+        }
+        def firstChar = simpleClassName.charAt(0).toString()
+        def result = simpleClassName.replaceFirst(firstChar, 
+            firstChar.toLowerCase())
+        return result.replace("Command", "")
+    }
+
+    /**
      *  Factory method to create the code name based on the name of the class of
      *  a command.
      * @param command is an abstract command.
@@ -223,15 +240,14 @@ abstract class AbstractCommand {
         if (command instanceof AbstractCommand) {
             String className = command.getClass().getSimpleName()
             // static classes
-            if (className.contains("\$")) {
-                className = className.substring(className.indexOf("\$") + 1).replace(
-                    "Command", "")
-            }
-            def firstChar = className.charAt(0).toString()
-            return className.replaceFirst(firstChar, firstChar.toLowerCase())
-        } else {
+            return makeCodeName(className)
+
+        } else if (command instanceof Map){
             // the command instance is a map
             return command["code"]
+
+        } else {
+            return makeCodeName(command)
         }
     }
 
@@ -253,6 +269,7 @@ abstract class AbstractCommand {
         this.context = executionContext
         this.id = id
         this.params = initialParameters
+        
         log.debug("Instantiating the command " + getClass().getName() + 
                 " with the parameters " + initialParameters)
     }

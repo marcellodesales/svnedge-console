@@ -30,11 +30,11 @@
          */
         function updateUiCommandsRunning(numberOfCommands) {
             if (numberOfCommands > 0) {
-                dojo.byId('spinner').style.display = '';
+                dojo.byId('spinner').src = '/csvn/images/replica/commands_updating_spinner.gif';
                 dojo.byId('commandsCount').innerHTML = numberOfCommands + " ${commands_running}";
 
             } else {
-                dojo.byId('spinner').style.display = 'none';
+                dojo.byId('spinner').src = '/csvn/images/fping_up.gif';
                 dojo.byId('commandsCount').innerHTML = "${no_commands}";
             }
         }
@@ -130,11 +130,11 @@
      </g:if>
       <g:if test="${isReplicaMode}">
         <div class="ImageListParent"><strong><g:message code="status.page.status.replication.activity" /></strong>
-        <g:set var="imageRunning" value="none" />
+        <g:set var="replicationStatusIcon" value="fping_up.gif" />
         <g:if test="${replicaCommandsSize > 0}">
-            <g:set var="imageRunning" value="" />
+            <g:set var="replicationStatusIcon" value="replica/commands_updating_spinner.gif" />
         </g:if>
-        <img src="/csvn/images/replica/commands_updating_spinner.gif" id="spinner" align="middle" alt="Commands are running." style="display:${imageRunning};">
+        <img src="/csvn/images/${replicationStatusIcon}" id="spinner">
              <div id="commandsCount">${replicaCommandsSize == 0 ? "No comands running." : (replicaCommandsSize + " commands")}</div>
         </div>
       </g:if>

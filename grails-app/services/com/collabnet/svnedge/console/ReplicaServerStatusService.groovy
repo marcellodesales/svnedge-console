@@ -22,6 +22,8 @@ import org.springframework.context.ApplicationListener;
 import com.collabnet.svnedge.domain.integration.CommandResult;
 import com.collabnet.svnedge.integration.command.AbstractCommand;
 import com.collabnet.svnedge.integration.command.CommandState;
+import com.collabnet.svnedge.integration.command.LongRunningCommand;
+import com.collabnet.svnedge.integration.command.ShortRunningCommand;
 import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent;
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent;
 import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
@@ -29,8 +31,8 @@ import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedE
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent;
 
-public final class ReplicaServerStatusService implements InitializingBean, 
-        ApplicationListener<ReplicaCommandsExecutionEvent> {
+public final class ReplicaServerStatusService extends AbstractSvnEdgeService 
+        implements InitializingBean, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     boolean transactional = false
 
@@ -56,10 +58,24 @@ public final class ReplicaServerStatusService implements InitializingBean,
      * The current 
      */
     private ConcurrentMap<AbstractCommand, CommandState> allCommands
+    /**
+     * The index of long-running commands
+     */
+    private Set<LongRunningCommand> allLongRunning
+    /**
+     * The index of short-running commands
+     */
+    private Set<ShortRunningCommand> allShortRunning
 
     public ReplicaServerStatusService() {
-        commandsByState = new ConcurrentHashMap<CommandState, Set<AbstractCommand>>()
-        allCommands = new ConcurrentHashMap<AbstractCommand, CommandState>()
+        commandsByState = new ConcurrentHashMap<CommandState, 
+            Set<AbstractCommand>>()
+        allCommands = new ConcurrentHashMap<AbstractCommand, 
+            CommandState>()
+        allLongRunning = Collections.synchronizedSet(
+            new HashSet<LongRunningCommand>())
+        allShortRunning = Collections.synchronizedSet(
+            new HashSet<ShortRunningCommand>())
     }
 
     def bootStrap = { 
@@ -85,6 +101,8 @@ public final class ReplicaServerStatusService implements InitializingBean,
      *     id: the id of the command.
      *     code: the code of the command to differentiate the type of command.
      *     state: the new state of the command.
+     *     type: "long" or "short"
+     *     startedAt: the timestamp when it started running
      *     succeeded: the result of the command, only shows if the command
      *      terminated.
      *  }
@@ -99,9 +117,20 @@ public final class ReplicaServerStatusService implements InitializingBean,
 
         def resp = [id: command.id, code: cmdCode, state: cmdState]
 
-        if (newState == CommandState.REPORTED || 
-                newState == CommandState.TERMINATED) {
+        def cmdType = command instanceof LongRunningCommand ? "long" : "short"
+        if (newState == CommandState.RUNNING) {
+            def dateTime = new Date(command.stateTransitions.get(
+                CommandState.RUNNING))
+            def dtFormat = getMessage("default.dateTime.format.withZone")
+            resp << [startedAt: dateTime.format(dtFormat)]
+            resp << [type: cmdType]
+        }
+        if (newState == CommandState.TERMINATED) {
             resp << [succeeded: command.succeeded]
+            resp << [type: cmdType]
+        }
+        if (newState == CommandState.REPORTED) {
+            resp << [type: cmdType]
 
         } else if (newState != CommandState.REPORTED) {
             // terminated, running, scheduled commands show the parameters
@@ -195,14 +224,37 @@ public final class ReplicaServerStatusService implements InitializingBean,
     }
 
     /**
+     * @param commandType Is one of the marker interfaces 
+     * {@link LongRunningCommand} or {@link ShortRunningCommand}.
+     * @return All the current commands for the given type.
+     */
+    public Set<AbstractCommand> getCommandsByType(commandType) {
+        Set<AbstractCommand> all = new LinkedHashSet<AbstractCommand>()
+        if (commandType == LongRunningCommand.class) {
+            synchronized (allLongRunning) {
+                for (cmd in allLongRunning) {
+                    all << cmd
+                }
+            }
+        } else if (commandType == ShortRunningCommand.class) {
+            synchronized (allShortRunning) {
+                for (cmd in allShortRunning) {
+                    all << cmd
+                }
+            }
+        }
+        return all
+    }
+
+    /**
      * @return All the current commands running in all states.
      */
     public Set<AbstractCommand> getAllCommands() {
-        Set<AbstractCommand> allCommands = new LinkedHashSet<AbstractCommand>()
+        Set<AbstractCommand> all = new LinkedHashSet<AbstractCommand>()
         for (state in CommandState.values()) {
-            allCommands.addAll(getCommands(state))
+            all.addAll(getCommands(state))
         }
-        return allCommands
+        return all
     }
 
      /**
@@ -213,6 +265,13 @@ public final class ReplicaServerStatusService implements InitializingBean,
     private void updateOrRemoveCommandState(AbstractCommand command, CommandState state) {
         if (state == null) {
             def commandState = allCommands.remove(command)
+
+            if (command.class == LongRunningCommand.class) {
+                allLongRunning.remove(command)
+
+            } else if (command.class == ShortRunningCommand.class) {
+                allShortRunning.remove(command)
+            }
 
             Set<AbstractCommand> commands = commandsByState.get(commandState)
             if (commands && commands.size() > 0) {
@@ -231,6 +290,14 @@ public final class ReplicaServerStatusService implements InitializingBean,
         } else {
             // override the state getting the previous value
             def previousState = allCommands.put(command, state)
+
+            if (command.class == LongRunningCommand.class) {
+                allLongRunning << command
+
+            } else if (command.class == ShortRunningCommand.class) {
+                allShortRunning << command
+            }
+
 
             // command had not been registered before
             if (!previousState) {

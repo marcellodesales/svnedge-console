@@ -216,8 +216,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
             publishEvent(new CommandResultReportedEvent(this, commandResult))
 
             // remove the command result as it has been transmitted.
-            // TODO: The command results should be removed after the day.
-            // deleteTransmittedResults(commandResult)
+            deleteTransmittedResults(commandResult)
 
         } catch (Exception remoteError) {
             log.error("Error while acknowledging the command " +
