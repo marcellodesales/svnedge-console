@@ -6,24 +6,14 @@
     <meta name="layout" content="main" />
     <title><g:message code="job.page.list.title"/></title>
 
-      <g:javascript library="prototype" />
-      <g:javascript src="fader-min.js" />
-
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
                 djconfig="parseOnLoad: true, isDebug: false"></script>
 
       <g:set var="no_commands" value="${message(code:'status.page.status.replication.no_commands')}" />
       <g:set var="commands_running" value="${message(code:'status.page.status.replication.commands_running')}" />
 
-     <g:set var="fadingImages">
-      <g:each in="${allCommands}" status="i" var="command">
-        <g:if test="${command.state == CommandState.RUNNING }">
-            fadeRunningIcon(${command.id});
-        </g:if>
-      </g:each>
-     </g:set>
-
       <script type="text/javascript">
+      // http://rick.measham.id.au/javascript/hash.htm
 
 	      function Hash(){
 	          for( var i=0; i < arguments.length; i++ )
@@ -82,9 +72,9 @@
 	                  if( arguments[i].hasOwnProperty(n) )
 	                      this[n] = arguments[i][n];
 	          return this;
-	      }
-	
-	      var passedResults = new Hash()
+        }
+
+        var passedResults = new Hash()
 
         /**
          * Author: Marcello de Sales (mdesales@collab.net)
@@ -369,21 +359,6 @@
                     }
                 }
             }
-        }
-
-        function fadeRunningIcon(commandId) {
-            //Fader with options
-            alert(commandId)
-            var img = ["/csvn/images/replica/command_running.png"]
-            new Widget.Fader("state_img_" + commandId, img, {
-                fadeInDuration: 0.5,
-                fadeOutDuration: 0.5,
-                displayDuration: 0.5
-            })
-        }
-
-        function showMessage() {
-            ${fadingImages}
         }
 
         /**
