@@ -108,6 +108,7 @@
                       repo: 'repo',
                       user: 'user',
                       role: 'user',
+                      job: 'job',
                       userCache: 'userCache',
                       statistics: 'statistics',
                       admin: 'admin',
@@ -122,6 +123,7 @@
         <g:set var="buttonNameMap"
                value="${[status: message(code:'status.main.icon'),
                       repo: message(code:'repository.main.icon'),
+                      job: message(code:'job.main.icon'),
                       user: message(code:'user.main.icon'),
                       userCache: message(code:'userCache.main.icon'),
                       statistics: message(code:'statistics.main.icon'),
@@ -132,6 +134,7 @@
         <g:set var="buttonIconMap"
                value="${[status: 'project-homeicon.gif',
                       repo: 'project-scmicon.gif',
+                      job: 'project-buildtesticon.gif',
                       user: 'project-adminusers.gif',
                       userCache: 'project-tasksicon.gif',
                       statistics: 'project-reportsicon.gif',
@@ -139,7 +142,7 @@
                       ocn: 'project-ocnicon.gif']}"/>
 
         <td class="VerticalSeparatorNoBorder"></td>
-        %{-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status)--}%
+ <%-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status) --%>
         <g:set var="selectedButton">status</g:set>
         <g:if test="${controllerButtonMap[activeButton]}">
             <g:set var="selectedButton"

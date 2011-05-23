@@ -1,3 +1,5 @@
+<%-- If you want to add a tab, go to layouts/main.gsp and specify its properties there --%> 
+
 <table cellspacing="0" cellpadding="0" border="0" class="TabTable">
   <tr>
   <g:if test="${tabs[0].action == actionName || tabs[0].active}">
