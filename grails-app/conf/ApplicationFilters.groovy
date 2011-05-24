@@ -64,7 +64,9 @@ class ApplicationFilters {
 
                 if (!isManagedMode &&
                     "server" == controllerName && (
-                        "editIntegration" == actionName || "revert" == actionName)) {
+                        "editIntegration" == actionName || "revert" == actionName) || 
+                        ("job" == controllerName && ServerMode.REPLICA != Server.getServer().mode)) {
+
                     flash.error = app.getMainContext().getMessage(
                         "filter.probihited.mode.standalone", null,
                             Locale.getDefault())

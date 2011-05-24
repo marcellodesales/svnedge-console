@@ -31,7 +31,7 @@
         function updateUiCommandsRunning(numberOfCommands) {
             if (numberOfCommands > 0) {
                 dojo.byId('spinner').src = '/csvn/images/replica/commands_updating_spinner.gif';
-                dojo.byId('commandsCount').innerHTML = numberOfCommands + " ${commands_running}";
+                dojo.byId('commandsCount').innerHTML = "${commands_running}" + numberOfCommands;
 
             } else {
                 dojo.byId('spinner').src = '/csvn/images/fping_up.gif';
@@ -135,7 +135,7 @@
             <g:set var="replicationStatusIcon" value="replica/commands_updating_spinner.gif" />
         </g:if>
         <img src="/csvn/images/${replicationStatusIcon}" id="spinner">
-             <div id="commandsCount">${replicaCommandsSize == 0 ? "No comands running." : (replicaCommandsSize + " commands")}</div>
+             <div id="commandsCount">${replicaCommandsSize == 0 ? no_commands : (commands_running + " " +replicaCommandsSize)}</div>
         </div>
       </g:if>
    </g:if>

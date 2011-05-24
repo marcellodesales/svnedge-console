@@ -1,3 +1,20 @@
+/*
+ * CollabNet Subversion Edge
+ * Copyright (C) 2011, CollabNet Inc. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package com.collabnet.svnedge.console
 
 import java.util.Collections;
@@ -31,6 +48,14 @@ import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedE
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent;
 
+/**
+ * This service is responsible for maintaining the current status of the 
+ * commands being executed. It will use Cometd to push the information on 
+ * each command status change.
+ * 
+ * @author Marcello de Sales (mdesales@collab.net)
+ *
+ */
 public final class ReplicaServerStatusService extends AbstractSvnEdgeService 
         implements InitializingBean, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
@@ -46,16 +71,19 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      */
     private Client bayeuxPublisherClient
     /**
-     * The Bayeux publisher Status message progress channel
+     * The Bayeux publisher Status message channel
      */
     private ChannelImpl commandStatusChannel
+    /**
+     * The Bayeux publisher Counter message channel
+     */
     private ChannelImpl commandsCounterChannel
     /**
      * The current set of commands by the state.
      */
     private ConcurrentMap<CommandState, Set<AbstractCommand>> commandsByState
     /**
-     * The current 
+     * All the commands running with their associated state.
      */
     private ConcurrentMap<AbstractCommand, CommandState> allCommands
     /**
@@ -112,17 +140,19 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
            CommandState newState) {
 
         def writer = new StringWriter();
-        def cmdState = newState.toString().toLowerCase()
+        def cmdState = newState.toString()
         def cmdCode = AbstractCommand.makeCodeName(command)
 
         def resp = [id: command.id, code: cmdCode, state: cmdState]
 
         def cmdType = command instanceof LongRunningCommand ? "long" : "short"
         if (newState == CommandState.RUNNING) {
-            def dateTime = new Date(command.stateTransitions.get(
-                CommandState.RUNNING))
+            def runTime = new Date()
+            if (command.stateTransitions.get(CommandState.RUNNING)) {
+                runTime.setTime(command.stateTransitions.get(CommandState.RUNNING))
+            }
             def dtFormat = getMessage("default.dateTime.format.withZone")
-            resp << [startedAt: dateTime.format(dtFormat)]
+            resp << [startedAt: runTime.format(dtFormat)]
             resp << [type: cmdType]
         }
         if (newState == CommandState.TERMINATED) {
@@ -139,13 +169,14 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
 
         def jsonRes = (resp as JSON).toString()
         log.debug("Command transition to publish: " + jsonRes)
-        this.commandStatusChannel.publish(this.bayeuxPublisherClient, jsonRes,
-            null)
+        this.commandStatusChannel.publish(this.bayeuxPublisherClient, 
+            jsonRes, null)
         def sizeCmdds = allCommands.size()
-        def tresp = [total : sizeCmdds]
+        def tresp = [total : sizeCmdds, longRunning: allLongRunning.size(),
+            shortRunning: allShortRunning.size()]
         def tjsonRes = (tresp as JSON).toString()
-        this.commandsCounterChannel.publish(this.bayeuxPublisherClient, tjsonRes,
-            null)
+        this.commandsCounterChannel.publish(this.bayeuxPublisherClient, 
+            tjsonRes, null)
     }
 
     /**
@@ -262,7 +293,9 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
       * @param command is the command to be executed.
       * @param state is the state of the command.
       */
-    private void updateOrRemoveCommandState(AbstractCommand command, CommandState state) {
+    private void updateOrRemoveCommandState(AbstractCommand command, 
+            CommandState state) {
+
         if (state == null) {
             def commandState = allCommands.remove(command)
 
@@ -314,7 +347,8 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
 
             } else {
                 // remove from the previous state
-                Set<AbstractCommand> commands = commandsByState.get(previousState)
+                Set<AbstractCommand> commands = commandsByState.get(
+                    previousState)
                 if (commands && commands.size() > 0) {
                     synchronized (commands) {
                         Iterator<AbstractCommand> iter = commands.iterator()
@@ -329,7 +363,8 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 }
                 Set<AbstractCommand> newStateCmds = commandsByState.get(state)
                 if (!newStateCmds) {
-                    Set<AbstractCommand> newSet = Collections.synchronizedSet(new LinkedHashSet<AbstractCommand>())
+                    Set<AbstractCommand> newSet = Collections.synchronizedSet(
+                        new LinkedHashSet<AbstractCommand>())
                     newStateCmds = commandsByState.putIfAbsent(state, newSet)
                     if (!newStateCmds) {
                         newStateCmds = newSet

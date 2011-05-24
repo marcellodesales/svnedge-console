@@ -24,10 +24,10 @@
     </tr>
      <tr class="ItemListHeader">
        <td width="18">#</td>
-       <td>${message(code: 'job.page.list.column.id')}</td>
-       <td>${message(code: 'job.page.list.column.code')}</td>
+       <td width="15%">${message(code: 'job.page.list.column.id')}</td>
+       <td width="20%">${message(code: 'job.page.list.column.code')}</td>
        <td>${message(code: 'job.page.list.column.properties')}</td>
-       <td>${message(code: 'job.page.list.column.started_at')}</td>
+       <td width="20%">${message(code: 'job.page.list.column.started_at')}</td>
     </tr>
   </thead>
   <tbody>
@@ -37,8 +37,8 @@
       <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
        <td>${i+1}</td>
        <g:set var="commandCode" value="${AbstractCommand.makeCodeName(command)}" />
-       <td width="15%"><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
-       <td width="20%">
+       <td><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
+       <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
          <g:if test="${!command.params.repoName}">
            ${commandCode}
@@ -58,7 +58,7 @@
           create + svn sync
          </g:if>
        </td>
-       <td width="20%">
+       <td>
         <g:formatDate format="${logDateFormat}" 
              date="${new Date(command.stateTransitions.get(CommandState.RUNNING))}"/>
        </td>
