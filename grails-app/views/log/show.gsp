@@ -11,6 +11,7 @@
 
     Event.observe(window, 'load', function() {
         $('tailButton').observe('click', toggleLogStreaming)
+        $('tailSpinner').hide()
 
         // allow initial state of tailing
         if ('${params.view}' == 'tail') {
@@ -23,13 +24,15 @@
     function toggleLogStreaming() {
       tailLog = !tailLog;
       if (tailLog) {
-          logStreamer  = new LogStreamer('${params.fileName}', '${fileSizeBytes}', $('fileContent'), $('fileContentDiv'))
+          logStreamer  = new LogStreamer('${params.fileName}', '${fileSizeBytes}', $('fileContent'), $('fileContentDiv'), "\n\n** <g:message code="logs.page.show.tail.error"/> **\n")
           logStreamer.start();
           $('tailButton').update("<g:message code="logs.page.show.button.tailStop"/>");
+          $('tailSpinner').show()
       }
       else {
           logStreamer.stop();
           $('tailButton').update("<g:message code="logs.page.show.button.tail"/>");
+          $('tailSpinner').hide()
       }
     }
 
@@ -95,6 +98,7 @@ if (params.highlight) {
   <tr class="ContainerFooter">
         <td >
           <div class="AlignRight">
+              <img id="tailSpinner" class="spinner" src="/csvn/images/spinner-gray-bg.gif" alt="Tailing.."/>
               <div class="Button"><div class="Middle">
                 <g:link id="tailButton" url="#" class="Button" onclick="return false"><g:message code="logs.page.show.button.tail" /></g:link>
               </div></div>

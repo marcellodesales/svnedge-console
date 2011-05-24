@@ -2852,6 +2852,11 @@ div.Middle, div.MiddleDisabled, div.LeftDisabled, div.RightDisabled {
   border: none;  
 }
 
+.spinner {
+    float: left;
+    padding: 2px;
+}
+
 .ButtonSpace, .ButtonSpaceSeparator {
   float: left;
 }

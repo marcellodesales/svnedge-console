@@ -18,12 +18,14 @@ if (Ajax && (Ajax != null)) {
  * @param initialOffset the offset at which to begin streaming (eg, length of already displayed content)
  * @param elementToUpdate the container for the log content
  * @param divElementToScroll the div element to scroll with the updates (could be same as element to update)
+ * @param errorMsg text to display if the incremental update reports an error)
  */
-function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToScroll) {
+function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToScroll, errorMsg) {
 
     this.logData = { "log" : {"fileName": logFileName, "startIndex": 0, "endIndex": initialOffset}}
     this.contentElement = elementToUpdate
     this.scrollingElement = divElementToScroll
+    this.errorMsg = errorMsg
     this.fetchUpdates = function(logStreamer) {
 
         new Ajax.Request('/csvn/log/tail', {
@@ -33,8 +35,14 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
             parameters: {fileName: logStreamer.logData.log.fileName, startIndex: logStreamer.logData.log.endIndex },
             onSuccess: function(transport){
               logStreamer.logData = transport.responseText.evalJSON(true);
-//              appendText = (logStreamer.logData.log.error) ? "\n\n** " + logStreamer.logData.log.error + " **" : logStreamer.logData.log.content
-              appendText = logStreamer.logData.log.content
+              appendText = ""
+              if (logStreamer.logData.log.error) {
+                  appendText = (logStreamer.errorMsg) ? logStreamer.errorMsg : "\n\n** " + logStreamer.logData.log.error + " **"
+                  logStreamer.stop()
+              }
+              else {
+                  appendText = logStreamer.logData.log.content
+              }
               if (Prototype.Browser.IE) {
                 var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" + appendText + "</PRE>"
                 logStreamer.contentElement.update(newContent);
