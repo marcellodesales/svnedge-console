@@ -53,7 +53,6 @@ public class RepoAddCommand extends AbstractRepositoryCommand
     }
 
     def undo() {
-        log.debug("Acquiring the command executor service...")
-        removeReplicatedRepository(getRepoName())
+        log.debug("No undo action taken; RepoAdd can be resumed by adding again from CTF master")
     }
 }
