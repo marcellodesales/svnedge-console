@@ -30,12 +30,14 @@ import com.collabnet.svnedge.domain.integration.ApprovalState
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.util.SoapClient
+import com.collabnet.svnedge.util.SvnEdgeCertHostnameVerifier
 
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
 import java.net.MalformedURLException
+import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
-
+import javax.net.ssl.HttpsURLConnection
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 
@@ -188,6 +190,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
             } else if (e.faultString.contains("SSLHandshakeException")) {
                 // catch axis fault of this type and rethrow as underlying exception
+                log.debug("SSL problem preventing authentication with CTF.", e)
                 throw new SSLHandshakeException(e.getMessage())
 
             } else if (e.faultString.contains("(301)Moved Permanently")) {
@@ -1044,6 +1047,26 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     
     private HttpURLConnection openPostUrl(String url, def paramMap, boolean followRedirect) 
             throws SSLHandshakeException {
+        HttpURLConnection conn = setupConnection(url, paramMap, followRedirect)
+        try {
+            writeParameters(paramMap, conn)
+        } catch (CertificateException ce) {
+            log.debug("Trying again with default cert because of exception", ce)
+            // try again in case CTF is using the default svnedge cert
+            try {
+                conn.disconnect()
+            } catch (Exception e) {
+                log.debug("Unable to close http connection.", e)
+            }
+            conn = setupConnection(url, paramMap, followRedirect)
+            HttpsURLConnection httpsConn = (HttpsURLConnection) conn
+            httpsConn.hostnameVerifier = new SvnEdgeCertHostnameVerifier(log)
+            writeParameters(paramMap, conn)
+        }
+        return conn
+    }
+
+    private setupConnection(String url, def paramMap, boolean followRedirect) {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         conn.setRequestMethod("POST")
         conn.setRequestProperty("Accept-Language", 'en');
@@ -1052,10 +1075,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         conn.setInstanceFollowRedirects(followRedirect)
         conn.setDoOutput(true)
         conn.setUseCaches(false);
-        writeParameters(paramMap, conn)
         return conn
     }
-    
+
     private void debugHeaders(conn) {
         String headerfields = conn.getHeaderField(0);
         log.debug headerfields
@@ -1154,3 +1176,4 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         }
     }
 }
+

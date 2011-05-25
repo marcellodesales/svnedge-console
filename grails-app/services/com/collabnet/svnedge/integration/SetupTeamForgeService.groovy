@@ -690,7 +690,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
      * @param ctfServer is the current ctf server
      * @param errors is the errors to be collected.
      */
-    private void undoServers(Server server, CtfServer ctfServer, error, locale) {
+    private void undoServers(Server server, CtfServer ctfServer, errors, locale) {
         try {
             if (ctfServer && ctfServer.mySystemId || server) {
                 this.undoLocalServerConfiguration(server)
