@@ -258,8 +258,8 @@ class CommandLineService {
         p.out.close()
 
         // ByteArray stream to capture command output as returned by this method
-        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream()
-        ByteArrayOutputStream errorByteArray = new ByteArrayOutputStream()
+        ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream(512)
+        ByteArrayOutputStream errorByteArray = new ByteArrayOutputStream(512)
 
         // Optionally, streams provided by caller will also receive the process output
         OutputStream stdout = (outputStream) ? new TeeOutputStream (outputByteArray, outputStream) : outputByteArray
