@@ -202,7 +202,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             "--non-interactive", "--no-auth-cache"] as String[]
         result = commandLineService.execute(command)
         log.info ("Info result in replica WC: \n" + result)
-        matcher = result =~ /Revision: (\d+)/
+        matcher = result =~ /Last Changed Rev: (\d+)/
         fileRevNumber = matcher[0][1]
 
         assertTrue("Replicated test file should exist: " + testFileReplica.canonicalPath, fileExists)
@@ -261,7 +261,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
            //"--username", username, "--password", password,
            "--non-interactive", "--no-auth-cache"] as String[]
             result = commandLineService.execute(command)
-            matcher = result =~ /Revision: (\d+)/
+            matcher = result =~ /Last Changed Rev: (\d+)/
             fileRevNumber = matcher[0][1]
 
             fileRevUpdated = fileRevNumber == nextRevNumber

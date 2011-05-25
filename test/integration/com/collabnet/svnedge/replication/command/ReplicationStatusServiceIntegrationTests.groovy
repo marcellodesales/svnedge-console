@@ -41,6 +41,7 @@ import org.mortbay.cometd.ChannelImpl;
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener 
 import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
+import groovy.time.TimeCategory
 
 /**
  * This test case verifies command threading, blocking, etc in the
@@ -125,7 +126,16 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         assert replicaServerStatusService in applicationEventMulticaster.applicationListeners
         assert replicaCommandSchedulerService in applicationEventMulticaster.applicationListeners
 
-        assertFalse "There should be no commands in the initial status",
+        // allow command queue to clear from other tests (wait up to 2 minutes)
+        Date timeout
+        use(TimeCategory) {
+            timeout = new Date() + 2.minutes
+        }
+        while (replicaServerStatusService.areThereAnyCommands() && new Date().getTime() < timeout.getTime()) {
+            Thread.sleep(250)
+        }
+        
+        assertFalse "Command queue should be clear",
                 replicaServerStatusService.areThereAnyCommands()
 
         def longRunningCommand = new RepoTestCommand()
@@ -140,7 +150,11 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         grailsApplication.mainContext.publishEvent(new LongRunningCommandQueuedEvent(this, 
                 longRunningCommand))
 
-        while (!replicaServerStatusService.areThereAnyCommands()) {
+        // wait up to 1 minute for new command to show up on queue 
+        use(TimeCategory) {
+            timeout = new Date() + 1.minute
+        }
+        while (!replicaServerStatusService.areThereAnyCommands() && new Date().getTime() < timeout.getTime()) {
             Thread.sleep(250)
         }
 
