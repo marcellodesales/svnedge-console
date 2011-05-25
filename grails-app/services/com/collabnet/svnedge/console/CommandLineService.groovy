@@ -265,7 +265,7 @@ class CommandLineService {
         OutputStream stdout = (outputStream) ? new TeeOutputStream (outputByteArray, outputStream) : outputByteArray
         OutputStream stderr = (errorStream) ? new TeeOutputStream (errorByteArray, errorStream) : errorByteArray
 
-        p.waitForProcessOutput(stdout, stderr)
+        p.consumeProcessOutput(stdout, stderr)
         def exitStatus = p.waitFor()
         // logging command and output can be suppressed
         String outString = new String(outputByteArray.toByteArray(), "UTF-8");
