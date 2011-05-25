@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2008 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -167,7 +167,14 @@ class BinCVSRepository(BaseCVSRepository):
       return revs[-1]
     return None
 
-  def openfile(self, path_parts, rev):
+  def openfile(self, path_parts, rev, options):
+    """see vclib.Repository.openfile docstring
+
+    Option values recognized by this implementation:
+
+      cvs_oldkeywords
+        boolean. true to use the original keyword substitution values.
+    """
     if self.itemtype(path_parts, rev) != vclib.FILE:  # does auth-check
       raise vclib.Error("Path '%s' is not a file."
                         % (string.join(path_parts, "/")))
@@ -175,12 +182,14 @@ class BinCVSRepository(BaseCVSRepository):
       rev_flag = '-p'
     else:
       rev_flag = '-p' + rev
+    if options.get('cvs_oldkeywords', 0):
+      kv_flag = '-ko'
+    else:
+      kv_flag = '-kkv'
     full_name = self.rcsfile(path_parts, root=1, v=0)
-
     used_rlog = 0
     tip_rev = None  # used only if we have to fallback to using rlog
-
-    fp = self.rcs_popen('co', (rev_flag, full_name), 'rb') 
+    fp = self.rcs_popen('co', (kv_flag, rev_flag, full_name), 'rb') 
     try:
       filename, revision = _parse_co_header(fp)
     except COMissingRevision:
@@ -1027,16 +1036,16 @@ def _get_logs(repos, dir_path_parts, entries, view_tag, get_dirs):
         file.errors.append("rlog error: %s" % msg)
         continue
 
+      tag = None
       if view_tag == 'MAIN' or view_tag == 'HEAD':
         tag = Tag(None, default_branch)
       elif taginfo.has_key(view_tag):
         tag = Tag(None, taginfo[view_tag])
-      elif view_tag:
-        # the tag wasn't found, so skip this file
+      elif view_tag and (eof != _EOF_FILE):
+        # the tag wasn't found, so skip this file (unless we already
+        # know there's nothing left of it to read)
         _skip_file(rlog)
-        eof = 1
-      else:
-        tag = None
+        eof = _EOF_FILE
 
       # we don't care about the specific values -- just the keys and whether
       # the values point to branches or revisions. this the fastest way to 

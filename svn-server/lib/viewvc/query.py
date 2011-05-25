@@ -217,8 +217,9 @@ def decode_command(cmd):
     else:
         return "exact"
 
-def form_to_cvsdb_query(form_data):
+def form_to_cvsdb_query(cfg, form_data):
     query = cvsdb.CreateCheckinQuery()
+    query.SetLimit(cfg.cvsdb.row_limit)
 
     if form_data.repository:
         for cmd, str in listparse_string(form_data.repository):
@@ -377,12 +378,15 @@ def build_commit(server, cfg, desc, files, cvsroots, viewvc_link):
     return ob
 
 def run_query(server, cfg, form_data, viewvc_link):
-    query = form_to_cvsdb_query(form_data)
+    query = form_to_cvsdb_query(cfg, form_data)
     db = cvsdb.ConnectDatabaseReadOnly(cfg)
     db.RunQuery(query)
 
-    if not query.commit_list:
-        return [ ]
+    commit_list = query.GetCommitList()
+    if not commit_list:
+        return [ ], 0
+
+    row_limit_reached = query.GetLimitReached()
 
     commits = [ ]
     files = [ ]
@@ -393,8 +397,8 @@ def run_query(server, cfg, form_data, viewvc_link):
     for key, value in rootitems:
         cvsroots[cvsdb.CleanRepository(value)] = key
 
-    current_desc = query.commit_list[0].GetDescription()
-    for commit in query.commit_list:
+    current_desc = commit_list[0].GetDescription()
+    for commit in commit_list:
         desc = commit.GetDescription()
         if current_desc == desc:
             files.append(commit)
@@ -417,7 +421,7 @@ def run_query(server, cfg, form_data, viewvc_link):
         return len(commit.files) > 0
     commits = filter(_only_with_files, commits)
   
-    return commits
+    return commits, row_limit_reached
 
 def main(server, cfg, viewvc_link):
   try:
@@ -426,10 +430,12 @@ def main(server, cfg, viewvc_link):
     form_data = FormData(form)
 
     if form_data.valid:
-        commits = run_query(server, cfg, form_data, viewvc_link)
+        commits, row_limit_reached = run_query(server, cfg,
+                                               form_data, viewvc_link)
         query = None
     else:
         commits = [ ]
+        row_limit_reached = 0
         query = 'skipped'
 
     docroot = cfg.options.docroot
@@ -449,6 +455,7 @@ def main(server, cfg, viewvc_link):
       'sortby' : form_data.sortby,
       'date' : form_data.date,
       'query' : query,
+      'row_limit_reached' : ezt.boolean(row_limit_reached),
       'commits' : commits,
       'num_commits' : len(commits),
       'rss_href' : None,

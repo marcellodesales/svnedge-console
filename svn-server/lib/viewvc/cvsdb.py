@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2009 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -38,13 +38,12 @@ error = "cvsdb error"
 ## complient database interface
 
 class CheckinDatabase:
-    def __init__(self, host, port, user, passwd, database, row_limit):
+    def __init__(self, host, port, user, passwd, database):
         self._host = host
         self._port = port
         self._user = user
         self._passwd = passwd
         self._database = database
-        self._row_limit = row_limit
         self._version = None
 
         ## database lookup caches
@@ -169,6 +168,9 @@ class CheckinDatabase:
 
         return list
 
+    def GetCommitsTable(self):
+        return self._version >= 1 and 'commits' or 'checkins'
+        
     def GetTableList(self):
         sql = "SHOW TABLES"
         cursor = self.db.cursor()
@@ -309,8 +311,7 @@ class CheckinDatabase:
         minus_count = commit.GetMinusCount() or '0'
         description_id = self.GetDescriptionID(commit.GetDescription())
 
-        commits_table = self._version >= 1 and 'commits' or 'checkins'
-        sql = "REPLACE INTO %s" % (commits_table)
+        sql = "REPLACE INTO %s" % (self.GetCommitsTable())
         sql = sql + \
               "  (type,ci_when,whoid,repositoryid,dirid,fileid,revision,"\
               "   stickytag,branchid,addedlines,removedlines,descid)"\
@@ -363,8 +364,8 @@ class CheckinDatabase:
 
         return "(%s)" % (string.join(sqlList, " OR "))
 
-    def CreateSQLQueryString(self, query):
-        commits_table = self._version >= 1 and 'commits' or 'checkins'
+    def CreateSQLQueryString(self, query, detect_leftover=0):
+        commits_table = self.GetCommitsTable()
         tableList = [(commits_table, None)]
         condList = []
 
@@ -444,13 +445,14 @@ class CheckinDatabase:
         conditions = string.join(joinConds + condList, " AND ")
         conditions = conditions and "WHERE %s" % conditions
 
-        ## limit the number of rows requested or we could really slam
-        ## a server with a large database
+        ## apply the query's row limit, if any (so we avoid really
+        ## slamming a server with a large database)
         limit = ""
         if query.limit:
-            limit = "LIMIT %s" % (str(query.limit))
-        elif self._row_limit:
-            limit = "LIMIT %s" % (str(self._row_limit))
+            if detect_leftover:
+                limit = "LIMIT %s" % (str(query.limit + 1))
+            else:
+                limit = "LIMIT %s" % (str(query.limit))
 
         sql = "SELECT %s.* FROM %s %s %s %s" \
               % (commits_table, tables, conditions, order_by, limit)
@@ -458,13 +460,19 @@ class CheckinDatabase:
         return sql
     
     def RunQuery(self, query):
-        sql = self.CreateSQLQueryString(query)
+        sql = self.CreateSQLQueryString(query, 1)
         cursor = self.db.cursor()
         cursor.execute(sql)
+        query.SetExecuted()
+        row_count = 0
         
         while 1:
             row = cursor.fetchone()
             if not row:
+                break
+            row_count = row_count + 1
+            if query.limit and (row_count > query.limit):
+                query.SetLimitReached()
                 break
             
             (dbType, dbCI_When, dbAuthorID, dbRepositoryID, dbDirID,
@@ -504,13 +512,12 @@ class CheckinDatabase:
         if file_id == None:
             return None
 
-        commits_table = self._version >= 1 and 'commits' or 'checkins'
         sql = "SELECT * FROM %s WHERE "\
               "  repositoryid=%%s "\
               "  AND dirid=%%s"\
               "  AND fileid=%%s"\
               "  AND revision=%%s"\
-              % (commits_table)
+              % (self.GetCommitsTable())
         sql_args = (repository_id, dir_id, file_id, commit.GetRevision())
 
         cursor = self.db.cursor()
@@ -527,10 +534,9 @@ class CheckinDatabase:
     def sql_delete(self, table, key, value, keep_fkey = None):
         sql = "DELETE FROM %s WHERE %s=%%s" % (table, key)
         sql_args = (value, )
-        commits_table = self._version >= 1 and 'commits' or 'checkins'
         if keep_fkey:
             sql += " AND %s NOT IN (SELECT %s FROM %s WHERE %s = %%s)" \
-                   % (key, keep_fkey, commits_table, keep_fkey)
+                   % (key, keep_fkey, self.GetCommitsTable(), keep_fkey)
             sql_args = (value, value)
         cursor = self.db.cursor()
         cursor.execute(sql, sql_args)
@@ -769,8 +775,9 @@ class QueryEntry:
         self.data = data
         self.match = match
 
-## CheckinDatabaseQueryData is a object which contains the search parameters
-## for a query to the CheckinDatabase
+## CheckinDatabaseQuery is an object which contains the search
+## parameters for a query to the Checkin Database and -- after the
+## query is executed -- the data returned by the query.
 class CheckinDatabaseQuery:
     def __init__(self):
         ## sorting
@@ -790,13 +797,17 @@ class CheckinDatabaseQuery:
 
         ## limit on number of rows to return
         self.limit = None
-
+        self.limit_reached = 0
+        
         ## list of commits -- filled in by CVS query
         self.commit_list = []
 
         ## commit_cb provides a callback for commits as they
         ## are added
         self.commit_cb = None
+
+        ## has this query been run?
+        self.executed = 0
 
     def SetRepository(self, repository, match = "exact"):
         self.repository_list.append(QueryEntry(repository, match))
@@ -843,6 +854,20 @@ class CheckinDatabaseQuery:
     def AddCommit(self, commit):
         self.commit_list.append(commit)
 
+    def SetExecuted(self):
+        self.executed = 1
+
+    def SetLimitReached(self):
+        self.limit_reached = 1
+
+    def GetLimitReached(self):
+        assert self.executed
+        return self.limit_reached
+
+    def GetCommitList(self):
+        assert self.executed
+        return self.commit_list
+        
 
 ##
 ## entrypoints
@@ -861,7 +886,7 @@ def ConnectDatabase(cfg, readonly=0):
         user = cfg.cvsdb.user
         passwd = cfg.cvsdb.passwd
     db = CheckinDatabase(cfg.cvsdb.host, cfg.cvsdb.port, user, passwd,
-                         cfg.cvsdb.database_name, cfg.cvsdb.row_limit)
+                         cfg.cvsdb.database_name)
     db.Connect()
     return db
 

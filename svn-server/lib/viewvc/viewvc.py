@@ -14,7 +14,7 @@
 #
 # -----------------------------------------------------------------------
 
-__version__ = '1.1.10'
+__version__ = '1.1.11'
 
 # this comes from our library; measure the startup time
 import debug
@@ -762,7 +762,6 @@ _legal_params = {
   'mindate'       : _re_validate_datetime,
   'maxdate'       : _re_validate_datetime,
   'format'        : _re_validate_alpha,
-  'limit'         : _re_validate_number,
 
   # for redirect_pathrev
   'orig_path'     : None,
@@ -1215,7 +1214,7 @@ class ViewVCHtmlFormatter:
            linkified email address, with no more than MAXLEN characters
            in the non-HTML-tag bits.  If MAXLEN is 0, there is no maximum.
          - the number of non-HTML-tag characters returned.
-    """    
+    """
     s = mobj.group(0)
     trunc_s = maxlen and s[:maxlen] or s
     return '<a href="mailto:%s">%s</a>' % (urllib.quote(s),
@@ -1316,45 +1315,51 @@ class ViewVCHtmlFormatter:
 
   def _tokenize_text(self, s):
     tokens = []
-    while s:
-      best_match = best_conv = best_userdata = None
-      for test in self._formatters:
-        match = test[0].search(s)
-        # If we find and match and (a) its our first one, or (b) it
-        # matches text earlier than our previous best match, or (c) it
-        # matches text at the same location as our previous best match
-        # but extends to cover more text than that match, then this is
-        # our new best match.
-        #
-        # Implied here is that when multiple formatters match exactly
-        # the same text, the first formatter in the registration list wins.
-        if match \
-           and ((best_match is None) \
-                or (match.start() < best_match.start())
-                or ((match.start() == best_match.start()) \
-                    and (match.end() > best_match.end()))):
-          best_match = match
-          best_conv = test[1]
-          best_userdata = test[2]
-      # If we found a match...
-      if best_match:
-        # ... add any non-matching stuff first, then the matching bit.
-        start = best_match.start()
-        end = best_match.end()
-        if start > 0:
-          tokens.append(_item(match=s[:start],
+    # We could just have a "while s:" here instead of "for line: while
+    # line:", but for really large log messages with heavy
+    # tokenization, the cost in both performance and memory
+    # consumption of the approach taken was atrocious.
+    for line in string.split(string.replace(s, '\r\n', '\n'), '\n'):
+      line = line + '\n'
+      while line:
+        best_match = best_conv = best_userdata = None
+        for test in self._formatters:
+          match = test[0].search(line)
+          # If we find and match and (a) its our first one, or (b) it
+          # matches text earlier than our previous best match, or (c) it
+          # matches text at the same location as our previous best match
+          # but extends to cover more text than that match, then this is
+          # our new best match.
+          #
+          # Implied here is that when multiple formatters match exactly
+          # the same text, the first formatter in the registration list wins.
+          if match \
+             and ((best_match is None) \
+                  or (match.start() < best_match.start())
+                  or ((match.start() == best_match.start()) \
+                      and (match.end() > best_match.end()))):
+            best_match = match
+            best_conv = test[1]
+            best_userdata = test[2]
+        # If we found a match...
+        if best_match:
+          # ... add any non-matching stuff first, then the matching bit.
+          start = best_match.start()
+          end = best_match.end()
+          if start > 0:
+            tokens.append(_item(match=line[:start],
+                                converter=self.format_text,
+                                userdata=None))
+          tokens.append(_item(match=best_match,
+                              converter=best_conv,
+                              userdata=best_userdata))
+          line = line[end:]
+        else:
+          # Otherwise, just add the rest of the string.
+          tokens.append(_item(match=line,
                               converter=self.format_text,
                               userdata=None))
-        tokens.append(_item(match=best_match,
-                            converter=best_conv,
-                            userdata=best_userdata))
-        s = s[end:]
-      else:
-        # Otherwise, just add the rest of the string.
-        tokens.append(_item(match=s,
-                            converter=self.format_text,
-                            userdata=None))
-        s = ''
+          line = ''
     return tokens
 
 # Custom TeamForge ID formatter.  (Keep this regexp in sync with
@@ -1902,7 +1907,7 @@ def markup_or_annotate(request, is_annotate):
   # Is this a viewable image type?
   if is_viewable_image(mime_type) \
      and 'co' in cfg.options.allowed_views:
-    fp, revision = request.repos.openfile(path, rev)
+    fp, revision = request.repos.openfile(path, rev, {})
     fp.close()
     if check_freshness(request, None, revision, weak=1):
       return
@@ -1925,7 +1930,7 @@ def markup_or_annotate(request, is_annotate):
       except:
         annotation = 'error'
 
-    fp, revision = request.repos.openfile(path, rev)
+    fp, revision = request.repos.openfile(path, rev, {'cvs_oldkeywords' : 1})
     if check_freshness(request, None, revision, weak=1):
       fp.close()
       return
@@ -2841,9 +2846,12 @@ def view_checkout(request):
   if 'co' not in cfg.options.allowed_views:
     raise debug.ViewVCException('Checkout view is disabled',
                                  '403 Forbidden')
-  
+  if request.pathtype != vclib.FILE:
+    raise debug.ViewVCException('Unsupported feature: checkout view on '
+                                'directory', '400 Bad Request')
+
   path, rev = _orig_path(request)
-  fp, revision = request.repos.openfile(path, rev)
+  fp, revision = request.repos.openfile(path, rev, {})
 
   # The revision number acts as a strong validator.
   if not check_freshness(request, None, revision):
@@ -2929,7 +2937,7 @@ def search_file(repos, path_parts, rev, search_re):
 
   # Read in each line of a checked-out file, and then use re.search to
   # search line.
-  fp = repos.openfile(path_parts, rev)[0]
+  fp = repos.openfile(path_parts, rev, {})[0]
   matches = 0
   while 1:
     line = fp.readline()
@@ -3389,13 +3397,13 @@ def view_diff(request):
     if (cfg.options.hr_intraline and idiff
         and ((human_readable and idiff.sidebyside)
              or (not human_readable and diff_type == vclib.UNIFIED))):
-      f1 = request.repos.openfile(p1, rev1)[0]
+      f1 = request.repos.openfile(p1, rev1, {})[0]
       try:
         lines_left = f1.readlines()
       finally:
         f1.close()
 
-      f2 = request.repos.openfile(p2, rev2)[0]
+      f2 = request.repos.openfile(p2, rev2, {})[0]
       try:
         lines_right = f2.readlines()
       finally:
@@ -3608,7 +3616,7 @@ def generate_tarball(out, request, reldir, stack, dir_mtime=None):
 
     ### FIXME: Read the whole file into memory?  Bad... better to do
     ### 2 passes.
-    fp = request.repos.openfile(rep_path + [file.name], request.pathrev)[0]
+    fp = request.repos.openfile(rep_path + [file.name], request.pathrev, {})[0]
     contents = fp.read()
     fp.close()
 
@@ -4257,7 +4265,6 @@ def view_query(request):
   mindate = request.query_dict.get('mindate', '')
   maxdate = request.query_dict.get('maxdate', '')
   format = request.query_dict.get('format')
-  limit = int(request.query_dict.get('limit', 0))
   limit_changes = int(request.query_dict.get('limit_changes',
                                              cfg.options.limit_changes))
 
@@ -4327,29 +4334,32 @@ def view_query(request):
       query.SetFromDateObject(mindate)
     if maxdate is not None:
       query.SetToDateObject(maxdate)
-  if limit:
-    query.SetLimit(limit)
-  elif format == 'rss':
+
+  # Set the admin-defined (via configuration) row limits.  This is to avoid
+  # slamming the database server with a monster query.
+  if format == 'rss':
     query.SetLimit(cfg.cvsdb.rss_row_limit)
+  else:
+    query.SetLimit(cfg.cvsdb.row_limit)
 
   # run the query
   db.RunQuery(query)
-
-  sql = request.server.escape(db.CreateSQLQueryString(query))
-
+  commit_list = query.GetCommitList()
+  row_limit_reached = query.GetLimitReached()
+  
   # gather commits
   commits = []
   plus_count = 0
   minus_count = 0
   mod_time = -1
-  if query.commit_list:
+  if commit_list:
     files = []
     limited_files = 0
-    current_desc = query.commit_list[0].GetDescriptionID()
-    current_rev = query.commit_list[0].GetRevision()
+    current_desc = commit_list[0].GetDescriptionID()
+    current_rev = commit_list[0].GetRevision()
     dir_strip = _path_join(repos_dir)
 
-    for commit in query.commit_list:
+    for commit in commit_list:
       commit_desc = commit.GetDescriptionID()
       commit_rev = commit.GetRevision()
 
@@ -4418,7 +4428,7 @@ def view_query(request):
 
   data = common_template_data(request)
   data.merge(ezt.TemplateData({
-    'sql': sql,
+    'sql': request.server.escape(db.CreateSQLQueryString(query)),
     'english_query': english_query(request),
     'queryform_href': request.get_url(view_func=view_queryform, escape=1),
     'backout_href': backout_href,
@@ -4427,6 +4437,7 @@ def view_query(request):
     'show_branch': show_branch,
     'querysort': querysort,
     'commits': commits,
+    'row_limit_reached' : ezt.boolean(row_limit_reached),
     'limit_changes': limit_changes,
     'limit_changes_href': limit_changes_href,
     'rss_link_href': request.get_url(view_func=view_query,
