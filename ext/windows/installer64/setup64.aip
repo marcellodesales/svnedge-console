@@ -32,10 +32,10 @@
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiDirsComponent">
     <ROW Directory="APPDIR" Directory_Parent="TARGETDIR" DefaultDir="APPDIR:." IsPseudoRoot="1"/>
-    <ROW Directory="C0_38.2699_3A20100118T163717Z_DIR" Directory_Parent="pkg_1_DIR" DefaultDir="11222%~1.269|1.122.2%2C0-38.2699%3A20100118T163717Z"/>
-    <ROW Directory="C0_38.2699_3A20100118T163737Z_DIR" Directory_Parent="python2.4_minimal_DIR" DefaultDir="2440%2~1.269|2.4.4.0%2C0-38.2699%3A20100118T163737Z"/>
-    <ROW Directory="C5.2.3790_2097.776_3A20110525T184545Z_DIR" Directory_Parent="csvn_svn_DIR" DefaultDir="1616%2~1.776|1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z"/>
-    <ROW Directory="C5.2.3790_2097.776_3A20110525T184611Z_DIR" Directory_Parent="csvn_DIR" DefaultDir="200%2C~1.776|2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z"/>
+    <ROW Directory="C0_38.2699_3A20100118T163717Z_DIR" Directory_Parent="pkg_1_DIR" DefaultDir="11222%~1.269|1.122.2%2C0-38.2699%3A20100118T163717Z" DirectoryOptions="3"/>
+    <ROW Directory="C0_38.2699_3A20100118T163737Z_DIR" Directory_Parent="python2.4_minimal_DIR" DefaultDir="2440%2~1.269|2.4.4.0%2C0-38.2699%3A20100118T163737Z" DirectoryOptions="3"/>
+    <ROW Directory="C6.1.7600_2097.663_3A20110525T184537Z_DIR" Directory_Parent="csvn_svn_DIR" DefaultDir="1616%2~1.663|1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z" DirectoryOptions="3"/>
+    <ROW Directory="C6.1.7600_2097.663_3A20110525T184555Z_DIR" Directory_Parent="csvn_DIR" DefaultDir="200%2C~1.663|2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z" DirectoryOptions="3"/>
     <ROW Directory="DLLs_1_DIR" Directory_Parent="Python25_DIR" DefaultDir="DLLs"/>
     <ROW Directory="DLLs_DIR" Directory_Parent="python2.4_minimal_1_DIR" DefaultDir="DLLs"/>
     <ROW Directory="Demos_DIR" Directory_Parent="pywin_DIR" DefaultDir="Demos"/>
@@ -63,7 +63,7 @@
     <ROW Directory="cat1_DIR" Directory_Parent="man_DIR" DefaultDir="cat1"/>
     <ROW Directory="cat1m_DIR" Directory_Parent="man_DIR" DefaultDir="cat1m"/>
     <ROW Directory="cat5_DIR" Directory_Parent="man_DIR" DefaultDir="cat5"/>
-    <ROW Directory="catalog_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="catalog"/>
+    <ROW Directory="catalog_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="catalog" DirectoryOptions="3"/>
     <ROW Directory="ccvs_DIR" Directory_Parent="vclib_DIR" DefaultDir="ccvs"/>
     <ROW Directory="ce_DIR" Directory_Parent="scripts_DIR" DefaultDir="ce"/>
     <ROW Directory="certs_DIR" Directory_Parent="data_1_DIR" DefaultDir="certs"/>
@@ -71,7 +71,7 @@
     <ROW Directory="chardet_DIR" Directory_Parent="lib_1_DIR" DefaultDir="chardet"/>
     <ROW Directory="cherrypy_DIR" Directory_Parent="vendor_packages_DIR" DefaultDir="cherrypy"/>
     <ROW Directory="client_DIR" Directory_Parent="pkg_3_DIR" DefaultDir="client"/>
-    <ROW Directory="collab.net_DIR" Directory_Parent="catalog_DIR" DefaultDir="collab.net"/>
+    <ROW Directory="collab.net_DIR" Directory_Parent="catalog_DIR" DefaultDir="collab.net" DirectoryOptions="3"/>
     <ROW Directory="color_DIR" Directory_Parent="editor_DIR" DefaultDir="color"/>
     <ROW Directory="command_DIR" Directory_Parent="distutils_DIR" DefaultDir="command"/>
     <ROW Directory="commons_DIR" Directory_Parent="core_DIR" DefaultDir="commons"/>
@@ -83,8 +83,8 @@
     <ROW Directory="contexts_DIR" Directory_Parent="appserver_DIR" DefaultDir="contexts"/>
     <ROW Directory="core_DIR" Directory_Parent="lib_5_DIR" DefaultDir="core"/>
     <ROW Directory="crashers_DIR" Directory_Parent="test_6_DIR" DefaultDir="crashers"/>
-    <ROW Directory="csvn_DIR" Directory_Parent="pkg_DIR" DefaultDir="csvn"/>
-    <ROW Directory="csvn_svn_DIR" Directory_Parent="pkg_DIR" DefaultDir="csvn-svn"/>
+    <ROW Directory="csvn_DIR" Directory_Parent="pkg_DIR" DefaultDir="csvn" DirectoryOptions="3"/>
+    <ROW Directory="csvn_svn_DIR" Directory_Parent="pkg_DIR" DefaultDir="csvn-svn" DirectoryOptions="3"/>
     <ROW Directory="ctypes_DIR" Directory_Parent="Lib_1_DIR" DefaultDir="ctypes"/>
     <ROW Directory="curl_DIR" Directory_Parent="vendor_packages_DIR" DefaultDir="curl"/>
     <ROW Directory="curses_1_DIR" Directory_Parent="Lib_1_DIR" DefaultDir="curses"/>
@@ -121,7 +121,7 @@
     <ROW Directory="ext_2_DIR" Directory_Parent="dom_1_DIR" DefaultDir="ext"/>
     <ROW Directory="ext_DIR" Directory_Parent="lib_DIR" DefaultDir="ext"/>
     <ROW Directory="extended_DIR" Directory_Parent="lib_5_DIR" DefaultDir="extended"/>
-    <ROW Directory="file_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="file"/>
+    <ROW Directory="file_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="file" DirectoryOptions="3"/>
     <ROW Directory="filters_DIR" Directory_Parent="pygments_DIR" DefaultDir="filters"/>
     <ROW Directory="flavor_DIR" Directory_Parent="pkg_3_DIR" DefaultDir="flavor"/>
     <ROW Directory="forbidden_DIR" Directory_Parent="vcauth_DIR" DefaultDir="forbid~1|forbidden"/>
@@ -129,7 +129,7 @@
     <ROW Directory="formatters_DIR" Directory_Parent="pygments_DIR" DefaultDir="format~1|formatters"/>
     <ROW Directory="framework_DIR" Directory_Parent="pywin_DIR" DefaultDir="framew~1|framework"/>
     <ROW Directory="groovy_DIR" Directory_Parent="core_DIR" DefaultDir="groovy"/>
-    <ROW Directory="history_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="history"/>
+    <ROW Directory="history_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="history" DirectoryOptions="3"/>
     <ROW Directory="hotshot_DIR" Directory_Parent="Lib_1_DIR" DefaultDir="hotshot"/>
     <ROW Directory="html_1_DIR" Directory_Parent="dom_1_DIR" DefaultDir="html"/>
     <ROW Directory="html_DIR" Directory_Parent="pycurl_DIR" DefaultDir="html"/>
@@ -140,8 +140,8 @@
     <ROW Directory="images_DIR" Directory_Parent="docroot_DIR" DefaultDir="images"/>
     <ROW Directory="include_1_DIR" Directory_Parent="viewvc_1_DIR" DefaultDir="include"/>
     <ROW Directory="include_DIR" Directory_Parent="error_DIR" DefaultDir="include"/>
-    <ROW Directory="index_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="index"/>
-    <ROW Directory="installed_DIR" Directory_Parent="state_DIR" DefaultDir="instal~1|installed"/>
+    <ROW Directory="index_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="index" DirectoryOptions="3"/>
+    <ROW Directory="installed_DIR" Directory_Parent="state_DIR" DefaultDir="instal~1|installed" DirectoryOptions="3"/>
     <ROW Directory="jna_DIR" Directory_Parent="core_DIR" DefaultDir="jna"/>
     <ROW Directory="jndi_DIR" Directory_Parent="lib_DIR" DefaultDir="jndi"/>
     <ROW Directory="jsp_DIR" Directory_Parent="lib_DIR" DefaultDir="jsp"/>
@@ -173,15 +173,15 @@
     <ROW Directory="ocx_DIR" Directory_Parent="Demos_DIR" DefaultDir="ocx"/>
     <ROW Directory="opensolaris.com_DIR" Directory_Parent="themes_DIR" DefaultDir="openso~1.com|opensolaris.com"/>
     <ROW Directory="opensolaris.org_DIR" Directory_Parent="themes_DIR" DefaultDir="openso~1.org|opensolaris.org"/>
-    <ROW Directory="org.opensolaris_pkg_DIR" Directory_Parent="APPDIR" DefaultDir="org~1.ope|.org.opensolaris,pkg"/>
+    <ROW Directory="org.opensolaris_pkg_DIR" Directory_Parent="APPDIR" DefaultDir="org~1.ope|.org.opensolaris,pkg" DirectoryOptions="3"/>
     <ROW Directory="output_DIR" Directory_Parent="test_6_DIR" DefaultDir="output"/>
     <ROW Directory="parsers_1_DIR" Directory_Parent="xmlplus_DIR" DefaultDir="parsers"/>
     <ROW Directory="parsers_2_DIR" Directory_Parent="xml_1_DIR" DefaultDir="parsers"/>
     <ROW Directory="parsers_DIR" Directory_Parent="xml_DIR" DefaultDir="parsers"/>
-    <ROW Directory="pkg_1_DIR" Directory_Parent="pkg_DIR" DefaultDir="pkg"/>
+    <ROW Directory="pkg_1_DIR" Directory_Parent="pkg_DIR" DefaultDir="pkg" DirectoryOptions="3"/>
     <ROW Directory="pkg_2_DIR" Directory_Parent="APPDIR" DefaultDir="pkg"/>
     <ROW Directory="pkg_3_DIR" Directory_Parent="vendor_packages_DIR" DefaultDir="pkg"/>
-    <ROW Directory="pkg_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="pkg"/>
+    <ROW Directory="pkg_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="pkg" DirectoryOptions="3"/>
     <ROW Directory="ply_3.1_py2.4.egg_info_DIR" Directory_Parent="vendor_packages_DIR" DefaultDir="ply-31~1.egg|ply-3.1-py2.4.egg-info"/>
     <ROW Directory="ply_DIR" Directory_Parent="vendor_packages_DIR" DefaultDir="ply"/>
     <ROW Directory="policy_DIR" Directory_Parent="lib_DIR" DefaultDir="policy"/>
@@ -191,7 +191,7 @@
     <ROW Directory="pycurl_DIR" Directory_Parent="doc_DIR" DefaultDir="pycurl"/>
     <ROW Directory="pygments_DIR" Directory_Parent="lib_1_DIR" DefaultDir="pygments"/>
     <ROW Directory="python2.4_minimal_1_DIR" Directory_Parent="pkg_2_DIR" DefaultDir="python~1.4-m|python2.4-minimal"/>
-    <ROW Directory="python2.4_minimal_DIR" Directory_Parent="pkg_DIR" DefaultDir="python~1.4-m|python2.4-minimal"/>
+    <ROW Directory="python2.4_minimal_DIR" Directory_Parent="pkg_DIR" DefaultDir="python~1.4-m|python2.4-minimal" DirectoryOptions="3"/>
     <ROW Directory="pythonwin_DIR" Directory_Parent="site_packages_1_DIR" DefaultDir="python~1|pythonwin"/>
     <ROW Directory="pywin32_system32_DIR" Directory_Parent="site_packages_1_DIR" DefaultDir="pywin3~1|pywin32_system32"/>
     <ROW Directory="pywin_DIR" Directory_Parent="pythonwin_DIR" DefaultDir="pywin"/>
@@ -214,7 +214,7 @@
     <ROW Directory="site_packages_DIR" Directory_Parent="Lib_DIR" DefaultDir="site-p~1|site-packages"/>
     <ROW Directory="small_DIR" Directory_Parent="icons_DIR" DefaultDir="small"/>
     <ROW Directory="sqlite3_DIR" Directory_Parent="Lib_1_DIR" DefaultDir="sqlite3"/>
-    <ROW Directory="state_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="state"/>
+    <ROW Directory="state_DIR" Directory_Parent="org.opensolaris_pkg_DIR" DefaultDir="state" DirectoryOptions="3"/>
     <ROW Directory="styles_DIR" Directory_Parent="pygments_DIR" DefaultDir="styles"/>
     <ROW Directory="suds_DIR" Directory_Parent="lib_1_DIR" DefaultDir="suds"/>
     <ROW Directory="sun.com_DIR" Directory_Parent="themes_DIR" DefaultDir="sun.com"/>
@@ -250,7 +250,7 @@
     <ROW Directory="win32_DIR" Directory_Parent="site_packages_1_DIR" DefaultDir="win32"/>
     <ROW Directory="win32rcparser_DIR" Directory_Parent="test_4_DIR" DefaultDir="win32r~1|win32rcparser"/>
     <ROW Directory="work_1_DIR" Directory_Parent="bin_DIR" DefaultDir="work"/>
-    <ROW Directory="work_DIR" Directory_Parent="appserver_DIR" DefaultDir="work"/>
+    <ROW Directory="work_DIR" Directory_Parent="appserver_DIR" DefaultDir="work" DirectoryOptions="3"/>
     <ROW Directory="wsgiref_DIR" Directory_Parent="Lib_1_DIR" DefaultDir="wsgiref"/>
     <ROW Directory="wsgiserver_DIR" Directory_Parent="cherrypy_DIR" DefaultDir="wsgise~1|wsgiserver"/>
     <ROW Directory="wstools_DIR" Directory_Parent="SOAPpy_DIR" DefaultDir="wstools"/>
@@ -282,7 +282,7 @@
     <ROW Component="README.txt" ComponentId="{612EC1AE-B4F5-4D1E-AF54-FA909687D122}" Directory_="leakers_DIR" Attributes="0" KeyPath="README.txt_2" Type="0"/>
     <ROW Component="ReadMe.txt" ComponentId="{D0DD66B0-F8C2-42EB-A09B-51068644DE4D}" Directory_="core_DIR" Attributes="0" KeyPath="ReadMe.txt_5" Type="0"/>
     <ROW Component="SHORTCUTDIR" ComponentId="{8B3981AF-B0F0-427B-833F-7BD32EB48468}" Directory_="SHORTCUTDIR" Attributes="0"/>
-    <ROW Component="T151950Z_01.xml" ComponentId="{2A7E67B2-5D1C-46D8-91D0-9C4DC38AB73B}" Directory_="history_DIR" Attributes="0" KeyPath="T185352Z_01.xml" Type="0"/>
+    <ROW Component="T151950Z_01.xml" ComponentId="{2A7E67B2-5D1C-46D8-91D0-9C4DC38AB73B}" Directory_="history_DIR" Attributes="0" KeyPath="T191119Z_01.xml" Type="0"/>
     <ROW Component="a.gif" ComponentId="{9D081B69-F691-4629-80D8-DE1351B9B463}" Directory_="icons_DIR" Attributes="0" KeyPath="a.gif" Type="0"/>
     <ROW Component="aboutDialog.py" ComponentId="{46F894B4-1A89-4C15-B4E5-E66A5EA7F484}" Directory_="idlelib_DIR" Attributes="0" KeyPath="aboutDialog.py" Type="0"/>
     <ROW Component="abs.decTest" ComponentId="{4B16741C-CBAC-4D42-8400-FF0E3B51025D}" Directory_="decimaltestdata_DIR" Attributes="0" KeyPath="abs.decTest" Type="0"/>
@@ -439,10 +439,10 @@
     <ROW Component="init_.py_7" ComponentId="{05B40D7D-E743-4BF4-AAB6-844A11D81CA3}" Directory_="curl_DIR" Attributes="0" KeyPath="init_.py_30" Type="0"/>
     <ROW Component="init_.py_8" ComponentId="{8BF003C6-F0F8-479F-BA88-F4597FE8F262}" Directory_="xml_1_DIR" Attributes="0" KeyPath="init_.py_84" Type="0"/>
     <ROW Component="init_.pyc" ComponentId="{F0D7BDF6-288A-458A-8EBD-15AB04EFC683}" Directory_="xml_DIR" Attributes="0" KeyPath="init_.pyc_9" Type="0"/>
-    <ROW Component="installed_1" ComponentId="{1322FEB3-D314-4AA1-817A-C11BC540046E}" Directory_="C5.2.3790_2097.776_3A20110525T184611Z_DIR" Attributes="0" KeyPath="installed_1" Type="0"/>
+    <ROW Component="installed" ComponentId="{74E2C8FD-0E64-4717-9A03-F6520F0A8E98}" Directory_="C6.1.7600_2097.663_3A20110525T184555Z_DIR" Attributes="0" KeyPath="installed" Type="0"/>
+    <ROW Component="installed_1" ComponentId="{84560A29-AF4E-418A-BFF2-3D8653D09E7C}" Directory_="C6.1.7600_2097.663_3A20110525T184537Z_DIR" Attributes="0" KeyPath="installed_1" Type="0"/>
     <ROW Component="installed_2" ComponentId="{F8DF83F5-BAF7-4AAC-A046-5E437A3977C5}" Directory_="C0_38.2699_3A20100118T163717Z_DIR" Attributes="0" KeyPath="installed_2" Type="0"/>
     <ROW Component="installed_3" ComponentId="{973BFB67-F896-4F67-9CC6-7091C54F8F83}" Directory_="C0_38.2699_3A20100118T163737Z_DIR" Attributes="0" KeyPath="installed_3" Type="0"/>
-    <ROW Component="installed_4" ComponentId="{DBF2E94C-FAAB-4013-B53B-E494CBF06ECF}" Directory_="C5.2.3790_2097.776_3A20110525T184545Z_DIR" Attributes="0" KeyPath="installed_4" Type="0"/>
     <ROW Component="integration_scripts.zip" ComponentId="{0104DB3F-511A-4962-8D01-F607483E127C}" Directory_="lib_1_DIR" Attributes="0" KeyPath="integration_scripts.zip" Type="0"/>
     <ROW Component="jdbcRealm.properties" ComponentId="{3C3F2AA3-2E00-4023-AD45-0B0B6E139535}" Directory_="etc_DIR" Attributes="0" KeyPath="jdbcRealm.properties" Type="0"/>
     <ROW Component="jetty.policy" ComponentId="{1039491C-5304-4F3E-9D6A-4E289EC67495}" Directory_="policy_DIR" Attributes="0" KeyPath="jetty.policy" Type="0"/>
@@ -553,7 +553,7 @@
     <ROW Component="zlib1.dll_1" ComponentId="{9A079B7C-BE7A-4ACC-9BDF-792024FFA48B}" Directory_="vendor_packages_DIR" Attributes="0" KeyPath="zlib1.dll_1"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFeatsComponent">
-    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="csvn.bat httpd.exe SHORTCUTDIR readme.txt AI_ExePath genConfig.bat catalog_cache attrs cfg_cache file T151950Z_01.xml fast_add.v1 installed_2 installed_3 csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20 csvn.xml jdbcRealm.properties ext jetty_ajp_7.0.2.v20100331.jar activation_1.1.jar ant_1.6.5.jar jetty.policy security start.ini csvn.war ApacheMonitor.exe apr_dbd_odbc_1.dll apr_ldap_1.dll printenv csvn.xml_1 htcacheclean.exe htdbm.exe htdigest.exe htpasswd.exe httxt2dbm.exe adobe_stdenc.so libapr_1.dll libapriconv_1.dll libaprutil_1.dll libdb41.dll libeay32.dll libhttpd.dll libsasl.dll libsvnjavahl_1.dll libsvn_client_1.dll libsvn_delta_1.dll libsvn_diff_1.dll libsvn_fs_1.dll libsvn_ra_1.dll libsvn_repos_1.dll libsvn_subr_1.dll libsvn_wc_1.dll logresolve.exe htaccess openssl.exe rotatelogs.exe sigar_amd64_winnt.dll sigar_x86_winnt.dll ssleay32.dll svn_populate_node_origins_index.exe svn.exe svnadmin.exe svndumpfilter.exe svnlook.exe svnserve.exe svnsync.exe svnversion.exe wintty.exe work_1 zlib1.dll openssl.cnf csvn_wrapper.conf logs repositories run csvn_wrapper.conf_1 big5freq.py integration_scripts.zip mod_actions.so AUTHORS init_.py bbcode.py agile.py autumn.py Client.py c14n.py test_t1.py binding.py builder.py appender.py attribute.py http.py attrlist.py deplist.py client.py libsvn_swig_py_1.dll client.dll core.dll delta.dll fs.dll ra.dll repos.dll wc.dll client.py_1 accept.py init_.py_1 init_.py_2 init_.py_3 init_.py_4 bincvs.py common.py default_v svn_ra.py init_.py_5 agpl_3.0.txt client.py_2 config.shtml advanced_search.shtml base.css feed_icon_14x14.png base.css_1 base.css_2 feed_icon_14x14.png_1 p5i_link.png base.css_3 pkg.1 pkg.depotd.1m pkg.5 OPENSOLARIS.LICENSE CURL_COPYING bz2.pyd anydbm.pyc db.pyc ast.pyc has_key.pyc base64MIME.pyc aliases.pyc config.pyc cherrypy.pth domreg.pyc expat.pyc expatreader.pyc init_.pyc msvcr71.dll python.exe python24.dll pythonw.exe cherryd auth.py plugins.py init_.py_6 init_.py_7 ChangeLog basicfirst.py callbacks.html test.py ast.py autohandler.py dependency_links.txt crypto.pyd libeay32.dll_1 ssleay32.dll_1 attribute.py_1 DirectoryBundle.py catalog.py actuator.py engine.py base.py os_aix.py dependencies.py api.py cpp.py dependency_links.txt_1 pycurl.pyd decoder.pyc zlib1.dll_1 Attr.pyc c14n.pyc HtmlLib.pyc HTMLAnchorElement.pyc FtCore.pyc expat.pyc_1 expatreader.pyc_1 characters.pyc bz2.pyd_1 sqlite3.dll tcl84.dll tclpip84.dll tix84.dll tk84.dll aifc.py db.py test_1413192.py ast.py_1 dyld.py runtests.py util.py ascii.py archive_util.py bdist.py wininst_6.exe wininst_7.1.exe support.py base64mime.py application.py audiotest.au test_email.py aliases.py log.py aboutDialog.py folder.gif Canvas.py config.py schema.py apache.py mod_python_3.3.1_py2.5.egg_info dde.pyd mfc71.dll Pythonwin.exe configui.py default.cfg basictimerapp.py cmdserver.py demoutils.py ideoptions.py DockingBar.py app.py coloreditor.py configui.py_1 AutoExpand.py activex.py bindings.py browseProjects.py scintilla.dll pythoncom25.dll pywintypes25.dll afxres.py license.txt perfmondata.dll pythonservice.exe backupEventLog.py pysynch.py BrandProject.py handles.py python.bmp dbapi2.py dbapi.py test.db bogus_code_obj.py abs.decTest README.txt test_cgi handlers.py domreg.py cElementTree.py expat.py expatreader.py init_.py_8 LICENSE.txt msvcr71.dll_1 python.exe_1 python25.dll pythoncom25.dll_1 pythonw.exe_1 pywintypes25.dll_1 w9xpopen.exe wrapper.conf commons_cli_2.jar groovy_all_1.6.4.jar jna.jar netty_3.2.0.BETA1.jar ReadMe.txt jrexx_1.1.1.jar velocity_1.5.jar release_notes.txt restart.gv contact.html.var bottom.html a.gif back.gif index.html diff.ezt help.css annotate.png annotate_icon.gif diff_form.ezt svnauthz_validate.exe diff.dll installed_1 installed_4"/>
+    <ROW Feature="MainFeature" Title="MainFeature" Description="Description" Display="1" Level="1" Directory_="APPDIR" Attributes="0" Components="csvn.bat httpd.exe SHORTCUTDIR readme.txt AI_ExePath genConfig.bat catalog_cache attrs cfg_cache file T151950Z_01.xml fast_add.v1 installed_2 installed_3 csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20 csvn.xml jdbcRealm.properties ext jetty_ajp_7.0.2.v20100331.jar activation_1.1.jar ant_1.6.5.jar jetty.policy security start.ini csvn.war ApacheMonitor.exe apr_dbd_odbc_1.dll apr_ldap_1.dll printenv csvn.xml_1 htcacheclean.exe htdbm.exe htdigest.exe htpasswd.exe httxt2dbm.exe adobe_stdenc.so libapr_1.dll libapriconv_1.dll libaprutil_1.dll libdb41.dll libeay32.dll libhttpd.dll libsasl.dll libsvnjavahl_1.dll libsvn_client_1.dll libsvn_delta_1.dll libsvn_diff_1.dll libsvn_fs_1.dll libsvn_ra_1.dll libsvn_repos_1.dll libsvn_subr_1.dll libsvn_wc_1.dll logresolve.exe htaccess openssl.exe rotatelogs.exe sigar_amd64_winnt.dll sigar_x86_winnt.dll ssleay32.dll svn_populate_node_origins_index.exe svn.exe svnadmin.exe svndumpfilter.exe svnlook.exe svnserve.exe svnsync.exe svnversion.exe wintty.exe work_1 zlib1.dll openssl.cnf csvn_wrapper.conf logs repositories run csvn_wrapper.conf_1 big5freq.py integration_scripts.zip mod_actions.so AUTHORS init_.py bbcode.py agile.py autumn.py Client.py c14n.py test_t1.py binding.py builder.py appender.py attribute.py http.py attrlist.py deplist.py client.py libsvn_swig_py_1.dll client.dll core.dll delta.dll fs.dll ra.dll repos.dll wc.dll client.py_1 accept.py init_.py_1 init_.py_2 init_.py_3 init_.py_4 bincvs.py common.py default_v svn_ra.py init_.py_5 agpl_3.0.txt client.py_2 config.shtml advanced_search.shtml base.css feed_icon_14x14.png base.css_1 base.css_2 feed_icon_14x14.png_1 p5i_link.png base.css_3 pkg.1 pkg.depotd.1m pkg.5 OPENSOLARIS.LICENSE CURL_COPYING bz2.pyd anydbm.pyc db.pyc ast.pyc has_key.pyc base64MIME.pyc aliases.pyc config.pyc cherrypy.pth domreg.pyc expat.pyc expatreader.pyc init_.pyc msvcr71.dll python.exe python24.dll pythonw.exe cherryd auth.py plugins.py init_.py_6 init_.py_7 ChangeLog basicfirst.py callbacks.html test.py ast.py autohandler.py dependency_links.txt crypto.pyd libeay32.dll_1 ssleay32.dll_1 attribute.py_1 DirectoryBundle.py catalog.py actuator.py engine.py base.py os_aix.py dependencies.py api.py cpp.py dependency_links.txt_1 pycurl.pyd decoder.pyc zlib1.dll_1 Attr.pyc c14n.pyc HtmlLib.pyc HTMLAnchorElement.pyc FtCore.pyc expat.pyc_1 expatreader.pyc_1 characters.pyc bz2.pyd_1 sqlite3.dll tcl84.dll tclpip84.dll tix84.dll tk84.dll aifc.py db.py test_1413192.py ast.py_1 dyld.py runtests.py util.py ascii.py archive_util.py bdist.py wininst_6.exe wininst_7.1.exe support.py base64mime.py application.py audiotest.au test_email.py aliases.py log.py aboutDialog.py folder.gif Canvas.py config.py schema.py apache.py mod_python_3.3.1_py2.5.egg_info dde.pyd mfc71.dll Pythonwin.exe configui.py default.cfg basictimerapp.py cmdserver.py demoutils.py ideoptions.py DockingBar.py app.py coloreditor.py configui.py_1 AutoExpand.py activex.py bindings.py browseProjects.py scintilla.dll pythoncom25.dll pywintypes25.dll afxres.py license.txt perfmondata.dll pythonservice.exe backupEventLog.py pysynch.py BrandProject.py handles.py python.bmp dbapi2.py dbapi.py test.db bogus_code_obj.py abs.decTest README.txt test_cgi handlers.py domreg.py cElementTree.py expat.py expatreader.py init_.py_8 LICENSE.txt msvcr71.dll_1 python.exe_1 python25.dll pythoncom25.dll_1 pythonw.exe_1 pywintypes25.dll_1 w9xpopen.exe wrapper.conf commons_cli_2.jar groovy_all_1.6.4.jar jna.jar netty_3.2.0.BETA1.jar ReadMe.txt jrexx_1.1.1.jar velocity_1.5.jar release_notes.txt restart.gv contact.html.var bottom.html a.gif back.gif index.html diff.ezt help.css annotate.png annotate_icon.gif diff_form.ezt svnauthz_validate.exe diff.dll installed installed_1"/>
     <ATTRIBUTE name="CurrentFeature" value="MainFeature"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiFilesComponent">
@@ -763,7 +763,7 @@
     <ROW File="StackViewer.py" Component_="aboutDialog.py" FileName="StackV~1.py|StackViewer.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\idlelib\StackViewer.py" SelfReg="false" Sequence="2045"/>
     <ROW File="StringIO.py" Component_="aifc.py" FileName="StringIO.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\StringIO.py" SelfReg="false" Sequence="2604"/>
     <ROW File="StringIO.pyc" Component_="anydbm.pyc" FileName="StringIO.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\StringIO.pyc" SelfReg="false" Sequence="1018"/>
-    <ROW File="T185352Z_01.xml" Component_="T151950Z_01.xml" FileName="201105~1.xml|20110525T185352Z-01.xml" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\history\20110525T185352Z-01.xml" SelfReg="false" Sequence="3643"/>
+    <ROW File="T191119Z_01.xml" Component_="T151950Z_01.xml" FileName="201105~2.xml|20110525T191119Z-01.xml" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\history\20110525T191119Z-01.xml" SelfReg="false" Sequence="3643"/>
     <ROW File="TODO" Component_="ChangeLog" FileName="TODO" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\doc\pycurl\TODO" SelfReg="false" Sequence="1191"/>
     <ROW File="TODO.txt" Component_="aboutDialog.py" FileName="TODO.txt" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\idlelib\TODO.txt" SelfReg="false" Sequence="2049"/>
     <ROW File="TarBundle.py" Component_="DirectoryBundle.py" FileName="TarBun~1.py|TarBundle.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\bundle\TarBundle.py" SelfReg="false" Sequence="1287"/>
@@ -872,18 +872,18 @@
     <ROW File="asybuiltins.py" Component_="agile.py" FileName="_asybu~1.py|_asybuiltins.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\lexers\_asybuiltins.py" SelfReg="false" Sequence="532"/>
     <ROW File="asynchat.py" Component_="aifc.py" FileName="asynchat.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\asynchat.py" SelfReg="false" Sequence="1558"/>
     <ROW File="asyncore.py" Component_="aifc.py" FileName="asyncore.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\asyncore.py" SelfReg="false" Sequence="1559"/>
-    <ROW File="at_depend" Component_="fast_add.v1" FileName="__at_d~1|__at_depend" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_depend" SelfReg="false" Sequence="20"/>
-    <ROW File="at_directory" Component_="fast_add.v1" FileName="__at_d~2|__at_directory" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_directory" SelfReg="false" Sequence="21"/>
-    <ROW File="at_file" Component_="fast_add.v1" FileName="__at_f~1|__at_file" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_file" SelfReg="false" Sequence="22"/>
-    <ROW File="at_license" Component_="fast_add.v1" FileName="__at_l~1|__at_license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_license" SelfReg="false" Sequence="23"/>
-    <ROW File="at_set" Component_="fast_add.v1" FileName="__at_set" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_set" SelfReg="false" Sequence="24"/>
+    <ROW File="at_depend" Component_="fast_add.v1" FileName="__at_d~1|__at_depend" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_depend" SelfReg="false" Sequence="20"/>
+    <ROW File="at_directory" Component_="fast_add.v1" FileName="__at_d~2|__at_directory" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_directory" SelfReg="false" Sequence="21"/>
+    <ROW File="at_file" Component_="fast_add.v1" FileName="__at_f~1|__at_file" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_file" SelfReg="false" Sequence="22"/>
+    <ROW File="at_license" Component_="fast_add.v1" FileName="__at_l~1|__at_license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_license" SelfReg="false" Sequence="23"/>
+    <ROW File="at_set" Component_="fast_add.v1" FileName="__at_set" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__at_set" SelfReg="false" Sequence="24"/>
     <ROW File="atexit.py" Component_="aifc.py" FileName="atexit.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\atexit.py" SelfReg="false" Sequence="1560"/>
     <ROW File="atexit.pyc" Component_="anydbm.pyc" FileName="atexit.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\atexit.pyc" SelfReg="false" Sequence="798"/>
     <ROW File="attribute.py" Component_="attribute.py" FileName="attrib~1.py|attribute.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\suds\sax\attribute.py" SelfReg="false" Sequence="619"/>
     <ROW File="attribute.py_1" Component_="attribute.py_1" FileName="attrib~1.py|attribute.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\actions\attribute.py" SelfReg="false" Sequence="1252"/>
     <ROW File="attribute.pyc" Component_="attribute.py_1" FileName="attrib~1.pyc|attribute.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\actions\attribute.pyc" SelfReg="false" Sequence="1253"/>
     <ROW File="attrlist.py" Component_="attrlist.py" FileName="attrlist.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\suds\umx\attrlist.py" SelfReg="false" Sequence="636"/>
-    <ROW File="attrs" Component_="attrs" FileName="attrs" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\attrs" SelfReg="false" Sequence="8"/>
+    <ROW File="attrs" Component_="attrs" FileName="attrs" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\attrs" SelfReg="false" Sequence="8"/>
     <ROW File="audio.py" Component_="application.py" FileName="audio.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\email\mime\audio.py" SelfReg="false" Sequence="1771"/>
     <ROW File="audiodev.py" Component_="aifc.py" FileName="audiodev.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\audiodev.py" SelfReg="false" Sequence="1561"/>
     <ROW File="audiotest.au" Component_="audiotest.au" FileName="audiot~1.au|audiotest.au" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\email\test\data\audiotest.au" SelfReg="false" Sequence="1781"/>
@@ -1039,16 +1039,16 @@
     <ROW File="calendar.py" Component_="aifc.py" FileName="calendar.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\calendar.py" SelfReg="false" Sequence="1596"/>
     <ROW File="calendar.pyc" Component_="anydbm.pyc" FileName="calendar.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\calendar.pyc" SelfReg="false" Sequence="810"/>
     <ROW File="callbacks.html" Component_="callbacks.html" FileName="callba~1.htm|callbacks.html" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\doc\pycurl\html\callbacks.html" SelfReg="false" Sequence="1158"/>
-    <ROW File="catalog" Component_="attrs" FileName="catalog" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\catalog" SelfReg="false" Sequence="9"/>
+    <ROW File="catalog" Component_="attrs" FileName="catalog" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\catalog" SelfReg="false" Sequence="9"/>
     <ROW File="catalog.py" Component_="catalog.py" FileName="catalog.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\catalog.py" SelfReg="false" Sequence="1291"/>
     <ROW File="catalog.py_1" Component_="api.py" FileName="catalog.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\server\catalog.py" SelfReg="false" Sequence="1418"/>
     <ROW File="catalog.pyc" Component_="catalog.py" FileName="catalog.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\catalog.pyc" SelfReg="false" Sequence="1292"/>
     <ROW File="catalog.pyc_1" Component_="api.py" FileName="catalog.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\server\catalog.pyc" SelfReg="false" Sequence="1419"/>
     <ROW File="catalog.shtml" Component_="advanced_search.shtml" FileName="catalo~1.sht|catalog.shtml" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\lib\web\en\catalog.shtml" SelfReg="false" Sequence="745"/>
-    <ROW File="catalog_cache" Component_="catalog_cache" FileName="catalo~1|catalog_cache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\catalog_cache" SelfReg="false" Sequence="7"/>
+    <ROW File="catalog_cache" Component_="catalog_cache" FileName="catalo~1|catalog_cache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\catalog_cache" SelfReg="false" Sequence="7"/>
     <ROW File="ccompiler.py" Component_="archive_util.py" FileName="ccompi~1.py|ccompiler.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\distutils\ccompiler.py" SelfReg="false" Sequence="1699"/>
     <ROW File="ccvs.py" Component_="bincvs.py" FileName="ccvs.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\viewvc\vclib\ccvs\ccvs.py" SelfReg="false" Sequence="707"/>
-    <ROW File="cfg_cache" Component_="cfg_cache" FileName="cfg_ca~1|cfg_cache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\cfg_cache" SelfReg="false" Sequence="11"/>
+    <ROW File="cfg_cache" Component_="cfg_cache" FileName="cfg_ca~1|cfg_cache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\cfg_cache" SelfReg="false" Sequence="11"/>
     <ROW File="cfgfiles.py" Component_="catalog.py" FileName="cfgfiles.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\cfgfiles.py" SelfReg="false" Sequence="1293"/>
     <ROW File="cfgfiles.pyc" Component_="catalog.py" FileName="cfgfiles.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\cfgfiles.pyc" SelfReg="false" Sequence="1294"/>
     <ROW File="cfgparser.1" Component_="test.db" FileName="cfgpar~1.1|cfgparser.1" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\test\cfgparser.1" SelfReg="false" Sequence="2630"/>
@@ -1371,8 +1371,8 @@
     <ROW File="csvn.war" Component_="csvn.war" FileName="csvn.war" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\webapps\csvn.war" SelfReg="false" Sequence="110"/>
     <ROW File="csvn.xml" Component_="csvn.xml" FileName="csvn.xml" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\contexts\csvn.xml" SelfReg="false" Sequence="59"/>
     <ROW File="csvn.xml_1" Component_="csvn.xml_1" FileName="csvn.xml" Attributes="0" SourcePath="C:\collabnet-csvn\bin\contexts\csvn.xml" SelfReg="false" Sequence="119"/>
-    <ROW File="csvn_2.0.0_2C5.2.3790_2097.776_3A20110525T184611Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="csvn@2~1.776|csvn@2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\csvn@2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z" SelfReg="false" Sequence="3666"/>
-    <ROW File="csvn_svn_1.6.16_2C5.2.3790_2097.776_3A20110525T184545Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="csvn-s~1.776|csvn-svn@1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\csvn-svn@1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z" SelfReg="false" Sequence="3665"/>
+    <ROW File="csvn_2.0.0_2C6.1.7600_2097.663_3A20110525T184555Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="csvn@2~1.663|csvn@2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\csvn@2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z" SelfReg="false" Sequence="3666"/>
+    <ROW File="csvn_svn_1.6.16_2C6.1.7600_2097.663_3A20110525T184537Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="csvn-s~1.663|csvn-svn@1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\csvn-svn@1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z" SelfReg="false" Sequence="3665"/>
     <ROW File="csvn_wrapper.conf" Component_="csvn_wrapper.conf" FileName="csvn-w~1.con|csvn-wrapper.conf" Attributes="0" SourcePath="C:\collabnet-csvn\data\conf\csvn-wrapper.conf" SelfReg="false" Sequence="378"/>
     <ROW File="csvn_wrapper.conf_1" Component_="csvn_wrapper.conf_1" FileName="csvn-w~1.con|csvn-wrapper.conf" Attributes="0" SourcePath="C:\collabnet-csvn\dist\csvn-wrapper.conf" SelfReg="false" Sequence="387"/>
     <ROW File="ctokens.py" Component_="cpp.py" FileName="ctokens.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\ply\ctokens.py" SelfReg="false" Sequence="1460"/>
@@ -1724,8 +1724,8 @@
     <ROW File="fail.py" Component_="configui.py" FileName="fail.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\pythonwin\pywin\debugger\fail.py" SelfReg="false" Sequence="2195"/>
     <ROW File="fail.pyo" Component_="configui.py" FileName="fail.pyo" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\pythonwin\pywin\debugger\fail.pyo" SelfReg="false" Sequence="2196"/>
     <ROW File="fancy_getopt.py" Component_="archive_util.py" FileName="fancy_~1.py|fancy_getopt.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\distutils\fancy_getopt.py" SelfReg="false" Sequence="1734"/>
-    <ROW File="fast_add.v1" Component_="fast_add.v1" FileName="fast_add.v1" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fast_add.v1" SelfReg="false" Sequence="12"/>
-    <ROW File="fast_remove.v1" Component_="fast_add.v1" FileName="fast_r~1.v1|fast_remove.v1" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fast_remove.v1" SelfReg="false" Sequence="13"/>
+    <ROW File="fast_add.v1" Component_="fast_add.v1" FileName="fast_add.v1" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fast_add.v1" SelfReg="false" Sequence="12"/>
+    <ROW File="fast_remove.v1" Component_="fast_add.v1" FileName="fast_r~1.v1|fast_remove.v1" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fast_remove.v1" SelfReg="false" Sequence="13"/>
     <ROW File="favicon.ico" Component_="cherryd" FileName="favicon.ico" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\cherrypy\favicon.ico" SelfReg="false" Sequence="1072"/>
     <ROW File="favicon.ico_1" Component_="annotate_icon.gif" FileName="favicon.ico" Attributes="0" SourcePath="C:\collabnet-csvn\www\viewvc\docroot\images\branding\favicon.ico" SelfReg="false" Sequence="3574"/>
     <ROW File="favicon.ico_2" Component_="annotate.png" FileName="favicon.ico" Attributes="0" SourcePath="C:\collabnet-csvn\www\viewvc\docroot\images\favicon.ico" SelfReg="false" Sequence="3596"/>
@@ -1761,7 +1761,7 @@
     <ROW File="fma.decTest" Component_="abs.decTest" FileName="fma~1.dec|fma.decTest" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\test\decimaltestdata\fma.decTest" SelfReg="false" Sequence="2751"/>
     <ROW File="fmri.py" Component_="catalog.py" FileName="fmri.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\fmri.py" SelfReg="false" Sequence="1370"/>
     <ROW File="fmri.pyc" Component_="catalog.py" FileName="fmri.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\fmri.pyc" SelfReg="false" Sequence="1371"/>
-    <ROW File="fmri_offsets.v1" Component_="fast_add.v1" FileName="fmri_o~1.v1|fmri_offsets.v1" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fmri_offsets.v1" SelfReg="false" Sequence="14"/>
+    <ROW File="fmri_offsets.v1" Component_="fast_add.v1" FileName="fmri_o~1.v1|fmri_offsets.v1" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\fmri_offsets.v1" SelfReg="false" Sequence="14"/>
     <ROW File="fnmatch.py" Component_="aifc.py" FileName="fnmatch.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\fnmatch.py" SelfReg="false" Sequence="1957"/>
     <ROW File="fnmatch.pyc" Component_="anydbm.pyc" FileName="fnmatch.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\fnmatch.pyc" SelfReg="false" Sequence="963"/>
     <ROW File="folder.gif" Component_="folder.gif" FileName="folder.gif" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\idlelib\Icons\folder.gif" SelfReg="false" Sequence="2009"/>
@@ -1802,8 +1802,8 @@
     <ROW File="fs.pyd" Component_="client.py" FileName="_fs.pyd" Attributes="0" SourcePath="C:\collabnet-csvn\lib\svn-python\libsvn\_fs.pyd" SelfReg="false" Sequence="668"/>
     <ROW File="ftplib.py" Component_="aifc.py" FileName="ftplib.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\ftplib.py" SelfReg="false" Sequence="1960"/>
     <ROW File="ftplib.pyc" Component_="anydbm.pyc" FileName="ftplib.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\ftplib.pyc" SelfReg="false" Sequence="964"/>
-    <ROW File="full_fmri_list" Component_="fast_add.v1" FileName="full_f~1|full_fmri_list" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\full_fmri_list" SelfReg="false" Sequence="15"/>
-    <ROW File="full_fmri_list.hash" Component_="fast_add.v1" FileName="full_f~1.has|full_fmri_list.hash" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\full_fmri_list.hash" SelfReg="false" Sequence="16"/>
+    <ROW File="full_fmri_list" Component_="fast_add.v1" FileName="full_f~1|full_fmri_list" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\full_fmri_list" SelfReg="false" Sequence="15"/>
+    <ROW File="full_fmri_list.hash" Component_="fast_add.v1" FileName="full_f~1.has|full_fmri_list.hash" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\full_fmri_list.hash" SelfReg="false" Sequence="16"/>
     <ROW File="functional.py" Component_="agile.py" FileName="functi~1.py|functional.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\lexers\functional.py" SelfReg="false" Sequence="524"/>
     <ROW File="functools.py" Component_="aifc.py" FileName="functo~1.py|functools.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\functools.py" SelfReg="false" Sequence="1961"/>
     <ROW File="future.py" Component_="ast.py_1" FileName="future.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\compiler\future.py" SelfReg="false" Sequence="1611"/>
@@ -2146,10 +2146,10 @@
     <ROW File="install_lib.py" Component_="bdist.py" FileName="instal~4.py|install_lib.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\distutils\command\install_lib.py" SelfReg="false" Sequence="1717"/>
     <ROW File="install_scripts.py" Component_="bdist.py" FileName="instal~5.py|install_scripts.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\distutils\command\install_scripts.py" SelfReg="false" Sequence="1718"/>
     <ROW File="install_updates.bat" Component_="csvn_wrapper.conf_1" FileName="instal~1.bat|install-updates.bat" Attributes="0" SourcePath="C:\collabnet-csvn\dist\install-updates.bat" SelfReg="false" Sequence="389"/>
-    <ROW File="installed_1" Component_="installed_1" FileName="instal~1|installed" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\installed" SelfReg="false" Sequence="3644"/>
-    <ROW File="installed_2" Component_="installed_2" FileName="instal~1|installed" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\installed" SelfReg="false" Sequence="39"/>
-    <ROW File="installed_3" Component_="installed_3" FileName="instal~1|installed" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\installed" SelfReg="false" Sequence="49"/>
-    <ROW File="installed_4" Component_="installed_4" FileName="instal~1|installed" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\installed" SelfReg="false" Sequence="3653"/>
+    <ROW File="installed" Component_="installed" FileName="instal~1|installed" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\installed" SelfReg="false" Sequence="3644"/>
+    <ROW File="installed_1" Component_="installed_1" FileName="instal~1|installed" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\installed" SelfReg="false" Sequence="3653"/>
+    <ROW File="installed_2" Component_="installed_2" FileName="instal~1|installed" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\installed" SelfReg="false" Sequence="39"/>
+    <ROW File="installed_3" Component_="installed_3" FileName="instal~1|installed" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\installed" SelfReg="false" Sequence="49"/>
     <ROW File="integration.war" Component_="csvn.war" FileName="integr~1.war|integration.war" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\webapps\integration.war" SelfReg="false" Sequence="111"/>
     <ROW File="integration.xml" Component_="csvn.xml" FileName="integr~1.xml|integration.xml" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\contexts\integration.xml" SelfReg="false" Sequence="60"/>
     <ROW File="integration_scripts.zip" Component_="integration_scripts.zip" FileName="integr~1.zip|integration-scripts.zip" Attributes="0" SourcePath="C:\collabnet-csvn\lib\integration-scripts.zip" SelfReg="false" Sequence="431"/>
@@ -2363,7 +2363,7 @@
     <ROW File="langhebrewmodel.py" Component_="big5freq.py" FileName="langhe~1.py|langhebrewmodel.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\chardet\langhebrewmodel.py" SelfReg="false" Sequence="417"/>
     <ROW File="langhungarianmodel.py" Component_="big5freq.py" FileName="langhu~1.py|langhungarianmodel.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\chardet\langhungarianmodel.py" SelfReg="false" Sequence="418"/>
     <ROW File="langthaimodel.py" Component_="big5freq.py" FileName="langth~1.py|langthaimodel.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\chardet\langthaimodel.py" SelfReg="false" Sequence="419"/>
-    <ROW File="last_refreshed" Component_="attrs" FileName="last_r~1|last_refreshed" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\last_refreshed" SelfReg="false" Sequence="10"/>
+    <ROW File="last_refreshed" Component_="attrs" FileName="last_r~1|last_refreshed" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\catalog\collab.net\last_refreshed" SelfReg="false" Sequence="10"/>
     <ROW File="latex.py" Component_="bbcode.py" FileName="latex.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\formatters\latex.py" SelfReg="false" Sequence="511"/>
     <ROW File="latin1prober.py" Component_="big5freq.py" FileName="latin1~1.py|latin1prober.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\chardet\latin1prober.py" SelfReg="false" Sequence="420"/>
     <ROW File="latin_1.py" Component_="aliases.py" FileName="latin_1.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\encodings\latin_1.py" SelfReg="false" Sequence="1918"/>
@@ -2400,15 +2400,15 @@
     <ROW File="libsvn_swig_py_1.dll" Component_="libsvn_swig_py_1.dll" FileName="libsvn~1.dll|libsvn_swig_py-1.dll" Attributes="0" SourcePath="C:\collabnet-csvn\lib\svn-python\libsvn\libsvn_swig_py-1.dll" SelfReg="false" Sequence="657"/>
     <ROW File="libsvn_wc_1.dll" Component_="libsvn_wc_1.dll" FileName="libsvn~9.dll|libsvn_wc-1.dll" Attributes="0" SourcePath="C:\collabnet-csvn\bin\libsvn_wc-1.dll" SelfReg="false" Sequence="353"/>
     <ROW File="libsvnjavahl_1.dll" Component_="libsvnjavahl_1.dll" FileName="libsvn~1.dll|libsvnjavahl-1.dll" Attributes="0" SourcePath="C:\collabnet-csvn\bin\libsvnjavahl-1.dll" SelfReg="false" Sequence="345"/>
-    <ROW File="license.AGPLv3_1" Component_="installed_1" FileName="licens~1.AGP|license.AGPLv3" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\license.AGPLv3" SelfReg="false" Sequence="3645"/>
-    <ROW File="license.Apache_2.0_1" Component_="installed_4" FileName="licens~1.0|license.Apache 2.0" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\license.Apache 2.0" SelfReg="false" Sequence="3654"/>
-    <ROW File="license.CDDLv1.0" Component_="installed_2" FileName="licens~1.0|license.CDDLv1.0" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\license.CDDLv1.0" SelfReg="false" Sequence="40"/>
-    <ROW File="license.LGPLv2.1_Neon_1" Component_="installed_4" FileName="licens~1.1-N|license.LGPLv2.1 - Neon" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\license.LGPLv2.1 - Neon" SelfReg="false" Sequence="3655"/>
-    <ROW File="license.OpenSSL_License_1" Component_="installed_4" FileName="licens~1.Ope|license.OpenSSL License" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\license.OpenSSL License" SelfReg="false" Sequence="3656"/>
-    <ROW File="license.PKG_3RD_PARTY" Component_="installed_2" FileName="licens~1.PKG|license.PKG-3RD-PARTY" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\license.PKG-3RD-PARTY" SelfReg="false" Sequence="41"/>
-    <ROW File="license.PSFv2" Component_="installed_3" FileName="licens~1.PSF|license.PSFv2" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\license.PSFv2" SelfReg="false" Sequence="50"/>
-    <ROW File="license.Subversion_License_1" Component_="installed_4" FileName="licens~1.Sub|license.Subversion License" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\license.Subversion License" SelfReg="false" Sequence="3657"/>
-    <ROW File="license.ViewVC_License_1" Component_="installed_4" FileName="licens~1.Vie|license.ViewVC License" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\license.ViewVC License" SelfReg="false" Sequence="3658"/>
+    <ROW File="license.AGPLv3" Component_="installed" FileName="licens~1.AGP|license.AGPLv3" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\license.AGPLv3" SelfReg="false" Sequence="3645"/>
+    <ROW File="license.Apache_2.0" Component_="installed_1" FileName="licens~1.0|license.Apache 2.0" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\license.Apache 2.0" SelfReg="false" Sequence="3654"/>
+    <ROW File="license.CDDLv1.0" Component_="installed_2" FileName="licens~1.0|license.CDDLv1.0" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\license.CDDLv1.0" SelfReg="false" Sequence="40"/>
+    <ROW File="license.LGPLv2.1_Neon" Component_="installed_1" FileName="licens~1.1-N|license.LGPLv2.1 - Neon" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\license.LGPLv2.1 - Neon" SelfReg="false" Sequence="3655"/>
+    <ROW File="license.OpenSSL_License" Component_="installed_1" FileName="licens~1.Ope|license.OpenSSL License" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\license.OpenSSL License" SelfReg="false" Sequence="3656"/>
+    <ROW File="license.PKG_3RD_PARTY" Component_="installed_2" FileName="licens~1.PKG|license.PKG-3RD-PARTY" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\license.PKG-3RD-PARTY" SelfReg="false" Sequence="41"/>
+    <ROW File="license.PSFv2" Component_="installed_3" FileName="licens~1.PSF|license.PSFv2" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\license.PSFv2" SelfReg="false" Sequence="50"/>
+    <ROW File="license.Subversion_License" Component_="installed_1" FileName="licens~1.Sub|license.Subversion License" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\license.Subversion License" SelfReg="false" Sequence="3657"/>
+    <ROW File="license.ViewVC_License" Component_="installed_1" FileName="licens~1.Vie|license.ViewVC License" Version="65535.65535.65535.65535" Attributes="1" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\license.ViewVC License" SelfReg="false" Sequence="3658"/>
     <ROW File="license.py" Component_="attribute.py_1" FileName="license.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\actions\license.py" SelfReg="false" Sequence="1270"/>
     <ROW File="license.pyc" Component_="attribute.py_1" FileName="license.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\actions\license.pyc" SelfReg="false" Sequence="1271"/>
     <ROW File="license.txt_2" Component_="dde.pyd" FileName="license.txt" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\pythonwin\license.txt" SelfReg="false" Sequence="2184"/>
@@ -2488,36 +2488,36 @@
     <ROW File="mail_1.4.jar" Component_="activation_1.1.jar" FileName="mail-1~1.jar|mail-1.4.jar" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\lib\jndi\mail-1.4.jar" SelfReg="false" Sequence="100"/>
     <ROW File="mailbox.py" Component_="aifc.py" FileName="mailbox.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\mailbox.py" SelfReg="false" Sequence="2089"/>
     <ROW File="mailcap.py" Component_="aifc.py" FileName="mailcap.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\mailcap.py" SelfReg="false" Sequence="2090"/>
-    <ROW File="main_dict.ascii.v2" Component_="fast_add.v1" FileName="main_d~1.v2|main_dict.ascii.v2" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\main_dict.ascii.v2" SelfReg="false" Sequence="17"/>
-    <ROW File="manf_list.v1" Component_="fast_add.v1" FileName="manf_l~1.v1|manf_list.v1" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\manf_list.v1" SelfReg="false" Sequence="18"/>
-    <ROW File="manifest.depend_1" Component_="installed_2" FileName="manife~1.dep|manifest.depend" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.depend" SelfReg="false" Sequence="43"/>
-    <ROW File="manifest.depend_2" Component_="installed_1" FileName="manife~1.dep|manifest.depend" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.depend" SelfReg="false" Sequence="3647"/>
-    <ROW File="manifest.dir_1" Component_="installed_1" FileName="manifest.dir" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.dir" SelfReg="false" Sequence="3648"/>
-    <ROW File="manifest.dir_2" Component_="installed_2" FileName="manifest.dir" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.dir" SelfReg="false" Sequence="44"/>
-    <ROW File="manifest.dir_3" Component_="installed_3" FileName="manifest.dir" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.dir" SelfReg="false" Sequence="52"/>
-    <ROW File="manifest.dir_4" Component_="installed_4" FileName="manifest.dir" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest.dir" SelfReg="false" Sequence="3660"/>
-    <ROW File="manifest.dircache_1" Component_="installed_1" FileName="manife~1.dir|manifest.dircache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.dircache" SelfReg="false" Sequence="3649"/>
-    <ROW File="manifest.dircache_2" Component_="installed_2" FileName="manife~1.dir|manifest.dircache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.dircache" SelfReg="false" Sequence="45"/>
-    <ROW File="manifest.dircache_3" Component_="installed_3" FileName="manife~1.dir|manifest.dircache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.dircache" SelfReg="false" Sequence="53"/>
-    <ROW File="manifest.dircache_4" Component_="installed_4" FileName="manife~1.dir|manifest.dircache" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest.dircache" SelfReg="false" Sequence="3661"/>
-    <ROW File="manifest.file_1" Component_="installed_1" FileName="manife~1.fil|manifest.file" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.file" SelfReg="false" Sequence="3650"/>
-    <ROW File="manifest.file_2" Component_="installed_2" FileName="manife~1.fil|manifest.file" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.file" SelfReg="false" Sequence="46"/>
-    <ROW File="manifest.file_3" Component_="installed_3" FileName="manife~1.fil|manifest.file" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.file" SelfReg="false" Sequence="54"/>
-    <ROW File="manifest.file_4" Component_="installed_4" FileName="manife~1.fil|manifest.file" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest.file" SelfReg="false" Sequence="3662"/>
-    <ROW File="manifest.license_1" Component_="installed_1" FileName="manife~1.lic|manifest.license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.license" SelfReg="false" Sequence="3651"/>
-    <ROW File="manifest.license_2" Component_="installed_2" FileName="manife~1.lic|manifest.license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.license" SelfReg="false" Sequence="47"/>
-    <ROW File="manifest.license_3" Component_="installed_3" FileName="manife~1.lic|manifest.license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.license" SelfReg="false" Sequence="55"/>
-    <ROW File="manifest.license_4" Component_="installed_4" FileName="manife~1.lic|manifest.license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest.license" SelfReg="false" Sequence="3663"/>
+    <ROW File="main_dict.ascii.v2" Component_="fast_add.v1" FileName="main_d~1.v2|main_dict.ascii.v2" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\main_dict.ascii.v2" SelfReg="false" Sequence="17"/>
+    <ROW File="manf_list.v1" Component_="fast_add.v1" FileName="manf_l~1.v1|manf_list.v1" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\manf_list.v1" SelfReg="false" Sequence="18"/>
+    <ROW File="manifest" Component_="installed" FileName="manifest" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest" SelfReg="false" Sequence="3646"/>
+    <ROW File="manifest.depend" Component_="installed" FileName="manife~1.dep|manifest.depend" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.depend" SelfReg="false" Sequence="3647"/>
+    <ROW File="manifest.depend_1" Component_="installed_2" FileName="manife~1.dep|manifest.depend" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.depend" SelfReg="false" Sequence="43"/>
+    <ROW File="manifest.dir" Component_="installed" FileName="manifest.dir" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.dir" SelfReg="false" Sequence="3648"/>
+    <ROW File="manifest.dir_1" Component_="installed_1" FileName="manifest.dir" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest.dir" SelfReg="false" Sequence="3660"/>
+    <ROW File="manifest.dir_2" Component_="installed_2" FileName="manifest.dir" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.dir" SelfReg="false" Sequence="44"/>
+    <ROW File="manifest.dir_3" Component_="installed_3" FileName="manifest.dir" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.dir" SelfReg="false" Sequence="52"/>
+    <ROW File="manifest.dircache" Component_="installed" FileName="manife~1.dir|manifest.dircache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.dircache" SelfReg="false" Sequence="3649"/>
+    <ROW File="manifest.dircache_1" Component_="installed_1" FileName="manife~1.dir|manifest.dircache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest.dircache" SelfReg="false" Sequence="3661"/>
+    <ROW File="manifest.dircache_2" Component_="installed_2" FileName="manife~1.dir|manifest.dircache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.dircache" SelfReg="false" Sequence="45"/>
+    <ROW File="manifest.dircache_3" Component_="installed_3" FileName="manife~1.dir|manifest.dircache" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.dircache" SelfReg="false" Sequence="53"/>
+    <ROW File="manifest.file" Component_="installed" FileName="manife~1.fil|manifest.file" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.file" SelfReg="false" Sequence="3650"/>
+    <ROW File="manifest.file_1" Component_="installed_1" FileName="manife~1.fil|manifest.file" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest.file" SelfReg="false" Sequence="3662"/>
+    <ROW File="manifest.file_2" Component_="installed_2" FileName="manife~1.fil|manifest.file" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.file" SelfReg="false" Sequence="46"/>
+    <ROW File="manifest.file_3" Component_="installed_3" FileName="manife~1.fil|manifest.file" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.file" SelfReg="false" Sequence="54"/>
+    <ROW File="manifest.license" Component_="installed" FileName="manife~1.lic|manifest.license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.license" SelfReg="false" Sequence="3651"/>
+    <ROW File="manifest.license_1" Component_="installed_1" FileName="manife~1.lic|manifest.license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest.license" SelfReg="false" Sequence="3663"/>
+    <ROW File="manifest.license_2" Component_="installed_2" FileName="manife~1.lic|manifest.license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.license" SelfReg="false" Sequence="47"/>
+    <ROW File="manifest.license_3" Component_="installed_3" FileName="manife~1.lic|manifest.license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.license" SelfReg="false" Sequence="55"/>
     <ROW File="manifest.py" Component_="catalog.py" FileName="manifest.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\manifest.py" SelfReg="false" Sequence="1374"/>
     <ROW File="manifest.pyc" Component_="catalog.py" FileName="manifest.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\manifest.pyc" SelfReg="false" Sequence="1375"/>
-    <ROW File="manifest.set_1" Component_="installed_1" FileName="manifest.set" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest.set" SelfReg="false" Sequence="3652"/>
-    <ROW File="manifest.set_2" Component_="installed_2" FileName="manifest.set" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.set" SelfReg="false" Sequence="48"/>
-    <ROW File="manifest.set_3" Component_="installed_3" FileName="manifest.set" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.set" SelfReg="false" Sequence="56"/>
-    <ROW File="manifest.set_4" Component_="installed_4" FileName="manifest.set" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest.set" SelfReg="false" Sequence="3664"/>
-    <ROW File="manifest_1" Component_="installed_1" FileName="manifest" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C5.2.3790-2097.776%3A20110525T184611Z\manifest" SelfReg="false" Sequence="3646"/>
-    <ROW File="manifest_2" Component_="installed_2" FileName="manifest" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest" SelfReg="false" Sequence="42"/>
-    <ROW File="manifest_3" Component_="installed_3" FileName="manifest" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest" SelfReg="false" Sequence="51"/>
-    <ROW File="manifest_4" Component_="installed_4" FileName="manifest" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C5.2.3790-2097.776%3A20110525T184545Z\manifest" SelfReg="false" Sequence="3659"/>
+    <ROW File="manifest.set" Component_="installed" FileName="manifest.set" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn\2.0.0%2C6.1.7600-2097.663%3A20110525T184555Z\manifest.set" SelfReg="false" Sequence="3652"/>
+    <ROW File="manifest.set_1" Component_="installed_1" FileName="manifest.set" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest.set" SelfReg="false" Sequence="3664"/>
+    <ROW File="manifest.set_2" Component_="installed_2" FileName="manifest.set" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest.set" SelfReg="false" Sequence="48"/>
+    <ROW File="manifest.set_3" Component_="installed_3" FileName="manifest.set" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest.set" SelfReg="false" Sequence="56"/>
+    <ROW File="manifest_1" Component_="installed_1" FileName="manifest" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\csvn-svn\1.6.16%2C6.1.7600-2097.663%3A20110525T184537Z\manifest" SelfReg="false" Sequence="3659"/>
+    <ROW File="manifest_2" Component_="installed_2" FileName="manifest" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\pkg\1.122.2%2C0-38.2699%3A20100118T163717Z\manifest" SelfReg="false" Sequence="42"/>
+    <ROW File="manifest_3" Component_="installed_3" FileName="manifest" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\pkg\python2.4-minimal\2.4.4.0%2C0-38.2699%3A20100118T163737Z\manifest" SelfReg="false" Sequence="51"/>
     <ROW File="manni.py" Component_="autumn.py" FileName="manni.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\styles\manni.py" SelfReg="false" Sequence="551"/>
     <ROW File="mapping.py" Component_="bbcode.py" FileName="_mapping.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\formatters\_mapping.py" SelfReg="false" Sequence="517"/>
     <ROW File="mapping.py_1" Component_="agile.py" FileName="_mapping.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\lexers\_mapping.py" SelfReg="false" Sequence="535"/>
@@ -2830,7 +2830,7 @@
     <ROW File="pkg.depotd.1m" Component_="pkg.depotd.1m" FileName="pkgdep~1.1m|pkg.depotd.1m" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\man\cat1m\pkg.depotd.1m" SelfReg="false" Sequence="784"/>
     <ROW File="pkg.depotd.bat" Component_="client.py_2" FileName="pkgdep~1.bat|pkg.depotd.bat" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\bin\pkg.depotd.bat" SelfReg="false" Sequence="737"/>
     <ROW File="pkg.pth" Component_="cherrypy.pth" FileName="pkg.pth" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\site-packages\pkg.pth" SelfReg="false" Sequence="1005"/>
-    <ROW File="pkg_1.122.2_2C0_38.2699_3A20100118T163717Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="pkg@11~1.269|pkg@1.122.2%2C0-38.2699%3A20100118T163717Z" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\pkg@1.122.2%2C0-38.2699%3A20100118T163717Z" SelfReg="false" Sequence="57"/>
+    <ROW File="pkg_1.122.2_2C0_38.2699_3A20100118T163717Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="pkg@11~1.269|pkg@1.122.2%2C0-38.2699%3A20100118T163717Z" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\pkg@1.122.2%2C0-38.2699%3A20100118T163717Z" SelfReg="false" Sequence="57"/>
     <ROW File="pkg_block_icon.png" Component_="p5i_link.png" FileName="pkg-bl~1.png|pkg-block-icon.png" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\lib\web\_themes\pkg-block-icon.png" SelfReg="false" Sequence="771"/>
     <ROW File="pkg_block_logo.png" Component_="p5i_link.png" FileName="pkg-bl~2.png|pkg-block-logo.png" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\lib\web\_themes\pkg-block-logo.png" SelfReg="false" Sequence="772"/>
     <ROW File="pkg_block_logo.svg" Component_="p5i_link.png" FileName="pkg-bl~1.svg|pkg-block-logo.svg" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\lib\web\_themes\pkg-block-logo.svg" SelfReg="false" Sequence="773"/>
@@ -2937,7 +2937,7 @@
     <ROW File="python.ico" Component_="python.bmp" FileName="python.ico" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\win32\test\win32rcparser\python.ico" SelfReg="false" Sequence="2542"/>
     <ROW File="python.py" Component_="base.py" FileName="python.py" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\flavor\python.py" SelfReg="false" Sequence="1364"/>
     <ROW File="python.pyc" Component_="base.py" FileName="python.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\vendor-packages\pkg\flavor\python.pyc" SelfReg="false" Sequence="1365"/>
-    <ROW File="python2.4_minimal_2.4.4.0_2C0_38.2699_3A20100118T163737Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="python~1.269|python2.4-minimal@2.4.4.0%2C0-38.2699%3A20100118T163737Z" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\python2.4-minimal@2.4.4.0%2C0-38.2699%3A20100118T163737Z" SelfReg="false" Sequence="58"/>
+    <ROW File="python2.4_minimal_2.4.4.0_2C0_38.2699_3A20100118T163737Z" Component_="csvn_svn_1.6.13_2C6.1.7600_1648.482_3A20" FileName="python~1.269|python2.4-minimal@2.4.4.0%2C0-38.2699%3A20100118T163737Z" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\state\installed\python2.4-minimal@2.4.4.0%2C0-38.2699%3A20100118T163737Z" SelfReg="false" Sequence="58"/>
     <ROW File="python22.py" Component_="apache.py" FileName="python22.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\mod_python\python22.py" SelfReg="false" Sequence="2168"/>
     <ROW File="python22.pyo" Component_="apache.py" FileName="python22.pyo" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\mod_python\python22.pyo" SelfReg="false" Sequence="2169"/>
     <ROW File="python24.dll" Component_="python24.dll" FileName="python24.dll" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\python24.dll" SelfReg="false" Sequence="1068"/>
@@ -3214,20 +3214,20 @@
     <ROW File="sspi.pyo" Component_="afxres.py" FileName="sspi.pyo" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\win32\lib\sspi.pyo" SelfReg="false" Sequence="2433"/>
     <ROW File="sspicon.py" Component_="afxres.py" FileName="sspicon.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\win32\lib\sspicon.py" SelfReg="false" Sequence="2434"/>
     <ROW File="sspicon.pyo" Component_="afxres.py" FileName="sspicon.pyo" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\site-packages\win32\lib\sspicon.pyo" SelfReg="false" Sequence="2435"/>
-    <ROW File="st_basename" Component_="fast_add.v1" FileName="__st_b~1|__st_basename" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_basename" SelfReg="false" Sequence="25"/>
-    <ROW File="st_content" Component_="fast_add.v1" FileName="__st_c~1|__st_content" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_content" SelfReg="false" Sequence="26"/>
-    <ROW File="st_description" Component_="fast_add.v1" FileName="__st_d~1|__st_description" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_description" SelfReg="false" Sequence="27"/>
-    <ROW File="st_fmri" Component_="fast_add.v1" FileName="__st_f~1|__st_fmri" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_fmri" SelfReg="false" Sequence="28"/>
-    <ROW File="st_info.classification" Component_="fast_add.v1" FileName="__st_i~1.cla|__st_info.classification" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.classification" SelfReg="false" Sequence="29"/>
-    <ROW File="st_info.maintainer_url" Component_="fast_add.v1" FileName="__st_i~1.mai|__st_info.maintainer_url" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.maintainer_url" SelfReg="false" Sequence="30"/>
-    <ROW File="st_info.upstream_url" Component_="fast_add.v1" FileName="__st_i~1.ups|__st_info.upstream_url" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.upstream_url" SelfReg="false" Sequence="31"/>
-    <ROW File="st_license" Component_="fast_add.v1" FileName="__st_l~1|__st_license" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_license" SelfReg="false" Sequence="32"/>
-    <ROW File="st_path" Component_="fast_add.v1" FileName="__st_p~1|__st_path" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_path" SelfReg="false" Sequence="33"/>
-    <ROW File="st_pkg.description" Component_="fast_add.v1" FileName="__st_p~1.des|__st_pkg.description" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.description" SelfReg="false" Sequence="34"/>
-    <ROW File="st_pkg.detailed_url" Component_="fast_add.v1" FileName="__st_p~1.det|__st_pkg.detailed_url" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.detailed_url" SelfReg="false" Sequence="35"/>
-    <ROW File="st_pkg.summary" Component_="fast_add.v1" FileName="__st_p~1.sum|__st_pkg.summary" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.summary" SelfReg="false" Sequence="36"/>
-    <ROW File="st_publisher" Component_="fast_add.v1" FileName="__st_p~2|__st_publisher" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_publisher" SelfReg="false" Sequence="37"/>
-    <ROW File="st_require" Component_="fast_add.v1" FileName="__st_r~1|__st_require" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_require" SelfReg="false" Sequence="38"/>
+    <ROW File="st_basename" Component_="fast_add.v1" FileName="__st_b~1|__st_basename" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_basename" SelfReg="false" Sequence="25"/>
+    <ROW File="st_content" Component_="fast_add.v1" FileName="__st_c~1|__st_content" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_content" SelfReg="false" Sequence="26"/>
+    <ROW File="st_description" Component_="fast_add.v1" FileName="__st_d~1|__st_description" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_description" SelfReg="false" Sequence="27"/>
+    <ROW File="st_fmri" Component_="fast_add.v1" FileName="__st_f~1|__st_fmri" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_fmri" SelfReg="false" Sequence="28"/>
+    <ROW File="st_info.classification" Component_="fast_add.v1" FileName="__st_i~1.cla|__st_info.classification" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.classification" SelfReg="false" Sequence="29"/>
+    <ROW File="st_info.maintainer_url" Component_="fast_add.v1" FileName="__st_i~1.mai|__st_info.maintainer_url" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.maintainer_url" SelfReg="false" Sequence="30"/>
+    <ROW File="st_info.upstream_url" Component_="fast_add.v1" FileName="__st_i~1.ups|__st_info.upstream_url" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_info.upstream_url" SelfReg="false" Sequence="31"/>
+    <ROW File="st_license" Component_="fast_add.v1" FileName="__st_l~1|__st_license" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_license" SelfReg="false" Sequence="32"/>
+    <ROW File="st_path" Component_="fast_add.v1" FileName="__st_p~1|__st_path" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_path" SelfReg="false" Sequence="33"/>
+    <ROW File="st_pkg.description" Component_="fast_add.v1" FileName="__st_p~1.des|__st_pkg.description" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.description" SelfReg="false" Sequence="34"/>
+    <ROW File="st_pkg.detailed_url" Component_="fast_add.v1" FileName="__st_p~1.det|__st_pkg.detailed_url" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.detailed_url" SelfReg="false" Sequence="35"/>
+    <ROW File="st_pkg.summary" Component_="fast_add.v1" FileName="__st_p~1.sum|__st_pkg.summary" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_pkg.summary" SelfReg="false" Sequence="36"/>
+    <ROW File="st_publisher" Component_="fast_add.v1" FileName="__st_p~2|__st_publisher" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_publisher" SelfReg="false" Sequence="37"/>
+    <ROW File="st_require" Component_="fast_add.v1" FileName="__st_r~1|__st_require" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\__st_require" SelfReg="false" Sequence="38"/>
     <ROW File="start.ini" Component_="start.ini" FileName="start.ini" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\start.ini" SelfReg="false" Sequence="108"/>
     <ROW File="start.jar" Component_="start.ini" FileName="start.jar" Attributes="0" SourcePath="C:\collabnet-csvn\appserver\start.jar" SelfReg="false" Sequence="109"/>
     <ROW File="startService.bat" Component_="genConfig.bat" FileName="startS~1.bat|startService.bat" Attributes="0" SourcePath="C:\collabnet-csvn\svcwrapper\bat\startService.bat" SelfReg="false" Sequence="5"/>
@@ -3917,7 +3917,7 @@
     <ROW File="token.py" Component_="AUTHORS" FileName="token.py" Attributes="0" SourcePath="C:\collabnet-csvn\lib\pygments\token.py" SelfReg="false" Sequence="562"/>
     <ROW File="token.py_1" Component_="aifc.py" FileName="token.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\token.py" SelfReg="false" Sequence="3207"/>
     <ROW File="token.pyc" Component_="anydbm.pyc" FileName="token.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\token.pyc" SelfReg="false" Sequence="1026"/>
-    <ROW File="token_byte_offset.v1" Component_="fast_add.v1" FileName="token_~1.v1|token_byte_offset.v1" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\token_byte_offset.v1" SelfReg="false" Sequence="19"/>
+    <ROW File="token_byte_offset.v1" Component_="fast_add.v1" FileName="token_~1.v1|token_byte_offset.v1" Version="65535.65535.65535.65535" Attributes="0" SourcePath="C:\collabnet-csvn\.org.opensolaris,pkg\index\token_byte_offset.v1" SelfReg="false" Sequence="19"/>
     <ROW File="tokenize.py" Component_="aifc.py" FileName="tokenize.py" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\tokenize.py" SelfReg="false" Sequence="3208"/>
     <ROW File="tokenize.pyc" Component_="anydbm.pyc" FileName="tokenize.pyc" Attributes="0" SourcePath="C:\collabnet-csvn\pkg\python2.4-minimal\Lib\tokenize.pyc" SelfReg="false" Sequence="1027"/>
     <ROW File="tokenize_tests.txt" Component_="test.db" FileName="tokeni~1.txt|tokenize_tests.txt" Attributes="0" SourcePath="C:\collabnet-csvn\Python25\Lib\test\tokenize_tests.txt" SelfReg="false" Sequence="3199"/>
@@ -4415,8 +4415,8 @@
     <ROW Registry="AI_ExePath" Root="-1" Key="Software\Caphyon\Advanced Installer\LZMA\[ProductCode]\[ProductVersion]" Name="AI_ExePath" Value="[AI_SETUPEXEPATH]" Component_="AI_ExePath"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiRemoveFileComponent">
-    <ROW FileKey="_" Component_="svn.exe" DirProperty="org.opensolaris_pkg_DIR" InstallMode="3"/>
-    <ROW FileKey="__1" Component_="svn.exe" DirProperty="work_DIR" InstallMode="3"/>
+    <ROW FileKey="_" Component_="svn.exe" DirProperty="org.opensolaris_pkg_DIR" InstallMode="2"/>
+    <ROW FileKey="__1" Component_="svn.exe" DirProperty="work_DIR" InstallMode="2"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.MsiServCtrlComponent">
     <ROW ServiceControl="httpd.exe" Name="CollabNetSubversionServer" Event="160" Wait="1" Component_="httpd.exe"/>
