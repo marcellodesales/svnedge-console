@@ -64,6 +64,12 @@ eventCleanEnd = {
                 includes: "**/*")
     }
 
+    Ant.echo(message: "Deleting logs")
+    Ant.delete(includeEmptyDirs: "true") {
+        fileset(dir: "${dataDir}/logs",
+                includes: "**/*")
+    }
+
     Ant.echo(message: "Deleting the teamforge vcauth files")
     Ant.delete(includeEmptyDirs: "true", quiet: "true") {
         fileset(dir: "${libDir}/viewvc/vcauth/teamforge", includes: "**/*")
