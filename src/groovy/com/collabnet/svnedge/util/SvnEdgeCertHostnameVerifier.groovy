@@ -19,21 +19,13 @@ package com.collabnet.svnedge.util
 
 import javax.net.ssl.HostnameVerifier
 
+/**
+ * Custom ssl verifier which always passes
+ */
 public class SvnEdgeCertHostnameVerifier implements HostnameVerifier {
-    private def log
-
-    SvnEdgeCertHostnameVerifier(log) {
-        this.log = log
-    }
 
     @Override 
     public boolean verify(String hostname, javax.net.ssl.SSLSession sslSession) {
-        def certDN = sslSession.peerCertificates[0].issuerX500Principal.name
-        if (certDN.startsWith("CN=svnedge.collab.net")) {
-            log.debug("Using default cert, so using sslSession hostname," + 
-                      sslSession.peerHost + ", for verification. Comparing to " + hostname)
-            return (hostname == sslSession.peerHost)
-        }
-        return false
+        return true
     }
 }

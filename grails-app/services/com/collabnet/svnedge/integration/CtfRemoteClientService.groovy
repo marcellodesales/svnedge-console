@@ -1060,7 +1060,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
             conn = setupConnection(url, paramMap, followRedirect)
             HttpsURLConnection httpsConn = (HttpsURLConnection) conn
-            httpsConn.hostnameVerifier = new SvnEdgeCertHostnameVerifier(log)
+            httpsConn.hostnameVerifier = new SvnEdgeCertHostnameVerifier()
             writeParameters(paramMap, conn)
         }
         return conn
