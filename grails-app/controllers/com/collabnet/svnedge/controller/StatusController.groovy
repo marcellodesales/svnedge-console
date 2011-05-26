@@ -339,4 +339,11 @@ class StatusController {
         flash.message = message(code: 'server.status.stopped')
         redirect(action:'index')
     }
+
+    def replicationInfo = {
+        def runningCmdsSize = replicaServerStatusService.getAllCommandsSize()
+        render(contentType:"text/json") {
+            relicaServerInfo(runningCmdsSize: runningCmdsSize)
+        }
+    }
 }
