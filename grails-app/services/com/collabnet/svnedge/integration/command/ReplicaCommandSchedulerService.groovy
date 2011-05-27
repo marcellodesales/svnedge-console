@@ -57,7 +57,6 @@ import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_I
 class ReplicaCommandSchedulerService extends AbstractSvnEdgeService 
         implements ApplicationContextAware, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
-    def bgThreadManager
     def commandResultDeliveryService
 
     ApplicationContext applicationContext
@@ -110,7 +109,7 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
 
     def startBackgroundHandlers() {
         // execute the command using the background service.
-        bgThreadManager.queueRunnable(new CommandsSchedulerHandler(this,
+        runAsync(new CommandsSchedulerHandler(this,
             queuedCommands, schedulerSynchronizer))
     }
 

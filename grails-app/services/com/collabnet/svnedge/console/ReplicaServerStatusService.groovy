@@ -57,7 +57,8 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
         implements InitializingBean, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     boolean transactional = false
-    def bgThreadManager
+
+    def executorService
     /**
      * Auto-wired Cometd bayeux server
      */
@@ -132,7 +133,7 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
             new LinkedBlockingQueue<CommandAtState>()
         delayedNotifierHandler = new CommandStateDelayedNotifierHandler(
             this, commandsStateChangeTranferQueue, allCommands)
-        bgThreadManager.queueRunnable(delayedNotifierHandler)
+        executorService.execute(delayedNotifierHandler)
     }
 
     /**

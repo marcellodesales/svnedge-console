@@ -21,6 +21,7 @@ import com.collabnet.svnedge.console.ReplicaServerStatusService.CommandAtState;
 import com.collabnet.svnedge.integration.command.AbstractCommand 
 import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
+import com.collabnet.svnedge.util.InterruptibleLoopRunnable
 
 import grails.converters.JSON;
 
@@ -44,7 +45,7 @@ import org.apache.log4j.Logger
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-class CommandStateDelayedNotifierHandler implements Runnable {
+class CommandStateDelayedNotifierHandler extends InterruptibleLoopRunnable {
 
     static Logger log = Logger.getLogger(
         CommandStateDelayedNotifierHandler.class)
@@ -70,8 +71,7 @@ class CommandStateDelayedNotifierHandler implements Runnable {
     }
 
     @Override
-    public void run() {
-        while(true) {
+    public void loop() {
             // blocks until one or more commands are queued.
             def commandAndState = commandsStateChange.take()
             log.debug("Command changed state: $commandAndState.command to " +
@@ -80,7 +80,6 @@ class CommandStateDelayedNotifierHandler implements Runnable {
             def cmdStateJson = makeCommandStateChangeMessage(commandAndState)
             statusService.publishBayeuxMessage(cmdStateJson)
             Thread.sleep(DELIVERY_DELAY)
-        }
     }
 
     /**

@@ -19,6 +19,8 @@ package com.collabnet.svnedge.integration.command.handler
 
 import com.collabnet.svnedge.integration.command.AbstractCommand 
 import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent 
+import com.collabnet.svnedge.util.InterruptibleLoopRunnable;
+
 import java.util.concurrent.BlockingQueue
 
 import org.apache.log4j.Logger
@@ -37,7 +39,7 @@ import org.apache.log4j.Logger
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-class CommandExecutorHandler<T extends AbstractCommand> implements Runnable {
+class CommandExecutorHandler<T extends AbstractCommand> extends InterruptibleLoopRunnable {
 
     static Logger log = Logger.getLogger(CommandExecutorHandler.class)
 
@@ -58,8 +60,7 @@ class CommandExecutorHandler<T extends AbstractCommand> implements Runnable {
     }
 
     @Override
-    public void run() {
-        while(true) {
+    public void loop() {
             def className = handlerType.getSimpleName()
             log.debug("Waiting for eligible $className...")
 
@@ -69,6 +70,5 @@ class CommandExecutorHandler<T extends AbstractCommand> implements Runnable {
 
             executorService.publishEvent(new CommandReadyForExecutionEvent(
                 this, eligibleCommand))
-        }
     }
 }

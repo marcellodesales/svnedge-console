@@ -56,8 +56,6 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
     static transactional = false
 
     def ctfRemoteClientService
-    def backgroundService
-    def bgThreadManager
     def replicaCommandSchedulerService
     def longRunningHandler
     def shortRunningHandler
@@ -115,8 +113,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * Starts the background handlers for the long-running and short-running commands.
      */
     def startBackgroundHandlers() {
-         bgThreadManager.queueRunnable(longRunningHandler)
-         bgThreadManager.queueRunnable(shortRunningHandler)
+         runAsync(longRunningHandler)
+         runAsync(shortRunningHandler)
     }
 
     /**
@@ -129,10 +127,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
    private def updateSemaphorePermits(newLongPermits, oldLongPermits, 
                                       newShortPermits, oldShortPermits) {
 
-       int maxCommandPermits = config.backgroundThread.threadCount - 
-           config.backgroundThread.svnedgeReservedThreads
        log.debug("updateSemaphorePermits newLong=" + newLongPermits + 
-           " newShort=" + newShortPermits + " maxPermits=" + maxCommandPermits)
+           " newShort=" + newShortPermits)
            
        if (newLongPermits <= 0) {
            newLongPermits = oldLongPermits > 0 ? oldLongPermits : 1
@@ -141,23 +137,6 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
        if (newShortPermits <= 0) {
            newShortPermits = oldShortPermits > 0 ? oldShortPermits : 1
            log.debug("updateSemaphorePermits short input changed to " + newShortPermits)
-       }
-       int total = newLongPermits + newShortPermits
-       if (total > maxCommandPermits) {
-           if (newLongPermits < 0.33 * maxCommandPermits) {
-               newShortPermits = maxCommandPermits - newLongPermits
-           } else if (newShortPermits < 0.33 * maxCommandPermits) {
-               newLongPermits = maxCommandPermits - newShortPermits
-           } else {
-               newShortPermits = Math.max((int)
-                   (newShortPermits * maxCommandPermits)/total, 1)
-               // this is redundant, but better safe than sorry
-               newShortPermits = Math.min(newShortPermits, maxCommandPermits - 1)
-               newLongPermits = maxCommandPermits - newShortPermits
-           }
-           log.debug("updateSemaphorPermits total permits exceeds available " +
-               "threads. Adjusting long=" + newLongPermits + " short=" +
-               newShortPermits)
        }
        updateLongRunningSemaphore(newLongPermits, oldLongPermits)
        updateShortRunningSemaphore(newShortPermits, oldShortPermits)
@@ -232,9 +211,11 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 def commandToExecute = executionEvent.commandToExecute
                 log.debug "CommandReadyForExecutionEvent: $commandToExecute"
                 // Execute the command in parallel
-                backgroundService.execute("Executing ${commandToExecute}", {
-                    executeCommand(commandToExecute)
-                })
+                runAsync { 
+                    log.debug "Executing command ${commandToExecute}"
+                    executeCommand(commandToExecute) 
+                    log.debug "Done executing command ${commandToExecute}}"
+                }
                 break
 
             case CommandTerminatedEvent:

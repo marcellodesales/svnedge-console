@@ -43,7 +43,6 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
     static transactional = false
 
     def ctfRemoteClientService
-    def backgroundService
     def securityService
 
     /**
@@ -150,11 +149,12 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 synchronized(this) {
                     if (connectivityWithRemoteManagerOpen) {
                         // Report the results in parallel
-                        backgroundService.execute("Report ${terminatedCommand}", { 
+                        runAsync {
+                            log.debug("Executing Report ${terminatedCommand}")
                             reportTerminatedCommandResult(
-                                terminatedCommand.context, commandResult) 
-                            })
-
+                                terminatedCommand.context, commandResult)
+                            log.debug("Done executing Report ${terminatedCommand}")
+                        }
                     } else {
                         log.debug "Since there is no connectivity, wait " +
                             "until it is restored to continue."
@@ -168,8 +168,11 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                 connectivityWithRemoteManagerOpen = true
                 // Report the results in parallel
                 def context = executionEvent.executionContext
-                backgroundService.execute("Reporting Pending Command Results",
-                    { reportPendingResultsAfterConnectivityRestored(context) })
+                runAsync {
+                    log.debug("Executing Reporting Pending Command Results")
+                    reportPendingResultsAfterConnectivityRestored(context)
+                    log.debug("Done executing Reporting Pending Command Results")
+                }
                 break
         }
     }

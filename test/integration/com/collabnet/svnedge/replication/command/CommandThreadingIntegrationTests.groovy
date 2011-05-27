@@ -45,7 +45,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
     def ctfRemote
     def commandResultDeliveryService
     def fetchReplicaCommandsJob
-    def bgThreadManager
 
     def REPO_NAME = "testproject2"
     def EXSY_ID = "exsy9876"
@@ -125,9 +124,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
 
         // delete log file
         getExecutionLog()?.delete()
-
-        // stop background threads
-        bgThreadManager.stop()
 
         // clear the command queue and history
         replicaCommandSchedulerService.cleanCommands()

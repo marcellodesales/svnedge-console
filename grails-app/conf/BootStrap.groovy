@@ -26,7 +26,7 @@ import grails.util.GrailsUtil
  */
 class BootStrap {
 
-    def backgroundService
+    def executorService
     //####### Services that are always instantiated #############
     def operatingSystemService
     def networkingService
@@ -165,9 +165,9 @@ class BootStrap {
 
         log.info("Bootstrapping discoveryService...")
         try {
-            backgroundService.execute("Starting Discovery Service", {
+            executorService.execute {
                 discoveryService.bootStrap(config)
-            })
+            }
         } catch (Exception e) {
             log.error ("Failed to intitialize DiscoveryService: " + 
                 e.getMessage(), e)
@@ -194,5 +194,8 @@ class BootStrap {
 
         log.info("Releasing resources from the Operating System service.")
         operatingSystemService.destroy()
+
+        log.info("Stopping background threads")        
+        executorService.shutdownNow()
     }
 } 

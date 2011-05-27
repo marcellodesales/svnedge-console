@@ -22,6 +22,8 @@ import com.collabnet.svnedge.integration.command.LongRunningCommand
 import com.collabnet.svnedge.integration.command.ShortRunningCommand 
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent 
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent 
+import com.collabnet.svnedge.util.InterruptibleLoopRunnable;
+
 import java.util.Map
 import java.util.concurrent.BlockingQueue
 
@@ -44,7 +46,7 @@ import org.apache.log4j.Logger
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-class CommandsSchedulerHandler implements Runnable {
+class CommandsSchedulerHandler extends InterruptibleLoopRunnable {
 
     static Logger log = Logger.getLogger(CommandsSchedulerHandler.class)
 
@@ -78,8 +80,7 @@ class CommandsSchedulerHandler implements Runnable {
     }
 
     @Override
-    public void run() {
-        while(true) {
+    protected void loop() {
             log.debug "Waiting for queued commands..."
             // block until all remote commands are initially offered
             synchronizer.take()
@@ -129,6 +130,5 @@ class CommandsSchedulerHandler implements Runnable {
                     break
                 }
             }
-        }
     }
 }

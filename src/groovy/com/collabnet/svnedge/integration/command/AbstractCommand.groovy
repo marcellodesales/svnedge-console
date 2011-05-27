@@ -521,14 +521,15 @@ abstract class AbstractCommand {
         def retVal
         def result
         FileOutputStream fileOutput = new FileOutputStream(getCommandOutputFile(), true)
-        try {
+        //try {
             def commandLineService = getService("commandLineService")
-            result = commandLineService.execute(command, fileOutput, fileOutput, null, null, true)
+            //result = commandLineService.execute(command, fileOutput, fileOutput, null, null, false)
+result = commandLineService.execute(command as String[])
             retVal = result[0]
             msg = result[1]
-        } catch (Exception e) {
-            msg = "${command} failed: ${e.getMessage()}"
-        }
+        //} catch (Exception e) {
+        //    msg = "${command} failed: ${e.getMessage()}"
+        //}
         if (retVal != "0") {
             if (!msg) {
                 msg = result[2]
