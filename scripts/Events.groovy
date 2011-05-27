@@ -65,10 +65,11 @@ eventCleanEnd = {
     }
 
     Ant.echo(message: "Deleting logs")
-    Ant.delete(includeEmptyDirs: "true") {
+    Ant.delete(includeEmptyDirs: "true", quiet: "true") {
         fileset(dir: "${dataDir}/logs",
                 includes: "**/*")
     }
+	Ant.mkdir(dir: "${dataDir}/logs")
 
     Ant.echo(message: "Deleting the teamforge vcauth files")
     Ant.delete(includeEmptyDirs: "true", quiet: "true") {
