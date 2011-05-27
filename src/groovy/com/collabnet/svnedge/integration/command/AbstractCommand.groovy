@@ -115,10 +115,10 @@ abstract class AbstractCommand {
     public String toString() {
         def paramsList = "params=" + params ? params : "[]"
         if (!succeeded) {
-            return "${getClass().getSimpleName()}($id): $paramsList"
+            return "${getClass().getSimpleName()}($id): ${this.state} : $paramsList"
         }
         return "${getClass().getSimpleName()}" +
-            "($id-${succeeded?'suceeded':'failed'}): $paramsList"
+            "($id-${succeeded?'suceeded':'failed'}): ${this.state} : $paramsList"
     }
 
     @Override
@@ -310,7 +310,6 @@ abstract class AbstractCommand {
      * executing the methods 'constraints()' or 'execute()'.
      */
     public final void run() throws CommandExecutionException {
-        makeTransitionToState(CommandState.RUNNING)
         try {
             log.debug("Verifying the constraints for the command...")
             constraints()
@@ -452,6 +451,29 @@ abstract class AbstractCommand {
      */
     public void setAsReported() {
         makeTransitionToState(CommandState.REPORTED)
+    }
+
+    /**
+     * @param state is the command state.
+     * @return the state transition time for the given state.
+     */
+    public long getStateTransitionTime(CommandState state) {
+        return stateTransitions.get(state) ? stateTransitions.get(state) : -1
+    }
+
+    /**
+     * @return the set of transition times the command has changed over time.
+     */
+    public Set<Long> getStateTransitionTimes() {
+        return stateTimeTransitions.keySet()
+    }
+
+    /**
+     * @param time is an existing time from getStateTransitionTimes().
+     * @return the state associated with the time.
+     */
+    public CommandState getStateAtTime(long time) {
+        return stateTimeTransitions.get(time)
     }
 
     /**

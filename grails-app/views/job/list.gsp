@@ -14,15 +14,19 @@
 
       <g:javascript src="hash.js" />
       <script type="text/javascript">
-            /** The current number of commands at the time the page loads. */
+          /** The current number of commands at the time the page loads. */
           var currentNumberCommands = ${totalCommandsRunning}
+          /** The total number of permits of short-running commands. */
           var sizeShortRunning = ${shortRunningCommands.size()}
+          /** The total number of permits of long-running commands (svn initializations). */
           var sizeLongRunning = ${longRunningCommands.size()}
+          /** When there are no commands running. */
           var no_commands = "${noCommands}"
+          /** The string for the running commands. */
           var commands_running = "${commandsRunning}"
-
+          /** A row that shows as idle. */
           var idleString = "${message(code: 'job.page.list.row.job_idle')}"
-
+          /** The hash of commands with passed results. [cmdexec1001 = true] */
           var passedResults = new Hash()
       </script>
       <g:javascript src="jobs-list.js" />
@@ -84,12 +88,12 @@
 </content>
 
 <g:render template="/job/runningCommands" model="['tableName': 'longRunningCommandsTable',
- 'runningCommands': longRunningCommands, 'maxNumber': 5, 'shortRun': false]" />
+ 'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
 
 <BR><BR>
 
 
 <g:render template="/job/runningCommands" model="['tableName': 'shortRunningCommandsTable',
- 'runningCommands': shortRunningCommands, 'maxNumber': 10, 'shortRun': true]" />
+ 'runningCommands': shortRunningCommands, 'maxNumber': maxShortRunning, 'shortRun': true]" />
 
 </body>

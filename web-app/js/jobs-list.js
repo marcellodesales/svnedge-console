@@ -9,9 +9,7 @@ dojo.require('dojox.cometd')
 dojo.require("dijit.Dialog")
 
 /** The counter cometd channel. */
-var statusCounterChannel = "/replica/status/counter"
-/** The counter cometd channel. */
-var commandsStateChannel = "/replica/status/all"
+var commandsStateChannel = "/csvn-replica/commands-states"
 
 /**
  * Function instance that is used to initialize upgrade process. Namely,
@@ -20,11 +18,7 @@ var commandsStateChannel = "/replica/status/all"
  */
 var init = function() {
     dojox.cometd.init('/csvn/plugins/cometd-0.1.5/cometd')
-    dojox.cometd.subscribe(statusCounterChannel, onMessage)
-    dojox.cometd.subscribe(commandsStateChannel, onMessage)
-
-    updateUiCommandsRunning(sizeLongRunning, "spinner_long")
-    updateUiCommandsRunning(sizeShortRunning, "spinner_short")
+    dojox.cometd.subscribe(commandsStateChannel, onStateMessageCallbackHandler)
 };
 dojo.addOnLoad(init)
 
@@ -33,7 +27,7 @@ dojo.addOnLoad(init)
  * finishes the dojox.cometd components.
  */
 var destroy = function() {
-    dojox.cometd.unsubscribe(statusCounterChannel)
+    dojox.cometd.unsubscribe(commandsStateChannel)
     dojox.cometd.disconnect()
 };
 dojo.addOnUnload(destroy)
@@ -45,46 +39,39 @@ dojo.addOnUnload(destroy)
  * one of the subscribed channels.
  * @see init()
  */
-function onMessage(m) {
-    var c = m.channel;
+function onStateMessageCallbackHandler(m) {
     var o = eval('(' + m.data + ')')
-    if (c == statusCounterChannel) {
-        updateUiCommandsRunning(o.total)
+    if (o.totalCommands > 0) {
+        dojo.byId('commandsCount').innerHTML = commands_running + " " + o.totalCommands
 
-    } else if (c == commandsStateChannel) {
-
-        if (o.state == "SCHEDULED") {
-            updateScheduledCommands(o)
-
-        } else if (o.state == "RUNNING") {
-            removeFromScheduled(o)
-            if (o.type == "long") {
-                updateRunningCommands("longRunningCommandsTable", o)
-
-            } else {
-                updateRunningCommands("shortRunningCommandsTable", o)
-            }
-
-        } else if (o.state == "TERMINATED") {
-            highlightTerminatedCommand(o)
-
-        } else if (o.state == "REPORTED") {
-            removeReportedCommand(o)
-        }
+    } else {
+        dojo.byId('commandsCount').innerHTML = no_commands
     }
+    updateCommands(o)
 }
 
 /**
- * If there are commands running, then print the number and 
+ * Utility method that waits for the server to restart at every
+ * 5 seconds.
  */
-function updateUiCommandsRunning(numberOfCommands, spinner) {
-    if (numberOfCommands > 0) {
-        dojo.byId(spinner).style.display = ''
-        dojo.byId('commandsCount').innerHTML = commands_running + " " + numberOfCommands
+function updateCommands(cmd) {
+    if (cmd.state == "SCHEDULED") {
+        updateScheduledCommands(cmd)
 
-    } else {
-        dojo.byId(spinner).style.display = 'none'
-        dojo.byId('commandsCount').innerHTML = no_commands
+    } else if (cmd.state == "RUNNING") {
+        removeFromScheduled(cmd)
+        if (cmd.type == "long") {
+            updateRunningCommands("longRunningCommandsTable", cmd)
+
+        } else {
+            updateRunningCommands("shortRunningCommandsTable", cmd)
+        }
+
+    } else if (cmd.state == "TERMINATED") {
+        highlightTerminatedCommand(cmd)
+
+    } else if (cmd.state == "REPORTED") {
+        removeReportedCommand(cmd)
     }
 }
 
@@ -242,10 +229,10 @@ function highlightTerminatedCommand(command) {
         if (row == null) {
             return
         }
-        if (command.succeeded == "true") {
+        if (new Boolean(command.succeeded)) {
             row.style.backgroundColor = "#99D6AD"
 
-        } else if (command.succeeded == "false") {
+        } else {
             row.style.backgroundColor = "#FFB2B2"
         }
         passedResults["run_" + command.id] = command.succeeded

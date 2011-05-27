@@ -18,8 +18,6 @@
         <g:if test="${runningCommands.size() > 0}">
            <g:set var="imageRunning" value="" />
         </g:if>
-        <img src="/csvn/images/replica/commands_updating_spinner.gif" 
-             id="spinner_${shortRun ? "short" : "long"}" style="display:'${imageRunning}';">
       </td>
     </tr>
      <tr class="ItemListHeader">
@@ -37,6 +35,7 @@
       <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
        <td>${i+1}</td>
        <g:set var="commandCode" value="${AbstractCommand.makeCodeName(command)}" />
+       <g:set var="commandDesc" value="job.page.list.${commandCode}" />
        <td><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
        <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
@@ -44,23 +43,27 @@
            ${commandCode}
          </g:if>
          <g:if test="${command.params.repoName}">
-           ${command.params.repoName}
+           ${command.params.getRepoName()}
          </g:if>
        </td>
        <td>
-         <g:if test="${shortRun && !command.params.repoName}">
-          ${command.params}
-         </g:if>
-         <g:if test="${shortRun && command.params.repoName}">
-          -
-         </g:if>
          <g:if test="${!shortRun}">
-          create + svn sync
+            ${message(code: commandDesc, params:[command.params.getRepoName()])}
+         </g:if>
+         <g:if test="${shortRun && !command.params.getRepoName()}">
+           ${message(code: commandDesc)}
+           ${command.params}
+         </g:if>
+         <g:if test="${command.params.getRepoName()}">
+           ${message(code: commandDesc)}
+         </g:if>
+         <g:if test="${!shortRun && command.params.getRepoName()}">
+           ${message(code: commandDesc, params: [command.params.getRepoName()])}
          </g:if>
        </td>
        <td>
-        <g:formatDate format="${logDateFormat}" 
-             date="${new Date(command.stateTransitions.get(CommandState.RUNNING))}"/>
+        <g:formatDate format="${logDateFormat}"
+             date="${new Date(command.getStateTransitionTime(CommandState.RUNNING))}"/>
        </td>
       </tr> 
     </g:if>

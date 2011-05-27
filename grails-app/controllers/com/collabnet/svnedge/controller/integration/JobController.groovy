@@ -96,6 +96,8 @@ class JobController {
             allCommands: allCommands,
             scheduledCommands: scheduledCommands,
             logDateFormat: dtFormat,
-            svnMasterUrl: replicaConfig.svnMasterUrl]
+            svnMasterUrl: replicaConfig.svnMasterUrl,
+            maxLongRunning: replicaConfig.maxLongRunningCmds,
+            maxShortRunning: replicaConfig.maxShortRunningCmds]
     }
 }

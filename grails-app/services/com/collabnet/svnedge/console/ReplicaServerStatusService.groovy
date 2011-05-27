@@ -18,35 +18,32 @@
 package com.collabnet.svnedge.console
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-
-import grails.converters.JSON;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.cometd.Client;
 import org.mortbay.cometd.ChannelImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 
-
-import com.collabnet.svnedge.domain.integration.CommandResult;
 import com.collabnet.svnedge.integration.command.AbstractCommand;
 import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
 import com.collabnet.svnedge.integration.command.ShortRunningCommand;
-import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent;
+import com.collabnet.svnedge.integration.command.event.CommandAboutToRunEvent;
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent;
 import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent;
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent;
+import com.collabnet.svnedge.integration.command.handler.CommandStateDelayedNotifierHandler;
 
 /**
  * This service is responsible for maintaining the current status of the 
@@ -60,8 +57,7 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
         implements InitializingBean, ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     boolean transactional = false
-
-    def commandLineService
+    def bgThreadManager
     /**
      * Auto-wired Cometd bayeux server
      */
@@ -75,13 +71,9 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      */
     private ChannelImpl commandStatusChannel
     /**
-     * The Bayeux publisher Counter message channel
-     */
-    private ChannelImpl commandsCounterChannel
-    /**
      * The current set of commands by the state.
      */
-    private ConcurrentMap<CommandState, Set<AbstractCommand>> commandsByState
+    private ConcurrentMap<CommandState, Set<AbstractCommand>> commandsByStateIndex
     /**
      * All the commands running with their associated state.
      */
@@ -89,94 +81,66 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
     /**
      * The index of long-running commands
      */
-    private Set<LongRunningCommand> allLongRunning
+    private Set<LongRunningCommand> allLongRunningIndexSet
     /**
      * The index of short-running commands
      */
-    private Set<ShortRunningCommand> allShortRunning
+    private Set<ShortRunningCommand> allShortRunningIndexSet
+    /**
+     * The sequential change of states per command.
+     */
+    BlockingQueue<CommandAtState> commandsStateChangeTranferQueue
+    private CommandStateDelayedNotifierHandler delayedNotifierHandler
+
+    /**
+     * Immutable command at a given state.
+     */
+    public static class CommandAtState {
+
+        private final AbstractCommand command
+        private final CommandState state
+
+        private CommandAtState(command, state) {
+            this.command = command
+            this.state = state
+        }
+
+        public static CommandAtState makeNew(command, state) {
+            return new CommandAtState(command, state)
+        }
+    }
 
     public ReplicaServerStatusService() {
-        commandsByState = new ConcurrentHashMap<CommandState, 
+        commandsByStateIndex = new ConcurrentHashMap<CommandState, 
             Set<AbstractCommand>>()
         allCommands = new ConcurrentHashMap<AbstractCommand, 
             CommandState>()
-        allLongRunning = Collections.synchronizedSet(
+        allLongRunningIndexSet = Collections.synchronizedSet(
             new HashSet<LongRunningCommand>())
-        allShortRunning = Collections.synchronizedSet(
+        allShortRunningIndexSet = Collections.synchronizedSet(
             new HashSet<ShortRunningCommand>())
-    }
-
-    def bootStrap = { 
     }
 
     // just like @PostConstruct
     void afterPropertiesSet() {
         this.bayeuxPublisherClient = this.bayeux.newClient(this.class.name)
-        def statusChannel = "/replica/status/all"
+        def statusChannel = "/csvn-replica/commands-states"
         def create = true
-        this.commandStatusChannel = this.bayeux.getChannel(statusChannel,
+        this.commandStatusChannel = this.bayeux.getChannel(statusChannel, 
             create)
-        def counterChannel = "/replica/status/counter"
-        this.commandsCounterChannel = this.bayeux.getChannel(counterChannel,
-            create)
+        commandsStateChangeTranferQueue =
+            new LinkedBlockingQueue<CommandAtState>()
+        delayedNotifierHandler = new CommandStateDelayedNotifierHandler(
+            this, commandsStateChangeTranferQueue, allCommands)
+        bgThreadManager.queueRunnable(delayedNotifierHandler)
     }
 
     /**
-     * An asynchronous publisher that publishes the given message in the 
-     * Bayeux server with the following Json doc:
-     * 
-     *  {
-     *     id: the id of the command.
-     *     code: the code of the command to differentiate the type of command.
-     *     state: the new state of the command.
-     *     type: "long" or "short"
-     *     startedAt: the timestamp when it started running
-     *     succeeded: the result of the command, only shows if the command
-     *      terminated.
-     *  }
-     *  
+     * @param jsonResponse is the response message of the command state.
      */
-    private void publishCommandTransition(AbstractCommand command, 
-           CommandState newState) {
-
-        def writer = new StringWriter();
-        def cmdState = newState.toString()
-        def cmdCode = AbstractCommand.makeCodeName(command)
-
-        def resp = [id: command.id, code: cmdCode, state: cmdState]
-
-        def cmdType = command instanceof LongRunningCommand ? "long" : "short"
-        if (newState == CommandState.RUNNING) {
-            def runTime = new Date()
-            if (command.stateTransitions.get(CommandState.RUNNING)) {
-                runTime.setTime(command.stateTransitions.get(CommandState.RUNNING))
-            }
-            def dtFormat = getMessage("default.dateTime.format.withZone")
-            resp << [startedAt: runTime.format(dtFormat)]
-            resp << [type: cmdType]
-        }
-        if (newState == CommandState.TERMINATED) {
-            resp << [succeeded: command.succeeded]
-            resp << [type: cmdType]
-        }
-        if (newState == CommandState.REPORTED) {
-            resp << [type: cmdType]
-
-        } else if (newState != CommandState.REPORTED) {
-            // terminated, running, scheduled commands show the parameters
-            resp << [params: command.params]
-        }
-
-        def jsonRes = (resp as JSON).toString()
-        log.debug("Command transition to publish: " + jsonRes)
-        this.commandStatusChannel.publish(this.bayeuxPublisherClient, 
-            jsonRes, null)
-        def sizeCmdds = allCommands.size()
-        def tresp = [total : sizeCmdds, longRunning: allLongRunning.size(),
-            shortRunning: allShortRunning.size()]
-        def tjsonRes = (tresp as JSON).toString()
-        this.commandsCounterChannel.publish(this.bayeuxPublisherClient, 
-            tjsonRes, null)
+    def publishBayeuxMessage(jsonResponse) {
+        log.debug("Command transition to publish: " + jsonResponse)
+        commandStatusChannel.publish(bayeuxPublisherClient, jsonResponse, null)
     }
 
     /**
@@ -192,7 +156,7 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      * @return whether there are commands in the given state.
      */
     public boolean areThereAnyCommands(CommandState state) {
-        def cmdsInState = this.commandsByState.get(state)
+        def cmdsInState = this.commandsByStateIndex.get(state)
         return cmdsInState && cmdsInState.size() > 0
     }
 
@@ -214,13 +178,13 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      * @return the set of commands on the given state.
      */
     public Set<AbstractCommand> getCommands(CommandState state) {
-        Set<AbstractCommand> commandsInState = this.commandsByState.get(state)
+        Set<AbstractCommand> commandsInState = this.commandsByStateIndex.get(state)
         Set<AbstractCommand> result = new LinkedHashSet<AbstractCommand>()
         if (!commandsInState || commandsInState.size() == 0) {
             return result
         }
         // as a concurrent hash set.
-        synchronized (commandsByState) {
+        synchronized (commandsByStateIndex) {
             Iterator<AbstractCommand> iter = commandsInState.iterator()
             while(iter.hasNext()) {
                 result.add(iter.next())
@@ -262,14 +226,14 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
     public Set<AbstractCommand> getCommandsByType(commandType) {
         Set<AbstractCommand> all = new LinkedHashSet<AbstractCommand>()
         if (commandType == LongRunningCommand.class) {
-            synchronized (allLongRunning) {
-                for (cmd in allLongRunning) {
+            synchronized (allLongRunningIndexSet) {
+                for (cmd in allLongRunningIndexSet) {
                     all << cmd
                 }
             }
         } else if (commandType == ShortRunningCommand.class) {
-            synchronized (allShortRunning) {
-                for (cmd in allShortRunning) {
+            synchronized (allShortRunningIndexSet) {
+                for (cmd in allShortRunningIndexSet) {
                     all << cmd
                 }
             }
@@ -296,17 +260,17 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
     private void updateOrRemoveCommandState(AbstractCommand command, 
             CommandState state) {
 
-        if (state == null) {
+        if (state == CommandState.REPORTED) {
             def commandState = allCommands.remove(command)
 
-            if (command.class == LongRunningCommand.class) {
-                allLongRunning.remove(command)
+            if (command instanceof LongRunningCommand) {
+                allLongRunningIndexSet.remove(command)
 
-            } else if (command.class == ShortRunningCommand.class) {
-                allShortRunning.remove(command)
+            } else if (command instanceof ShortRunningCommand) {
+                allShortRunningIndexSet.remove(command)
             }
 
-            Set<AbstractCommand> commands = commandsByState.get(commandState)
+            Set<AbstractCommand> commands = commandsByStateIndex.get(commandState)
             if (commands && commands.size() > 0) {
                 synchronized (commands) {
                     Iterator<AbstractCommand> iter = commands.iterator()
@@ -324,21 +288,20 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
             // override the state getting the previous value
             def previousState = allCommands.put(command, state)
 
-            if (command.class == LongRunningCommand.class) {
-                allLongRunning << command
+            if (command instanceof LongRunningCommand) {
+                allLongRunningIndexSet << command
 
-            } else if (command.class == ShortRunningCommand.class) {
-                allShortRunning << command
+            } else if (command instanceof ShortRunningCommand) {
+                allShortRunningIndexSet << command
             }
-
 
             // command had not been registered before
             if (!previousState) {
-                Set<AbstractCommand> commands = commandsByState.get(state)
+                Set<AbstractCommand> commands = commandsByStateIndex.get(state)
                 if (!commands) {
                     Set<AbstractCommand> newSet = Collections.synchronizedSet(
                         new LinkedHashSet<AbstractCommand>())
-                    commands = commandsByState.putIfAbsent(state, newSet)
+                    commands = commandsByStateIndex.putIfAbsent(state, newSet)
                     if (!commands) {
                         commands = newSet
                     }
@@ -347,7 +310,7 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
 
             } else {
                 // remove from the previous state
-                Set<AbstractCommand> commands = commandsByState.get(
+                Set<AbstractCommand> commands = commandsByStateIndex.get(
                     previousState)
                 if (commands && commands.size() > 0) {
                     synchronized (commands) {
@@ -361,11 +324,11 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                         }
                     }
                 }
-                Set<AbstractCommand> newStateCmds = commandsByState.get(state)
+                Set<AbstractCommand> newStateCmds = commandsByStateIndex.get(state)
                 if (!newStateCmds) {
                     Set<AbstractCommand> newSet = Collections.synchronizedSet(
                         new LinkedHashSet<AbstractCommand>())
-                    newStateCmds = commandsByState.putIfAbsent(state, newSet)
+                    newStateCmds = commandsByStateIndex.putIfAbsent(state, newSet)
                     if (!newStateCmds) {
                         newStateCmds = newSet
                     }
@@ -373,6 +336,9 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 newStateCmds.add(command)
             }
         }
+        // offering the command for the delayed delivery handler.
+        commandsStateChangeTranferQueue.offer(CommandAtState.makeNew(
+            command, state))
     }
 
     /**
@@ -388,15 +354,13 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 log.debug "Command scheduled: $scheduledCommand"
                 def state = CommandState.SCHEDULED
                 updateOrRemoveCommandState(scheduledCommand, state)
-                publishCommandTransition(scheduledCommand, state)
                 break;
 
-            case CommandReadyForExecutionEvent:
+            case CommandAboutToRunEvent:
                 def commandToExecute = executionEvent.commandToExecute
                 log.debug "Command executing: $commandToExecute"
                 def state = CommandState.RUNNING
                 updateOrRemoveCommandState(commandToExecute, state)
-                publishCommandTransition(commandToExecute, state)
                 break
 
             case CommandTerminatedEvent:
@@ -404,7 +368,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 log.debug "Command terminated: ${terminatedCommand}"
                 def state = CommandState.TERMINATED
                 updateOrRemoveCommandState(terminatedCommand, state)
-                publishCommandTransition(terminatedCommand, state)
                 break
 
             case CommandResultReportedEvent:
@@ -413,8 +376,8 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 def reportedCommand = AbstractCommand.makeCommand(cmdResult,
                     state)
                 log.debug "Command reported: ${reportedCommand}"
-                updateOrRemoveCommandState(reportedCommand, null)
-                publishCommandTransition(reportedCommand, state)
+                reportedCommand.state = state
+                updateOrRemoveCommandState(reportedCommand, state)
                 break
         }
     }

@@ -30,6 +30,7 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration;
 import com.collabnet.svnedge.integration.FetchReplicaCommandsJob 
 import com.collabnet.svnedge.integration.command.event.AppliedExecutorSemaphoresUpdateEvent 
+import com.collabnet.svnedge.integration.command.event.CommandAboutToRunEvent;
 import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent 
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent 
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent 
@@ -296,6 +297,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * @param commandInstance an instance of {@link AbstractReplicaCommand}
      */
     def commandLifecycleExecutor(commandExec) {
+        // command acquired permit and ready to execute.
+        commandExec.makeTransitionToState(CommandState.RUNNING)
+        publishEvent(new CommandAboutToRunEvent(this, commandExec))
         try { 
             AbstractCommand.logExecution("RUN-BEGIN", commandExec)
             commandExec.run()

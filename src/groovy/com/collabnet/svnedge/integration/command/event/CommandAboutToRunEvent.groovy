@@ -20,22 +20,21 @@ package com.collabnet.svnedge.integration.command.event
 import com.collabnet.svnedge.integration.command.AbstractCommand 
 
 /**
- * This event signals the executor service that the given command is ready 
- * to be executed by its executor (instance of a long-running or short-running)
- * . However, the command will only execute if there is a permit available to
- * it. In this case, the Event CommandAboutToRunEvent.
+ * This event signals interested services that a command is about to start
+ * running. That means that the given command has acquired a permit to start
+ * running.
  *
  *  @author Marcello de Sales (mdesales@collab.net)
  *
  */
-final class CommandReadyForExecutionEvent extends ReplicaCommandsExecutionEvent {
+final class CommandAboutToRunEvent extends ReplicaCommandsExecutionEvent {
 
     /**
      * The instance of the command to be executed.
      */
     def final commandToExecute
 
-    def CommandReadyForExecutionEvent(source, AbstractCommand command) {
+    def CommandAboutToRunEvent(source, AbstractCommand command) {
         super(source, command.context)
         commandToExecute = command
     }
