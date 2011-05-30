@@ -5,13 +5,13 @@ for more information.
 GET GRAILS
 
 Grails needs a JDK installed, we assume you already have one. The Sun 1.6 JDK
-is recommended version. We are currently using Grails 1.1.1. You can download
+is recommended version. We are currently using Grails 1.3.4. You can download
 it here: http://www.grails.org/download/archive/Grails. We also have this
 stored in our SVN repository:
 
-https://forge.collab.net/svn/repos/svnedge/trunk/components/replica_admin/grails/1.1.1
+https://forge.collab.net/svn/repos/svnedge/trunk/components/replica_admin/grails/1.3.4
 
-Unpack Grails to a location such as $HOME/grails-1.1.1
+Unpack Grails to a location such as $HOME/grails-1.3.4
 
 
 INSTALL GRAILS PLUGINS AND USING GRAILS COMMAND LINE
@@ -33,7 +33,7 @@ are the basic things you need to do:
 Here are examples from OSX:
 
 export JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Home
-export GRAILS_HOME=/Users/username/grails-1.1.1
+export GRAILS_HOME=/Users/username/grails-1.3.4
 export PATH=$PATH:$GRAILS_HOME/bin
 
 Once these steps are done, navigate to your checked out project and run a
