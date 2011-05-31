@@ -63,7 +63,7 @@ class CommandStateDelayedNotifierHandler extends InterruptibleLoopRunnable {
     /**
      * The delay in milliseconds for publishing the status changes.
      */
-    private static final long DELIVERY_DELAY = 4000
+    private static final long DELIVERY_DELAY = 1500
 
     def CommandStateDelayedNotifierHandler(service, commandsQueue, commands) {
         statusService = service

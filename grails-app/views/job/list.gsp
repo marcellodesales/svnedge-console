@@ -71,11 +71,8 @@
     <tr id="sch_${schCommand.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
      <td>
       &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(schCommand)}" />
-      <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
+      <img border="0" src="/csvn/images/replica/${commandCode}.png">
       ${schCommand.id}
-      <g:if test="${schCommand.params.repoName}">
-         (${schCommand.params.repoName})
-      </g:if>
      </td>
     </tr>
   </g:each>

@@ -133,7 +133,9 @@ function createCommandRow(table, index) {
     newRow.insertCell(1)
     newRow.insertCell(2)
     newRow.insertCell(3)
-    newRow.insertCell(4)
+    if (table.getAttribute("id") == "shortRunningCommandsTable") {
+        newRow.insertCell(4)
+    }
     return newRow
 }
 
@@ -209,14 +211,23 @@ function updateRunningCommands(tableBodyId, command) {
         var repoStringElement = document.createTextNode(cmdStrings[command.code].replace(
             "&quot;x&quot;", "'" + repo + "'"))
         codeCol.appendChild(repoStringElement)
-        row.cells[3].innerHTML = ""
 
     } else {
         var cmdDescStringElement = document.createTextNode(cmdStrings[command.code])
         codeCol.appendChild(cmdDescStringElement)
-        row.cells[3].innerHTML = command.params.toJSONString().replace(/,/gi, " , ")
+        var parameters = command.params.toJSONString().replace(/,/gi, " , ")
+        if (parameters == null || parameters.length == 0) {
+            row.cells[3].innerHTML = "-"
+        }  else {
+            row.cells[3].innerHTML = parameters
+        }
     }
-    row.cells[4].innerHTML = command.startedAt
+    if (table.getAttribute("id") == "shortRunningCommandsTable") {
+        row.cells[4].innerHTML = command.startedAt
+
+    } else {
+        row.cells[3].innerHTML = command.startedAt
+    }
 }
 
 /**
@@ -229,7 +240,8 @@ function highlightTerminatedCommand(command) {
         if (row == null) {
             return
         }
-        if (new Boolean(command.succeeded)) {
+        var succ = new String(command.succeeded)
+        if (succ == "true") {
             row.style.backgroundColor = "#99D6AD"
 
         } else {
