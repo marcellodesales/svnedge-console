@@ -83,7 +83,8 @@ class SetupTeamForgeController {
             session[WIZARD_BEAN_KEY] = null
         }
         [isFreshInstall: setupTeamForgeService.isFreshInstall(), con: con, 
-            errorCause: errorCause, connectionErrors: savedCon?.errors, 
+            errorCause: errorCause, connectionErrors: 
+            savedCon?.hasProperty('errors') ? savedCon.errors : [], 
             generalError: generalError]
     }
 
