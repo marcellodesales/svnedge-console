@@ -183,8 +183,10 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         grailsApplication.mainContext.publishEvent(
             new CommandReadyForExecutionEvent(this, longRunningCommand))
 
-        while (!replicaServerStatusService.areThereAnyCommands(
-                CommandState.RUNNING)) {
+        use(TimeCategory) {
+            timeout = new Date() + 1.minute
+        }
+        while (!replicaServerStatusService.areThereAnyCommands(CommandState.RUNNING) && new Date().getTime() < timeout.getTime()) {
             Thread.sleep(250)
         }
 
@@ -208,8 +210,10 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
             }
         }
 
-        while (!replicaServerStatusService.areThereAnyCommands(
-                CommandState.TERMINATED)) {
+        use(TimeCategory) {
+            timeout = new Date() + 1.minute
+        }
+        while (!replicaServerStatusService.areThereAnyCommands(CommandState.TERMINATED) && new Date().getTime() < timeout.getTime()) {
             Thread.sleep(250)
         }
 

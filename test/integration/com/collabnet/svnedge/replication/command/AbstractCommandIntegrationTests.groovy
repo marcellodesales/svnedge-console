@@ -63,7 +63,7 @@ class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testMakeRepoCommand() {
-        def cmdMap = [id:'cmdexec1001', code:'repoSync', 
+        def cmdMap = [id:CommandTestsHelper.createCommandId(), code:'repoSync',
             params:[repoName:'/repos/repo1']]
         def ctxt = new CommandsExecutionContext()
         cmdMap.context = ctxt
@@ -95,7 +95,7 @@ class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
     }
 
     void testMakeReplicaCommand() {
-        def cmdMap = [id:'cmdexec1004', code:'replicaPropsUpdate',
+        def cmdMap = [id:CommandTestsHelper.createCommandId(), code:'replicaPropsUpdate',
             params:[name:'Replica Brisbane', commandPollPeriod:4,
                 commandConcurrencyLong: 10, commandConcurrencyShort: 15]]
         def ctxt = new CommandsExecutionContext()
@@ -134,7 +134,7 @@ class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
      * Test processing a good add command.
      */
     void testLogExecution() {
-        def cmdMap = [id:'cmdexec1001', code:'repoSync', 
+        def cmdMap = [id:CommandTestsHelper.createCommandId(), code:'repoSync',
             params:[repoName:'/repos/repo1']]
 
         def logsDir = config.svnedge.logsDirPath + ""
@@ -177,7 +177,7 @@ class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
         assertTrue "The file must contain the repository name/path" +
             cmdInstance.repoName,logFileContents.contains(cmdInstance.repoName)
 
-        def cmdMap2 = [id:'cmdexec1004', code:'replicaPropsUpdate',
+        def cmdMap2 = [id:CommandTestsHelper.createCommandId(), code:'replicaPropsUpdate',
             params:[name:'Replica Brisbane', commandPollPeriod:4,
                 commandConcurrencyLong: 10, commandConcurrencyShort: 15]]
         cmdMap2.context = ctxt
