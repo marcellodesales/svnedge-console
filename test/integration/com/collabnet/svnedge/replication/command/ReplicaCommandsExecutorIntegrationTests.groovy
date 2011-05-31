@@ -117,7 +117,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
-        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+        def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(getClass().getClassLoader(),
             commandMap)
@@ -157,7 +157,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
+        def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -176,7 +176,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // then remove
-        commandMap = [code: 'repoRemove', id: 0, params: cmdParams, 
+        commandMap = [code: 'repoRemove', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
 
         command = AbstractCommand.makeCommand(classLoader, commandMap)
@@ -218,7 +218,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["description"] = newDescription
 
         // add first
-        def commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+        def commandMap = [code: 'replicaPropsUpdate', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -260,7 +260,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["commandConcurrencyShort"] = "15"
 
         // add first
-        commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+        commandMap = [code: 'replicaPropsUpdate', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
 
         command = AbstractCommand.makeCommand(classLoader, commandMap)
@@ -306,7 +306,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         def cmdParams = [:]
 
         // add first
-        def commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+        def commandMap = [code: 'replicaPropsUpdate', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -327,7 +327,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["commandConcurrencyShort"] = "-11"
 
        // update the properties
-       commandMap = [code: 'replicaPropsUpdate', id: 0, params: cmdParams,
+       commandMap = [code: 'replicaPropsUpdate', id: CommandTestsHelper.createCommandId(), params: cmdParams,
            context: executionContext]
 
        command = AbstractCommand.makeCommand(classLoader, commandMap)
@@ -351,7 +351,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+        def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -377,7 +377,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // then remove
-        commandMap = [code: 'repoRemove', id: 0, params: cmdParams, 
+        commandMap = [code: 'repoRemove', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -403,7 +403,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             repoDir.getCanonicalPath(), repoDir.exists())
 
         // try to re-add the same repository
-        commandMap = [code: 'repoAdd', id: 0, params: cmdParams,
+        commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -430,7 +430,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // add first
-        def commandMap = [code: 'repoAdd', id: 0, params: cmdParams, 
+        def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -496,7 +496,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // execute svn sync
-        commandMap = [code: 'repoSync', id: "cmdSync011", params: cmdParams,
+        def cmdId = CommandTestsHelper.createCommandId()
+        commandMap = [code: 'repoSync', id: cmdId, params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         assertTrue "The command instance is incorrect",
@@ -528,7 +529,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         def commandResult
         int counter = 0
         while(counter++ < 3) {
-            commandResult = CommandResult.findWhere(commandId:"cmdSync011")
+            commandResult = CommandResult.findWhere(commandId: cmdId)
             if (commandResult.transmitted) {
                 break
             } else {

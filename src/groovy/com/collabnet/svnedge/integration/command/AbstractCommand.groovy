@@ -90,6 +90,11 @@ abstract class AbstractCommand {
      */
     protected Map<CommandState, Long> stateTransitions
 
+   /**
+    * Output stream for writing the output of this command
+    */
+    protected OutputStream commandOutputStream;
+
     /**
      * Constructs a new abstract replica command.
      */
@@ -269,7 +274,11 @@ abstract class AbstractCommand {
         this.context = executionContext
         this.id = id
         this.params = initialParameters
-        
+
+        // start the command execution output log for this instance
+        this.commandOutputStream = new FileOutputStream(getCommandOutputFile())
+        writeCommmandOutputFileHeading()
+
         log.debug("Instantiating the command " + getClass().getName() + 
                 " with the parameters " + initialParameters)
     }
@@ -317,7 +326,6 @@ abstract class AbstractCommand {
             execute()
             log.debug("Command execution was successful...")
             succeeded = true
-            getCommandOutputFile().delete()
 
         } catch (Throwable t) {
             succeeded = false
@@ -330,6 +338,9 @@ abstract class AbstractCommand {
                 logExecution("EXECUTION-EXCEPTION", t)
             }
         }
+
+        commandOutputStream.close()
+        if (succeeded) getCommandOutputFile().delete()
         makeTransitionToState(CommandState.TERMINATED)
 
         if (executionException) {
@@ -504,9 +515,10 @@ abstract class AbstractCommand {
     public void writeCommmandOutputFileHeading() {
         def logEntry = "${new  Date()} ${this.id} " +
                 "${this.class.simpleName} params: " +
-                 (this.params ? "${this.params}" : "[]")
-        getCommandOutputFile().setText(logEntry +
-                "\nExecution output below\n----------------------\n")
+                 (this.params ? "${this.params}" : "[]") +
+                "\nExecution output below\n----------------------\n"
+
+        commandOutputStream.write(logEntry.toString().getBytes())
     }
 
     /**
@@ -520,10 +532,9 @@ abstract class AbstractCommand {
         def msg
         def retVal
         def result
-        FileOutputStream fileOutput = new FileOutputStream(getCommandOutputFile(), true)
         try {
             def commandLineService = getService("commandLineService")
-            result = commandLineService.execute(command, fileOutput, fileOutput, null, null, true)
+            result = commandLineService.execute(command, commandOutputStream, commandOutputStream , null, null, true)
             retVal = result[0]
             msg = result[1]
         } catch (Exception e) {
@@ -541,7 +552,6 @@ abstract class AbstractCommand {
             }
             throw new IllegalStateException(msg)
         }
-        fileOutput.close()
         return msg
     }
 }

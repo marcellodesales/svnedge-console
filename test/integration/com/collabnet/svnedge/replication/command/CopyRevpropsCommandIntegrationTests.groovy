@@ -114,7 +114,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         // add and sync the repo
         assertNotNull("ReplicaConfig must have svnMasterUrl from which to sync",
                 ReplicaConfiguration.getCurrentConfig().svnMasterUrl)
-        def commandMap = [code: 'repoAdd', id: "cmdexec1001", params: cmdParams,
+        def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         def command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)
@@ -174,7 +174,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         cmdParams["masterId"] = EXSY_ID
 
         // execute svn sync
-        commandMap = [code: 'repoSync', id: "cmdSync011", params: cmdParams,
+        commandMap = [code: 'repoSync', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)
@@ -238,7 +238,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
 
-        commandMap = [code: 'repoSync', id: "cmdSync011", params: cmdParams,
+        commandMap = [code: 'repoSync', id:  CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)
@@ -284,7 +284,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         cmdParams["repoName"] = REPO_NAME
         cmdParams["masterId"] = EXSY_ID
         cmdParams["revision"] = revNumberToAlter
-        commandMap = [code: 'copyRevprops', id: "cmdexec7001", params: cmdParams,
+        commandMap = [code: 'copyRevprops', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
         command = AbstractCommand.makeCommand(classLoader, commandMap)
         replicaCommandExecutorService.commandLifecycleExecutor(command)
