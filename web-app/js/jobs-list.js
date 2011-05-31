@@ -41,12 +41,6 @@ dojo.addOnUnload(destroy)
  */
 function onStateMessageCallbackHandler(m) {
     var o = eval('(' + m.data + ')')
-    if (o.totalCommands > 0) {
-        dojo.byId('commandsCount').innerHTML = commands_running + " " + o.totalCommands
-
-    } else {
-        dojo.byId('commandsCount').innerHTML = no_commands
-    }
     updateCommands(o)
 }
 
@@ -126,18 +120,20 @@ function removeFromScheduled(command) {
  * Creates a new row with the columns for a command in the given index, printing the given
  * printIndex with the given classRow.
  */
-function createCommandRow(table, index, printIndex, classRow) {
+function createCommandRow(table, index) {
+    var rowClass = table.rows[index].getAttribute("class")
+    table.deleteRow(index)
+
     var newRow = table.insertRow(index)
-    newRow.setAttribute('class', classRow)
+    newRow.setAttribute('class', rowClass)
 
     var indexCol = newRow.insertCell(0)
-    indexCol.innerHTML = printIndex
+    indexCol.innerHTML = index + 1
 
     newRow.insertCell(1)
     newRow.insertCell(2)
     newRow.insertCell(3)
     newRow.insertCell(4)
-
     return newRow
 }
 
@@ -158,63 +154,67 @@ function removePossibleHighlight(fromRow, toRow) {
 
 /**
  * Adding a new command row to the existing table.
+ * @param tableBodyId is the Id of the TBody tag holding the rows.
  */
-function updateRunningCommands(tableId, command) {
-    var table = dojo.byId(tableId)
-    // move all commands one line down. Last command disappear.
-    var bottomPosition = table.rows.length - 2 // table header and columns description
+function updateRunningCommands(tableBodyId, command) {
+    var table = dojo.byId(tableBodyId)
+    // move all commands one line down.
+    var row = null
+    if (table.rows.length >= 2) {
+        var bottomPosition = table.rows.length - 2
+        for (i = bottomPosition; i >= 0 ; i--) {
+            var currentRow = table.rows[i]
+            var nextRow = table.rows[i + 1]
+            if (currentRow.getAttribute("id") == null && nextRow.getAttribute("id") == null) {
+                if (i == 0) {
+                    // First command to be added.
+                    row = createCommandRow(table, i)
+                    break
 
-    for (i = bottomPosition; i > 1 ; i--) {
-        var currentRow = table.rows[i]
-        var nextRow = table.rows[i + 1]
-        if (currentRow.getAttribute("id") == null && nextRow.getAttribute("id") == null) {
-            if (i == 2) {
-                // First command to be added.
-                var rowClass = currentRow.getAttribute("class")
-                var rowIndex = currentRow.cells[0].innerHTML
-                table.deleteRow(i) // currentRow
+                } else continue
 
-                createCommandRow(table, i, rowIndex, rowClass)
-                break
-
-            } else {
-                continue
+            } else if (currentRow.getAttribute("id") != null && nextRow.getAttribute("id") == null) {
+                // remove the idle row and place a new one, keeping its formatting.
+                nextRow = createCommandRow(table, i + 1)
             }
-
-        } else if (currentRow.getAttribute("id") != null && nextRow.getAttribute("id") == null) {
-            // remove the idle row and place a new one, keeping its formatting.
-            var rowClass = nextRow.getAttribute("class")
-            var rowIndex = nextRow.cells[0].innerHTML
-            table.deleteRow(i+1) // nextRow
-
-            var nextRow = createCommandRow(table, i+1, rowIndex, rowClass)
+            // move all the cells/columns from current to next
+            nextRow.setAttribute("id", currentRow.getAttribute("id"))
+            for (j = 1; j < table.rows[i].cells.length; j++) {
+                nextRow.cells[j].innerHTML = currentRow.cells[j].innerHTML
+            }
+            // if the current row had a highlight, then move it down
+            removePossibleHighlight(currentRow, nextRow)
         }
-        // move all the cells/columns from current to next
-        nextRow.setAttribute("id", currentRow.getAttribute("id"))
-        for (j = 1; j < table.rows[i].cells.length; j++) {
-            nextRow.cells[j].innerHTML = currentRow.cells[j].innerHTML
-        }
-        // if the current row had a highlight, then move it down
-        removePossibleHighlight(currentRow, nextRow)
+
+    } else {
+        // Table had only one row.
+        row = createCommandRow(table, 0)
     }
 
-    // add the new command in the new row.
-    var row = table.rows[2]
+    // add the ID column
     row.setAttribute("id", "run_" + command.id)
-
     row.cells[1].innerHTML = "<a target='" + command.id + "' href='/csvn/log/show?fileName=/temp/" + command.id + ".log&view=tail'>" + command.id + "</a>"
 
+    // add the command code column
     var codeCol = row.cells[2]
     codeCol.innerHTML = ""
     appendCommandIcon(codeCol, command)
     codeCol.appendChild(document.createTextNode(" "))
     if (command.params.repoName != null) {
-        codeCol.appendChild(document.createTextNode(command.params.repoName))
-        row.cells[3].innerHTML = "-"
+        var index = command.params.repoName.lastIndexOf("/")
+        if (index == -1) {
+            index = command.params.repoName.lastIndexOf("\\")
+        }
+        var repo = command.params.repoName.substring(index + 1, command.params.repoName.length)
+        var repoStringElement = document.createTextNode(cmdStrings[command.code].replace(
+            "&quot;x&quot;", "'" + repo + "'"))
+        codeCol.appendChild(repoStringElement)
+        row.cells[3].innerHTML = ""
 
     } else {
-        codeCol.appendChild(document.createTextNode(command.code))
-        row.cells[3].innerHTML = command.params
+        var cmdDescStringElement = document.createTextNode(cmdStrings[command.code])
+        codeCol.appendChild(cmdDescStringElement)
+        row.cells[3].innerHTML = command.params.toJSONString().replace(/,/gi, " , ")
     }
     row.cells[4].innerHTML = command.startedAt
 }
@@ -236,18 +236,23 @@ function highlightTerminatedCommand(command) {
             row.style.backgroundColor = "#FFB2B2"
         }
         passedResults["run_" + command.id] = command.succeeded
+        paramsIndex[command.id] = command.params
     }
 }
 
 /**
  * Creates a new idle row in the given index position with the index value.
  */
-function makeIdleRow(table, index, value, rowClass) {
+function makeIdleRow(table, index) {
+    var row = table.rows[index]
+    var rowClass = row.getAttribute("class")
+    table.removeChild(row)
+
     var idleRow = table.insertRow(index)
     idleRow.setAttribute('class', rowClass)
 
     var indexCell = idleRow.insertCell(0)
-    indexCell.innerHTML = value //same for UI and table
+    indexCell.innerHTML = index + 1 //same for UI and table
 
     var idleCell = idleRow.insertCell(1)
     idleCell.innerHTML = "<b>" + idleString + "</b>"
@@ -267,78 +272,80 @@ function removeReportedCommand(command) {
             return
         }
         var missingIndex = new Number(row.cells[0].innerHTML)
-        var table = row.parentNode
-        table.removeChild(row)
+        missingIndex--
 
-        var bottom = table.rows.length
-        if (missingIndex == bottom) {
+        var table = row.parentNode // table actually is a tbody
+
+        if (table.rows.length == 1) {
             // Since it is the bottom, create idle row
-            // get the class of the previous one, as the deleted one changed its background
-            var rowClass = table.rows[bottom - 1].getAttribute("class") == "OddRow" ? "EvenRow" : "OddRow"
-            makeIdleRow(table, missingIndex - 1, missingIndex, lastRow)
+            makeIdleRow(table, 0)
 
-        } else if (missingIndex < bottom) {
-            var currentRow = table.rows[missingIndex - 1]
-            var missingRowClass = currentRow.getAttribute("class") == "OddRow" ? "EvenRow" : "OddRow"
-            if (currentRow.getAttribute("id") == null) {
-                // next is idle, then create another idle.
-                makeIdleRow(table, missingIndex - 1, missingIndex, missingRowClass)
+        } else if (missingIndex < table.rows.length - 1) {
+            // place an idle row
+            var idleRow = makeIdleRow(table, missingIndex)
 
-            } else {
-                // we are adding a command row in order to get the next ones be pushed up
-                var missingRow = table.insertRow(missingIndex - 1)
-                missingRow.setAttribute('class', missingRowClass)
-
-                var indexCol = missingRow.insertCell(0)
-                indexCol.innerHTML = missingIndex // the UI same as table index
-
-                missingRow.insertCell(1)
-                missingRow.insertCell(2)
-                missingRow.insertCell(3)
-                missingRow.insertCell(4)
-
-                // move all of command up until an idle row is found
-                var lastDuplicateIndex = null
-                var lastDuplicateId
-                for (i = missingIndex; i < table.rows.length; i++) {
-                    if (table.rows[i].getAttribute("id") == null) {
-                        // the next was an idle row
-                        lastDuplicateIndex = i - 1
-                        break
-
-                    } else {
-                        lastDuplicateId = table.rows[i].getAttribute("id")
-
-                        // move the ID
-                        table.rows[i-1].setAttribute("id", table.rows[i].getAttribute("id"))
-
-                        // if the current row had a highlight, then move it up
-                        removePossibleHighlight(table.rows[i], table.rows[i-1])
-
-                        // move all the cells/columns from current to next, but the index column
-                        for (j = 1; j < table.rows[i].cells.length; j++) {
-                            table.rows[i-1].cells[j].innerHTML = table.rows[i].cells[j].innerHTML
-                        }
-                    }
+            // if there are more commands below it, push all commands up
+            for (i = missingIndex + 1; i < table.rows.length; i++) {
+                var nextRow = table.rows[i] // the current after the deletion
+                if (nextRow.getAttribute("id") == null) {
+                    break
                 }
-                // remove the last command, as it is duplicate from the one pushed up
-                var rowDeleted = table.rows[lastDuplicateIndex]
-                var deletedRowClass = row.getAttribute("class")
-                table.deleteRow(lastDuplicateIndex)
+                table.rows[i - 1] = nextRow
+                table.rows[i] = idleRow
+                table.rows[i - 1].cells[0].innerHTML = i
+                table.rows[i].cells[0].innerHTML = i + 1
+            }
+        }
+        if (command.code == "replicaPropsUpdate") {
+            var params = paramsIndex[command.id]
+            if (params == null) {
+                return
+            }
+            if (params.commandPollPeriod != null) {
+                dojo.byId("pollingIntervalString").innerHTML = pollingChangeString.replace("x", params.commandPollPeriod)
+            }
+            var newMaxLong = parseInt(params.commandConcurrencyLong)
+            if (newMaxLong != null) {
+                var longRunningTable = dojo.byId("longRunningCommandsTable")
+                resizeTable(longRunningTable, newMaxLong)
+            }
+            var newMaxShort = parseInt(params.commandConcurrencyShort)
+            if (newMaxShort != null) {
+                var shortRunningTable = dojo.byId("shortRunningCommandsTable")
+                resizeTable(shortRunningTable, newMaxShort)
+            }
+        }
+        paramsIndex[command.id] = null
+    }
 
-                var row = makeIdleRow(table, lastDuplicateIndex, lastDuplicateIndex + 1, deletedRowClass)
+    /**
+     * Resizes the the given table to the given new size.
+     * @param table
+     * @param newSize
+     */
+    function resizeTable(table, newSize) {
+        if (newSize > table.rows.length) {
+            var diff = newSize - table.rows.length
+            var newRowClass = table.rows[table.rows.length - 1].getAttribute('class')
+            for (i = 0; i < diff; i++) {
+                newRowClass = newRowClass == "EvenRow" ?  "OddRow" : "EvenRow"
 
-                // if the current row had a highlight, then move it up
-                removePossibleHighlight(table.rows[i], table.rows[i-1])
+                var idleRow = table.insertRow(table.rows.length)
+                idleRow.setAttribute('class', newRowClass)
 
-                if (passedResults.containsKey(lastDuplicateId)) {
-                    if (passedResults[lastDuplicateId] == "true") {
-                        row.style.backgroundColor = "#99D6AD"
-                    } else {
-                        row.style.backgroundColor = "#FFB2B2"
-                    }
-                    table.rows[lastDuplicateIndex + 1].style.backgroundColor = null
-                }
+                var indexCell = idleRow.insertCell(0)
+                indexCell.innerHTML = table.rows.length
+
+                var idleCell = idleRow.insertCell(1)
+                idleCell.innerHTML = "<b>" + idleString + "</b>"
+                idleCell.setAttribute("colspan", "4")
+                idleCell.setAttribute("align", "center")
+            }
+
+        } else if (newSize < table.rows.length) {
+            var diff = table.rows.length - newSize
+            for (i = 0; i < diff; i++) {
+                table.deleteRow(table.rows.length - 1)
             }
         }
     }

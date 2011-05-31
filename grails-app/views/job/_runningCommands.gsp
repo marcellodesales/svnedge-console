@@ -2,8 +2,8 @@
 <%@page import="com.collabnet.svnedge.integration.command.AbstractCommand"%>
 <%@page import="com.collabnet.svnedge.integration.command.CommandState"%>
 
-<table class="Container" id="${tableName}">
-  <tbody>
+<table class="Container">
+  <thead>
     <tr class="ContainerHeader">
       <td colspan="4">
        <g:if test="${shortRun}">
@@ -28,7 +28,7 @@
        <td width="20%">${message(code: 'job.page.list.column.started_at')}</td>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="${tableName}">
    <g:each in="${(0..maxNumber-1)}" var="i">
     <g:if test="${i < runningCommands.size()}">
      <g:set var="command" value="${runningCommands.get(i)}" />
@@ -43,22 +43,22 @@
            ${commandCode}
          </g:if>
          <g:if test="${command.params.repoName}">
-           ${command.params.getRepoName()}
+           ${command.params.repoName}
          </g:if>
        </td>
        <td>
          <g:if test="${!shortRun}">
-            ${message(code: commandDesc, params:[command.params.getRepoName()])}
+            ${message(code: commandDesc, params:[command.params.repoName])}
          </g:if>
-         <g:if test="${shortRun && !command.params.getRepoName()}">
+         <g:if test="${shortRun && !command.params.repoName}">
            ${message(code: commandDesc)}
            ${command.params}
          </g:if>
-         <g:if test="${command.params.getRepoName()}">
+         <g:if test="${command.params.repoName}">
            ${message(code: commandDesc)}
          </g:if>
-         <g:if test="${!shortRun && command.params.getRepoName()}">
-           ${message(code: commandDesc, params: [command.params.getRepoName()])}
+         <g:if test="${!shortRun && command.params.repoName}">
+           ${message(code: commandDesc, params: [command.params.repoName])}
          </g:if>
        </td>
        <td>

@@ -21,6 +21,7 @@ import com.collabnet.svnedge.console.ReplicaServerStatusService.CommandAtState;
 import com.collabnet.svnedge.integration.command.AbstractCommand 
 import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
+import com.collabnet.svnedge.integration.command.impl.ReplicaPropsUpdateCommand;
 import com.collabnet.svnedge.util.InterruptibleLoopRunnable
 
 import grails.converters.JSON;
@@ -120,6 +121,9 @@ class CommandStateDelayedNotifierHandler extends InterruptibleLoopRunnable {
         }
         if (cmdState != CommandState.REPORTED) {
             // terminated, running, scheduled commands show the parameters
+            resp << [params: cmd.params]
+
+        } else if (cmd instanceof ReplicaPropsUpdateCommand) {
             resp << [params: cmd.params]
         }
         return (resp as JSON).toString()

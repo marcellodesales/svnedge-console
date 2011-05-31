@@ -9,9 +9,7 @@
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
                 djconfig="parseOnLoad: false, isDebug: false"></script>
 
-      <g:set var="noCommands" value="${message(code:'status.page.status.replication.no_commands')}" />
-      <g:set var="commandsRunning" value="${message(code:'status.page.status.replication.commands_running')}" />
-
+      <g:javascript src="json.js" />
       <g:javascript src="hash.js" />
       <script type="text/javascript">
           /** The current number of commands at the time the page loads. */
@@ -20,14 +18,23 @@
           var sizeShortRunning = ${shortRunningCommands.size()}
           /** The total number of permits of long-running commands (svn initializations). */
           var sizeLongRunning = ${longRunningCommands.size()}
-          /** When there are no commands running. */
-          var no_commands = "${noCommands}"
-          /** The string for the running commands. */
-          var commands_running = "${commandsRunning}"
           /** A row that shows as idle. */
           var idleString = "${message(code: 'job.page.list.row.job_idle')}"
+          /** The polling interval string when the value is changed */
+          var pollingChangeString = "${message(code:'job.page.list.polling_interval', args:["x"])}"
+
+          var cmdStrings = new Hash()
+          cmdStrings["copyRevprops"] = "${message(code: 'job.page.list.copyRevprops', args:["x"])}"
+          cmdStrings["replicaPropsUpdate"] = "${message(code: 'job.page.list.replicaPropsUpdate', args:["x"])}"
+          cmdStrings["replicaUnregister"] = "${message(code: 'job.page.list.replicaUnregister')}"
+          cmdStrings["repoSync"] = "${message(code: 'job.page.list.repoSync', args:["x"])}"
+          cmdStrings["repoRemove"] = "${message(code: 'job.page.list.repoRemove', args:["x"])}"
+          cmdStrings["repoAdd"] = "${message(code: 'job.page.list.repoAdd', args:["x"])}"
+
           /** The hash of commands with passed results. [cmdexec1001 = true] */
           var passedResults = new Hash()
+          /** The hash of parameters. [cmdexec1001 = true] */
+          var paramsIndex = new Hash()
       </script>
       <g:javascript src="jobs-list.js" />
 </head>
@@ -45,18 +52,9 @@
     <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
    </div>
    <div class="ImageListParent">
-     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-     ${message(code:'job.page.list.polling_interval', args:[commandPollRate])}
-   </div>
-   <div class="ImageListParent">
      <div style="float: left;"><img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-     </div> <div id="commandsCount" style="float: left;">
-         <g:if test="${totalCommandsRunning == 0}">
-            ${no_commands}
-         </g:if>
-         <g:if test="${totalCommandsRunning != 0}">
-            ${commands_running} ${totalCommandsRunning}
-         </g:if>
+     </div> <div id="pollingIntervalString" style="float: left;">
+        ${message(code:'job.page.list.polling_interval', args:[commandPollRate])}
      </div>
    </div>
 <BR>
