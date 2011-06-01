@@ -42,6 +42,7 @@ import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener 
 import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
 import groovy.time.TimeCategory
+import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
 
 /**
  * This test case verifies command threading, blocking, etc in the
@@ -165,21 +166,14 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.SCHEDULED) {
-                assertEquals "The replica status service must contain all scheduled " +
-                    "commands", 1, scheduledCmds.size()
-                def cmd = scheduledCmds.iterator().next()
-                assertSame "The cmd must be same", longRunningCommand, cmd
-                assertEquals "The state shuld be equals", 
-                    CommandState.SCHEDULED, cmd.state
-
+                assertTrue ("The test command should be in the state ${cmdState}", scheduledCmds?.contains(longRunningCommand))
             } else {
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertEquals "The replica status service must have no commands on " +
-                    "$cmdState state", 0, cmds.size()
+                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
             }
         }
 
-        // fire the event
+        // fire the running event
         grailsApplication.mainContext.publishEvent(
             new CommandReadyForExecutionEvent(this, longRunningCommand))
 
@@ -196,19 +190,16 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.RUNNING) {
-                assertEquals "The replica status service must contain all scheduled " +
-                    "commands", 1, runningCmds.size()
-                def cmd = runningCmds.iterator().next()
-                assertSame "The cmd must be same", longRunningCommand, cmd
-                assertEquals "The state shuld be equals", 
-                    CommandState.RUNNING, cmd.state
-
+                assertTrue ("The test command should be in the state ${cmdState}", runningCmds?.contains(longRunningCommand))
             } else {
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertEquals "The replica status service must have no commands on " +
-                    "$cmdState state", 0, cmds.size()
+                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
             }
         }
+
+        // fire the terminated event
+        grailsApplication.mainContext.publishEvent(
+            new CommandTerminatedEvent(this, longRunningCommand))
 
         use(TimeCategory) {
             timeout = new Date() + 1.minute
@@ -223,17 +214,11 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.TERMINATED) {
-                assertEquals "The replica status service must contain all scheduled " +
-                    "commands", 1, runningCmds.size()
-                def cmd = runningCmds.iterator().next()
-                assertSame "The cmd must be same", longRunningCommand, cmd
-                assertEquals "The state shuld be equals", 
-                    CommandState.TERMINATED, cmd.state
+                assertTrue ("The test command should be in the state ${cmdState}", terminatedCmds?.contains(longRunningCommand))
 
             } else {
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertEquals "The replica status service must have no commands on " +
-                    "$cmdState state", 0, cmds.size()
+                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
             }
         }
     }
