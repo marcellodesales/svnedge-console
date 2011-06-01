@@ -80,6 +80,22 @@ function appendCommandIcon(element, command) {
 }
 
 /**
+ * @param command
+ * @returns the repository name if the command contains the repo name.
+ */
+function getRepoName(command) {
+    if (command.params.repoName == null) {
+        return ""
+    }
+    var index = command.params.repoName.lastIndexOf("/")
+    if (index == -1) {
+        index = command.params.repoName.lastIndexOf("\\")
+    }
+    return command.params.repoName.substring(index + 1, 
+        command.params.repoName.length)
+}
+
+/**
  * Updates the table of scheduled commands with the given command.
  */
 function updateScheduledCommands(command) {
@@ -104,6 +120,9 @@ function updateScheduledCommands(command) {
     appendCommandIcon(col, command)
     col.appendChild(document.createTextNode(" "))
     col.appendChild(document.createTextNode(command.id))
+    if (command.params.repoName != null) {
+        col.appendChild(document.createTextNode(" (" + getRepoName(command) + ")"))
+    }
 }
 
 /**
@@ -159,6 +178,9 @@ function removePossibleHighlight(fromRow, toRow) {
  * @param tableBodyId is the Id of the TBody tag holding the rows.
  */
 function updateRunningCommands(tableBodyId, command) {
+    if (runningCommands.containsKey(command.id)) {
+        return
+    }
     var table = dojo.byId(tableBodyId)
     // move all commands one line down.
     var row = null
@@ -195,7 +217,11 @@ function updateRunningCommands(tableBodyId, command) {
 
     // add the ID column
     row.setAttribute("id", "run_" + command.id)
-    row.cells[1].innerHTML = "<a target='" + command.id + "' href='/csvn/log/show?fileName=/temp/" + command.id + ".log&view=tail'>" + command.id + "</a>"
+    if (command.code.match("replica")) {
+        row.cells[1].innerHTML = command.id
+    } else {
+        row.cells[1].innerHTML = "<a target='" + command.id + "' href='/csvn/log/show?fileName=/temp/" + command.id + ".log&view=tail'>" + command.id + "</a>"
+    }
 
     // add the command code column
     var codeCol = row.cells[2]
@@ -203,11 +229,7 @@ function updateRunningCommands(tableBodyId, command) {
     appendCommandIcon(codeCol, command)
     codeCol.appendChild(document.createTextNode(" "))
     if (command.params.repoName != null) {
-        var index = command.params.repoName.lastIndexOf("/")
-        if (index == -1) {
-            index = command.params.repoName.lastIndexOf("\\")
-        }
-        var repo = command.params.repoName.substring(index + 1, command.params.repoName.length)
+        var repo = getRepoName(command)
         var repoStringElement = document.createTextNode(cmdStrings[command.code].replace(
             "&quot;x&quot;", "'" + repo + "'"))
         codeCol.appendChild(repoStringElement)
@@ -228,6 +250,7 @@ function updateRunningCommands(tableBodyId, command) {
     } else {
         row.cells[3].innerHTML = command.startedAt
     }
+    runningCommands[command.id] = "true"
 }
 
 /**
@@ -236,6 +259,7 @@ function updateRunningCommands(tableBodyId, command) {
  */
 function highlightTerminatedCommand(command) {
     if (command.state == "TERMINATED") {
+        runningCommands.remove(command.id)
         var row = dojo.byId("run_" + command.id)
         if (row == null) {
             return
@@ -327,7 +351,7 @@ function removeReportedCommand(command) {
                 resizeTable(shortRunningTable, newMaxShort)
             }
         }
-        paramsIndex[command.id] = null
+        paramsIndex.remove(command.id)
     }
 
     /**

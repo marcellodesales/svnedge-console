@@ -64,7 +64,6 @@ class JobController {
             } else {
                 scheduledCommands << cmd
             }
-            longRunningCommands << cmd
         }
         def shortRunningCommands = new ArrayList<AbstractCommand>()
         for (cmd in shortRunning) {
@@ -99,7 +98,8 @@ class JobController {
             svnMasterUrl: replicaConfig.svnMasterUrl,
             maxLongRunning: replicaConfig.maxLongRunningCmds,
             maxShortRunning: replicaConfig.maxShortRunningCmds,
-            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog
+            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog,
+            replicaName: replicaConfig.name
         ]
     }
 }

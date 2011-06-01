@@ -32,9 +32,20 @@
           cmdStrings["repoAdd"] = "${message(code: 'job.page.list.repoAdd', args:["x"])}"
 
           /** The hash of commands with passed results. [cmdexec1001 = true] */
+          var runningCommands = new Hash()
+          /** The hash of commands with passed results. [cmdexec1001 = true] */
           var passedResults = new Hash()
           /** The hash of parameters. [cmdexec1001 = true] */
           var paramsIndex = new Hash()
+
+          /** Currently running commands at load-time. */
+      <g:each in="${longRunningCommands}" var="command">
+          runningCommands[command.id] = "true"
+      </g:each>
+      <g:each in="${shortRunningCommands}" var="command">
+          runningCommands[command.id] = "true"
+      </g:each>
+
       </script>
       <g:javascript src="jobs-list.js" />
 </head>
@@ -47,6 +58,10 @@
 
 <content tag="leftMenu">
 <BR>
+   <div class="ImageListParent">
+    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+    <b>${replicaName}</b>
+   </div>
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
@@ -72,7 +87,7 @@
      <td>
       &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(schCommand)}" />
       <img border="0" src="/csvn/images/replica/${commandCode}.png">
-      ${schCommand.id}
+      ${schCommand.id} ${command.params.repoName ? "(" + command.params.repoName.substring(lastIndex + 1, command.params.repoName.length()) + ")" : ""})
      </td>
     </tr>
   </g:each>

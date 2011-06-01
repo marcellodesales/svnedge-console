@@ -55,15 +55,16 @@
            <g:if test="${!lastIndex || lastIndex < 0}">
               <g:set var="lastIndex" value="${command.params.repoName.lastIndexOf("\\")}" />
            </g:if>
-           <g:set var="repoName" value="${command.params.repoName.substring(lastIndex + 1, command.params.repoName.length)}" />
+           <g:set var="repoName" value="${command.params.repoName.substring(lastIndex + 1, command.params.repoName.length())}" />
          </g:if>
-
-       <g:if test="${showLinksToCommandOutputLog}">
-         <td><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
-       </g:if>
-       <g:else>
-         <td>${command.id}</td>
-       </g:else>
+       <td>
+         <g:if test="${command.code.contains('replica')}">
+            ${command.id}
+         </g:if>
+         <g:else>
+            <a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a>
+         </g:else>
+       </td>
 
        <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
