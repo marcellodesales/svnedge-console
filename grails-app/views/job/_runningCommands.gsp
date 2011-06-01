@@ -58,7 +58,12 @@
            <g:set var="repoName" value="${command.params.repoName.substring(lastIndex + 1, command.params.repoName.length)}" />
          </g:if>
 
-       <td><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
+       <g:if test="${showLinksToCommandOutputLog}">
+         <td><a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a></td>
+       </g:if>
+       <g:else>
+         <td>${command.id}</td>
+       </g:else>
 
        <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 

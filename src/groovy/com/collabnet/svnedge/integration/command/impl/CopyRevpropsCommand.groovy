@@ -91,7 +91,7 @@ public class CopyRevpropsCommand extends AbstractRepositoryCommand
                 "--non-interactive", "--no-auth-cache", "--config-dir",
                 ConfigUtil.svnConfigDirPath()]
 
-        executeShellCommandWithLogging(command)
+        executeShellCommand(command)
         log.info("Done syncing repoPath '${repoPath}'.")
     }
 

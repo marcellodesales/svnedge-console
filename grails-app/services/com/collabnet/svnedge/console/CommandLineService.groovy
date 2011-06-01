@@ -261,9 +261,31 @@ class CommandLineService {
         ByteArrayOutputStream outputByteArray = new ByteArrayOutputStream(512)
         ByteArrayOutputStream errorByteArray = new ByteArrayOutputStream(512)
 
+        OutputStream stdout = outputByteArray
+        OutputStream stderr = errorByteArray
+
         // Optionally, streams provided by caller will also receive the process output
-        OutputStream stdout = (outputStream) ? new TeeOutputStream (outputByteArray, outputStream) : outputByteArray
-        OutputStream stderr = (errorStream) ? new TeeOutputStream (errorByteArray, errorStream) : errorByteArray
+        // First verify the provided streams before handing to the process-handling threads
+        if (outputStream) {
+            try {
+                OutputStream teedOutStream = new TeeOutputStream (outputByteArray, outputStream)
+                teedOutStream.write("Starting command: ${command}".toString().getBytes())
+                stdout = teedOutStream
+            }
+            catch (Exception ) {
+                log.error("Unable to write to provided out stream, discarding")
+            }
+        }
+        if (errorStream) {
+            try {
+                OutputStream teedOutStream = new TeeOutputStream (errorByteArray, errorStream)
+                teedOutStream.write("Starting command: ${command}".toString().getBytes())
+                stderr = teedOutStream
+            }
+            catch (Exception ) {
+                log.error("Unable to write to provided err stream, discarding")
+            }
+        }
 
         p.consumeProcessOutput(stdout, stderr)
         def exitStatus = p.waitFor()

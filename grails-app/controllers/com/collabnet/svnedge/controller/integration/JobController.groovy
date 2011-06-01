@@ -98,6 +98,8 @@ class JobController {
             logDateFormat: dtFormat,
             svnMasterUrl: replicaConfig.svnMasterUrl,
             maxLongRunning: replicaConfig.maxLongRunningCmds,
-            maxShortRunning: replicaConfig.maxShortRunningCmds]
+            maxShortRunning: replicaConfig.maxShortRunningCmds,
+            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog
+        ]
     }
 }

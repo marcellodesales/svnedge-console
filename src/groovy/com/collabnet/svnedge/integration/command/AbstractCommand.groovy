@@ -27,6 +27,7 @@ import org.apache.log4j.Logger
 import grails.util.GrailsUtil
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.integration.RepoStatus
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * Defines the Abstract Command to be instantiated based on the map
@@ -276,8 +277,10 @@ abstract class AbstractCommand {
         this.params = initialParameters
 
         // start the command execution output log for this instance
-        this.commandOutputStream = new FileOutputStream(getCommandOutputFile())
-        writeCommmandOutputFileHeading()
+        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+            this.commandOutputStream = new FileOutputStream(getCommandOutputFile())
+            writeCommmandOutputFileHeading()
+        }
 
         log.debug("Instantiating the command " + getClass().getName() + 
                 " with the parameters " + initialParameters)
@@ -339,8 +342,11 @@ abstract class AbstractCommand {
             }
         }
 
-        commandOutputStream.close()
-        if (succeeded) getCommandOutputFile().delete()
+        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+            commandOutputStream.close()
+            if (succeeded) getCommandOutputFile().delete()
+        }
+
         makeTransitionToState(CommandState.TERMINATED)
 
         if (executionException) {
@@ -512,7 +518,7 @@ abstract class AbstractCommand {
         return new File("${this.id}.log", tempLogDir)
     }
 
-    public void writeCommmandOutputFileHeading() {
+    private void writeCommmandOutputFileHeading() {
         def logEntry = "${new  Date()} ${this.id} " +
                 "${this.class.simpleName} params: " +
                  (this.params ? "${this.params}" : "[]") +
@@ -523,18 +529,24 @@ abstract class AbstractCommand {
 
     /**
      * Helper for executing shell commands for the ReplicaCommand heirarchy
-     * Stdout and Stderr are logged to "data/logs/temp/${command.id}.log"
+     * Stdout and Stderr are logged to "data/logs/temp/${command.id}.log" when
+     * <code>replica.logging.commandOutputLog</code> is set to true in Config.groovy
      * @param comand List of String command and args to execute
      * @param repo which can be
      * @return
      */
-    protected String executeShellCommandWithLogging(command, repo = null) {
+    protected String executeShellCommand(command, repo = null) {
         def msg
         def retVal
         def result
         try {
             def commandLineService = getService("commandLineService")
-            result = commandLineService.execute(command, commandOutputStream, commandOutputStream , null, null, true)
+            if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+                result = commandLineService.execute(command, commandOutputStream, commandOutputStream , null, null, true)
+            }
+            else {
+                result = commandLineService.execute(command as String[], null, null, true)
+            }
             retVal = result[0]
             msg = result[1]
         } catch (Exception e) {

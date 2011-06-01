@@ -138,6 +138,9 @@ svnedge {
             //svnsyncRate is in minute.
             svnsyncRate = 1
         }
+        logging {
+            commandOutputLog = true
+        }
     }
     // Multi-cast DNS properties
     mdns {
@@ -168,6 +171,13 @@ svnedge {
 // set per-environment serverURL stem for creating absolute links
 environments {
     test {
+        svnedge {
+            replica  {
+                logging {
+                    commandOutputLog = false
+                }
+            }
+        }
 
     }
     development {

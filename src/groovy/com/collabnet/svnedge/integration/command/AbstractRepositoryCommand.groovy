@@ -154,7 +154,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             out.writeLine("#!/bin/bash\nexit 0;\n")
         }
         if (!isWindows()) {
-            executeShellCommandWithLogging(["chmod", "755",
+            executeShellCommand(["chmod", "755",
                 dummyPreRevPropChangeScript])
         }
         log.info("Done changing the rev prop hooks.")
@@ -177,7 +177,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
 
-        executeShellCommandWithLogging(command, repo)
+        executeShellCommand(command, repo)
         log.info("Done initing the repo.")
         repo.lastSyncRev = 0
 
@@ -186,7 +186,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         if (masterUUID) {
             command = [ConfigUtil.svnadminPath(), "setuuid", repoPath, 
                 masterUUID]
-            executeShellCommandWithLogging(command, repo)
+            executeShellCommand(command, repo)
             log.info("Done setting uuid ${masterUUID} of the repo as that " +
                 "of master.")
             execSvnSync(repo, System.currentTimeMillis(), username, password, 
@@ -203,7 +203,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--username", username,"--password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
-        def output = executeShellCommandWithLogging(command, null)
+        def output = executeShellCommand(command, null)
         def matcher = output =~ /Repository UUID: ([^\s]+)/
         if (matcher && matcher[0][1]) {
             uuid = matcher[0][1]
@@ -236,7 +236,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         
         def msg = "${command} failed. "
         try {
-            def output = executeShellCommandWithLogging(command, repo)
+            def output = executeShellCommand(command, repo)
             // if there is output, scan for last "revision N" pattern
             // if not, there are no new revisions to sync
             if (output) {
