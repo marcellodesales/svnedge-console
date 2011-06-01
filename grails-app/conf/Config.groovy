@@ -171,13 +171,6 @@ svnedge {
 // set per-environment serverURL stem for creating absolute links
 environments {
     test {
-        svnedge {
-            replica  {
-                logging {
-                    commandOutputLog = false
-                }
-            }
-        }
 
     }
     development {

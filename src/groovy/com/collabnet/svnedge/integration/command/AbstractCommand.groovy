@@ -533,15 +533,16 @@ abstract class AbstractCommand {
      * <code>replica.logging.commandOutputLog</code> is set to true in Config.groovy
      * @param comand List of String command and args to execute
      * @param repo which can be
+     * @param disableLogging turn off logging explicitly if it's enabled for the environment
      * @return
      */
-    protected String executeShellCommand(command, repo = null) {
+    protected String executeShellCommand(command, repo = null, disableLogging = false) {
         def msg
         def retVal
         def result
         try {
             def commandLineService = getService("commandLineService")
-            if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+            if (!disableLogging && ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
                 result = commandLineService.execute(command, commandOutputStream, commandOutputStream , null, null, true)
             }
             else {

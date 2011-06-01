@@ -203,7 +203,10 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--username", username,"--password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
-        def output = executeShellCommand(command, null)
+        // disable logging for this command -- for some reason the output cannot be captured
+        // reliably by an outputstream
+        boolean disableLogging = true
+        def output = executeShellCommand(command, null, disableLogging)
         def matcher = output =~ /Repository UUID: ([^\s]+)/
         if (matcher && matcher[0][1]) {
             uuid = matcher[0][1]
