@@ -479,6 +479,14 @@ abstract class AbstractCommand {
     }
 
     /**
+     * @return the state transition time for the given state.
+     */
+    public long getCurrentStateTransitionTime() {
+        return stateTransitions.get(this.state) ? 
+            stateTransitions.get(this.state) : -1
+    }
+
+    /**
      * @return the set of transition times the command has changed over time.
      */
     public Set<Long> getStateTransitionTimes() {

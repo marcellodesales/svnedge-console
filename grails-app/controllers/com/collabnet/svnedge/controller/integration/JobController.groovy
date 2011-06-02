@@ -58,7 +58,7 @@ class JobController {
 
         def longRunningCommands = new ArrayList<AbstractCommand>()
         for (cmd in longRunning) {
-            if (cmd.state == CommandState.RUNNING) {
+            if (cmd.state == CommandState.RUNNING || cmd.state == CommandState.TERMINATED) {
                 longRunningCommands << cmd
 
             } else {
@@ -67,7 +67,7 @@ class JobController {
         }
         def shortRunningCommands = new ArrayList<AbstractCommand>()
         for (cmd in shortRunning) {
-            if (cmd.state == CommandState.RUNNING) {
+            if (cmd.state == CommandState.RUNNING || cmd.state == CommandState.TERMINATED) {
                 shortRunningCommands << cmd
 
             } else {

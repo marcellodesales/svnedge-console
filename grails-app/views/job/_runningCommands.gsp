@@ -46,30 +46,35 @@
     <g:if test="${i < runningCommands.size()}">
      <g:set var="command" value="${runningCommands.get(i)}" />
 
+    <g:if test="${command.state == CommandState.RUNNING}">
       <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
+    </g:if>
+    <g:elseif test="${(command.state == CommandState.TERMINATED || command.state == CommandState.REPORTED) && command.succeeded}">
+      <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}" style="background-color : #99D6AD;">
+    </g:elseif>
+    <g:elseif test="${(command.state == CommandState.TERMINATED || command.state == CommandState.REPORTED) && !command.succeeded}">
+      <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}" style="background-color : #FFB2B2;">
+    </g:elseif>
+
        <td>${i+1}</td>
        <g:set var="commandCode" value="${AbstractCommand.makeCodeName(command)}" />
        <g:set var="commandDesc" value="job.page.list.${commandCode}" />
-         <g:if test="${command.params.repoName}">
-           <g:set var="lastIndex" value="${command.params.repoName.lastIndexOf("/")}" />
-           <g:if test="${!lastIndex || lastIndex < 0}">
-              <g:set var="lastIndex" value="${command.params.repoName.lastIndexOf("\\")}" />
-           </g:if>
-           <g:set var="repoName" value="${command.params.repoName.substring(lastIndex + 1, command.params.repoName.length())}" />
+         <g:if test="${command?.params?.repoName}">
+           <g:set var="repoName" value="${command.params.repoName.substring(command.params.repoName.lastIndexOf("/") + 1)}" />
          </g:if>
        <td>
-         <g:if test="${command.code.contains('replica')}">
+         <g:if test="${commandCode.contains('replica') || command.state == CommandState.REPORTED}">
             ${command.id}
          </g:if>
-         <g:else>
+         <g:elseif test="${command.state == CommandState.RUNNING || command.state == CommandState.TERMINATED}">
             <a target="${command.id}" href="/csvn/log/show?fileName=/temp/${command.id}.log&view=tail">${command.id}</a>
-         </g:else>
+         </g:elseif>
        </td>
 
        <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
-         <g:if test="${command.params.repoName}">
-           ${message(code: commandDesc, params:[repoName])}
+         <g:if test="${command?.params?.repoName}">
+           ${message(code: commandDesc, args:[command.params.repoName.substring(command.params.repoName.lastIndexOf("/") + 1, command.params.repoName.length())])}
          </g:if>
          <g:else>
            ${message(code: commandDesc)}
@@ -77,14 +82,14 @@
        </td>
   <g:if test="${shortRun}">
        <td>
-         <g:if test="${!command.params.repoName}">
+         <g:if test="${!command?.params?.repoName}">
            ${command.params}
          </g:if>
        </td>
   </g:if>
        <td>
         <g:formatDate format="${logDateFormat}"
-             date="${new Date(command.getStateTransitionTime(CommandState.RUNNING))}"/>
+             date="${new Date(command.getCurrentStateTransitionTime())}"/>
        </td>
       </tr> 
     </g:if>

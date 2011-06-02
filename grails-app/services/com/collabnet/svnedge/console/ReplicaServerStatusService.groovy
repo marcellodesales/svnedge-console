@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
+import grails.util.GrailsUtil;
+
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -261,6 +263,12 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
     private void updateOrRemoveCommandState(AbstractCommand command, 
             CommandState state) {
 
+        if (!command) {
+            throw new IllegalArgumentException("The command must be provided.")
+
+        } else if (!state) {
+            throw new IllegalArgumentException("The state must be provided.")
+        }
         if (state == CommandState.REPORTED) {
             def commandState = allCommands.remove(command)
 
@@ -348,6 +356,9 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      * @param executionEvent is the instance of an execution event.
      */
     void onApplicationEvent(ReplicaCommandsExecutionEvent executionEvent) {
+        if (GrailsUtil.environment == "test") {
+            return
+        }
         switch(executionEvent) {
             case LongRunningCommandQueuedEvent:
             case ShortRunningCommandQueuedEvent:
