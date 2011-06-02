@@ -140,6 +140,7 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
                 longRunningCommand))
 
         // wait up to 1 minute for new command to show up on queue 
+        Date timeout
         use(TimeCategory) {
             timeout = new Date() + 1.minute
         }
