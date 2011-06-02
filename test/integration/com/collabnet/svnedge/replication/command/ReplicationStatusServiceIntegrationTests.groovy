@@ -127,18 +127,6 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         assert replicaServerStatusService in applicationEventMulticaster.applicationListeners
         assert replicaCommandSchedulerService in applicationEventMulticaster.applicationListeners
 
-        // allow command queue to clear from other tests (wait up to 2 minutes)
-        Date timeout
-        use(TimeCategory) {
-            timeout = new Date() + 2.minutes
-        }
-        while (replicaServerStatusService.areThereAnyCommands() && new Date().getTime() < timeout.getTime()) {
-            Thread.sleep(250)
-        }
-        
-        assertFalse "Command queue should be clear",
-                replicaServerStatusService.areThereAnyCommands()
-
         def longRunningCommand = new RepoTestCommand()
         longRunningCommand.id = "cmdexec10001" 
         longRunningCommand.repoName = "/tmp/repo1"
