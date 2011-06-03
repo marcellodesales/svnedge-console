@@ -265,11 +265,11 @@ class CommandLineService {
         OutputStream stdout = (outputStream) ? new TeeOutputStream (outputByteArray, outputStream) : outputByteArray
         OutputStream stderr = (errorStream) ? new TeeOutputStream (errorByteArray, errorStream) : errorByteArray
 
-        p.consumeProcessOutput(stdout, stderr)
+        p.waitForProcessOutput(stdout, stderr)
         def exitStatus = p.waitFor()
-        // logging command and output can be suppressed
         String outString = new String(outputByteArray.toByteArray(), "UTF-8");
         String errorString = new String(errorByteArray.toByteArray(), "UTF-8");
+        // console log output of command tokens can be suppressed with "quiet" param
         if (!quiet) {
             log.debug("Command: " + command + " result=" + exitStatus)
 
