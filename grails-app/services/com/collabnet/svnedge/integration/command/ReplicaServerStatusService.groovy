@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.console
+package com.collabnet.svnedge.integration.command
 
 import grails.util.GrailsUtil;
 
@@ -23,18 +23,16 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.cometd.Client;
 import org.mortbay.cometd.ChannelImpl;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationListener;
 
+import com.collabnet.svnedge.console.AbstractSvnEdgeService;
 import com.collabnet.svnedge.integration.command.AbstractCommand;
 import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
@@ -45,7 +43,6 @@ import com.collabnet.svnedge.integration.command.event.CommandResultReportedEven
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent;
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent;
-import com.collabnet.svnedge.integration.command.handler.CommandStateDelayedNotifierHandler;
 
 /**
  * This service is responsible for maintaining the current status of the 
@@ -55,24 +52,13 @@ import com.collabnet.svnedge.integration.command.handler.CommandStateDelayedNoti
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public final class ReplicaServerStatusService extends AbstractSvnEdgeService 
-        implements InitializingBean, ApplicationListener<ReplicaCommandsExecutionEvent> {
+public final class ReplicaServerStatusService extends AbstractSvnEdgeService
+        implements ApplicationListener<ReplicaCommandsExecutionEvent> {
 
     boolean transactional = false
 
     def executorService
-    /**
-     * Auto-wired Cometd bayeux server
-     */
-    def bayeux
-    /**
-     * The bayeux publisher client
-     */
-    private Client bayeuxPublisherClient
-    /**
-     * The Bayeux publisher Status message channel
-     */
-    private ChannelImpl commandStatusChannel
+
     /**
      * The current set of commands by the state.
      */
@@ -89,11 +75,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      * The index of short-running commands
      */
     private Set<ShortRunningCommand> allShortRunningIndexSet
-    /**
-     * The sequential change of states per command.
-     */
-    BlockingQueue<CommandAtState> commandsStateChangeTranferQueue
-    private CommandStateDelayedNotifierHandler delayedNotifierHandler
 
     /**
      * Immutable command at a given state.
@@ -122,28 +103,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
             new HashSet<LongRunningCommand>())
         allShortRunningIndexSet = Collections.synchronizedSet(
             new HashSet<ShortRunningCommand>())
-    }
-
-    // just like @PostConstruct
-    void afterPropertiesSet() {
-        this.bayeuxPublisherClient = this.bayeux.newClient(this.class.name)
-        def statusChannel = "/csvn-replica/commands-states"
-        def create = true
-        this.commandStatusChannel = this.bayeux.getChannel(statusChannel, 
-            create)
-        commandsStateChangeTranferQueue =
-            new LinkedBlockingQueue<CommandAtState>()
-        delayedNotifierHandler = new CommandStateDelayedNotifierHandler(
-            this, commandsStateChangeTranferQueue, allCommands)
-        executorService.execute(delayedNotifierHandler)
-    }
-
-    /**
-     * @param jsonResponse is the response message of the command state.
-     */
-    def publishBayeuxMessage(jsonResponse) {
-        log.debug("Command transition to publish: " + jsonResponse)
-        commandStatusChannel.publish(bayeuxPublisherClient, jsonResponse, null)
     }
 
     /**
@@ -345,9 +304,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 newStateCmds.add(command)
             }
         }
-        // offering the command for the delayed delivery handler.
-        commandsStateChangeTranferQueue.offer(CommandAtState.makeNew(
-            command, state))
     }
 
     /**
