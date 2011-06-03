@@ -6,10 +6,7 @@ GET GRAILS
 
 Grails needs a JDK installed, we assume you already have one. The Sun 1.6 JDK
 is recommended version. We are currently using Grails 1.3.4. You can download
-it here: http://www.grails.org/download/archive/Grails. We also have this
-stored in our SVN repository:
-
-https://forge.collab.net/svn/repos/svnedge/trunk/components/replica_admin/grails/1.3.4
+it here: http://www.grails.org/download/archive/Grails.
 
 Unpack Grails to a location such as $HOME/grails-1.3.4
 
