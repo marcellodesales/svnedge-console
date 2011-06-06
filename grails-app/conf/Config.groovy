@@ -324,3 +324,9 @@ codenarc {
     reportName = 'target/test-reports/CodeNarcReport.html'
     reportType = 'html'
 }
+
+beans {
+    applicationEventMulticaster {
+        taskExecutor = java.util.concurrent.Executors.newCachedThreadPool()
+    }
+}
