@@ -530,7 +530,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         int counter = 0
         while(counter++ < 3) {
             commandResult = CommandResult.findWhere(commandId: cmdId)
-            if (commandResult.transmitted) {
+            if (commandResult?.transmitted) {
                 break
             } else {
                 println "Command result not transmitted yet..."
