@@ -49,6 +49,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     def lifecycleService
     def discoveryService
     def replicaCommandExecutorService
+    def replicaCommandSchedulerService
     def networkingService
     def authenticationManager    
     def csvnAuthenticationProvider
@@ -339,6 +340,10 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             errors << getMessage("server.error.cantBindPort", locale)
         }
 
+        replicaConfig?.delete(flush:true);
+
+        replicaCommandSchedulerService.cleanCommands()
+        replicaCommandExecutorService.resetQueues()        
     }
 
     def getCertDetailsOfMaster = {

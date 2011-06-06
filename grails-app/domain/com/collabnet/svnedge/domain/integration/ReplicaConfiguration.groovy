@@ -23,6 +23,9 @@ package com.collabnet.svnedge.domain.integration
  */
 public class ReplicaConfiguration {
 
+    static final Integer DEFAULT_MAX_LONG_RUNNING_COMMANDS = 2
+    static final Integer DEFAULT_MAX_SHORT_RUNNING_COMMANDS = 10
+    
     /**
      * The URL of the Master SVN
      */
@@ -50,11 +53,11 @@ public class ReplicaConfiguration {
     /**
      * The max number of long-running commands such as svnsync.
      */
-    Integer maxLongRunningCmds = 2
+    Integer maxLongRunningCmds = DEFAULT_MAX_LONG_RUNNING_COMMANDS
     /**
      * The max number of short-running commands such as the props updates
      */
-    Integer maxShortRunningCmds = 10
+    Integer maxShortRunningCmds = DEFAULT_MAX_SHORT_RUNNING_COMMANDS
 
     /**
      * Fingerprint details

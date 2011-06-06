@@ -34,7 +34,7 @@ import com.collabnet.svnedge.integration.command.event.CommandAboutToRunEvent;
 import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent 
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent 
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent 
-import com.collabnet.svnedge.integration.command.event.NoCommandsRunningUpdateSemaphoresEvent 
+import com.collabnet.svnedge.integration.command.event.UpdateSemaphoresEvent 
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent 
 import com.collabnet.svnedge.integration.command.event.ShortRunningCommandQueuedEvent 
 import com.collabnet.svnedge.integration.command.handler.CommandExecutorHandler 
@@ -91,9 +91,8 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         longRunningScheduledCommands = new LinkedBlockingQueue<LongRunningCommand>()
         shortRunningScheduledCommands = new LinkedBlockingQueue<ShortRunningCommand>()
         // initialize the semaphores
-        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
-        updateSemaphorePermits(replica?.maxLongRunningCmds ?: 2, 0,
-                               replica?.maxShortRunningCmds ?: 10, 0)
+        updateShortRunningSemaphore(initialShortRunningQueueLength(), 0)
+        updateLongRunningSemaphore(initialLongRunningQueueLength(), 0)
 
         // initialize the long-running command executor handler.
         longRunningHandler =
@@ -117,30 +116,27 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
          runAsync(shortRunningHandler)
     }
 
-    /**
-    * Setups up a new value for the total number of permits available in the
-    * Semaphore that controls the concurrent number commands executing.
-    * @param semaphore is a given semaphore
-    * @param newPermits the new number of permits
-    * @param oldPermits the old number of permits
-    */
-   private def updateSemaphorePermits(newLongPermits, oldLongPermits, 
-                                      newShortPermits, oldShortPermits) {
+    def resetQueues() {
+        // drain any queued commands
+        while (longRunningScheduledCommands.poll()) {
+        }
+        while (shortRunningScheduledCommands.poll()) {
+        }
+        longRunningSemaphore = new Semaphore(initialLongRunningQueueLength())
+        shortRunningSemaphore = new Semaphore(initialShortRunningQueueLength())
+    }
 
-       log.debug("updateSemaphorePermits newLong=" + newLongPermits + 
-           " newShort=" + newShortPermits)
-           
-       if (newLongPermits <= 0) {
-           newLongPermits = oldLongPermits > 0 ? oldLongPermits : 1
-           log.debug("updateSemaphorePermits long input changed to " + newLongPermits)
-       }
-       if (newShortPermits <= 0) {
-           newShortPermits = oldShortPermits > 0 ? oldShortPermits : 1
-           log.debug("updateSemaphorePermits short input changed to " + newShortPermits)
-       }
-       updateLongRunningSemaphore(newLongPermits, oldLongPermits)
-       updateShortRunningSemaphore(newShortPermits, oldShortPermits)
-   }
+    private Integer initialLongRunningQueueLength() {
+        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
+        return replica?.maxLongRunningCmds ?:
+            ReplicaConfiguration.DEFAULT_MAX_LONG_RUNNING_COMMANDS
+    }
+
+    private Integer initialShortRunningQueueLength() {
+        ReplicaConfiguration replica = ReplicaConfiguration.getCurrentConfig()
+        return replica?.maxShortRunningCmds ?:
+            ReplicaConfiguration.DEFAULT_MAX_SHORT_RUNNING_COMMANDS
+    }
 
     /**
      * Setups up a new value for the total number of permits available in the
@@ -150,19 +146,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * @param oldPermits the old number of permits
      */
     private def updateLongRunningSemaphore(newPermits, oldPermits) {
-        if (!longRunningSemaphore) {
-            longRunningSemaphore = new Semaphore(newPermits)
-
-        } else {
-            if (newPermits < 1 || newPermits == oldPermits) {
-                // permits must be positive integers
-                // no changes to the number of permits
-                return
-            }
-            synchronized(longRunningSemaphore) {
-                longRunningSemaphore = new Semaphore(newPermits)
-            }
-        }
+        log.debug("updateSemaphorePermits newLong=" + newPermits)
+        updateSemaphore(newPermits, oldPermits, longRunningSemaphore,
+            {permits -> longRunningSemaphore = new Semaphore(permits)})
     }
 
     /**
@@ -173,20 +159,49 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
      * @param oldPermits the old number of permits
      */
     private def updateShortRunningSemaphore(newPermits, oldPermits) {
-        if (!shortRunningSemaphore) {
-            shortRunningSemaphore = new Semaphore(newPermits)
-
-        } else {
-            if (newPermits < 1 || newPermits == oldPermits) {
-                // permits must be positive integers
-                // no changes to the number of permits
-                return
-            }
-            synchronized(shortRunningSemaphore) {
-                shortRunningSemaphore = new Semaphore(newPermits)
-            }
-        }
+        log.debug("updateSemaphorePermits newShort=" + newPermits)
+        updateSemaphore(newPermits, oldPermits, shortRunningSemaphore,
+            {permits -> shortRunningSemaphore = new Semaphore(permits)})
     }
+
+    /**
+    * Setups up a new value for the total number of permits available in the
+    * Semaphore that controls the concurrent number commands executing.
+    * @param semaphore is a given semaphore
+    * @param newPermits the new number of permits
+    * @param oldPermits the old number of permits
+    */
+   private void updateSemaphore(newPermits, oldPermits, semaphore, newSemaphoreClosure) {
+       if (newPermits <= 0) {
+           newPermits = oldPermits > 0 ? oldPermits : 1
+           log.debug("updateSemaphorePermits input changed to " + newPermits)
+       }
+       if (!semaphore) {
+           log.debug("Initializing semaphore for first time.")
+           newSemaphoreClosure(newPermits)           
+
+       } else if (newPermits > 0 && newPermits != oldPermits) {
+
+           int change = newPermits - oldPermits
+           if (change > 0) {
+               // releasing permits that don't exist has the effect of increasing
+               // the number of permits
+               log.debug("Increasing available permits by " + change)
+               semaphore.release(change)
+           } else {
+               // acquiring one at a time to avoid being locked out for a longer
+               // period while waiting for the full number of permits to be available
+               log.debug("Decreasing available permits by " + change + 
+                   ". Approx immediately available permits " + semaphore.availablePermits())
+               for (i in change..<0) {
+                   log.debug("Acquiring... " + i)
+                   semaphore.acquire()
+                   log.debug("Acquired " + i)
+               }
+           }
+       }
+   }
+
 
     /**
      * The event handler of all {@link ReplicaCommandsExecutionEvent} to 
@@ -218,16 +233,14 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 }
                 break
 
-            case NoCommandsRunningUpdateSemaphoresEvent:
-                log.debug("NoCommandsRunningEvent: updating the " +
+            case UpdateSemaphoresEvent:
+                log.debug("UpdateSemaphoresEvent: updating the " +
                     "semaphores and counting down the latch")
-                log.debug("MaxNumberCommandsRunningUpdatedEvent: updating " +
-                    "the executor semaphores")
                 def maxChangesEvent = executionEvent.maxNumberCommandsRunningUpdatedEvent
-                updateSemaphorePermits(maxChangesEvent.newMaxLongRunningCmds,
-                        maxChangesEvent.oldMaxLongRunningCmds,
-                        maxChangesEvent.newMaxShortRunningCmds,
-                        maxChangesEvent.oldMaxShortRunningCmds)
+                updateShortRunningSemaphore(maxChangesEvent.newMaxShortRunningCmds,
+                    maxChangesEvent.oldMaxShortRunningCmds)
+                updateLongRunningSemaphore(maxChangesEvent.newMaxLongRunningCmds, 
+                    maxChangesEvent.oldMaxLongRunningCmds)
                 publishEvent(new AppliedExecutorSemaphoresUpdateEvent(this))
                 break
         }

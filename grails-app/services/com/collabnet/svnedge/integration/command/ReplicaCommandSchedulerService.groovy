@@ -35,7 +35,7 @@ import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.integration.command.event.AppliedExecutorSemaphoresUpdateEvent 
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent 
 import com.collabnet.svnedge.integration.command.event.MaxNumberCommandsRunningUpdatedEvent 
-import com.collabnet.svnedge.integration.command.event.NoCommandsRunningUpdateSemaphoresEvent 
+import com.collabnet.svnedge.integration.command.event.UpdateSemaphoresEvent 
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent 
 import com.collabnet.svnedge.integration.command.handler.CommandsSchedulerHandler 
 import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
@@ -117,7 +117,13 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
      * Initializes all the data structures for the queued commands.
      */
     void cleanCommands() {
-        queuedCommands = new LinkedBlockingQueue<Map<String, String>>()
+        if (queuedCommands == null) {
+            queuedCommands = new LinkedBlockingQueue<Map<String, String>>()
+        } else {
+            while (queuedCommands.poll()) {
+                // emptying queue
+            }
+        }
         executionMutex = Collections.synchronizedMap(
             new LinkedHashMap<String, String>())
         commandIdIndex = Collections.synchronizedSet(
@@ -184,6 +190,9 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
                 "the gate (count-down latch) until semaphores are updated.")
             semaphoreUpdatedEvent = semaphoresUpdated
             updatedSemaphoresGate = new CountDownLatch(1)
+            log.debug "The updated semaphore gate is active. Publish UpdateSemaphoresEvent"
+            publishEvent(new UpdateSemaphoresEvent(this, semaphoreUpdatedEvent))
+
         } else {
             log.debug("semaphoresUpdated event did not alter the queue sizes, so leaving current" +
                       " semaphores in place")
@@ -369,20 +378,6 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
                 def terminatedCommand = executionEvent.terminatedCommand
                 log.debug("CommandTerminatedEvent: $terminatedCommand")
                 removeTerminatedCommand(terminatedCommand.id)
-                synchronized(executionMutex) {
-                    if (executionMutex.size() == 0) {
-                        // after executing all commands, verify if there were
-                        // changes in the semaphores after handing the event 
-                        if (hasSemaphoresUpdated()) {
-                            log.debug "The updated semaphore gate is active. " +
-                                "Publish NoCommandsRunningUpdateSemaphoresEvent"
-                            def ev = getSemaphoresUpdatedEvent()
-                            publishEvent(
-                                new NoCommandsRunningUpdateSemaphoresEvent(this,
-                                    ev))
-                        }
-                    }
-                }
                 break
 
             case AppliedExecutorSemaphoresUpdateEvent:

@@ -24,14 +24,14 @@ package com.collabnet.svnedge.integration.command.event
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-final class NoCommandsRunningUpdateSemaphoresEvent extends ReplicaCommandsExecutionEvent {
+final class UpdateSemaphoresEvent extends ReplicaCommandsExecutionEvent {
 
     /**
      * The event with the new and old values of the semaphores permits.
      */
     def final maxNumberCommandsRunningUpdatedEvent
 
-    def NoCommandsRunningUpdateSemaphoresEvent(source, maxNumbersEvent) {
+    def UpdateSemaphoresEvent(source, maxNumbersEvent) {
         super(source, null)
         maxNumberCommandsRunningUpdatedEvent = maxNumbersEvent
     }

@@ -96,9 +96,6 @@ class ServerController {
                 } else {
                     flash.message = message(code: 
                         "server.action.revert.success")
-                    // since we have a success flash message, we can delete the
-                    // ReplicaConfiguration, which signals a duplicate message
-                    ReplicaConfiguration.getCurrentConfig()?.delete(flush:true);
                     redirect(controller: "status", action: "index")
                 }
             } catch (CtfAuthenticationException wrongCredentials) {
