@@ -78,13 +78,22 @@ class CsvnTagLib {
     }
 
     /**
-     * Given 
-     * @param command
-     * @return the code name of the commad.
+     * @return the code name of the command.
      */
     def makeCommandCodeName = { attrs ->
         def className = attrs.className ?: ""
         out << className ? AbstractCommand.makeCodeName(className).trim() : className.trim()
     }
+    
+    /**
+     * @return the description of a command with a link to the repo name.
+     */
+   def replicaCommandDescription = { attrs ->
+       def repoName = attrs.repoName ?: ""
+       def masterUrl = attrs.masterUrl ?: ""
+       def commandDescription = attrs.commandDescription ?: ""
+       def repoNameLink = "<a target=\"${repoName}\" href=\"${masterUrl}/${repoName}\">${repoName}</a>"
+       out << commandDescription.replace(repoName, repoNameLink)
+   }
 
 }

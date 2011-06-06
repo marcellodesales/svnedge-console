@@ -4,14 +4,8 @@
 
 <table class="Container">
   <thead>
-    <g:if test="${shortRun}">
-      <g:set var="numOfColumns" value="4" />
-    </g:if>
-    <g:else>
-      <g:set var="numOfColumns" value="3" />
-    </g:else>
     <tr class="ContainerHeader">
-      <td colspan="${numOfColumns}">
+      <td colspan="3">
        <g:if test="${shortRun}">
         <g:message code="job.page.list.short_running.header"/>
        </g:if>
@@ -29,15 +23,7 @@
      <tr class="ItemListHeader">
        <td width="18">#</td>
        <td width="15%">${message(code: 'job.page.list.column.id')}</td>
-  <g:if test="${shortRun}">
-       <td width="20%">${message(code: 'job.page.list.column.code')}</td>
-  </g:if>
-  <g:else>
        <td>${message(code: 'job.page.list.column.code')}</td>
-  </g:else>
-  <g:if test="${shortRun}">
-       <td>${message(code: 'job.page.list.column.properties')}</td>
-  </g:if>
        <td width="20%">${message(code: 'job.page.list.column.started_at')}</td>
     </tr>
   </thead>
@@ -74,19 +60,16 @@
        <td>
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
          <g:if test="${command?.params?.repoName}">
-           ${message(code: commandDesc, args:[command.params.repoName.substring(command.params.repoName.lastIndexOf("/") + 1, command.params.repoName.length())])}
+           <g:set var="repoName" value="${command.params.repoName.substring(command.params.repoName.lastIndexOf('/') + 1, command.params.repoName.length())}" />
+           <g:replicaCommandDescription masterUrl="${svnMasterUrl}" repoName="${repoName}" commandDescription="${message(code: commandDesc, args:[repoName])}" />
          </g:if>
          <g:else>
            ${message(code: commandDesc)}
          </g:else>
-       </td>
-  <g:if test="${shortRun}">
-       <td>
          <g:if test="${!command?.params?.repoName}">
            ${command.params}
          </g:if>
        </td>
-  </g:if>
        <td>
         <g:formatDate format="${logDateFormat}"
              date="${new Date(command.getCurrentStateTransitionTime())}"/>
@@ -96,7 +79,7 @@
     <g:else>
       <tr class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
        <td>${i+1}</td>
-       <td colspan="${numOfColumns}" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
+       <td colspan="3" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
       </tr>
     </g:else>
      </tr>

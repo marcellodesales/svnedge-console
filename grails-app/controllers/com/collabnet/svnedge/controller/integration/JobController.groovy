@@ -21,6 +21,7 @@ package com.collabnet.svnedge.controller.integration
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
+import com.collabnet.svnedge.domain.integration.CtfServer;
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.integration.command.AbstractCommand;
 import com.collabnet.svnedge.integration.command.CommandState;
@@ -74,7 +75,6 @@ class JobController {
                 scheduledCommands << cmd
             }
         }
-
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def runningCmdsSize = replicaServerStatusService.getAllCommandsSize()
 
@@ -82,8 +82,6 @@ class JobController {
         def allCommands = []
         allCommands.addAll(longRunning)
         allCommands.addAll(shortRunning)
-
-        replicaConfig.svnMasterUrl
 
         return [commandPollRate: replicaConfig.commandPollRate,
             maxLongRunningCmds: replicaConfig.maxLongRunningCmds,
@@ -95,6 +93,7 @@ class JobController {
             allCommands: allCommands,
             scheduledCommands: scheduledCommands,
             logDateFormat: dtFormat,
+            ctfUrl: CtfServer.getServer().getWebAppUrl(),
             svnMasterUrl: replicaConfig.svnMasterUrl,
             maxLongRunning: replicaConfig.maxLongRunningCmds,
             maxShortRunning: replicaConfig.maxShortRunningCmds,

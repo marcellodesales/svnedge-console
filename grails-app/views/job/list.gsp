@@ -11,18 +11,18 @@
 <body>
 
 <content tag="title">
-  <g:message code="job.page.header"/>
+  <g:message code="job.page.header"/> - ${replicaName}
 </content>
 
 <content tag="leftMenu">
 <BR>
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${replicaName}</b>
+    <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
    </div>
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
+    <b>${message(code:'status.page.url.teamforge')}</b> ${ctfUrl}
    </div>
    <div class="ImageListParent">
      <div style="float: left;"><img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
