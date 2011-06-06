@@ -312,9 +312,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      * @param executionEvent is the instance of an execution event.
      */
     void onApplicationEvent(ReplicaCommandsExecutionEvent executionEvent) {
-        if (GrailsUtil.environment == "test") {
-            return
-        }
         switch(executionEvent) {
             case LongRunningCommandQueuedEvent:
             case ShortRunningCommandQueuedEvent:
