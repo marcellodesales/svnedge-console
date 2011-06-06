@@ -218,20 +218,6 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
                 }
                 break
 
-            case CommandTerminatedEvent:
-                def terminatedCommand = executionEvent.terminatedCommand
-                log.debug "CommandTerminatedEvent: ${terminatedCommand}"
-                switch(terminatedCommand) {
-                    case LongRunningCommand:
-                        longRunningSemaphore.release()
-                        break
-
-                    case ShortRunningCommand:
-                        shortRunningSemaphore.release()
-                        break
-                }
-                break
-
             case NoCommandsRunningUpdateSemaphoresEvent:
                 log.debug("NoCommandsRunningEvent: updating the " +
                     "semaphores and counting down the latch")
@@ -266,10 +252,19 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
         def numPermits = selectedSemaphore.availablePermits()
         log.debug "Number of semaphore's permits: $numPermits. Trying " +
             "to acquire..."
-        selectedSemaphore.acquire()
-
-        log.debug "Permit acquired... Executing the command lifecycle..."
-        commandLifecycleExecutor(commandInstance)
+        boolean isAcquired = false
+        try {
+            selectedSemaphore.acquire()
+            isAcquired = true
+            log.debug "Permit acquired... Executing the command lifecycle..."
+            commandLifecycleExecutor(commandInstance)
+            log.debug "Command finished execution: ${commandInstance}"
+        } finally {
+            if (isAcquired) {
+                selectedSemaphore.release()
+                log.debug "Permit released."
+            }
+        }
     }
 
     /**
