@@ -343,7 +343,7 @@ abstract class AbstractCommand {
         }
 
         if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
-            commandOutputStream.close()
+            if (commandOutputStream) commandOutputStream.close()
             if (succeeded) getCommandOutputFile().delete()
         }
 
