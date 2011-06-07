@@ -144,7 +144,10 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         use(TimeCategory) {
             timeout = new Date() + 1.minute
         }
-        while (!replicaServerStatusService.areThereAnyCommands() && new Date().getTime() < timeout.getTime()) {
+        while (!replicaServerStatusService.areThereAnyCommands()) {
+            if (new Date().getTime() > timeout.getTime()) {
+                fail "Command did not appear within one minute"
+            }
             Thread.sleep(250)
         }
 
@@ -169,7 +172,10 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         use(TimeCategory) {
             timeout = new Date() + 1.minute
         }
-        while (!replicaServerStatusService.areThereAnyCommands(CommandState.RUNNING) && new Date().getTime() < timeout.getTime()) {
+        while (!replicaServerStatusService.areThereAnyCommands(CommandState.RUNNING)) {
+            if (new Date().getTime() > timeout.getTime()) {
+                fail "Command did not start running within one minute"
+            }
             Thread.sleep(250)
         }
 
@@ -186,14 +192,17 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
             }
         }
 
-        // fire the terminated event
-        grailsApplication.mainContext.publishEvent(
-            new CommandTerminatedEvent(this, longRunningCommand))
+        // Long running command is set to take 3 seconds, so need to give at least that long 
+        // before assuming the firing of the terminated event
+        Thread.sleep(3000)
 
         use(TimeCategory) {
             timeout = new Date() + 1.minute
         }
-        while (!replicaServerStatusService.areThereAnyCommands(CommandState.TERMINATED) && new Date().getTime() < timeout.getTime()) {
+        while (!replicaServerStatusService.areThereAnyCommands(CommandState.TERMINATED)) {
+            if (new Date().getTime() > timeout.getTime()) {
+                fail "Long running command did not finish within one minute"
+            }
             Thread.sleep(250)
         }
 
