@@ -5,7 +5,7 @@
     <!-- Default settings -->
     <property file="default.properties"/>
 
-    <property name="CSVN-VERSION" value="2.0.0" />
+    <property name="CSVN-VERSION" value="2.1.0" />
     <property name="SVN_BINARIES_VERSION" value="1.6.17" />
     <property name="REVISION-VERSION" value="${env.SVN_REVISION}.${env.BUILD_NUMBER}" />
     <property name="DEFAULT-PACKAGE-VERSION" value="${CSVN-VERSION}-${REVISION-VERSION}" />
