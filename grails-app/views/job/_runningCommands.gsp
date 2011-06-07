@@ -61,7 +61,7 @@
          <img border="0" src="/csvn/images/replica/${commandCode}.png"> 
          <g:if test="${command?.params?.repoName}">
            <g:set var="repoName" value="${command.params.repoName.substring(command.params.repoName.lastIndexOf('/') + 1, command.params.repoName.length())}" />
-           <g:replicaCommandDescription masterUrl="${svnMasterUrl}" repoName="${repoName}" commandDescription="${message(code: commandDesc, args:[repoName])}" />
+           ${message(code: commandDesc, args:[repoName])}
          </g:if>
          <g:else>
            ${message(code: commandDesc)}
