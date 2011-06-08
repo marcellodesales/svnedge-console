@@ -85,6 +85,7 @@ class CommandsSchedulerHandler extends InterruptibleLoopRunnable {
             // block until all remote commands are initially offered
             synchronizer.take()
             log.debug "Initial commands offered... evaluating all of them..."
+            boolean isCommandQueued = false
             while(receivedRemoteQueuedCommands.size() > 0) {
                 def iterator = receivedRemoteQueuedCommands.iterator()
                 while (iterator.hasNext()) {
@@ -126,7 +127,13 @@ class CommandsSchedulerHandler extends InterruptibleLoopRunnable {
                     commandInstance.logExecution("QUEUED")
 
                     // start evaluating the commands from the beginning
+                    isCommandQueued = true
                     break
+                }
+                if (isCommandQueued) {
+                    isCommandQueued = false
+                } else {
+                    Thread.sleep(5000)
                 }
             }
     }
