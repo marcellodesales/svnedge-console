@@ -29,7 +29,9 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.integration.command.AbstractCommand
 import com.collabnet.svnedge.integration.command.CommandState
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext;
+import com.collabnet.svnedge.integration.command.event.CommandAboutToRunEvent;
 import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent
+import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
 import com.collabnet.svnedge.integration.command.impl.RepoAddCommand;
@@ -107,27 +109,11 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         }
     }
 
-    class RepoTestCommand extends RepoAddCommand {
-
-        def constraints() {
-            println "Verifying constraints..."
-        }
-
-        def execute() {
-            println "Executing Test Command for 3 seconds..."
-            Thread.sleep 3000
-        }
-
-        def undo() {
-            log.debug("Undoing...")
-        }
-    }
-
     void testStatusChangeForCommands() {
         assert replicaServerStatusService in applicationEventMulticaster.applicationListeners
         assert replicaCommandSchedulerService in applicationEventMulticaster.applicationListeners
 
-        def longRunningCommand = new RepoTestCommand()
+        def longRunningCommand = new RepoAddCommand()
         longRunningCommand.id = "cmdexec10001" 
         longRunningCommand.repoName = "/tmp/repo1"
         longRunningCommand.state = CommandState.SCHEDULED
@@ -135,89 +121,97 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         longRunningCommand.context.logsDir = System.getProperty("java.io.tmpdir")
         longRunningCommand.context.appContext = grailsApplication.mainContext
 
-        // fire the event
-        grailsApplication.mainContext.publishEvent(new LongRunningCommandQueuedEvent(this, 
+        // calling the event directly
+        replicaServerStatusService.onApplicationEvent(new LongRunningCommandQueuedEvent(this, 
                 longRunningCommand))
 
-        // wait up to 1 minute for new command to show up on queue 
-        Date timeout
-        use(TimeCategory) {
-            timeout = new Date() + 1.minute
-        }
-        while (!replicaServerStatusService.areThereAnyCommands()) {
-            if (new Date().getTime() > timeout.getTime()) {
-                fail "Command did not appear within one minute"
-            }
-            Thread.sleep(250)
-        }
-
-        assertTrue "There should be commands after scheduling",
-            replicaServerStatusService.areThereAnyCommands()
-        def scheduledCmds = replicaServerStatusService.getCommands(CommandState.SCHEDULED)
+        println "Before getting all scheduled commands: " + longRunningCommand
 
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.SCHEDULED) {
-                assertTrue ("The test command should be in the state ${cmdState}", scheduledCmds?.contains(longRunningCommand))
+                def scheduledCmds = replicaServerStatusService.getCommands(CommandState.SCHEDULED)
+                println "After getting all scheduled commands: " + longRunningCommand
+                println "All commands: " + scheduledCmds
+                assertNotNull "There should be scheduled commands", scheduledCmds
+                assertTrue "There should be 1 scheduled commands", scheduledCmds.size() == 1
+                println "MUST be $cmdState at this moment: " + longRunningCommand
+                assertTrue ("The test command should be in the state ${cmdState}", 
+                    scheduledCmds?.contains(longRunningCommand))
             } else {
+                println "MUST NOT be $cmdState at this moment: " + longRunningCommand
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
+                assertFalse ("The test command should not be in the state ${cmdState}", 
+                    cmds?.contains(longRunningCommand))
             }
         }
 
-        // fire the running event
-        grailsApplication.mainContext.publishEvent(
-            new CommandReadyForExecutionEvent(this, longRunningCommand))
+        longRunningCommand.state = CommandState.RUNNING
+        // Calling the command directly
+        replicaServerStatusService.onApplicationEvent(
+            new CommandAboutToRunEvent(this, longRunningCommand))
 
-        use(TimeCategory) {
-            timeout = new Date() + 1.minute
-        }
-        while (!replicaServerStatusService.areThereAnyCommands(CommandState.RUNNING)) {
-            if (new Date().getTime() > timeout.getTime()) {
-                fail "Command did not start running within one minute"
-            }
-            Thread.sleep(250)
-        }
-
-        def runningCmds = replicaServerStatusService.getCommands(
-            CommandState.RUNNING)
+        println "Before getting all running commands: " + longRunningCommand
 
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.RUNNING) {
-                assertTrue ("The test command should be in the state ${cmdState}", runningCmds?.contains(longRunningCommand))
+                def runningCmds = replicaServerStatusService.getCommands(CommandState.RUNNING)
+                println "All commands: " + runningCmds
+                println "MUST be $cmdState at this moment: " + longRunningCommand
+                assertNotNull "There should be running commands", runningCmds
+                assertTrue "There should be 1 scheduled commands", runningCmds.size() == 1
+                assertTrue ("The test command should be in the state ${cmdState}", 
+                    runningCmds?.contains(longRunningCommand))
             } else {
+                println "MUST NOT be $cmdState at this moment: " + longRunningCommand
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
+                assertFalse ("The test command should not be in the state ${cmdState}", 
+                    cmds?.contains(longRunningCommand))
             }
         }
 
-        // Long running command is set to take 3 seconds, so need to give at least that long 
-        // before assuming the firing of the terminated event
-        Thread.sleep(3000)
+        longRunningCommand.state = CommandState.TERMINATED
+        longRunningCommand.succeeded = true
+        // Calling the command directly
+        replicaServerStatusService.onApplicationEvent(
+            new CommandTerminatedEvent(this, longRunningCommand))
 
-        use(TimeCategory) {
-            timeout = new Date() + 1.minute
-        }
-        while (!replicaServerStatusService.areThereAnyCommands(CommandState.TERMINATED)) {
-            if (new Date().getTime() > timeout.getTime()) {
-                fail "Long running command did not finish within one minute"
-            }
-            Thread.sleep(250)
-        }
-
-        def terminatedCmds = replicaServerStatusService.getCommands(
-            CommandState.TERMINATED)
+        println "Before getting all running commands: " + longRunningCommand
 
         // verifying all comments of different states as empty
         for (cmdState in CommandState.values()) {
             if (cmdState == CommandState.TERMINATED) {
-                assertTrue ("The test command should be in the state ${cmdState}", terminatedCmds?.contains(longRunningCommand))
-
+                def terminatedCmds = replicaServerStatusService.getCommands(CommandState.TERMINATED)
+                println "All commands: " + terminatedCmds
+                println "MUST be $cmdState at this moment: " + longRunningCommand
+                assertNotNull "There should be running commands", terminatedCmds
+                assertTrue "There should be 1 terminated commands", terminatedCmds.size() == 1
+                assertTrue ("The test command should be in the state ${cmdState}", 
+                    terminatedCmds?.contains(longRunningCommand))
             } else {
+                println "MUST NOT be $cmdState at this moment: " + longRunningCommand
                 def cmds = replicaServerStatusService.getCommands(cmdState)
-                assertFalse ("The test command should not be in the state ${cmdState}", cmds?.contains(longRunningCommand))
+                assertFalse ("The test command should not be in the state ${cmdState}", 
+                    cmds?.contains(longRunningCommand))
             }
+        }
+
+        def cmdResult = new CommandResult()
+        cmdResult.commandId = longRunningCommand.id
+        cmdResult.commandCode = AbstractCommand.makeCodeName(longRunningCommand)
+
+        // Calling the command directly
+        replicaServerStatusService.onApplicationEvent(
+            new CommandResultReportedEvent(this, cmdResult))
+
+        // verifying all comments of different states as empty
+        for (cmdState in CommandState.values()) {
+            println "MUST NOT be $cmdState at this moment: " + longRunningCommand
+            def cmds = replicaServerStatusService.getCommands(cmdState)
+            assertFalse ("The test command should not be in the state ${cmdState}", 
+            cmds?.contains(longRunningCommand))
+            assertTrue("The local cache should not have any element.", cmds.size() == 0)
         }
     }
 }
