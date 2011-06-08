@@ -40,6 +40,7 @@ class DiscoveryService {
     boolean transactional = false
 
     def networkingService
+    def config
     
     def boolean bootstrapped
 
@@ -61,6 +62,7 @@ class DiscoveryService {
         def serviceName = config.svnedge.mdns.serviceName
         serviceName = serviceName as String
         def hostAddr = networkingService.ipAddress
+        this.config = config
 
         try {
             register = SvnEdgeBonjourRegister.getInstance(
@@ -78,9 +80,9 @@ class DiscoveryService {
         if (register) {
             def serviceName = config.svnedge.mdns.serviceName
             serviceName = serviceName as String
-            def port = config.svnedge.mdns.port
-            def path = config.grails.app.context
-            def tfPath = config.svnedge.mdns.teamForgeRegistrationPath
+            def port = getCsvnPort()
+            def path = getCsvnContextPath()
+            def tfPath = getCsvnTeamforgeSetupPath()
             def server = Server.getServer()
             if (server.managedByCtf()) {
                 tfPath = "" // clients interpret as managed
@@ -134,4 +136,17 @@ class DiscoveryService {
             log.error(e)
         }
     }
+
+    def getCsvnContextPath() {
+        config.grails.app.context
+    }
+
+    def getCsvnTeamforgeSetupPath() {
+        config.svnedge.mdns.teamForgeRegistrationPath
+    }
+
+    def getCsvnPort() {
+        config.svnedge.mdns.port
+    }
+
 }
