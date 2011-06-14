@@ -15,36 +15,24 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.replication.command
+package com.collabnet.svnedge.integration
 
-import com.collabnet.svnedge.domain.Server
 import grails.test.GrailsUnitTestCase
-import groovy.mock.interceptor.MockFor;
-
-import java.util.concurrent.CountDownLatch 
-import java.util.concurrent.TimeUnit;
 
 import com.collabnet.svnedge.domain.integration.*
-import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.integration.command.AbstractCommand
 import com.collabnet.svnedge.integration.command.CommandState
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext;
+import com.collabnet.svnedge.integration.command.ReplicaServerStatusService;
 import com.collabnet.svnedge.integration.command.event.CommandAboutToRunEvent;
-import com.collabnet.svnedge.integration.command.event.CommandReadyForExecutionEvent
 import com.collabnet.svnedge.integration.command.event.CommandResultReportedEvent;
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent
-import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent;
-import com.collabnet.svnedge.integration.command.impl.RepoAddCommand;
-
-import org.cometd.Client;
-import org.cometd.Message;
-import org.cometd.MessageListener;
-import org.mortbay.cometd.ChannelImpl;
-import org.springframework.context.ApplicationEvent
-import org.springframework.context.ApplicationListener 
-import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
-import groovy.time.TimeCategory
 import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
+import com.collabnet.svnedge.integration.command.impl.RepoAddCommand;
+import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_ID_PREFIX
+
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
+
 
 /**
  * This test case verifies command threading, blocking, etc in the
@@ -52,20 +40,27 @@ import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
  * classes for long and short run times, and scans the command execution log
  * to validate expectations
  */
-class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
-    
-    def grailsApplication
-    def applicationEventMulticaster
+class ReplicaServerStatusServiceTests extends GrailsUnitTestCase {
+
     def replicaServerStatusService
-    def replicaCommandSchedulerService
 
     def REPO_NAME = "testproject2"
     def EXSY_ID = "exsy9876"
     def rConf
+    
+    def config = ConfigurationHolder.config
+
+    protected void setUp() {
+        super.setUp()
+
+        // mock the service and its dependencies
+        mockLogging(ReplicaServerStatusService, true)
+        replicaServerStatusService = new ReplicaServerStatusService()
+    }
 
     def remotecmdexecs = Collections.synchronizedList(new LinkedList<Map<String, String>>())
 
-    def ReplicationStatusServiceIntegrationTests() {
+    def ReplicaServerStatusServiceTests() {
         remotecmdexecs << [id:'cmdexec1001', repoName:'repo1', code:'repoSync']
         remotecmdexecs << [id:'cmdexec1009', repoName:null, code:'replicaPropsUpdate',
                     params:[until:'2011-01-22']]
@@ -92,34 +87,13 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
         commands.sort(idComparator)
     }
 
-    void testSpringEventsListener() {
-        def latch = new CountDownLatch(1)
-        def listener = { ev ->
-            latch.countDown()
-        } as ApplicationListener<DummyEvent>
-        applicationEventMulticaster.addApplicationListener listener
-        assert listener in applicationEventMulticaster.applicationListeners
-        grailsApplication.mainContext.publishEvent(new DummyEvent())
-        assert latch.await(1000, TimeUnit.MILLISECONDS) : 'timeout waiting for event'
-    }
-
-    class DummyEvent extends ApplicationEvent {
-        DummyEvent() {
-            super([])
-        }
-    }
-
     void testStatusChangeForCommands() {
-        assert replicaServerStatusService in applicationEventMulticaster.applicationListeners
-        assert replicaCommandSchedulerService in applicationEventMulticaster.applicationListeners
-
         def longRunningCommand = new RepoAddCommand()
         longRunningCommand.id = "cmdexec10001" 
         longRunningCommand.repoName = "/tmp/repo1"
         longRunningCommand.state = CommandState.SCHEDULED
         longRunningCommand.context = new CommandsExecutionContext()
         longRunningCommand.context.logsDir = System.getProperty("java.io.tmpdir")
-        longRunningCommand.context.appContext = grailsApplication.mainContext
 
         // calling the event directly
         replicaServerStatusService.onApplicationEvent(new LongRunningCommandQueuedEvent(this, 
@@ -160,7 +134,7 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
                 println "All commands: " + runningCmds
                 println "MUST be $cmdState at this moment: " + longRunningCommand
                 assertNotNull "There should be running commands", runningCmds
-                assertTrue "There should be 1 scheduled commands", runningCmds.size() == 1
+                assertTrue "There should be 1 running commands", runningCmds.size() == 1
                 assertTrue ("The test command should be in the state ${cmdState}", 
                     runningCmds?.contains(longRunningCommand))
             } else {
@@ -185,7 +159,7 @@ class ReplicationStatusServiceIntegrationTests extends GrailsUnitTestCase {
                 def terminatedCmds = replicaServerStatusService.getCommands(CommandState.TERMINATED)
                 println "All commands: " + terminatedCmds
                 println "MUST be $cmdState at this moment: " + longRunningCommand
-                assertNotNull "There should be running commands", terminatedCmds
+                assertNotNull "There should be terminated commands", terminatedCmds
                 assertTrue "There should be 1 terminated commands", terminatedCmds.size() == 1
                 assertTrue ("The test command should be in the state ${cmdState}", 
                     terminatedCmds?.contains(longRunningCommand))
