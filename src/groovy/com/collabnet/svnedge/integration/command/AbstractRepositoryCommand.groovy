@@ -98,6 +98,17 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.status = RepoStatus.IN_PROGRESS
                 replRepo.statusMsg = null
                 replRepo.save()
+                
+                def commandLineService = getService("commandLineService")
+                def syncRepoURI = commandLineService.createSvnFileURI(
+                    new File(Server.getServer().repoParentDir, repoName))
+                def ctfServer = CtfServer.getServer()
+                def username = ctfServer.ctfUsername
+                def securityService = getService("securityService")
+                def password = securityService.decrypt(ctfServer.ctfPassword)
+                execSvnSync(replRepo, System.currentTimeMillis(), username, password,
+                    syncRepoURI)
+    
             }  else {
                 def msg = "createRepositoryOnFileSystem found existing directory " +
                     repoPath + ", but it would not verify as a valid repository."
