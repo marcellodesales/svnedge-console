@@ -82,6 +82,10 @@ class JobController {
         def allCommands = []
         allCommands.addAll(longRunning)
         allCommands.addAll(shortRunning)
+        
+        // calling this after the queued command methods, so it is unlikely to contain
+        // any commands which might be in the other lists.
+        def unprocessedCommands = replicaCommandSchedulerService.listUnprocessedCommands()
 
         return [commandPollRate: replicaConfig.commandPollRate,
             maxLongRunningCmds: replicaConfig.maxLongRunningCmds,
@@ -98,7 +102,8 @@ class JobController {
             maxLongRunning: replicaConfig.maxLongRunningCmds,
             maxShortRunning: replicaConfig.maxShortRunningCmds,
             showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog,
-            replicaName: replicaConfig.name
+            replicaName: replicaConfig.name,
+            unprocessedCommands: unprocessedCommands
         ]
     }
 }

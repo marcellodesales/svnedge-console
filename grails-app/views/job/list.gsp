@@ -51,6 +51,30 @@
   </g:each>
     </tbody>
    </table>
+<g:if test="${unprocessedCommands}">
+<br />
+   <table class="Container" id="blockedCommandsTable">
+     <tbody>
+     <tr class="ContainerHeader">
+       <td colspan="2">
+         <g:message code="job.page.list.blocked.header"/>
+       </td>
+     </tr>
+  <g:set var="rowClass" value="OddRow"/>
+  <g:each in="${unprocessedCommands}" status="i" var="cmd">
+    <tr id="sch_${cmd.id}" class="${rowClass}}">
+     <td>
+      &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(cmd)}" />
+      <img border="0" src="/csvn/images/replica/${commandCode}.png" alt"" />
+      ${cmd.id} ${cmd.params.repoName ? "(" + cmd.params.repoName.substring(cmd.params.repoName.lastIndexOf("/") + 1, cmd.params.repoName.length()) + ")" : ""}
+     </td>
+    </tr>
+    <g:set var="rowClass" value="${rowClass ==  'OddRow' ? 'EvenRow' : 'OddRow'}"/>
+  </g:each>
+    </tbody>
+   </table>
+   <small><g:message code="job.page.list.blocked.note"/></small>
+</g:if>
 </div>
 
 </content>

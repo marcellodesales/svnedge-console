@@ -390,4 +390,12 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
                 break
         }
     }
+    
+    List<Map<String, String>> listUnprocessedCommands() {
+        List<Map<String, String>> cmds = new ArrayList<Map<String, String>>()
+        synchronized (queuedCommands) {
+            cmds.addAll(queuedCommands)
+        }
+        return cmds
+    }
 }
