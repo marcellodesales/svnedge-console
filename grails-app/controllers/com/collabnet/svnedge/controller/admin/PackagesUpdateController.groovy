@@ -155,19 +155,12 @@ class PackagesUpdateController {
     }
 
     private String getNoConnectionErrorMessage(packagesType) {
-        def msg = message(code: 'packagesUpdate.status.reloadCheckNetwork')
-        def action = ". "
-        if (packagesType == "reloadInstalled") {
-            def reload = message(code:'packagesUpdate.status.reloadReplace')
-            action += msg.replace(reload,
-                "<a href='/csvn/packagesUpdate/reloadInstalled'>${reload}</a>")
-        } else {
-            action += msg + " ."
-        }
         def server = this.packagesUpdateService.getImageOriginUrl() ?: ""
-        def noConMsg = message(code: 'packagesUpdate.error.server.noConnection')
-        server = (server != "") ? " '${server}'" : ""
-        return noConMsg + server + action
+        def noConMsg = message(code: 'packagesUpdate.error.server.noConnection',
+            args: [server])
+
+        def reloadMsg = message(code: 'packagesUpdate.status.reloadCheckNetwork')
+        return noConMsg + " " +  reloadMsg
     }
 
     private String getNoRouteErrorMessage(packagesType) {
