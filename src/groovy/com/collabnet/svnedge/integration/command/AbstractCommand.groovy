@@ -111,8 +111,10 @@ abstract class AbstractCommand {
      * Makes a new transition state for this command.
      */
     public void makeTransitionToState(CommandState newState) {
-        this.state = newState
         def time = System.currentTimeMillis()
+        def previousState = this.state
+        logStateTransition(previousState, newState, time)
+        this.state = newState
         this.stateTransitions.put(newState, time)
         this.stateTimeTransitions.put(time, newState)
     }
@@ -277,7 +279,7 @@ abstract class AbstractCommand {
         this.params = initialParameters
 
         // start the command execution output log for this instance
-        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutput)  {
             this.commandOutputStream = new FileOutputStream(getCommandOutputFile())
             writeCommmandOutputFileHeading()
         }
@@ -342,7 +344,7 @@ abstract class AbstractCommand {
             }
         }
 
-        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+        if (ConfigurationHolder.config.svnedge.replica.logging.commandOutput)  {
             if (commandOutputStream) commandOutputStream.close()
             if (succeeded) getCommandOutputFile().delete()
         }
@@ -463,6 +465,46 @@ abstract class AbstractCommand {
     }
 
     /**
+     * Logs a state transition in the replica commands log
+     * "data/logs/replica_cmds_YYYY_MM_DD.log".
+     * @param previousState is the status quo
+     * @param newState is the state into which we are transitioning
+     * @param time is the timestamp
+     */
+    def logStateTransition(previousState, newState, timestamp) {
+        // logging is skipped when configured, or states are not actually changing
+        if (!ConfigurationHolder.config.svnedge.replica.logging.commandStateTransitions || previousState == newState) {
+            return
+        }
+        File logFile = getExecutionLogFile(this.context)
+        if (!logFile) {
+            def errorMsg = "Can't log replica commands: logs directory can't" +
+                " be determined with context ${this.context}..."
+            log.error errorMsg
+            throw new IllegalStateException(errorMsg)
+        }
+        if (!logFile.exists()) {
+            try {
+                FileUtils.touch(logFile);
+                log.debug "Created the empty log file " + logFile
+
+            } catch (Exception e) {
+                log.error "Can't create the replica command log file " +
+                    "$logFile: " + e.getMessage()
+                return
+            }
+        }
+        logFile.withWriterAppend("UTF-8") {
+
+            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', timestamp)
+
+            def logEntry = "${timeToken} ${this.id} " +
+                "${this.class.simpleName} entering state: ${newState}"
+            it.write(logEntry + "\n")
+        }
+    }
+
+    /**
      * When the command has been reported to CTF. Any object maintaining a 
      * reference of this can verify which state this command is in.
      */
@@ -511,10 +553,13 @@ abstract class AbstractCommand {
         //creates the file for the current day
         def logName = "replica_cmds_" + String.format('%tY_%<tm_%<td', now) +
             ".log"
-        if (!ctxt?.logsDir) {
+        def logsDir = (ctxt) ?
+                ctxt.logsDir :
+                new File(ConfigurationHolder.config.svnedge.logsDirPath + "")
+        if (!logsDir) {
             return null
         }
-        return new File(ctxt.logsDir, logName)
+        return new File(logsDir, logName)
     }
 
     protected File getCommandOutputFile() {
@@ -538,7 +583,7 @@ abstract class AbstractCommand {
     /**
      * Helper for executing shell commands for the ReplicaCommand heirarchy
      * Stdout and Stderr are logged to "data/logs/temp/${command.id}.log" when
-     * <code>replica.logging.commandOutputLog</code> is set to true in Config.groovy
+     * <code>replica.logging.commandOutput</code> is set to true in Config.groovy
      * @param comand List of String command and args to execute
      * @param repo which can be
      * @param disableLogging turn off logging explicitly if it's enabled for the environment
@@ -550,7 +595,7 @@ abstract class AbstractCommand {
         def result
         try {
             def commandLineService = getService("commandLineService")
-            if (!disableLogging && ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog)  {
+            if (!disableLogging && ConfigurationHolder.config.svnedge.replica.logging.commandOutput)  {
                 result = commandLineService.execute(command, commandOutputStream, commandOutputStream , null, null, true)
             }
             else {

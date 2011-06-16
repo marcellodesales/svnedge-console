@@ -101,7 +101,7 @@ class JobController {
             svnMasterUrl: replicaConfig.svnMasterUrl,
             maxLongRunning: replicaConfig.maxLongRunningCmds,
             maxShortRunning: replicaConfig.maxShortRunningCmds,
-            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutputLog,
+            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutput,
             replicaName: replicaConfig.name,
             unprocessedCommands: unprocessedCommands
         ]

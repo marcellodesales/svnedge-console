@@ -139,7 +139,8 @@ svnedge {
             svnsyncRate = 1
         }
         logging {
-            commandOutputLog = true
+            commandOutput = true
+            commandStateTransitions = false
         }
     }
     // Multi-cast DNS properties
@@ -171,7 +172,13 @@ svnedge {
 // set per-environment serverURL stem for creating absolute links
 environments {
     test {
-
+        svnedge {
+            replica {
+                logging {
+                    commandStateTransitions = true
+                }
+            }
+        }
     }
     development {
 

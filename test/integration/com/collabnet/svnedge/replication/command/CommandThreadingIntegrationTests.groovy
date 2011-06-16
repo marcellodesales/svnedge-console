@@ -30,7 +30,8 @@ import org.junit.Ignore
  * This test case verifies command threading, blocking, etc in the
  * ReplicaCommand processing components. It uses mock command implementation
  * classes for long and short run times, and scans the command execution log
- * to validate expectations
+ * to validate expectations. The command execution log should be configured to
+ * log "commandStateTransitions" in Config.groovy (svnedge.replica.logging)
  */
 class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
 
@@ -135,7 +136,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
     /**
      * Tests basic blocking and concurrency expectations
      */
-    @Ignore
     void testBasicBlockingAndConcurrency() {
 
         // mock commands from CTF
@@ -182,16 +182,16 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         Date cmd2End
 
         logContent.eachLine { it ->
-            if (it.contains(cmdId1) && it.contains("RUN-BEGIN")) {
+            if (it.contains(cmdId1) && it.contains("entering state: RUNNING")) {
                 cmd1Start = parseTime(it)
             }
-            if (it.contains(cmdId1) && it.contains("RUN-END")) {
+            if (it.contains(cmdId1) && it.contains("entering state: TERMINATED")) {
                 cmd1End = parseTime(it)
             }
-            if (it.contains(cmdId2) && it.contains("RUN-BEGIN")) {
+            if (it.contains(cmdId2) && it.contains("entering state: RUNNING")) {
                 cmd2Start = parseTime(it)
             }
-            if (it.contains(cmdId2) && it.contains("RUN-END")) {
+            if (it.contains(cmdId2) && it.contains("entering state: TERMINATED")) {
                 cmd2End = parseTime(it)
             }
         }
