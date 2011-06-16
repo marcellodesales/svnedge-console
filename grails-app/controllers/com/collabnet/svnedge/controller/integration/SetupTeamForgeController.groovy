@@ -227,7 +227,7 @@ class SetupTeamForgeController {
             def pathLimit = SetupTeamForgeService.CTF_REPO_PATH_LIMIT
             conversionObject.errors.reject(
                 "ctfConversion.ctfProject.invalidReposCtfPathConstraint",
-                [pathLimit].toArray())
+                [pathLimit].toArray(), "Path length limited to " + pathLimit)
             conversionObject.errors.reject(
                 "ctfConversion.ctfProject.invalidReposCtfPathConstraintEg",
                 [longRepoPath].toArray(), longRepoPath)
