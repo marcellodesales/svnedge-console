@@ -104,11 +104,23 @@ Contents
 5. Updates
 
    CollabNet Subversion Edge includes a built-in mechanism for discovering and 
-   installing updates.  You must use this facility to install updates.  Do not
-   download and run a new version of the application installer.
+   installing updates.  You should use this facility to install updates.
 
    The update mechanism will require you to restart the servers at the end of
    the process, but it will do it for you.
+   
+   As of the 2.0.0 release you can also update the application by running the
+   installer for the new release.  For the upgrade from the 1.x releases to the
+   2.x releases you should do the following:
+   
+   * Uninstall the 1.x version from the Windows control panel
+   * The uninstall will leave behind the C:\csvn folder and any files updated
+     after the original install.  Delete all of the folders left behind EXCEPT
+     for the C:\csvn\data folder.
+   * Install the 2.x version
+   
+   For future updates to the 2.x versions you should be able to just run the
+   installer.
 
 6. Documentation
    
