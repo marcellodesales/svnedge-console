@@ -102,6 +102,13 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 def commandLineService = getService("commandLineService")
                 def syncRepoURI = commandLineService.createSvnFileURI(
                     new File(Server.getServer().repoParentDir, repoName))
+                try {
+                    def command = ['svn', 'propdel', '--revprop', '-r0', 'svn:sync-lock', syncRepoURI]
+                    executeShellCommand(command)
+                } catch (Exception e) {
+                    // there might not even be a lock, so log exception and move on
+                    log.warn "Exception deleting sync-lock property on " + repoName + ": " + e.message
+                }
                 def ctfServer = CtfServer.getServer()
                 def username = ctfServer.ctfUsername
                 def securityService = getService("securityService")
