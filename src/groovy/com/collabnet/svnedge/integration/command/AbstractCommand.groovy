@@ -472,8 +472,11 @@ abstract class AbstractCommand {
      * @param time is the timestamp
      */
     def logStateTransition(previousState, newState, timestamp) {
-        // logging is skipped when configured, or states are not actually changing
-        if (!ConfigurationHolder.config.svnedge.replica.logging.commandStateTransitions || previousState == newState) {
+        // state logging is skipped when not configured, or states are not actually changing
+        if (!ConfigurationHolder.config || !ConfigurationHolder.config.svnedge.replica.logging.commandStateTransitions) {
+            return
+        }
+        if (previousState == newState) {
             return
         }
         File logFile = getExecutionLogFile(this.context)
