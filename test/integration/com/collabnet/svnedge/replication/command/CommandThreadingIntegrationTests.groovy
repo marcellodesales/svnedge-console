@@ -124,7 +124,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         super.tearDown()
 
         // delete log file
-        getExecutionLog()?.delete()
+//        getExecutionLog()?.delete()
 
         // clear the command queue and history
         replicaCommandSchedulerService.cleanCommands()
@@ -143,7 +143,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         remotecmdexecs << [id: 'cmdexec9801', repoName: 'threadTestRepo1', code: 'mockLongRunning']
         remotecmdexecs << [id: 'cmdexec9802', code: 'mockShortRunning']
         remotecmdexecs << [id: 'cmdexec9803', repoName: 'threadTestRepo2', code: 'mockLongRunning']
-//        remotecmdexecs << [id: 'cmdexec9804', repoName: 'threadTestRepo3', code: 'mockLongRunning']
+        remotecmdexecs << [id: 'cmdexec9804', repoName: 'threadTestRepo3', code: 'mockLongRunning']
         remotecmdexecs << [id: 'cmdexec9805', repoName: 'threadTestRepo1', code: 'mockShortRunning']
         ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> remotecmdexecs }
 
@@ -156,15 +156,26 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         // wait a bit
         Thread.currentThread().sleep(30000)
 
-        // validate expectations in the execution log
+        // validate concurrency expectations in the execution log
         assertEquals("commands from same repo should be sequential",
                 ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9805"));
         assertEquals("command for repo and general category should be parallel",
                 ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9802"));
-        assertEquals("commands for distinct repos should run parallel within the concurrency limit",
-                ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9803"));
-//        assertEquals("commands for distinct repos should run sequential outside the concurrency limit",
-//                ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9804"));
+
+        // one of these command pairs should be parallel
+        boolean distinctRepoConcurrency = (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9801", "cmdexec9803")) ||
+                (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9801", "cmdexec9804")) ||
+                (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9803", "cmdexec9804"))
+
+        // one of these command pairs should be serial
+        boolean distinctRepoSequentiality = (ExecutionOrder.SEQUENTIAL == getExecutionOrder("cmdexec9801", "cmdexec9803")) ||
+                (ExecutionOrder.SEQUENTIAL == getExecutionOrder("cmdexec9801", "cmdexec9804")) ||
+                (ExecutionOrder.SEQUENTIAL == getExecutionOrder("cmdexec9803", "cmdexec9804"))
+
+        assertTrue("commands for distinct repos should run parallel within the concurrency limit",
+                distinctRepoConcurrency);
+        assertTrue("commands for distinct repos should run sequential outside the concurrency limit",
+                distinctRepoSequentiality);
     }
 
     /**

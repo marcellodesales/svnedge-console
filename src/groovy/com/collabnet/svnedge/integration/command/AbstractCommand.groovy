@@ -43,6 +43,9 @@ abstract class AbstractCommand {
 
     private static Logger log = Logger.getLogger(getClass())
 
+    // synchronization object for state transition logging
+    private static Object stateLogLock = new Object()
+
     /**
      * The command execution ID
      */
@@ -113,7 +116,7 @@ abstract class AbstractCommand {
     public void makeTransitionToState(CommandState newState) {
         def time = System.currentTimeMillis()
         def previousState = this.state
-        logStateTransition(previousState, newState, time)
+        logStateTransition(this, previousState, newState, time)
         this.state = newState
         this.stateTransitions.put(newState, time)
         this.stateTimeTransitions.put(time, newState)
@@ -467,11 +470,12 @@ abstract class AbstractCommand {
     /**
      * Logs a state transition in the replica commands log
      * "data/logs/replica_cmds_YYYY_MM_DD.log".
+     * @param cmd the AbstractCommand instance
      * @param previousState is the status quo
      * @param newState is the state into which we are transitioning
      * @param time is the timestamp
      */
-    def logStateTransition(previousState, newState, timestamp) {
+    def static logStateTransition(cmd, previousState, newState, timestamp) {
         // state logging is skipped when not configured, or states are not actually changing
         if (!ConfigurationHolder.config || !ConfigurationHolder.config.svnedge.replica.logging.commandStateTransitions) {
             return
@@ -479,31 +483,34 @@ abstract class AbstractCommand {
         if (previousState == newState) {
             return
         }
-        File logFile = getExecutionLogFile(this.context)
-        if (!logFile) {
-            def errorMsg = "Can't log replica commands: logs directory can't" +
-                " be determined with context ${this.context}..."
-            log.error errorMsg
-            throw new IllegalStateException(errorMsg)
-        }
-        if (!logFile.exists()) {
-            try {
-                FileUtils.touch(logFile);
-                log.debug "Created the empty log file " + logFile
-
-            } catch (Exception e) {
-                log.error "Can't create the replica command log file " +
-                    "$logFile: " + e.getMessage()
-                return
+        // the logging block requires synchronization to insure all commands transitions are written
+        synchronized (stateLogLock) {
+            File logFile = getExecutionLogFile(cmd.context)
+            if (!logFile) {
+                def errorMsg = "Can't log replica commands: logs directory can't" +
+                    " be determined with context ${cmd.context}..."
+                log.error errorMsg
+                throw new IllegalStateException(errorMsg)
             }
-        }
-        logFile.withWriterAppend("UTF-8") {
+            if (!logFile.exists()) {
+                try {
+                    FileUtils.touch(logFile);
+                    log.debug "Created the empty log file " + logFile
 
-            def timeToken = String.format('%tH:%<tM:%<tS,%<tL', timestamp)
+                } catch (Exception e) {
+                    log.error "Can't create the replica command log file " +
+                        "$logFile: " + e.getMessage()
+                    return
+                }
+            }
+            logFile.withWriterAppend("UTF-8") {
 
-            def logEntry = "${timeToken} ${this.id} " +
-                "${this.class.simpleName} entering state: ${newState}"
-            it.write(logEntry + "\n")
+                def timeToken = String.format('%tH:%<tM:%<tS,%<tL', timestamp)
+
+                def logEntry = "${timeToken} ${cmd.id} " +
+                    "${cmd.class.simpleName} entering state: ${newState}"
+                it.write(logEntry + "\n")
+            }
         }
     }
 
