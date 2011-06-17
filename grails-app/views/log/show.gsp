@@ -113,5 +113,21 @@ if (params.highlight) {
       </tr>
    </tbody>  
    </table>
+  <g:javascript>
+  Event.observe(window, 'load', function() {
+  var fileContentDiv = $('fileContentDiv');
+  var parentDiv = $(fileContentDiv.parentNode);
+  // don't put possible scrollbar right next to the main page scrollbar
+  var newWidth = parentDiv.getWidth() - 30;
+  if (newWidth > fileContentDiv.getWidth()) {
+      fileContentDiv.style.width = newWidth + "px";
+  }
+  var footerDiv = $('footer')
+  var extraHeight = document.viewport.getHeight() - footerDiv.cumulativeOffset()[1] - footerDiv.getHeight();
+  if (extraHeight > 0) {
+      fileContentDiv.style.height = (fileContentDiv.getHeight() + extraHeight) + "px";
+  }
+});
+  </g:javascript>
 </body>
 </html>
