@@ -277,7 +277,9 @@ class AbstractCommandIntegrationTests extends GrailsUnitTestCase {
             assertNotNull(e)
         }
         try {
-            AbstractCommand.logExecution(null, new ReplicaApproveCommand())
+            def command = new ReplicaApproveCommand()
+            command.context = [:]
+            AbstractCommand.logExecution(null, command)
             fail("There should be no log with null parameters")
 
         } catch (Exception e) {

@@ -143,7 +143,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         remotecmdexecs << [id: 'cmdexec9801', repoName: 'threadTestRepo1', code: 'mockLongRunning']
         remotecmdexecs << [id: 'cmdexec9802', code: 'mockShortRunning']
         remotecmdexecs << [id: 'cmdexec9803', repoName: 'threadTestRepo2', code: 'mockLongRunning']
-        remotecmdexecs << [id: 'cmdexec9804', repoName: 'threadTestRepo3', code: 'mockLongRunning']
+//        remotecmdexecs << [id: 'cmdexec9804', repoName: 'threadTestRepo3', code: 'mockLongRunning']
         remotecmdexecs << [id: 'cmdexec9805', repoName: 'threadTestRepo1', code: 'mockShortRunning']
         ctfRemote.getReplicaQueuedCommands = { p1, p2, p3, p4, p5 -> remotecmdexecs }
 
@@ -163,8 +163,8 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
                 ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9802"));
         assertEquals("commands for distinct repos should run parallel within the concurrency limit",
                 ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9803"));
-        assertEquals("commands for distinct repos should run sequential outside the concurrency limit",
-                ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9804"));
+//        assertEquals("commands for distinct repos should run sequential outside the concurrency limit",
+//                ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9804"));
     }
 
     /**
