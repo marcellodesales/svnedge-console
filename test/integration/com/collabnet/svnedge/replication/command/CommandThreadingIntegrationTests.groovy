@@ -124,7 +124,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         super.tearDown()
 
         // delete log file
-//        getExecutionLog()?.delete()
+        getExecutionLog()?.delete()
 
         // clear the command queue and history
         replicaCommandSchedulerService.cleanCommands()
@@ -207,13 +207,18 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
             }
         }
 
-        if ((cmd2Start && !cmd1End) || cmd2Start?.before(cmd1End)) {
-            return ExecutionOrder.PARALLEL
+        try {
+            if (cmd1Start <= cmd1End && cmd2Start <= cmd1End) {
+                return ExecutionOrder.PARALLEL
+            }
+            else if (cmd1End < cmd2Start || cmd2End < cmd1Start){
+                return ExecutionOrder.SEQUENTIAL
+            }
+            else {
+                return ExecutionOrder.UNKNOWN
+            }
         }
-        else if (cmd1Start && cmd1End && (!cmd2Start || cmd2Start.after(cmd1End)))  {
-            return ExecutionOrder.SEQUENTIAL
-        }
-        else {
+        catch (Exception e) {
             return ExecutionOrder.UNKNOWN
         }
     }
