@@ -208,7 +208,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         }
 
         try {
-            if (cmd1Start <= cmd1End && cmd2Start <= cmd1End) {
+            if (cmd1Start <= cmd2End && cmd2Start <= cmd1End) {
                 return ExecutionOrder.PARALLEL
             }
             else if (cmd1End < cmd2Start || cmd2End < cmd1Start){
