@@ -124,7 +124,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         super.tearDown()
 
         // delete log file
-        getExecutionLog()?.delete()
+//        getExecutionLog()?.delete()
 
         // clear the command queue and history
         replicaCommandSchedulerService.cleanCommands()
