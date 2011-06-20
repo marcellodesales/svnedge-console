@@ -139,9 +139,14 @@
     </p>
 </div>
 </g:if>
-<g:if test="${standardPortInstructions}">
+<g:if test="${privatePortInstructions}">
 <div class="instructionText">
-    <i><g:message code="server.page.edit.standardPorts.header" /></i>
+    <g:if test ="${isStandardPort}">
+      <i><g:message code="server.page.edit.standardPorts.header" /></i>
+    </g:if>
+    <g:else>
+      <i><g:message code="server.page.edit.privatePorts.header" /></i>
+    </g:else>
     <g:if test="${isSolaris}">
       <p><g:message code="server.page.edit.solarisStandardPorts.instructions" /></p>
       <ul>
@@ -150,24 +155,34 @@
         <li><g:message code="server.page.edit.solarisStandardPorts.instructions3" /></li>
         <li><g:message code="server.page.edit.solarisStandardPorts.instructions4" /></li>
       </ul>
-      <p><g:message code="server.page.edit.solarisStandardPorts.altInstructions" /></p>
+      <g:if test ="${isStandardPort}">
+        <p><g:message code="server.page.edit.solarisStandardPorts.altInstructions" /></p>
+      </g:if>
+      <g:else>
+        <p><g:message code="server.page.edit.solarisPrivatePorts.altInstructions" /></p>
+      </g:else>
     </g:if>
-    <g:else>
+    <g:elseif test ="${isStandardPort}">
       <p><g:message code="server.page.edit.standardPorts.instructions" /></p>
+    </g:elseif>
+    <g:else>
+      <p><g:message code="server.page.edit.privatePorts.instructions" /></p>
     </g:else>
 <ul>
-<li><g:message code="server.page.edit.httpdBind" /> <a id="toggleBind" href="#" 
-  onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
-<div id="bindInstructions" style="border: 1px;">
-<p><g:message code="server.page.edit.httpdBind.instructions" /> <em><g:message code="server.page.edit.httpdBind.asRoot" /></em>
-</p>
-<blockquote>
-<code>chown root:${httpd_group} ${csvnHome}/lib/httpd_bind/httpd_bind
-<br/>
-chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
-</blockquote>
-</div>
-</li>
+<g:if test ="${isStandardPort}">
+    <li><g:message code="server.page.edit.httpdBind" /> <a id="toggleBind" href="#"
+      onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+    <div id="bindInstructions" style="border: 1px;">
+    <p><g:message code="server.page.edit.httpdBind.instructions" /> <em><g:message code="server.page.edit.httpdBind.asRoot" /></em>
+    </p>
+    <blockquote>
+    <code>chown root:${httpd_group} ${csvnHome}/lib/httpd_bind/httpd_bind
+    <br/>
+    chmod u+s ${csvnHome}/lib/httpd_bind/httpd_bind</code>
+    </blockquote>
+    </div>
+    </li>
+</g:if>
 <li><g:message code="server.page.edit.httpd.asSudo" /> <a id="toggleSudo" href="#" 
   onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="sudoInstructions" style="border: 1px;">
@@ -233,7 +248,7 @@ $('bindInstructions').hide();
               value="${params.port ?: server.port}"/>
         </td>
         <td class="ItemDetailValue">
-            <g:if test="${standardPortInstructions}">
+            <g:if test="${privatePortInstructions}">
                 <i><g:message code="server.port.label.tip" /></i>
             </g:if>
             <g:else>

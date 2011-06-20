@@ -243,9 +243,10 @@ class ServerController {
             .collect{ it.getName() }
         Collections.sort(networkInterfaces)
 
-        String portValue = server.port.toString()
-        boolean isPrivatePort = Integer.parseInt(portValue) < 1024
-        def showPortInstructions = isPrivatePort && 
+        int portValue = Integer.parseInt(server.port.toString())
+        boolean isPrivatePort = portValue < 1024
+        boolean isStandardPort = portValue == 80 || portValue == 443
+        def showPortInstructions = isPrivatePort &&
             !lifecycleService.isDefaultPortAllowed()
         def isSolaris = operatingSystemService.isSolaris()
         def config = ConfigurationHolder.config
@@ -261,7 +262,8 @@ class ServerController {
             csvnHome: config.svnedge.appHome ?
                 config.svnedge.appHome : '<AppHome>',
             csvnConf: ConfigUtil.confDirPath(),
-            standardPortInstructions: showPortInstructions,
+            privatePortInstructions: showPortInstructions,
+            isStandardPort: isStandardPort,
             isSolaris: isSolaris,
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,
