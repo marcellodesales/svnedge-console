@@ -17,7 +17,15 @@
  */
 package com.collabnet.svnedge.integration.security
 
+import java.net.ConnectException;
+
 import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.integration.CtfServer;
+import com.collabnet.svnedge.integration.CtfConnectionException;
+import com.collabnet.svnedge.integration.RemoteMasterException;
+
+import org.mortbay.log.Log;
+import org.springframework.security.providers.ProviderNotFoundException;
 import org.springframework.security.providers.AuthenticationProvider
 import org.springframework.security.Authentication
 import org.springframework.security.AuthenticationException
@@ -33,9 +41,22 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
     def ctfRemoteClientService
 
     Authentication authenticate(Authentication authentication) 
-        throws AuthenticationException {
-        GrailsUser gUser = ctfRemoteClientService.authenticateUser(
-            authentication.getPrincipal(), authentication.getCredentials())
+            throws AuthenticationException {
+
+        GrailsUser gUser = null
+        try {
+            gUser = ctfRemoteClientService.authenticateUser(
+                authentication.getPrincipal(), authentication.getCredentials())
+
+        } catch (RemoteMasterException connectivityError) {
+            throw new ProviderNotFoundException(connectivityError.getMessage())
+
+        } catch (Exception otherError) {
+            def otherMsg = "Othe problem occurred while contacting the " +
+                "teamforge manager: " + otherError.getMessage()
+            log.debug(otherMsg)
+            throw new ProviderNotFoundException(otherMsg)
+        }
         if (!gUser) {
             throw new BadCredentialsException("Authentication failed for " + 
                 authentication.getPrincipal())

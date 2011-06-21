@@ -31,6 +31,7 @@ import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.util.SoapClient
 import com.collabnet.svnedge.util.SvnEdgeCertHostnameVerifier
+import com.collabnet.svnedge.console.AbstractSvnEdgeService;
 
 import java.net.NoRouteToHostException
 import java.net.UnknownHostException
@@ -255,26 +256,57 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @param password is the associated password for the given username. 
      * @return GrailsUser, if auth succeeds, null otherwise
      */
-    GrailsUser authenticateUser(username, password) {
+    GrailsUser authenticateUser(username, password) throws RemoteMasterException,
+            NoRouteToHostException, UnknownHostException {
         GrailsUser gUser = null
         String sessionId = null
+        def locale = Locale.getDefault()
+        def ctfUrl = CtfServer.server.baseUrl
         try {
             sessionId = getStrategy().login(username, password, null)
-        } catch (AxisFault e) { 
-            String msg = e.faultCode
-            // don't log LoginFault even if converted to AxisFault
-            if (!msg || msg.indexOf("LoginFault") < 0) {
-                GrailsUtil.deepSanitize(e)
-                log.warn(msg + " Unable to authenticate user='" + 
-                    username + "' due to exception", e)
+
+        } catch (AxisFault e) {
+             String faultMsg = e.faultString
+             def hostname = new URL(ctfUrl).host
+
+           if (e.detail instanceof NoRouteToHostException) {
+                // server started without connection, recovered, and lost again
+                // Network is unreachable
+                throw new NoRouteToHostException(getMessage(
+                    "ctfRemoteClientService.host.unreachable.error", 
+                    [hostname.encodeAsHTML()], locale))
+
+           } else if (e.detail instanceof UnknownHostException) {
+                 throw new UnknownHostException(getMessage(
+                     "ctfRemoteClientService.host.unknown.error",
+                     [hostname.encodeAsHTML()], locale))
+
+            } else if (faultMsg.contains("(503)Service Temporarily Unavailable") 
+                    || faultMsg.contains("(502)Proxy Error")) {
+
+                // the ctf service/server is down.
+                def msg = getMessage(
+                    "ctfRemoteClientService.cannot.authenticate.user.unreachable",
+                    [hostname.encodeAsHTML()], locale)
+                log.warn (msg)
+                throw new RemoteMasterException(msg, e.detail)
+
+            } else {
+                 def generalMsg = getMessage(
+                     "ctfRemoteClientService.general.error", [e.getMessage()],
+                     locale)
+                log.error(generalMsg, e)
+                throw new RemoteMasterException(ctfUrl, generalMsg, e)
             }
-        } catch (CtfAuthenticationException e) {
-            // leave sessionId as null
+
         } catch (Exception e) {
-            GrailsUtil.deepSanitize(e)
-            // also no session, but log this one as it indicates a problem
-            log.warn("Unable to authenticate user='" + username +
-                "' due to exception", e)
+             GrailsUtil.deepSanitize(e)
+             // also no session, but log this one as it indicates a problem
+             def generalMsg = getMessage(
+                 "ctfRemoteClientService.general.error", [e.getMessage()],
+                 locale)
+             log.error(generalMsg, e)
+             throw new RemoteMasterException(ctfUrl, generalMsg, e)
         }
 
         if (null != sessionId && sessionId.length() > 0) {

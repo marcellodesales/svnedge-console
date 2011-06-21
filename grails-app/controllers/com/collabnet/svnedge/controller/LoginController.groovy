@@ -22,6 +22,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.RedirectUtils
 import org.springframework.security.AuthenticationTrustResolverImpl
 import org.springframework.security.DisabledException
 import org.springframework.security.context.SecurityContextHolder as SCH
+import org.springframework.security.providers.ProviderNotFoundException;
 import org.springframework.security.ui.AbstractProcessingFilter
 import org.springframework.security.ui.webapp.AuthenticationProcessingFilter
 import com.collabnet.svnedge.domain.Server
@@ -160,13 +161,20 @@ class LoginController {
         if (exception) {
             if (exception instanceof DisabledException) {
                 msg = message(code: 'user.disabled', args: [username])
-            }
-            if (Server.getServer().ldapEnabledConsole && !lifecycleService.isStarted()) {
-                log.warn("LDAP authentication is enabled, but apache server is not running.")
+
+            } else if (exception instanceof ProviderNotFoundException) {
+                msg = exception.getMessage()
+
+            } else if (Server.getServer().ldapEnabledConsole && 
+                    !lifecycleService.isStarted()) {
+
+                log.warn("LDAP authentication is enabled, but apache server " +
+                    "is not running.")
                 msg = message(code: 'login.page.ldap.auth.server.not.started')
-            }
-            else {
-                msg = message(code: 'user.credential.incorrect', args: [username])
+
+            } else {
+                msg = message(code: 'user.credential.incorrect', 
+                    args: [username])
             }
         }
 
