@@ -34,6 +34,11 @@ class RemoteMasterException extends Exception {
     def hostname
 
     /**
+     * The key to the messages.properties used.
+     */
+    def messageKey
+
+    /**
      * Creates a new exception with the given hostname, error message and
      * the cause.
      * @param hostname is the hostname of the Master remote commuication.
@@ -54,4 +59,13 @@ class RemoteMasterException extends Exception {
         super(message, cause)
     }
 
+    /**
+     * Creates a new exception with the given error message.
+     * @param message is the error message.
+     * @param key is the messages key in the i18n messages.
+     */
+    public RemoteMasterException(String message, String key) {
+        super(message)
+        this.messageKey = key
+    }
 }

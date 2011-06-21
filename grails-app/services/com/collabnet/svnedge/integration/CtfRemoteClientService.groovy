@@ -201,6 +201,15 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 throw new CtfConnectionException(msg,
                     "ctfRemoteClientService.service.redirect.error")
 
+            } else if (e.faultString.contains("(503)Service Temporarily Unavailable") 
+                    || e.faultString.contains("(502)Proxy Error")) {
+
+                def key = "ctfRemoteClientService.cannot.authenticate.user.integration"
+                // the ctf service/server is down.
+                def msg = getMessage(key, [ctfUrl.encodeAsHTML()], locale)
+                log.info(msg)
+                throw new RemoteMasterException(msg, key)
+
             } else if (e.detail instanceof UnknownHostException) {
                 def hostname = new URL(ctfUrl).host
                 throw new UnknownHostException(getMessage(

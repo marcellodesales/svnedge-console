@@ -168,7 +168,7 @@ class LifecycleService {
      /**
       * gracefully restart the svn server
       */
-    def gracefulRestartServer() {
+    def gracefulRestartServer() throws CantBindPortException {
         if (!isStarted()) {
             return -1
         }
