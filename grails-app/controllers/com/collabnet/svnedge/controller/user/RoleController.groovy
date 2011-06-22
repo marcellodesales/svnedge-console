@@ -79,7 +79,7 @@ class RoleController {
             return
         }
 
-        // add self to Role.people if already there (removed by Grails params mappign)
+        // add self to Role.people if already there (removed by Grails params mapping)
         def u = getActiveUser()
         boolean addSelf = role.people.contains(u)
 
@@ -101,6 +101,28 @@ class RoleController {
         // restore self to collection if needed
         if (addSelf) {
             role.addToPeople (u)
+        }
+
+        // do not remove the ROLE_USER role if other roles are granted to the user
+        Role roleUser = Role.findByAuthority("ROLE_USER")
+        def users = roleUser.people
+        if (role == roleUser) {
+            def admins = []
+            admins.addAll(Role.findByAuthority("ROLE_ADMIN").people)
+            admins.addAll(Role.findByAuthority("ROLE_ADMIN_REPO").people)
+            admins.addAll(Role.findByAuthority("ROLE_ADMIN_USERS").people)
+            admins.addAll(Role.findByAuthority("ROLE_ADMIN_SYSTEM").people)
+            getUserList().each {
+                if (admins.contains(it) && !users.contains(it)) {
+                    roleUser.addToPeople(it)
+                }
+            }
+        } else {            
+            role.people.each {
+                if (!users.contains(it)) {
+                    roleUser.addToPeople(it)
+                }
+            }
         }
 
         if (role.save()) {

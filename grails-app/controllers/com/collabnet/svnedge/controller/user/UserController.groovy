@@ -261,6 +261,11 @@ class UserController {
 
                    if(authenticateService.ifAnyGranted("ROLE_ADMIN," +
                            "${it.authority}")) {
+                       // add the ROLE_USER role if other roles are granted to the user
+                       Role roleUser = Role.findByAuthority("ROLE_USER")
+                       if (!addedRoles.contains(roleUser)) {
+                           roleUser.addToPeople(userInstance)
+                       }
                        it.addToPeople userInstance
                        invalidateSecurityCache = true
                    }
@@ -274,8 +279,11 @@ class UserController {
 
                    if(authenticateService.ifAnyGranted("ROLE_ADMIN,"+
                            "${it.authority}")) {
-                       it.removeFromPeople userInstance
-                       invalidateSecurityCache = true
+                       // do not remove the ROLE_USER role if other roles are granted to the user
+                       if (it.authority != 'ROLE_USER' || subtractedRoles.size == Role.list().size()) {
+                           it.removeFromPeople(userInstance)
+                           invalidateSecurityCache = true
+                       }
                    }
 
                    else {
