@@ -91,14 +91,19 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
         }
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
-        
-        def response = ctfRemoteClientService.authenticateUser(username, password)
-        assertNotNull("Authentication must succeed for valid user on CTF",
+
+        def response = ctfRemoteClientService.authenticateUser(username, 
+            password)
+        assertNotNull("Authentication must succeed for valid user on CTF", 
             response)
-        response = ctfRemoteClientService
-            .authenticateUser("admin", "wrong-password")
-        assertNull("Authentication must NOT succeed for a user on " +
-                        "CTF with a wrong password", response)
+        try {
+            response = ctfRemoteClientService.authenticateUser("admin", 
+                "wrong-password")
+            fail("Authentication must NOT succeed for a user on " +
+                "CTF with a wrong password", response)
+        } catch (CtfAuthenticationException wrongCredentialsError) {
+            assertNotNull wrongCredentialsError
+        }
     }
 
     void testLoginWithCorrectValues() {
@@ -146,19 +151,38 @@ class CtfRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
         if (isSkipTests) {
             return
         }
-        def response = ctfRemoteClientService
-            .authenticateUser("non-exist", "pwd")
-        assertNull("Authentication must NOT succeed for non-existent " +
-                   "user on CTF", response)
-        response = ctfRemoteClientService.authenticateUser("", "")
-        assertNull("Authentication must NOT be valid for empty user/pw " +
-                   "on CTF", response)
-        response = ctfRemoteClientService.authenticateUser("admin", "")
-        assertNull("Authentication must NOT be valid for empty password" +
-                   " on CTF", response)
-        response = ctfRemoteClientService.authenticateUser("", "12345")
-        assertNull("Authentication must NOT be valid for empty user", 
-                    response)
+        try {
+            ctfRemoteClientService.authenticateUser("non-exist", "pwd")
+            fail("Authentication must NOT succeed for non-existent " +
+                   "user on CTF")
+        } catch (CtfAuthenticationException authError) {
+            assertNotNull(authError)
+        }
+
+        try {
+            ctfRemoteClientService.authenticateUser("", "")
+            fail("Authentication must NOT be valid for empty user/pw " +
+                   "on CTF")
+        } catch (CtfAuthenticationException authError) {
+            assertNotNull(authError)
+        }
+
+
+        try {
+            ctfRemoteClientService.authenticateUser("admin", "")
+            fail("Authentication must NOT be valid for empty password" +
+                   " on CTF")
+        } catch (CtfAuthenticationException authError) {
+            assertNotNull(authError)
+        }
+
+        try {
+            ctfRemoteClientService.authenticateUser("", "12345")
+            fail("Authentication must NOT be valid for empty user" +
+                   " on CTF")
+        } catch (CtfAuthenticationException authError) {
+            assertNotNull(authError)
+        }
     }
 
     void testGetRolePathsWithWithoutAccessType() {
