@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.integration
 
-
-
 import com.collabnet.svnedge.integration.RemoteMasterException;
 
 /**
@@ -37,6 +35,6 @@ class RemoteAndLocalConversationException extends RemoteMasterException {
      * @param msg is the error message.
      */
     public RemoteAndLocalConversationException(String hostname, String msg) {
-        super(hostname, msg, null)
+        super(hostname, msg, new Exception())
     }
 }
