@@ -297,15 +297,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 def msg = getMessage(
                     "ctfRemoteClientService.cannot.authenticate.user.unreachable",
                     [hostname.encodeAsHTML()], locale)
-                log.warn (msg)
-                throw new RemoteMasterException(msg, e.detail)
+                throw new CtfServiceUnavailableException(msg, e.detail)
 
-            } else {
-                 def generalMsg = getMessage(
-                     "ctfRemoteClientService.general.error", [e.getMessage()],
-                     locale)
-                log.error(generalMsg, e)
-                throw new RemoteMasterException(ctfUrl, generalMsg, e)
+            } else if (faultMsg.contains("verify the username and password")) {
+                def key = "ctfRemoteClientService.auth.error"
+                def msg = getMessage(key, [ctfUrl.encodeAsHTML()], locale)
+                throw new CtfAuthenticationException(msg, key)
             }
 
         } catch (Exception e) {

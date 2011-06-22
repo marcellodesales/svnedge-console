@@ -21,7 +21,9 @@ import java.net.ConnectException;
 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer;
+import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConnectionException;
+import com.collabnet.svnedge.integration.CtfServiceUnavailableException;
 import com.collabnet.svnedge.integration.RemoteMasterException;
 
 import org.mortbay.log.Log;
@@ -48,14 +50,16 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
             gUser = ctfRemoteClientService.authenticateUser(
                 authentication.getPrincipal(), authentication.getCredentials())
 
-        } catch (RemoteMasterException connectivityError) {
+        } catch (CtfServiceUnavailableException connectivityError) {
             throw new ProviderNotFoundException(connectivityError.getMessage())
 
+        } catch (CtfAuthenticationException connectivityError) {
+            throw new BadCredentialsException(connectivityError.getMessage())
+        
         } catch (Exception otherError) {
             def otherMsg = "Othe problem occurred while contacting the " +
                 "teamforge manager: " + otherError.getMessage()
-            log.debug(otherMsg)
-            throw new ProviderNotFoundException(otherMsg)
+            throw new BadCredentialsException(otherMsg)
         }
         if (!gUser) {
             throw new BadCredentialsException("Authentication failed for " + 

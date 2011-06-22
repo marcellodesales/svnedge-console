@@ -18,19 +18,14 @@
 package com.collabnet.svnedge.integration
 
 /**
- * The authentication exception occurs when the credentials provided to the
- * SOAP API are incorrect for the CTF server. This can be tracked by verifying
- * the sessionId.
+ * The communication with the TeamForge server can't be completed because
+ * the server is down due to 504 or 503 HTTP errors.
  * 
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-class CtfAuthenticationException extends RemoteMasterException {
+class CtfServiceUnavailableException extends RemoteMasterException {
 
-    /**
-     * The session ID used to authenticate with CTF.
-     */
-    def sessionId
     /**
      * The key to the messages.properties used.
      */
@@ -45,11 +40,10 @@ class CtfAuthenticationException extends RemoteMasterException {
      * @param message is the error message.
      * @param cause is the original error message.
      */
-    public CtfAuthenticationException(String sessionId, String hostname,
-            String message, Throwable cause) {
+    public CtfServiceUnavailableException(String hostname, String message, 
+            Throwable cause) {
 
         super(hostname, message, cause)
-        this.sessionId = sessionId
     }
 
     /**
@@ -58,7 +52,7 @@ class CtfAuthenticationException extends RemoteMasterException {
      * @param message the message retrieved from the messages.properties.
      * @param key the key of the originating message if needed.
      */
-    public CtfAuthenticationException(String message, String key) {
+    public CtfServiceUnavailableException(String message, String key) {
         super(message, null)
         this.messageKey = key
     }
@@ -69,7 +63,7 @@ class CtfAuthenticationException extends RemoteMasterException {
      * 
      * @param message is the error message.
      */
-    public CtfAuthenticationException(String message) {
+    public CtfServiceUnavailableException(String message) {
         super(message, null)
     }
 }
