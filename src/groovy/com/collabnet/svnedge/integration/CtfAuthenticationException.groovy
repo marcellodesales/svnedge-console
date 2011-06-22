@@ -59,7 +59,7 @@ class CtfAuthenticationException extends RemoteMasterException {
      * @param key the key of the originating message if needed.
      */
     public CtfAuthenticationException(String message, String key) {
-        super(message, null)
+        super(message, "")
         this.messageKey = key
     }
 
