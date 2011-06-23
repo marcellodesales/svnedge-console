@@ -103,7 +103,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 def syncRepoURI = commandLineService.createSvnFileURI(
                     new File(Server.getServer().repoParentDir, repoName))
                 try {
-                    def command = ['svn', 'propdel', '--revprop', '-r0', 'svn:sync-lock', syncRepoURI]
+                    def command = [ConfigUtil.svnPath(), 'propdel', '--revprop', '-r0', 'svn:sync-lock', syncRepoURI]
                     executeShellCommand(command)
                 } catch (Exception e) {
                     // there might not even be a lock, so log exception and move on
