@@ -45,6 +45,7 @@ Event.observe(window, 'load', function() {
         allItemSelectCheckboxes.each(function(s) {
             s.checked = checkedState
         })
+        updateActionButtons()
     })
 
     // enable/disable action buttons based on initial page state
