@@ -289,6 +289,14 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             fetchCommandsJobTrigger)
         assertNotNull "The updated trigger should not be null", 
             updatedFetchDetails
+
+        // return the queue sizes back to the default, as later tests will assume
+        // the semaphore permits match the configuration values
+        commandMap = [code: 'replicaPropsUpdate', id: CommandTestsHelper.createCommandId(), 
+            params: [commandConcurrencyLong: "2", commandConcurrencyShort:"10"],
+            context: executionContext]     
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
     }
 
    /**

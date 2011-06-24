@@ -21,6 +21,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.integration.FetchReplicaCommandsJob
 import com.collabnet.svnedge.integration.command.AbstractCommand
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext
+import com.collabnet.svnedge.integration.command.event.MaxNumberCommandsRunningUpdatedEvent;
+
 import grails.test.GrailsUnitTestCase
 import com.collabnet.svnedge.domain.integration.*
 import com.collabnet.svnedge.domain.ServerMode
@@ -61,9 +63,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
                     approvalState: ApprovalState.APPROVED)
 
         }
-        rConf.maxLongRunningCmds = 2
-        rConf.maxShortRunningCmds = 2
-        rConf.save()
 
         def server = Server.getServer()
         server.setMode(ServerMode.REPLICA)
@@ -97,6 +96,16 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         commandResultDeliveryService = new Expando()
         def cnSoap60 = new Expando()
 
+        // set command queue sizes
+        def oldMaxLong = rConf.maxLongRunningCmds
+        def oldMaxShort = rConf.maxShortRunningCmds
+        rConf.maxLongRunningCmds = 2
+        rConf.maxShortRunningCmds = 2
+        rConf.save()
+        replicaCommandSchedulerService.setSemaphoresUpdatedEvent(
+            new MaxNumberCommandsRunningUpdatedEvent(this,
+                oldMaxLong, 2, oldMaxShort, 2))
+        
         cnSoap60.getUserSessionBySoapId = { p1 -> "userSessionId1001" }
         ctfRemote.login = { p1, p2, p3, p4 -> "soapSessionId1001" }
         ctfRemote.cnSoap = { p1 -> cnSoap60 }
