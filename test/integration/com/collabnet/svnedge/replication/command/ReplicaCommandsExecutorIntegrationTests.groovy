@@ -40,6 +40,7 @@ import grails.test.*
 class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandExecutorService
+    def ctfRemoteClientService
     def commandLineService
     def securityService
     def jobsAdminService
@@ -78,7 +79,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
         assertNotNull("The replica instance must exist", this.rConf)
         this.config = grailsApplication.config
-        this.rConf.svnMasterUrl = makeCtfBaseUrl() + "/svn/repos"
+        def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
+        this.rConf.svnMasterUrl = ctfUrl + "/svn/repos"
         this.rConf.save()
 
         Server server = Server.getServer()
@@ -90,7 +92,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         repoFileDir.deleteDir()
 
         CtfServer ctfServer = CtfServer.getServer()
-        ctfServer.baseUrl = makeCtfBaseUrl()
+        ctfServer.baseUrl = ctfUrl
         ctfServer.mySystemId = EXSY_ID
         ctfServer.ctfUsername = "admin"
         ctfServer.ctfPassword = "n3TEQWKEjpY="
@@ -99,14 +101,6 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         executionContext = new CommandsExecutionContext()
         executionContext.logsDir = System.getProperty("java.io.tmpdir")
         executionContext.appContext = grailsApplication.mainContext
-    }
-
-    private def makeCtfBaseUrl() {
-        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
-        def ctfHost = config.svnedge.ctfMaster.domainName
-        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
-                config.svnedge.ctfMaster.port
-        return ctfProto + ctfHost + ctfPort
     }
 
     /**
@@ -425,9 +419,11 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
     void testSyncReplicatedRepository() {
         def classLoader = getClass().getClassLoader()
 
-        def cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        def repoResult = CommandTestsHelper
+            .createTestRepository(config, ctfRemoteClientService)
+        def repoName = repoResult.repoName
+        def projectName = repoResult.projectName
+        def cmdParams = [repoName: repoName]
 
         // add first
         def commandMap = [code: 'repoAdd', id: CommandTestsHelper.createCommandId(), params: cmdParams,
@@ -446,17 +442,17 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         }
 
         def repo = ReplicatedRepository.findByRepo(Repository.findByName(
-            REPO_NAME))
+            repoName))
         assertNotNull("The repo should exist.", repo)
 
-        File repoDir = new File(repoParentDir, REPO_NAME)
+        File repoDir = new File(repoParentDir, repoName)
         assertTrue("Repository directory should exist: " + 
             repoDir.getCanonicalPath(), repoDir.exists())
 
         File wcDir = createTestDir("wc")
 
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
-        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + REPO_NAME
+        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
 
         def ctfServer = CtfServer.getServer()
         def username = ctfServer.ctfUsername
@@ -492,8 +488,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             testFile2.canonicalPath, testFile2.exists())
 
         cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        cmdParams["repoName"] = repoName
 
         // execute svn sync
         def cmdId = CommandTestsHelper.createCommandId()
@@ -539,6 +534,8 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         }
         wcDir.deleteDir()
         wcDir2.deleteDir()
+        CommandTestsHelper
+            .deleteTestProject(config, ctfRemoteClientService, projectName)
     }
 
     private File createTestDir(String prefix) {

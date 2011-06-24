@@ -491,13 +491,11 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         if (!projectId) {
             log.info("Creating new project '" + projectName + 
                 "' in CTF to hold existing repositories")
-            def ctfSoap = ctfRemoteClientService.cnSoap(conversionData.ctfURL)
-            //TODO: move this method call to ctfRemoteClientService
-            def p = ctfSoap.createProject(conversionData.soapSessionId, 
+            projectId = ctfRemoteClientService.createProject(
+                conversionData.ctfURL, conversionData.soapSessionId, 
                 projectPath, projectName, getMessage(
                     "setupTeamForge.integration.container.existed", 
                     conversionData.userLocale))
-            projectId = p.id
         }
         
         def systemId = conversionData.exSystemId

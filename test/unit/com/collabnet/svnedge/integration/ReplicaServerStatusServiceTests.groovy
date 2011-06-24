@@ -43,11 +43,6 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 class ReplicaServerStatusServiceTests extends GrailsUnitTestCase {
 
     def replicaServerStatusService
-
-    def REPO_NAME = "testproject2"
-    def EXSY_ID = "exsy9876"
-    def rConf
-    
     def config = ConfigurationHolder.config
 
     protected void setUp() {

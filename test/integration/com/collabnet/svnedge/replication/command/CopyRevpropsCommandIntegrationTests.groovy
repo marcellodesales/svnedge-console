@@ -31,16 +31,18 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandExecutorService
     def commandLineService
+    def ctfRemoteClientService
     def securityService
     def jobsAdminService
     def grailsApplication
     def config
 
-    def REPO_NAME = "testproject2"
     def EXSY_ID = "exsy9876"
     def rConf
     File repoParentDir
     CommandsExecutionContext executionContext
+    def repoName
+    def projectName
 
     public CopyRevpropsCommandIntegrationTests() {
         this.rConf = ReplicaConfiguration.getCurrentConfig()
@@ -61,6 +63,8 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
         // delete any log file
         AbstractCommand.getExecutionLogFile(executionContext)?.delete()
+        CommandTestsHelper
+            .deleteTestProject(config, ctfRemoteClientService, projectName)
     }
 
     protected void setUp() {
@@ -68,19 +72,24 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
         assertNotNull("The replica instance must exist", this.rConf)
         this.config = grailsApplication.config
-        this.rConf.svnMasterUrl = makeCtfBaseUrl() + "/svn/repos"
+        def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
+        this.rConf.svnMasterUrl = ctfUrl + "/svn/repos"
         this.rConf.save(flush:true)
 
         Server server = Server.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.save(flush:true)
 
+        def repoResult = CommandTestsHelper
+            .createTestRepository(config, ctfRemoteClientService)
+        repoName = repoResult.repoName
+        projectName = repoResult.projectName
         // delete the repo directory for the repo we are adding.
-        def repoFileDir = new File(repoParentDir, REPO_NAME)
+        def repoFileDir = new File(repoParentDir, repoName)
         repoFileDir.deleteDir()
 
         CtfServer ctfServer = CtfServer.getServer()
-        ctfServer.baseUrl = makeCtfBaseUrl()
+        ctfServer.baseUrl = ctfUrl
         ctfServer.mySystemId = EXSY_ID
         ctfServer.ctfUsername = "admin"
         ctfServer.ctfPassword = "n3TEQWKEjpY="
@@ -91,15 +100,6 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         executionContext.appContext = grailsApplication.mainContext
     }
 
-    private def makeCtfBaseUrl() {
-        def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
-        def ctfHost = config.svnedge.ctfMaster.domainName
-        def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
-                config.svnedge.ctfMaster.port
-        return ctfProto + ctfHost + ctfPort
-    }
-
-
     public void testSyncRevprops() {
         def classLoader = getClass().getClassLoader()
 
@@ -108,8 +108,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         def updatedCommitMsg = "UPDATED commit msg"
 
         def cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        cmdParams["repoName"] = repoName
 
         // add and sync the repo
         assertNotNull("ReplicaConfig must have svnMasterUrl from which to sync",
@@ -127,7 +126,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         File wcMaster = createTestDir("wcMaster")
 
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
-        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + REPO_NAME
+        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
 
         def ctfServer = CtfServer.getServer()
         def username = ctfServer.ctfUsername
@@ -161,7 +160,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         def matcher = result =~ /Committed revision (\d+)/
         revNumberToAlter = matcher[0][1]
 
-        def repoUri = commandLineService.createSvnFileURI(new File(repoParentDir, REPO_NAME))
+        def repoUri = commandLineService.createSvnFileURI(new File(repoParentDir, repoName))
         File wcReplica = createTestDir("wcReplica")
         command = [ConfigUtil.svnPath(), "co", repoUri, wcReplica.canonicalPath,
             //"--username", username, "--password", password,
@@ -170,8 +169,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         File testFileReplica = new File(wcReplica, testFileMaster.name)
 
         cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        cmdParams["repoName"] = repoName
 
         // execute svn sync
         commandMap = [code: 'repoSync', id: CommandTestsHelper.createCommandId(), params: cmdParams,
@@ -235,8 +233,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
         // execute svn sync
         cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        cmdParams["repoName"] = repoName
 
         commandMap = [code: 'repoSync', id:  CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]
@@ -281,8 +278,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
         // execute revprop sync command
         cmdParams = [:]
-        cmdParams["repoName"] = REPO_NAME
-        cmdParams["masterId"] = EXSY_ID
+        cmdParams["repoName"] = repoName
         cmdParams["revision"] = revNumberToAlter
         commandMap = [code: 'copyRevprops', id: CommandTestsHelper.createCommandId(), params: cmdParams,
             context: executionContext]

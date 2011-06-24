@@ -17,9 +17,11 @@
  */
 package com.collabnet.svnedge.integration
 
+import java.text.SimpleDateFormat
 import java.util.Map;
 import org.springframework.security.GrantedAuthority
 import org.springframework.security.GrantedAuthorityImpl
+import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import grails.util.GrailsUtil
@@ -881,6 +883,22 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             }
         }
         getStrategy(ctfUrl).deleteProject(soapId, projectId)
+    }
+
+    /**
+     * create a CTF project
+     *
+     * @param soapId the session id
+     * @param ctfUrl base URL to CTF server
+     * @param projectPath projectName as used in the URL a lower case version with no spaces
+     * or other special characters
+     * @param projectName the title for the project
+     * @param desc description of the project's purpose
+     * @return the object id of the new project
+     */
+    String createProject(ctfUrl, soapId, projectPath, projectName, desc) {
+        def p = cnSoap(ctfUrl).createProject(soapId, projectPath, projectName, desc)
+        return p.id
     }
 
     def createRepository(ctfUrl, soapSessionId, projectId, systemId, repoName,

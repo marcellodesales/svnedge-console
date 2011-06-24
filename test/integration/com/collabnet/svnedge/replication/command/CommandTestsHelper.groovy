@@ -1,5 +1,7 @@
 package com.collabnet.svnedge.replication.command
 
+import java.text.SimpleDateFormat;
+
 /**
  * Helper class for common code used in testing the replication command subsystem
  */
@@ -14,4 +16,47 @@ class CommandTestsHelper {
         def id = Math.round(Math.random() * 8999) + 1000
         return prefix + id
     }
+    
+    /**
+    * Creates a new repository in CTF
+    * @return the repository name
+    */
+   public static def createTestRepository(config, clientService) {
+       def suffix = new SimpleDateFormat("HHmmss").format(new Date()) + 
+           String.valueOf(Math.round(Math.random() * 1000000))
+       def projectName = "testproject-" + suffix
+       def repoName = "testrepo-" + suffix
+       def ctfUrl = makeCtfBaseUrl(config)
+       def sessionId = clientService.login(ctfUrl, config.svnedge.ctfMaster.username,
+           config.svnedge.ctfMaster.password, null)
+       def projectId = clientService.createProject(ctfUrl, sessionId, projectName, 
+           projectName, "Test project for commands")
+       clientService.createRepository(ctfUrl, sessionId, projectId, 
+           config.svnedge.ctfMaster.systemId, repoName,
+           "Test repository for commands", false, false)
+       clientService.logoff(ctfUrl, config.svnedge.ctfMaster.username, sessionId)
+       return [repoName: repoName, 
+           projectName: projectName, projectId: projectId]
+   }
+   
+   public static void deleteTestProject(config, clientService, projectName) {
+       def ctfUrl = makeCtfBaseUrl(config)
+       def sessionId = clientService.login(ctfUrl, config.svnedge.ctfMaster.username,
+           config.svnedge.ctfMaster.password, null)
+       clientService.deleteProject(ctfUrl, sessionId, projectName)
+       clientService.logoff(ctfUrl, config.svnedge.ctfMaster.username, sessionId)
+   }
+        
+           
+   public static def makeCtfBaseUrl(config) {
+       def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+       def ctfHost = config.svnedge.ctfMaster.domainName
+       def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
+               config.svnedge.ctfMaster.port
+       return ctfProto + ctfHost + ctfPort
+   }
+
+
+
+
 }

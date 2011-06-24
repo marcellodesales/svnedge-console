@@ -47,7 +47,6 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
     def commandResultDeliveryService
     def fetchReplicaCommandsJob
 
-    def REPO_NAME = "testproject2"
     def EXSY_ID = "exsy9876"
     def rConf
 
