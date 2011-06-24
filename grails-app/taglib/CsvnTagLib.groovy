@@ -96,4 +96,41 @@ class CsvnTagLib {
        out << commandDescription.replace(repoName, repoNameLink)
    }
 
+    /**
+     * this tag will output the check box for a list view "select all" checkbox
+     * @return the select all checkbox
+     */
+    def listViewSelectAll = { attrs ->
+        out << "<input type='checkbox' id='listViewSelectAll' name='listViewSelectAll'/>"
+    }
+
+    /**
+     * this tag will output the check box for a list view item row
+     * @attr item REQUIRED the item whose "id" attribute will be used for naming this field
+     * @return the item row checkbox
+     */
+    def listViewSelectItem = { attrs ->
+        out << "<input type='checkbox' class='listViewSelectItem' id='listViewItem_${attrs.item.id}' name='listViewItem_${attrs.item.id}'/>"
+    }
+
+    /**
+     * This tag will create a "multi-select" action button for use
+     * in list views
+     * @attr action REQUIRED the controller action to execut
+     * @attr minSelected the min number of items selected to enable the button
+     * @attr maxSelected the max number of items selected to enable the button
+     * @attr confirmMessage the confirmation message to display before allowing the action
+     * @body the value to display as the button text
+     * @return the button html
+     */
+    def listViewActionButton = { attrs, body ->
+        out << "<input type='submit' class='Button ${attrs.action} listViewAction' "
+        out << " name='_action_${attrs.action}' minSelected='${attrs.minSelected ?: 1}' maxSelected='${attrs.maxSelected ?: 100}'"
+        if (attrs.confirmMessage) {
+            out << " confirmMessage='${attrs.confirmMessage}'"
+        }
+        out << " value='${body().trim()}'/>"
+    }
+
+
 }

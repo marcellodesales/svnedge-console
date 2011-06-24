@@ -174,6 +174,41 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def deleteMultiple = {
+        getListViewSelectedIds(params).each {
+            def repo = Repository.get( it )
+            if(repo) {
+                def repoName = repo.name
+                try {
+                    svnRepoService.archivePhysicalRepository(repo)
+                    svnRepoService.removeRepository(repo)
+                    def msg = message(code: 'repository.deleted.message', args: [repoName])
+                    if (flash.message) {
+                        msg = flash.message + "\n" + msg
+                    }
+                    flash.message = msg
+                    redirect(action:list)
+                }
+                catch(org.springframework.dao.DataIntegrityViolationException e) {
+                    def msg = message(code:'repository.not.deleted.message', args: [repoName])
+                    if (flash.error) {
+                        msg = flash.error + "\n" + msg
+                    }
+                    flash.error = msg
+                }
+            }
+            else {
+                def msg = message(code: 'repository.action.not.found', args: [params.id])
+                if (flash.error) {
+                    msg = flash.error + "\n" + msg
+                }
+                flash.error = msg
+            }
+        }
+        redirect(action:list)
+    }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def updatePermissions = {
 
         def repo = Repository.get( params.id )
@@ -263,5 +298,19 @@ class RepoController {
         }
 
         render(view : 'editAuthorization', model : [authRulesCommand : cmd])
+    }
+
+    private List getListViewSelectedIds(Map params) {
+        def ids = []
+        params.each() {
+            def matcher = it.key =~ /listViewItem_([\d]+)/
+            if (matcher && matcher[0][1]) {
+                def id = matcher[0][1]
+                if (it.value == "on") {
+                    ids << id
+                }
+            }
+        }
+        return ids
     }
 }

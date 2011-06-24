@@ -3,6 +3,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
+      <g:javascript library="prototype" />
+      <g:javascript library="listView"/>
+
     </head>
 
 <g:render template="leftNav" />
@@ -12,39 +15,38 @@
 </content>
     
     <body>
+
+    <g:set var="colCount">
+      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">5</g:ifAnyGranted>
+      <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">3</g:ifNotGranted>
+    </g:set>
+
+    <g:form>
     <table class="Container">
     <tbody>
 
     <g:if test="${repositoryInstanceList.size() > 0}">
         <tr class="ContainerHeader">
-          <td colspan="4"><g:message code="repository.page.list.header" /></td>
+          <td colspan="${colCount}"><g:message code="repository.page.list.header" /></td>
         </tr>
         <tr class="ItemListHeader">
-           <g:sortableColumn property="name" title="${message(code:'repository.page.list.name')}" />
+          <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+            <th><g:listViewSelectAll/></th>
+          </g:ifAnyGranted>
+          <g:sortableColumn property="name" title="${message(code:'repository.page.list.name')}" />
+          <th><g:message code="repository.page.list.checkout_command" /></th>
+          <g:sortableColumn property="permissionsOk" title="${message(code:'repository.page.list.status')}" />
+          <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+            <th><g:message code="repository.page.list.show" /></th>
+          </g:ifAnyGranted>
 
-      <g:if test="${isReplica}">
-              <g:sortableColumn property="lastSyncTime" title="${message(code:'repository.page.list.replica.lastSyncTime')}" />
-              <g:sortableColumn property="lastSyncRev" title="${message(code:'repository.page.list.replica.lastSyncRevision')}" />
-              <g:sortableColumn property="enabled" title="${message(code:'repository.page.list.replica.enabled')}" />
-              <g:sortableColumn property="status" title="${message(code:'repository.page.list.replica.status')}" />
-      </g:if> 
-                               <th><g:message code="repository.page.list.checkout_command" /></th>
-      <g:if test="${!isReplica}">
-              <g:sortableColumn property="permissionsOk" title="${message(code:'repository.page.list.status')}" />
-        <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-              <th><g:message code="repository.page.list.show" /></th>
-        </g:ifAnyGranted>
-      </g:if>
-                        </tr>
-                    <tbody>
-                    <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
-<g:if test="${isReplica}">
-  <g:set var="repoName" value="${repositoryInstance.repo.name}"/>
-</g:if>
-<g:else>
-  <g:set var="repoName" value="${repositoryInstance.name}"/>
-</g:else>
-                        <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+         </tr>
+         <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
+         <g:set var="repoName" value="${repositoryInstance.name}"/>
+           <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+             <td><g:listViewSelectItem item="${repositoryInstance}"/></td>
+           </g:ifAnyGranted>
                             <g:set var="viewvcURL" value="${server.viewvcURL(repoName)}"/>
                             <g:if test="${viewvcURL}">
                               <td><a href="${viewvcURL}" target="_blank">${repoName}</a></td>
@@ -53,23 +55,8 @@
                               <td>${repoName}</td>
                             </g:else>
 
-      <g:if test="${isReplica}">
-                <g:if test="${repositoryInstance.lastSyncTime > 0}">
-                  <td><g:formatDate date="${new Date(repositoryInstance.lastSyncTime)}"
-                                    format="yyyy-MM-dd HH:mm:ss z"/></td>
-                </g:if>
-                <g:else>
-                  <td><g:message code="repository.page.list.replica.notUdated" /></td>
-                </g:else>
-                <td>${fieldValue(bean:repositoryInstance, field:'lastSyncRev')}</td>
-                <td>${fieldValue(bean:repositoryInstance, field:'enabled')}</td>
-                <td>
-                  ${fieldValue(bean:repositoryInstance, field:'status')}
-                </td>
-      </g:if>
 
                 <td>svn co ${server.svnURL()}${repoName} ${repoName} --username=<g:loggedInUsername/></td>
-      <g:if test="${!isReplica}">
                   <td>
                     <g:if test="${repositoryInstance.permissionsOk}">
                       <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
@@ -83,14 +70,22 @@
       <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
                             <td><g:link action="show" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.info" /></g:link></td>
       </g:ifAnyGranted>
-      </g:if> 
                         </tr>
                     </g:each>
                     <tr class="ContainerFooter">
-                       <td colspan="4">
-                       <div class="paginateButtons">
+                       <td colspan="${colCount}">
+                         <div class="AlignLeft">
+                                  <div class="paginateButtons">
                 <g:paginate total="${repositoryInstanceTotal}" />
             </div>
+                         </div>
+
+                         <div class="AlignRight">
+                             <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1" confirmMessage="${message(code:'repository.page.list.delete.confirmation')}">
+                               <g:message code="default.button.delete.label"/>
+                             </g:listViewActionButton>
+                         </div>
+
                        </td>
                     </tr>
             </div>
@@ -108,5 +103,6 @@
 
        </tbody>
       </table>
+      </g:form>
     </body>
 </html>
