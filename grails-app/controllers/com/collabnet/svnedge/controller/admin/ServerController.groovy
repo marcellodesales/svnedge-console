@@ -135,7 +135,7 @@ class ServerController {
         def server = Server.getServer()
         if (!server.authHelperPort) {
            server.authHelperPort =     
-                csvnAuthenticationProvider.getAuthHelperPort(server, server.ldapEnabled) 
+                csvnAuthenticationProvider.getAuthHelperPort(server, server.ldapEnabled) as Integer
         }
         return [server: server,
                 csvnConf: ConfigUtil.confDirPath(),
