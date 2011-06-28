@@ -180,7 +180,7 @@ class RepoController {
             if(repo) {
                 def repoName = repo.name
                 try {
-                    svnRepoService.archivePhysicalRepository(repo)
+                    svnRepoService.deletePhysicalRepository(repo)
                     svnRepoService.removeRepository(repo)
                     def msg = message(code: 'repository.deleted.message', args: [repoName])
                     if (flash.message) {
