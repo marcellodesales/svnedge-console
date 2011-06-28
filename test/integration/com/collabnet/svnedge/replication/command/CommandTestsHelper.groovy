@@ -49,10 +49,12 @@ class CommandTestsHelper {
         
            
    public static def makeCtfBaseUrl(config) {
-       def ctfProto = config.svnedge.ctfMaster.ssl ? "https://" : "http://"
+       boolean ssl = config.svnedge.ctfMaster.ssl
+       def ctfProto = ssl ? "https://" : "http://"
        def ctfHost = config.svnedge.ctfMaster.domainName
-       def ctfPort = config.svnedge.ctfMaster.port == "80" ? "" : ":" +
-               config.svnedge.ctfMaster.port
+       def port = config.svnedge.ctfMaster.port
+       def ctfPort = (!ssl && port == 80) || (ssl && port == 443) ? 
+           "" : ":" + port
        return ctfProto + ctfHost + ctfPort
    }
 
