@@ -3,8 +3,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
-      <g:javascript library="prototype" />
-      <g:javascript library="listView"/>
+        <g:render template="/common/listViewResources"/>
 
     </head>
 
@@ -81,7 +80,9 @@
                          </div>
 
                          <div class="AlignRight">
-                             <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1" confirmMessage="${message(code:'repository.page.list.delete.confirmation')}">
+                             <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
+                                 confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
+                                 confirmTypeThis="${message(code:'default.confirmation.typeThis')}">
                                <g:message code="default.button.delete.label"/>
                              </g:listViewActionButton>
                          </div>

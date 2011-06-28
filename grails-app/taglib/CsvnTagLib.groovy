@@ -120,6 +120,7 @@ class CsvnTagLib {
      * @attr minSelected the min number of items selected to enable the button
      * @attr maxSelected the max number of items selected to enable the button
      * @attr confirmMessage the confirmation message to display before allowing the action
+     * @attr confirmTypeThis if set, the confirmation will require that the user type in this exact text
      * @body the value to display as the button text
      * @return the button html
      */
@@ -127,9 +128,21 @@ class CsvnTagLib {
         out << "<input type='submit' class='Button ${attrs.action} listViewAction' "
         out << " name='_action_${attrs.action}' minSelected='${attrs.minSelected ?: 1}' maxSelected='${attrs.maxSelected ?: 100}'"
         if (attrs.confirmMessage) {
-            out << " confirmMessage='${attrs.confirmMessage}'"
+            out << " confirmMessageElement='_confirm_${attrs.action}'"
+        }
+        if (attrs.confirmTypeThis) {
+            out << " confirmTypeThis='${attrs.confirmTypeThis}'"
         }
         out << " value='${body().trim()}'/>"
+        if (attrs.confirmMessage) {
+            out << "<div id='_confirm_${attrs.action}' style='display:none'>"
+            out << "<p>${attrs.confirmMessage}</p>"
+            if (attrs.confirmTypeThis) {
+                out << "<p>${message(code:'default.confirmation.typeThis.prompt')} ${attrs.confirmTypeThis}</p>"
+                out << "<p><input id='_confirmTypeThisInput' type='text' size='20'/></p>"
+            }
+            out << "</div>"
+        }
     }
 
 

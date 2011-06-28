@@ -16,9 +16,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
+/*
  * This file provides js functions for "list view" item selection and actions
  */
+
+String.prototype.trim = function () {
+    return this.replace(/^\s*/, "").replace(/\s*$/, "");
+}
+
 Event.observe(window, 'load', function() {
     // add observer to checkboxes for enabling / disabling checkboxes
     var allItemSelectCheckboxes = $$('input.listViewSelectItem');
@@ -28,25 +33,49 @@ Event.observe(window, 'load', function() {
 
     // add observer to action buttons with confirmation messages
     $$('input.listViewAction').each (function(s) {
-        var confirmMsg = s.readAttribute('confirmMessage')
-        if (confirmMsg) {
+        var confirmMessageElement = s.readAttribute('confirmMessageElement')
+        if (confirmMessageElement) {
             Event.observe(s, 'click', function(e){
-               if (!confirm(confirmMsg)) {
-                   Event.stop(e)
-               }
+                // stop this button click from submitting form
+                Event.stop(e)
+                // confirm dialog, with callback functions for "ok" and "cancel"
+                confirmAction($(confirmMessageElement).innerHTML,
+                        function() {
+                            // on "ok", submit the form
+                            // if "type this" confirmation present, verify user input matches first
+                            if (s.readAttribute('confirmTypeThis')) {
+                                var typeThis = s.readAttribute('confirmTypeThis')
+                                var userInput = $('_confirmTypeThisInput').value;
+                                if (typeThis != userInput) {
+                                    new Effect.Shake(Windows.focusedWindow.getId());
+                                    return;
+                                }
+                            }
+                            // submit the form with the original button properties transferred to a hidden field
+                            var action = new Element('input', { type: 'hidden',  name: s.readAttribute('name'), value: s.readAttribute('value') });
+                            var theForm = s.up('form');
+                            theForm.appendChild(action);
+                            theForm.submit();
+                        },
+                        function() {
+                            // on cancel, do nothing
+                            return
+                        })
             })
         }
     })
 
     // "select all" handler
-    $('listViewSelectAll').observe('click', function(event) {
-        // set all the item checkboxes to state of the "select all" checkbox
-        var checkedState = $('listViewSelectAll').checked
-        allItemSelectCheckboxes.each(function(s) {
-            s.checked = checkedState
+    if ($('listViewSelectAll')) {
+        $('listViewSelectAll').observe('click', function(event) {
+            // set all the item checkboxes to state of the "select all" checkbox
+            var checkedState = $('listViewSelectAll').checked
+            allItemSelectCheckboxes.each(function(s) {
+                s.checked = checkedState
+            })
+            updateActionButtons()
         })
-        updateActionButtons()
-    })
+    }
 
     // enable/disable action buttons based on initial page state
     updateActionButtons()
@@ -61,6 +90,33 @@ function updateActionButtons()  {
     $$('input.listViewAction').each(function(s) {
         s.disabled = (parseInt(s.readAttribute('minSelected')) > numberItemsSelected) ||
                 (parseInt(s.readAttribute('maxSelected')) < numberItemsSelected)
+    })
+}
+
+/**
+ * creates a confirmation dialog based on the message. callback functions are invoked
+ * @param confirmMessage the text to prompt (can be html)
+ * @param okHandler the function that's called on "ok"
+ * @param cancelHandler the function that's called on "cancel"
+ */
+function confirmAction(confirmMessage, okHandler, cancelHandler) {
+
+    var s = Dialog.confirm(confirmMessage, {
+                className: "bluelighting",
+                width:300, height: 200,
+                okLabel: $('_confirmOkLabel').innerHTML,
+                cancelLabel: $('_confirmCancelLabel').innerHTML,
+                onOk: function(win) {
+                    if (okHandler) {
+                        okHandler()
+                    }
+                },
+                onCancel: function(win) {
+                    if (cancelHandler) {
+                        cancelHandler()
+                    }
+                    win.close()
+                }
     })
 }
 
