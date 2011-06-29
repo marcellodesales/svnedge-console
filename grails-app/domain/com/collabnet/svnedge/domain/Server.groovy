@@ -20,6 +20,7 @@ package com.collabnet.svnedge.domain
 import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.util.ConfigUtil
 
 /**
  * Defines the svn server and console. 
@@ -62,7 +63,7 @@ class Server {
     String adminEmail
     String adminAltContact
     ServerMode mode = ServerMode.STANDALONE
-    String dumpDir = System.getProperty("java.io.tmpdir", "/tmp")
+    String dumpDir = ConfigUtil.dumpDirPath()
 
     Integer pruneLogsOlderThan
     ApacheLogLevel apacheLogLevel = ApacheLogLevel.WARN

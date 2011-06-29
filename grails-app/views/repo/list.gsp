@@ -85,6 +85,9 @@
                                  confirmTypeThis="${message(code:'default.confirmation.typeThis')}">
                                <g:message code="default.button.delete.label"/>
                              </g:listViewActionButton>
+                             <g:listViewActionButton action="dumpOptions" minSelected="1" maxSelected="1">
+                               <g:message code="repository.page.list.button.dump.label"/>
+                             </g:listViewActionButton>
                          </div>
 
                        </td>

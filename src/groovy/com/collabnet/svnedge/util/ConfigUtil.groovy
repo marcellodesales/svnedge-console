@@ -111,6 +111,11 @@ public final class ConfigUtil {
             new File(dataDirPath(), "logs").absolutePath
     }
 
+    def static dumpDirPath() {
+        return getConfig().svnedge.dumpDirPath ?:
+            new File(dataDirPath(), "repo-dumps").absolutePath
+    }
+
     def static viewvcTemplateDir() {
         return getConfig().svnedge.svn.viewvcTemplatesPath ? 
             getConfig().svnedge.svn.viewvcTemplatesPath : 

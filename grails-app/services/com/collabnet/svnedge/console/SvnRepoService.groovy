@@ -546,7 +546,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
     
     void createDump(DumpBean bean, repo) {
         Server server = Server.getServer()
-        def dumpDir = server.dumpDir
         def cmd = [ConfigUtil.svnadminPath(), "dump"]
         cmd << new File(server.repoParentDir, repo.name).canonicalPath
         if (bean.revisionRange) {
@@ -560,6 +559,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
             cmd << "--deltas"
         }
 
+        File dumpDir = new File(server.dumpDir)
+        if (!dumpDir.exists()) {
+            dumpDir.mkdir()
+        }
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         if (!tempLogDir.exists()) {
             tempLogDir.mkdir()

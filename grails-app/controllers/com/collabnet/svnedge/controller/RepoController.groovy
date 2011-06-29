@@ -90,10 +90,26 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def dumpOptions = { DumpBean cmd ->
-        def repo = Repository.get(params.id)
+        def id = params.id
+        def repo = Repository.get(id)
+        if (!repo) {
+            def ids = getListViewSelectedIds(params)
+            if (!ids) {
+                flash.error = message(code: 'repository.action.not.found',
+                    args: ['null'])
+                redirect(action: list)
+
+            } else if (ids.size() > 1) {
+                flash.error = message(code: 'repository.action.multiple.unsupported')
+                redirect(action: list)
+            } else {
+                id = ids[0]
+                repo = Repository.get(id)
+            }
+        }
         if (!repo) {
             flash.error = message(code: 'repository.action.not.found', 
-                                  args: [params.id])
+                                  args: [id])
             redirect(action: list)
             
         } else {
@@ -121,6 +137,11 @@ class RepoController {
     
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def createDumpFile = { DumpBean cmd ->
+        if (params.cancelButton) {
+            redirect(action: list)
+            return
+        }
+        
         def repo = Repository.get(params.id)
         if (!repo) {
             flash.error = message(code: 'repository.action.not.found', 

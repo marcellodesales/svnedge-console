@@ -207,6 +207,7 @@
                   <td colspan="5">
                     <div class="AlignRight">
                         <input type="hidden" name="id" value="${repositoryInstance?.id}" />
+                        <span><g:submitButton name="cancelButton" value="${message(code:'default.confirmation.cancel')}" class="Button"/></span>
                         <span><g:submitButton name="dumpButton" value="${message(code:'repository.page.dump.button.dump')}" class="Button"/></span>
                     </div>
                   </td>
