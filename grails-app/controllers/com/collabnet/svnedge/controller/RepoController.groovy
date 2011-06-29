@@ -187,7 +187,6 @@ class RepoController {
                         msg = flash.message + "\n" + msg
                     }
                     flash.message = msg
-                    redirect(action:list)
                 }
                 catch(org.springframework.dao.DataIntegrityViolationException e) {
                     def msg = message(code:'repository.not.deleted.message', args: [repoName])
