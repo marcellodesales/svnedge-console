@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.controller
 
+import java.text.SimpleDateFormat
+import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode;
@@ -86,13 +88,59 @@ class RepoController {
         redirect(action:list,params:params)
     }
 
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def dumpOptions = { DumpBean cmd ->
+        def repo = Repository.get(params.id)
+        if (!repo) {
+            flash.error = message(code: 'repository.action.not.found', 
+                                  args: [params.id])
+            redirect(action: list)
+            
+        } else {
+            def repoParentDir = serverConfService.server.repoParentDir
+            def repoPath = new File(repoParentDir, repo.name).absolutePath
+            def headRev = svnRepoService.findHeadRev(repo)
+            def dumpDir = serverConfService.server.dumpDir
+            
+            if (!cmd.filename) {
+                cmd.filename = defaultDumpFilename(repo)
+            }
+            return [ repositoryInstance: repo,
+                repoPath: repoPath,
+                dumpDir: dumpDir,
+                headRev: headRev,
+                dump: cmd
+                ]
+        }
+    }
+
+    private String defaultDumpFilename(repo) {
+        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
+        return "svnedge-" + repo.name + "-" + ts + ".dump.zip"
+    }
+    
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def createDumpFile = { DumpBean cmd ->
+        def repo = Repository.get(params.id)
+        if (!repo) {
+            flash.error = message(code: 'repository.action.not.found', 
+                                  args: [params.id])
+            redirect(action: list)
+            
+        } else {
+            svnRepoService.createDump(cmd, repo)
+            flash.message = message(code: 'repository.action.createDumpfile.success')
+            redirect(action: show, params: [id: params.id])
+        }
+    }
+    
     @Secured(['ROLE_USER'])
     def show = {
         def repo = Repository.get( params.id )
 
         if(!repo) {
             flash.error = message(code: 'repository.action.not.found',
-                [params.id] as String[])
+                args: [params.id])
             redirect(action:list)
 
         } else {

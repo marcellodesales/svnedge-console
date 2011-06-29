@@ -62,6 +62,7 @@ class Server {
     String adminEmail
     String adminAltContact
     ServerMode mode = ServerMode.STANDALONE
+    String dumpDir = System.getProperty("java.io.tmpdir", "/tmp")
 
     Integer pruneLogsOlderThan
     ApacheLogLevel apacheLogLevel = ApacheLogLevel.WARN

@@ -20,7 +20,8 @@ package com.collabnet.svnedge.console.services
 import grails.test.GrailsUnitTestCase
 import com.collabnet.svnedge.console.CommandLineService 
 import com.collabnet.svnedge.console.LifecycleService 
-import com.collabnet.svnedge.console.SvnRepoService 
+import com.collabnet.svnedge.console.SvnRepoService
+import com.collabnet.svnedge.console.DumpBean 
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.util.ConfigUtil;
@@ -101,6 +102,41 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         wcDir.deleteDir()
     }
 
+    public void testDump() {
+        def testRepoName = "dump-test"
+        Repository repo = new Repository(name: testRepoName)
+        assertEquals "Failed to create repository.", 0,
+            svnRepoService.createRepository(repo, true)
+
+        DumpBean params = new DumpBean()
+        params.filename = "svnedge-dump-test.dump"
+        svnRepoService.createDump(params, repo)
+        // Async so wait for it
+        Thread.sleep(2000)
+        File dumpFile = new File(Server.getServer().dumpDir, params.filename)
+        assertTrue "Dump file does not exist", dumpFile.exists()
+        String contents = dumpFile.text
+        assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
+        assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
+        assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
+        
+        // confirm exclusion filter works
+        params = new DumpBean()
+        params.filename = "svnedge-dump-test2.dump"
+        params.filter = true
+        params.excludePath = "branches"
+        svnRepoService.createDump(params, repo)
+        // Async so wait for it
+        Thread.sleep(2000)
+        dumpFile = new File(Server.getServer().dumpDir, params.filename)
+        assertTrue "Dump file does not exist", dumpFile.exists()
+        contents = dumpFile.text
+        assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
+        assertFalse "Missing branches in dump", contents.contains("Node-path: branches")
+        assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
+        
+    } 
+     
       private File createTestDir(String prefix) {
         def testDir = File.createTempFile(prefix + "-test", null)
         log.info("testDir = " + testDir.getCanonicalPath())

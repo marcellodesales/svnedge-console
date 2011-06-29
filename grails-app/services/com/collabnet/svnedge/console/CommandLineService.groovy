@@ -133,7 +133,13 @@ class CommandLineService {
         "SSH_TTY", "LOGNAME", "LD_LIBRARY_PATH", "SSH_CONNECTION", 
         "SHELL", "PATH", "USER", "HOME", "PYTHONPATH"]) 
 
-    private Process startProcess(String... command, Map<String, String> addEnv, 
+    Process startProcess(List command, Map<String, String> addEnv=null,
+        boolean quiet=false) {
+        
+        return startProcess(command as String[], addEnv, quiet)
+    }
+
+    Process startProcess(String... command, Map<String, String> addEnv=null, 
             boolean quiet=false) {
 
         ProcessBuilder pb = new ProcessBuilder(command)
@@ -293,5 +299,4 @@ class CommandLineService {
         }
         return [String.valueOf(exitStatus), outString, errorString] as String[]
     }
-
 }

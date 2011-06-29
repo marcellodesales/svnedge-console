@@ -107,8 +107,7 @@ public final class ConfigUtil {
     }
 
     def static logsDirPath() {
-        return getConfig().svnedge.logsDirPath ? 
-            getConfig().logsDirPath : 
+        return getConfig().svnedge.logsDirPath ?:
             new File(dataDirPath(), "logs").absolutePath
     }
 

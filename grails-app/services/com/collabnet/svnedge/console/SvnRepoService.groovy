@@ -17,6 +17,9 @@
  */
 package com.collabnet.svnedge.console
 
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
@@ -541,5 +544,119 @@ class SvnRepoService extends AbstractSvnEdgeService {
             group == serverConfService.httpdGroup)
     }
     
+    void createDump(DumpBean bean, repo) {
+        Server server = Server.getServer()
+        def dumpDir = server.dumpDir
+        def cmd = [ConfigUtil.svnadminPath(), "dump"]
+        cmd << new File(server.repoParentDir, repo.name).canonicalPath
+        if (bean.revisionRange) {
+            cmd << "-r"
+            cmd << bean.revisionRange
+        }
+        if (bean.incremental) {
+            cmd << "--incremental"
+        }
+        if (bean.deltas) {
+            cmd << "--deltas"
+        }
 
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdir()
+        }
+        File progressLogFile = 
+            new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        
+        log.debug("Dump command: " + cmd)
+        Process dumpProcess = commandLineService.startProcess(cmd)
+
+        FileOutputStream progress = new FileOutputStream(progressLogFile)
+        File tempDumpFile = new File(dumpDir, bean.filename + "-processing")
+        File finalDumpFile = new File(dumpDir, bean.filename)
+        FileOutputStream out = new FileOutputStream(tempDumpFile)
+
+        if (!bean.deltas && bean.filter && (bean.includePath || bean.excludePath)) {
+            log.debug("Dump: With filter")
+            String svndumpfilterPath = new File(new File(
+                ConfigUtil.svnadminPath()).parent, "svndumpfilter").canonicalPath
+            def threads = []
+            threads << dumpProcess.consumeProcessErrorStream(progress)
+            if (bean.includePath) {
+                def filterCmd = [svndumpfilterPath, "include"]
+                addFilterOptions(bean, filterCmd)
+                filterCmd.addAll(bean.includePathPrefixes)
+                dumpProcess = dumpProcess.pipeTo(commandLineService.startProcess(filterCmd))
+                threads << dumpProcess.consumeProcessErrorStream(progress)
+            }
+            if (bean.excludePath) {
+                def filterCmd = [svndumpfilterPath, "exclude"]
+                addFilterOptions(bean, filterCmd)
+                filterCmd.addAll(bean.excludePathPrefixes)
+                dumpProcess = dumpProcess.pipeTo(commandLineService.startProcess(filterCmd))
+                threads << dumpProcess.consumeProcessErrorStream(progress)
+            }
+            threads << dumpProcess.consumeProcessOutputStream(out)
+            runAsync {
+                try {
+                    for (t in threads) {
+                        try {
+                            t.join()
+                        } catch (InterruptedException e) {
+                             log.debug("Process consuming thread was interrupted")
+                        }
+                    }
+                } finally {
+                    out.close()
+                    progress.close()
+                }
+            }
+
+        } else {
+            log.debug("Dump: No filter")
+            runAsync {
+                try {
+                    dumpProcess.waitForProcessOutput(out, progress)
+                } finally {
+                    out.close()
+                    progress.close()
+                }
+            }
+        }
+
+        def dumpFilename = finalDumpFile.name
+        if (dumpFilename.endsWith('.zip')) {
+            def baseDumpFilename = 
+                dumpFilename.substring(0, dumpFilename.length() - 4)       
+            ZipOutputStream zos = null
+            try {
+                zos = new ZipOutputStream(finalDumpFile.newOutputStream())
+                ZipEntry ze = new ZipEntry(baseDumpFilename)
+                zos.putNextEntry(ze)
+                tempDumpFile.withInputStream { zos << it }
+                zos.closeEntry()
+            } finally {
+                if (zos) {
+                    zos.close()
+                }
+            }
+            tempDumpFile.delete()
+        } else {
+            tempDumpFile.renameTo(finalDumpFile)
+        }
+    }
+    
+    private addFilterOptions(DumpBean bean, filterCmd) {
+        if (bean.dropEmptyRevs) {
+            filterCmd << "--drop-empty-revs"
+            if (bean.renumberRevs) {
+                filterCmd << "--renumber-revs"
+            }
+        } else if (bean.preserveRevprops) {
+            filterCmd << "--preserve-revprops"
+        }
+        
+        if (bean.skipMissingMergeSources) {
+            filterCmd << "--skip-missing-merge-sources"
+        }
+    }
 }

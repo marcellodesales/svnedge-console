@@ -31,15 +31,12 @@
 
 
         <table class="Container">
-    <tbody>
+    <thead>
     <tr class="ContainerHeader">
       <td colspan="5"><g:message code="repository.page.show.header" /></td>    
     </tr>
-
+    </thead>
                     <tbody>
-                    
-                        <g:include controller="repo" action="info" id="${repositoryInstance.id}" />
-
                         <tr class="prop">
                             <td valign="top" class="name"><g:message code="repository.page.show.name" /></td>
                             <td valign="top" class="value">${fieldValue(bean:repositoryInstance, field:'name')}</td>
