@@ -103,6 +103,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     public void testDump() {
+        // Give this test 30s max to finish
+        long timeLimit = System.currentTimeMillis() + 30000
         def testRepoName = "dump-test"
         Repository repo = new Repository(name: testRepoName)
         assertEquals "Failed to create repository.", 0,
@@ -110,31 +112,64 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
         DumpBean params = new DumpBean()
         params.filename = "svnedge-dump-test.dump"
+        File dumpFile = new File(Server.getServer().dumpDir, params.filename)
+        dumpFile.delete()
+        assertFalse "Dump file: " + dumpFile.name + " already exists.", dumpFile.exists()
         svnRepoService.createDump(params, repo)
         // Async so wait for it
-        Thread.sleep(2000)
-        File dumpFile = new File(Server.getServer().dumpDir, params.filename)
-        assertTrue "Dump file does not exist", dumpFile.exists()
+        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        Thread.sleep(250)
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
         String contents = dumpFile.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
         
-        // confirm exclusion filter works
+        // test exclusion filter
         params = new DumpBean()
         params.filename = "svnedge-dump-test2.dump"
         params.filter = true
         params.excludePath = "branches"
+        File dumpFile2 = new File(Server.getServer().dumpDir, params.filename)
+        dumpFile2.delete()
+        assertFalse "Dump file: " + dumpFile2.name + " already exists.", dumpFile2.exists()
         svnRepoService.createDump(params, repo)
         // Async so wait for it
-        Thread.sleep(2000)
-        dumpFile = new File(Server.getServer().dumpDir, params.filename)
-        assertTrue "Dump file does not exist", dumpFile.exists()
-        contents = dumpFile.text
+        while (!dumpFile2.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        Thread.sleep(250)
+        assertTrue "Dump file does not exist: " + dumpFile2.name, dumpFile2.exists()
+        contents = dumpFile2.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
-        assertFalse "Missing branches in dump", contents.contains("Node-path: branches")
+        assertFalse "branches exists in dump", contents.contains("Node-path: branches")
+        assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
+
+        // test inclusion filter
+        params = new DumpBean()
+        params.filename = "svnedge-dump-test3.dump"
+        params.filter = true
+        params.includePath = "trunk tags"
+        File dumpFile3 = new File(Server.getServer().dumpDir, params.filename)
+        dumpFile3.delete()
+        assertFalse "Dump file: " + dumpFile3.name + " already exists.", dumpFile3.exists()
+        svnRepoService.createDump(params, repo)
+        // Async so wait for it
+        while (!dumpFile3.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        Thread.sleep(250)
+        assertTrue "Dump file does not exist: " + dumpFile3.name, dumpFile3.exists()
+        contents = dumpFile3.text
+        assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
+        assertFalse "branches exists in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
         
+        dumpFile.delete()
+        dumpFile2.delete()
+        dumpFile3.delete()
     } 
      
       private File createTestDir(String prefix) {

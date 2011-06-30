@@ -73,9 +73,11 @@ public class DumpBean {
         List<String> result = null
         if (paths?.trim()) {
             String prefixes = paths.trim()
-            List matches = prefixes.findAll(~/\b.+[^\\]\b/, { match -> return match.replace("\\", "") })
+            List matches = prefixes.findAll(~/\b((?:\S|\\ )+)\b/, { match, path -> 
+                return path.replace("\\", "").trim() })
             result = matches
         }
+        return result
     }
 }
 
