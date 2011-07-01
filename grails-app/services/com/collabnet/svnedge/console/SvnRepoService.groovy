@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.console
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -578,7 +579,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         File progressLogFile = 
             new File(tempLogDir, "dump-progress-" + repo.name + ".log")
-        
+        if (progressLogFile.exists()) {
+            throw new ValidationException("repository.action.createDumpfile.alreadyInProgress")
+        }
+    
         String filename = dumpFilename(bean, repo)
         File tempDumpFile = new File(dumpDir, filename + "-processing")
         File finalDumpFile = new File(dumpDir, filename)
@@ -623,9 +627,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     }
                 } finally {
                     out.close()
-                    progress.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
             }
 
         } else {
@@ -635,22 +638,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     dumpProcess.waitForProcessOutput(out, progress)
                 } finally {
                     out.close()
-                    progress.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
             }
         }
         return filename
     }
     
-    private finishDumpFile(finalDumpFile, tempDumpFile) {
+    private finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile) {
         def dumpFilename = finalDumpFile.name
         if (dumpFilename.endsWith('.zip')) {
+            progress << "Compressing dump file...\n"
+            File tempZipFile = new File(tempDumpFile.parentFile, 
+                                        tempDumpFile.name + ".zip")
             def baseDumpFilename = 
                 dumpFilename.substring(0, dumpFilename.length() - 4)       
             ZipOutputStream zos = null
             try {
-                zos = new ZipOutputStream(finalDumpFile.newOutputStream())
+                zos = new ZipOutputStream(tempZipFile.newOutputStream())
                 ZipEntry ze = new ZipEntry(baseDumpFilename)
                 zos.putNextEntry(ze)
                 tempDumpFile.withInputStream { zos << it }
@@ -660,13 +665,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     zos.close()
                 }
             }
+            progress << "Finished compressing dump file.\n"
             tempDumpFile.delete()
-        } else {
-            if (!tempDumpFile.renameTo(finalDumpFile)) {
-                log.warn("Rename of dump file " + tempDumpFile?.name + " to " +
-                    finalDumpFile?.name + " failed.")
-            }
+            tempDumpFile = tempZipFile
         }
+        progress << "Moving dump file to final location.\n"
+        if (!tempDumpFile.renameTo(finalDumpFile)) {
+            log.warn("Rename of dump file " + tempDumpFile?.name + " to " +
+                finalDumpFile?.name + " failed.")
+        }
+        progress << "Dump file " + finalDumpFile?.name + " is complete.\n"
+        progress.close()
+        progressLogFile.delete()
     }
     
     private String dumpFilename(DumpBean bean, repo) {

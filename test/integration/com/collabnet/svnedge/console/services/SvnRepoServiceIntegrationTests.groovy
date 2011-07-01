@@ -123,6 +123,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
+        Thread.sleep(250)
         
         // test exclusion filter
         params = new DumpBean()
@@ -162,6 +163,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         dumpFile.delete()
         dumpFile2.delete()
         dumpFile3.delete()
+        Thread.sleep(200)
     } 
 
     private File newDumpFile(filename, repo) {

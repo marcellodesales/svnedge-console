@@ -162,7 +162,12 @@ class RepoController {
                 redirect(action: show, params: [id: params.id])
             } catch (ValidationException e) {
                 log.debug "Rejecting " + e.field + " with message " + e.message
-                cmd.errors.rejectValue(e.field, e.message)
+                if (e.field) {
+                    cmd.errors.rejectValue(e.field, e.message)
+                } else {
+                    cmd.errors.reject(e.message)
+                    flash.error = message(code: e.message)
+                }
                 flash.dumpBean = cmd
                 redirect(action:'dumpOptions', params:params)
             }
