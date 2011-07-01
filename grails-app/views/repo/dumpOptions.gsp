@@ -68,26 +68,6 @@
               <tbody>
                 <tr>
                   <td class="ItemDetailName">
-                    <label for="filename"><g:message code="repository.page.dump.filename.label" /></label>
-                  </td>
-                  <td valign="top" class="value">
-                    <input name="filename" id="filename" type="text" value="${dump.filename}" size="35"/>
-                  </td>
-                  <td class="ItemDetailValue"><g:message code="repository.page.dump.filename.tip" args="${[dumpDir]}"/></td>
-                </tr>
-                <g:hasErrors bean="${dump}" field="filename">
-                  <tr>
-                    <td>&nbsp;</td>
-                    <td colspan="2" width="100%" valign="top" class="errors">
-                      <ul><g:eachError bean="${dump}" field="filename">
-                        <li><g:message error="${it}" encodeAs="HTML"/></li>
-                      </g:eachError></ul>
-                    </td>
-                  </tr>
-                </g:hasErrors>
-
-                <tr>
-                  <td class="ItemDetailName">
                     <label for="revisionRange"><g:message code="repository.page.dump.revisionRange.label" /></label>
                   </td>
                   <td valign="top" class="value">
@@ -127,6 +107,18 @@
                   </td>
                   <td class="ItemDetailValue">
                     <g:message code="repository.page.dump.deltas.tip" />
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="ItemDetailName">
+                    <label for="compress"><g:message code="repository.page.dump.compress.label" /></label>
+                  </td>
+                  <td class="value">
+                    <g:checkBox name="compress" id="compress" value="${dump.compress}"/>
+                  </td>
+                  <td class="ItemDetailValue">
+                    <g:message code="repository.page.dump.compress.tip" />
                   </td>
                 </tr>
 

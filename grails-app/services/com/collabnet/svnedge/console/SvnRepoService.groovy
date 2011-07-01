@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.console
 
+import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -545,7 +546,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
             group == serverConfService.httpdGroup)
     }
     
-    void createDump(DumpBean bean, repo) {
+    /**
+     * Method to invoke "svnadmin dump" possibly piped through svndumpfilter
+     * 
+     * @param bean dump options
+     * @param repo domain object
+     * @return dump filename
+     */
+    String createDump(DumpBean bean, repo) {
         Server server = Server.getServer()
         def cmd = [ConfigUtil.svnadminPath(), "dump"]
         cmd << new File(server.repoParentDir, repo.name).canonicalPath
@@ -560,10 +568,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
             cmd << "--deltas"
         }
 
-        File dumpDir = new File(server.dumpDir)
+        File dumpDir = new File(server.dumpDir, repo.name)
         if (!dumpDir.exists()) {
-            dumpDir.mkdir()
-        }
+            dumpDir.mkdirs()
+        }        
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         if (!tempLogDir.exists()) {
             tempLogDir.mkdir()
@@ -571,8 +579,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
         File progressLogFile = 
             new File(tempLogDir, "dump-progress-" + repo.name + ".log")
         
-        File tempDumpFile = new File(dumpDir, bean.filename + "-processing")
-        File finalDumpFile = new File(dumpDir, bean.filename)
+        String filename = dumpFilename(bean, repo)
+        File tempDumpFile = new File(dumpDir, filename + "-processing")
+        File finalDumpFile = new File(dumpDir, filename)
         if (tempDumpFile.exists() || finalDumpFile.exists()) {
             throw new ValidationException("dumpBean.filename.exists", "filename")
         }
@@ -612,6 +621,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                              log.debug("Process consuming thread was interrupted")
                         }
                     }
+                    finishDumpFile(finalDumpFile, tempDumpFile)
                 } finally {
                     out.close()
                     progress.close()
@@ -623,13 +633,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
             runAsync {
                 try {
                     dumpProcess.waitForProcessOutput(out, progress)
+                    finishDumpFile(finalDumpFile, tempDumpFile)
                 } finally {
                     out.close()
                     progress.close()
                 }
             }
         }
-
+        return filename
+    }
+    
+    private finishDumpFile(finalDumpFile, tempDumpFile) {
         def dumpFilename = finalDumpFile.name
         if (dumpFilename.endsWith('.zip')) {
             def baseDumpFilename = 
@@ -650,6 +664,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
         } else {
             tempDumpFile.renameTo(finalDumpFile)
         }
+    }
+    
+    private String dumpFilename(DumpBean bean, repo) {
+        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
+        def range = bean.revisionRange ?  
+            "-r" + bean.revisionRange.replace(":", "_") : ""
+        def options = ""
+        if (bean.incremental) {
+            options += "-incremental"
+        }
+        if (bean.deltas) {
+            options += "-deltas"
+        }
+        if (bean.filter) {
+            options += "-filtered"
+        }
+        def zip = bean.compress ? ".zip" : ""
+        return repo.name + range + options + "-" + ts + ".dump" + zip
     }
     
     private addFilterOptions(DumpBean bean, filterCmd) {

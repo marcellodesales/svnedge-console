@@ -127,9 +127,6 @@ class RepoController {
                 cmd = new DumpBean()
                 bindData(cmd, params)
             }
-            if (!cmd.filename) {
-                cmd.filename = defaultDumpFilename(repo)
-            }
             return [ repositoryInstance: repo,
                 repoPath: repoPath,
                 dumpDir: dumpDir,
@@ -139,11 +136,6 @@ class RepoController {
         }
     }
 
-    private String defaultDumpFilename(repo) {
-        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
-        return "svnedge-" + repo.name + "-" + ts + ".dump.zip"
-    }
-    
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def createDumpFile = { DumpBean cmd ->
         if (params.cancelButton) {
@@ -164,8 +156,9 @@ class RepoController {
             
         } else {
             try {
-                svnRepoService.createDump(cmd, repo)
-                flash.message = message(code: 'repository.action.createDumpfile.success')
+                def filename = svnRepoService.createDump(cmd, repo)
+                flash.message = message(code: 'repository.action.createDumpfile.success', 
+                    args: [filename])
                 redirect(action: show, params: [id: params.id])
             } catch (ValidationException e) {
                 log.debug "Rejecting " + e.field + " with message " + e.message

@@ -113,7 +113,7 @@ public final class ConfigUtil {
 
     def static dumpDirPath() {
         return getConfig().svnedge.dumpDirPath ?:
-            new File(dataDirPath(), "repo-dumps").absolutePath
+            new File(dataDirPath(), "dumps").absolutePath
     }
 
     def static viewvcTemplateDir() {
