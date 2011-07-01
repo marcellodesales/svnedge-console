@@ -621,11 +621,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
                              log.debug("Process consuming thread was interrupted")
                         }
                     }
-                    finishDumpFile(finalDumpFile, tempDumpFile)
                 } finally {
                     out.close()
                     progress.close()
                 }
+                finishDumpFile(finalDumpFile, tempDumpFile)
             }
 
         } else {
@@ -633,11 +633,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
             runAsync {
                 try {
                     dumpProcess.waitForProcessOutput(out, progress)
-                    finishDumpFile(finalDumpFile, tempDumpFile)
                 } finally {
                     out.close()
                     progress.close()
                 }
+                finishDumpFile(finalDumpFile, tempDumpFile)
             }
         }
         return filename
@@ -662,7 +662,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
             tempDumpFile.delete()
         } else {
-            tempDumpFile.renameTo(finalDumpFile)
+            if (!tempDumpFile.renameTo(finalDumpFile)) {
+                log.warn("Rename of dump file " + tempDumpFile?.name + " to " +
+                    finalDumpFile?.name + " failed.")
+            }
         }
     }
     
