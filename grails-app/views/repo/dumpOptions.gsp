@@ -72,14 +72,19 @@
                   </td>
                   <td valign="top" class="value">
                     <input name="filename" id="filename" type="text" value="${dump.filename}" size="35"/>
-                    <g:hasErrors bean="${dump}" field="filename">
-                      <ul><g:eachError bean="${dump}" field="filename">
-                            <li><g:message error="${it}" encodeAs="HTML"/></li>
-                          </g:eachError></ul>
-                    </g:hasErrors>
                   </td>
                   <td class="ItemDetailValue"><g:message code="repository.page.dump.filename.tip" args="${[dumpDir]}"/></td>
                 </tr>
+                <g:hasErrors bean="${dump}" field="filename">
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td colspan="2" width="100%" valign="top" class="errors">
+                      <ul><g:eachError bean="${dump}" field="filename">
+                        <li><g:message error="${it}" encodeAs="HTML"/></li>
+                      </g:eachError></ul>
+                    </td>
+                  </tr>
+                </g:hasErrors>
 
                 <tr>
                   <td class="ItemDetailName">
@@ -87,14 +92,19 @@
                   </td>
                   <td valign="top" class="value">
                     <input name="revisionRange" id="revisionRange" type="text" value="${dump.revisionRange}"/>
-                    <g:hasErrors bean="${dump}" field="revisionRange">
-                      <ul><g:eachError bean="${dump}" field="revisionRange">
-                            <li><g:message error="${it}" encodeAs="HTML"/></li>
-                          </g:eachError></ul>
-                    </g:hasErrors>
                   </td>
                   <td class="ItemDetailValue"><g:message code="repository.page.dump.revisionRange.tip" /></td>
-                </tr>      
+                </tr>
+                <g:hasErrors bean="${dump}" field="revisionRange">
+                  <tr>
+                    <td>&nbsp;</td>
+                    <td colspan="2" width="100%" valign="top" class="errors">
+                      <ul><g:eachError bean="${dump}" field="revisionRange">
+                        <li><g:message error="${it}" encodeAs="HTML"/></li>
+                      </g:eachError></ul>
+                    </td>
+                  </tr>
+                </g:hasErrors>
 
                 <tr>
                   <td class="ItemDetailName">
@@ -103,7 +113,7 @@
                   <td class="value">
                     <g:checkBox name="incremental" id="incremental" value="${dump.incremental}"/>
                   </td>
-                  <td class="ItemDetailValue ${hasErrors(bean: dump, field:'incremental','errors')}">
+                  <td class="ItemDetailValue">
                     <g:message code="repository.page.dump.incremental.tip" />
                   </td>
                 </tr>
@@ -115,7 +125,7 @@
                   <td class="value">
                     <g:checkBox name="deltas" id="deltas" value="${dump.deltas}"/>
                   </td>
-                  <td class="ItemDetailValue ${hasErrors(bean: dump, field:'deltas','errors')}">
+                  <td class="ItemDetailValue">
                     <g:message code="repository.page.dump.deltas.tip" />
                   </td>
                 </tr>
@@ -127,7 +137,7 @@
                   <td class="value">
                     <g:checkBox name="filter" id="filter" value="${dump.filter}"/>
                   </td>
-                  <td class="ItemDetailValue ${hasErrors(bean: dump, field:'deltas','errors')}">
+                  <td class="ItemDetailValue">
                     <g:message code="repository.page.dump.filter.tip" />
                   </td>
                 </tr>
@@ -144,11 +154,6 @@
                          </td>
                          <td valign="top" class="value">
                            <input name="includePath" id="includePath" type="text" size="60" value="${dump.includePath}"/>
-                           <g:hasErrors bean="${dump}" field="includePath">
-                             <ul><g:eachError bean="${dump}" field="includePath">
-                               <li><g:message error="${it}" encodeAs="HTML"/></li>
-                             </g:eachError></ul>
-                           </g:hasErrors>
                          </td>
                          <td class="ItemDetailValue"><g:message code="repository.page.dump.filter.include.tip" /></td>
                        </tr>
@@ -158,25 +163,20 @@
                          </td>
                          <td valign="top" class="value">
                            <input name="excludePath" id="excludePath" type="text" size="60" value="${dump.excludePath}"/>
-                           <g:hasErrors bean="${dump}" field="excludePath">
-                             <ul><g:eachError bean="${dump}" field="excludePath">
-                               <li><g:message error="${it}" encodeAs="HTML"/></li>
-                             </g:eachError></ul>
-                           </g:hasErrors>
                          </td>
                          <td class="ItemDetailValue"><g:message code="repository.page.dump.filter.exclude.tip" /></td>
                        </tr>
                        <tr>
                          <td class="ItemDetailName"><label for="dropEmptyRevs"><g:message
                            code="repository.page.dump.filter.drop-empty-revs.label" /></label></td>
-                         <td colspan="2" class="value ItemDetailValue ${hasErrors(bean: dump, field:'deltas','errors')}">
+                         <td colspan="2" class="value ItemDetailValue">
                            <g:checkBox name="dropEmptyRevs" id="dropEmptyRevs" value="${dump.dropEmptyRevs}" /> <g:message
                              code="repository.page.dump.filter.drop-empty-revs.tip" /></td>
                        </tr>
                        <tr>
                          <td class="ItemDetailName"><label for="renumberRevs"><g:message
                            code="repository.page.dump.filter.renumber-revs.label" /></label></td>
-                         <td colspan="2" class="value ItemDetailValue ${hasErrors(bean: dump, field:'deltas','errors')}">
+                         <td colspan="2" class="value ItemDetailValue">
                            <g:checkBox name="renumberRevs" id="renumberRevs" value="${dump.renumberRevs}" /> <g:message
                              code="repository.page.dump.filter.renumber-revs.tip" /></td>
                        </tr>
@@ -184,7 +184,7 @@
                          <td class="ItemDetailName">
                            <label for="preserveRevprops"><g:message code="repository.page.dump.filter.preserve-revprops.label" /></label>
                          </td>
-                         <td colspan="2" class="value ItemDetailValue ${hasErrors(bean: dump, field: 'deltas', 'errors')}">
+                         <td colspan="2" class="value ItemDetailValue">
                            <g:checkBox name="preserveRevprops" id="preserveRevprops" value="${dump.preserveRevprops}"/>
                            <g:message code="repository.page.dump.filter.preserve-revprops.tip" />
                          </td>
@@ -193,7 +193,7 @@
                          <td class="ItemDetailName">
                            <label for="skipMissingMergeSources"><g:message code="repository.page.dump.filter.skip-missing-merge-sources.label" /></label>
                          </td>
-                         <td colspan="2" class="value ItemDetailValue ${hasErrors(bean: dump, field: 'deltas', 'errors')}">
+                         <td colspan="2" class="value ItemDetailValue">
                            <g:checkBox name="skipMissingMergeSources" id="skipMissingMergeSources" value="${dump.skipMissingMergeSources}"/>
                            <g:message code="repository.page.dump.filter.skip-missing-merge-sources.tip" />
                          </td>

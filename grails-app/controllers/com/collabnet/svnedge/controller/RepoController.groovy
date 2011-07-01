@@ -18,6 +18,8 @@
 package com.collabnet.svnedge.controller
 
 import java.text.SimpleDateFormat
+
+import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
@@ -89,7 +91,7 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
-    def dumpOptions = { DumpBean cmd ->
+    def dumpOptions = {
         def id = params.id
         def repo = Repository.get(id)
         if (!repo) {
@@ -98,10 +100,12 @@ class RepoController {
                 flash.error = message(code: 'repository.action.not.found',
                     args: ['null'])
                 redirect(action: list)
+                return
 
             } else if (ids.size() > 1) {
                 flash.error = message(code: 'repository.action.multiple.unsupported')
                 redirect(action: list)
+                return
             } else {
                 id = ids[0]
                 repo = Repository.get(id)
@@ -118,6 +122,11 @@ class RepoController {
             def headRev = svnRepoService.findHeadRev(repo)
             def dumpDir = serverConfService.server.dumpDir
             
+            DumpBean cmd = flash.dumpBean
+            if (!cmd) {
+                cmd = new DumpBean()
+                bindData(cmd, params)
+            }
             if (!cmd.filename) {
                 cmd.filename = defaultDumpFilename(repo)
             }
@@ -141,6 +150,11 @@ class RepoController {
             redirect(action: list)
             return
         }
+        if (cmd.hasErrors()) {
+            flash.dumpBean = cmd
+            redirect(action:'dumpOptions', params:params)
+            return
+        }
         
         def repo = Repository.get(params.id)
         if (!repo) {
@@ -149,9 +163,16 @@ class RepoController {
             redirect(action: list)
             
         } else {
-            svnRepoService.createDump(cmd, repo)
-            flash.message = message(code: 'repository.action.createDumpfile.success')
-            redirect(action: show, params: [id: params.id])
+            try {
+                svnRepoService.createDump(cmd, repo)
+                flash.message = message(code: 'repository.action.createDumpfile.success')
+                redirect(action: show, params: [id: params.id])
+            } catch (ValidationException e) {
+                log.debug "Rejecting " + e.field + " with message " + e.message
+                cmd.errors.rejectValue(e.field, e.message)
+                flash.dumpBean = cmd
+                redirect(action:'dumpOptions', params:params)
+            }
         }
     }
     

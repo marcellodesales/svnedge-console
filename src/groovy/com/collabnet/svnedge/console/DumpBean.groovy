@@ -21,6 +21,8 @@ package com.collabnet.svnedge.console
  * A command bean to hold all the parameters for an svnadmin dump with filtering
  */
 public class DumpBean {
+    static final String FILENAME_PATTERN = ~/[^<>\/\?\\;:'"`!@#%&\$\*\+)(\|\s]+/.toString()
+    
     String filename
     String revisionRange
     boolean incremental
@@ -78,6 +80,19 @@ public class DumpBean {
             result = matches
         }
         return result
+    }
+    
+    static constraints = {   
+        
+        filename(blank: false, nullable: false, matches: FILENAME_PATTERN)
+
+        revisionRange(blank: true, nullable: true, matches: "\\d+(?::\\d+)?",
+                      validator: { val, obj ->
+                          Integer upperRev = obj.getUpperRevision()
+                          if (upperRev && upperRev < obj.getLowerRevision()) {
+                              return ['lowerLimitExceedsUpperLimit']
+                          }
+                      })
     }
 }
 

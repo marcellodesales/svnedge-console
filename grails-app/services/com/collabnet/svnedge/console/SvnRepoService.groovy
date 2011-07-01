@@ -20,6 +20,7 @@ package com.collabnet.svnedge.console
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
@@ -570,12 +571,15 @@ class SvnRepoService extends AbstractSvnEdgeService {
         File progressLogFile = 
             new File(tempLogDir, "dump-progress-" + repo.name + ".log")
         
-        log.debug("Dump command: " + cmd)
-        Process dumpProcess = commandLineService.startProcess(cmd)
-
-        FileOutputStream progress = new FileOutputStream(progressLogFile)
         File tempDumpFile = new File(dumpDir, bean.filename + "-processing")
         File finalDumpFile = new File(dumpDir, bean.filename)
+        if (tempDumpFile.exists() || finalDumpFile.exists()) {
+            throw new ValidationException("dumpBean.filename.exists", "filename")
+        }
+        
+        log.debug("Dump command: " + cmd)
+        Process dumpProcess = commandLineService.startProcess(cmd)
+        FileOutputStream progress = new FileOutputStream(progressLogFile)
         FileOutputStream out = new FileOutputStream(tempDumpFile)
 
         if (!bean.deltas && bean.filter && (bean.includePath || bean.excludePath)) {
