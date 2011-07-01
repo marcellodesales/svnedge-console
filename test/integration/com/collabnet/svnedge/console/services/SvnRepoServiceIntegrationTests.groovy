@@ -110,6 +110,15 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals "Failed to create repository.", 0,
             svnRepoService.createRepository(repo, true)
 
+        // Earlier checkin was not deleting this file, so make sure it is
+        // gone before testing
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        File progressLogFile =
+                new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        if (progressLogFile.exists()) {
+            progressLogFile.delete()
+        }
+        
         DumpBean params = new DumpBean()
         params.compress = false
         def filename = svnRepoService.createDump(params, repo)
