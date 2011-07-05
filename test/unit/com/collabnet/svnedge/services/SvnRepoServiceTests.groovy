@@ -26,6 +26,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import com.collabnet.svnedge.domain.statistics.StatValue 
 import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.util.ConfigUtil;
 
 class SvnRepoServiceTests extends GrailsUnitTestCase {
 
@@ -48,6 +49,9 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoOnDiskMarkerFile.createNewFile()
         repoOnDiskMarkerFile = new File(repoOnDisk, "db")
         repoOnDiskMarkerFile.mkdir()
+
+        ConfigUtil.configuration = ["svnedge": ["dumpDirPath":
+            System.getProperty("java.io.tmpdir", "/tmp")]]
 
         // mock domain objects
         def testServer = new Server(
