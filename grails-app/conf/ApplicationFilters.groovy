@@ -64,8 +64,7 @@ class ApplicationFilters {
 
                 if (!isManagedMode &&
                     "server" == controllerName && (
-                        "editIntegration" == actionName || "revert" == actionName) || 
-                        ("job" == controllerName && ServerMode.REPLICA != Server.getServer().mode)) {
+                        "editIntegration" == actionName || "revert" == actionName)) {
 
                     flash.error = app.getMainContext().getMessage(
                         "filter.probihited.mode.standalone", null,
@@ -111,6 +110,7 @@ class ApplicationFilters {
 
                 // role-based additions
                 if (authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
+                    featureList << "job"
                     if (lifecycleService.getServer().replica) {
                         featureList << "admin"
                     }

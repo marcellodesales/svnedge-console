@@ -30,6 +30,8 @@ import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.statistics.StatValue 
 import com.collabnet.svnedge.domain.statistics.Statistic 
 import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.event.BackgroundJobStartedEvent
+import com.collabnet.svnedge.event.BackgroundJobTerminatedEvent
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -577,8 +579,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (!tempLogDir.exists()) {
             tempLogDir.mkdir()
         }
-        File progressLogFile = 
-            new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        def progressLogFileName = "dump-progress-" + repo.name + ".log"
+        File progressLogFile =
+            new File(tempLogDir, progressLogFileName)
         if (progressLogFile.exists()) {
             throw new ValidationException("repository.action.createDumpfile.alreadyInProgress")
         }
@@ -594,6 +597,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         Process dumpProcess = commandLineService.startProcess(cmd)
         FileOutputStream progress = new FileOutputStream(progressLogFile)
         FileOutputStream out = new FileOutputStream(tempDumpFile)
+
+        // background job notification properties
+        Map eventProperties = [id: "repoDump-${repo.name}",
+                description: getMessage("repository.action.createDumpfile.job.description", [repo.name], bean.userLocale),
+                url: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail" ]
 
         if (!bean.deltas && bean.filter && (bean.includePath || bean.excludePath)) {
             log.debug("Dump: With filter")
@@ -617,6 +625,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
             threads << dumpProcess.consumeProcessOutputStream(out)
             runAsync {
+                publishEvent(new BackgroundJobStartedEvent(this, Thread.currentThread().id, eventProperties))
                 try {
                     for (t in threads) {
                         try {
@@ -629,17 +638,20 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                publishEvent(new BackgroundJobTerminatedEvent(this, Thread.currentThread().id, eventProperties))
             }
 
         } else {
             log.debug("Dump: No filter")
             runAsync {
+                publishEvent(new BackgroundJobStartedEvent(this, Thread.currentThread().id, eventProperties))
                 try {
                     dumpProcess.waitForProcessOutput(out, progress)
                 } finally {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                publishEvent(new BackgroundJobTerminatedEvent(this, Thread.currentThread().id, eventProperties))
             }
         }
         return filename

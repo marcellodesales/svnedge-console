@@ -32,6 +32,7 @@ public class DumpBean {
     boolean renumberRevs
     boolean preserveRevprops
     boolean skipMissingMergeSources
+    Locale userLocale
 
     Integer getLowerRevision() {
         Integer result = null

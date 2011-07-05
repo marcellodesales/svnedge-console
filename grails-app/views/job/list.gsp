@@ -1,4 +1,4 @@
-<%@page import="java.util.concurrent.TimeUnit"%>
+<%@page import="com.collabnet.svnedge.domain.ServerMode; java.util.concurrent.TimeUnit"%>
 <%@page import="com.collabnet.svnedge.integration.command.CommandState"%>
 <%@page import="com.collabnet.svnedge.integration.command.CommandState"%>
 <%@page import="com.collabnet.svnedge.integration.command.AbstractCommand"%>
@@ -11,11 +11,15 @@
 <body>
 
 <content tag="title">
-  <g:message code="job.page.header"/> - ${replicaName}
+  <g:message code="job.page.header"/>
+  <g:if test="${serverMode == ServerMode.REPLICA}">
+  - ${replicaName}
+  </g:if>
 </content>
 
 <content tag="leftMenu">
 <BR>
+  <g:if test="${serverMode == ServerMode.REPLICA}">
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
@@ -31,6 +35,7 @@
      </div>
    </div>
 <BR>
+  </g:if>
 
 <div class="ImageListParent">
    <table class="Container" id="scheduledCommandsTable">
@@ -79,13 +84,25 @@
 
 </content>
 
-<g:render template="/job/runningCommands" model="['tableName': 'longRunningCommandsTable',
+<g:if test="${serverMode == ServerMode.REPLICA}">
+<g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
 
 <BR><BR>
 
 
-<g:render template="/job/runningCommands" model="['tableName': 'shortRunningCommandsTable',
+<g:render template="/job/replicaCommands" model="['tableName': 'shortRunningCommandsTable',
  'runningCommands': shortRunningCommands, 'maxNumber': maxShortRunning, 'shortRun': true]" />
+
+<BR><BR>
+</g:if>
+
+<g:render template="/job/backgroundJobs" model="['tableName': 'backgroundJobsRunningTable',
+ 'heading': message(code:'job.page.list.backgroundActive.header'), 'itemList': backgroundJobsRunning, 'maxNumber': 1]" />
+
+<BR><BR>
+
+<g:render template="/job/backgroundJobs" model="['tableName': 'backgroundJobsFinishedTable',
+ 'heading': message(code:'job.page.list.backgroundFinished.header'),'itemList': backgroundJobsFinished, 'maxNumber': 1]" />
 
 </body>

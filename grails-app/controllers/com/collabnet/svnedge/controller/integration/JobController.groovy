@@ -28,12 +28,15 @@ import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
 import com.collabnet.svnedge.integration.command.ShortRunningCommand;
 
-import java.util.LinkedHashSet;
+import java.util.LinkedHashSet
+import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.Server;
 
 @Secured(['ROLE_USER'])
 class JobController {
 
     def replicaServerStatusService
+    def backgroundJobsInfoService
     def replicaCommandSchedulerService
     def applicationContext
     def ctfRemoteClientService
@@ -54,6 +57,9 @@ class JobController {
 
         def shortRunning = replicaServerStatusService.getCommandsByType(
             ShortRunningCommand.class)
+
+        def backgroundJobsRunning = backgroundJobsInfoService.runningJobs.values()
+        def backgroundJobsFinished = backgroundJobsInfoService.finishedJobs.values()
 
         def scheduledCommands = new LinkedHashSet<AbstractCommand>()
 
@@ -87,23 +93,34 @@ class JobController {
         // any commands which might be in the other lists.
         def unprocessedCommands = replicaCommandSchedulerService.listUnprocessedCommands()
 
-        return [commandPollRate: replicaConfig.commandPollRate,
-            maxLongRunningCmds: replicaConfig.maxLongRunningCmds,
-            maxShortRunningCmds: replicaConfig.maxShortRunningCmds,
-            totalCommandsRunning: longRunningCommands.size() + 
-                shortRunningCommands.size(),
-            longRunningCommands: longRunningCommands,
-            shortRunningCommands: shortRunningCommands,
-            allCommands: allCommands,
-            scheduledCommands: scheduledCommands,
-            logDateFormat: dtFormat,
-            ctfUrl: CtfServer.getServer().getWebAppUrl(),
-            svnMasterUrl: replicaConfig.svnMasterUrl,
-            maxLongRunning: replicaConfig.maxLongRunningCmds,
-            maxShortRunning: replicaConfig.maxShortRunningCmds,
-            showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutput,
-            replicaName: replicaConfig.name,
-            unprocessedCommands: unprocessedCommands
+        // default page model
+        def modelMap = [
+
+                logDateFormat: dtFormat,
+                showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutput,
+                unprocessedCommands: unprocessedCommands ,
+                backgroundJobsRunning: backgroundJobsRunning,
+                backgroundJobsFinished: backgroundJobsFinished,
         ]
+        // replica-related additions
+        if (Server.getServer().mode == ServerMode.REPLICA) {
+            def replicaRelated = [
+                    serverMode: ServerMode.REPLICA,
+                    replicaName: replicaConfig.name,
+                    totalCommandsRunning: longRunningCommands.size() +
+                    shortRunningCommands.size(),
+                    longRunningCommands: longRunningCommands,
+                    shortRunningCommands: shortRunningCommands,
+                    allCommands: allCommands,
+                    scheduledCommands: scheduledCommands,
+                    commandPollRate: replicaConfig.commandPollRate,
+                    ctfUrl: CtfServer.getServer().getWebAppUrl(),
+                    svnMasterUrl: replicaConfig.svnMasterUrl,
+                    maxLongRunning: replicaConfig.maxLongRunningCmds,
+                    maxShortRunning: replicaConfig.maxShortRunningCmds ]
+
+            modelMap << replicaRelated
+        }
+        return modelMap
     }
 }
