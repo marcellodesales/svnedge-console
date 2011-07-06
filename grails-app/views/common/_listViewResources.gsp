@@ -24,7 +24,12 @@
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'alert.css')}" type="text/css"/>
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
-<div id='_confirmOkLabel' style='display:none'>${message(code:'default.confirmation.ok')}</div>"
-<div id='_confirmCancelLabel' style='display:none'>${message(code:'default.confirmation.cancel')}</div>"
+<g:javascript>
+var listViewI18n = {
+  _confirmOkLabel: "${message(code:'default.confirmation.ok')}",
+  _confirmCancelLabel: "${message(code:'default.confirmation.cancel')}"
+}
+</g:javascript>
+
 
 

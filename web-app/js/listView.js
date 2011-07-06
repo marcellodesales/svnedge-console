@@ -104,8 +104,8 @@ function confirmAction(confirmMessage, okHandler, cancelHandler) {
     var s = Dialog.confirm(confirmMessage, {
                 className: "bluelighting",
                 width:300, height: 200,
-                okLabel: $('_confirmOkLabel').innerHTML,
-                cancelLabel: $('_confirmCancelLabel').innerHTML,
+                okLabel: listViewI18n._confirmOkLabel,
+                cancelLabel: listViewI18n._confirmCancelLabel,
                 onOk: function(win) {
                     if (okHandler) {
                         okHandler()

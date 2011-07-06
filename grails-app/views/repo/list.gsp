@@ -21,10 +21,10 @@
     </g:set>
 
     <g:form>
-    <table class="Container">
-    <tbody>
-
     <g:if test="${repositoryInstanceList.size() > 0}">
+      <table class="Container">
+      <tbody>
+
         <tr class="ContainerHeader">
           <td colspan="${colCount}"><g:message code="repository.page.list.header" /></td>
         </tr>
@@ -92,8 +92,9 @@
 
                        </td>
                     </tr>
-            </div>
-        </div>
+       </tbody>
+      </table>
+
     </g:if>
 
     <g:else>
@@ -105,8 +106,6 @@
       </g:else>
     </g:else>
 
-       </tbody>
-      </table>
       </g:form>
     </body>
 </html>
