@@ -25,7 +25,7 @@ String.prototype.trim = function () {
 }
 
 Event.observe(window, 'load', function() {
-    // add observer to checkboxes for enabling / disabling checkboxes
+    // add observer to checkboxes for enabling / disabling command buttons
     var allItemSelectCheckboxes = $$('input.listViewSelectItem');
     allItemSelectCheckboxes.each(function(item) {
         Event.observe(item, 'click', updateActionButtons);
@@ -51,7 +51,8 @@ Event.observe(window, 'load', function() {
                                     return;
                                 }
                             }
-                            // submit the form with the original button properties transferred to a hidden field
+                            // submit the form with the original button properties transferred to a hidden field,
+                            // to simulate the button click and thereby activate Grails dispatcher
                             var action = new Element('input', { type: 'hidden',  name: s.readAttribute('name'), value: s.readAttribute('value') });
                             var theForm = s.up('form');
                             theForm.appendChild(action);
