@@ -102,9 +102,12 @@ function updateActionButtons()  {
  */
 function confirmAction(confirmMessage, okHandler, cancelHandler) {
 
+    var guessHeight = (confirmMessage.length / 3)
+    guessHeight += (confirmMessage.split("<p>").length * 50)
+
     var s = Dialog.confirm(confirmMessage, {
                 className: "bluelighting",
-                width:300, height: 200,
+                width:300, height: guessHeight,
                 okLabel: listViewI18n._confirmOkLabel,
                 cancelLabel: listViewI18n._confirmCancelLabel,
                 onOk: function(win) {
