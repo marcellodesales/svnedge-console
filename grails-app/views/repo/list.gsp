@@ -67,7 +67,7 @@
                   </td>
 
       <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-                            <td><g:link action="show" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.info" /></g:link></td>
+                            <td><g:link action="dumpFileList" id="${repositoryInstance.id}"><g:message code="repository.page.list.instance.info" /></g:link></td>
       </g:ifAnyGranted>
                         </tr>
                     </g:each>

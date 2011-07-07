@@ -132,15 +132,8 @@
                              </td>
                          </tr>
 
-                         <tr>
-                            <td colspan="5">
-                                <g:render template="../statistics/chart"/>
-                            </td>
-                        </tr>
-                    
                     </tbody>
                 </table>
-    
 
             <div class="buttons">
                 <g:form>
@@ -153,6 +146,9 @@
                     --%>
                 </g:form>
             </div>
-        </div>
-    </body>
-</html>
+
+  <g:set var="tabArray" value="${[[action:'dumpFileList', href:createLink(action: 'dumpFileList', id: params.id), label: message(code:'repository.page.show.tabs.dumpFileList')]]}" />
+  <g:set var="tabArray" value="${tabArray << [action:'bkupSchedule', href:createLink(action: 'bkupSchedule', id: params.id), label: message(code:'repository.page.show.tabs.bkupSchedule')]}" />
+  <g:set var="tabArray" value="${tabArray << [action:'reports', href:createLink(action: 'reports', id: params.id), label: message(code:'repository.page.show.tabs.reports')]}" />
+
+  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />

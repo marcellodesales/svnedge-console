@@ -177,6 +177,11 @@ class RepoController {
     
     @Secured(['ROLE_USER'])
     def show = {
+        redirect(action: 'dumpFileList', id: params.id)
+    }
+
+    @Secured(['ROLE_USER'])
+    def reports = {
         def repo = Repository.get( params.id )
 
         if(!repo) {
@@ -239,6 +244,74 @@ class RepoController {
         }
     }
 
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def dumpFileList = {
+        def model = reports()
+        def repo = Repository.get(params.id)
+        if (repo) {
+            model["dumpFileList"] = svnRepoService.listDumpFiles(repo)
+            model["numFilesTotal"] = model["dumpFileList"].size()
+        }        
+        return model
+    }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def bkupSchedule = {
+        def model = reports()
+        def repo = Repository.get(params.id)
+        if (repo) {
+            // TODO
+        }        
+        return model
+    }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def downloadDumpFile = {
+        def repo = Repository.get(params.id)
+        if (repo) {
+            def ids = getListViewSelectedIds(params)
+            def filename = ids ? ids[0] : params.filename
+            if (filename) {
+                
+                Server server = Server.getServer()
+                File dumpDir = new File(server.dumpDir, repo.name)
+                File dumpFile = new File(dumpDir, filename)
+                if (dumpFile.exists() && dumpFile.canRead()) {
+                    
+                    def contentType = filename.endsWith(".zip") ?
+                            "application/zip" : "application/octet-stream"
+                    response.setContentType(contentType)
+                    response.setHeader("Content-disposition", 'attachment;filename="' + filename + '"')
+                    dumpFile.withInputStream {
+                        response.outputStream << it
+                    }
+                    
+                } else {
+                    flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
+                            args: [filename])
+                    redirect(action: 'dumpFileList', id: params.id)
+                }
+            } else {
+                flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
+                        args: [null])
+                redirect(action: 'dumpFileList', id: params.id)
+            }
+        } else {
+            flash.error = message(code: 'repository.action.not.found',
+                args: [params.id])
+            redirect(action: 'dumpFileList', id: params.id)
+        }
+        return null
+    }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def deleteDumpFile = {
+        // TODO
+        flash.error = message(code: 'repository.action.not.found',
+            "Delete Dump File Not Implemented Yet")
+        redirect(action:list)
+    }
+    
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def delete = {
         def repo = Repository.get( params.id )
@@ -391,7 +464,7 @@ class RepoController {
     private List getListViewSelectedIds(Map params) {
         def ids = []
         params.each() {
-            def matcher = it.key =~ /listViewItem_([\d]+)/
+            def matcher = it.key =~ /listViewItem_(.+)/
             if (matcher && matcher[0][1]) {
                 def id = matcher[0][1]
                 if (it.value == "on") {

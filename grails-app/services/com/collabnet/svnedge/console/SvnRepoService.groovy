@@ -22,6 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import groovy.io.FileType;
+
 import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
@@ -547,6 +549,27 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         return (user == serverConfService.httpdUser && 
             group == serverConfService.httpdGroup)
+    }
+    
+    /**
+     * Lists all the dump files generated for the given repository
+     * @param repo A Repository object
+     * @return List of File objects
+     */
+    List<File> listDumpFiles(repo) {
+        def files = []
+
+        Server server = Server.getServer()
+        File dumpDir = new File(server.dumpDir, repo.name)
+        if (dumpDir.exists()) {
+            dumpDir.eachFile(FileType.FILES) { f ->
+                def name = f.name
+                if (!name.endsWith("-processing") && !name.endsWith("-processing.zip")) {
+                    files << f
+                }
+            }
+        }
+        return files
     }
     
     /**

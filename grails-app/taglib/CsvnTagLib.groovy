@@ -110,7 +110,9 @@ class CsvnTagLib {
      * @return the item row checkbox
      */
     def listViewSelectItem = { attrs ->
-        out << "<input type='checkbox' class='listViewSelectItem' id='listViewItem_${attrs.item.id}' name='listViewItem_${attrs.item.id}'/>"
+        def prop = attrs.property ?: "id"
+        def name = "listViewItem_${attrs.item[prop]}"
+        out << "<input type='checkbox' class='listViewSelectItem' id='${name}' name='${name}'/>"
     }
 
     /**

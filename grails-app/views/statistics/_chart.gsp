@@ -31,13 +31,13 @@
          <td>
            <ofchart:chart name="chart" 
             url="${createLink(action:initialGraph, controller:'statistics', 
-            params : [repoId: repositoryInstance?.id, timespan: 1])}" width="100%"
+            params : [repoId: repositoryInstance?.id, timespan: 1]).encodeAsHTML()}" width="100%"
             height="400"/>
-          <br>
+          <br />
           <g:select id="ts" from="${timespanSelect}" 
             optionValue="value" optionKey="key" value="1" 
-            onChange="updateGraph();"/>
-          </br>
+            onchange="updateGraph();"/>
+          <br />
          </td>
        </tr>
      </tbody>
