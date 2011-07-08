@@ -249,8 +249,19 @@ class RepoController {
         def model = reports()
         def repo = Repository.get(params.id)
         if (repo) {
-            model["dumpFileList"] = svnRepoService.listDumpFiles(repo)
-            model["numFilesTotal"] = model["dumpFileList"].size()
+            // set default sort to be date descending, if neither sort 
+            // parameter is present
+            if (!params.sort) {
+                params.sort = "date"
+                params.order = "desc"
+            }
+            if (!params.order) {
+                params.order = "asc"
+            }
+            def sortBy = params.sort
+            boolean isAscending = params.order == "asc"
+            model["dumpFileList"] = 
+                svnRepoService.listDumpFiles(repo, sortBy, isAscending)
         }        
         return model
     }
@@ -272,23 +283,18 @@ class RepoController {
             def ids = getListViewSelectedIds(params)
             def filename = ids ? ids[0] : params.filename
             if (filename) {
-                
-                Server server = Server.getServer()
-                File dumpDir = new File(server.dumpDir, repo.name)
-                File dumpFile = new File(dumpDir, filename)
-                if (dumpFile.exists() && dumpFile.canRead()) {
-                    
+                try {
                     def contentType = filename.endsWith(".zip") ?
-                            "application/zip" : "application/octet-stream"
+                        "application/zip" : "application/octet-stream"
                     response.setContentType(contentType)
-                    response.setHeader("Content-disposition", 'attachment;filename="' + filename + '"')
-                    dumpFile.withInputStream {
-                        response.outputStream << it
+                    response.setHeader("Content-disposition",
+                        'attachment;filename="' + filename + '"')
+                    if (!svnRepoService.copyDumpFile(filename, repo, response.outputStream)) {
+                        throw new FileNotFoundException()
                     }
-                    
-                } else {
+                } catch (FileNotFoundException e) {
                     flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
-                            args: [filename])
+                        args: [filename])
                     redirect(action: 'dumpFileList', id: params.id)
                 }
             } else {
@@ -305,11 +311,37 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
-    def deleteDumpFile = {
-        // TODO
-        flash.error = message(code: 'repository.action.not.found',
-            "Delete Dump File Not Implemented Yet")
-        redirect(action:list)
+    def deleteDumpFiles = {
+        def repo = Repository.get(params.id)
+        if (repo) {
+            def ids = getListViewSelectedIds(params)
+            if (ids) {
+                ids.each { filename ->
+                    try {
+                        // TODO messaging needs improvement to support
+                        // multiple file delete
+                        if (svnRepoService.deleteDumpFile(filename, repo)) {
+                            flash.message = message(code: 'repository.action.deleteDumpFile.success',
+                                args: [filename])
+
+                        } else {
+                            flash.error = message(code: 'repository.action.deleteDumpFile.fail',
+                                args: [filename])
+                        }
+                    } catch (FileNotFoundException e) {
+                        flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
+                            args: [filename])
+                    }
+                }
+            } else {
+                flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
+                        args: [null])
+            }
+        } else {
+            flash.error = message(code: 'repository.action.not.found',
+                args: [params.id])
+        }
+        redirect(action: 'dumpFileList', id: params.id)
     }
     
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])

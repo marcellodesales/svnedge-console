@@ -556,7 +556,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @param repo A Repository object
      * @return List of File objects
      */
-    List<File> listDumpFiles(repo) {
+    List<File> listDumpFiles(repo, sortBy = "date", isAscending = false) {
         def files = []
 
         Server server = Server.getServer()
@@ -569,9 +569,63 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 }
             }
         }
+        int sign = isAscending ? 1 : -1
+        switch (sortBy) {
+            case "name":
+                files = files.sort { a, b -> sign * (a.name <=> b.name) }
+                break
+            case "size":
+                files = files.sort { f -> sign * f.length() }
+                break
+            default:
+                files = files.sort { f -> sign * f.lastModified() }
+        }
         return files
     }
-    
+
+    /**
+     * Hard delete of the specified repository dump file
+     * 
+     * @param filename
+     * @param repo Repository object
+     * @return true, if the delete was successful; false otherwise
+     */
+    boolean deleteDumpFile(filename, repo) throws FileNotFoundException {
+        return getDumpFile(filename, repo).delete()
+    }
+
+    /**
+     * Copies the contents of the specified repository dump file to the 
+     * given stream
+     *     
+     * @param filename
+     * @param repo Repository object
+     * @param outputStream
+     * @return true, if the file could be read
+     */
+    boolean copyDumpFile(filename, repo, outputStream) 
+            throws FileNotFoundException {
+        File dumpFile = getDumpFile(filename, repo)
+        if (dumpFile.canRead()) {
+            dumpFile.withInputStream {
+                outputStream << it
+            }
+            return true
+        } 
+        return false
+    }
+
+    private File getDumpFile(filename, repo) throws FileNotFoundException {
+        Server server = Server.getServer()
+        File dumpDir = new File(server.dumpDir, repo.name)
+        File dumpFile = new File(dumpDir, filename)
+        if (dumpFile.exists()) {
+            return dumpFile
+        }
+        throw new FileNotFoundException(filename)
+    }
+        
+            
     /**
      * Method to invoke "svnadmin dump" possibly piped through svndumpfilter
      * 

@@ -1,5 +1,9 @@
-    <g:render template="commonHeader"/>
+<g:applyLayout name="repoDetail">
+ <content tag="headSnippet">
+    <g:render template="/common/listViewResources"/>
+ </content>
 
+ <content tag="tabContent">
     <g:form>
       <input type="hidden" name="id" value="${params.id}" />
     <g:if test="${dumpFileList.size() > 0}">
@@ -7,9 +11,10 @@
       <tbody>
         <tr class="ItemListHeader">
           <th><g:listViewSelectAll/></th>
-          <g:sortableColumn property="name" title="${message(code:'repository.page.dumpFileList.filename')}" />
-          <g:sortableColumn property="timestamp" title="${message(code:'repository.page.dumpFileList.timestamp')}" />
-          <th><g:message code="repository.page.dumpFileList.fileSize" /></th>
+          <g:sortableColumn property="name" titleKey="repository.page.dumpFileList.filename" />
+          <g:sortableColumn property="date" titleKey="repository.page.dumpFileList.timestamp" defaultOrder="desc"/>
+          <g:sortableColumn property="size" titleKey="repository.page.dumpFileList.fileSize" />
+          <th><g:message code="" /></th>
         </tr>
         <g:each in="${dumpFileList}" status="i" var="file">
            <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
@@ -23,16 +28,13 @@
                     
         <tr class="ContainerFooter">
            <td colspan="4">
-             <div class="AlignLeft">
-             <div class="paginateButtons"><g:paginate total="${numFilesTotal}" /></div>
-             </div>
-
              <div class="AlignRight">
                  <g:listViewActionButton action="downloadDumpFile" minSelected="1" maxSelected="1">
                    <g:message code="repository.page.dumpFileList.button.download.label"/>
                  </g:listViewActionButton>
                <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-                 <g:listViewActionButton action="deleteDumpFiles" minSelected="1" maxSelected="1">
+                 <g:listViewActionButton action="deleteDumpFiles" minSelected="1" maxSelected="1"
+                     confirmMessage="${message(code:'repository.page.dumpFileList.delete.confirmation')}">
                    <g:message code="default.button.delete.label"/>
                  </g:listViewActionButton>
                </g:ifAnyGranted>
@@ -49,7 +51,5 @@
     </g:else>
 
       </g:form>
-
-
-    </body>
-</html>
+  </content>
+</g:applyLayout>

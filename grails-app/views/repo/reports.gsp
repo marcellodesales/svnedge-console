@@ -1,4 +1,6 @@
-      <g:render template="commonHeader"/>
+<g:applyLayout name="repoDetail">
+ <content tag="tabContent">
       <g:render template="../statistics/chart"/>
-    </body>
-</html>
+  </content>
+</g:applyLayout>
+      

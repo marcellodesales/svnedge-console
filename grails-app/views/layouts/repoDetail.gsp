@@ -3,6 +3,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title><g:message code="repository.page.show.title" /></title>
+        <g:pageProperty name="page.headSnippet" />
     </head>
 
 <g:render template="leftNav" />
@@ -152,3 +153,9 @@
   <g:set var="tabArray" value="${tabArray << [action:'reports', href:createLink(action: 'reports', id: params.id), label: message(code:'repository.page.show.tabs.reports')]}" />
 
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
+  
+  <g:pageProperty name="page.tabContent" />
+  
+    </body>
+</html>
+  

@@ -1,6 +1,7 @@
-      <g:render template="commonHeader"/>
+<g:applyLayout name="repoDetail">
+ <content tag="tabContent">
 
 TBD
 
-    </body>
-</html>
+  </content>
+</g:applyLayout>

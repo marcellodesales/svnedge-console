@@ -37,7 +37,7 @@
     <td style="background: url(${resource(dir:'images/tabs',file:tabImage)})" width="0" 
       class="TabBody">
     <g:if test="${tabLink}">
-      <a${tab.action ? ' id="' + tab.action + 'TabLink"' : ''} 
+      <a <g:if test="${tab.action}">id="${tab.action}TabLink"</g:if> 
         ${tab.events ? tab.events : ''}  href="${tabLink}">
     </g:if>
       <%= tab.label.replaceAll(" ", "&nbsp;") %> 
