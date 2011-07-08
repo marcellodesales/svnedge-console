@@ -33,6 +33,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
     SvnRepoService svc;
     File repoParentDir;
     File repoOnDisk;
+    File dumpDir
 
     protected void setUp() {
         super.setUp()
@@ -50,18 +51,21 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         repoOnDiskMarkerFile = new File(repoOnDisk, "db")
         repoOnDiskMarkerFile.mkdir()
 
-        ConfigUtil.configuration = ["svnedge": ["dumpDirPath":
-            System.getProperty("java.io.tmpdir", "/tmp")]]
+        def repoTest = new Repository( name: "existingRepo")
+        dumpDir = new File(
+            System.getProperty("java.io.tmpdir", "/tmp"), "test-repo-dumps")
+        File repoDumpDir = new File(dumpDir, repoTest.name)
+        repoDumpDir.mkdirs()
+
+        ConfigUtil.configuration = ["svnedge": ["dumpDirPath": dumpDir.canonicalPath]]
 
         // mock domain objects
         def testServer = new Server(
                 repoParentDir: repoParentDir.absolutePath
         )
-        def repoTest = new Repository( name: "existingRepo")
         def stat = new Statistic()
         def statValue = new StatValue(repo:repoTest, statistic: stat)
         def replicatedRepo = new ReplicatedRepository(repo : repoTest)
-        
 
         mockDomain (Server, [testServer])
         mockDomain (Repository, [repoTest])
@@ -90,8 +94,6 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         svc.commandLineService = cls
         svc.serverConfService = repoSvc
         svc.operatingSystemService = osSvc
-
-
     }
 
     protected void tearDown() {
@@ -99,6 +101,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
 
         repoOnDisk.delete()
         repoParentDir.deleteDir()
+        dumpDir.deleteDir()
     }
 
     private File createMockRepo(String repoName, boolean doSync) {
@@ -405,6 +408,99 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
 
     }
 
+    /**
+    * Lists all the dump files generated for the given repository
+    * @param repo A Repository object
+    * @return List of File objects
+    */
+   void testListDumpFiles() {
+       def repo = Repository.get(1)
+       setupDumpTestFiles(repo, 1000)
+       // test default sort
+       List<File> files = svc.listDumpFiles(repo)
+       assertEquals "Should be 3 files", 3, files.size()
+       def filenames = ["b.txt", "a.txt", "c.txt"]
+       assertEquals "Default sort did not match", filenames, files.collect { it.name }
 
+       files = svc.listDumpFiles(repo, "name", true)
+       filenames = ["a.txt", "b.txt", "c.txt"]
+       assertEquals "Name asc sort did not match", filenames, files.collect { it.name }
+       
+       files = svc.listDumpFiles(repo, "name")
+       filenames = ["c.txt", "b.txt", "a.txt"]
+       assertEquals "Name desc sort did not match", filenames, files.collect { it.name }
+       
+       files = svc.listDumpFiles(repo, "size", true)
+       filenames = ["a.txt", "c.txt", "b.txt"]
+       assertEquals "Size asc sort did not match", filenames, files.collect { it.name }
+       
+       files = svc.listDumpFiles(repo, "size")
+       filenames = ["b.txt", "c.txt", "a.txt"]
+       assertEquals "Size desc sort did not match", filenames, files.collect { it.name }
 
+       files = svc.listDumpFiles(repo, "date", true)
+       filenames = ["c.txt", "a.txt", "b.txt"]
+       assertEquals "Date asc sort did not match", filenames, files.collect { it.name }
+
+       // nonexistent property results in default sort
+       files = svc.listDumpFiles(repo, "xyz", true)
+       filenames = ["b.txt", "a.txt", "c.txt"]
+       assertEquals "Nonexistent property did not result in default sort", 
+           filenames, files.collect { it.name }
+   }
+   
+   void testDeleteDumpFile() {
+       def repo = Repository.get(1)
+       setupDumpTestFiles(repo)
+       File repoDumpDir = new File(dumpDir, repo.name)
+       File existingFile = new File(repoDumpDir, "a.txt")
+       assertTrue "Test file " + existingFile + " should exist before deletion", existingFile.exists() 
+       assertTrue "Delete of existing dump file should succeed", 
+           svc.deleteDumpFile("a.txt", repo)
+
+       File missingFile = new File(repoDumpDir, "z.txt")
+       assertFalse "Test file expected to not exist", missingFile.exists()
+       try {
+           svc.deleteDumpFile("z.txt", repo)
+           fail "Delete of nonexistent dump file throw exception" 
+       } catch (FileNotFoundException e) {
+           // expected
+       }           
+   }
+
+   void testCopyDumpFile() {
+       def repo = Repository.get(1)
+       setupDumpTestFiles(repo)
+       File repoDumpDir = new File(dumpDir, repo.name)
+       def filenames = ["a.txt", "b.txt", "c.txt"]
+       for (filename in filenames) {
+           File existingFile = new File(repoDumpDir, filename)
+           assertTrue "Test file '" + existingFile + "'should exist", existingFile.exists()
+           File dest = new File(repoDumpDir, "copy.txt")
+           def fout = dest.newOutputStream()
+           svc.copyDumpFile(filename, repo, fout)
+           fout.close()
+           assertTrue "Copied file exists", dest.exists()
+           assertEquals "File contents were not equal", 
+               existingFile.text, dest.text
+           dest.delete()
+       }
+   }
+
+   private void setupDumpTestFiles(repo, int wait = 0) {
+       def repoDumpDir = new File(dumpDir, repo.name)
+       // Setup some dump files
+       File f = new File(repoDumpDir, "c.txt")
+       f.text = "12345"
+       if (wait > 0) {
+           Thread.sleep(wait)
+       }
+       f = new File(repoDumpDir, "a.txt")
+       f.text = "1"
+       if (wait > 0) {
+           Thread.sleep(wait)
+       }
+       f = new File(repoDumpDir, "b.txt")
+       f.text = "123456789"
+   }
 }

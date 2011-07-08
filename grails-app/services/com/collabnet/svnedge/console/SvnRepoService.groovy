@@ -577,8 +577,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
             case "size":
                 files = files.sort { f -> sign * f.length() }
                 break
-            default:
+            case "date":
                 files = files.sort { f -> sign * f.lastModified() }
+                break
+            default:
+                files = files.sort { f -> -1 * f.lastModified() }
         }
         return files
     }
