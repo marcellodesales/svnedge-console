@@ -9,6 +9,7 @@ rem note this is not the java exe for running the application. the exe for runni
 set java_exe="java"
 
 if not defined JAVA_HOME goto findjava
+if not exist "%JAVA_HOME%\bin\java.exe" goto findjava
 set java_exe="%JAVA_HOME%\bin\java"
 goto out
 
