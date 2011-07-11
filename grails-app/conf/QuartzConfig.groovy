@@ -26,7 +26,7 @@ quartz {
 environments {
     test {
         quartz {
-//            autoStartup = false
+            jdbcStore = false
         }
     }
 }

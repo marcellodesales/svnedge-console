@@ -33,6 +33,7 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
     def grailsApplication
     def config
     def packagesUpdateService
+    def jobsAdminService
     def validImageFileDir
     def invalidImagePath
     def pkgInternalDirectory
@@ -51,6 +52,7 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
         invalidImagePath = new File(this.validImageFileDir, 
             "/non-existing").absolutePath
         this.packagesUpdateService = new PackagesUpdateService()
+        this.packagesUpdateService.jobsAdminService = jobsAdminService
 
         try {
             this.packagesUpdateService.bootstrap(this.config)
