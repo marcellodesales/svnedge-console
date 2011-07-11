@@ -27,9 +27,10 @@ import org.quartz.Trigger
  * This job consolidates StatValues.
  */
 class ConsolidateStatJob {
-    static String name = "ConsolidateStatJob"
+    static String name = "com.collabnet.svnedge.statistics.ConsolidateStatJob"
     static String group = "Statistics"
     static String triggerGroup = "Statistics_Triggers"
+    def volatility = false
 
     def consolidateStatisticsService
 
@@ -53,6 +54,7 @@ class ConsolidateStatJob {
         trigger.setJobName(name)
         trigger.setJobGroup(group)
         trigger.setJobDataMap(new JobDataMap(params))
+        trigger.setVolatility(false)
         trigger
     }
 }

@@ -34,6 +34,7 @@ import org.quartz.SchedulerException
 class FileSystemStatisticsService extends AbstractStatisticsService {
 
     def operatingSystemService
+    def jobsAdminService
 
     public static String CATEGORY_NAME = "System"
     public static String STATGROUP_NAME = "FileSystem"
@@ -60,8 +61,9 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         def params = ["serviceName": "fileSystemStatisticsService"]
         def statCollectJob = new StatCollectJob()
         try {
-            statCollectJob.schedule(StatCollectJob
-                .createTrigger(TRIGGER_NAME, JOB_INTERVAL_MILLIS, params, JOB_START_DELAY))
+            def trigger = StatCollectJob
+                .createTrigger(TRIGGER_NAME, JOB_INTERVAL_MILLIS, params, JOB_START_DELAY)
+            jobsAdminService.createOrReplaceTrigger(trigger)
             log.info("creating stat collection job at interval (millis): " + JOB_INTERVAL_MILLIS)
         } catch (SchedulerException ex) {
             log.error("Failed to start StatCollectJob due to exception.", ex)

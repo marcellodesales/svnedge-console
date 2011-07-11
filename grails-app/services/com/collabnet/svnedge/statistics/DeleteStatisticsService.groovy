@@ -46,7 +46,7 @@ class DeleteStatisticsService {
             StatValue.executeUpdate("delete StatValue sv where " 
                                     + "sv.timestamp < ? and sv.statistic = ? " 
                                     + "and sv.interval = ?", 
-                                    [deleteOlderThan, stat, intervalGrade])
+                                    [deleteOlderThan, stat, intervalGrade] as Collection)
         }
     }
 }

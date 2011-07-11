@@ -35,6 +35,7 @@ class LogManagementService {
     def operatingSystemService
     def serverConfService
     def lifecycleService
+    def jobsAdminService
 
     def dataDir
 
@@ -59,7 +60,7 @@ class LogManagementService {
         if (consoleLogLevel) {
             setConsoleLevel(consoleLogLevel)
         }
-        new LogRotateJob().start()
+        jobsAdminService.createOrReplaceTrigger(LogRotateJob.createTrigger())
     }
 
     /**

@@ -23,15 +23,18 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.util.ConfigUtil
 
 import org.quartz.CronTrigger
+import org.quartz.SchedulerException
+import org.quartz.Trigger
 
 class LogRotateJob {
 
     def lifecycleService
     def serverConfService
+    def jobsAdminService
     def configUtil
-    static def name = "com.collabnet.svnedge.jobs.LogRotateJob"
+    static def name = "com.collabnet.svnedge.admin.LogRotateJob"
     static def group = "Maintenance"
-    private static boolean isStarted = false
+    def volatility = false
 
     static triggers = { 
     // artf4934, some OS's don't compile the quartz plugin correctly, so
@@ -46,12 +49,10 @@ class LogRotateJob {
     /** 
      * Schedule daily 12:05 am repeating trigger
      */
-    void start() {
-        if (!isStarted) {
-            schedule(new CronTrigger("LogRotateTrigger", 
-                group + "_Triggers", name, group, "0 5 0 * * ?"))
-            isStarted = true
-        }
+    static Trigger createTrigger() {
+        def trigger = new CronTrigger("LogRotateTrigger",
+            group + "_Triggers", name, group, "0 5 0 * * ?")
+        return trigger
     }
 
     def pruneLog(daysToKeep) {

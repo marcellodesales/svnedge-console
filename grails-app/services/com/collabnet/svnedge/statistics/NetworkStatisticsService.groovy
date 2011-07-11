@@ -32,6 +32,7 @@ class NetworkStatisticsService extends AbstractStatisticsService {
 
     def operatingSystemService
     def networkingService
+    def jobsAdminService
 
     protected static String RECEIVED_STAT_NAME = "BytesIn"
     protected static String SENT_STAT_NAME = "BytesOut"
@@ -54,11 +55,12 @@ class NetworkStatisticsService extends AbstractStatisticsService {
         def params = ["serviceName": "networkStatisticsService"]
         def statCollectJob = new StatCollectJob()
         try {
-            statCollectJob.schedule(StatCollectJob
-                .createTrigger(TRIGGER_NAME, interval, params, 12800L))
+            def trigger = StatCollectJob
+                .createTrigger(TRIGGER_NAME, interval, params, 12800L)
+            jobsAdminService.createOrReplaceTrigger(trigger)
             log.info("creating stat collection job at interval (millis): " + interval)
         } catch (SchedulerException ex) {
-            log.error("Failed to start StatCollectJob due to exception.", ex)
+            log.warn("Did not schedule StatCollectJob due to exception.", ex)
         }
         addDeleteJob(getStatGroup())
         addConsolidateJob(getStatGroup())
@@ -112,6 +114,7 @@ class NetworkStatisticsService extends AbstractStatisticsService {
      * Called from the quartz service
      */
     def collectData() {
+        log.debug("Collecting network transmitted and received values")
         def now = new Date().getTime()
         def byteValues = parseBytes()
         def interval = getStatGroup().getRawInterval() * 1000

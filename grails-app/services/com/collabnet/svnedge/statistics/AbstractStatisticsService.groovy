@@ -203,14 +203,14 @@ abstract class AbstractStatisticsService {
             def params = ["statGroupName": statGroup.getName()]
             def deleteStatJob = new DeleteStatJob()
             try {
-                deleteStatJob
-                    .schedule(DeleteStatJob
-                              .createTrigger(statGroup.getName() 
-                                             + "StatDeleteTrigger", 
-                                             minInterval * 1000, params))
+                def trigger = DeleteStatJob
+                              .createTrigger(statGroup.getName()
+                                             + "StatDeleteTrigger",
+                                             minInterval * 1000, params)
+                jobsAdminService.createOrReplaceTrigger(trigger)
                 log.info("Created DeleteStatJob for " + statGroup.getName())
             } catch (SchedulerException ex) {
-                log.error("Failed to start DeleteStatJob for " 
+                log.warn("Failed to schedule DeleteStatJob for "
                           + statGroup.getName() + " due to exception.", ex)
             }
         } else {
@@ -225,15 +225,15 @@ abstract class AbstractStatisticsService {
             def params = ["statGroupName": statGroup.getName()]
             def consolidateStatJob = new ConsolidateStatJob()
             try {
-                consolidateStatJob
-                    .schedule(ConsolidateStatJob
-                              .createTrigger(statGroup.getName() 
+                def trigger = ConsolidateStatJob
+                              .createTrigger(statGroup.getName()
                                              + "StatConsolidateTrigger", 
-                                             minInterval * 1000, params))
+                                             minInterval * 1000, params)
+                jobsAdminService.createOrReplaceTrigger(trigger)
                 log.info("Created ConsolidateStatJob for " 
                          + statGroup.getName())
             } catch (SchedulerException ex) {
-                log.error("Failed to start ConsolidateStatJob for " 
+                log.warn("Failed to start ConsolidateStatJob for "
                           + statGroup.getName() + " due to exception.", ex)
             }
         } else {

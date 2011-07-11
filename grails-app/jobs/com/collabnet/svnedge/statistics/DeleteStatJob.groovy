@@ -30,9 +30,10 @@ import org.quartz.Trigger
  * interval.
  */
 class DeleteStatJob {
-    static String name = "DeleteStatJob"
+    static String name = "com.collabnet.svnedge.statistics.DeleteStatJob"
     static String group = "Statistics"
     static String triggerGroup = "Statistics_Triggers"
+    def volatility = false
 
     def deleteStatisticsService
 

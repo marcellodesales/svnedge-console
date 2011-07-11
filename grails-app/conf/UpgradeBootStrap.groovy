@@ -21,6 +21,7 @@ import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.quartz.QrtzLocks
 
 /**
  * Bootstrap script for handling any special conditions associated with upgrades
@@ -36,6 +37,7 @@ class UpgradeBootStrap {
         release1_1_0()
         release1_2_0()
         release1_3_1()
+        release2_1_0()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -117,5 +119,25 @@ class UpgradeBootStrap {
             description: "1.3.1 updated Server adding field " +
                 "'ldapEnabledConsole'.")
         v.save()
+    }
+
+    def void release2_1_0() {
+        if (isSchemaCurrent(2, 1, 0)) {
+            return
+        }
+        log.info("Applying 2.1.0 updates")
+
+        def locks = [ new QrtzLocks(lockName: 'TRIGGER_ACCESS'),
+                new QrtzLocks(lockName: 'JOB_ACCESS'),
+                new QrtzLocks(lockName: 'CALENDAR_ACCESS'),
+                new QrtzLocks(lockName: 'STATE_ACCESS'),
+                new QrtzLocks(lockName: 'MISFIRE_ACCESS') ]
+
+        locks.each { it.save() }
+
+        SchemaVersion v = new SchemaVersion(major: 2, minor: 1, revision: 0,
+                description: "2.1.0 added Quartz tables and data.")
+        v.save()
+
     }
 }

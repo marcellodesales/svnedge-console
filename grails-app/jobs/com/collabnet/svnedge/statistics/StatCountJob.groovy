@@ -34,7 +34,7 @@ import org.quartz.Trigger
  * when the system was running, but no events occurred. 
  */
 class StatCountJob {
-    static def name = "StatCount"
+    static def name = "com.collabnet.svnedge.statistics.StatCountJob"
     static def group = "Statistics"
     static def triggerGroup = "Statistics_Triggers"
 

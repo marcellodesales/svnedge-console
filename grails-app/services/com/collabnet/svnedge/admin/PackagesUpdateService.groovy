@@ -54,6 +54,12 @@ public final class PackagesUpdateService implements InitializingBean {
      * The lifecycle service reference.
      */
     def lifecycleService
+
+    /**
+     * the quartz administration service
+     */
+    def jobsAdminService
+
     /**
      * Non-transactional service 
      */
@@ -214,7 +220,7 @@ public final class PackagesUpdateService implements InitializingBean {
             log.error("Packages Update not initialized: " 
                 + directoryNotFound.message)
         }
-        PackagesUpdateJob.start()
+        jobsAdminService.createOrReplaceTrigger(PackagesUpdateJob.createTrigger())
     }
 
     // just like @PostConstruct

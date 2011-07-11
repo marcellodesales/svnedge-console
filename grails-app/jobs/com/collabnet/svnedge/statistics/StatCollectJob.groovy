@@ -31,9 +31,10 @@ import org.springframework.context.ApplicationContextAware
  * interval.
  */
 class StatCollectJob implements ApplicationContextAware {
-    static String name = "StatCollectJob"
+    static String name = "com.collabnet.svnedge.statistics.StatCollectJob"
     static String group = "Statistics"
     static String triggerGroup = "Statistics_Triggers"
+    def volatility = false
 
     ApplicationContext appCtx
 

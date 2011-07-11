@@ -263,6 +263,24 @@ class JobsAdminService {
         }
     }
 
+    /**
+     * create or update a trigger, depending on whether it exists
+     * @param trigger to create or update
+     * @return
+     */
+    def createOrReplaceTrigger(Trigger trigger) {
+        def existingTrigger = getTrigger(trigger.name, trigger.group)
+        if (existingTrigger){
+            log.info("Updating ${trigger.name}")
+            quartzScheduler.rescheduleJob(trigger.name, trigger.group, trigger)
+        }
+        else {
+            log.info("Scheduling ${trigger.name}")
+            quartzScheduler.scheduleJob(trigger)
+        }
+    }
+
+
     // reschedule unscheduled trigger (which should be associated with a job)
     def scheduleTrigger(Trigger trigger) {
         quartzScheduler.scheduleJob(trigger)
