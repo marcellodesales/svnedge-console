@@ -34,6 +34,23 @@ public class DumpBean {
     boolean skipMissingMergeSources
     Locale userLocale
 
+    // list of fieldnames to facilitate conversion to/from a JobDataMap for use
+    // in Quartz scheduling
+    private static List propertyNames = [
+        "compress",
+        "revisionRange",
+        "incremental",
+        "deltas",
+        "filter",
+        "includePath",
+        "excludePath",
+        "dropEmptyRevs",
+        "renumberRevs",
+        "preserveRevprops",
+        "skipMissingMergeSources",
+        "userLocale"
+    ]
+
     Integer getLowerRevision() {
         Integer result = null
         if (revisionRange?.trim()) {
@@ -90,6 +107,34 @@ public class DumpBean {
                               return ['lowerLimitExceedsUpperLimit']
                           }
                       })
+    }
+
+    /**
+     * convenience method to create a DumpBean from a Map
+     * @param m map
+     * @return DumpBean instance
+     */
+    static DumpBean fromMap(Map m) {
+        DumpBean b = new DumpBean()
+        propertyNames.each { it ->
+            def mapValue = m.get(it)
+            b."${it}" = mapValue
+        }
+        return b
+    }
+
+    /**
+     * convenience method to create a Map from DumpBean
+     * @param b DumpBean to convert
+     * @return Map of the bean's properties
+     */
+    static Map toMap(DumpBean b) {
+        Map m = [:]
+        propertyNames.each { it ->
+            def beanValue = b."${it}"
+            m.put(it, beanValue)
+        }
+        return m
     }
 }
 

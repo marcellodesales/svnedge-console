@@ -34,6 +34,9 @@ import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.util.ConfigUtil;
 import com.collabnet.svnedge.event.BackgroundJobStartedEvent
 import com.collabnet.svnedge.event.BackgroundJobTerminatedEvent
+import org.quartz.SimpleTrigger
+import com.collabnet.svnedge.admin.RepoDumpJob
+import org.quartz.JobDataMap
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -43,6 +46,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def commandLineService
     def serverConfService
     def statisticsService
+    def jobsAdminService
 
     boolean transactional = false
 
@@ -627,6 +631,29 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         throw new FileNotFoundException(filename)
     }
+
+    /**
+     * method to schedule a RepoDump quartz job
+     * @param bean the parameters for the dump job
+     * @param repo the repo ni question
+     * @return the filename the dumpfile is expected to have
+     */
+    String scheduleDump(DumpBean bean, repo) {
+        def runAtDate = new Date(System.currentTimeMillis() + 1000)
+        log.info("Creating backup job to run at: ${runAtDate}")
+
+        def trigger = new SimpleTrigger("RepoDump-${repo.name}", "Backup",
+                runAtDate)
+        trigger.setJobName(RepoDumpJob.name)
+        trigger.setJobGroup(RepoDumpJob.group)
+
+        def jobDataMap = ["repoId": repo.id]
+        jobDataMap.putAll(DumpBean.toMap(bean))
+        trigger.setJobDataMap(new JobDataMap(jobDataMap))
+
+        jobsAdminService.createOrReplaceTrigger(trigger)
+        return dumpFilename(bean, repo, runAtDate)
+    }
         
             
     /**
@@ -771,8 +798,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         progressLogFile.delete()
     }
     
-    private String dumpFilename(DumpBean bean, repo) {
-        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date())
+    private String dumpFilename(DumpBean bean, repo, Date runAtDate = new Date()) {
+        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(runAtDate)
         def range = bean.revisionRange ?  
             "-r" + bean.revisionRange.replace(":", "_") : ""
         def options = ""
