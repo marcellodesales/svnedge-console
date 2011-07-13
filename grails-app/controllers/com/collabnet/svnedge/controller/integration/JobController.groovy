@@ -28,7 +28,7 @@ import com.collabnet.svnedge.integration.command.CommandState;
 import com.collabnet.svnedge.integration.command.LongRunningCommand;
 import com.collabnet.svnedge.integration.command.ShortRunningCommand;
 
-import java.util.LinkedHashSet
+
 import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.Server;
 
@@ -36,7 +36,7 @@ import com.collabnet.svnedge.domain.Server;
 class JobController {
 
     def replicaServerStatusService
-    def backgroundJobsInfoService
+    def jobsInfoService
     def replicaCommandSchedulerService
     def applicationContext
     def ctfRemoteClientService
@@ -58,8 +58,8 @@ class JobController {
         def shortRunning = replicaServerStatusService.getCommandsByType(
             ShortRunningCommand.class)
 
-        def backgroundJobsRunning = backgroundJobsInfoService.runningJobs.values()
-        def backgroundJobsFinished = backgroundJobsInfoService.finishedJobs.values()
+        def backgroundJobsRunning = jobsInfoService.runningJobs.values()
+        def backgroundJobsFinished = jobsInfoService.finishedJobs.values()
 
         def scheduledCommands = new LinkedHashSet<AbstractCommand>()
 

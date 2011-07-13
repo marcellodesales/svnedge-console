@@ -647,7 +647,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
 
-        def jobDataMap = ["repoId": repo.id]
+        // data for reporting status to quartz job listeners
+        def progressLogFileName = "dump-progress-" + repo.name + ".log"
+        def jobDataMap =
+                [id: "repoDump-${repo.name}", repoId: repo.id,
+                description: getMessage("repository.action.createDumpfile.job.description", [repo.name],
+                        bean.userLocale),
+                url: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail" ]
+        // data for generating the dump file
         jobDataMap.putAll(DumpBean.toMap(bean))
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
 
@@ -705,11 +712,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
         FileOutputStream progress = new FileOutputStream(progressLogFile)
         FileOutputStream out = new FileOutputStream(tempDumpFile)
 
-        // background job notification properties
-        Map eventProperties = [id: "repoDump-${repo.name}",
-                description: getMessage("repository.action.createDumpfile.job.description", [repo.name], bean.userLocale),
-                url: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail" ]
-
         if (!bean.deltas && bean.filter && (bean.includePath || bean.excludePath)) {
             log.debug("Dump: With filter")
             String svndumpfilterPath = new File(new File(
@@ -732,7 +734,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
             threads << dumpProcess.consumeProcessOutputStream(out)
             runAsync {
-                publishEvent(new BackgroundJobStartedEvent(this, Thread.currentThread().id, eventProperties))
                 try {
                     for (t in threads) {
                         try {
@@ -745,20 +746,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
-                publishEvent(new BackgroundJobTerminatedEvent(this, Thread.currentThread().id, eventProperties))
             }
 
         } else {
             log.debug("Dump: No filter")
             runAsync {
-                publishEvent(new BackgroundJobStartedEvent(this, Thread.currentThread().id, eventProperties))
                 try {
                     dumpProcess.waitForProcessOutput(out, progress)
                 } finally {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
-                publishEvent(new BackgroundJobTerminatedEvent(this, Thread.currentThread().id, eventProperties))
             }
         }
         return filename
