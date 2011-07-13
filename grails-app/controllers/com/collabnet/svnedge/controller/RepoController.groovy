@@ -277,6 +277,18 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def updateBkupSchedule = {
+        def repo = Repository.get(params.id)
+        if (repo) {
+            // TODO
+        }
+        params.remove('_action_updateBkupSchedule')
+        flash.error = 'Not implemented yet.'
+        redirect(action: 'bkupSchedule', params: params)
+    }
+
+    
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def downloadDumpFile = {
         def repo = Repository.get(params.id)
         if (repo) {

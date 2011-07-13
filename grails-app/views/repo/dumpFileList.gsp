@@ -14,7 +14,6 @@
           <g:sortableColumn property="name" titleKey="repository.page.dumpFileList.filename" />
           <g:sortableColumn property="date" titleKey="repository.page.dumpFileList.timestamp" defaultOrder="desc"/>
           <g:sortableColumn property="size" titleKey="repository.page.dumpFileList.fileSize" />
-          <th><g:message code="" /></th>
         </tr>
         <g:each in="${dumpFileList}" status="i" var="file">
            <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
