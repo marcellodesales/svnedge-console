@@ -32,8 +32,6 @@ import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.statistics.StatValue 
 import com.collabnet.svnedge.domain.statistics.Statistic 
 import com.collabnet.svnedge.util.ConfigUtil;
-import com.collabnet.svnedge.event.BackgroundJobStartedEvent
-import com.collabnet.svnedge.event.BackgroundJobTerminatedEvent
 import org.quartz.SimpleTrigger
 import com.collabnet.svnedge.admin.RepoDumpJob
 import org.quartz.JobDataMap

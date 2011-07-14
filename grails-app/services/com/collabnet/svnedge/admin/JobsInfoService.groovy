@@ -18,10 +18,6 @@
 package com.collabnet.svnedge.admin
 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
-import com.collabnet.svnedge.event.BackgroundJobEvent
-
-import com.collabnet.svnedge.event.BackgroundJobStartedEvent
-import com.collabnet.svnedge.event.BackgroundJobTerminatedEvent
 
 import org.quartz.JobExecutionContext
 import org.springframework.beans.factory.InitializingBean
@@ -54,7 +50,10 @@ class JobsInfoService extends AbstractSvnEdgeService
     // the maximum number of finished jobs to hold info about
     public static final int MAX_FINISHED_JOBS_SIZE = 5
 
-
+    /**
+     * @see JobListener#jobToBeExecuted
+     * @param jobExecutionContext
+     */
     void jobToBeExecuted(JobExecutionContext jobExecutionContext) {
         if(!interested(jobExecutionContext)) {
             return
@@ -62,6 +61,10 @@ class JobsInfoService extends AbstractSvnEdgeService
         runningJobs.put(jobExecutionContext.jobInstance, jobExecutionContext)
     }
 
+    /**
+     * @see JobListener#jobExecutionVetoed
+     * @param jobExecutionContext
+     */
     void jobExecutionVetoed(JobExecutionContext jobExecutionContext) {
         if(!interested(jobExecutionContext)) {
             return
@@ -69,6 +72,10 @@ class JobsInfoService extends AbstractSvnEdgeService
         runningJobs.remove(jobExecutionContext.jobInstance)
     }
 
+    /**
+     * @see JobListener#jobWasExecuted
+     * @param jobExecutionContext
+     */
     void jobWasExecuted(JobExecutionContext jobExecutionContext, JobExecutionException e) {
         if(!interested(jobExecutionContext)) {
             return
@@ -80,6 +87,7 @@ class JobsInfoService extends AbstractSvnEdgeService
     }
 
     /**
+     * @see InitializingBean#afterPropertiesSet
      * initializing bean -- after injection, we need to register with the quartz scheduler to receive events
      */
     void afterPropertiesSet() {

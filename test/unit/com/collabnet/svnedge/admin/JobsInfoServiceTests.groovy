@@ -18,9 +18,9 @@
 package com.collabnet.svnedge.admin
 
 import grails.test.GrailsUnitTestCase
-import com.collabnet.svnedge.event.BackgroundJobTerminatedEvent
-import com.collabnet.svnedge.event.BackgroundJobStartedEvent
 import org.junit.Ignore
+import org.quartz.JobExecutionContext
+import org.quartz.Job
 
 /**
  * Tests for the JobsInfoService
@@ -36,18 +36,22 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     @Ignore
     public void testJobsInfo() {
 
-        Map eventProperties = [jobType: "repoDump", repo: "testRepo", dumpFile: new File("myFile.txt")]
-        def e1 = new BackgroundJobStartedEvent(this, "1234", eventProperties)
-        def e2 = new BackgroundJobStartedEvent(this, "5678", eventProperties)
-        jobsInfoService.onApplicationEvent(e1)
-        jobsInfoService.onApplicationEvent(e2)
+        def e1 = [:]
+        e1.jobInstance = new Object()
+        e1.jobDetail = [:]
+        e1.jobDetail.name = "Somejob"
+        jobsInfoService.jobToBeExecuted(e1 as JobExecutionContext)
+
+        def e2 = [:]
+        e2.jobInstance = new Object()
+        e2.jobDetail = [:]
+        e2.jobDetail.name = "Somejob"
+        jobsInfoService.jobToBeExecuted(e2 as JobExecutionContext)
 
         assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
 
-        def e3 = new BackgroundJobTerminatedEvent(this, "1234", eventProperties)
-        jobsInfoService.onApplicationEvent(e3)
-
+        jobsInfoService.jobWasExecuted(e2 as JobExecutionContext, null)
 
         assertEquals("there should be 1 running job according to the service", 1,
                 jobsInfoService.runningJobs.size())
@@ -60,37 +64,30 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     @Ignore
     public void testFinishedJobsPruning() {
 
-        Map eventProperties = [jobType: "repoDump", repo: "testRepo", dumpFile: new File("myFile.txt")]
-        def startEvents = [new BackgroundJobStartedEvent(this, "1", eventProperties), 
-            new BackgroundJobStartedEvent(this, "2", eventProperties),
-            new BackgroundJobStartedEvent(this, "3", eventProperties),
-            new BackgroundJobStartedEvent(this, "4", eventProperties),
-            new BackgroundJobStartedEvent(this, "5", eventProperties),
-            new BackgroundJobStartedEvent(this, "6", eventProperties)]
+        def jobContexts = [new JobExecutionContext(null, null, null),
+            new JobExecutionContext(null, null, null),
+            new JobExecutionContext(null, null, null),
+            new JobExecutionContext(null, null, null),
+            new JobExecutionContext(null, null, null),
+            new JobExecutionContext(null, null, null)]
         
-        startEvents.each {
-            jobsInfoService.onApplicationEvent(it)
+        jobContexts.each {
+            it.jobInstance = new Object()
+            jobsInfoService.jobToBeExecuted(it)
         }
 
         assertEquals("there should be 6 running jobs according to the service", 6,
                 jobsInfoService.runningJobs.size())
 
-        def endEvents = [new BackgroundJobTerminatedEvent(this, "1", eventProperties), 
-            new BackgroundJobTerminatedEvent(this, "2", eventProperties),
-            new BackgroundJobTerminatedEvent(this, "3", eventProperties),
-            new BackgroundJobTerminatedEvent(this, "4", eventProperties),
-            new BackgroundJobTerminatedEvent(this, "5", eventProperties),
-            new BackgroundJobTerminatedEvent(this, "6", eventProperties)]
-        
-        endEvents.each {
-            jobsInfoService.onApplicationEvent(it)
-        }
 
+        jobContexts.each {
+            jobsInfoService.jobWasExecuted(it)
+        }
 
         assertEquals("there should be 0 running jobs according to the service", 0,
                 jobsInfoService.runningJobs.size())
 
-        assertEquals("there should be 5 finished job according to the service", 5,
+        assertEquals("there should be 5 finished job according to the service (oldest dropped)", 5,
                 jobsInfoService.finishedJobs.size())
 
     }
