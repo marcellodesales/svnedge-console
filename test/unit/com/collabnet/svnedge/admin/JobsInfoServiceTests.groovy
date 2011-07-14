@@ -18,9 +18,6 @@
 package com.collabnet.svnedge.admin
 
 import grails.test.GrailsUnitTestCase
-import org.junit.Ignore
-import org.quartz.JobExecutionContext
-import org.quartz.Job
 
 /**
  * Tests for the JobsInfoService
@@ -30,28 +27,25 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     def jobsInfoService
 
     public void setUp() {
+        super.setUp()
         this.jobsInfoService = new JobsInfoService()
     }
 
-    @Ignore
-    public void testJobsInfo() {
+    /**
+     * validates that JobInfoService correctly registers running and finishing of jobs
+     */
+    public void testJobsRunningAndFinished() {
 
-        def e1 = [:]
-        e1.jobInstance = new Object()
-        e1.jobDetail = [:]
-        e1.jobDetail.name = "Somejob"
-        jobsInfoService.jobToBeExecuted(e1 as JobExecutionContext)
+        def e1 = createMockJobExecutionContext()
+        jobsInfoService.jobStarted(e1)
 
-        def e2 = [:]
-        e2.jobInstance = new Object()
-        e2.jobDetail = [:]
-        e2.jobDetail.name = "Somejob"
-        jobsInfoService.jobToBeExecuted(e2 as JobExecutionContext)
+        def e2 =  createMockJobExecutionContext()
+        jobsInfoService.jobStarted(e2)
 
         assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
 
-        jobsInfoService.jobWasExecuted(e2 as JobExecutionContext, null)
+        jobsInfoService.jobFinished(e2)
 
         assertEquals("there should be 1 running job according to the service", 1,
                 jobsInfoService.runningJobs.size())
@@ -61,27 +55,42 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
 
     }
 
-    @Ignore
+    /**
+     * validates that JobInfoService only tracks jobs of interest
+     */
+    public void testInterestingJobsOnly() {
+
+        def jobOfInterest = createMockJobExecutionContext(true)
+        jobsInfoService.jobStarted(jobOfInterest)
+
+        def notInterested =  createMockJobExecutionContext(false)
+        jobsInfoService.jobStarted(notInterested)
+
+        assertEquals("there should be 1 running jobs according to the service", 1,
+                jobsInfoService.runningJobs.size())
+
+    }
+
+
+    /**
+     * validates that info of only 5 recent jobs are retained
+     */
     public void testFinishedJobsPruning() {
 
-        def jobContexts = [new JobExecutionContext(null, null, null),
-            new JobExecutionContext(null, null, null),
-            new JobExecutionContext(null, null, null),
-            new JobExecutionContext(null, null, null),
-            new JobExecutionContext(null, null, null),
-            new JobExecutionContext(null, null, null)]
-        
+        def jobContexts = []
+        (1..6).each {
+            jobContexts << createMockJobExecutionContext()
+        }
+
         jobContexts.each {
-            it.jobInstance = new Object()
-            jobsInfoService.jobToBeExecuted(it)
+            jobsInfoService.jobStarted(it)
         }
 
         assertEquals("there should be 6 running jobs according to the service", 6,
                 jobsInfoService.runningJobs.size())
 
-
         jobContexts.each {
-            jobsInfoService.jobWasExecuted(it)
+            jobsInfoService.jobFinished(it)
         }
 
         assertEquals("there should be 0 running jobs according to the service", 0,
@@ -90,6 +99,25 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         assertEquals("there should be 5 finished job according to the service (oldest dropped)", 5,
                 jobsInfoService.finishedJobs.size())
 
+    }
+
+    /**
+     * helper to create a mock JobExecutionContext
+     * @param isObserved boolean whether to provide a context of the type that JobInfoService is observing
+     * @return
+     */
+    def createMockJobExecutionContext(boolean isObserved = true) {
+
+        def jobDetail = new Expando()
+        jobDetail.name = (isObserved) ?
+                jobsInfoService.interestingJobNames[0] :
+                "TestJob${Math.floor(Math.random() * 1000)}"
+
+        def job = new Expando()
+        job.jobDetail = jobDetail
+        job.jobInstance = new Object()
+
+        return job
     }
     
 }

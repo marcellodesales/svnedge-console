@@ -22,17 +22,19 @@ import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import org.quartz.JobExecutionContext
 import org.springframework.beans.factory.InitializingBean
 import org.quartz.JobListener
-import org.quartz.JobExecutionException
 
 /**
  * Provides info about Quartz jobs in the console
  */
-class JobsInfoService extends AbstractSvnEdgeService
-        implements JobListener, InitializingBean {
+class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean {
 
-    // required field for observing Quartz events
+    // Observer name supplied to Quartz
     String name = "JobsInfoService"
 
+    // Job names we wish to observe
+    def interestingJobNames = [RepoDumpJob.name]
+
+    // scheduler upon which to register listener
     def quartzScheduler
 
     // current running jobs
@@ -51,10 +53,12 @@ class JobsInfoService extends AbstractSvnEdgeService
     public static final int MAX_FINISHED_JOBS_SIZE = 5
 
     /**
-     * @see JobListener#jobToBeExecuted
+     * call this method with JobExecutionContext (or other containing similar properties)
+     * to indicate a Job has started
+     * @see JobExecutionContext
      * @param jobExecutionContext
      */
-    void jobToBeExecuted(JobExecutionContext jobExecutionContext) {
+    void jobStarted(jobExecutionContext) {
         if(!interested(jobExecutionContext)) {
             return
         }
@@ -62,10 +66,13 @@ class JobsInfoService extends AbstractSvnEdgeService
     }
 
     /**
-     * @see JobListener#jobExecutionVetoed
+     * call this method with JobExecutionContext (or other containing similar properties)
+     * to indicate a Job has vetoed
+     * @see JobExecutionContext
      * @param jobExecutionContext
      */
-    void jobExecutionVetoed(JobExecutionContext jobExecutionContext) {
+    void jobVetoed(jobExecutionContext)  {
+
         if(!interested(jobExecutionContext)) {
             return
         }
@@ -73,10 +80,13 @@ class JobsInfoService extends AbstractSvnEdgeService
     }
 
     /**
-     * @see JobListener#jobWasExecuted
+     * call this method with JobExecutionContext (or other containing similar properties)
+     * to indicate a Job has completed
+     * @see JobExecutionContext
      * @param jobExecutionContext
      */
-    void jobWasExecuted(JobExecutionContext jobExecutionContext, JobExecutionException e) {
+    void jobFinished(jobExecutionContext) {
+
         if(!interested(jobExecutionContext)) {
             return
         }
@@ -91,17 +101,24 @@ class JobsInfoService extends AbstractSvnEdgeService
      * initializing bean -- after injection, we need to register with the quartz scheduler to receive events
      */
     void afterPropertiesSet() {
-        quartzScheduler.addGlobalJobListener(this)
+
+        // create JobListener interface impl to register with quartzScheduler
+        def listener = [
+                getName: { name },
+                jobToBeExecuted: {p1 -> jobStarted(p1)},
+                jobExecutionVetoed: {p1 -> jobVetoed(p1)},
+                jobWasExecuted: {p1, e -> jobFinished(p1)}
+                ] as JobListener
+        quartzScheduler.addGlobalJobListener(listener)
     }
 
     /**
      * are we keeping track of this job execution?
-     * @param ctx the JobExecutionContext
+     * @param ctx the JobExecutionContext (or other with jobDetail.name property)
      * @return boolean yes or no
      */
-    private boolean interested(JobExecutionContext ctx) {
+    private boolean interested(ctx) {
 
-        def interestingJobNames = [RepoDumpJob.name]
         return interestingJobNames.contains(ctx.jobDetail.name)
 
     }
