@@ -270,21 +270,64 @@ class RepoController {
     def bkupSchedule = {
         def model = reports()
         def repo = Repository.get(params.id)
-        if (repo) {
-            // TODO
+        if (!repo) {
+            flash.error = message(code: 'repository.action.not.found',
+                                  args: [id])
+            redirect(action: list)
+            
+        } else {
+            DumpBean cmd = flash.dumpBean
+            if (!cmd) {
+                def backups = svnRepoService.retrieveScheduledBackups(repo)
+                if (backups) {
+                    cmd = backups[0]
+                } else {
+                    params.type = 'none'
+                    cmd = new DumpBean()
+                    bindData(cmd, params)
+                }
+            }
+            model["dump"] = cmd
         }        
         return model
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
-    def updateBkupSchedule = {
-        def repo = Repository.get(params.id)
-        if (repo) {
-            // TODO
-        }
+    def updateBkupSchedule = { DumpBean cmd ->
         params.remove('_action_updateBkupSchedule')
-        flash.error = 'Not implemented yet.'
-        redirect(action: 'bkupSchedule', params: params)
+        def repo = Repository.get(params.id)
+        if (!repo) {
+            flash.error = message(code: 'repository.action.not.found',
+                                  args: [params.id])
+            redirect(action: list)
+            
+        } else {
+            try {
+                cmd.userLocale = request.locale
+                cmd.deltas = (params.type == 'dump_delta')
+                cmd.backup = true
+                if (cmd.hasErrors()) {
+                    flash.dumpBean = cmd
+                    flash.error = "There were errors"
+                    redirect(action:'bkupSchedule', params:params)
+                    return
+                }
+                svnRepoService.scheduleDump(cmd, repo)
+
+                flash.message = message(code: 'repository.action.updateBkupSchedule.success')
+                redirect(action: show, params: [id: params.id])
+            } catch (ValidationException e) {
+                log.debug "Rejecting " + e.field + " with message " + e.message
+                if (e.field) {
+                    cmd.errors.rejectValue(e.field, e.message)
+                } else {
+                    cmd.errors.reject(e.message)
+                    flash.error = message(code: e.message)
+                }
+                flash.dumpBean = cmd
+                redirect(action:'bkupSchedule', params:params)
+            }
+        }
     }
 
     

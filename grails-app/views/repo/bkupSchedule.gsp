@@ -1,3 +1,4 @@
+<%@page import="com.collabnet.svnedge.console.SchedulerBean"%>
 <g:applyLayout name="repoDetail">
  <content tag="headSnippet">
    <g:javascript library="prototype" />
@@ -19,17 +20,17 @@
         </td>
         <td valign="top" class="value ItemDetailValue">
          <select id="type" name="type">
-         <option value="dump"><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
-         <option value="dump_delta"><g:message code="repository.page.bkupSchedule.type.fullDumpDelta" /></option>
+         <option value="dump" <g:if test="${params.type != 'none' && !dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
+         <option value="dump_delta" <g:if test="${dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
          <option value="cloud"><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
-         <option value="none"><g:message code="repository.page.bkupSchedule.type.none" /></option>
+         <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
         </td>
       </tr>
       
       <tr id="whenRow">
         <td class="ItemDetailName">
-          <label for="period"><g:message code="repository.page.bkupSchedule.period" /></label>
+          <label for="frequency"><g:message code="repository.page.bkupSchedule.period" /></label>
         </td>
         <td valign="top" class="value ItemDetailValue">
           <table>
@@ -37,19 +38,19 @@
               <td>
                 <div>
                 <label>
-                  <g:radio id="period_h" name="period" value="h" checked="${params.period == 'h'}" />
+                  <g:radio id="frequency_h" name="schedule.frequency" value="HOURLY" checked="${dump.schedule.frequency == SchedulerBean.Frequency.HOURLY}" />
                   <g:message code="repository.page.bkupSchedule.period.hourly" />
                 </label>
                 </div>
                 <div>
                 <label>
-                  <g:radio id="period_d" name="period" value="d" checked="${params.period == 'd'}" />
+                  <g:radio id="frequency_d" name="schedule.frequency" value="DAILY" checked="${dump.schedule.frequency == SchedulerBean.Frequency.DAILY}" />
                   <g:message code="repository.page.bkupSchedule.period.daily" />
                 </label>
                 </div>
                 <div>
                 <label>
-                  <g:radio id="period_w" name="period" value="w" checked="${params.period != 'h' && params.period != 'd'}" />
+                  <g:radio id="frequency_w" name="schedule.frequency" value="WEEKLY" checked="${dump.schedule.frequency != SchedulerBean.Frequency.HOURLY && dump.schedule.frequency != SchedulerBean.Frequency.DAILY}" />
                   <g:message code="repository.page.bkupSchedule.period.weekly" />
                 </label>
                 </div>
@@ -66,7 +67,7 @@
                       <g:set var="hours" value="${(0..23).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
                       <g:set var="minutes" value="${(0..59).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
                       <span id="time">
-                        <g:select id="startHour" name="startHour" from="${hours}" />&nbsp;:&nbsp;<g:select name="startMinute" from="${minutes}" />&nbsp;:&nbsp;00
+                        <g:select id="startHour" name="schedule.hour" from="${hours}" value="${formatNumber(number: dump.schedule.hour, minIntegerDigits: 2)}"/>&nbsp;:&nbsp;<g:select name="schedule.minute" from="${minutes}" value="${formatNumber(number: dump.schedule.minute, minIntegerDigits: 2)}"/>&nbsp;:&nbsp;00
                       </span>
                     </td>
                   </tr>
@@ -74,7 +75,11 @@
                     <g:set var="daysOfWeek" value="${[message(code: 'default.dayOfWeek.sunday'), message(code: 'default.dayOfWeek.monday'), message(code: 'default.dayOfWeek.tuesday'), message(code: 'default.dayOfWeek.wednesday'), message(code: 'default.dayOfWeek.thursday'), message(code: 'default.dayOfWeek.friday'), message(code: 'default.dayOfWeek.saturday')]}"/>
                     <td class="ItemDetailName"><g:message code="repository.page.bkupSchedule.dayOfWeek" /></td>
                     <td valign="top" class="value ItemDetailValue">
-                      <g:select name="day" from="${daysOfWeek}" />
+                      <select id="dayOfWeek" name="schedule.dayOfWeek"> 
+                      <g:each status="i" var="day" in="${daysOfWeek}">
+                        <option value="${i + 1}"<g:if test="${dump.schedule.dayOfWeek == i}"> selected="selected"</g:if>>${day}</option>
+                      </g:each>
+                      </select>
                     </td>
                   </tr>
                 </table>
@@ -89,7 +94,7 @@
           <label for="keep"><g:message code="repository.page.bkupSchedule.numberToKeep" /></label>
         </td>
         <td valign="top" class="value ItemDetailValue">
-          <input type="text" size="3" name="keep" value="${params.keep}" />
+          <input type="text" size="3" name="numberToKeep" value="${dump.numberToKeep}" />
           &nbsp;&nbsp;<g:message code="repository.page.bkupSchedule.numberToKeep.all" />
         </td>
       </tr>     
@@ -105,7 +110,6 @@
    </tr>
   </table>
 </g:form>
-
 <g:javascript>
   function typeHandler() {
       var typeSelect = $('type');
@@ -129,7 +133,7 @@
       hourOptions[i] = hourSelect.options[i];
   }
   function displayTimeWidget() {
-      if ($('period_h').checked) {
+      if ($('frequency_h').checked) {
           for (var i = hourSelect.options.length - 1; i > 0; i--) {
               hourSelect.remove(i);
           }
@@ -144,20 +148,20 @@
       }
   }
   function displayDayOfWeekWidget() {
-      if ($('period_w').checked) {
+      if ($('frequency_w').checked) {
           $('dayOfWeekRow').style.display = '';
       } else {
           $('dayOfWeekRow').style.display = 'none';
       }
   }
-  function periodHandler() {
+  function frequencyHandler() {
       displayTimeWidget();
       displayDayOfWeekWidget();
   }
-  periodHandler();
-  $('period_h').onchange = periodHandler;
-  $('period_d').onchange = periodHandler;
-  $('period_w').onchange = periodHandler;
+  frequencyHandler();
+  $('frequency_h').onchange = frequencyHandler;
+  $('frequency_d').onchange = frequencyHandler;
+  $('frequency_w').onchange = frequencyHandler;
 
 </g:javascript>
           

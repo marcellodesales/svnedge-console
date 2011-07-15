@@ -17,6 +17,8 @@
 */
 package com.collabnet.svnedge.console
 
+import java.util.Map;
+
 /**
  * A command bean to hold all the parameters for an svnadmin dump with filtering
  */
@@ -33,6 +35,9 @@ public class DumpBean {
     boolean preserveRevprops
     boolean skipMissingMergeSources
     Locale userLocale
+    int numberToKeep = 0
+    SchedulerBean schedule = new SchedulerBean()
+    boolean backup
 
     // list of fieldnames to facilitate conversion to/from a JobDataMap for use
     // in Quartz scheduling
@@ -48,6 +53,8 @@ public class DumpBean {
         "renumberRevs",
         "preserveRevprops",
         "skipMissingMergeSources",
+        "numberToKeep",
+        "backup",
         "userLocale"
     ]
 
@@ -108,7 +115,7 @@ public class DumpBean {
                           }
                       })
     }
-
+    
     /**
      * convenience method to create a DumpBean from a Map
      * @param m map
@@ -120,20 +127,30 @@ public class DumpBean {
             def mapValue = m.get(it)
             b."${it}" = mapValue
         }
+        SchedulerBean.propertyNames.each { it ->
+            def mapValue = m.get("schedule." + it)
+            b.schedule."${it}" = mapValue
+        }
+        b.schedule.frequency = 
+            SchedulerBean.Frequency.valueOf(m.get("schedule.frequency"))
         return b
     }
-
+    
     /**
-     * convenience method to create a Map from DumpBean
-     * @param b DumpBean to convert
+     * convenience method to create a Map from Scheduler/DumpBean
      * @return Map of the bean's properties
      */
-    static Map toMap(DumpBean b) {
+    Map toMap() {
         Map m = [:]
         propertyNames.each { it ->
-            def beanValue = b."${it}"
+            def beanValue = this."${it}"
             m.put(it, beanValue)
         }
+        SchedulerBean.propertyNames.each { it ->
+            def beanValue = this.schedule."${it}"
+            m.put("schedule." + it, beanValue)
+        }
+        m.put("schedule.frequency", this.schedule.frequency.toString())
         return m
     }
 }

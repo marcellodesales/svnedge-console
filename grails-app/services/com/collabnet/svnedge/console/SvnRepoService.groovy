@@ -19,12 +19,15 @@ package com.collabnet.svnedge.console
 
 import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import groovy.io.FileType;
 
 import com.collabnet.svnedge.ValidationException;
+import com.collabnet.svnedge.console.SchedulerBean
+import com.collabnet.svnedge.console.SchedulerBean.Frequency
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
@@ -32,6 +35,8 @@ import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.statistics.StatValue 
 import com.collabnet.svnedge.domain.statistics.Statistic 
 import com.collabnet.svnedge.util.ConfigUtil;
+
+import org.quartz.CronTrigger;
 import org.quartz.SimpleTrigger
 import com.collabnet.svnedge.admin.RepoDumpJob
 import org.quartz.JobDataMap
@@ -630,6 +635,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
         throw new FileNotFoundException(filename)
     }
 
+    List retrieveScheduledBackups(repo) {
+        List backups = []
+        def tName = "RepoDump-${repo.name}"
+        def tGroup = "Backup"
+        def trigger = jobsAdminService.getTrigger(tName, tGroup)
+        if (trigger) {
+            DumpBean bean = DumpBean.fromMap(trigger.jobDataMap)
+            backups << bean
+        }
+        return backups
+    }
+    
     /**
      * method to schedule a RepoDump quartz job
      * @param bean the parameters for the dump job
@@ -637,11 +654,45 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return the filename the dumpfile is expected to have
      */
     String scheduleDump(DumpBean bean, repo) {
-        def runAtDate = new Date(System.currentTimeMillis() + 1000)
-        log.info("Creating backup job to run at: ${runAtDate}")
+        def tName = "RepoDump-${repo.name}"
+        def tGroup = bean.backup ? "Backup" : "AdhocDump"
+        SchedulerBean schedule = bean.schedule
+        def trigger
+        if (!schedule.frequency) {
+            schedule.frequency = Frequency.ONCE
+            Calendar cal = Calendar.getInstance()
+            cal.setTimeInMillis(System.currentTimeMillis() + 1000)
+            schedule.second = cal.get(Calendar.SECOND)
+            schedule.minute = cal.get(Calendar.MINUTE)
+            schedule.hour = cal.get(Calendar.HOUR_OF_DAY)
+            schedule.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+            schedule.month = cal.get(Calendar.MONTH)
+            schedule.year = cal.get(Calendar.YEAR)
+        }
 
-        def trigger = new SimpleTrigger("RepoDump-${repo.name}", "Backup",
-                runAtDate)
+        String seconds = (schedule.second < 0) ? "0" : "${schedule.second}"
+        String minute = " ${schedule.minute}"
+        String hour = " $schedule.hour}"
+        String dayOfMonth = " *"
+        String month = " *"
+        String dayOfWeek = " ?"
+        String year = ""
+        switch(schedule.frequency) {
+            case Frequency.WEEKLY:
+                dayOfWeek = " ${schedule.dayOfWeek + 1}"
+                dayOfMonth = " ?"
+            case Frequency.HOURLY:
+                hour = " *"
+            case Frequency.DAILY:
+                break
+            case Frequency.ONCE:
+                dayOfMonth = " ${schedule.dayOfMonth}"
+                month = " ${schedule.month}"
+                year = " ${schedule.year}"
+        }
+        String cron = seconds + minute + hour + dayOfMonth +
+            month + dayOfWeek + year
+        trigger = new CronTrigger(tName, tGroup, cron)
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
 
@@ -653,11 +704,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
                         bean.userLocale),
                 url: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail" ]
         // data for generating the dump file
-        jobDataMap.putAll(DumpBean.toMap(bean))
+        jobDataMap.putAll(bean.toMap())
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
 
         jobsAdminService.createOrReplaceTrigger(trigger)
-        return dumpFilename(bean, repo, runAtDate)
+        return dumpFilename(bean, repo)
     }
         
             
@@ -672,10 +723,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         Server server = Server.getServer()
         def cmd = [ConfigUtil.svnadminPath(), "dump"]
         cmd << new File(server.repoParentDir, repo.name).canonicalPath
-        if (bean.revisionRange) {
-            cmd << "-r"
-            cmd << bean.revisionRange
+        if (!bean.revisionRange) {
+            bean.revisionRange = "0:" + findHeadRev(repo)
         }
+        cmd << "-r"
+        cmd << bean.revisionRange
         if (bean.incremental) {
             cmd << "--incremental"
         }
@@ -794,8 +846,21 @@ class SvnRepoService extends AbstractSvnEdgeService {
         progressLogFile.delete()
     }
     
-    private String dumpFilename(DumpBean bean, repo, Date runAtDate = new Date()) {
-        def ts = new SimpleDateFormat("yyyyMMddHHmmss").format(runAtDate)
+    private String pad(int value) {
+        return (value < 10) ? "0" + value : String.valueOf(value)
+    }
+    
+    private String dumpFilename(DumpBean bean, repo) {
+        Calendar cal = Calendar.getInstance()
+        SchedulerBean sched = bean.schedule
+        String ts = ""
+        ts += (sched.year < 1) ? cal.get(Calendar.YEAR) : sched.year
+        ts += pad((sched.month < 1) ? cal.get(Calendar.MONTH) : sched.month)
+        ts += pad((sched.dayOfMonth < 1) ? 
+            cal.get(Calendar.DAY_OF_MONTH) : sched.dayOfMonth)
+        ts += pad((sched.hour < 0) ? cal.get(Calendar.HOUR_OF_DAY) : sched.hour)
+        ts += pad((sched.minute < 0) ? cal.get(Calendar.MINUTE): sched.minute)
+        ts += pad((sched.second < 0) ? cal.get(Calendar.SECOND) : sched.second)
         def range = bean.revisionRange ?  
             "-r" + bean.revisionRange.replace(":", "_") : ""
         def options = ""
@@ -809,7 +874,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
             options += "-filtered"
         }
         def zip = bean.compress ? ".zip" : ""
-        return repo.name + range + options + "-" + ts + ".dump" + zip
+        def prefix = bean.backup ? repo.name + "-bkup" : repo.name
+        return prefix + range + options + "-" + ts + ".dump" + zip
     }
     
     private addFilterOptions(DumpBean bean, filterCmd) {
