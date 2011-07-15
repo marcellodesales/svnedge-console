@@ -668,7 +668,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             schedule.minute = cal.get(Calendar.MINUTE)
             schedule.hour = cal.get(Calendar.HOUR_OF_DAY)
             schedule.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
-            schedule.month = cal.get(Calendar.MONTH)
+            schedule.month = cal.get(Calendar.MONTH) + 1 // Calendar uses 0 for first month
             schedule.year = cal.get(Calendar.YEAR)
         }
 

@@ -27,7 +27,7 @@ public class SchedulerBean {
     static enum Frequency { ONCE, HOURLY, DAILY, WEEKLY, MONTHLY }
     static enum DAY_OF_WEEK { SUN, MON, TUE, WED, THU, FRI, SAT }
     
-    Frequency frequency = Frequency.ONCE
+    Frequency frequency
     int second = -1
     int hour = -1
     int minute = -1
