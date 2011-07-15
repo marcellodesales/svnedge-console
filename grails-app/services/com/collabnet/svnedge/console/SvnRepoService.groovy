@@ -43,6 +43,8 @@ import org.quartz.JobDataMap
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
+    private static final String BACKUP_TRIGGER_GROUP = "Backup"
+
     // service dependencies
     def operatingSystemService
     def lifecycleService
@@ -655,7 +657,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      */
     String scheduleDump(DumpBean bean, repo) {
         def tName = "RepoDump-${repo.name}"
-        def tGroup = bean.backup ? "Backup" : "AdhocDump"
+        def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
         def trigger
         if (!schedule.frequency) {
@@ -672,17 +674,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         String seconds = (schedule.second < 0) ? "0" : "${schedule.second}"
         String minute = " ${schedule.minute}"
-        String hour = " $schedule.hour}"
+        String hour = " ${schedule.hour}"
         String dayOfMonth = " *"
         String month = " *"
         String dayOfWeek = " ?"
         String year = ""
         switch(schedule.frequency) {
             case Frequency.WEEKLY:
-                dayOfWeek = " ${schedule.dayOfWeek + 1}"
+                dayOfWeek = " ${schedule.dayOfWeek}"
                 dayOfMonth = " ?"
+                break
             case Frequency.HOURLY:
                 hour = " *"
+                break
             case Frequency.DAILY:
                 break
             case Frequency.ONCE:
@@ -693,6 +697,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String cron = seconds + minute + hour + dayOfMonth +
             month + dayOfWeek + year
         trigger = new CronTrigger(tName, tGroup, cron)
+        log.debug("Scheduling backup dump using cron expression: " + trigger.cronExpression)
+        log.debug("cron expression summary:\n" + trigger.expressionSummary)
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
 
@@ -891,5 +897,23 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (bean.skipMissingMergeSources) {
             filterCmd << "--skip-missing-merge-sources"
         }
+    }
+    
+    /**
+     * Removes all triggers for backup jobs on the given repository
+     * 
+     * @param repo Repository domain object
+     */
+    def clearScheduledDumps(repo) {
+        def triggerNames = jobsAdminService
+            .getTriggerNamesInGroup(BACKUP_TRIGGER_GROUP)
+        if (triggerNames) {
+            triggerNames.each {
+                if (it.startsWith("RepoDump-${repo.name}")) {
+                    jobsAdminService.removeTrigger(it, BACKUP_TRIGGER_GROUP)
+                }
+            }
+        }
+
     }
 }

@@ -22,7 +22,7 @@
          <select id="type" name="type">
          <option value="dump" <g:if test="${params.type != 'none' && !dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
          <option value="dump_delta" <g:if test="${dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
-         <option value="cloud"><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
+         <option value="cloud" disabled="disabled"><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
          <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
         </td>
@@ -77,7 +77,7 @@
                     <td valign="top" class="value ItemDetailValue">
                       <select id="dayOfWeek" name="schedule.dayOfWeek"> 
                       <g:each status="i" var="day" in="${daysOfWeek}">
-                        <option value="${i + 1}"<g:if test="${dump.schedule.dayOfWeek == i}"> selected="selected"</g:if>>${day}</option>
+                        <option value="${i + 1}"<g:if test="${dump.schedule.dayOfWeek == i + 1}"> selected="selected"</g:if>>${day}</option>
                       </g:each>
                       </select>
                     </td>

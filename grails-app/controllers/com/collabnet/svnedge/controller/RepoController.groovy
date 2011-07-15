@@ -302,9 +302,21 @@ class RepoController {
             redirect(action: list)
             
         } else {
+            def type = params.type
+            if (type == "cloud") {
+                flash.error = "CollabNet Cloud Services backup is not available yet."
+                redirect(action: 'bkupSchedule', id: params.id)
+                return
+            } else if (type == "none") {
+                svnRepoService.clearScheduledDumps(repo)
+                flash.message = message(code: 'repository.action.updateBkupSchedule.none')
+                redirect(action: 'dumpFileList', id: params.id)
+                return
+            }
+        
             try {
                 cmd.userLocale = request.locale
-                cmd.deltas = (params.type == 'dump_delta')
+                cmd.deltas = (type == 'dump_delta')
                 cmd.backup = true
                 if (cmd.hasErrors()) {
                     flash.dumpBean = cmd
@@ -315,7 +327,7 @@ class RepoController {
                 svnRepoService.scheduleDump(cmd, repo)
 
                 flash.message = message(code: 'repository.action.updateBkupSchedule.success')
-                redirect(action: show, params: [id: params.id])
+                redirect(action: 'dumpFileList', id: params.id)
             } catch (ValidationException e) {
                 log.debug "Rejecting " + e.field + " with message " + e.message
                 if (e.field) {

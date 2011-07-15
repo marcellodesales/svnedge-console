@@ -298,6 +298,10 @@ class JobsAdminService {
     def getTriggerNamesInGroup(triggerGroup) {
         quartzScheduler.getTriggerNames(triggerGroup)
     }
+    
+    def removeTrigger(triggerName, triggerGroup) {
+        quartzScheduler.unscheduleJob(triggerName, triggerGroup)
+    }
 
     /**
      * Returns job groups which include at least one job with a trigger.
