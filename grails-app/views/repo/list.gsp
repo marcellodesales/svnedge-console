@@ -79,6 +79,7 @@
             </div>
                          </div>
 
+                         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
                          <div class="AlignRight">
                              <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
                                  confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
@@ -89,6 +90,7 @@
                                <g:message code="repository.page.list.button.dump.label"/>
                              </g:listViewActionButton>
                          </div>
+                         </g:ifAnyGranted>
 
                        </td>
                     </tr>
