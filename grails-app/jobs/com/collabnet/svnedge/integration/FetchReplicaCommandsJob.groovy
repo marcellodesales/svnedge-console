@@ -46,6 +46,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     def ctfRemoteClientService
     def replicaCommandSchedulerService
     def commandResultDeliveryService
+    def volatility = false    
 
     def static final JOB_NAME = 
         "com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob"
