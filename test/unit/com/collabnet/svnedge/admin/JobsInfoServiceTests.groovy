@@ -111,7 +111,10 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         def jobDetail = new Expando()
         jobDetail.name = (isObserved) ?
                 jobsInfoService.interestingJobNames[0] :
-                "TestJob${Math.floor(Math.random() * 1000)}"
+                "TestJobName${Math.floor(Math.random() * 1000)}"
+        jobDetail.group = (isObserved) ?
+                jobsInfoService.interestingJobGroups[0] :
+                "TestJobGroup${Math.floor(Math.random() * 1000)}"
 
         def job = new Expando()
         job.jobDetail = jobDetail

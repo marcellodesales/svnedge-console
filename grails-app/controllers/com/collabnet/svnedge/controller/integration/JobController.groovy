@@ -43,23 +43,22 @@ class JobController {
     def config = ConfigurationHolder.config
     def securityService
 
-    // start and stop actions use POST requests
-    //static allowedMethods = [start:'POST']
-
     def index = {
-        redirect(action:'list')
+        if (Server.getServer().mode == ServerMode.REPLICA) {
+            redirect(action:'listReplica')
+        }
+        else {
+            redirect(action:'list')
+        }
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
-    def list = {
+    def listReplica = {
         def longRunning = replicaServerStatusService.getCommandsByType(
             LongRunningCommand.class)
 
         def shortRunning = replicaServerStatusService.getCommandsByType(
             ShortRunningCommand.class)
-
-        def backgroundJobsRunning = jobsInfoService.runningJobs.values()
-        def backgroundJobsFinished = jobsInfoService.finishedJobs.values()
 
         def scheduledCommands = new LinkedHashSet<AbstractCommand>()
 
@@ -88,39 +87,51 @@ class JobController {
         def allCommands = []
         allCommands.addAll(longRunning)
         allCommands.addAll(shortRunning)
-        
+
         // calling this after the queued command methods, so it is unlikely to contain
         // any commands which might be in the other lists.
         def unprocessedCommands = replicaCommandSchedulerService.listUnprocessedCommands()
 
-        // default page model
+        def modelMap = [
+                serverMode: ServerMode.REPLICA,
+                replicaName: replicaConfig.name,
+                logDateFormat: dtFormat,
+                showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutput,
+                unprocessedCommands: unprocessedCommands ,
+                totalCommandsRunning: longRunningCommands.size() +
+                shortRunningCommands.size(),
+                longRunningCommands: longRunningCommands,
+                shortRunningCommands: shortRunningCommands,
+                allCommands: allCommands,
+                scheduledCommands: scheduledCommands,
+                commandPollRate: replicaConfig.commandPollRate,
+                ctfUrl: CtfServer.getServer().getWebAppUrl(),
+                svnMasterUrl: replicaConfig.svnMasterUrl,
+                maxLongRunning: replicaConfig.maxLongRunningCmds,
+                maxShortRunning: replicaConfig.maxShortRunningCmds ]
+
+        return modelMap
+    }
+
+     @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
+    def list = {
+
+        def backgroundJobsScheduled = jobsInfoService.scheduledJobs.values()
+        def backgroundJobsRunning = jobsInfoService.runningJobs.values()
+        def backgroundJobsFinished = jobsInfoService.finishedJobs.values()
+
+        def dtFormat = message(code: "default.dateTime.format.withZone")
+
+        // page model
         def modelMap = [
 
                 logDateFormat: dtFormat,
                 showLinksToCommandOutputLog: ConfigurationHolder.config.svnedge.replica.logging.commandOutput,
-                unprocessedCommands: unprocessedCommands ,
+                backgroundJobsScheduled: backgroundJobsScheduled,
                 backgroundJobsRunning: backgroundJobsRunning,
                 backgroundJobsFinished: backgroundJobsFinished,
         ]
-        // replica-related additions
-        if (Server.getServer().mode == ServerMode.REPLICA) {
-            def replicaRelated = [
-                    serverMode: ServerMode.REPLICA,
-                    replicaName: replicaConfig.name,
-                    totalCommandsRunning: longRunningCommands.size() +
-                    shortRunningCommands.size(),
-                    longRunningCommands: longRunningCommands,
-                    shortRunningCommands: shortRunningCommands,
-                    allCommands: allCommands,
-                    scheduledCommands: scheduledCommands,
-                    commandPollRate: replicaConfig.commandPollRate,
-                    ctfUrl: CtfServer.getServer().getWebAppUrl(),
-                    svnMasterUrl: replicaConfig.svnMasterUrl,
-                    maxLongRunning: replicaConfig.maxLongRunningCmds,
-                    maxShortRunning: replicaConfig.maxShortRunningCmds ]
 
-            modelMap << replicaRelated
-        }
         return modelMap
     }
 }

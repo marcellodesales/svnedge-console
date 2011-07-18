@@ -19,9 +19,11 @@ package com.collabnet.svnedge.admin
 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 
-import org.quartz.JobExecutionContext
 import org.springframework.beans.factory.InitializingBean
+import org.quartz.JobExecutionContext
 import org.quartz.JobListener
+import org.quartz.Trigger
+
 
 /**
  * Provides info about Quartz jobs in the console
@@ -31,8 +33,9 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     // Observer name supplied to Quartz
     String name = "JobsInfoService"
 
-    // Job names we wish to observe
+    // Job names and groups we wish to observe
     def interestingJobNames = [RepoDumpJob.name]
+    def interestingJobGroups = [RepoDumpJob.group]
 
     // scheduler upon which to register listener
     def quartzScheduler
@@ -97,6 +100,31 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     }
 
     /**
+     * fetch a map of trigger info pertaining to interesting jobs (only includes
+     * those with "nextFireTime" property
+     * @return list of Map containing info about the job, keyed by Trigger fullname
+     */
+    Map getScheduledJobs() {
+
+        def triggerInfo = [:]
+        interestingJobGroups.each { jobGroup ->
+            interestingJobNames.each { jobName ->
+                Trigger[] t = quartzScheduler.getTriggersOfJob(jobName, jobGroup)
+                t.each {
+                    if (it.nextFireTime) {
+                        triggerInfo << ["${it.fullName}": [
+                                nextFireTime: it.nextFireTime,
+                                jobRunTime: -1,
+                                mergedJobDataMap: it.jobDataMap
+                        ]]
+                    }
+                }
+            }
+        }
+        return triggerInfo
+    }
+
+    /**
      * @see InitializingBean#afterPropertiesSet
      * initializing bean -- after injection, we need to register with the quartz scheduler to receive events
      */
@@ -114,12 +142,13 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
 
     /**
      * are we keeping track of this job execution?
-     * @param ctx the JobExecutionContext (or other with jobDetail.name property)
+     * @param ctx the JobExecutionContext (or other with jobDetail.name & .group property)
      * @return boolean yes or no
      */
     private boolean interested(ctx) {
 
-        return interestingJobNames.contains(ctx.jobDetail.name)
+        return interestingJobNames.contains(ctx.jobDetail.name) &&
+                interestingJobGroups.contains(ctx.jobDetail.group)
 
     }
 

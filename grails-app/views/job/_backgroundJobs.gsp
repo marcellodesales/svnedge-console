@@ -21,7 +21,7 @@
 <table class="Container">
   <thead>
   <tr class="ContainerHeader">
-    <td colspan="4">
+    <td colspan="5">
       ${heading}
     </td>
     <td>
@@ -32,11 +32,12 @@
     </td>
   </tr>
   <tr class="ItemListHeader">
-    <td width="18">#</td>
+    <td width="5%">#</td>
     <td width="15%">${message(code: 'job.page.list.column.id')}</td>
-    <td>${message(code: 'job.page.list.column.code')}</td>
-    <td width="20%">${message(code: 'job.page.list.column.started_at')}</td>
-    <td width="20%">${message(code: 'job.page.list.column.finished_at')}</td>
+    <td width="50%">${message(code: 'job.page.list.column.description')}</td>
+    <td width="10%">${message(code: 'job.page.list.column.scheduled')}</td>
+    <td width="10%">${message(code: 'job.page.list.column.started_at')}</td>
+    <td width="10%">${message(code: 'job.page.list.column.finished_at')}</td>
   </tr>
   </thead>
   <tbody id="${tableName}">
@@ -46,18 +47,38 @@
 
       <td>${i + 1}</td>
       <td>
-        <g:if test="${jobCtx.jobRunTime > -1}">
-          ${jobCtx.mergedJobDataMap.id}
-        </g:if>
-        <g:elseif test="${jobCtx.jobRunTime == -1}">
-          <a target="${jobCtx.mergedJobDataMap.id}" href="${jobCtx.mergedJobDataMap.url}">${mergedJobDataMap.id}</a>
-        </g:elseif>
+        ${jobCtx.mergedJobDataMap.id}
       </td>
       <td>
         ${jobCtx.mergedJobDataMap.description}
+
+        <g:if test="${view == 'scheduled' && jobCtx.mergedJobDataMap.urlConfigure}">
+          <a href="${jobCtx.mergedJobDataMap.urlConfigure}">${message(code: 'job.page.list.jobConfigure')}</a>
+        </g:if>
+        <g:elseif test="${view == 'running' && jobCtx.mergedJobDataMap.urlProgress}">
+          <a target="${jobCtx.mergedJobDataMap.id}" href="${jobCtx.mergedJobDataMap.urlProgress}">${message(code: 'job.page.list.jobProgress')}</a>
+        </g:elseif>
+        <g:elseif test="${view == 'finished' && jobCtx.mergedJobDataMap.urlResult}">
+          <a href="${jobCtx.mergedJobDataMap.urlResult}">${message(code: 'job.page.list.jobResult')}</a>
+        </g:elseif>
+
       </td>
       <td>
-        <g:formatDate format="${logDateFormat}" date="${jobCtx.fireTime}"/>
+        <g:set var="scheduledTime" value="${view == 'scheduled' ? jobCtx.nextFireTime : jobCtx.scheduledFireTime}"/>
+        <g:if test="${scheduledTime}">
+          <g:formatDate format="${logDateFormat}" date="${scheduledTime}"/>
+        </g:if>
+        <g:else>
+            -
+        </g:else>
+      </td>
+      <td>
+        <g:if test="${jobCtx.fireTime}">
+          <g:formatDate format="${logDateFormat}" date="${jobCtx.fireTime}"/>
+        </g:if>
+        <g:else>
+          -
+        </g:else>
       </td>
       <td>
         <g:if test="${jobCtx.jobRunTime > -1}">

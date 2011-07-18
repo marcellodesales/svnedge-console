@@ -5,104 +5,37 @@
 <head>
     <meta name="layout" content="main" />
     <meta http-equiv="refresh" content="5">
-    <title><g:message code="job.page.list.title"/></title>
+    <title><g:message code="job.page.header"/></title>
 </head>
 
-<body>
 
 <content tag="title">
   <g:message code="job.page.header"/>
-  <g:if test="${serverMode == ServerMode.REPLICA}">
-  - ${replicaName}
-  </g:if>
 </content>
 
 <content tag="leftMenu">
-<BR>
-  <g:if test="${serverMode == ServerMode.REPLICA}">
-   <div class="ImageListParent">
+  <div class="<g:if test="${actionName == 'list' || actionName == 'listReplica'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
-   </div>
-   <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${message(code:'status.page.url.teamforge')}</b> ${ctfUrl}
-   </div>
-   <div class="ImageListParent">
-     <div style="float: left;"><img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-     </div> <div id="pollingIntervalString" style="float: left;">
-        ${message(code:'job.page.list.polling_interval', args:[commandPollRate])}
-     </div>
-   </div>
-<BR>
-  </g:if>
-
-<div class="ImageListParent">
-   <table class="Container" id="scheduledCommandsTable">
-     <tbody>
-     <tr class="ContainerHeader">
-       <td colspan="2">
-         <g:message code="job.page.list.scheduled.header"/>
-       </td>
-     </tr>
-  <g:each in="${scheduledCommands}" status="i" var="schCommand">
-    <tr id="sch_${schCommand.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
-     <td>
-      &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(schCommand)}" />
-      <img border="0" src="/csvn/images/replica/${commandCode}.png">
-      ${schCommand.id} ${schCommand.params.repoName ? "(" + schCommand.params.repoName.substring(schCommand.params.repoName.lastIndexOf("/") + 1, schCommand.params.repoName.length()) + ")" : ""}
-     </td>
-    </tr>
-  </g:each>
-    </tbody>
-   </table>
-<g:if test="${unprocessedCommands}">
-<br />
-   <table class="Container" id="blockedCommandsTable">
-     <tbody>
-     <tr class="ContainerHeader">
-       <td colspan="2">
-         <g:message code="job.page.list.blocked.header"/>
-       </td>
-     </tr>
-  <g:set var="rowClass" value="OddRow"/>
-  <g:each in="${unprocessedCommands}" status="i" var="cmd">
-    <tr id="sch_${cmd.id}" class="${rowClass}}">
-     <td>
-      &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(cmd)}" />
-      <img border="0" src="/csvn/images/replica/${commandCode}.png" alt"" />
-      ${cmd.id} ${cmd.params.repoName ? "(" + cmd.params.repoName.substring(cmd.params.repoName.lastIndexOf("/") + 1, cmd.params.repoName.length()) + ")" : ""}
-     </td>
-    </tr>
-    <g:set var="rowClass" value="${rowClass ==  'OddRow' ? 'EvenRow' : 'OddRow'}"/>
-  </g:each>
-    </tbody>
-   </table>
-   <small><g:message code="job.page.list.blocked.note"/></small>
-</g:if>
-</div>
-
+    <g:link controller="job" action="index"><g:message code="job.page.leftNav.list" /></g:link>
+  </div>
 </content>
 
-<g:if test="${serverMode == ServerMode.REPLICA}">
-<g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
- 'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
+<body>
+
+<g:render template="/job/backgroundJobs" model="['view': 'scheduled', 'tableName': 'backgroundJobsScheduledTable',
+ 'heading': message(code:'job.page.list.backgroundScheduled.header'), 'itemList': backgroundJobsScheduled,
+ 'maxNumber': 1]" />
 
 <BR><BR>
 
-
-<g:render template="/job/replicaCommands" model="['tableName': 'shortRunningCommandsTable',
- 'runningCommands': shortRunningCommands, 'maxNumber': maxShortRunning, 'shortRun': true]" />
-
-<BR><BR>
-</g:if>
-
-<g:render template="/job/backgroundJobs" model="['tableName': 'backgroundJobsRunningTable',
+<g:render template="/job/backgroundJobs" model="['view': 'running','tableName': 'backgroundJobsRunningTable',
  'heading': message(code:'job.page.list.backgroundActive.header'), 'itemList': backgroundJobsRunning, 'maxNumber': 1]" />
 
 <BR><BR>
 
-<g:render template="/job/backgroundJobs" model="['tableName': 'backgroundJobsFinishedTable',
+<g:render template="/job/backgroundJobs" model="['view': 'finished','tableName': 'backgroundJobsFinishedTable',
  'heading': message(code:'job.page.list.backgroundFinished.header'),'itemList': backgroundJobsFinished, 'maxNumber': 1]" />
 
+
+</content>
 </body>

@@ -711,7 +711,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 [id: "repoDump-${repo.name}", repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description", [repo.name],
                         bean.userLocale),
-                url: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail" ]
+                urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
+                urlResult: "/csvn/repo/dumpFileList/${repo.id}",
+                urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}" ]
         // data for generating the dump file
         jobDataMap.putAll(bean.toMap())
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
