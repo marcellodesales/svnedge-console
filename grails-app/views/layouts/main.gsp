@@ -128,7 +128,7 @@
                       userCache: message(code:'userCache.main.icon'),
                       statistics: message(code:'statistics.main.icon'),
                       admin: message(code:'server.main.icon'),
-                      ocn: 'openCollabNet'
+                      ocn: message(code:'ocn.main.icon')
                       ]}" />
 
         <g:set var="buttonIconMap"
@@ -139,7 +139,7 @@
                       userCache: 'project-tasksicon.gif',
                       statistics: 'project-reportsicon.gif',
                       admin: 'project-projectadminicon.gif',
-                      ocn: 'project-ocnicon.gif']}"/>
+                      ocn: 'project-extensionicon.gif']}"/>
 
         <td class="VerticalSeparatorNoBorder"></td>
  <%-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status) --%>
