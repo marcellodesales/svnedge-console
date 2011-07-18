@@ -28,8 +28,8 @@ class OcnController {
 
     def index = {
         try {
-            def ocnContent = 'http://tab.open.collab.net/nonav/csvn.html'.
-                    toURL().text
+            def ocnContent = 'http://tab.open.collab.net/nonav/svnedge-extensions.html'
+                    .toURL().text
             [ocnContent: ocnContent]
 
         } catch (Exception e) {
