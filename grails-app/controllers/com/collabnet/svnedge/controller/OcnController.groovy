@@ -28,7 +28,10 @@ class OcnController {
 
     def index = {
         try {
-            def ocnContent = 'http://tab.open.collab.net/nonav/svnedge-extensions.html'
+            def page = ifAnyGranted(role: ['ROLE_ADMIN', 'ROLE_ADMIN_REPO', 
+                    'ROLE_ADMIN_SYSTEM', 'ROLE_ADMIN_USERS']) ?
+                'svnedge-extensions.html' : 'svnedge-user.html'
+            def ocnContent = ('http://tab.open.collab.net/nonav/' + page)
                     .toURL().text
             [ocnContent: ocnContent]
 
