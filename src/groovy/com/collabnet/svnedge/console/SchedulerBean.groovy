@@ -24,9 +24,10 @@ import java.util.Map;
  * A command bean to hold all the parameters for an svnadmin dump with filtering
  */
 public class SchedulerBean {
-    static enum Frequency { ONCE, HOURLY, DAILY, WEEKLY, MONTHLY }
+    static enum Frequency { NOW, ONCE, HOURLY, DAILY, WEEKLY, MONTHLY }
     static enum DAY_OF_WEEK { SUN, MON, TUE, WED, THU, FRI, SAT }
     
+    // null value should be handled the same as NOW
     Frequency frequency
     int second = -1
     int hour = -1

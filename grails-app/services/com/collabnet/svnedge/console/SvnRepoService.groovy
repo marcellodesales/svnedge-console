@@ -44,6 +44,9 @@ import org.quartz.JobDataMap
 class SvnRepoService extends AbstractSvnEdgeService {
 
     private static final String BACKUP_TRIGGER_GROUP = "Backup"
+    private static final boolean ASCENDING = true
+    private static final boolean DESCENDING = false
+    
 
     // service dependencies
     def operatingSystemService
@@ -660,7 +663,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
         def trigger
-        if (!schedule.frequency) {
+        if (!schedule.frequency || schedule.frequency == Frequency.NOW) {
             schedule.frequency = Frequency.ONCE
             Calendar cal = Calendar.getInstance()
             cal.setTimeInMillis(System.currentTimeMillis() + 1000)
@@ -696,8 +699,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         String cron = seconds + minute + hour + dayOfMonth +
             month + dayOfWeek + year
+        log.debug("Scheduling backup dump using cron expression: " + cron)
         trigger = new CronTrigger(tName, tGroup, cron)
-        log.debug("Scheduling backup dump using cron expression: " + trigger.cronExpression)
         log.debug("cron expression summary:\n" + trigger.expressionSummary)
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
@@ -802,6 +805,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                cleanupOldBackups(bean, finalDumpFile)
             }
 
         } else {
@@ -813,6 +817,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                cleanupOldBackups(bean, repo, finalDumpFile)
             }
         }
         return filename
@@ -850,6 +855,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
         progress << "Dump file " + finalDumpFile?.name + " is complete.\n"
         progress.close()
         progressLogFile.delete()
+    }
+    
+    private cleanupOldBackups(dumpBean, repo, finalDumpFile) {
+        int numToKeep = dumpBean.numberToKeep
+        if (dumpBean.backup && numToKeep > 0) {
+            def dumps = listDumpFiles(repo, "date", DESCENDING)
+            int i = 0
+            for (dumpFile in dumps) {
+                def name = dumpFile.name
+                if (name.startsWith(repo.name + "-bkup") && 
+                    !name.endsWith("-processing") && 
+                    !name.endsWith("-processing.zip") &&
+                    (++i > numToKeep)) {
+                    
+                    dumpFile.delete()    
+                }
+            }
+        }
     }
     
     private String pad(int value) {
