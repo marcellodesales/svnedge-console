@@ -318,7 +318,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         }
 
         if (null != sessionId && sessionId.length() > 0) {
-            gUser = getUserDetails(sessionId, username)
+
+            // if the provided credentials match those stored in the CtfServer instance,
+            // grant ROLE_ADMIN to the session
+            def ctfServer = CtfServer.getServer()
+            boolean loginMatchesStoredCredentials = (username == ctfServer.ctfUsername &&
+                    password == securityService.decrypt(ctfServer.ctfPassword))            
+            
+            gUser = getUserDetails(sessionId, username, loginMatchesStoredCredentials)
 
             try {
                 cnSoap().logoff(username, sessionId)
@@ -332,10 +339,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * @param sessionId the ctf soap session key
      * @param username for the user.
+     * @param isLocalAdmin grant ROLE_ADMIN to the user session, irrespective of Ctf permissions
      * @return information about the user
      */
-   private GrailsUser getUserDetails(sessionId, username) {
+   private GrailsUser getUserDetails(sessionId, username, boolean isLocalAdmin = false) {
         def ctfUser = cnSoap().getUserData(sessionId, username)
 
         // TODO CTF REPLICA
@@ -352,12 +361,12 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         // trues =>  enabled, accountNonExpired, credentialsNonExpired,
         //           accountNonLocked,
         new GrailsUserImpl(username, "password", true, true, true, true, 
-                           getGrantedAuthorities(ctfUser), u)
+                           getGrantedAuthorities(ctfUser, isLocalAdmin), u)
     }
 
-    private GrantedAuthority[] getGrantedAuthorities(ctfUser) {
+    private GrantedAuthority[] getGrantedAuthorities(ctfUser, boolean isLocalAdmin = false) {
         GrantedAuthority[] auth
-        if (ctfUser.superUser) {
+        if (ctfUser.superUser || isLocalAdmin) {
             auth = new GrantedAuthority[2]
             auth[0] = new GrantedAuthorityImpl(ROLE_USER)
             auth[1] = new GrantedAuthorityImpl(ROLE_ADMIN)
