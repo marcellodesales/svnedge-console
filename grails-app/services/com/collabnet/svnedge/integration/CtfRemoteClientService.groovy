@@ -322,8 +322,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             // if the provided credentials match those stored in the CtfServer instance,
             // grant ROLE_ADMIN to the session
             def ctfServer = CtfServer.getServer()
-            boolean loginMatchesStoredCredentials = (username == ctfServer.ctfUsername &&
-                    password == securityService.decrypt(ctfServer.ctfPassword))            
+            boolean loginMatchesStoredCredentials = (username == ctfServer.ctfUsername)            
             
             gUser = getUserDetails(sessionId, username, loginMatchesStoredCredentials)
 
