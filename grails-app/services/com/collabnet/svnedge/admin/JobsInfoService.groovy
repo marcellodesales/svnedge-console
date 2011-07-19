@@ -23,7 +23,10 @@ import org.springframework.beans.factory.InitializingBean
 import org.quartz.JobExecutionContext
 import org.quartz.JobListener
 import org.quartz.Trigger
-
+import com.collabnet.svnedge.statistics.ConsolidateStatJob
+import com.collabnet.svnedge.statistics.DeleteStatJob
+import com.collabnet.svnedge.statistics.StatCollectJob
+import com.collabnet.svnedge.statistics.StatCountJob
 
 /**
  * Provides info about Quartz jobs in the console
@@ -33,9 +36,8 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     // Observer name supplied to Quartz
     String name = "JobsInfoService"
 
-    // Job names and groups we wish to observe
-    def interestingJobNames = [RepoDumpJob.name]
-    def interestingJobGroups = [RepoDumpJob.group]
+    // Jobs we wish to observe
+    def interestingJobs = [RepoDumpJob]
 
     // scheduler upon which to register listener
     def quartzScheduler
@@ -107,17 +109,16 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     Map getScheduledJobs() {
 
         def triggerInfo = [:]
-        interestingJobGroups.each { jobGroup ->
-            interestingJobNames.each { jobName ->
-                Trigger[] t = quartzScheduler.getTriggersOfJob(jobName, jobGroup)
-                t.each {
-                    if (it.nextFireTime) {
-                        triggerInfo << ["${it.fullName}": [
-                                nextFireTime: it.nextFireTime,
-                                jobRunTime: -1,
-                                mergedJobDataMap: it.jobDataMap
-                        ]]
-                    }
+        interestingJobs.each { it ->
+            Trigger[] t = quartzScheduler.getTriggersOfJob(it.name, it.group)
+            t.each {
+                if (it.nextFireTime) {
+                    triggerInfo << ["${it.fullName}": [
+                            nextFireTime: it.nextFireTime,
+                            jobRunTime: -1,
+                            mergedJobDataMap: it.jobDataMap,
+                            trigger: it
+                    ]]
                 }
             }
         }
@@ -147,8 +148,10 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
      */
     private boolean interested(ctx) {
 
-        return interestingJobNames.contains(ctx.jobDetail.name) &&
-                interestingJobGroups.contains(ctx.jobDetail.group)
+        def match = interestingJobs.find {
+            ctx.jobDetail.name == it.name && ctx.jobDetail.group == it.group
+        }
+        return (match != null)
 
     }
 
