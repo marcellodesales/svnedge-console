@@ -160,7 +160,7 @@ class RepoController {
                 def filename = svnRepoService.scheduleDump(cmd, repo)
                 flash.message = message(code: 'repository.action.createDumpfile.success',
                     args: [filename])
-                redirect(action: show, params: [id: params.id])
+                redirect(action: 'dumpFileList', params: [id: params.id])
             } catch (ValidationException e) {
                 log.debug "Rejecting " + e.field + " with message " + e.message
                 if (e.field) {
