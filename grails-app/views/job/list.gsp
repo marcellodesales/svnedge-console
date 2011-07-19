@@ -22,12 +22,6 @@
 
 <body>
 
-<g:render template="/job/backgroundJobs" model="['view': 'scheduled', 'tableName': 'backgroundJobsScheduledTable',
- 'heading': message(code:'job.page.list.backgroundScheduled.header'), 'itemList': backgroundJobsScheduled,
- 'maxNumber': 1]" />
-
-<BR><BR>
-
 <g:render template="/job/backgroundJobs" model="['view': 'running','tableName': 'backgroundJobsRunningTable',
  'heading': message(code:'job.page.list.backgroundActive.header'), 'itemList': backgroundJobsRunning, 'maxNumber': 1]" />
 
@@ -36,6 +30,11 @@
 <g:render template="/job/backgroundJobs" model="['view': 'finished','tableName': 'backgroundJobsFinishedTable',
  'heading': message(code:'job.page.list.backgroundFinished.header'),'itemList': backgroundJobsFinished, 'maxNumber': 1]" />
 
+<BR><BR>
+
+<g:render template="/job/backgroundJobs" model="['view': 'scheduled', 'tableName': 'backgroundJobsScheduledTable',
+ 'heading': message(code:'job.page.list.backgroundScheduled.header'), 'itemList': backgroundJobsScheduled,
+ 'maxNumber': 1]" />
 
 </content>
 </body>

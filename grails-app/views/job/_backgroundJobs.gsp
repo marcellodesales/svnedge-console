@@ -93,7 +93,7 @@
   <g:if test="${!itemList}">
     <tr class="EvenRow}">
       <td>1</td>
-      <td colspan="3" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
+      <td colspan="6" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
     </tr>
   </g:if>
   </tbody>
