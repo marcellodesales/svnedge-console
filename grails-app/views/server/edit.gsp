@@ -289,6 +289,28 @@ $('bindInstructions').hide();
         </td>
       </tr>
     </g:hasErrors>
+
+      <tr>
+        <td class="ItemDetailName">
+          <label for="dumpDir"><g:message code="server.dumpDir.label" /></label>
+        </td>
+        <td class="value ${hasErrors(bean:server,field:'dumpDir','errors')}">
+          <input size="30" type="text" id="dumpDir" name="dumpDir" 
+              value="${fieldValue(bean:server,field:'dumpDir')}"/>
+        </td>
+        <td class="ItemDetailValue"><i><g:message code="server.dumpDir.label.tip" /></i></td>
+      </tr> 
+    <g:hasErrors bean="${server}" field="dumpDir">
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="2" width="100%" valign="top" class="errors">
+          <ul><g:eachError bean="${server}" field="dumpDir">
+              <li><g:message error="${it}" encodeAs="HTML"/></li>
+          </g:eachError></ul>
+        </td>
+      </tr>
+    </g:hasErrors>
+     
       
       <tr>
       	  <td class="ItemDetailName">
@@ -398,7 +420,7 @@ $('bindInstructions').hide();
           <g:message code="server.defaultStart.label.tip" />
         </td>
       </tr>
-     
+
       </table>
       </td>
       </tr>

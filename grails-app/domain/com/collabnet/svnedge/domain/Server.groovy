@@ -158,6 +158,10 @@ class Server {
                 return ['chooseAuth']
             }
         })
+        dumpDir(nullable: false, blank: false, validator: { val, obj ->
+            def dirFile = new File(val)
+            return dirFile.exists() && dirFile.isDirectory()
+        })
     }
     
     static Server getServer() {

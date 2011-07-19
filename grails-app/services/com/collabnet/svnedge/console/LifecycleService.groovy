@@ -116,6 +116,11 @@ class LifecycleService {
                 pruneLogsOlderThan: 0,
                 ldapServerCertVerificationNeeded: true,
                 hasSoftwareUpdates: false)
+            
+            File dumpDir = new File(server.dumpDir)
+            if (!dumpDir.exists()) {
+                dumpDir.mkdir()
+            }
 
             if (!server.validate()) {
                 server.errors.allErrors.each { log.error(it) }
