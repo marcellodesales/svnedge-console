@@ -19,6 +19,7 @@ package com.collabnet.svnedge.controller
 
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import org.codehaus.groovy.grails.plugins.springsecurity.AuthorizeTools
 
 /**
  * OpenCollabNet view controller
@@ -28,8 +29,7 @@ class OcnController {
 
     def index = {
         try {
-            def page = ifAnyGranted(role: ['ROLE_ADMIN', 'ROLE_ADMIN_REPO', 
-                    'ROLE_ADMIN_SYSTEM', 'ROLE_ADMIN_USERS']) ?
+            def page = AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
                 'svnedge-extensions.html' : 'svnedge-user.html'
             def ocnContent = ('http://tab.open.collab.net/nonav/' + page)
                     .toURL().text
@@ -40,6 +40,7 @@ class OcnController {
             //a proxy or there's no Internet connectivity. Use the iframe on
             //the browser instead (might be configured with proxy, if that's
             //the case)
+            log.debug "Unable to contact url, using proxy", e
             render(view:"index-proxy")
         }
     }
