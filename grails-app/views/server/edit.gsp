@@ -1,3 +1,4 @@
+<%@ page import="com.collabnet.svnedge.domain.ServerMode" %>
 <html>
   <head>
     <title>CollabNet Subversion Edge <g:message code="server.page.edit.title" /></title>
@@ -392,7 +393,18 @@ $('bindInstructions').hide();
                   </g:eachError></ul>
               </g:hasErrors>
           </td>
-      </tr>      
+      </tr>
+      <g:if test="${server.mode == ServerMode.REPLICA}">
+      <tr>
+         <td class="ItemDetailName">
+          <label for="useSsl"><g:message code="server.useHttpV2.label" /></label>
+         </td>
+        <td class="ItemDetailValue ${hasErrors(bean:server,field:'useHttpV2','errors')}" colspan="2">
+          <g:checkBox name="useHttpV2" value="${server.useHttpV2}"/>
+          <g:message code="server.useHttpV2.label.tip" />
+        </td>
+      </tr>
+      </g:if>
       <tr>
          <td class="ItemDetailName">
           <label for="useSsl"><g:message code="server.useSsl.label" /></label>

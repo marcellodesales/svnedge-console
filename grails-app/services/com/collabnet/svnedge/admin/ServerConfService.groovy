@@ -508,6 +508,9 @@ RedirectMatch ^(${contextPath})\$ \$1/
    SVNParentPath "${server.repoParentDir}"
    SVNReposName "CollabNet Subversion Repository"
 """
+        if (server.useHttpV2 == false) {
+            conf += "   SVNAdvertiseV2Protocol off\n"
+        }
         conf += ctfMode ? getCtfSvnHttpdConf(server, contextPath) : 
             getSVNHttpdConf(server)
         conf += "</Location>\n\n"

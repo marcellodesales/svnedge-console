@@ -31,6 +31,9 @@ class UpgradeBootStrap {
     def operatingSystemService
     def fileSystemStatisticsService
     def dataSource
+    def lifecycleService
+    def serverConfService
+    
 
     def init = { servletContext ->
         log.info("Applying updates") 
@@ -123,7 +126,7 @@ class UpgradeBootStrap {
 
     def void release2_1_0() {
         if (isSchemaCurrent(2, 1, 0)) {
-            return
+//            return
         }
         log.info("Applying 2.1.0 updates")
 
@@ -135,8 +138,20 @@ class UpgradeBootStrap {
 
         locks.each { it.save() }
 
+        // with upgrade to svn 1.7, an existing replica will need the new apache HTTPv2 directive written to conf
+        Server s = Server.getServer()
+        s.useHttpV2 = (s.mode != ServerMode.REPLICA)
+        s.save(flush:true)
+        if (s.mode == ServerMode.REPLICA) {
+            serverConfService.writeConfigFiles()
+            if (lifecycleService.isStarted()) {
+                lifecycleService.restartServer()
+            }
+        }
+
         SchemaVersion v = new SchemaVersion(major: 2, minor: 1, revision: 0,
-                description: "2.1.0 added Quartz tables and data.")
+                description: "2.1.0 added Quartz tables and data; initialized Server.useHttpV2 field")
+
         v.save()
 
     }
