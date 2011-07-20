@@ -79,13 +79,13 @@
 
 </content>
 
-<g:render template="/job/runningCommands" model="['tableName': 'longRunningCommandsTable',
+<g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
 
 <br/><br/>
 
 
-<g:render template="/job/runningCommands" model="['tableName': 'shortRunningCommandsTable',
+<g:render template="/job/replicaCommands" model="['tableName': 'shortRunningCommandsTable',
  'runningCommands': shortRunningCommands, 'maxNumber': maxShortRunning, 'shortRun': true]" />
 
 </body>
