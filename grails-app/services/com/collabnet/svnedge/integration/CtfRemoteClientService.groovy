@@ -344,8 +344,24 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
      * @return information about the user
      */
    private GrailsUser getUserDetails(sessionId, username, boolean isLocalAdmin = false) {
+      
         def ctfUser = cnSoap().getUserData(sessionId, username)
-
+        
+        // if we're not already granting local admin permissions, check back with CTF to 
+        // see if the user has the Integration.edit.edit_scm permission
+        boolean hasScmEditPermission = false
+        if (!ctfUser.superUser && !isLocalAdmin) {
+            try {
+                String[] adapterNames = makeScmSoap().getScmAdapterNames(sessionId)
+                if (adapterNames?.length) {
+                    hasScmEditPermission = true
+                }
+            }
+            catch (Exception e)  {
+                log.info("ScmAppSoap.getScmAdapterNamers() is not accessible; not granting local admin role ")
+            }
+        }
+       
         // TODO CTF REPLICA
         // Using a domain object here to avoid introducing another user
         // object until it is decided whether we should maybe use 
@@ -360,7 +376,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         // trues =>  enabled, accountNonExpired, credentialsNonExpired,
         //           accountNonLocked,
         new GrailsUserImpl(username, "password", true, true, true, true, 
-                           getGrantedAuthorities(ctfUser, isLocalAdmin), u)
+                           getGrantedAuthorities(ctfUser, (isLocalAdmin || hasScmEditPermission)), u)
     }
 
     private GrantedAuthority[] getGrantedAuthorities(ctfUser, boolean isLocalAdmin = false) {

@@ -38,7 +38,9 @@ public abstract class CtfRemoteStrategy {
 
     public abstract def makeCollabNetClient()
     public abstract def makeScmAppClient()
-    public abstract def login(username, password, locale)
+    public abstract def login(username, password, locale) throws CtfAuthenticationException, UnknownHostException, 
+            NoRouteToHostException, MalformedURLException,
+            SSLHandshakeException
     
     /**
     * Creates a new instance of SoapNamedValues based on the array lists
