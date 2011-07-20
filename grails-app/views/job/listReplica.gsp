@@ -15,7 +15,7 @@
 </content>
 
 <content tag="leftMenu">
-<BR>
+<br/>
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
@@ -30,7 +30,7 @@
         ${message(code:'job.page.list.polling_interval', args:[commandPollRate])}
      </div>
    </div>
-<BR>
+<br/>
 
 <div class="ImageListParent">
    <table class="Container" id="scheduledCommandsTable">
@@ -82,7 +82,7 @@
 <g:render template="/job/runningCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
 
-<BR><BR>
+<br/><br/>
 
 
 <g:render template="/job/runningCommands" model="['tableName': 'shortRunningCommandsTable',
