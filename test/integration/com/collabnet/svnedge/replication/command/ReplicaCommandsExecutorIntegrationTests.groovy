@@ -237,7 +237,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
 
         // start the fetch job with the default properties as the poll rate
         // will be updated (commandPollPeriod)
-        new FetchReplicaCommandsJob().start()
+        jobsAdminService.createOrReplaceTrigger(FetchReplicaCommandsJob.makeTrigger(60))
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
 
