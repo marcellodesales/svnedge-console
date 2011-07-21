@@ -33,7 +33,7 @@ class Server {
     // this property represents the console SSL state
     Boolean useSslConsole = false;
     // this property represents whether the server should use HttpV2 (svn 1.7+)
-    Boolean useHttpV2;
+    Boolean useHttpV2 = true
     /**
      * When server is used as a replica, hostname uniquely identifies the 
      * Replica to the Master.  Care should be take when changing this value.

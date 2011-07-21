@@ -126,7 +126,7 @@ class UpgradeBootStrap {
 
     def void release2_1_0() {
         if (isSchemaCurrent(2, 1, 0)) {
-//            return
+            return
         }
         log.info("Applying 2.1.0 updates")
 
@@ -140,12 +140,14 @@ class UpgradeBootStrap {
 
         // with upgrade to svn 1.7, an existing replica will need the new apache HTTPv2 directive written to conf
         Server s = Server.getServer()
-        s.useHttpV2 = (s.mode != ServerMode.REPLICA)
-        s.save(flush:true)
-        if (s.mode == ServerMode.REPLICA) {
-            serverConfService.writeConfigFiles()
-            if (lifecycleService.isStarted()) {
-                lifecycleService.restartServer()
+        if (s) {
+            s.useHttpV2 = (s.mode != ServerMode.REPLICA)
+            s.save(flush:true)
+            if (s.mode == ServerMode.REPLICA) {
+                serverConfService.writeConfigFiles()
+                if (lifecycleService.isStarted()) {
+                    lifecycleService.restartServer()
+                }
             }
         }
 
