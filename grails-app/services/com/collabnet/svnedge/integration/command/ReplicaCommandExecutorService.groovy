@@ -57,6 +57,7 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
 
     def ctfRemoteClientService
     def replicaCommandSchedulerService
+    def jobsAdminService 
     def longRunningHandler
     def shortRunningHandler
     def config = ConfigurationHolder.config
@@ -85,7 +86,9 @@ public class ReplicaCommandExecutorService extends AbstractSvnEdgeService
 
     def bootStrap = {
         if (Server.getServer().mode == ServerMode.REPLICA) {
-            new FetchReplicaCommandsJob().start()
+            def replica = ReplicaConfiguration.getCurrentConfig()
+            def triggerInstance = FetchReplicaCommandsJob.makeTrigger(replica.commandPollRate)
+            jobsAdminService.createOrReplaceTrigger(triggerInstance)
         }
         // initialize the queues
         longRunningScheduledCommands = new LinkedBlockingQueue<LongRunningCommand>()

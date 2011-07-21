@@ -48,12 +48,12 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     def commandResultDeliveryService
     def volatility = false    
 
-    def static final JOB_NAME = 
-        "com.collabnet.svnedge.replication.jobs.FetchReplicaCommandsJob"
+    def static final name = 
+        "com.collabnet.svnedge.integration.FetchReplicaCommandsJob"
 
-    def static final JOB_GROUP_NAME = JobsAdminService.REPLICA_GROUP
+    def static final group = JobsAdminService.REPLICA_GROUP
 
-    def static final TRIGGER_GROUP = JOB_GROUP_NAME + "_Triggers"
+    def static final TRIGGER_GROUP = group + "_Triggers"
 
     def static final TRIGGER_NAME = "FetchReplicaCommandsTrigger"
 
@@ -69,10 +69,6 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     }
 
     /**
-     * If the job has been started.
-     */
-    static boolean isStarted = false
-    /**
      * Taking advantage of the grails injection to write the 
      * setApplicationContext method from the attribute.
      */
@@ -83,23 +79,6 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
     CommandsExecutionContext executionContext
 
     /** 
-     * Schedule with the current command pool rate from the 
-     * ReplicaConfiguration.
-     */
-    void start() {
-        if (!isStarted) {
-            def replica = ReplicaConfiguration.getCurrentConfig()
-            def triggerInstance = makeTrigger(replica.commandPollRate)
-            schedule(triggerInstance)
-            isStarted = true
-            log.info("Started FetchReplicaCommandsJob")
-
-        } else {
-            log.debug("FetchReplicaCommandsJob is already started")
-        }
-    }
-
-    /** 
      * Create an infinitely repeating simple trigger with the current
      * replica server commandPoolRate with a delay of INITIAL_DELAY_SEC seconds
      */
@@ -108,8 +87,8 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
         def startDelay = INITIAL_DELAY_SEC * 1000L
         def trigger = new SimpleTrigger(TRIGGER_NAME, TRIGGER_GROUP, 
             SimpleTrigger.REPEAT_INDEFINITELY, interval)
-        trigger.setJobName(JOB_NAME)
-        trigger.setJobGroup(JOB_GROUP_NAME)
+        trigger.setJobName(name)
+        trigger.setJobGroup(group)
         trigger.setStartTime(new Date(System.currentTimeMillis() + startDelay))
         return trigger
     }

@@ -95,10 +95,6 @@ class ApplicationFilters {
                     featureList << "repo"
                 }
 
-                if (ServerMode.REPLICA == Server.getServer().mode) {
-                    featureList << "job"
-                }
-
                 if (lifecycleService.getServer().replica) {
                     featureList << "userCache"
                 }

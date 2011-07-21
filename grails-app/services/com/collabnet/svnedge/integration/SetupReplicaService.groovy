@@ -191,7 +191,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         authenticationManager.providers = [ctfAuthenticationProvider]
 
         log.info("starting FetchReplicaCommandsJob")
-        new FetchReplicaCommandsJob().start()
+        def triggerInstance = FetchReplicaCommandsJob.makeTrigger(rc.commandPollRate)
+        jobsAdminService.createOrReplaceTrigger(triggerInstance)
         log.info("Resuming replica jobs")
         jobsAdminService.resumeGroup(REPLICA_GROUP)
 
