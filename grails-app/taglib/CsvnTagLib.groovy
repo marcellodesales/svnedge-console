@@ -127,24 +127,29 @@ class CsvnTagLib {
      * @return the button html
      */
     def listViewActionButton = { attrs, body ->
-        out << "<input type='submit' class='Button ${attrs.action} listViewAction' "
-        out << " name='_action_${attrs.action}' minSelected='${attrs.minSelected ?: 1}' maxSelected='${attrs.maxSelected ?: 100}'"
-        if (attrs.confirmMessage) {
-            out << " confirmMessageElement='_confirm_${attrs.action}'"
-        }
-        if (attrs.confirmTypeThis) {
-            out << " confirmTypeThis='${attrs.confirmTypeThis}'"
-        }
+        out << "<input id='listViewAction_${attrs.action}' type='submit' class='Button ${attrs.action} listViewAction' "
+        out << " name='_action_${attrs.action}' "
         out << " value='${body().trim()}'/>"
         if (attrs.confirmMessage) {
             out << "<div id='_confirm_${attrs.action}' style='display:none'>"
             out << "<p>${attrs.confirmMessage}</p>"
-            if (attrs.confirmTypeThis) {
+            if (attrs.confirmByTypingThis) {
                 out << "<p>${message(code:'default.confirmation.typeThis.prompt')} ${attrs.confirmTypeThis}</p>"
-                out << "<p><input id='_confirmTypeThisInput' type='text' size='20'/></p>"
+                out << "<p><input id='_confirmTypeThis_${attrs.action}' type='text' size='20'/></p>"
             }
             out << "</div>"
         }
+        out << "<script>"
+        out << "elementExtendedAttributes = { 'minSelected' : ${attrs.minSelected ?: 1}, 'maxSelected':${attrs.maxSelected ?: 100}};"
+        if (attrs.confirmMessage) {
+            out << " elementExtendedAttributes['confirmMessageElement'] = '_confirm_${attrs.action}';"
+        }
+        if (attrs.confirmByTypingThis) {
+            out << " elementExtendedAttributes['confirmByTypingThisValue'] = '${attrs.confirmByTypingThis}';"
+            out << " elementExtendedAttributes['confirmByTypingInputElement'] = '_confirmTypeThis_${attrs.action}';"
+        }
+        out << " listViewElementExtendedAttributes['listViewAction_${attrs.action}'] = elementExtendedAttributes;"
+        out << "</script>"
     }
 
 

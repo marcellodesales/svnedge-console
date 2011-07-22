@@ -83,7 +83,7 @@
                          <div class="AlignRight">
                              <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
                                  confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
-                                 confirmTypeThis="${message(code:'default.confirmation.typeThis')}">
+                                 confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
                                <g:message code="default.button.delete.label"/>
                              </g:listViewActionButton>
                              <g:listViewActionButton action="dumpOptions" minSelected="1" maxSelected="1">

@@ -24,6 +24,17 @@ String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
 }
 
+var listViewElementExtendedAttributes = {};
+/**
+ * retrieves an extended attribute associated with an element
+ * @param attrName
+ * @return the element value, or null
+ */
+Element.prototype.readExtendedAttribute = function(attrName) {
+    elementAttributes = listViewElementExtendedAttributes[this.id];
+    return elementAttributes[attrName];
+}
+
 Event.observe(window, 'load', function() {
     // add observer to checkboxes for enabling / disabling command buttons
     var allItemSelectCheckboxes = $$('input.listViewSelectItem');
@@ -33,7 +44,7 @@ Event.observe(window, 'load', function() {
 
     // add observer to action buttons with confirmation messages
     $$('input.listViewAction').each (function(s) {
-        var confirmMessageElement = s.readAttribute('confirmMessageElement')
+        var confirmMessageElement = s.readExtendedAttribute('confirmMessageElement')
         if (confirmMessageElement) {
             Event.observe(s, 'click', function(e){
                 // stop this button click from submitting form
@@ -43,9 +54,9 @@ Event.observe(window, 'load', function() {
                         function() {
                             // on "ok", submit the form
                             // if "type this" confirmation present, verify user input matches first
-                            if (s.readAttribute('confirmTypeThis')) {
-                                var typeThis = s.readAttribute('confirmTypeThis')
-                                var userInput = $('_confirmTypeThisInput').value;
+                            if (s.readExtendedAttribute('confirmByTypingThisValue')) {
+                                var typeThis = s.readExtendedAttribute('confirmByTypingThisValue')
+                                var userInput = $(s.readExtendedAttribute('confirmByTypingInputElement')).value;
                                 if (typeThis != userInput) {
                                     new Effect.Shake(Windows.focusedWindow.getId());
                                     return;
@@ -89,8 +100,8 @@ Event.observe(window, 'load', function() {
 function updateActionButtons()  {
     numberItemsSelected = $$('input:checked.listViewSelectItem').length
     $$('input.listViewAction').each(function(s) {
-        s.disabled = (parseInt(s.readAttribute('minSelected')) > numberItemsSelected) ||
-                (parseInt(s.readAttribute('maxSelected')) < numberItemsSelected)
+        s.disabled = (parseInt(s.readExtendedAttribute('minSelected')) > numberItemsSelected) ||
+                (parseInt(s.readExtendedAttribute('maxSelected')) < numberItemsSelected)
     })
 }
 
