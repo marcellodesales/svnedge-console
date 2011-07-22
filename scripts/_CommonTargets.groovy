@@ -127,7 +127,7 @@ target(downloadArtifacts: 'Downloads the csvn binaries') {
 
     } else if (osName == "windows") {
         Ant.get(dest: archiveFile,
-            src: urlPrefix + "windows/CollabNet_Subversion-Win32-latest.zip")
+            src: urlPrefix + "windows/CollabNet_Subversion-Win${bits}-latest.zip")
     } else
     if (osName == "mac") {
         System.err.println("Feature not implemented for Mac")
