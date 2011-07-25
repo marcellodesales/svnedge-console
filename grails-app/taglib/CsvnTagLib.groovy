@@ -69,7 +69,7 @@ class CsvnTagLib {
       out << """
         <input type="hidden" name="${fieldName}_changed" id="${fieldName}_changed" value="false"/>
         <input type="password" name="${fieldName}" id="${fieldName}" value="${pwdToken}" size="${size}"/>
-        <script>
+        <script type="text/javascript">
         \$('${fieldName}').observe('change', function(event){
             \$('${fieldName}_changed').value = 'true'
         })
@@ -139,7 +139,7 @@ class CsvnTagLib {
             }
             out << "</div>"
         }
-        out << "<script>"
+        out << '<script type="text/javascript">'
         out << "elementExtendedAttributes = { 'minSelected' : ${attrs.minSelected ?: 1}, 'maxSelected':${attrs.maxSelected ?: 100}};"
         if (attrs.confirmMessage) {
             out << " elementExtendedAttributes['confirmMessageElement'] = '_confirm_${attrs.action}';"
