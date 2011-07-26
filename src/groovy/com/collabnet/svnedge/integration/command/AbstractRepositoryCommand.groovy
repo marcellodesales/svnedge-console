@@ -149,6 +149,47 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
     }
 
     /**
+     * Checks svn master for httpV2 support (1.7+). The local server is set accordingly.
+     * @param repoName
+     */
+    def syncHttpV2SupportWithMaster(repoName) {
+
+        def svnRepoService = getService("svnRepoService")
+        def securityService = getService("securityService")
+        def lifecycleService = getService("lifecycleService")
+        def serverConfService = getService("serverConfService")
+
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.currentConfig
+        CtfServer ctfServer = CtfServer.getServer()
+        Server server = Server.getServer()
+
+        String username = ctfServer.ctfUsername
+        String password = securityService.decrypt(ctfServer.ctfPassword)
+        String repoUrl = replicaConfig.svnMasterUrl
+        if (!repoUrl.endsWith("/")) {
+            repoUrl += "/"
+        }
+        repoUrl += repoName
+
+        // assess the remote server
+        boolean hasSupport = svnRepoService.svnServerSupportsHttpV2(repoUrl, username, password)
+        log.info("The svn master supports httpv2 (svn 1.7+): " + hasSupport)
+        // if the local config matches the remote server already, do nothing
+        if (server.useHttpV2 == hasSupport) {
+            log.debug("The replica server httpv2 config is unchanged (useHttpV2: ${server.useHttpV2})")
+            return
+        }
+        else {
+            server.useHttpV2 = hasSupport
+            server.save(flush:true)
+            log.debug("The replica server httpv2 is updated to match the server (useHttpV2: ${server.useHttpV2})")
+
+            serverConfService.writeConfigFiles()
+            lifecycleService.gracefulRestartServer()
+        }
+    }
+
+    /**
      * @return if the current server running is a windows box.
      */
     private boolean isWindows() {

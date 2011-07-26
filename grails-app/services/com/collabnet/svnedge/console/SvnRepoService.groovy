@@ -941,4 +941,31 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
 
     }
+
+   /**
+    * helper to evaluate an svn instance url for support of httpv2
+    * @param repoUrl
+    * @param uname
+    * @param password
+    * @return boolean true if verified, false if unknown or verified no support
+    */
+    def boolean svnServerSupportsHttpV2(String repoUrl, String uname, String password) {
+
+        // svn ls against the url, with config options exposed, will reveal markers of 1.7+ server
+        def out = new StringBuffer()
+        def err = new StringBuffer()
+        def proc = "${ConfigUtil.svnPath()} ls ${repoUrl} --config-option servers:global:neon-debug-mask=130 --username ${uname} --password ${password}".execute()
+        proc.waitForProcessOutput(out, err)
+
+        // look for options headers returned only by 1.7+ server
+        String errput = err.toString()
+        if (errput.contains("SVN-Youngest-Rev") && errput.contains("SVN-Repository-UUID")) {
+            return true
+        }
+        else {
+            return false
+        }
+
+
+    }
 }
