@@ -52,7 +52,7 @@ public class RepoAddCommand extends AbstractRepositoryCommand
         createRepositoryOnFileSystem(repoName)
 
         log.debug("Updating local HttpV2 support if master supports...")
-        syncHttpV2SupportWithMaster(repoName)
+        syncConfigurationWithMaster()
     }
 
     def undo() {

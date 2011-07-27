@@ -138,16 +138,15 @@ class UpgradeBootStrap {
 
         locks.each { it.save() }
 
-        // with upgrade to svn 1.7, an existing replica will need the new apache HTTPv2 directive written to conf
+        // initialize new useHttpV2 field; 
+        // if we are a replica and have replicated repos, the local HttpV2 usage needs to be 
+        // synced with the master
         Server s = Server.getServer()
         if (s) {
-            s.useHttpV2 = (s.mode != ServerMode.REPLICA)
+            s.useHttpV2 = true
             s.save(flush:true)
-            if (s.mode == ServerMode.REPLICA) {
-                serverConfService.writeConfigFiles()
-                if (lifecycleService.isStarted()) {
-                    lifecycleService.restartServer()
-                }
+            if (serverConfService.syncReplicaConfigurationWithMaster()) {
+                 lifecycleService.gracefulRestartServer()
             }
         }
 

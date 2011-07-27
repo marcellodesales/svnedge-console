@@ -30,7 +30,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository;
 
 class ServerConfService {
 
@@ -93,6 +94,79 @@ class ServerConfService {
         } catch (Exception e) {
             log.error("Unable to write initial set of configuration " +
                 "files", e)
+        }
+    }
+    
+    /**
+     * Service method for replica mode to sync this server configuration with the master
+     * -- currently this only pertains to the use of HttpV2.
+     * @return boolean whether restart is needed
+     */
+    public boolean syncReplicaConfigurationWithMaster() {    
+        
+        Server server = Server.getServer()
+        if (server.mode != ServerMode.REPLICA) {
+            log.debug("Not a replica, no reason to sync configuration with master svn")
+            return false
+        }
+        ReplicatedRepository rr = ReplicatedRepository.list()?.get(0)
+        if (!rr) {
+            log.warn("No replicated repositories, this configuration cannot be compared to the master")
+            return false
+        }
+        
+        def repoName = rr.repo.name
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.currentConfig
+        CtfServer ctfServer = CtfServer.getServer()
+
+        String username = ctfServer.ctfUsername
+        String password = securityService.decrypt(ctfServer.ctfPassword)
+        String repoUrl = replicaConfig.svnMasterUrl
+        if (!repoUrl.endsWith("/")) {
+            repoUrl += "/"
+        }
+        repoUrl += repoName
+
+        // assess the remote server
+        boolean hasSupport = svnServerSupportsHttpV2(repoUrl, username, password)
+        log.info("The svn master supports httpv2 (svn 1.7+): " + hasSupport)
+        // if the local config matches the remote server already, do nothing
+        if (server.useHttpV2 == hasSupport) {
+            log.debug("The replica server httpv2 config is unchanged (useHttpV2: ${server.useHttpV2})")
+            return false
+        }
+        else {
+            server.useHttpV2 = hasSupport
+            server.save(flush:true)
+            log.debug("The replica server httpv2 is updated to match the server (useHttpV2: ${server.useHttpV2})")
+
+            writeConfigFiles()
+            return true
+        }
+    }
+    
+    /**
+     * helper to evaluate an svn instance url for support of httpv2
+     * @param repoUrl
+     * @param uname
+     * @param password
+     * @return boolean true if verified, false if unknown or verified no support
+     */
+    def boolean svnServerSupportsHttpV2(String repoUrl, String uname, String password) {
+
+        // svn ls against the url, with config options exposed, will reveal markers of 1.7+ server
+        def out = new StringBuffer()
+        def err = new StringBuffer()
+        def proc = "${ConfigUtil.svnPath()} ls ${repoUrl} --config-option servers:global:neon-debug-mask=130 --username ${uname} --password ${password}".execute()
+        proc.waitForProcessOutput(out, err)
+
+        // look for options headers returned only by 1.7+ server
+        String errput = err.toString()
+        if (errput.contains("SVN-Youngest-Rev") && errput.contains("SVN-Repository-UUID")) {
+            return true
+        }
+        else {
+            return false
         }
     }
     
