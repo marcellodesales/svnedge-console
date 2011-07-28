@@ -36,6 +36,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
     def svnRepoService
     def ctfRemoteClientService
     def lifecycleService
+    def grailsApplication
     
 
     protected void setUp() {
@@ -126,7 +127,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
     void testSvnServerSupportsHttpV2() {
         
         // evaluate CTF instance for httpv2 support (should be false)
-        def config = ConfigurationHolder.config
+        def config = grailsApplication.config
         def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
         def svnUrl = ctfUrl + "/svn/repos/"
         def testRepo = CommandTestsHelper
