@@ -21,7 +21,10 @@ import grails.test.*
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.replication.command.CommandTestsHelper
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.domain.Repository;
 
 /**
  * this test class validates the configuration files being modified
@@ -30,6 +33,9 @@ import com.collabnet.svnedge.util.ConfigUtil;
 class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 
     def serverConfService
+    def svnRepoService
+    def ctfRemoteClientService
+    def lifecycleService
     
 
     protected void setUp() {
@@ -113,6 +119,45 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 	assertTrue("Missing ctf_httpd.conf", confFile.exists())
     }
 
+    /**
+     * Test a repo url for httpv2 support. Confirms that the ctf test instance is not showing support,
+     * while the local svn does.
+     */
+    void testSvnServerSupportsHttpV2() {
+        
+        // evaluate CTF instance for httpv2 support (should be false)
+        def config = ConfigurationHolder.config
+        def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
+        def svnUrl = ctfUrl + "/svn/repos/"
+        def testRepo = CommandTestsHelper
+            .createTestRepository(config, ctfRemoteClientService)
+        def repoUrl = svnUrl + testRepo.repoName
+        
+        boolean hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, config.svnedge.ctfMaster.username,
+           config.svnedge.ctfMaster.password)
+        
+        assertFalse("the CTF test instance should not show svn 1.7+ httpv2 support", hasHttpV2Support)
+        
+        // evaluate the local SvnEdge instance for httpv2 support (should be true)
+        def testRepoName = "httpv2-test"
+        Repository repo = new Repository(name: testRepoName)
+        svnRepoService.createRepository(repo, true)
+        
+        if (!lifecycleService.isStarted()) {
+            lifecycleService.startServer()
+        }
+        
+        Server s = Server.getServer()
+        repoUrl = s.svnURL() + testRepoName
+        hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, "admin", "admin")
+        
+        assertTrue("the svnedge test instance should show svn 1.7+ httpv2 support", hasHttpV2Support)
+        
+        svnRepoService.removeRepository(repo)
+        svnRepoService.deletePhysicalRepository(repo)
+        
+    }
+    
 
     private boolean validateProperty(File f, String propertyName, String expectedValue) {
 

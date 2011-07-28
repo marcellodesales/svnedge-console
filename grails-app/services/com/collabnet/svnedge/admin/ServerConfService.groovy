@@ -157,11 +157,18 @@ class ServerConfService {
         // svn ls against the url, with config options exposed, will reveal markers of 1.7+ server
         def out = new StringBuffer()
         def err = new StringBuffer()
-        def proc = "${ConfigUtil.svnPath()} ls ${repoUrl} --config-option servers:global:neon-debug-mask=130 --username ${uname} --password ${password}".execute()
+        def commandLine = "${ConfigUtil.svnPath()} ls ${repoUrl} --config-option servers:global:neon-debug-mask=130 "
+        log.debug("svn command to assess options headers: '${commandLine}'")
+        // adding credentials after logging to avoid security issues
+        commandLine += "--username ${uname} --password ${password}"
+
+        def proc = commandLine.execute()
         proc.waitForProcessOutput(out, err)
 
         // look for options headers returned only by 1.7+ server
         String errput = err.toString()
+        log.debug("svn command stdout: " + out.toString())
+        log.debug("svn command stderr: " + err.toString())
         if (errput.contains("SVN-Youngest-Rev") && errput.contains("SVN-Repository-UUID")) {
             return true
         }
