@@ -24,7 +24,8 @@ import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.replication.command.CommandTestsHelper
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import com.collabnet.svnedge.domain.Repository;
+import com.collabnet.svnedge.domain.Repository
+import org.junit.Ignore;
 
 /**
  * this test class validates the configuration files being modified
@@ -124,6 +125,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
      * Test a repo url for httpv2 support. Confirms that the ctf test instance is not showing support,
      * while the local svn does.
      */
+    @Ignore
     void testSvnServerSupportsHttpV2() {
         
         // evaluate CTF instance for httpv2 support (should be false)
