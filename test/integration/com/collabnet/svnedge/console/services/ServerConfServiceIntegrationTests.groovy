@@ -125,9 +125,8 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
      * Test a repo url for httpv2 support. Confirms that the ctf test instance is not showing support,
      * while the local svn does.
      */
-    @Ignore
     void testSvnServerSupportsHttpV2() {
-        
+
         // evaluate CTF instance for httpv2 support (should be false)
         def config = grailsApplication.config
         def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
@@ -154,7 +153,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         repoUrl = s.svnURL() + testRepoName
         hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, "admin", "admin")
         
-        assertTrue("the svnedge test instance should show svn 1.7+ httpv2 support", hasHttpV2Support)
+        assertTrue("the local subversion server should show svn 1.7+ httpv2 support", hasHttpV2Support)
         
         svnRepoService.removeRepository(repo)
         svnRepoService.deletePhysicalRepository(repo)

@@ -31,7 +31,8 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.util.ConfigUtil
-import com.collabnet.svnedge.domain.integration.ReplicatedRepository;
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
+import sun.misc.BASE64Encoder;
 
 class ServerConfService {
 
@@ -154,29 +155,52 @@ class ServerConfService {
      */
     def boolean svnServerSupportsHttpV2(String repoUrl, String uname, String password) {
 
-        // svn ls against the url, with config options exposed, will reveal markers of 1.7+ server
-        def out = new StringBuffer()
-        def err = new StringBuffer()
-        def commandLine = "${ConfigUtil.svnPath()} ls ${repoUrl} --config-option servers:global:neon-debug-mask=130 "
-        log.debug("svn command to assess options headers: '${commandLine}'")
-        // adding credentials after logging to avoid security issues
-        commandLine += "--username ${uname} --password ${password}"
-
-        def proc = commandLine.execute()
-        proc.waitForProcessOutput(out, err)
-
-        // look for options headers returned only by 1.7+ server
-        String errput = err.toString()
-        log.debug("svn command stdout: " + out.toString())
-        log.debug("svn command stderr: " + err.toString())
-        if (errput.contains("SVN-Youngest-Rev") && errput.contains("SVN-Repository-UUID")) {
-            return true
+        URL url = new URL(repoUrl);
+        int port = url.port
+        if (port == -1) {
+            port = (url.protocol == "https") ? 443 : 80
         }
-        else {
-            return false
+        String credentials = "${uname}:${password}"
+        byte[] credentialsBytes = credentials.getBytes("UTF8");
+        String encodedCredentials = new BASE64Encoder().encode(credentialsBytes)
+
+        String body = """
+OPTIONS ${url.path} HTTP/1.1
+Host: ${url.host}
+Content-Type: text/xml
+Authorization: Basic ${encodedCredentials}
+DAV: http://subversion.tigris.org/xmlns/dav/svn/depth
+DAV: http://subversion.tigris.org/xmlns/dav/svn/mergeinfo
+DAV: http://subversion.tigris.org/xmlns/dav/svn/log-revprops
+Content-Length: 107
+
+<?xml version="1.0" encoding="utf-8"?>
+<D:options xmlns:D="DAV:">
+<D:activity-collection-set/>
+</D:options>
+"""
+        log.debug "Opening connection to ${url.host} ${port}"
+        boolean returnVal = false
+        try {
+            Socket s = new Socket(url.host, port);
+            s.withStreams { input, output ->
+                output << body
+                def reader = input.newReader()
+                def line
+
+                while ((line = reader.readLine()) != null) {
+                    if (line.contains("SVN-Me-Resource")) {
+                        returnVal = true
+                    }
+                }
+            }
         }
+        catch (Exception e) {
+            log.warn("Unable to connect to repo", e)
+        }
+        returnVal
     }
-    
+
     private String confDirPath() {
         return ConfigUtil.confDirPath()
     }
