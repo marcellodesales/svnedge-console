@@ -32,7 +32,9 @@ import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
-import sun.misc.BASE64Encoder;
+import sun.misc.BASE64Encoder
+import javax.net.SocketFactory
+import javax.net.ssl.SSLSocketFactory;
 
 class ServerConfService {
 
@@ -182,7 +184,14 @@ Content-Length: 107
         log.debug "Opening connection to ${url.host} ${port}"
         boolean returnVal = false
         try {
-            Socket s = new Socket(url.host, port);
+            Socket s
+            if (url.protocol == "https" ) {
+                SocketFactory socketFactory = SSLSocketFactory.getDefault();
+                s = socketFactory.createSocket(url.host, port);
+            }
+            else {
+                s = new Socket(url.host, port);
+            }
             s.withStreams { input, output ->
                 output << body
                 def reader = input.newReader()
