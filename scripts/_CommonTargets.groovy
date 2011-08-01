@@ -95,6 +95,12 @@ target(prepare: 'Prepares properties and fields') {
 
 target(downloadArtifacts: 'Downloads the csvn binaries') {
 
+    def buildNos = [linux:   ['32': 'latest', '64': 'latest'],
+                    solaris: ['x86': ['32': 'latest'], 
+                              'SPARC': ['32': 'latest']],
+                    windows: ['32': 'latest', '64': 'latest']
+        ]
+
     Ant.echo(message: "Downloading the CSVN binaries")
 
     //Generating the truststore files for downloading
@@ -110,24 +116,26 @@ target(downloadArtifacts: 'Downloads the csvn binaries') {
     System.setProperty( 'javax.net.ssl.keyStorePassword', "together" )
 
     def bits = Ant.project.properties."bits"
+    def build = buildNos[osName][bits]
 
     //Downloading from the Cubit Project Build Library... "guest" access...
     if (osName == "linux") {
         Ant.get(dest: archiveFile,
                 src: urlPrefix + "linux/" +
-                "CollabNet_Subversion-Linux-x86_${bits}-latest.tar.gz")
+                "CollabNet_Subversion-Linux-x86_${bits}-${build}.tar.gz")
 
     } else if (osName == "solaris") {
         def proc = System.getProperty("os.arch").startsWith("sparc") ?
 	    "SPARC" : "x86"
+        build = buildNos[osName][proc][bits]
         Ant.get(dest: archiveFile, 
                 src: urlPrefix + "solaris/" +
-                "CollabNet_Subversion-Sol10-${proc}_${bits}-latest.tar.gz")
+                "CollabNet_Subversion-Sol10-${proc}_${bits}-${build}.tar.gz")
 
 
     } else if (osName == "windows") {
         Ant.get(dest: archiveFile,
-            src: urlPrefix + "windows/CollabNet_Subversion-Win${bits}-latest.zip")
+            src: urlPrefix + "windows/CollabNet_Subversion-Win${bits}-${build}.zip")
     } else
     if (osName == "mac") {
         System.err.println("Feature not implemented for Mac")
