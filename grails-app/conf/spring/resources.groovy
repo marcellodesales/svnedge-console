@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 // Place your Spring DSL code here
+import grails.util.Environment
+
 beans = {
     ctfAuthenticationProvider(com.collabnet.svnedge.integration.security.CtfAuthenticationProvider) {
         ctfRemoteClientService = ref("ctfRemoteClientService")
@@ -32,5 +34,13 @@ beans = {
 
     configUtil(com.collabnet.svnedge.util.ConfigUtil) { bean ->
         bean.autowire = 'byName'
+    }
+
+    switch(Environment.current) {
+    case Environment.TEST:
+        databaseInit(com.collabnet.svnedge.schema.DatabaseInitializer) {
+            application = ref("grailsApplication")
+        }
+        break
     }
 }

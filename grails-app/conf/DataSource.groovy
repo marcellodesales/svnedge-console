@@ -30,19 +30,19 @@ hibernate {
 environments {
     development {
         dataSource {
-            dbCreate = "create-drop" // one of 'create', 'create-drop','update'
-            url = "jdbc:hsqldb:mem:devDB"
+            dbCreate = "none" // one of 'create', 'create-drop','update'
+            url = "jdbc:hsqldb:file:svn-server/data/csvn-dev-hsqldb;shutdown=true"
         }
     }
     test {
         dataSource {
-            dbCreate = "create-drop"
+            dbCreate = "none"
             url = "jdbc:hsqldb:mem:testDb"
         }
     }
     production {
         dataSource {
-            dbCreate = "update"
+            dbCreate = "none"
             url = "jdbc:hsqldb:file:../data/csvn-production-hsqldb;shutdown=true"
         }
     }

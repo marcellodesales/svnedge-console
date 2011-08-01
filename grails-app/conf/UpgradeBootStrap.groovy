@@ -130,14 +130,6 @@ class UpgradeBootStrap {
         }
         log.info("Applying 2.1.0 updates")
 
-        def locks = [ new QrtzLocks(lockName: 'TRIGGER_ACCESS'),
-                new QrtzLocks(lockName: 'JOB_ACCESS'),
-                new QrtzLocks(lockName: 'CALENDAR_ACCESS'),
-                new QrtzLocks(lockName: 'STATE_ACCESS'),
-                new QrtzLocks(lockName: 'MISFIRE_ACCESS') ]
-
-        locks.each { it.save() }
-
         // initialize new useHttpV2 field; 
         // if we are a replica and have replicated repos, the local HttpV2 usage needs to be 
         // synced with the master

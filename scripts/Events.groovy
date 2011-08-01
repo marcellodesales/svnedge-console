@@ -85,6 +85,11 @@ eventCleanEnd = {
     }
     Ant.delete(dir: "${dataDir}/deleted-repos", quiet: "true")
 
+    Ant.echo(message: "Deleting the dev database")
+    Ant.delete(quiet: "true") {
+        fileset(dir: "${dataDir}", includes: "csvn-dev-hsqldb.*")
+    }
+
     event("StatusFinal", ["CSVN Development environment cleaned!"])
 }
 

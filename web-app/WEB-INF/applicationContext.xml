@@ -10,6 +10,11 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
         <property name="grailsResourceLoader" ref="grailsResourceLoader" />
 	</bean>
 
+        <bean id="databaseInit" class="com.collabnet.svnedge.schema.DatabaseInitializer">
+            <description>Handles creating and migration of the database tables required by Subversion Edge</description>
+            <property name="application" ref="grailsApplication" />
+	</bean>
+
 	<bean id="pluginManager" class="org.codehaus.groovy.grails.plugins.GrailsPluginManagerFactoryBean">
 		<description>A bean that manages Grails plugins</description>
         <property name="grailsDescriptor" value="/WEB-INF/grails.xml" />
