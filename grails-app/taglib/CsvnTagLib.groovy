@@ -134,7 +134,7 @@ class CsvnTagLib {
             out << "<div id='_confirm_${attrs.action}' style='display:none'>"
             out << "<p>${attrs.confirmMessage}</p>"
             if (attrs.confirmByTypingThis) {
-                out << "<p>${message(code:'default.confirmation.typeThis.prompt')} ${attrs.confirmTypeThis}</p>"
+                out << "<p>${message(code:'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>"
                 out << "<p><input id='_confirmTypeThis_${attrs.action}' type='text' size='20'/></p>"
             }
             out << "</div>"
