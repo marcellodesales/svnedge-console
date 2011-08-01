@@ -143,6 +143,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         // evaluate the local SvnEdge instance for httpv2 support (should be true)
         def testRepoName = "httpv2-test"
         Repository repo = new Repository(name: testRepoName)
+        repo.save(flush:true)
         svnRepoService.createRepository(repo, true)
         
         if (!lifecycleService.isStarted()) {
