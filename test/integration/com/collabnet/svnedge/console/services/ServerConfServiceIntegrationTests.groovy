@@ -37,6 +37,7 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
     def svnRepoService
     def ctfRemoteClientService
     def lifecycleService
+    def setupReplicaService
     def grailsApplication
     
 
@@ -141,14 +142,16 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse("the CTF test instance should not show svn 1.7+ httpv2 support", hasHttpV2Support)
         
         // evaluate the local SvnEdge instance for httpv2 support (should be true)
-        def testRepoName = "httpv2-test"
+        def testRepoName = "httpv2-test-" + Math.round(Math.random() * 1000)
         Repository repo = new Repository(name: testRepoName)
         repo.save(flush:true)
         svnRepoService.createRepository(repo, true)
         
-        if (!lifecycleService.isStarted()) {
-            lifecycleService.startServer()
+        if (Server.getServer().mode == ServerMode.REPLICA) {
+            setupReplicaService.undoReplicaModeConfiguration([], Locale.defaultLocale)
         }
+        lifecycleService.restartServer()
+        
         
         Server s = Server.getServer()
         repoUrl = s.svnURL() + testRepoName
