@@ -33,8 +33,7 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import sun.misc.BASE64Encoder
-import javax.net.SocketFactory
-import javax.net.ssl.SSLSocketFactory;
+import com.collabnet.svnedge.util.SSLUtil;
 
 class ServerConfService {
 
@@ -186,8 +185,7 @@ Content-Length: 107
         try {
             Socket s
             if (url.protocol == "https" ) {
-                SocketFactory socketFactory = SSLSocketFactory.getDefault();
-                s = socketFactory.createSocket(url.host, port);
+                s = SSLUtil.createTrustingSocket(url.host, port);
             }
             else {
                 s = new Socket(url.host, port);
