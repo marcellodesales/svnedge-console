@@ -139,16 +139,17 @@ class CsvnTagLib {
             }
             out << "</div>"
         }
-        out << '<script type="text/javascript">'
-        out << "elementExtendedAttributes = { 'minSelected' : ${attrs.minSelected ?: 1}, 'maxSelected':${attrs.maxSelected ?: 100}};"
+        out << '\n<script type="text/javascript">\n'
+        out << "  var button = \$('listViewAction_${attrs.action}');\n"
+        out << "  button.minSelected = ${attrs.minSelected ?: 1};\n"
+        out << "  button.maxSelected = ${attrs.maxSelected ?: 100};\n"
         if (attrs.confirmMessage) {
-            out << " elementExtendedAttributes['confirmMessageElement'] = '_confirm_${attrs.action}';"
+            out << "button.confirmMessageElement = '_confirm_${attrs.action}';\n"
         }
         if (attrs.confirmByTypingThis) {
-            out << " elementExtendedAttributes['confirmByTypingThisValue'] = '${attrs.confirmByTypingThis}';"
-            out << " elementExtendedAttributes['confirmByTypingInputElement'] = '_confirmTypeThis_${attrs.action}';"
+            out << "button.confirmByTypingThisValue = '${attrs.confirmByTypingThis}';\n"
+            out << "button.confirmByTypingInputElement = '_confirmTypeThis_${attrs.action}';\n"
         }
-        out << " listViewElementExtendedAttributes['listViewAction_${attrs.action}'] = elementExtendedAttributes;"
         out << "</script>"
     }
 
