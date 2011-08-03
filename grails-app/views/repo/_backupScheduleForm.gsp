@@ -118,6 +118,7 @@
      </td>
    </tr>
   </table>
+</g:form>
 <g:javascript>
   function typeHandler() {
       var typeSelect = $('type');
