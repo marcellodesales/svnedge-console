@@ -739,16 +739,18 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         catch (CtfAuthenticationException e) {
             def msg = getMessage("ctfRemoteClientService.auth.error",
                     [ctfUrl.encodeAsHTML()], locale)
-            log.error(msg)
+            log.debug(msg)
             errors << msg
             throw new CtfAuthenticationException(msg,
                     "ctfRemoteClientService.auth.error")
         }
         catch (AxisFault e) {
-            if (e.faultCode.toString().contains("PermissionDeniedFault")) {
+            if (e.faultCode.toString().contains("PermissionDeniedFault") ||
+                    e.faultString.contains(
+                    "You must be a site administrator to delete an external system")) {
                 def msg = getMessage("ctfRemoteClientService.permission.error", 
                     [ctfUrl.encodeAsHTML()], locale)
-                log.error(msg)
+                log.debug(msg)
                 errors << msg
                 throw new CtfAuthenticationException(msg, 
                     "ctfRemoteClientService.permission.error")
@@ -762,7 +764,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 def errorMsg = getMessage(
                          "ctfRemoteClientService.general.error", [e.getMessage()],
                          locale)
-                log.error(errorMsg, e)
+                log.warn(errorMsg, e)
                 errors << errorMsg
                 throw new RemoteMasterException(ctfUrl, errorMsg, e)
             }
