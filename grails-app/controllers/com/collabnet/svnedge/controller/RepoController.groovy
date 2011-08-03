@@ -342,6 +342,12 @@ class RepoController {
         }
     }
 
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    def bkupScheduleMultiple = {
+        def model = list()
+        model["dump"] = new DumpBean()
+        return model
+    }
     
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def downloadDumpFile = {

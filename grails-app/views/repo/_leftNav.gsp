@@ -31,6 +31,11 @@
           <g:link action="editAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>
       </div>
 
+      <div class="${actionName == 'bkupScheduleMultiple' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+          <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+          <g:link action="bkupScheduleMultiple"><g:message code="repository.page.leftnav.backup" /></g:link>
+      </div>
+
     </g:ifAnyGranted>
   </g:else>
   </div>
