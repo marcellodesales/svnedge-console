@@ -376,7 +376,9 @@ class RepoController {
             def backups = svnRepoService.retrieveScheduledBackups(it)
             if (backups) {
                 DumpBean b = (DumpBean) backups[0]
-                job.type = (b.cloud) ? "CollabNet Cloud Services" : (b.deltas) ? "Dump (deltas)" : "Dump (full)"
+                job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
+                        message(code: "repository.page.bkupSchedule.type.fullDumpDelta") :
+                        message(code: "repository.page.bkupSchedule.type.fullDump")
                 job.keepNumber = b.numberToKeep
                 job.scheduledFor = formatSchedule(b.schedule)
             }

@@ -108,7 +108,7 @@
         </td>
       </tr>
      </table>
-     <g:if test="${repoBackupJobList}">
+     <g:if test="${!repositoryInstance}">
      <br/>
      <table class="Container">
        <tbody>
@@ -130,6 +130,11 @@
            <td>${job.keepNumber == 0 ? "ALL" : job.keepNumber}</td>
          </tr>
        </g:each>
+       <g:if test="${!repoBackupJobList}">
+         <tr>
+           <td colspan="5"><p><g:message code="repository.page.list.noRepos" /></p></td>
+         </tr>
+       </g:if>
      </table>
      </g:if>
      </td>
@@ -137,7 +142,7 @@
      <tr class="ContainerFooter">
      <td >
        <div class="AlignRight">
-         <g:if test="${repoBackupJobList}">
+         <g:if test="${!repositoryInstance}">
            <g:listViewActionButton action="updateBkupSchedule" minSelected="1" >
              <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
            </g:listViewActionButton>
