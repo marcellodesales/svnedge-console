@@ -428,7 +428,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def replicatedRepos = ReplicatedRepository.findAllByRepo(repo)
         replicatedRepos.each() {
            it.delete()
-        } 
+        }
+
+        // remove scheduled jobs
+        clearScheduledDumps(repo)
 
         // delete the repo entity
         repo.delete()
