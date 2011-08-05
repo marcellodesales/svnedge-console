@@ -38,6 +38,7 @@ public class DumpBean {
     int numberToKeep = 0
     SchedulerBean schedule = new SchedulerBean()
     boolean backup
+    Boolean cloud
 
     // list of fieldnames to facilitate conversion to/from a JobDataMap for use
     // in Quartz scheduling
@@ -55,6 +56,7 @@ public class DumpBean {
         "skipMissingMergeSources",
         "numberToKeep",
         "backup",
+        "cloud",
         "userLocale"
     ]
 

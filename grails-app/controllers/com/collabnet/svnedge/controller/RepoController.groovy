@@ -26,6 +26,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import com.collabnet.svnedge.console.SchedulerBean
 
 /**
  * Command class for 'saveAuthorization' action provides validation
@@ -295,57 +296,101 @@ class RepoController {
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def updateBkupSchedule = { DumpBean cmd ->
         params.remove('_action_updateBkupSchedule')
-        def repo = Repository.get(params.id)
-        if (!repo) {
-            flash.error = message(code: 'repository.action.not.found',
-                                  args: [params.id])
-            redirect(action: list)
-            
-        } else {
-            def type = params.type
-            if (type == "cloud") {
-                flash.error = "CollabNet Cloud Services backup is not available yet."
-                redirect(action: 'bkupSchedule', id: params.id)
+        // handle single or multiple repo backups with same action
+        def repoIdList = (params.id) ? [params.id] : getListViewSelectedIds(params)
+        def type = params.type
+        repoIdList.each {
+            Repository repo = Repository.get(it)
+            if (!repo) {
+                flash.error = message(code: 'repository.action.not.found',
+                                      args: [params.id])
+                redirect(action: list)
                 return
+            }
+
+            if (type == "cloud") {
+                // todo this should be enabled when Cloud Services credentials are available
+                flash.error = "CollabNet Cloud Services backup is not available yet."
             } else if (type == "none") {
                 svnRepoService.clearScheduledDumps(repo)
                 flash.message = message(code: 'repository.action.updateBkupSchedule.none')
+            } else {
+                try {
+                    cmd.userLocale = request.locale
+                    cmd.deltas = (type == 'dump_delta')
+                    cmd.backup = true
+                    if (cmd.hasErrors()) {
+                        flash.dumpBean = cmd
+                        flash.error = "There were errors"
+                    }
+                    else {
+                        svnRepoService.scheduleDump(cmd, repo)
+                        flash.message = message(code: 'repository.action.updateBkupSchedule.success')
+                    }
+                }
+                catch (ValidationException e) {
+                    log.debug "Rejecting " + e.field + " with message " + e.message
+                    if (e.field) {
+                        cmd.errors.rejectValue(e.field, e.message)
+                    } else {
+                        cmd.errors.reject(e.message)
+                        flash.error = message(code: e.message)
+                    }
+                    flash.dumpBean = cmd
+                }
+            }
+        }
+
+        // redirect based on origin (single repo or multiple-repo backup)
+        if (params.id) {
+            if (flash.error || cmd.errors) {
+                redirect(action: 'bkupSchedule', params: params)
+                return
+            }
+            else {
                 redirect(action: 'dumpFileList', id: params.id)
                 return
             }
-        
-            try {
-                cmd.userLocale = request.locale
-                cmd.deltas = (type == 'dump_delta')
-                cmd.backup = true
-                if (cmd.hasErrors()) {
-                    flash.dumpBean = cmd
-                    flash.error = "There were errors"
-                    redirect(action:'bkupSchedule', params:params)
-                    return
-                }
-                svnRepoService.scheduleDump(cmd, repo)
-
-                flash.message = message(code: 'repository.action.updateBkupSchedule.success')
-                redirect(action: 'dumpFileList', id: params.id)
-            } catch (ValidationException e) {
-                log.debug "Rejecting " + e.field + " with message " + e.message
-                if (e.field) {
-                    cmd.errors.rejectValue(e.field, e.message)
-                } else {
-                    cmd.errors.reject(e.message)
-                    flash.error = message(code: e.message)
-                }
-                flash.dumpBean = cmd
-                redirect(action:'bkupSchedule', params:params)
-            }
+        }
+        else {
+            redirect(action: 'bkupScheduleMultiple', params: params)
         }
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
     def bkupScheduleMultiple = {
-        def model = list()
+
+        def model = [:]
+        def repoBackupJobList = []
+
+        // fetch list of repositories using request params to page, then add backup trigger info
+        def listParams = [:]
+        listParams.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+        listParams.offset = params.offset ? params.offset.toInteger() : 0
+        listParams.sort = "name"
+        listParams.order = (params.sort == "repoName") ? params.order : "asc"
+        Repository.list(listParams).each {
+            def job = [:]
+            job.repoId = it.id
+            job.repoName = it.name
+            def backups = svnRepoService.retrieveScheduledBackups(it)
+            if (backups) {
+                DumpBean b = (DumpBean) backups[0]
+                job.type = (b.cloud) ? "CollabNet Cloud Services" : (b.deltas) ? "Dump (deltas)" : "Dump (full)"
+                job.keepNumber = b.numberToKeep
+                job.scheduledFor = formatSchedule(b.schedule)
+            }
+            repoBackupJobList << job
+        }
+
+        // sort the resulting job list according to params
+        repoBackupJobList = repoBackupJobList.sort { it."${params.sort}"}
+        if (params.order == "desc") {
+            repoBackupJobList = repoBackupJobList.reverse()
+        }
+        // add to model
         model["dump"] = new DumpBean()
+        model["repoBackupJobList"] = repoBackupJobList
         return model
     }
     
@@ -578,5 +623,34 @@ class RepoController {
             }
         }
         return ids
+    }
+
+    /**
+     * helper to format a SchedulerBean instance to a human-readable string
+     * @param s
+     * @return string such as "Weekly on Sunday at 11:15"
+     */
+    private String formatSchedule(SchedulerBean s) {
+        String output = ""
+        String minutes = String.format("%02d", s.minute)
+        String hour = String.format("%02d", s.hour)
+        switch (s.frequency) {
+            case SchedulerBean.Frequency.HOURLY:
+                output = message(code: "repository.page.bkupSchedule.schedule.hourly",
+                        args: [minutes])
+                break
+            case SchedulerBean.Frequency.DAILY:
+                output = message(code: "repository.page.bkupSchedule.schedule.daily",
+                        args: [hour, minutes])
+                break
+            case SchedulerBean.Frequency.WEEKLY:
+                def daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+                int dayOfWeekIndex = s.dayOfWeek - 1
+                String scheduleDayOfWeek = message( code: "default.dayOfWeek.${daysOfWeek[dayOfWeekIndex]}")
+                output = message(code: "repository.page.bkupSchedule.schedule.weekly",
+                        args: [scheduleDayOfWeek, hour, minutes])
+                break
+        }
+        return output
     }
 }

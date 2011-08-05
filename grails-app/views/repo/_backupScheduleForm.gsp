@@ -108,12 +108,43 @@
         </td>
       </tr>
      </table>
-    </td>
-   </tr>
-   <tr class="ContainerFooter">
+     <g:if test="${repoBackupJobList}">
+     <br/>
+     <table class="Container">
+       <tbody>
+       <tr class="ItemListHeader">
+         <th><g:listViewSelectAll/></th>
+         <g:sortableColumn property="repoName" titleKey="repository.page.bkupSchedule.job.repoName"
+                           defaultOrder="asc"/>
+         <g:sortableColumn property="type" titleKey="repository.page.bkupSchedule.job.type"/>
+         <g:sortableColumn property="scheduledFor" titleKey="repository.page.bkupSchedule.job.scheduledFor"/>
+         <g:sortableColumn property="keepNumber" titleKey="repository.page.bkupSchedule.job.keepNumber"/>
+       </tr>
+       <g:each in="${repoBackupJobList}" status="i" var="job">
+         <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+           <td><g:listViewSelectItem item="${job}" property="repoId"/></td>
+
+           <td>${job.repoName}</td>
+           <td>${job.type}</td>
+           <td>${job.scheduledFor}</td>
+           <td>${job.keepNumber == 0 ? "ALL" : job.keepNumber}</td>
+         </tr>
+       </g:each>
+     </table>
+     </g:if>
+     </td>
+     </tr>
+     <tr class="ContainerFooter">
      <td >
        <div class="AlignRight">
-          <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}" class="Button"/>
+         <g:if test="${repoBackupJobList}">
+           <g:listViewActionButton action="updateBkupSchedule" minSelected="1" >
+             <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
+           </g:listViewActionButton>
+         </g:if>
+         <g:else>
+           <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}" class="Button"/>
+         </g:else>
        </div>
      </td>
    </tr>
