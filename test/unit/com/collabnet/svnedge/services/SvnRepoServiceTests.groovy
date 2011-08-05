@@ -26,7 +26,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import com.collabnet.svnedge.domain.statistics.StatValue 
 import com.collabnet.svnedge.domain.statistics.Statistic 
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.admin.JobsAdminService;
 
 class SvnRepoServiceTests extends GrailsUnitTestCase {
 
@@ -80,6 +81,11 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
 
         // mock the injected services
         LifecycleService lcs = new LifecycleService()
+        JobsAdminService jas = new JobsAdminService()
+        def quartzScheduler = new Expando()
+        quartzScheduler.getTriggerNames = { p1 -> null }
+        jas.quartzScheduler = quartzScheduler
+
         def cls = new Expando()
         cls.executeWithOutput = { p1, p2, p3 -> ". nobody nobody nobody" }
 
@@ -91,6 +97,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         osSvc.isWindows = { false }
 
         svc.lifecycleService = lcs
+        svc.jobsAdminService = jas
         svc.commandLineService = cls
         svc.serverConfService = repoSvc
         svc.operatingSystemService = osSvc
