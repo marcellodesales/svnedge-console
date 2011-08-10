@@ -54,14 +54,6 @@ class RemoteMasterException extends Exception {
     /**
      * Creates a new exception with the given error message.
      * @param message is the error message.
-     */
-    public RemoteMasterException(String message, Throwable cause) {
-        super(message, cause)
-    }
-
-    /**
-     * Creates a new exception with the given error message.
-     * @param message is the error message.
      * @param key is the messages key in the i18n messages.
      */
     public RemoteMasterException(String message, String key) {

@@ -700,7 +700,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                        locale), e)
             }
              else {
-                throw new RemoteMasterException(e.faultString, e)
+                throw new RemoteMasterException(ctfUrl, e.faultString, e)
              }
             
          } catch (Exception e) {
