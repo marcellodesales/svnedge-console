@@ -16,8 +16,8 @@
 
 drop table MASTER if exists;
 drop table REPLICA_CONFIG if exists;
-drop table REPLICA_ERROR if exists;
 drop table REPLICA_ERROR_TRACE if exists;
+drop table REPLICA_ERROR if exists;
         
 // remove some stats entries that were dropped in later versions
 delete from STAT_ACTION where GROUP_ID in (select ID from STAT_GROUP where NAME in ('UserCache', 'Latency'));
