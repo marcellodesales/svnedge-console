@@ -54,7 +54,7 @@ public class DatabaseInitializer implements InitializingBean {
                     log.debug("Migration " + scriptName + 
                         " was previously applied.");
                 } else {
-                    log.debug("Migrating schema using " + scriptName);
+                    log.info("Migrating schema using " + scriptName);
                     if (!script.migrate(db)) {
                         db.updateSchemaVersion(version, scriptName);
                     } else {
