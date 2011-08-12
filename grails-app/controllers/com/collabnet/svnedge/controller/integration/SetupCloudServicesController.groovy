@@ -101,12 +101,13 @@ class SetupCloudServicesController {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
         }
-        render(view: "credentials", model: [ cmd: cmd, existingCredentials: cloudConfig ])
+        render(view: "credentials", model: [ cmd: cmd, existingCredentials: (cloudConfig != null) ])
     }
 
     def updateCredentials = { CloudServicesAccountCommand cmd ->
         // with existing config, only password can be updated
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+        def existingCredentials = (cloudConfig != null)
         if (cloudConfig) {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
@@ -123,7 +124,7 @@ class SetupCloudServicesController {
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username") || cmd.errors.hasFieldErrors("password") ||
                 cmd.errors.hasFieldErrors("domain"))) {
-            render(view: "credentials", model: [ cmd: cmd ])
+            render(view: "credentials", model: [ cmd: cmd, existingCredentials: existingCredentials ])
         }
         else {
             cloudConfig.username = cmd.username
