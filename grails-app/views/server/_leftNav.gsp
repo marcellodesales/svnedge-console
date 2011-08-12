@@ -26,4 +26,9 @@
     <g:link controller="server" action="editIntegration"><g:message code="server.page.leftNav.toStandalone" /></g:link>
   </div>
 </g:else>
+
+  <div class="<g:if test="${controllerName == 'setupCloudServices'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
+    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+    <g:link controller="setupCloudServices" action="index"><g:message code="server.page.leftNav.cloudServices" /></g:link>
+  </div>
 </content>

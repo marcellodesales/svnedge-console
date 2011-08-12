@@ -117,6 +117,7 @@
                       packagesUpdate: 'admin',
                       setupTeamForge: 'admin',
                       setupReplica: 'admin',
+                      setupCloudServices: 'admin',
                       ocn: 'ocn'
                       ]}" />
 
