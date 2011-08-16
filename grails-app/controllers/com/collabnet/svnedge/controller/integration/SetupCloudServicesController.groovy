@@ -69,9 +69,6 @@ class SetupCloudServicesController {
         if (CloudServicesConfiguration.getCurrentConfig()) {
             redirect(action:'credentials')
         }
-        else {
-            redirect(action:'getStarted')
-        }
     }
 
     def getStarted = {
@@ -86,10 +83,10 @@ class SetupCloudServicesController {
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
             cloudConfig.save()
-            render(view: "confirm", model: [ cmd: cmd])
+            render(view: "confirm", model: [ cmd: cmd ])
         }
         else {
-            render(view: "signup", model: [ cmd: cmd])
+            render(view: "signup", model: [ cmd: cmd ])
         }
     }
 
