@@ -56,6 +56,19 @@ grails.app.context="/csvn"
 
 grails.logging.jul.usebridge = true
 
+appHome = new File(new File("."), "svn-server").absolutePath
+dataDir = new File(appHome, "data").absolutePath
+
+rest {
+    https {
+        truststore.path = new File(new File(dataDir, "certs"), "svnedge-client.jks").absolutePath
+        keystore.path = new File(new File(dataDir, "certs"), "svnedge-client.jks").absolutePath
+        keystore.pass = 'svnedge'
+        cert.hostnameVerifier = 'BROWSER_COMPATIBLE'
+        sslSocketFactory.enforce = true
+    }
+}
+
 svnedge {
     defaultHighPort = 18080
     defaultApacheAuthHelperPort = 49152
@@ -93,7 +106,18 @@ svnedge {
     svn.confDirPath = svn.dataDirPath + "/conf"
     // in minutes
     svn.parseLogRate = 5
-    
+
+    cloudServices {
+        baseUrl = "http://api.codesion.com/1"
+        credentials {
+            organization= "svnEdge"
+            developerOrganization = "svnEdge"
+            developerKey = "0f75a56b3c5966afa4693314f631fcd03682b4f7"
+            login = "wwang"
+            password = "UtNib2IjIs"
+        }
+    }
+
     ctfMaster {
         ssl = false
         domainName = "cu313.cloud.sp.collab.net"
@@ -103,7 +127,7 @@ svnedge {
         systemId = "exsy1002"
         replicaId = "replica1044"
     }
-    
+
     replica {
         cache {
             //This is the rate at which a positive cache entry will last in

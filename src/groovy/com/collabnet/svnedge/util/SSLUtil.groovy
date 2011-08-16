@@ -23,6 +23,8 @@ import javax.net.ssl.X509TrustManager
 import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
+import javax.net.SocketFactory
+import java.security.KeyStore
 
 /**
  * Utility class for SSL-related functions
@@ -31,7 +33,6 @@ class SSLUtil {
     
     private static TrustManager[] trustAllCerts 
     private static SSLContext sslContext 
-    private static SSLSocketFactory sslSocketFactory 
 
     /**
      * static constructor
@@ -56,8 +57,6 @@ class SSLUtil {
         // Install the all-trusting trust manager
         sslContext = SSLContext.getInstance( "SSL" );
         sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
-        // Create an ssl socket factory with all-trusting manager
-        sslSocketFactory = sslContext.getSocketFactory();
     }
 
     /**
@@ -67,8 +66,41 @@ class SSLUtil {
      * @return an SSL-capable socket that ignores certificate trust problems
      */
     public static Socket createTrustingSocket(String host, int port) {
-        return sslSocketFactory.createSocket (host, port)
-    } 
+        return createTrustingSocketFactory().createSocket(host, port)
+    }
+
+    /**
+     * creates a client socket factory that will trust all SSL certifactes
+     * @return a new SocketFactory
+     */
+    public static SSLSocketFactory createTrustingSocketFactory() {
+        // Create an ssl socket factory with all-trusting manager
+        return sslContext.getSocketFactory();
+    }
+
+    /**
+     * creates an SSL context that trusts all certifactes
+     * @return a new sslContext
+     */
+    public static SSLContext createTrustingSSLContext() {
+        def sslContext = SSLContext.getInstance( "SSL" );
+        sslContext.init( null, trustAllCerts, new java.security.SecureRandom() );
+        return sslContext
+    }
+
+    /**
+     * Fetches the SvnEdge keystore that ships with the application
+     * @return the application KeyStore
+     */
+    public static KeyStore getApplicationKeyStore() {
+        File file = new File(ConfigUtil.configuration.rest.https.keystore.path)
+        FileInputStream is = new FileInputStream(file);
+        KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+        String password = ConfigUtil.configuration.rest.https.keystore.pass;
+        keystore.load(is, password.toCharArray());
+        return keystore
+    }
+
     
 
     
