@@ -51,6 +51,28 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * validates the provided credentials
+     * @param username
+     * @param password
+     * @param organization
+     * @return boolean indicating success or failure
+     */
+    def validateCredentials(String username, String password, String organization) {
+        def restClient = createRestClient()
+        def body = createFullCredentialsMap(username, password, organization)
+        try {
+            def resp = restClient.post(path: "login.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            return resp.status == 200
+        }
+        catch (Exception e) {
+            return false
+        }
+    }
+
+    /**
      * creates a RESTClient for the codesion API
      * @return a RESTClient
      */
@@ -60,5 +82,33 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         restClient.client.connectionManager.schemeRegistry.register(
                 new Scheme("https", new SSLSocketFactory(keyStore), 443))
         return restClient
+    }
+
+    /**
+     * creates the initial params map of credentials for authenticated requests to the api
+     * @param username
+     * @param password
+     * @param organization
+     * @return map of credentials
+     */
+    private Map createFullCredentialsMap(String username, String password, String organization) {
+        def creds  = [
+            "credentials[login]": username,
+            "credentials[password]": password,
+            "credentials[organization]": organization
+        ]
+        creds.putAll(createApiCredentialsMap())
+        return creds
+    }
+
+    /**
+     * creates the initial params map of credentials of non-authenticated requests to the api (eg, create org)
+     * @return map of credentials
+     */
+    private Map createApiCredentialsMap() {
+        [
+            "credentials[developerOrganization]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerOrganization,
+            "credentials[developerKey]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerKey
+        ]
     }
 }

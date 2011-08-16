@@ -108,13 +108,10 @@ svnedge {
     svn.parseLogRate = 5
 
     cloudServices {
-        baseUrl = "http://api.codesion.com/1"
+        baseUrl = "https://api01.codesion.com/1/"
         credentials {
-            organization= "svnEdge"
             developerOrganization = "svnEdge"
             developerKey = "0f75a56b3c5966afa4693314f631fcd03682b4f7"
-            login = "wwang"
-            password = "UtNib2IjIs"
         }
     }
 
