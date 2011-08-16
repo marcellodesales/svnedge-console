@@ -95,7 +95,7 @@
             <td valign="top">
               <g:passwordFieldWithChangeNotification name="password"
                                                      value="${fieldValue(bean:cmd,field:'password')}"
-                                                     size="30"/>
+                                                     size="40"/>
             </td>
             <td></td>
           </tr>

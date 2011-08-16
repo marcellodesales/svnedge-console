@@ -36,25 +36,25 @@ class CloudServicesAccountCommand {
     static constraints = {
         username(blank: false)
         password(blank: false)
-        passwordConfirm (blank: false,
-            validator: { String val, CloudServicesAccountCommand cmd ->
-                if (val != cmd.password) {
-                    return "cloudServicesAccountCommand.passwordConfirm.mismatch"
+        passwordConfirm(blank: false,
+                validator: { String val, CloudServicesAccountCommand cmd ->
+                    if (val != cmd.password) {
+                        return "cloudServicesAccountCommand.passwordConfirm.mismatch"
+                    }
                 }
-            }
         )
-        domain (blank: false)
-        firstName (blank: false)
-        lastName (blank: false)
-        emailAddress (blank: false, email: true)
-        phoneNumber (blank: true, )
-        organization (blank: false)
-        acceptTerms (
-            validator: { Boolean val ->
-                if (val != new Boolean(true)) {
-                    return "cloudServicesAccountCommand.acceptTerms.notAccepted"
+        domain(blank: false)
+        firstName(blank: false)
+        lastName(blank: false)
+        emailAddress(blank: false, email: true)
+        phoneNumber(blank: true,)
+        organization(blank: false)
+        acceptTerms(
+                validator: { Boolean val ->
+                    if (val != new Boolean(true)) {
+                        return "cloudServicesAccountCommand.acceptTerms.notAccepted"
+                    }
                 }
-            }
         )
     }
 }
@@ -64,15 +64,16 @@ class CloudServicesAccountCommand {
 class SetupCloudServicesController {
 
     def securityService
+    def cloudServicesRemoteClientService
 
     def index = {
         if (CloudServicesConfiguration.getCurrentConfig()) {
-            redirect(action:'credentials')
+            redirect(action: 'credentials')
         }
     }
 
     def getStarted = {
-        render(view: "signup", model: [ cmd: new CloudServicesAccountCommand()])
+        render(view: "signup", model: [cmd: new CloudServicesAccountCommand()])
     }
 
     def createAccount = { CloudServicesAccountCommand cmd ->
@@ -83,10 +84,10 @@ class SetupCloudServicesController {
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
             cloudConfig.save()
-            render(view: "confirm", model: [ cmd: cmd ])
+            render(view: "confirm", model: [cmd: cmd])
         }
         else {
-            render(view: "signup", model: [ cmd: cmd ])
+            render(view: "signup", model: [cmd: cmd])
         }
     }
 
@@ -98,7 +99,7 @@ class SetupCloudServicesController {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
         }
-        render(view: "credentials", model: [ cmd: cmd, existingCredentials: (cloudConfig != null) ])
+        render(view: "credentials", model: [cmd: cmd, existingCredentials: (cloudConfig != null)])
     }
 
     def updateCredentials = { CloudServicesAccountCommand cmd ->
@@ -117,18 +118,24 @@ class SetupCloudServicesController {
             cloudConfig = new CloudServicesConfiguration();
         }
 
-        // validate input command, but only concerned about subset of fields
+        // first, field validation
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username") || cmd.errors.hasFieldErrors("password") ||
                 cmd.errors.hasFieldErrors("domain"))) {
-            render(view: "credentials", model: [ cmd: cmd, existingCredentials: existingCredentials ])
+            render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
         }
+        // then validate cloudservices credential against api
+        else if (!cloudServicesRemoteClientService.validateCredentials(cmd.username, cmd.password, cmd.domain)) {
+            flash.error = message(code: "setupCloudServices.page.credentials.validation.error")
+            render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
+        }
+        // persist the credentials when successful
         else {
             cloudConfig.username = cmd.username
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
             cloudConfig.save()
-            render(view: "confirm", model: [ cmd: cmd ])
+            render(view: "confirm", model: [cmd: cmd])
         }
     }
 }
