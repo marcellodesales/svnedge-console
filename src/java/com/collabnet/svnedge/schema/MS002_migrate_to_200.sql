@@ -20,7 +20,9 @@ drop table REPLICA_ERROR_TRACE if exists;
 drop table REPLICA_ERROR if exists;
         
 // remove some stats entries that were dropped in later versions
+set REFERENTIAL_INTEGRITY False;
 delete from STAT_ACTION where GROUP_ID in (select ID from STAT_GROUP where NAME in ('UserCache', 'Latency'));
+set REFERENTIAL_INTEGRITY True;
 delete from STAT_VALUE where STATISTIC_ID in (select ID from STATISTIC inner join STAT_GROUP on (STATISTIC.GROUP_ID=STAT_GROUP.ID) where STAT_GROUP.NAME in ('UserCache', 'Latency'));
 delete from STATISTIC where GROUP_ID in (select ID from STAT_GROUP where NAME in ('UserCache', 'Latency'));
 delete from STAT_GROUP where NAME in ('UserCache', 'Latency');
