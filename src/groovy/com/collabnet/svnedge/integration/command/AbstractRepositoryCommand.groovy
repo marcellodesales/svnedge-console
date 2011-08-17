@@ -35,7 +35,6 @@ import com.collabnet.svnedge.util.ConfigUtil;
  */
 abstract class AbstractRepositoryCommand extends AbstractCommand {
 
-    
     /**
      * Takes the "repoName" parameter and strips any parent paths
      * @return just the path name after the final /
@@ -92,11 +91,6 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def replRepo = ReplicatedRepository.findByRepo(repo)
         def svnRepoService = getService("svnRepoService")
         def repoPath = svnRepoService.getRepositoryHomePath(repo)
-        def ctfServer = CtfServer.getServer()
-        def username = ctfServer.ctfUsername
-        def securityService = getService("securityService")
-        def password = securityService.decrypt(ctfServer.ctfPassword)
-        def syncRepoURI = getSyncRepoURI(repoName)
         if (new File(repoPath).exists()) {
             if (svnRepoService.verifyRepository(repo)) {
                 log.info("createRepositoryOnFileSystem found an existing repo: "
@@ -105,8 +99,9 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.statusMsg = null
                 replRepo.save()
                 
-                prepareSyncRepo(repoPath, replRepo, repoName)
                 def commandLineService = getService("commandLineService")
+                def syncRepoURI = commandLineService.createSvnFileURI(
+                    new File(Server.getServer().repoParentDir, repoName))
                 try {
                     def command = [ConfigUtil.svnPath(), 'propdel', '--revprop', '-r0', 'svn:sync-lock', syncRepoURI]
                     executeShellCommand(command)
@@ -114,6 +109,10 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                     // there might not even be a lock, so log exception and move on
                     log.warn "Exception deleting sync-lock property on " + repoName + ": " + e.message
                 }
+                def ctfServer = CtfServer.getServer()
+                def username = ctfServer.ctfUsername
+                def securityService = getService("securityService")
+                def password = securityService.decrypt(ctfServer.ctfPassword)
                 execSvnSync(replRepo, System.currentTimeMillis(), username, password,
                     syncRepoURI)
     
@@ -133,19 +132,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.statusMsg = null
                 replRepo.save()
                 
-                prepareHookScripts(repoPath)
-                try {
-                    def masterRepoUrl = getMasterRepoUrl(repoName)
-                    rdumpAndLoad(repo, masterRepoUrl, username, password)
-                    prepareSyncRepo(repoPath, replRepo, repoName)
-                } catch (Exception e) {
-                    def msg = "Svnadmin failed to load repository: " + repoName
-                    log.error(msg, e)
-                    replRepo.status = RepoStatus.ERROR
-                    replRepo.statusMsg = msg
-                    replRepo.save()
-                    throw new IllegalStateException(msg)
-                }
+                prepareHookScripts(repoPath, replRepo)
+                prepareSyncRepo(repoPath, replRepo, repoName)
             } else {
                 def msg = "Svnadmin failed to create repository: " + repoName
                 log.error(msg)
@@ -187,50 +175,43 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
      * @param repoPath
      * @param repo
      */
-    private def prepareHookScripts(repoPath) {
+    private def prepareHookScripts(repoPath, repo) {
         log.info("Changing the rev prop hooks.")
-        def preRevPropChange = repoPath + '/hooks/pre-revprop-change'
+        def dummyPreRevPropChangeScript = repoPath +
+                                          '/hooks/pre-revprop-change'
         if (isWindows()) {
-            preRevPropChange += ".bat"
+            dummyPreRevPropChangeScript += ".bat"
         }
-        new File(preRevPropChange).text = "#!/bin/bash\nexit 0;\n"
+        new File("${dummyPreRevPropChangeScript}").withWriter { out ->
+            out.writeLine("#!/bin/bash\nexit 0;\n")
+        }
         if (!isWindows()) {
-            executeShellCommand(["chmod", "755", preRevPropChange])
+            executeShellCommand(["chmod", "755",
+                dummyPreRevPropChangeScript])
         }
         log.info("Done changing the rev prop hooks.")
     }
 
-    private def getSyncRepoURI(repoName) {
-        def commandLineService = getService("commandLineService")
-        return commandLineService.createSvnFileURI(
-            new File(Server.getServer().repoParentDir, repoName))
-    }
-
-    private def getMasterRepoUrl(repoName) {
-        return ReplicaConfiguration.getCurrentConfig().getSvnMasterUrl() + 
-            "/" + repoName
-    }
-    
     private def prepareSyncRepo(repoPath, repo, repoName) {
         log.info("Initing the repo...: " + repoName)
-        def masterRepoUrl = getMasterRepoUrl(repoName)
+        def replicaConfig = ReplicaConfiguration.getCurrentConfig()
+        def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
         def commandLineService = getService("commandLineService")
-        def syncRepoURI = getSyncRepoURI(repoName)
+        def syncRepoURI = commandLineService.createSvnFileURI(
+            new File(Server.getServer().repoParentDir, repoName))
         def ctfServer = CtfServer.getServer()
         def username = ctfServer.ctfUsername
         def securityService = getService("securityService")
         def password = securityService.decrypt(ctfServer.ctfPassword)
-
-        // init svnsync
         def command = [ConfigUtil.svnsyncPath(), "init", syncRepoURI, 
-            masterRepoUrl, "--allow-non-empty",
+            masterRepoUrl,
             "--source-username", username, "--source-password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
+
         executeShellCommand(command, repo)
         log.info("Done initing the repo.")
-        def svnRepoService = getService("svnRepoService")
-        repo.lastSyncRev = svnRepoService.findHeadRev(repo.repo)
+        repo.lastSyncRev = 0
 
         def masterUUID = getMasterUUID(masterRepoUrl, username, password, 
             repoName)
@@ -240,51 +221,11 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             executeShellCommand(command, repo)
             log.info("Done setting uuid ${masterUUID} of the repo as that " +
                 "of master.")
+            execSvnSync(repo, System.currentTimeMillis(), username, password, 
+                syncRepoURI)
         }
     }
 
-    private void rdumpAndLoad(repo, masterRepoUrl, username, password) {
-        def command = [ConfigUtil.svnrdumpPath(), "dump", masterRepoUrl,
-            "--non-interactive", "--no-auth-cache", "--config-dir",
-            ConfigUtil.svnConfigDirPath()]
-        log.debug("rdump command: " + command)
-        command << "--username" << username << "--password" << password
-
-        File progressLogFile = getCommandOutputFile()
-        def commandLineService = getService("commandLineService")
-        Process dumpProcess = commandLineService.startProcess(command)
-        FileOutputStream progress = new FileOutputStream(progressLogFile)
-        
-        def threads = []
-        threads << dumpProcess.consumeProcessErrorStream(progress)
-        File repoPath = new File(Server.getServer().repoParentDir, repo.name)
-        def loadCmd = [ConfigUtil.svnadminPath(), "load", repoPath.canonicalPath]
-        def loadProcess = dumpProcess.pipeTo(commandLineService.startProcess(loadCmd))
-        threads << loadProcess.consumeProcessErrorStream(progress)
-        threads << loadProcess.consumeProcessOutputStream(progress)
-        try {
-            // wait for the consumer threads to finish
-            for (t in threads) {
-                try {
-                    t.join()
-                } catch (InterruptedException e) {
-                    log.debug("Process consuming thread was interrupted")
-                }
-            }
-        } finally {
-            if (dumpProcess.waitFor() == 0 && loadProcess.waitFor() == 0) {
-                progress << "Initial load is complete.\n"
-                progress.close()
-            } else {
-                progress << "Error code returned during initial load.\n"
-                progress << "Dump process exit value = " + dumpProcess.exitValue()+ "\n"
-                progress << "Load process exit value = " + loadProcess.exitValue()+ "\n"
-                progress.close()
-                throw new Exception("Remote dump and load is incomplete.");
-            }
-        }
-    }
-    
     /**
      * Returns Master Repository's UUID.
      */
