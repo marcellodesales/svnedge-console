@@ -56,19 +56,6 @@ grails.app.context="/csvn"
 
 grails.logging.jul.usebridge = true
 
-appHome = new File(new File("."), "svn-server").absolutePath
-dataDir = new File(appHome, "data").absolutePath
-
-rest {
-    https {
-        truststore.path = new File(new File(dataDir, "certs"), "svnedge-client.jks").absolutePath
-        keystore.path = new File(new File(dataDir, "certs"), "svnedge-client.jks").absolutePath
-        keystore.pass = 'svnedge'
-        cert.hostnameVerifier = 'BROWSER_COMPATIBLE'
-        sslSocketFactory.enforce = true
-    }
-}
-
 svnedge {
     defaultHighPort = 18080
     defaultApacheAuthHelperPort = 49152
@@ -188,6 +175,14 @@ svnedge {
         imagepath = new File(".").canonicalPath + "/target/csvn-image-test-${appVersion}"
         currentVersion = appVersion
     }
+
+    httpClient {
+        truststore.path = new File(new File(svn.dataDirPath, "certs"), "svnedge-client.jks").absolutePath
+        keystore.path = new File(new File(svn.dataDirPath, "certs"), "svnedge-client.jks").absolutePath
+        keystore.pass = 'svnedge'
+        cert.hostnameVerifier = 'BROWSER_COMPATIBLE'
+        sslSocketFactory.enforce = true
+    }
 }
 
 // set per-environment serverURL stem for creating absolute links
@@ -292,6 +287,11 @@ environments {
 
             softwareupdates {
                 imagepath = appHome
+            }
+
+            httpClient {
+                truststore.path = new File(new File(svn.dataDirPath, "certs"), "svnedge-client.jks").absolutePath
+                keystore.path = new File(new File(svn.dataDirPath, "certs"), "svnedge-client.jks").absolutePath
             }
         }
 

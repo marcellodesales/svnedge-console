@@ -93,10 +93,10 @@ class SSLUtil {
      * @return the application KeyStore
      */
     public static KeyStore getApplicationKeyStore() {
-        File file = new File(ConfigUtil.configuration.rest.https.keystore.path)
+        File file = new File(ConfigUtil.configuration.svnedge.httpClient.keystore.path)
         FileInputStream is = new FileInputStream(file);
         KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-        String password = ConfigUtil.configuration.rest.https.keystore.pass;
+        String password = ConfigUtil.configuration.svnedge.httpClient.keystore.pass;
         keystore.load(is, password.toCharArray());
         return keystore
     }
