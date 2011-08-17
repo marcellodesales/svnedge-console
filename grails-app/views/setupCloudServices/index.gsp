@@ -72,7 +72,7 @@
       <table id="CloudServices">
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
-          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup.detail"/></td>
         </tr>
         <tr>
@@ -80,7 +80,7 @@
         </tr>
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
-          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></td>
         </tr>
         <tr>
@@ -88,7 +88,7 @@
         </tr>
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
-          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.extend.detail"/></td>
         </tr>
       </table>
