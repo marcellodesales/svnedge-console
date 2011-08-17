@@ -20,6 +20,35 @@
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.index.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
+  <style>
+  table#CloudServices tr td {
+    font-size: 1.27em;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  td.CloudServicesHeading, td.CloudServicesSubHeading {
+    background-color: #006699;
+    color: white;
+    border-collapse: collapse;
+    border: 1px solid #006699;
+    border-top: 1px solid #006699;
+    padding: 3px 5px;
+    font-size: 1.50em;
+    font-weight: bold;
+  }
+
+  td.CloudServicesSubHeading  {
+    font-size: 1.27em;
+    font-weight: normal;
+  }
+
+  td.CloudServicesSubHeading a, td.CloudServicesSubHeading a:visited {
+    text-decoration: underline;
+    color: white;
+  }
+
+  </style>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.leftNav.header"/>
@@ -29,21 +58,41 @@
 
 <body>
 <table class="ItemDetailContainer">
-  <tr class="ContainerHeader">
-    <td colspan="2"><g:message code="setupCloudServices.page.index.title"/></td>
+  <tr>
+    <td class="CloudServicesHeading">
+      <g:message code="setupCloudServices.page.index.title"/>
+    </td>
+  </tr>
+  <tr>
+    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.index.p1"/></td>
   </tr>
   <tr>
     <td class="ContainerBodyWithPaddedBorder">
-      <p><g:message code="setupCloudServices.page.index.p1"/></p>
 
-      <p><g:message code="setupCloudServices.page.index.p2"/></p>
+      <table id="CloudServices">
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
+          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup.detail"/></td>
+        </tr>
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
+          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></td>
+        </tr>
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
+          <td width="60%"><img style="padding: 10px" width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend.detail"/></td>
+        </tr>
+      </table>
 
-      <p><g:message code="setupCloudServices.page.index.services.header"/>
-      <ul>
-        <li><g:message code="setupCloudServices.page.index.service.1"/></li>
-        <li><g:message code="setupCloudServices.page.index.service.2"/></li>
-      </ul>
-    </p>
     </td>
   </tr>
   <tr class="ContainerFooter">
