@@ -223,13 +223,10 @@
 </tr>
 <tr>
   <td class="ItemDetailName">
-
   </td>
-  <td valign="top">
+  <td valign="top" colspan="2">
     <g:checkBox name="acceptTerms" checked="${cmd.acceptTerms}"/>
     <label for="acceptTerms"><g:message code="setupCloudServices.page.signup.terms.label"/></label>
-  </td>
-  <td>
   </td>
 </tr>
 <tr>
