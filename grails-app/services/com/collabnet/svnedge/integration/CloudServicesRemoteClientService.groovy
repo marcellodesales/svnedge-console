@@ -21,6 +21,7 @@ package com.collabnet.svnedge.integration
 import groovyx.net.http.RESTClient
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
+
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.util.*
 
@@ -55,6 +56,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return resp.status == 200
         }
         catch (Exception e) {
+            log.warn("Unexpected exception while attempting login", e)
             return false
         }
     }
@@ -74,12 +76,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         body.put("user[contactPhone]", cmd.phoneNumber)
         body.put("user[login]", cmd.username)
         body.put("user[password]]", cmd.password)
-        // the following are new names...
-//        body.put("organizationName", cmd.organization)
-//        body.put("domain", cmd.domain)
-        // ... for these keys
-        body.put("companyName", cmd.organization)
-        body.put("name", cmd.domain)
+        body.put("organizationName", cmd.organization)
+        body.put("domain", cmd.domain)
 
         body.put("affirmations[termsOfService]", cmd.acceptTerms)
         body.put("affirmations[privacyPolicy]", cmd.acceptTerms)
@@ -107,6 +105,103 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * Adds a project within the configured domain. 
+     * @param projectName Short and long names are the same.
+     * @return the projectId
+     */
+    String createProject(projectName) {
+        def restClient = createRestClient()
+        def body = createFullCredentialsMap()
+        body.put("shortName", projectName)
+        body.put("longName", projectName)
+        try {
+            def resp = restClient.post(path: "projects.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // sc 201 = created
+            if (resp.status != 201) {
+                return null
+            }
+            
+            def data = resp.data
+            log.debug("REST data " + data)
+
+            return data['responseHeader']['projectId']
+        }
+        catch (Exception e) {
+            log.warn("Unable to create Cloud project: " + projectName, e)
+            throw e
+        }
+        return null
+    }
+        
+    /**
+     * Deletes the project given by the ID.
+     * @param projectId 
+     * @return true if the deletion was successful
+     */
+    boolean deleteProject(projectId) {
+        def restClient = createRestClient()
+        def body = createFullCredentialsMap()        
+        try {
+            def resp = restClient.post(path: "login.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // will be 401 if login fails
+            if (resp.status != 200) {
+                log.warn("Unable to delete Cloud projectId: " + projectId +
+                    " due to failure to login", e)
+                return false
+            }
+
+            resp = restClient.delete(path: "projects/" + projectId + ".json")
+
+            // sc 200 = deleted
+            if (resp.status == 200) {
+                return true
+            }
+        }
+        catch (Exception e) {
+            log.warn("Unable to delete Cloud projectId: " + projectId, e)
+        }
+        return false
+    }
+    
+    /**
+     * Adds the Subversion service to a project
+     * @param projectId
+     * @return the serviceId
+     */
+    String addSvnToProject(projectId) {
+        def restClient = createRestClient()
+        def body = createFullCredentialsMap()
+        body.put("projectId", projectId)
+        body.put("serviceType", "svn")
+        try {
+            def resp = restClient.post(path: "services.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // sc 201 = created
+            if (resp.status != 201) {
+                return null
+            }
+            
+            def data = resp.data
+            log.debug("REST data " + data)
+
+            return data['responseHeader']['serviceId']
+        }
+        catch (Exception e) {
+            log.warn("Unable to create Cloud service for projectId: " + projectId, e)
+            throw e
+        }
+        return null
+    }
+    
+    /**
      * creates a RESTClient for the codesion API
      * @return a RESTClient
      */
@@ -119,17 +214,31 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+    * creates the initial params map of credentials for authenticated requests to the api
+    * based on previously stored values
+    * @return map of credentials
+    */
+   private Map createFullCredentialsMap() {
+       CloudServicesConfiguration csConf = CloudServicesConfiguration.getCurrentConfig()
+       if (!csConf) {
+           throw IllegalStateException("Credentials are unavailable")
+       }
+       String password = securityService.decrypt(csConf.password)
+       return createFullCredentialsMap(csConf.username, password, csConf.domain)   
+   }
+
+    /**
      * creates the initial params map of credentials for authenticated requests to the api
      * @param username
      * @param password
-     * @param organization
+     * @param domain
      * @return map of credentials
      */
-    private Map createFullCredentialsMap(String username, String password, String organization) {
+    private Map createFullCredentialsMap(String username, String password, String domain) {
         def creds  = [
             "credentials[login]": username,
             "credentials[password]": password,
-            "credentials[domain]": organization
+            "credentials[domain]": domain
         ]
         creds.putAll(createApiCredentialsMap())
         return creds
