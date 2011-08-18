@@ -29,11 +29,17 @@
         </td>
         <td valign="top" class="value ItemDetailValue">
          <select id="type" name="type">
-         <option value="dump" <g:if test="${params.type != 'none' && !dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
+         <option value="dump" <g:if test="${params.type != 'none' && !dump.deltas && !dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
          <option value="dump_delta" <g:if test="${dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
-         <option value="cloud" disabled="disabled"><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
+         <option value="cloud" <g:if test="${dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
          <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
+       <g:if test="${cloudRegistrationRequired}">
+         <span id="cloudRegister" class="TextRequired">
+           <img width="15" height="15" alt="Warning" align="bottom" src="${resource(dir:'images/icons',file:'icon_warning_sml.gif')}" border="0"/>
+           <g:message code="repository.page.bkupSchedule.cloud.not.configured" args="${[createLink(controller: 'setupCloudServices', action: 'index')]}"/>
+         </span>
+       </g:if>
         </td>
       </tr>
 
@@ -125,7 +131,13 @@
            <td><g:listViewSelectItem item="${job}" property="repoId"/></td>
 
            <td>${job.repoName}</td>
-           <td>${job.type}</td>
+           <td>${job.type} 
+               <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
+                 <span class="TextRequired">
+                 <g:message code="repository.page.bkupSchedule.cloud.activation.required" args="${[createLink(controller: 'setupCloudServices', action: 'index')]}"/>
+                 </span>
+               </g:if>
+           </td>
            <td>${job.scheduledFor}</td>
            <td>${job.keepNumber == 0 ? "ALL" : job.keepNumber}</td>
          </tr>
@@ -161,12 +173,21 @@
       if (typeSelect.value == 'dump' || typeSelect.value == 'dump_delta') {
           $('whenRow').style.display = '';
           $('keepRow').style.display = '';
+          if ($('cloudRegister')) {
+              $('cloudRegister').style.display = 'none';
+          }
       } else if (typeSelect.value == 'cloud') {
           $('whenRow').style.display = '';
           $('keepRow').style.display = 'none';
+          if ($('cloudRegister')) {
+              $('cloudRegister').style.display = '';
+          }
       } else {
           $('whenRow').style.display = 'none';
           $('keepRow').style.display = 'none';
+          if ($('cloudRegister')) {
+              $('cloudRegister').style.display = 'none';
+          }
       }
   }
   typeHandler();

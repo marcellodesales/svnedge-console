@@ -24,6 +24,7 @@ import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode;
+import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
@@ -290,6 +291,8 @@ class RepoController {
             }
             model["dump"] = cmd
         }        
+        model['cloudRegistrationRequired'] = 
+            CloudServicesConfiguration.getCurrentConfig() == null
         return model
     }
 
@@ -309,35 +312,19 @@ class RepoController {
             }
 
             if (type == "cloud") {
-                // todo this should be enabled when Cloud Services credentials are available
-                flash.error = "CollabNet Cloud Services backup is not available yet."
+                cmd.cloud = true
+                scheduleBackup(cmd, repo, type)
+                if (!CloudServicesConfiguration.getCurrentConfig()) {
+                    flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
+                    redirect(controller: 'setupCloudServices', action:'index')
+                    return
+                }
+        
             } else if (type == "none") {
                 svnRepoService.clearScheduledDumps(repo)
                 flash.message = message(code: 'repository.action.updateBkupSchedule.none')
             } else {
-                try {
-                    cmd.userLocale = request.locale
-                    cmd.deltas = (type == 'dump_delta')
-                    cmd.backup = true
-                    if (cmd.hasErrors()) {
-                        flash.dumpBean = cmd
-                        flash.error = "There were errors"
-                    }
-                    else {
-                        svnRepoService.scheduleDump(cmd, repo)
-                        flash.message = message(code: 'repository.action.updateBkupSchedule.success')
-                    }
-                }
-                catch (ValidationException e) {
-                    log.debug "Rejecting " + e.field + " with message " + e.message
-                    if (e.field) {
-                        cmd.errors.rejectValue(e.field, e.message)
-                    } else {
-                        cmd.errors.reject(e.message)
-                        flash.error = message(code: e.message)
-                    }
-                    flash.dumpBean = cmd
-                }
+                scheduleBackup(cmd, repo, type)
             }
         }
 
@@ -354,6 +341,32 @@ class RepoController {
         }
         else {
             redirect(action: 'bkupScheduleMultiple', params: params)
+        }
+    }
+
+    private void scheduleBackup(DumpBean cmd, Repository repo, def type) {
+        try {
+            cmd.userLocale = request.locale
+            cmd.deltas = (type == 'dump_delta')
+            cmd.backup = true
+            if (cmd.hasErrors()) {
+                flash.dumpBean = cmd
+                flash.error = "There were errors"
+            }
+            else {
+                svnRepoService.scheduleDump(cmd, repo)
+                flash.message = message(code: 'repository.action.updateBkupSchedule.success')
+            }
+        }
+        catch (ValidationException e) {
+            log.debug "Rejecting " + e.field + " with message " + e.message
+            if (e.field) {
+                cmd.errors.rejectValue(e.field, e.message)
+            } else {
+                cmd.errors.reject(e.message)
+                flash.error = message(code: e.message)
+            }
+            flash.dumpBean = cmd
         }
     }
 
@@ -376,6 +389,7 @@ class RepoController {
             def backups = svnRepoService.retrieveScheduledBackups(it)
             if (backups) {
                 DumpBean b = (DumpBean) backups[0]
+                job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : 'dump')
                 job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
                         message(code: "repository.page.bkupSchedule.type.fullDumpDelta") :
                         message(code: "repository.page.bkupSchedule.type.fullDump")
@@ -393,6 +407,7 @@ class RepoController {
         // add to model
         model["dump"] = new DumpBean()
         model["repoBackupJobList"] = repoBackupJobList
+        model['cloudRegistrationRequired'] = CloudServicesConfiguration.getCurrentConfig() == null
         return model
     }
     
