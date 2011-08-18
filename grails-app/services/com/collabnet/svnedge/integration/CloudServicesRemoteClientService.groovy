@@ -129,7 +129,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         def creds  = [
             "credentials[login]": username,
             "credentials[password]": password,
-            "credentials[organization]": organization
+            "credentials[domain]": organization
         ]
         creds.putAll(createApiCredentialsMap())
         return creds
