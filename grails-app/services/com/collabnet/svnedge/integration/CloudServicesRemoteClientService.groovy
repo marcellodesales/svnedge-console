@@ -26,29 +26,15 @@ import com.collabnet.svnedge.util.*
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
+import com.collabnet.svnedge.controller.integration.CloudServicesAccountCommand
+import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
 
 /**
  * This class provides remote access to the Cloud  Services api
  */
 class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
-    def retrieveUsers() {
-
-        def http = createRestClient()
-        http.request(GET, JSON) {
-            uri.path = 'users'
-
-            // response handler for a success response code:
-            response.success = { resp, json ->
-                println resp.statusLine
-
-                // parse the JSON response object:
-                json.responseData.results.each {
-                    println "  ${it.titleNoFormatting} : ${it.visibleUrl}"
-                }
-            }
-        }
-    }
+    def securityService
 
     /**
      * validates the provided credentials
@@ -65,9 +51,57 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     body: body,
                     requestContentType: URLENC)
 
+            // will be 401 if login fails
             return resp.status == 200
         }
         catch (Exception e) {
+            return false
+        }
+    }
+
+    /**
+     * creates the cloud services account if possible (organization + admin user)
+     * @param cmd CloudServicesAccountCommand from the controller
+     * @return boolean indicating success or failure
+     */
+    def createAccount(CloudServicesAccountCommand cmd) {
+
+        def restClient = createRestClient()
+        def body = createApiCredentialsMap()
+        body.put("user[firstName]", cmd.firstName)
+        body.put("user[lastName]", cmd.lastName)
+        body.put("user[email]", cmd.emailAddress)
+        body.put("user[contactPhone]", cmd.phoneNumber)
+        body.put("user[login]", cmd.username)
+        body.put("user[password]]", cmd.password)
+        // the following are new names...
+//        body.put("organizationName", cmd.organization)
+//        body.put("domain", cmd.domain)
+        // ... for these keys
+        body.put("companyName", cmd.organization)
+        body.put("name", cmd.domain)
+
+        body.put("affirmations[termsOfService]", cmd.acceptTerms)
+        body.put("affirmations[privacyPolicy]", cmd.acceptTerms)
+        try {
+            def resp = restClient.post(path: "organizations.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // sc 201 = created
+            if (resp.status != 201) {
+                return false
+            }
+
+            def cloudConfig = new CloudServicesConfiguration()
+            cloudConfig.username = cmd.username
+            cloudConfig.password = securityService.encrypt(cmd.password)
+            cloudConfig.domain = cmd.domain
+            cloudConfig.save()
+            return true
+        }
+        catch (Exception e) {
+            log.error("Unable to create Cloud account: " + e.getMessage(), e)
             return false
         }
     }

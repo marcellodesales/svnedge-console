@@ -47,7 +47,7 @@ class CloudServicesAccountCommand {
         firstName(blank: false)
         lastName(blank: false)
         emailAddress(blank: false, email: true)
-        phoneNumber(blank: true,)
+        phoneNumber(blank: false,)
         organization(blank: false)
         acceptTerms(
                 validator: { Boolean val ->
@@ -78,15 +78,14 @@ class SetupCloudServicesController {
 
     def createAccount = { CloudServicesAccountCommand cmd ->
         cmd.validate()
-        if (!cmd.hasErrors()) {
-            def cloudConfig = new CloudServicesConfiguration()
-            cloudConfig.username = cmd.username
-            cloudConfig.password = securityService.encrypt(cmd.password)
-            cloudConfig.domain = cmd.domain
-            cloudConfig.save()
+        if (cmd.hasErrors()) {
+            render(view: "signup", model: [cmd: cmd])
+        }
+        else if (cloudServicesRemoteClientService.createAccount(cmd)) {
             render(view: "confirm", model: [cmd: cmd])
         }
         else {
+            flash.error = message(code: "setupCloudServices.page.signup.accountCreation.error")
             render(view: "signup", model: [cmd: cmd])
         }
     }
@@ -125,17 +124,17 @@ class SetupCloudServicesController {
             render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
         }
         // then validate cloudservices credential against api
-        else if (!cloudServicesRemoteClientService.validateCredentials(cmd.username, cmd.password, cmd.domain)) {
-            flash.error = message(code: "setupCloudServices.page.credentials.validation.error")
-            render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
-        }
         // persist the credentials when successful
-        else {
+        else if (cloudServicesRemoteClientService.validateCredentials(cmd.username, cmd.password, cmd.domain)) {
             cloudConfig.username = cmd.username
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
             cloudConfig.save()
             render(view: "confirm", model: [cmd: cmd])
+        }
+        else {
+            flash.error = message(code: "setupCloudServices.page.credentials.validation.error")
+            render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
         }
     }
 }
