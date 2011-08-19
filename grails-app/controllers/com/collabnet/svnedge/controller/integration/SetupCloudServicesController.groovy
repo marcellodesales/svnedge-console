@@ -36,7 +36,7 @@ class CloudServicesAccountCommand {
     Locale requestLocale = Locale.default
 
     static constraints = {
-        username(blank: false)
+        username(blank: false, matches: "[a-zA-Z0-9_]+")
         password(blank: false)
         passwordConfirm(blank: false,
                 validator: { String val, CloudServicesAccountCommand cmd ->
@@ -49,7 +49,7 @@ class CloudServicesAccountCommand {
         firstName(blank: false)
         lastName(blank: false)
         emailAddress(blank: false, email: true)
-        phoneNumber(blank: false,)
+        phoneNumber(matches: "[0-9 #()\\+-]+")
         organization(blank: false)
         acceptTerms(
                 validator: { Boolean val ->
