@@ -24,6 +24,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory
 
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.util.*
+import com.collabnet.svnedge.domain.Repository
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
@@ -35,7 +36,9 @@ import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
  */
 class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
+    def commandLineService
     def securityService
+    def svnRepoService
 
     /**
      * validates the provided credentials
@@ -56,7 +59,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return resp.status == 200
         }
         catch (Exception e) {
-            log.warn("Unexpected exception while attempting login", e)
+            if (e.message != "Unauthorized") {
+                log.warn("Unexpected exception while attempting login", e)
+            }
             return false
         }
     }
@@ -218,6 +223,61 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return null
     }
 
+    boolean synchronizeRepository(Repository repo) throws CloudServicesException {
+        
+        if (!repo.cloudProjectId) {
+            repo.cloudProjectId = createProject(repo.name)
+            if (!repo.cloudProjectId) {
+                throw new CloudServicesException('cloud.services.unable.to.create.project')
+            }
+            repo.save()
+        }
+
+        def credMap = createFullCredentialsMap()
+        log.error("Credential map: " + credMap)
+        def username = credMap.get('credentials[login]')
+        def password = credMap.get('credentials[password]')
+        def cloudRepoURI = getCloudSvnURI(credMap.get('credentials[domain]'), repo.name)
+        
+        if (!repo.cloudSvnServiceId) {
+            repo.cloudSvnServiceId = addSvnToProject(repo.cloudProjectId)
+            if (!repo.cloudSvnServiceId) {
+                throw new CloudServicesException('cloud.services.unable.to.create.svn')
+            }
+            repo.save()
+            
+            // repository is setup async, so waiting a bit, TODO make this 
+            // loop until the repository is ready
+            Thread.sleep(10000)
+            
+            // prepare sync
+            File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
+            def localRepoURI = commandLineService.createSvnFileURI(repoPath)
+            def command = [ConfigUtil.svnsyncPath(), "init", 
+                cloudRepoURI, localRepoURI,
+                "--username", username, "--password", password,
+                "--non-interactive", "--no-auth-cache", 
+                "--config-dir", ConfigUtil.svnConfigDirPath()]
+            // TODO refactor the replica command executeShellCommand code to use
+            // here
+            commandLineService.execute(command.toArray(new String[0]), null, null, true)
+        }
+        
+        log.debug("Syncing repo '${repo.name}' at " +
+            " local timestamp: ${new Date()}...")
+        def command = [ConfigUtil.svnsyncPath(), "sync", cloudRepoURI,
+            "--username", username, "--password", password,
+            "--non-interactive", "--no-auth-cache", 
+            "--config-dir", ConfigUtil.svnConfigDirPath()]
+        // TODO refactor the replica command executeShellCommand code to use
+        // here
+        commandLineService.execute(command.toArray(new String[0]), null, null, true)
+    }
+
+    private String getCloudSvnURI(domain, repoName) {
+        return "https://" + domain + ".svn.cvsdude.com/" + repoName
+    }
+    
     /**
      * creates a RESTClient for the codesion API
      * @return a RESTClient

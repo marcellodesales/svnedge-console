@@ -32,6 +32,9 @@ class Repository {
      * PermissionsOk -- flag to indicate need for permissions fix-up
      */
     Boolean permissionsOk = true
+    
+    String cloudProjectId
+    String cloudSvnServiceId
 
     /**
      * Repo statistics are FK'd, so this is used for cascade delete 
@@ -60,5 +63,7 @@ class Repository {
 
     static constraints = {
         name(blank: false, unique: true)
+        cloudProjectId(blank: true, nullable: true)
+        cloudSvnServiceId(blank: true, nullable: true)
     }
 }

@@ -108,7 +108,7 @@
                     <!-- More content -->
                     <p><g:message code="error.contactAdmin"/></p> 
                     <p><g:message code="error.submitErrorReport" args="${['https://ctf.open.collab.net/sf/discussion/do/listTopics/projects.svnedge/discussion.user_questions', 
-                        exception?.message?.replace('?', 'QMark').replace('&', 'AND').encodeAsHTML().replace('&', '_')]}"/>
+                        (exception && exception.message ? exception?.message?.replace('?', 'QMark').replace('&', 'AND').encodeAsHTML().replace('&', '_') : 'null')]}"/>
                     <br />
                     <!-- \" , '${}'      -->
                     

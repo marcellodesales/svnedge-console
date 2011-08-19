@@ -722,7 +722,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
 
         jobsAdminService.createOrReplaceTrigger(trigger)
-        return dumpFilename(bean, repo)
+        return bean.cloud ? null : dumpFilename(bean, repo)
     }
         
             

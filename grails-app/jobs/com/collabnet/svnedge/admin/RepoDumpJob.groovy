@@ -27,6 +27,7 @@ import com.collabnet.svnedge.console.DumpBean
 class RepoDumpJob {
 
     def svnRepoService
+    def cloudServicesRemoteClientService
 
     static def jobName = "com.collabnet.svnedge.admin.RepoDumpJob"
     static def group = "Maintenance"
@@ -42,12 +43,16 @@ class RepoDumpJob {
         Repository repo = Repository.get(dataMap.get("repoId"))
         DumpBean dumpBean = DumpBean.fromMap(dataMap)
         if (repo && dumpBean) {
-            String file = svnRepoService.createDump(dumpBean, repo)
-            log.info("Creating repo dump file: " + file)
-            return
+            if (dumpBean.cloud) {
+                cloudServicesRemoteClientService.synchronizeRepository(repo)
+                log.info("Synchronized cloud backup for " + repo.name)
+            } else {
+                String file = svnRepoService.createDump(dumpBean, repo)
+                log.info("Creating repo dump file: " + file)
+            }
         }
         else {
-            log.warn("Unable to execute the repo dump")
+            log.warn("Unable to execute the repo backup")
         }
     }
 }
