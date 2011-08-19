@@ -78,13 +78,15 @@
 </tr>
 <tr>
   <td class="ItemDetailName">
-    <label for="emailAddress"><g:message code="setupCloudServices.page.signup.email.label"/></label>
+    <label for="emailAddress"><g:message code="setupCloudServices.page.signup.emailAddress.label"/></label>
   </td>
   <td valign="top">
     <input size="40" type="text" id="emailAddress" name="emailAddress"
            value="${fieldValue(bean: cmd, field: 'emailAddress')}"/>
   </td>
-  <td></td>
+  <td>
+    <em><g:message code="setupCloudServices.page.signup.emailAddress.label.tip"/></em>
+  </td>
 </tr>
 <tr>
   <td></td>
@@ -141,7 +143,7 @@
     <label for="password"><g:message code="setupCloudServices.page.signup.password.label"/></label>
   </td>
   <td valign="top">
-    <input size="40" type="text" id="password" name="password"
+    <input size="40" type="password" id="password" name="password"
            value="${fieldValue(bean: cmd, field: 'password')}"/>
   </td>
   <td></td>
@@ -159,10 +161,10 @@
 <tr>
   <td class="ItemDetailName">
     <label for="passwordConfirm"><g:message
-        code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
+            code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
   </td>
   <td valign="top">
-    <input size="40" type="text" id="passwordConfirm" name="passwordConfirm"
+    <input size="40" type="password" id="passwordConfirm" name="passwordConfirm"
            value="${fieldValue(bean: cmd, field: 'passwordConfirm')}"/>
   </td>
   <td></td>
@@ -245,15 +247,15 @@
 </tr>
 <tr class="ContainerFooter">
   <td>
-      <div class="AlignRight">
-        <g:actionSubmit id="btnCloudServicesExistingLogin"
-                        value="${message(code:'setupCloudServices.page.signup.button.existingLogin')}"
-                        controller="setupCloudServices" action="credentials" class="Button"/>
+    <div class="AlignRight">
+      <g:actionSubmit id="btnCloudServicesExistingLogin"
+                      value="${message(code:'setupCloudServices.page.signup.button.existingLogin')}"
+                      controller="setupCloudServices" action="credentials" class="Button"/>
 
-        <g:actionSubmit id="btnCloudServicesCreateAccout"
-                        value="${message(code:'setupCloudServices.page.signup.button.continue')}"
-                        controller="setupCloudServices" action="createAccount" class="Button"/>
-      </div>
+      <g:actionSubmit id="btnCloudServicesCreateAccout"
+                      value="${message(code:'setupCloudServices.page.signup.button.continue')}"
+                      controller="setupCloudServices" action="createAccount" class="Button"/>
+    </div>
   </td>
 </tr>
 </table>

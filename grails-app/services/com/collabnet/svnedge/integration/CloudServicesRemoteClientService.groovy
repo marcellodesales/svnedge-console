@@ -99,7 +99,24 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return true
         }
         catch (Exception e) {
-            log.error("Unable to create Cloud account: " + e.getMessage(), e)
+
+            String error = e.response.responseData.error
+            log.error("Unable to create Cloud account: ${e.message} - ${error}", e)
+
+            // add error messages to command fields if possible
+            if (error.contains("User login unavailable")) {
+                cmd.errors.rejectValue("username", getMessage("cloudServicesAccountCommand.username.inUse", cmd.requestLocale))
+            }
+            if (error.contains("Organization name already in use")) {
+                cmd.errors.rejectValue("organization", getMessage("cloudServicesAccountCommand.organization.inUse", cmd.requestLocale))
+            }
+            if (error.contains("Organization alias already in use")) {
+                cmd.errors.rejectValue("domain", getMessage("cloudServicesAccountCommand.domain.inUse", cmd.requestLocale))
+            }
+            if (error.contains("Organization alias invalid")) {
+                cmd.errors.rejectValue("domain", getMessage("cloudServicesAccountCommand.domain.matches.invalid", cmd.requestLocale))
+            }
+
             return false
         }
     }
@@ -123,7 +140,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             if (resp.status != 201) {
                 return null
             }
-            
+
             def data = resp.data
             log.debug("REST data " + data)
 
@@ -135,15 +152,15 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
         return null
     }
-        
+
     /**
      * Deletes the project given by the ID.
-     * @param projectId 
+     * @param projectId
      * @return true if the deletion was successful
      */
     boolean deleteProject(projectId) {
         def restClient = createRestClient()
-        def body = createFullCredentialsMap()        
+        def body = createFullCredentialsMap()
         try {
             def resp = restClient.post(path: "login.json",
                     body: body,
@@ -152,7 +169,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             // will be 401 if login fails
             if (resp.status != 200) {
                 log.warn("Unable to delete Cloud projectId: " + projectId +
-                    " due to failure to login", e)
+                        " due to failure to login", e)
                 return false
             }
 
@@ -168,7 +185,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
         return false
     }
-    
+
     /**
      * Adds the Subversion service to a project
      * @param projectId
@@ -188,7 +205,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             if (resp.status != 201) {
                 return null
             }
-            
+
             def data = resp.data
             log.debug("REST data " + data)
 
@@ -200,7 +217,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
         return null
     }
-    
+
     /**
      * creates a RESTClient for the codesion API
      * @return a RESTClient
@@ -214,18 +231,18 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
-    * creates the initial params map of credentials for authenticated requests to the api
-    * based on previously stored values
-    * @return map of credentials
-    */
-   private Map createFullCredentialsMap() {
-       CloudServicesConfiguration csConf = CloudServicesConfiguration.getCurrentConfig()
-       if (!csConf) {
-           throw IllegalStateException("Credentials are unavailable")
-       }
-       String password = securityService.decrypt(csConf.password)
-       return createFullCredentialsMap(csConf.username, password, csConf.domain)   
-   }
+     * creates the initial params map of credentials for authenticated requests to the api
+     * based on previously stored values
+     * @return map of credentials
+     */
+    private Map createFullCredentialsMap() {
+        CloudServicesConfiguration csConf = CloudServicesConfiguration.getCurrentConfig()
+        if (!csConf) {
+            throw IllegalStateException("Credentials are unavailable")
+        }
+        String password = securityService.decrypt(csConf.password)
+        return createFullCredentialsMap(csConf.username, password, csConf.domain)
+    }
 
     /**
      * creates the initial params map of credentials for authenticated requests to the api
@@ -235,10 +252,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      * @return map of credentials
      */
     private Map createFullCredentialsMap(String username, String password, String domain) {
-        def creds  = [
-            "credentials[login]": username,
-            "credentials[password]": password,
-            "credentials[domain]": domain
+        def creds = [
+                "credentials[login]": username,
+                "credentials[password]": password,
+                "credentials[domain]": domain
         ]
         creds.putAll(createApiCredentialsMap())
         return creds
@@ -250,8 +267,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      */
     private Map createApiCredentialsMap() {
         [
-            "credentials[developerOrganization]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerOrganization,
-            "credentials[developerKey]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerKey
+                "credentials[developerOrganization]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerOrganization,
+                "credentials[developerKey]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerKey
         ]
     }
 }

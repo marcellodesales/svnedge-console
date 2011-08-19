@@ -33,6 +33,8 @@ class CloudServicesAccountCommand {
     String organization
     Boolean acceptTerms
 
+    Locale requestLocale = Locale.default
+
     static constraints = {
         username(blank: false)
         password(blank: false)
@@ -43,7 +45,7 @@ class CloudServicesAccountCommand {
                     }
                 }
         )
-        domain(blank: false)
+        domain(blank: false, matches: "[a-zA-Z0-9]+")
         firstName(blank: false)
         lastName(blank: false)
         emailAddress(blank: false, email: true)
@@ -77,11 +79,13 @@ class SetupCloudServicesController {
     }
 
     def createAccount = { CloudServicesAccountCommand cmd ->
+        cmd.requestLocale = request.locale
         cmd.validate()
         if (cmd.hasErrors()) {
             render(view: "signup", model: [cmd: cmd])
         }
         else if (cloudServicesRemoteClientService.createAccount(cmd)) {
+            flash.message = message(code: "setupCloudServices.page.signup.accountCreation.mustValidate")
             render(view: "confirm", model: [cmd: cmd])
         }
         else {
@@ -118,6 +122,7 @@ class SetupCloudServicesController {
         }
 
         // first, field validation
+        cmd.requestLocale = request.locale
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username") || cmd.errors.hasFieldErrors("password") ||
                 cmd.errors.hasFieldErrors("domain"))) {
