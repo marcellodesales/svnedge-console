@@ -234,7 +234,6 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
 
         def credMap = createFullCredentialsMap()
-        log.error("Credential map: " + credMap)
         def username = credMap.get('credentials[login]')
         def password = credMap.get('credentials[password]')
         def cloudRepoURI = getCloudSvnURI(credMap.get('credentials[domain]'), repo.name)
