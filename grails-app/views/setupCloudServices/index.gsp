@@ -21,31 +21,44 @@
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
   <style>
-  table#CloudServices tr td {
-    font-size: 1.27em;
-    vertical-align: middle;
-    text-align: center;
-  }
 
   td.CloudServicesHeading, td.CloudServicesSubHeading {
-    background-color: #006699;
-    color: white;
     border-collapse: collapse;
-    border: 1px solid #006699;
-    border-top: 1px solid #006699;
-    padding: 3px 5px;
-    font-size: 1.50em;
+    padding: 3px 20px;
+    font-size: 1.75em;
     font-weight: bold;
+    color: #69c;
   }
 
   td.CloudServicesSubHeading  {
     font-size: 1.27em;
     font-weight: normal;
+    color: black;
+    padding: 3px 20px;
   }
 
-  td.CloudServicesSubHeading a, td.CloudServicesSubHeading a:visited {
-    text-decoration: underline;
-    color: white;
+  td.CloudServicesBody {
+    border-spacing: 0;
+    padding: 4px;
+  }
+
+  p#GetStartedPrompt {
+    font-size: 1.50em;
+    vertical-align: top;
+    text-align: left;
+    padding: 4px;
+  }
+
+  table#ServiceList tr td {
+    font-size: 1.50em;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  p.ServiceDetail {
+    font-size: .96em;
+    vertical-align: top;
+    text-align: center;
   }
 
   </style>
@@ -64,16 +77,20 @@
     </td>
   </tr>
   <tr>
-    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.index.p1"/></td>
+    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.index.p1"/>
+      <g:link controller="setupCloudServices" action="getStarted" >
+        <img align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
+      </g:link>
+    </td>
   </tr>
   <tr>
-    <td class="ContainerBodyWithPaddedBorder">
+    <td class="CloudServicesBody">
 
-      <table id="CloudServices">
+      <table id="ServiceList">
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup.detail"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.backup.detail"/></p></td>
         </tr>
         <tr>
           <td colspan="3"><hr/></td>
@@ -81,7 +98,7 @@
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p></td>
         </tr>
         <tr>
           <td colspan="3"><hr/></td>
@@ -89,7 +106,7 @@
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend.detail"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.extend.detail"/></p></td>
         </tr>
       </table>
 
@@ -98,10 +115,13 @@
   <tr class="ContainerFooter">
     <td>
       <g:form method="post">
+        <div class="AlignLeft">
+          <p id="GetStartedPrompt"><g:message code="setupCloudServices.page.index.getStarted.prompt"/></p>
+        </div>
         <div class="AlignRight">
-          <g:actionSubmit id="btnCloudServicesGetStarted"
-                          value="${message(code:'setupCloudServices.page.index.button.continue')}"
-                          controller="setupCloudServices" action="getStarted" class="Button"/>
+          <g:link controller="setupCloudServices" action="getStarted" >
+            <img alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
+          </g:link>
         </div>
       </g:form>
     </td>

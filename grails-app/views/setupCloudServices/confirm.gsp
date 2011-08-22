@@ -17,11 +17,55 @@
   --}%
 <html>
 <head>
-  <title>CollabNet Subversion Edge
-
-    <g:message code="setupCloudServices.page.confirmation.title"/></title>
+  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.index.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
+  <style>
+
+  td.CloudServicesHeading, td.CloudServicesSubHeading {
+    border-collapse: collapse;
+    padding: 3px 20px;
+    font-size: 1.75em;
+    font-weight: bold;
+    color: #69c;
+  }
+
+  td.CloudServicesSubHeading  {
+    font-size: 1.27em;
+    font-weight: normal;
+    color: black;
+    padding: 3px 20px;
+  }
+
+  td.CloudServicesBody {
+    border-spacing: 0;
+    padding: 4px;
+  }
+
+  p#GetStartedPrompt {
+    font-size: 1.50em;
+    vertical-align: top;
+    text-align: left;
+    padding: 4px;
+  }
+
+  table#ServiceList tr td {
+    font-size: 1.50em;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  p.ServiceDetail, ol.ServiceDetail {
+    font-size: .96em;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  p.ServiceDetail {
+    margin-left: 1em;
+  }
+
+  </style>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.leftNav.header"/>
@@ -31,19 +75,61 @@
 
 <body>
 <table class="ItemDetailContainer">
-  <tr class="ContainerHeader">
-    <td colspan="2"><g:message code="setupCloudServices.page.confirmation.title"/></td>
+  <tr>
+    <td class="CloudServicesHeading">
+      <g:message code="setupCloudServices.page.confirmation.title"/>
+    </td>
   </tr>
   <tr>
-    <td class="ContainerBodyWithPaddedBorder">
-      <p><g:message code="setupCloudServices.page.confirmation.p1"/></p>
+    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.confirmation.p1"/>
+    </td>
+  </tr>
+  <tr>
+    <td class="CloudServicesBody">
 
-      <g:render template="nextSteps"/>
+      <table id="ServiceList">
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.service.backup.detail"/></p></td>
+        </tr>
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
+          <td width="20%">
+            <ol class="ServiceDetail">
+              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step1"/></li>
+              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step2"/></li>
+              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step3"/></li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
+          <td width="20%">
+            <ol class="ServiceDetail">
+              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step1"/></li>
+              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step2"/></li>
+              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step3"/></li>
+            </ol>
+          </td>
+        </tr>
+      </table>
+
     </td>
   </tr>
   <tr class="ContainerFooter">
     <td>
-
+        <div class="AlignLeft">
+          <p id="GetStartedPrompt"><g:message code="setupCloudServices.page.confirmation.getStarted.prompt"/></p>
+        </div>
     </td>
   </tr>
 </table>
