@@ -36,7 +36,7 @@ class CloudServicesAccountCommand {
     Locale requestLocale = Locale.default
 
     static constraints = {
-        username(blank: false, matches: "[a-zA-Z0-9_]+")
+        username(blank: false, matches: "[a-zA-Z0-9_]+", minSize: 3, maxSize: 16)
         password(blank: false)
         passwordConfirm(blank: false,
                 validator: { String val, CloudServicesAccountCommand cmd ->
@@ -45,12 +45,12 @@ class CloudServicesAccountCommand {
                     }
                 }
         )
-        domain(blank: false, matches: "[a-zA-Z0-9]+")
+        domain(blank: false, matches: "[a-zA-Z0-9]+", minSize: 3, maxSize: 32)
         firstName(blank: false)
         lastName(blank: false)
         emailAddress(blank: false, email: true)
         phoneNumber(matches: "[0-9 #()\\+-]+")
-        organization(blank: false)
+        organization(blank: false, minSize: 1, maxSize: 256)
         acceptTerms(
                 validator: { Boolean val ->
                     if (val != new Boolean(true)) {
