@@ -99,20 +99,13 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.statusMsg = null
                 replRepo.save()
                 
-                def commandLineService = getService("commandLineService")
-                def syncRepoURI = commandLineService.createSvnFileURI(
-                    new File(Server.getServer().repoParentDir, repoName))
-                try {
-                    def command = [ConfigUtil.svnPath(), 'propdel', '--revprop', '-r0', 'svn:sync-lock', syncRepoURI]
-                    executeShellCommand(command)
-                } catch (Exception e) {
-                    // there might not even be a lock, so log exception and move on
-                    log.warn "Exception deleting sync-lock property on " + repoName + ": " + e.message
-                }
                 def ctfServer = CtfServer.getServer()
                 def username = ctfServer.ctfUsername
                 def securityService = getService("securityService")
                 def password = securityService.decrypt(ctfServer.ctfPassword)
+                def commandLineService = getService("commandLineService")
+                def syncRepoURI = commandLineService.createSvnFileURI(
+                    new File(Server.getServer().repoParentDir, repoName))
                 execSvnSync(replRepo, System.currentTimeMillis(), username, password,
                     syncRepoURI)
     
@@ -263,8 +256,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 " master timestamp: ${masterTimestamp}...")
         def command = [ConfigUtil.svnsyncPath(), "sync", syncRepoURI,
             "--source-username", username, "--source-password", password,
-            "--non-interactive", "--no-auth-cache", "--config-dir",
-            ConfigUtil.svnConfigDirPath()]
+            "--non-interactive", "--no-auth-cache", "--disable-locking",
+            "--config-dir", ConfigUtil.svnConfigDirPath()]
         
         def msg = "${command} failed. "
         try {

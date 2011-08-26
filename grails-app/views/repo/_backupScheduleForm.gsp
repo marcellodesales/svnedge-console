@@ -113,6 +113,21 @@
           &nbsp;&nbsp;<g:message code="repository.page.bkupSchedule.numberToKeep.all" />
         </td>
       </tr>
+     <g:if test="${repositoryInstance && (flash['nameAdjustmentRequired' + repositoryInstance.id] || repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name)}">
+       <tr id="cloudNameRow">
+        <td class="ItemDetailName">
+          <label for="${'cloudName' + repositoryInstance.id}"><g:message code="repository.page.bkupSchedule.cloudName" /></label>
+        </td>
+        <td valign="top" class="value ItemDetailValue">
+          <g:if test="${flash['nameAdjustmentRequired' + repositoryInstance.id]}">
+            <input type="text" name="${'cloudName' + repositoryInstance.id}" 
+               value="${params['cloudName' + repositoryInstance.id] ?: repositoryInstance.cloudName ?: repositoryInstance.name}" size="30"/>
+          </g:if>
+          <g:elseif test="${repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name}"> ${repositoryInstance.cloudName}</g:elseif>
+        </td>
+        </tr>
+     </g:if>
+      
      </table>
      <g:if test="${!repositoryInstance}">
      <br/>
@@ -130,7 +145,16 @@
          <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
            <td><g:listViewSelectItem item="${job}" property="repoId"/></td>
 
-           <td>${job.repoName}</td>
+           <td>${job.repoName}
+             <g:if test="${flash['nameAdjustmentRequired' + job.repoId]}">
+                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                 <label><g:message code="repository.page.bkupSchedule.cloudName" />
+                 <input type="text" name="${'cloudName' + job.repoId}" 
+                     value="${params['cloudName' + job.repoId] ?: job.cloudName ?: job.repoName}" size="30"/>
+                 </label>
+             </g:if>
+             <g:elseif test="${job.cloudName && job.cloudName != job.repoName}"> (${job.cloudName})</g:elseif>
+           </td>
            <td>${job.type} 
                <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
                  <span class="TextRequired">
@@ -176,17 +200,26 @@
           if ($('cloudRegister')) {
               $('cloudRegister').style.display = 'none';
           }
+          if ($('cloudNameRow')) {
+              $('cloudNameRow').style.display = 'none';
+          }
       } else if (typeSelect.value == 'cloud') {
           $('whenRow').style.display = '';
           $('keepRow').style.display = 'none';
           if ($('cloudRegister')) {
               $('cloudRegister').style.display = '';
           }
+          if ($('cloudNameRow')) {
+              $('cloudNameRow').style.display = '';
+          }
       } else {
           $('whenRow').style.display = 'none';
           $('keepRow').style.display = 'none';
           if ($('cloudRegister')) {
               $('cloudRegister').style.display = 'none';
+          }
+          if ($('cloudNameRow')) {
+              $('cloudNameRow').style.display = 'none';
           }
       }
   }

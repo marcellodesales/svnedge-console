@@ -25,5 +25,5 @@ CREATE MEMORY TABLE CLOUD_SERVICES_CONFIGURATION (
   DOMAIN VARCHAR(255) NOT NULL
 );
 
-alter table REPOSITORY add column CLOUD_PROJECT_ID varchar(255);
-alter table REPOSITORY add column CLOUD_SVN_SERVICE_ID varchar(255);
+alter table REPOSITORY add column CLOUD_NAME varchar(255);
+alter table REPOSITORY add column CLOUD_SVN_URI varchar(255);

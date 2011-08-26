@@ -26,6 +26,9 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.integration.InvalidNameCloudServicesException;
+import com.collabnet.svnedge.integration.QuotaCloudServicesException;
+
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
 
@@ -43,6 +46,7 @@ class AuthzRulesCommand {
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
 class RepoController {
 
+    def cloudServicesRemoteClientService
     def svnRepoService
     def serverConfService
     def packagesUpdateService
@@ -302,6 +306,7 @@ class RepoController {
         // handle single or multiple repo backups with same action
         def repoIdList = (params.id) ? [params.id] : getListViewSelectedIds(params)
         def type = params.type
+        try {
         repoIdList.each {
             Repository repo = Repository.get(it)
             if (!repo) {
@@ -312,20 +317,25 @@ class RepoController {
             }
 
             if (type == "cloud") {
-                cmd.cloud = true
-                scheduleBackup(cmd, repo, type)
                 if (!CloudServicesConfiguration.getCurrentConfig()) {
                     flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
                     redirect(controller: 'setupCloudServices', action:'index')
                     return
                 }
-        
+
+                if (confirmCloudProject(repo)) {
+                    cmd.cloud = true
+                    scheduleBackup(cmd, repo, type)
+                } 
             } else if (type == "none") {
                 svnRepoService.clearScheduledDumps(repo)
                 flash.message = message(code: 'repository.action.updateBkupSchedule.none')
             } else {
                 scheduleBackup(cmd, repo, type)
             }
+        }
+        } catch (QuotaCloudServicesException quota) {
+            flash.error = message(code: 'repository.action.bkupSchedule.cloud.quota.met')
         }
 
         // redirect based on origin (single repo or multiple-repo backup)
@@ -344,6 +354,43 @@ class RepoController {
         }
     }
 
+    private boolean confirmCloudProject(repo) throws QuotaCloudServicesException {
+        def projects = cloudServicesRemoteClientService.listProjects()
+        def cloudName = params["cloudName${repo.id}"]
+        if (cloudName) {
+            for (def p : projects) {
+                if (p['shortName'] == cloudName) {
+                    flash.error = "There is already a project with the name " +
+                        cloudName
+                    return false
+                }
+            }
+            repo.cloudName = cloudName
+            repo.save()
+            return createProject(repo)
+        }
+            
+        cloudName = repo.cloudName ?: repo.name
+        for (def p : projects) {
+            if (p['shortName'] == cloudName) {
+                return true
+            }
+        }
+        return createProject(repo)        
+    }
+
+    private boolean createProject(repo) throws QuotaCloudServicesException {
+        try {
+            cloudServicesRemoteClientService.createProject(repo)
+            return true
+        } catch (InvalidNameCloudServicesException invalidName) {
+            flash.error = message(code: 'repository.action.bkupSchedule.cloud.name.invalid',
+                args: [(repo.cloudName ?: repo.name)])
+            flash["nameAdjustmentRequired${repo.id}"] = true
+        }
+        return false
+    }
+    
     private void scheduleBackup(DumpBean cmd, Repository repo, def type) {
         try {
             cmd.userLocale = request.locale
@@ -386,6 +433,7 @@ class RepoController {
             def job = [:]
             job.repoId = it.id
             job.repoName = it.name
+            job.cloudName = it.cloudName
             def backups = svnRepoService.retrieveScheduledBackups(it)
             if (backups) {
                 DumpBean b = (DumpBean) backups[0]

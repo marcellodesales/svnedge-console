@@ -709,7 +709,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobGroup(RepoDumpJob.group)
 
         // data for reporting status to quartz job listeners
-        def progressLogFileName = "dump-progress-" + repo.name + ".log"
+        def progressLogFileName = getProgressLogFileName(repo.name)
         def jobDataMap =
                 [id: "repoDump-${repo.name}", repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description", [repo.name],
@@ -717,6 +717,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
                 urlResult: "/csvn/repo/dumpFileList/${repo.id}",
                 urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}" ]
+        if (bean.cloud) {
+            jobDataMap['urlResult'] = repo.cloudSvnUri
+        }
         // data for generating the dump file
         jobDataMap.putAll(bean.toMap())
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
@@ -725,7 +728,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return bean.cloud ? null : dumpFilename(bean, repo)
     }
         
-            
+    File prepareProgressLogFile(repoName) {        
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdir()
+        }
+        return new File(tempLogDir, getProgressLogFileName(repoName))
+    }
+
+    private String getProgressLogFileName(repoName) {
+        return "bkup-progress-" + repoName + ".log"
+    }
+                
     /**
      * Method to invoke "svnadmin dump" possibly piped through svndumpfilter
      * 
@@ -752,14 +766,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
         File dumpDir = new File(server.dumpDir, repo.name)
         if (!dumpDir.exists()) {
             dumpDir.mkdirs()
-        }        
-        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        if (!tempLogDir.exists()) {
-            tempLogDir.mkdir()
         }
-        def progressLogFileName = "dump-progress-" + repo.name + ".log"
-        File progressLogFile =
-            new File(tempLogDir, progressLogFileName)
+                
+        File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
             throw new ValidationException("repository.action.createDumpfile.alreadyInProgress")
         }

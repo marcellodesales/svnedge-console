@@ -33,8 +33,8 @@ class Repository {
      */
     Boolean permissionsOk = true
     
-    String cloudProjectId
-    String cloudSvnServiceId
+    String cloudName
+    String cloudSvnUri
 
     /**
      * Repo statistics are FK'd, so this is used for cascade delete 
@@ -63,7 +63,7 @@ class Repository {
 
     static constraints = {
         name(blank: false, unique: true)
-        cloudProjectId(blank: true, nullable: true)
-        cloudSvnServiceId(blank: true, nullable: true)
+        cloudName(blank: true, nullable: true)
+        cloudSvnUri(blank: true, nullable: true)
     }
 }

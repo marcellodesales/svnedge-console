@@ -18,6 +18,7 @@
 
 package com.collabnet.svnedge.integration
 
+import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
@@ -127,15 +128,49 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+    * Lists projects within the configured domain.
+    */
+   def listProjects(RESTClient restClient = null) throws CloudServicesException {
+       def body = [:]
+       if (!restClient) {
+           restClient = createRestClient()
+           body = createFullCredentialsMap()
+       }
+       try {
+           def resp = restClient.get(path: "projects.json",
+               query: body,
+               requestContentType: URLENC)
+
+           if (resp.status != 200) {
+               throw CloudServicesException("project.listing.failure")
+           }
+
+           def data = resp.data
+           log.debug("REST data " + data)
+
+           return data
+       }
+       catch (Exception e) {
+           log.warn("Unable to list Cloud projects", e)
+           throw e
+       }
+       return null
+   }
+
+    /**
      * Adds a project within the configured domain. 
      * @param projectName Short and long names are the same.
      * @return the projectId
      */
-    String createProject(projectName) {
-        def restClient = createRestClient()
-        def body = createFullCredentialsMap()
-        body.put("shortName", projectName)
-        body.put("longName", projectName)
+    String createProject(Repository repo, RESTClient restClient = null) 
+            throws CloudServicesException {
+        def body = [:]
+        if (!restClient) {
+            restClient = createRestClient()
+            body = createFullCredentialsMap()
+        }
+        body.put("shortName", getProjectShortNameForRepository(repo))
+        body.put("longName", getProjectLongNameForRepository(repo))
         try {
             def resp = restClient.post(path: "projects.json",
                     body: body,
@@ -151,9 +186,40 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
             return data['responseHeader']['projectId']
         }
+        catch (HttpResponseException hre) {
+            def resp = hre.response
+            def data = resp.data
+            def error = resp.data['error']
+            if (error?.contains('Invalid project shortName')) {
+                throw new InvalidNameCloudServicesException()
+                // current error message is: 
+                // Failed to create project: You already have NN out of NN projects.
+                // if there are other errors which start the same, this might
+                // need to be made more rigorous.
+            } else if (error?.startsWith('Failed to create project')) {
+                throw new QuotaCloudServicesException()
+            }
+            // FIXME why doesn't this log anything?
+            log.debug("REST data " + data)
+            throw new CloudServicesException("Unknown error: " + data.toString())
+        }
         catch (Exception e) {
-            log.warn("Unable to create Cloud project: " + projectName, e)
+            log.warn("Unable to create Cloud project for repo: " + repo.name, e)
             throw e
+        }
+        return null
+    }
+
+    def retrieveProjectMap(repo, restClient = null) {
+        if (!restClient) {
+            restClient = getAuthenticatedRestClient()
+        }
+        def projectName = getProjectShortNameForRepository(repo)
+        for (Map projectMap : listProjects(restClient)) {
+            log.debug("ProjectMap: " + projectMap)
+            if (projectMap['shortName'] == projectName) {
+                return projectMap
+            }
         }
         return null
     }
@@ -164,20 +230,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      * @return true if the deletion was successful
      */
     boolean deleteProject(projectId) {
-        def restClient = createRestClient()
-        def body = createFullCredentialsMap()
+        def restClient = getAuthenticatedRestClient()
         try {
-            def resp = restClient.post(path: "login.json",
-                    body: body,
-                    requestContentType: URLENC)
-
-            // will be 401 if login fails
-            if (resp.status != 200) {
-                log.warn("Unable to delete Cloud projectId: " + projectId +
-                        " due to failure to login", e)
-                return false
-            }
-
             resp = restClient.delete(path: "projects/" + projectId + ".json")
 
             // sc 200 = deleted
@@ -191,14 +245,64 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return false
     }
 
+    private RESTClient getAuthenticatedRestClient() throws CloudServicesException {
+        RESTClient restClient = createRestClient()
+        def body = createFullCredentialsMap()
+        try {
+            def resp = restClient.post(path: "login.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // will be 401 if login fails
+            if (resp.status != 200) {
+                throw new CloudServicesException("authentication.failure.using.stored.credentials")
+            }
+        } catch (Exception e) {
+            if (e.message != "Unauthorized") {
+                log.warn("Unexpected exception while attempting login", e)
+                throw e
+            }
+        }
+        return restClient
+    }
+
+    /**
+    * Lists services within the configured domain.
+    */
+   def listServices(RESTClient restClient) throws CloudServicesException {
+       try {
+           def resp = restClient.get(path: "services.json",
+               requestContentType: URLENC)
+
+           if (resp.status != 200) {
+               throw CloudServicesException("cloud.services.service.listing.failure")
+           }
+
+           def data = resp.data
+           log.debug("REST data " + data)
+           return data
+       }
+       catch (Exception e) {
+           if (e.message != "Not Found") {
+               log.warn("Unable to list Cloud services", e)
+               throw e
+           }
+       }
+       return []
+   }
+
+
     /**
      * Adds the Subversion service to a project
      * @param projectId
      * @return the serviceId
      */
-    String addSvnToProject(projectId) {
-        def restClient = createRestClient()
-        def body = createFullCredentialsMap()
+    String addSvnToProject(projectId, RESTClient restClient = null) {
+        def body = [:]
+        if (!restClient) {
+            restClient = createRestClient()
+            body = createFullCredentialsMap()
+        }
         body.put("projectId", projectId)
         body.put("serviceType", "svn")
         try {
@@ -223,58 +327,167 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return null
     }
 
+    private getProjectShortNameForRepository(Repository repo) {
+        return repo.cloudName ?: repo.name
+    }
+    
+    private getProjectLongNameForRepository(Repository repo) {
+        return repo.name
+    }
+
     boolean synchronizeRepository(Repository repo) throws CloudServicesException {
-        
-        if (!repo.cloudProjectId) {
-            repo.cloudProjectId = createProject(repo.name)
-            if (!repo.cloudProjectId) {
+
+        File progressFile = svnRepoService.prepareProgressLogFile(repo.name)
+        FileOutputStream fos
+        try {
+            fos = new FileOutputStream(progressFile)
+            String preamble = new Date().toString() + 
+                " Synchronizing repository '" +
+                repo.name + "' with cloud services for backup" + 
+                "\nExecution output below\n----------------------\n"
+            write(preamble, fos)
+            
+            return synchronizeRepositoryWithProgress(repo, fos)
+        } finally {
+            fos?.close()
+            progressFile.delete()
+        }
+    }
+    
+    private void write(String s, OutputStream os) {
+        os.write((s + "\n").getBytes("UTF-8"))
+    }
+    
+    private boolean synchronizeRepositoryWithProgress(repo, fos) {
+        // confirm that the project exists
+        String projectId = null
+        def projectName = null
+        boolean projectExists = false
+        RESTClient restClient = getAuthenticatedRestClient()
+        def projectMap = retrieveProjectMap(repo, restClient)
+        if (projectMap) {
+            projectId = projectMap['projectId']
+            projectName = projectMap['shortName']
+            projectExists = true
+            write("Sync'ing project: " + projectName, fos)
+        } else {
+            projectName = getProjectShortNameForRepository(repo)
+            write("Project did not exist, creating a new project: " + 
+                projectName, fos)
+            projectId = createProject(repo, restClient)
+            if (!projectId) {
                 throw new CloudServicesException('cloud.services.unable.to.create.project')
             }
-            repo.save()
         }
 
         def credMap = createFullCredentialsMap()
         def username = credMap.get('credentials[login]')
         def password = credMap.get('credentials[password]')
-        def cloudRepoURI = getCloudSvnURI(credMap.get('credentials[domain]'), repo.name)
-        
-        if (!repo.cloudSvnServiceId) {
-            repo.cloudSvnServiceId = addSvnToProject(repo.cloudProjectId)
-            if (!repo.cloudSvnServiceId) {
+
+        boolean serviceExists = false
+        String serviceId = null
+        String cloudSvnURI = null
+        // check for svn service, if project is new it won't be created yet
+        if (projectExists) {
+            for (def serviceMap : listServices(restClient)) {
+                if (serviceMap['projectId'].toString() == projectId && 
+                    serviceMap['serviceType'] == 'svn') {
+                    
+                    serviceExists = true
+                    serviceId = serviceMap['serviceId']
+                    if (serviceMap['ready']) {
+                        cloudSvnURI = serviceMap['access_url']
+                    }
+                }
+            }
+        }
+
+        if (!serviceExists) {
+            write("SVN service did not exist, creating it.", fos)
+            serviceId = addSvnToProject(projectId, restClient)
+            if (!serviceId) {
                 throw new CloudServicesException('cloud.services.unable.to.create.svn')
             }
-            repo.save()
+        }
             
-            // repository is setup async, so waiting a bit, TODO make this 
-            // loop until the repository is ready
-            Thread.sleep(10000)
-            
+        if (!cloudSvnURI) {
+            cloudSvnURI = getCloudSvnURI(repo.name, serviceId, restClient)
+            if (!cloudSvnURI) {
+                throw new CloudServicesException('cloud.services.unable.to.access.svn')
+            }
+        }
+        
+        if (!repo.cloudSvnUri) {
             // prepare sync
+            write("Initializing cloud repository for sync.", fos)
             File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
             def localRepoURI = commandLineService.createSvnFileURI(repoPath)
             def command = [ConfigUtil.svnsyncPath(), "init", 
-                cloudRepoURI, localRepoURI,
-                "--username", username, "--password", password,
+                cloudSvnURI, localRepoURI, "--allow-non-empty", 
+                "--trust-server-cert",
+                "--sync-username", username, "--sync-password", password,
                 "--non-interactive", "--no-auth-cache", 
                 "--config-dir", ConfigUtil.svnConfigDirPath()]
-            // TODO refactor the replica command executeShellCommand code to use
-            // here
-            commandLineService.execute(command.toArray(new String[0]), null, null, true)
+            def result =
+                commandLineService.execute(command, fos, fos, null, null, true)
+            if (result[0] != "0") {
+                log.warn("Unable to svnsync init.  stderr=" + result[2])
+                throw new CloudServicesException("cloud.services.svnsync.init.failure")
+            }
         }
-        
-        log.debug("Syncing repo '${repo.name}' at " +
-            " local timestamp: ${new Date()}...")
-        def command = [ConfigUtil.svnsyncPath(), "sync", cloudRepoURI,
-            "--username", username, "--password", password,
-            "--non-interactive", "--no-auth-cache", 
+
+        // if access url has changed, update our copy
+        if (repo.cloudSvnUri != cloudSvnURI) {
+            repo.cloudSvnUri = cloudSvnURI
+            repo.save()
+        }
+
+        String startSyncMessage = "Syncing repo '${repo.name}' at " +
+            "local timestamp: ${new Date()}..."
+        log.debug(startSyncMessage)
+        write(startSyncMessage, fos)
+        def command = [ConfigUtil.svnsyncPath(), "sync", cloudSvnURI,
+            "--sync-username", username, "--sync-password", password,
+            "--trust-server-cert",
+            "--non-interactive", "--no-auth-cache", "--disable-locking",
             "--config-dir", ConfigUtil.svnConfigDirPath()]
-        // TODO refactor the replica command executeShellCommand code to use
-        // here
-        commandLineService.execute(command.toArray(new String[0]), null, null, true)
+        def result =
+            commandLineService.execute(command, fos, fos, null, null, true)
+        if (result[0] != "0") {
+            log.warn("Unable to svnsync sync.  stderr=" + result[2])
+            throw new CloudServicesException("cloud.services.svnsync.sync.failure")
+        }
     }
 
-    private String getCloudSvnURI(domain, repoName) {
-        return "https://" + domain + ".svn.cvsdude.com/" + repoName
+    private String getCloudSvnURI(repoName, serviceId, restClient) {
+        long waitTime = 100
+        try {
+            // gives about 6 min 45 seconds for service to initialize
+            while (waitTime < 300000) {
+                Thread.sleep(waitTime)
+                def resp = restClient.get(path: "services/${serviceId}.json",
+                                          requestContentType: URLENC)
+                if (resp.status == 200) {
+                    def data = resp.data
+                    log.debug("REST data " + data)                    
+                    boolean isReady = data['service']['ready']
+                    if (isReady) {
+                        // The repository seems to sometimes declare itself
+                        // ready just a bit too soon and is not yet created
+                        // on the file system.
+                        Thread.sleep(1000)
+                        return data['service']['access_url']
+                    }
+                }
+                waitTime *= 2
+            }
+            throw new CloudServicesException('cloud.services.svn.not.ready')
+        }
+        catch (Exception e) {
+            log.warn("Unable to get svn service URI for repository: " + repoName, e)
+            throw e
+        }
+        return null
     }
     
     /**
