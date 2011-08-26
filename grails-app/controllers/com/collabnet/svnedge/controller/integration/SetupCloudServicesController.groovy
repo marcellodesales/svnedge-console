@@ -37,7 +37,7 @@ class CloudServicesAccountCommand {
 
     static constraints = {
         username(blank: false, matches: "[a-zA-Z0-9_]+", minSize: 3, maxSize: 16)
-        password(blank: false)
+        password(blank: false, minSize: 6, maxSize: 64)
         passwordConfirm(blank: false,
                 validator: { String val, CloudServicesAccountCommand cmd ->
                     if (val != cmd.password) {
@@ -85,6 +85,8 @@ class SetupCloudServicesController {
             render(view: "signup", model: [cmd: cmd])
         }
         else if (cloudServicesRemoteClientService.createAccount(cmd)) {
+            // remove error message if it persists from previous submit (occasional grails bug)
+            flash.error = null
             flash.message = message(code: "setupCloudServices.page.signup.accountCreation.mustValidate")
             render(view: "confirm", model: [cmd: cmd])
         }
