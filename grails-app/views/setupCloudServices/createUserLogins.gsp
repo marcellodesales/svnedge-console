@@ -83,7 +83,9 @@
   <table class="ItemDetailContainer">
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
-
+        <p>
+          <g:message code="setupCloudServices.page.createUserLogins.p1"/>
+        </p>
         <table class="Container">
           <tbody>
           <tr class="ItemListHeader">

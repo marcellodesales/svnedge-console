@@ -41,7 +41,9 @@
   <table class="ItemDetailContainer">
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
-
+        <p>
+          <g:message code="setupCloudServices.page.selectUsers.p1"/>
+        </p>
         <table class="Container">
           <tbody>
           <tr class="ItemListHeader">
