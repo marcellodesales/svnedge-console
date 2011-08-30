@@ -80,10 +80,21 @@ class SetupCloudServicesController {
         render(view: "signup", model: [cmd: new CloudServicesAccountCommand()])
     }
 
-    def checkLoginAvailability = {
-        def resp = cloudServicesRemoteClientService.isLoginNameAvailable(params.username, null)
+    def checkLoginAvailability = { CloudServicesAccountCommand cmd ->
+
+        // first validate according to local rules to save roundtrip to api
+        def loginAvailable = true
+        cmd.validate()
+        if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username"))) {
+            loginAvailable = false
+        }
+        // else, check remote availability
+        else {
+            loginAvailable = cloudServicesRemoteClientService.isLoginNameAvailable(cmd.username, null)
+        }
+
         render(contentType: "text/json") {
-            loginAvailable = resp.toString()
+            result(loginAvailable: loginAvailable.toString())
         }
     }
 
@@ -156,7 +167,7 @@ class SetupCloudServicesController {
 
     def selectUsers = {
         def listParams = [:]
-        listParams.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+        listParams.max = Math.min(params.max ? params.max.toInteger() : 10, 100)
         listParams.offset = params.offset ? params.offset.toInteger() : 0
         listParams.sort = "username"
         listParams.order = (params.sort == "username") ? params.order : "asc"
@@ -190,12 +201,12 @@ class SetupCloudServicesController {
     }
 
     def createUserLogins = {
-       def userList = []
-       ControllerUtil.getListViewSelectedIds(params).each {
+        def userList = []
+        ControllerUtil.getListViewSelectedIds(params).each {
             User u = User.get(it)
             userList << u
-       }
-       [userList: userList]
+        }
+        [userList: userList]
     }
 
 
@@ -206,7 +217,7 @@ class SetupCloudServicesController {
             cloudServicesRemoteClientService.createUser(u)
         }
         flash.info = message(code: 'setupCloudServices.page.migrateUsers.success')
-        forward(action:'selectUsers')
+        forward(action: 'selectUsers')
     }
 
 }

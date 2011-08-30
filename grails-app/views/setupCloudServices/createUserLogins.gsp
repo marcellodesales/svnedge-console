@@ -27,15 +27,15 @@
   <script type="text/javascript">
 
     var usernameAvailableMessages = {
-        prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
-        checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
-        available: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
-        notAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>'
+      prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
+      checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
+      available: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
+      notAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>'
     }
 
     var usernameAvailabilityCheckers = []
     Event.observe(window, 'load', function() {
-      $$('input.CheckForLoginUniqueness').each (function(s) {
+      $$('input.CheckForLoginUniqueness').each(function(s) {
         var usernameField = s
         var usernameMsgElement = s.next()
         var checker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
@@ -51,32 +51,36 @@
       updateActionButtons()
     })
 
-  function updateActionButtons() {
-    var enableActions = true
-    for (var i=0; i < usernameAvailabilityCheckers.length; i++) {
-      if (usernameAvailabilityCheckers[i].loginAvailable != true) {
-        enableActions = false
-        break
+    function updateActionButtons() {
+      var enableActions = true
+      for (var i = 0; i < usernameAvailabilityCheckers.length; i++) {
+        if (usernameAvailabilityCheckers[i].loginAvailable != true) {
+          enableActions = false
+          break
+        }
       }
+      $$('input.listViewAction').each(function(s) {
+        s.disabled = !enableActions
+      })
     }
-    $$('input.listViewAction').each(function(s) {
-       s.disabled = !enableActions
-    })
-  }
 
   </script>
 </head>
 <content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
+  <g:message code="setupCloudServices.page.selectUsers.title"/>
 </content>
 
 <g:render template="/server/leftNav"/>
 <body>
+
+<g:set var="tabArray"
+       value="${[[action:'selectUsers', label: message(code:'setupCloudServices.page.tabs.selectUsers', args:[1])]]}"/>
+<g:set var="tabArray"
+       value="${tabArray << [active: true, label: message(code:'setupCloudServices.page.tabs.createLogins', args:[2])]}"/>
+<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+
 <g:form>
   <table class="ItemDetailContainer">
-    <tr class="ContainerHeader">
-      <td><g:message code="setupCloudServices.page.selectUsers.title"/></td>
-    </tr>
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
 
@@ -95,8 +99,8 @@
               <td>${user.email}</td>
               <td>
                 <input size="40" type="text" id="username_${user.id}" name="username_${user.id}"
-                  value="${fieldValue(bean: user, field: 'username')}"
-                  class="CheckForLoginUniqueness"/>
+                       value="${fieldValue(bean: user, field: 'username')}"
+                       class="CheckForLoginUniqueness"/>
                 <span class="usernameUniqueneMessage" id="usernameUniqueMessage_${user.id}"></span>
               </td>
             </tr>
@@ -114,15 +118,14 @@
       <td colspan="3">
         <div class="AlignRight">
           <g:actionSubmit id="btnMigrateUsers"
-                value="${message(code:'setupCloudServices.page.selectUsers.migrate')}"
-                controller="setupCloudServices" action="migrateUsers" class="Button listViewAction"
-                disabled="disabled"/>
+                          value="${message(code:'setupCloudServices.page.selectUsers.migrate')}"
+                          controller="setupCloudServices" action="migrateUsers" class="Button listViewAction"
+                          disabled="disabled"/>
         </div>
       </td>
     </tr>
   </table>
 </g:form>
-
 
 </body>
 </html>

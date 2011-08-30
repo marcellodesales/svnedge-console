@@ -25,16 +25,20 @@
   <g:render template="/common/listViewResources"/>
 </head>
 <content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
+  <g:message code="setupCloudServices.page.selectUsers.title"/>
 </content>
 
 <g:render template="/server/leftNav"/>
 <body>
+
+<g:set var="tabArray"
+       value="${[[active: true, action:'selectUsers', label: message(code:'setupCloudServices.page.tabs.selectUsers', args:[1])]]}"/>
+<g:set var="tabArray"
+       value="${tabArray << [label: message(code:'setupCloudServices.page.tabs.createLogins', args:[2])]}"/>
+<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+
 <g:form>
   <table class="ItemDetailContainer">
-    <tr class="ContainerHeader">
-      <td><g:message code="setupCloudServices.page.selectUsers.title"/></td>
-    </tr>
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
 
@@ -46,7 +50,8 @@
                               defaultOrder="asc"/>
             <g:sortableColumn property="realUsername" titleKey="setupCloudServices.page.selectUsers.realUsername"/>
             <g:sortableColumn property="emailAddress" titleKey="setupCloudServices.page.selectUsers.emailAddress"/>
-            <g:sortableColumn property="matchingRemoteUser" titleKey="setupCloudServices.page.selectUsers.matchingRemoteUser"/>
+            <g:sortableColumn property="matchingRemoteUser"
+                              titleKey="setupCloudServices.page.selectUsers.matchingRemoteUser"/>
           </tr>
           <g:each in="${userList}" status="i" var="user">
             <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
@@ -69,15 +74,14 @@
     <tr class="ContainerFooter">
       <td colspan="3">
         <div class="AlignRight">
-          <g:listViewActionButton action="createUserLogins" minSelected="1" >
-             <g:message code="setupCloudServices.page.selectUsers.createLogins"/>
-           </g:listViewActionButton>
+          <g:listViewActionButton action="createUserLogins" minSelected="1">
+            <g:message code="setupCloudServices.page.selectUsers.createLogins"/>
+          </g:listViewActionButton>
         </div>
       </td>
     </tr>
   </table>
 </g:form>
-
 
 </body>
 </html>

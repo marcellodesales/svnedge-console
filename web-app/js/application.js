@@ -18,16 +18,16 @@
 
 var Ajax;
 if (Ajax && (Ajax != null)) {
-	Ajax.Responders.register({
-	  onCreate: function() {
-        if($('spinner') && Ajax.activeRequestCount>0)
-          Effect.Appear('spinner',{duration:0.5,queue:'end'});
-	  },
-	  onComplete: function() {
-        if($('spinner') && Ajax.activeRequestCount==0)
-          Effect.Fade('spinner',{duration:0.5,queue:'end'});
-	  }
-	});
+    Ajax.Responders.register({
+                onCreate: function() {
+                    if ($('spinner') && Ajax.activeRequestCount > 0)
+                        Effect.Appear('spinner', {duration:0.5,queue:'end'});
+                },
+                onComplete: function() {
+                    if ($('spinner') && Ajax.activeRequestCount == 0)
+                        Effect.Fade('spinner', {duration:0.5,queue:'end'});
+                }
+            });
 }
 
 /**
@@ -47,38 +47,40 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
     this.fetchUpdates = function(logStreamer) {
 
         new Ajax.Request('/csvn/log/tail', {
-            logStreamer: logStreamer,
-            method:'get',
-            requestHeaders: {Accept: 'text/json'},
-            parameters: {fileName: logStreamer.logData.log.fileName, startIndex: logStreamer.logData.log.endIndex },
-            onSuccess: function(transport){
-              logStreamer.logData = transport.responseText.evalJSON(true);
-              appendText = ""
-              if (logStreamer.logData.log.error) {
-                  appendText = (logStreamer.errorMsg) ? logStreamer.errorMsg : "\n\n** " + logStreamer.logData.log.error + " **"
-                  logStreamer.stop()
-              }
-              else {
-                  appendText = logStreamer.logData.log.content
-              }
-              if (Prototype.Browser.IE) {
-                var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" + appendText + "</PRE>"
-                logStreamer.contentElement.update(newContent);
-              }
-              else {
-                var newContent = logStreamer.contentElement.innerHTML + appendText
-                logStreamer.contentElement.update(newContent) ;
-              }
-              logStreamer.scrollingElement.scrollTop = logStreamer.scrollingElement.scrollHeight;
-            }
-         })
+                    logStreamer: logStreamer,
+                    method:'get',
+                    requestHeaders: {Accept: 'text/json'},
+                    parameters: {fileName: logStreamer.logData.log.fileName, startIndex: logStreamer.logData.log.endIndex },
+                    onSuccess: function(transport) {
+                        logStreamer.logData = transport.responseText.evalJSON(true);
+                        appendText = ""
+                        if (logStreamer.logData.log.error) {
+                            appendText = (logStreamer.errorMsg) ? logStreamer.errorMsg : "\n\n** " + logStreamer.logData.log.error + " **"
+                            logStreamer.stop()
+                        }
+                        else {
+                            appendText = logStreamer.logData.log.content
+                        }
+                        if (Prototype.Browser.IE) {
+                            var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" + appendText + "</PRE>"
+                            logStreamer.contentElement.update(newContent);
+                        }
+                        else {
+                            var newContent = logStreamer.contentElement.innerHTML + appendText
+                            logStreamer.contentElement.update(newContent);
+                        }
+                        logStreamer.scrollingElement.scrollTop = logStreamer.scrollingElement.scrollHeight;
+                    }
+                })
     }
     this.periodicUpdater = null
     this.start = function() {
         var fetchUpdates = this.fetchUpdates.curry(this)
         this.periodicUpdater = new PeriodicalExecuter(fetchUpdates, 1)
     }
-    this.stop = function() { if (this.periodicUpdater) this.periodicUpdater.stop() }
+    this.stop = function() {
+        if (this.periodicUpdater) this.periodicUpdater.stop()
+    }
 }
 
 /**
@@ -87,7 +89,6 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
  * @param messageElement the message field in which to indicate result (element)
  */
 function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
-
 
 
     this.usernameElement = usernameElement
@@ -104,7 +105,7 @@ function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
                     parameters: {username: checker.usernameElement.value },
                     onSuccess: function(transport) {
                         var responseJson = transport.responseText.evalJSON(true);
-                        if (responseJson.loginAvailable == 'true') {
+                        if (responseJson.result.loginAvailable == 'true') {
                             checker.messageElement.innerHTML = usernameAvailableMessages.available
                             checker.loginAvailable = true
                             if (checker.onSuccess != null) {
