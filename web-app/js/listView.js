@@ -72,7 +72,9 @@ Event.observe(window, 'load', function() {
             // set all the item checkboxes to state of the "select all" checkbox
             var checkedState = $('listViewSelectAll').checked
             allItemSelectCheckboxes.each(function(s) {
-                s.checked = checkedState
+                if (!s.disabled) {
+                    s.checked = checkedState
+                }
             })
             updateActionButtons()
         })

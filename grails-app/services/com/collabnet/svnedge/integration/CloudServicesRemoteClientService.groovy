@@ -68,6 +68,34 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * Find out if a given login name is already in use or not
+     * @param loginName to check for availability
+     * @param domain in which to search availability (optional -- global search if none provided)
+     * @return boolean indicating availability
+     */
+    def isLoginNameAvailable(String loginName, String domain) {
+
+        def restClient = createRestClient()
+        def query = createApiCredentialsMap()
+        query.put("login", loginName)
+        if (domain) {
+            query.put("domain", domain)
+        }
+        try {
+            def resp = restClient.get(path: "organizations/isLoginUnique.json",
+                    query: query,
+                    requestContentType: URLENC)
+
+            return Boolean.valueOf(resp.responseData["loginIsUnique"])
+        }
+        catch (Exception e) {
+            String error = e.response.responseData.error
+            log.error("Unable to evaluate login name uniqueness: ${e.message} ${error} ")
+        }
+        return false
+    }
+
+    /**
      * creates the cloud services account if possible (organization + admin user)
      * @param cmd CloudServicesAccountCommand from the controller
      * @return boolean indicating success or failure
@@ -158,11 +186,11 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
    }
 
     /**
-     * Adds a project within the configured domain. 
+     * Adds a project within the configured domain.
      * @param projectName Short and long names are the same.
      * @return the projectId
      */
-    String createProject(Repository repo, RESTClient restClient = null) 
+    String createProject(Repository repo, RESTClient restClient = null)
             throws CloudServicesException {
         def body = [:]
         if (!restClient) {
@@ -192,7 +220,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             def error = resp.data['error']
             if (error?.contains('Invalid project shortName')) {
                 throw new InvalidNameCloudServicesException()
-                // current error message is: 
+                // current error message is:
                 // Failed to create project: You already have NN out of NN projects.
                 // if there are other errors which start the same, this might
                 // need to be made more rigorous.
@@ -330,7 +358,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     private getProjectShortNameForRepository(Repository repo) {
         return repo.cloudName ?: repo.name
     }
-    
+
     private getProjectLongNameForRepository(Repository repo) {
         return repo.name
     }
@@ -341,23 +369,85 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         FileOutputStream fos
         try {
             fos = new FileOutputStream(progressFile)
-            String preamble = new Date().toString() + 
+            String preamble = new Date().toString() +
                 " Synchronizing repository '" +
-                repo.name + "' with cloud services for backup" + 
+                repo.name + "' with cloud services for backup" +
                 "\nExecution output below\n----------------------\n"
             write(preamble, fos)
-            
+
             return synchronizeRepositoryWithProgress(repo, fos)
         } finally {
             fos?.close()
             progressFile.delete()
         }
     }
+
+    def fetchUsers() {
+        def restClient = createRestClient()
+        def params = createFullCredentialsMap()
+        def userData = [:]
+        try {
+            def resp = restClient.get(path: "users.json",
+                    query: params,
+                    requestContentType: URLENC)
+
+            // return the users as map of json data keyed by username
+            resp.responseData.each {
+                userData.put (it.login, it)
+            }
+        }
+        catch (Exception e) {
+            if (e.message != "Unauthorized") {
+                log.error("Unexpected exception while attempting to fetch Cloud Services users", e)
+            }
+            else {
+                log.error("Credentials not accepted")
+            }
+        }
+        return userData
+    }
     
+    /**
+     * creates a cloud services user from the given input
+     * @param user the User or map of user properties
+     * @return boolean indicating success or failure
+     */
+    def createUser(user) {
+
+        def restClient = createRestClient()
+        def body = createFullCredentialsMap()
+        String[] names = user.realUserName?.split(" ")
+
+        if (names && names.length > 0) {
+            body.put("firstName", names[0])
+        }
+        if (names && names.length > 1) {
+            body.put("lastName", names[names.length - 1])
+        }
+        body.put("login", user.username)
+        body.put("preferredName", user.realUserName)
+        body.put("email", user.email)
+
+        try {
+            def resp = restClient.post(path: "users.json",
+                    body: body,
+                    requestContentType: URLENC)
+
+            // sc 201 = created
+            return resp.status == 201
+        }
+        catch (Exception e) {
+            log.warn("Unable to get svn service URI for repository: " + repoName, e)
+            throw e
+        }
+        return null
+    }
+
+
     private void write(String s, OutputStream os) {
         os.write((s + "\n").getBytes("UTF-8"))
     }
-    
+
     private boolean synchronizeRepositoryWithProgress(repo, fos) {
         // confirm that the project exists
         String projectId = null
@@ -372,7 +462,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             write("Sync'ing project: " + projectName, fos)
         } else {
             projectName = getProjectShortNameForRepository(repo)
-            write("Project did not exist, creating a new project: " + 
+            write("Project did not exist, creating a new project: " +
                 projectName, fos)
             projectId = createProject(repo, restClient)
             if (!projectId) {
@@ -416,14 +506,14 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 throw new CloudServicesException('cloud.services.unable.to.access.svn')
             }
         }
-        
+
         if (!repo.cloudSvnUri) {
             // prepare sync
             write("Initializing cloud repository for sync.", fos)
             File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
             def localRepoURI = commandLineService.createSvnFileURI(repoPath)
             def command = [ConfigUtil.svnsyncPath(), "init", 
-                cloudSvnURI, localRepoURI, "--allow-non-empty", 
+                cloudSvnURI, localRepoURI, "--allow-non-empty",
                 "--trust-server-cert",
                 "--sync-username", username, "--sync-password", password,
                 "--non-interactive", "--no-auth-cache", 

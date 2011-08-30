@@ -81,5 +81,51 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
     this.stop = function() { if (this.periodicUpdater) this.periodicUpdater.stop() }
 }
 
+/**
+ * A class for validating that a given login username is available in CollabNet cloud services via ajax
+ * @param usernameElement the input field to validate (element)
+ * @param messageElement the message field in which to indicate result (element)
+ */
+function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
 
 
+
+    this.usernameElement = usernameElement
+    this.messageElement = messageElement
+    this.delayCheckTimer = null
+    this.onSuccess = null
+    this.onFailure = null
+    this.loginAvailable = false
+    this.doAjaxRequest = function(checker) {
+        checker.messageElement.innerHTML = usernameAvailableMessages.checking
+        checker.ajaxInstance = new Ajax.Request('/csvn/setupCloudServices/checkLoginAvailability', {
+                    method:'get',
+                    requestHeaders: {Accept: 'text/json'},
+                    parameters: {username: checker.usernameElement.value },
+                    onSuccess: function(transport) {
+                        var responseJson = transport.responseText.evalJSON(true);
+                        if (responseJson.loginAvailable == 'true') {
+                            checker.messageElement.innerHTML = usernameAvailableMessages.available
+                            checker.loginAvailable = true
+                            if (checker.onSuccess != null) {
+                                checker.onSuccess()
+                            }
+                        }
+                        else {
+                            checker.messageElement.innerHTML = usernameAvailableMessages.notAvailable
+                            checker.loginAvailable = false
+                            if (checker.onFailure != null) {
+                                checker.onFailure()
+                            }
+                        }
+                    }
+                })
+    }
+    this.keypressHandler = function() {
+        clearTimeout(this.delayCheckTimer)
+        var checkLoginAvailability = this.doAjaxRequest.curry(this)
+        this.delayCheckTimer = setTimeout(checkLoginAvailability, 1000)
+    }
+
+    this.messageElement.innerHTML = usernameAvailableMessages.prompt
+}

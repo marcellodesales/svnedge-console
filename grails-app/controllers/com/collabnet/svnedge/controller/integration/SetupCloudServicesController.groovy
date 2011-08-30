@@ -19,6 +19,8 @@ package com.collabnet.svnedge.controller.integration
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
+import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.util.ControllerUtil
 
 class CloudServicesAccountCommand {
     String username
@@ -76,6 +78,13 @@ class SetupCloudServicesController {
 
     def getStarted = {
         render(view: "signup", model: [cmd: new CloudServicesAccountCommand()])
+    }
+
+    def checkLoginAvailability = {
+        def resp = cloudServicesRemoteClientService.isLoginNameAvailable(params.username, null)
+        render(contentType: "text/json") {
+            loginAvailable = resp.toString()
+        }
     }
 
     def createAccount = { CloudServicesAccountCommand cmd ->
@@ -144,4 +153,60 @@ class SetupCloudServicesController {
             render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
         }
     }
+
+    def selectUsers = {
+        def listParams = [:]
+        listParams.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+        listParams.offset = params.offset ? params.offset.toInteger() : 0
+        listParams.sort = "username"
+        listParams.order = (params.sort == "username") ? params.order : "asc"
+        def localUsers = User.list(listParams)
+
+        def remoteUsers = cloudServicesRemoteClientService.fetchUsers()
+        def userList = []
+
+        localUsers.each() {
+            def user = [:]
+            user.userId = it.id
+            user.username = it.username
+            user.realUsername = it.realUserName
+            user.emailAddress = it.email
+            def remoteUserInfo = null
+            if (remoteUsers[it.username]) {
+                def remoteData = remoteUsers[it.username]
+                remoteUserInfo = "${remoteData.login} | ${remoteData.firstName} ${remoteData.lastName} | ${remoteData.email}"
+            }
+            user.matchingRemoteUser = remoteUserInfo
+            user.selectForMigration = (remoteUserInfo == null && it.username != 'admin')
+            userList << user
+        }
+
+        // sort the user list according to params
+        userList = userList.sort { it."${params.sort}"}
+        if (params.order == "desc") {
+            userList = userList.reverse()
+        }
+        [userList: userList]
+    }
+
+    def createUserLogins = {
+       def userList = []
+       ControllerUtil.getListViewSelectedIds(params).each {
+            User u = User.get(it)
+            userList << u
+       }
+       [userList: userList]
+    }
+
+
+    def migrateUsers = {
+
+        ControllerUtil.getListViewSelectedIds(params).each {
+            User u = User.get(it)
+            cloudServicesRemoteClientService.createUser(u)
+        }
+        flash.info = message(code: 'setupCloudServices.page.migrateUsers.success')
+        forward(action:'selectUsers')
+    }
+
 }

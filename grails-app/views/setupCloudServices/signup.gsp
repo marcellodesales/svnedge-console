@@ -20,6 +20,27 @@
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.signup.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
+  <g:javascript library="application"/>
+
+  <script type="text/javascript">
+
+    var usernameAvailableMessages = {
+        prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
+        checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
+        available: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
+        notAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>'
+    }
+
+    Event.observe(window, 'load', function() {
+      var usernameField = $('username')
+      var usernameMsgElement = $('usernameUniquenessMessage')
+      var checker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
+      Event.observe(usernameField, 'keydown', function(e) {
+        checker.keypressHandler()
+      })
+    })
+
+  </script>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.leftNav.header"/>
@@ -126,7 +147,9 @@
     <input size="40" type="text" id="username" name="username"
            value="${fieldValue(bean: cmd, field: 'username')}"/>
   </td>
-  <td></td>
+  <td>
+    <span id="usernameUniquenessMessage"></span>
+  </td>
 </tr>
 <tr>
   <td></td>
@@ -161,7 +184,7 @@
 <tr>
   <td class="ItemDetailName">
     <label for="passwordConfirm"><g:message
-            code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
+        code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
   </td>
   <td valign="top">
     <input size="40" type="password" id="passwordConfirm" name="passwordConfirm"

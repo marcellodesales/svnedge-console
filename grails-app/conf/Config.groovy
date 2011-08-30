@@ -45,6 +45,7 @@ grails.mime.types = [ html: ['text/html','application/xhtml+xml'],
 grails.views.default.codec="html" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 grails.converters.encoding="UTF-8"
+grails.json.legacy.builder = false
 
 // enabled native2ascii conversion of i18n properties files
 grails.enable.native2ascii = true
@@ -201,7 +202,7 @@ environments {
     }
     production {
         grails.serverURL = "http://www.changeme.com"
-        
+
         svnedge {
             defaultHighPort = 18080
             osName = System.getProperty("os.name").substring(0,3)
@@ -238,7 +239,7 @@ environments {
             svn.confDirPath = svn.dataDirPath + "/conf"
             // in minutes
             svn.parseLogRate = 5
-            
+
             ctfMaster {
                 ssl = false
                 domainName = "cu313.cloud.sp.collab.net"
@@ -247,7 +248,7 @@ environments {
                 port = 80
                 systemId = "exsy1002"
             }
-            
+
             replica {
                 cache {
                     //This is the rate at which a positive cache entry will last in
@@ -297,9 +298,9 @@ environments {
 
         def catalinaBase = System.properties.getProperty('catalina.base')
         if (!catalinaBase) catalinaBase = '.'   // just in case
-         
+
         log4j = {
-            
+
             appenders {
                 //not to log to the regular svnedge.log
                 'null' name:'stacktrace'
