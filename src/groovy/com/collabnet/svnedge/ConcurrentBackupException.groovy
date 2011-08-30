@@ -15,17 +15,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.integration
+package com.collabnet.svnedge
 
 /**
- * Thrown when a project cannot be created as quota is reached
+ * An exception which may be thrown within a service to indicate an invalid input.
  */
-class InvalidNameCloudServicesException extends CloudServicesException {
+class ConcurrentBackupException extends RuntimeException {
+    
+    String field
+    
     /**
-     * Creates a new exception with the given error message.
-     * @param key can be the messages key in the i18n messages.
+     * Creates a ConcurrentBackupException with the given errorKey.
+     * @param errorKey a message resource key
      */
-    public InvalidNameCloudServicesException() {
-        super("cloud.services.invalid.name")
+    public ConcurrentBackupException(String errorKey) {
+        super(errorKey)
     }
 }

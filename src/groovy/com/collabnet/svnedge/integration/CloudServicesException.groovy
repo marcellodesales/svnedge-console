@@ -1,6 +1,6 @@
 /*
  * CollabNet Subversion Edge
- * Copyright (C) 2010, CollabNet Inc. All rights reserved.
+ * Copyright (C) 2011, CollabNet Inc. All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by

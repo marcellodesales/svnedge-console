@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 
 import groovy.io.FileType;
 
+import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
@@ -711,7 +712,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         // data for reporting status to quartz job listeners
         def progressLogFileName = getProgressLogFileName(repo.name)
         def jobDataMap =
-                [id: "repoDump-${repo.name}", repoId: repo.id,
+                [id: (bean.cloud ? "cloudSync-" : "repoDump-") + repo.name, repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description", [repo.name],
                         bean.userLocale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
@@ -719,6 +720,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}" ]
         if (bean.cloud) {
             jobDataMap['urlResult'] = repo.cloudSvnUri
+            jobDataMap['description'] = getMessage("repository.action.cloudSync.job.description", 
+                [repo.name], bean.userLocale)
         }
         // data for generating the dump file
         jobDataMap.putAll(bean.toMap())
@@ -747,7 +750,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @param repo domain object
      * @return dump filename
      */
-    String createDump(DumpBean bean, repo) {
+    String createDump(DumpBean bean, repo) throws ConcurrentBackupException {
         Server server = Server.getServer()
         def cmd = [ConfigUtil.svnadminPath(), "dump"]
         cmd << new File(server.repoParentDir, repo.name).canonicalPath
@@ -770,7 +773,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 
         File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
-            throw new ValidationException("repository.action.createDumpfile.alreadyInProgress")
+            throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
         }
     
         String filename = dumpFilename(bean, repo)

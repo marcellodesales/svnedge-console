@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.admin
 
+import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.console.DumpBean
 
@@ -43,12 +44,17 @@ class RepoDumpJob {
         Repository repo = Repository.get(dataMap.get("repoId"))
         DumpBean dumpBean = DumpBean.fromMap(dataMap)
         if (repo && dumpBean) {
-            if (dumpBean.cloud) {
-                cloudServicesRemoteClientService.synchronizeRepository(repo)
-                log.info("Synchronized cloud backup for " + repo.name)
-            } else {
-                String file = svnRepoService.createDump(dumpBean, repo)
-                log.info("Creating repo dump file: " + file)
+            try {
+                if (dumpBean.cloud) {
+                    cloudServicesRemoteClientService.synchronizeRepository(repo)
+                    log.info("Synchronized cloud backup for " + repo.name)
+                } else {
+                    String file = svnRepoService.createDump(dumpBean, repo)
+                    log.info("Creating repo dump file: " + file)
+                }
+            } catch (ConcurrentBackupException e) {
+                log.info("Backup for repository '" + repo.name + 
+                    "' skipped as an earlier dump/sync is still in progress")
             }
         }
         else {

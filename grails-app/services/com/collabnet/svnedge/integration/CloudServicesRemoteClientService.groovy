@@ -23,6 +23,7 @@ import groovyx.net.http.RESTClient
 import org.apache.http.conn.scheme.Scheme
 import org.apache.http.conn.ssl.SSLSocketFactory
 
+import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.util.*
 import com.collabnet.svnedge.domain.Repository
@@ -211,6 +212,14 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
             def data = resp.data
             log.debug("REST data " + data)
+            
+            // If a project has just been created, then the svn URI should
+            // still be unknown, but if the cloud project was deleted, we might
+            // have a stale reference, so clear it
+            if (repo.cloudSvnUri) {
+                repo.cloudSvnUri = null
+                repo.save()
+            }
 
             return data['responseHeader']['projectId']
         }
@@ -227,7 +236,6 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             } else if (error?.startsWith('Failed to create project')) {
                 throw new QuotaCloudServicesException()
             }
-            // FIXME why doesn't this log anything?
             log.debug("REST data " + data)
             throw new CloudServicesException("Unknown error: " + data.toString())
         }
@@ -363,9 +371,13 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return repo.name
     }
 
-    boolean synchronizeRepository(Repository repo) throws CloudServicesException {
+    boolean synchronizeRepository(Repository repo) 
+        throws CloudServicesException, ConcurrentBackupException {
 
         File progressFile = svnRepoService.prepareProgressLogFile(repo.name)
+        if (progressFile.exists()) {
+            throw new ConcurrentBackupException("repository.action.cloudSync.alreadyInProgress")
+        }
         FileOutputStream fos
         try {
             fos = new FileOutputStream(progressFile)
@@ -508,21 +520,24 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
 
         if (!repo.cloudSvnUri) {
-            // prepare sync
-            write("Initializing cloud repository for sync.", fos)
-            File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
-            def localRepoURI = commandLineService.createSvnFileURI(repoPath)
-            def command = [ConfigUtil.svnsyncPath(), "init", 
-                cloudSvnURI, localRepoURI, "--allow-non-empty",
-                "--trust-server-cert",
-                "--sync-username", username, "--sync-password", password,
-                "--non-interactive", "--no-auth-cache", 
-                "--config-dir", ConfigUtil.svnConfigDirPath()]
-            def result =
-                commandLineService.execute(command, fos, fos, null, null, true)
-            if (result[0] != "0") {
-                log.warn("Unable to svnsync init.  stderr=" + result[2])
-                throw new CloudServicesException("cloud.services.svnsync.init.failure")
+            // prepare sync, the cloud service is not always completely ready
+            // when it indicates that it is, so we'll retry this until success 
+            // or timeout
+            long waitTime = 100
+            long maxWaitTime = 300000
+            // gives about 6 min 45 seconds for service to initialize
+            while (waitTime < maxWaitTime) {
+                Thread.sleep(waitTime)
+                try {
+                    svnsyncInit(repo, cloudSvnURI, username, password, fos)
+                    break
+                } catch (CloudServicesException e) {
+                    write("Cloud service was not ready, trying svnsync init again", fos)
+                    waitTime *= 2
+                }
+            }
+            if (waitTime >= maxWaitTime) {
+                throw new CloudServicesException('cloud.services.svnsync.init.failure')
             }
         }
 
@@ -549,6 +564,24 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
     }
 
+    private void svnsyncInit(repo, cloudSvnURI, username, password, fos) {
+        write("Initializing cloud repository for sync.", fos)
+        File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
+        def localRepoURI = commandLineService.createSvnFileURI(repoPath)
+        def command = [ConfigUtil.svnsyncPath(), "init",
+            cloudSvnURI, localRepoURI, "--allow-non-empty",
+            "--trust-server-cert",
+            "--sync-username", username, "--sync-password", password,
+            "--non-interactive", "--no-auth-cache",
+            "--config-dir", ConfigUtil.svnConfigDirPath()]
+        def result =
+            commandLineService.execute(command, fos, fos, null, null, true)
+        if (result[0] != "0") {
+            log.warn("Unable to svnsync init.  stderr=" + result[2])
+            throw new CloudServicesException("cloud.services.svnsync.init.failure")
+        }
+    }
+    
     private String getCloudSvnURI(repoName, serviceId, restClient) {
         long waitTime = 100
         try {
@@ -562,10 +595,6 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     log.debug("REST data " + data)                    
                     boolean isReady = data['service']['ready']
                     if (isReady) {
-                        // The repository seems to sometimes declare itself
-                        // ready just a bit too soon and is not yet created
-                        // on the file system.
-                        Thread.sleep(1000)
                         return data['service']['access_url']
                     }
                 }
