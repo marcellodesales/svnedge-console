@@ -446,10 +446,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      */
     def createUser(user, login) {
 
-        def restClient = createRestClient()
-        def body = createFullCredentialsMap()
+        def restClient = getAuthenticatedRestClient()
         String[] names = user.realUserName?.split(" ")
-
+        def body = [:]
         if (names && names.length > 0) {
             body.put("firstName", names[0])
         }
