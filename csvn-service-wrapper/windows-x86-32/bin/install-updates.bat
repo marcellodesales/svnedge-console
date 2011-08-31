@@ -40,7 +40,7 @@ goto loop2
 REM exit now if there are no updates
 if not exist "%_REALPATH%..\updates" goto noaction
 echo "Copying contents of updates folder" >> "%_LOG%"
-xcopy /S/E/R/Y/C "%_REALPATH%..\updates" "%_REALPATH%..\"  >> "%_LOG%"
+xcopy /S/E/R/Y/C "%_REALPATH%..\updates" "%_REALPATH%..\"  >> "%_LOG%" 2>&1
 goto cleanup
 
 :noaction
