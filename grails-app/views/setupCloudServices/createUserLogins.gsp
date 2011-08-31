@@ -100,6 +100,7 @@
               <td>${user.realUserName}</td>
               <td>${user.email}</td>
               <td>
+                <g:listViewSelectItem item="${user}" hidden="true"/>
                 <input size="40" type="text" id="username_${user.id}" name="username_${user.id}"
                        value="${fieldValue(bean: user, field: 'username')}"
                        class="CheckForLoginUniqueness"/>

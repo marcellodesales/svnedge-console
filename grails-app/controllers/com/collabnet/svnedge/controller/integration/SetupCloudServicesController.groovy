@@ -184,8 +184,8 @@ class SetupCloudServicesController {
                 user.realUsername = it.realUserName
                 user.emailAddress = it.email
                 def remoteUserInfo = null
-                if (remoteUsers[it.username]) {
-                    def remoteData = remoteUsers[it.username]
+                def remoteData = remoteUsers.find { remoteItem -> remoteItem.login == it.username || remoteItem.email == it.email}
+                if (remoteData) {
                     remoteUserInfo = "${remoteData.login} | ${remoteData.firstName} ${remoteData.lastName} | ${remoteData.email}"
                 }
                 user.matchingRemoteUser = remoteUserInfo
@@ -214,14 +214,19 @@ class SetupCloudServicesController {
         [userList: userList]
     }
 
-
     def migrateUsers = {
-
+        boolean success = true
         ControllerUtil.getListViewSelectedIds(params).each {
             User u = User.get(it)
-            cloudServicesRemoteClientService.createUser(u)
+            def loginName = params."username_${it}"
+            success &= cloudServicesRemoteClientService.createUser(u, loginName)
         }
-        flash.info = message(code: 'setupCloudServices.page.migrateUsers.success')
+        if (success) {
+            flash.message = message(code: 'setupCloudServices.page.migrateUsers.success')
+        }
+        else {
+            flash.error = message(code: 'setupCloudServices.page.migrateUsers.failure')
+        }
         forward(action: 'selectUsers')
     }
 

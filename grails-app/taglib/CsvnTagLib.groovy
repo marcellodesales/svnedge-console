@@ -107,17 +107,26 @@ class CsvnTagLib {
     /**
      * this tag will output the check box for a list view item row
      * @attr item REQUIRED the item whose "id" attribute will be used for naming this field
+     * @attr property OPTIONAL the item field to use in the element name (default: item.id)
+     * @attr hidden OPTIONAL if true, this will be a hidden field instead of checkbox
+     * @attr disabled OPTIONAL if true and not hidden, this checkbox will be disabled
+     * @attr selected OPTIONAL if true and not hidden, this checkbox will be preselected
      * @return the item row checkbox
      */
     def listViewSelectItem = { attrs ->
         def prop = attrs.property ?: "id"
         def name = "listViewItem_${attrs.item[prop]}"
-        out << "<input type='checkbox' class='listViewSelectItem' id='${name}' name='${name}'"
-        if (attrs.disabled) {
-            out << " disabled"
+        if (attrs.hidden) {
+           out << "<input type='hidden' class='listViewSelectItem' id='${name}' name='${name}' value='on'"
         }
-        if (attrs.selected) {
-            out << " checked"
+        else {
+            out << "<input type='checkbox' class='listViewSelectItem' id='${name}' name='${name}'"
+            if (attrs.disabled) {
+                out << " disabled"
+            }
+            if (attrs.selected) {
+                out << " checked"
+            }
         }
         out << "/>"
     }

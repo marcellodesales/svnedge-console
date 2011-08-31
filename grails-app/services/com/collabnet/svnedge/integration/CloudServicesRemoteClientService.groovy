@@ -415,17 +415,14 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
     }
 
-    def fetchUsers()  throws CloudServicesException {
+    def fetchUsers() throws CloudServicesException {
         def restClient = getAuthenticatedRestClient()
-        def userData = [:]
         try {
             def resp = restClient.get(path: "users.json",
                                       requestContentType: URLENC)
 
-            // return the users as map of json data keyed by username
-            resp.responseData.each {
-                userData.put (it.login, it)
-            }
+            // return the user data as JSON object
+            return resp.responseData
         }
         catch (Exception e) {
             if (e.message != "Unauthorized") {
@@ -435,15 +432,16 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 log.error("Credentials not accepted")
             }
         }
-        return userData
+        return null
     }
     
     /**
      * creates a cloud services user from the given input
      * @param user the User or map of user properties
+     * @param login the cloud login name to use (if null, user.username is tried)
      * @return boolean indicating success or failure
      */
-    def createUser(user) {
+    def createUser(user, login) {
 
         def restClient = createRestClient()
         def body = createFullCredentialsMap()
@@ -455,7 +453,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         if (names && names.length > 1) {
             body.put("lastName", names[names.length - 1])
         }
-        body.put("login", user.username)
+        body.put("login", (login) ?: user.username)
         body.put("preferredName", user.realUserName)
         body.put("email", user.email)
 
@@ -468,10 +466,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return resp.status == 201
         }
         catch (Exception e) {
-            log.warn("Unable to get svn service URI for repository: " + repoName, e)
-            throw e
+            String error = e.response.responseData.error
+            log.error("Unable to create Cloud account: ${e.message} - ${error}", e)
         }
-        return null
+        return false
     }
 
 
