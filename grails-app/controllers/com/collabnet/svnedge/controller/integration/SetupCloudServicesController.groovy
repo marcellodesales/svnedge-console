@@ -176,7 +176,7 @@ class SetupCloudServicesController {
 
         def userList = []
         try {
-            def remoteUsers = cloudServicesRemoteClientService.fetchUsers()
+            def remoteUsers = cloudServicesRemoteClientService.listUsers()
             localUsers.each() {
                 def user = [:]
                 user.userId = it.id

@@ -415,7 +415,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
     }
 
-    def fetchUsers() throws CloudServicesException {
+    /**
+     * Lists user accounts within the configured domain.
+     */
+    def listUsers() throws CloudServicesException {
         def restClient = getAuthenticatedRestClient()
         try {
             def resp = restClient.get(path: "users.json",
