@@ -423,7 +423,7 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
-    def bkupScheduleMultiple = {
+    def bkupScheduleMultiple = { DumpBean cmd ->
 
         def model = [:]
         def repoBackupJobList = []
@@ -458,7 +458,7 @@ class RepoController {
             repoBackupJobList = repoBackupJobList.reverse()
         }
         // add to model
-        model["dump"] = new DumpBean()
+        model["dump"] = cmd
         model["repoBackupJobList"] = repoBackupJobList
         model['cloudRegistrationRequired'] = CloudServicesConfiguration.getCurrentConfig() == null
         return model

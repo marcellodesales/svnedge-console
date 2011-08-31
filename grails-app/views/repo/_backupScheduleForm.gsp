@@ -29,9 +29,9 @@
         </td>
         <td valign="top" class="value ItemDetailValue">
          <select id="type" name="type">
-         <option value="dump" <g:if test="${params.type != 'none' && !dump.deltas && !dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
-         <option value="dump_delta" <g:if test="${dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
-         <option value="cloud" <g:if test="${dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
+         <option value="dump" <g:if test="${params.type == 'dump' || (params.type != 'none' && !dump.deltas && !dump.cloud)}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
+         <option value="dump_delta" <g:if test="${params.type == 'dump_delta' || dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
+         <option value="cloud" <g:if test="${params.type == 'cloud' || dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
          <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
        <g:if test="${cloudRegistrationRequired}">
