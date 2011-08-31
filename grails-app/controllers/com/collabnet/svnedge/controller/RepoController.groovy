@@ -309,33 +309,33 @@ class RepoController {
         def type = params.type
         try {
             def projects = cloudServicesRemoteClientService.listProjects()
-        repoIdList.each {
-            Repository repo = Repository.get(it)
-            if (!repo) {
-                flash.error = message(code: 'repository.action.not.found',
-                                      args: [params.id])
-                redirect(action: list)
-                return
-            }
-
-            if (type == "cloud") {
-                if (!CloudServicesConfiguration.getCurrentConfig()) {
-                    flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
-                    redirect(controller: 'setupCloudServices', action:'index')
+            repoIdList.each {
+                Repository repo = Repository.get(it)
+                if (!repo) {
+                    flash.error = message(code: 'repository.action.not.found',
+                            args: [params.id])
+                    redirect(action: list)
                     return
                 }
-
-                if (confirmCloudProject(repo, projects)) {
-                    cmd.cloud = true
+                
+                if (type == "cloud") {
+                    if (!CloudServicesConfiguration.getCurrentConfig()) {
+                        flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
+                        redirect(controller: 'setupCloudServices', action:'index')
+                        return
+                    }
+                    
+                    if (confirmCloudProject(repo, projects)) {
+                        cmd.cloud = true
+                        scheduleBackup(cmd, repo, type)
+                    } 
+                } else if (type == "none") {
+                    svnRepoService.clearScheduledDumps(repo)
+                    flash.message = message(code: 'repository.action.updateBkupSchedule.none')
+                } else {
                     scheduleBackup(cmd, repo, type)
-                } 
-            } else if (type == "none") {
-                svnRepoService.clearScheduledDumps(repo)
-                flash.message = message(code: 'repository.action.updateBkupSchedule.none')
-            } else {
-                scheduleBackup(cmd, repo, type)
+                }
             }
-        }
         } catch (QuotaCloudServicesException quota) {
             flash.error = message(code: 'repository.action.bkupSchedule.cloud.quota.met')
         } catch (AuthenticationCloudServicesException auth) {
