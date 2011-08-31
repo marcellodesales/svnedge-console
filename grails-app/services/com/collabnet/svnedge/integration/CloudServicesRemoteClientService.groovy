@@ -74,17 +74,16 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      * @param domain in which to search availability (optional -- global search if none provided)
      * @return boolean indicating availability
      */
-    def isLoginNameAvailable(String loginName, String domain) {
+    def isLoginNameAvailable(String loginName, String domain) throws CloudServicesException {
 
-        def restClient = createRestClient()
-        def query = createApiCredentialsMap()
-        query.put("login", loginName)
+        def restClient = getAuthenticatedRestClient()
+        def params = [login: loginName]
         if (domain) {
-            query.put("domain", domain)
+            params["domain"] = domain
         }
         try {
             def resp = restClient.get(path: "organizations/isLoginUnique.json",
-                    query: query,
+                    query: params,
                     requestContentType: URLENC)
 
             return Boolean.valueOf(resp.responseData["loginIsUnique"])
@@ -160,14 +159,11 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     * Lists projects within the configured domain.
     */
    def listProjects(RESTClient restClient = null) throws CloudServicesException {
-       def body = [:]
        if (!restClient) {
-           restClient = createRestClient()
-           body = createFullCredentialsMap()
+           restClient = getAuthenticatedRestClient()
        }
        try {
            def resp = restClient.get(path: "projects.json",
-               query: body,
                requestContentType: URLENC)
 
            if (resp.status != 200) {
@@ -246,7 +242,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return null
     }
 
-    def retrieveProjectMap(repo, restClient = null) {
+    def retrieveProjectMap(repo, restClient = null) throws CloudServicesException {
         if (!restClient) {
             restClient = getAuthenticatedRestClient()
         }
@@ -265,7 +261,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      * @param projectId
      * @return true if the deletion was successful
      */
-    boolean deleteProject(projectId) {
+    boolean deleteProject(projectId) throws CloudServicesException {
         def restClient = getAuthenticatedRestClient()
         try {
             resp = restClient.delete(path: "projects/" + projectId + ".json")
@@ -291,10 +287,12 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
             // will be 401 if login fails
             if (resp.status != 200) {
-                throw new CloudServicesException("authentication.failure.using.stored.credentials")
+                throw new AuthenticationCloudServicesException()
             }
         } catch (Exception e) {
-            if (e.message != "Unauthorized") {
+            if (e.message == "Unauthorized") {
+                throw new AuthenticationCloudServicesException()
+            } else {
                 log.warn("Unexpected exception while attempting login", e)
                 throw e
             }
@@ -394,14 +392,12 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
     }
 
-    def fetchUsers() {
-        def restClient = createRestClient()
-        def params = createFullCredentialsMap()
+    def fetchUsers()  throws CloudServicesException {
+        def restClient = getAuthenticatedRestClient()
         def userData = [:]
         try {
             def resp = restClient.get(path: "users.json",
-                    query: params,
-                    requestContentType: URLENC)
+                                      requestContentType: URLENC)
 
             // return the users as map of json data keyed by username
             resp.responseData.each {
@@ -460,7 +456,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         os.write((s + "\n").getBytes("UTF-8"))
     }
 
-    private boolean synchronizeRepositoryWithProgress(repo, fos) {
+    private boolean synchronizeRepositoryWithProgress(repo, fos) 
+            throws CloudServicesException {
         // confirm that the project exists
         String projectId = null
         def projectName = null

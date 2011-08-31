@@ -20,6 +20,7 @@ package com.collabnet.svnedge.controller.integration
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
 import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
 import com.collabnet.svnedge.util.ControllerUtil
 
 class CloudServicesAccountCommand {
@@ -173,29 +174,33 @@ class SetupCloudServicesController {
         listParams.order = (params.sort == "username") ? params.order : "asc"
         def localUsers = User.list(listParams)
 
-        def remoteUsers = cloudServicesRemoteClientService.fetchUsers()
         def userList = []
-
-        localUsers.each() {
-            def user = [:]
-            user.userId = it.id
-            user.username = it.username
-            user.realUsername = it.realUserName
-            user.emailAddress = it.email
-            def remoteUserInfo = null
-            if (remoteUsers[it.username]) {
-                def remoteData = remoteUsers[it.username]
-                remoteUserInfo = "${remoteData.login} | ${remoteData.firstName} ${remoteData.lastName} | ${remoteData.email}"
+        try {
+            def remoteUsers = cloudServicesRemoteClientService.fetchUsers()
+            localUsers.each() {
+                def user = [:]
+                user.userId = it.id
+                user.username = it.username
+                user.realUsername = it.realUserName
+                user.emailAddress = it.email
+                def remoteUserInfo = null
+                if (remoteUsers[it.username]) {
+                    def remoteData = remoteUsers[it.username]
+                    remoteUserInfo = "${remoteData.login} | ${remoteData.firstName} ${remoteData.lastName} | ${remoteData.email}"
+                }
+                user.matchingRemoteUser = remoteUserInfo
+                user.selectForMigration = (remoteUserInfo == null && it.username != 'admin')
+                userList << user
             }
-            user.matchingRemoteUser = remoteUserInfo
-            user.selectForMigration = (remoteUserInfo == null && it.username != 'admin')
-            userList << user
-        }
-
-        // sort the user list according to params
-        userList = userList.sort { it."${params.sort}"}
-        if (params.order == "desc") {
-            userList = userList.reverse()
+    
+            // sort the user list according to params
+            userList = userList.sort { it."${params.sort}"}
+            if (params.order == "desc") {
+                userList = userList.reverse()
+            }
+        } catch (AuthenticationCloudServicesException auth) {
+            flash.unfiltered_error = message(code: auth.message, args: [0])
+            redirect(action: 'credentials')
         }
         [userList: userList]
     }

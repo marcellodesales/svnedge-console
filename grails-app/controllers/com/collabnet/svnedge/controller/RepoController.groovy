@@ -26,6 +26,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
 import com.collabnet.svnedge.integration.InvalidNameCloudServicesException;
 import com.collabnet.svnedge.integration.QuotaCloudServicesException;
 
@@ -307,6 +308,7 @@ class RepoController {
         def repoIdList = (params.id) ? [params.id] : getListViewSelectedIds(params)
         def type = params.type
         try {
+            def projects = cloudServicesRemoteClientService.listProjects()
         repoIdList.each {
             Repository repo = Repository.get(it)
             if (!repo) {
@@ -323,7 +325,7 @@ class RepoController {
                     return
                 }
 
-                if (confirmCloudProject(repo)) {
+                if (confirmCloudProject(repo, projects)) {
                     cmd.cloud = true
                     scheduleBackup(cmd, repo, type)
                 } 
@@ -336,6 +338,9 @@ class RepoController {
         }
         } catch (QuotaCloudServicesException quota) {
             flash.error = message(code: 'repository.action.bkupSchedule.cloud.quota.met')
+        } catch (AuthenticationCloudServicesException auth) {
+            flash.unfiltered_error = message(code: auth.message, 
+                args: [1, createLink(controller: 'setupCloudServices', action: 'index')])
         }
 
         // redirect based on origin (single repo or multiple-repo backup)
@@ -354,14 +359,14 @@ class RepoController {
         }
     }
 
-    private boolean confirmCloudProject(repo) throws QuotaCloudServicesException {
-        def projects = cloudServicesRemoteClientService.listProjects()
+    private boolean confirmCloudProject(repo, projects) throws QuotaCloudServicesException {
         def cloudName = params["cloudName${repo.id}"]
         if (cloudName) {
             for (def p : projects) {
                 if (p['shortName'] == cloudName) {
-                    flash.error = "There is already a project with the name " +
-                        cloudName
+                    flash.error = message(code: 
+                        "repository.action.bkupSchedule.cloud.existing.project", 
+                        args: [cloudName])
                     return false
                 }
             }
