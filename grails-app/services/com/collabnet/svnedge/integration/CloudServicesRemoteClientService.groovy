@@ -41,7 +41,13 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     def commandLineService
     def securityService
     def svnRepoService
-
+    
+    private static final long CACHED_CLIENT_TIME_LIMIT = 300L
+    private static final long CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT = 60L
+    private long mLastAccessTimestamp = 0L
+    private long mCreatedTimestamp = 0L
+    private RESTClient mAuthenticatedRestClient
+    
     /**
      * validates the provided credentials
      * @param username
@@ -76,8 +82,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      */
     def isLoginNameAvailable(String loginName, String domain) throws CloudServicesException {
 
-        def restClient = getAuthenticatedRestClient()
-        def params = [login: loginName]
+        def restClient = createRestClient()
+        def params = createApiCredentialsMap()
+        params["login"] = loginName        
         if (domain) {
             params["domain"] = domain
         }
@@ -277,7 +284,21 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return false
     }
 
-    private RESTClient getAuthenticatedRestClient() throws CloudServicesException {
+    private synchronized RESTClient getAuthenticatedRestClient() 
+            throws CloudServicesException {
+        long now = System.currentTimeMillis()
+        if (mAuthenticatedRestClient) {
+            if (now - mLastAccessTimestamp < CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT * 1000 &&
+                now - mCreatedTimestamp < CACHED_CLIENT_TIME_LIMIT * 1000) {
+                 mLastAccessTimestamp = now
+                 log.debug("Using cached RESTClient")
+                 return mAuthenticatedRestClient    
+            } else {
+                mAuthenticatedRestClient = null
+            }
+        }
+        
+        log.debug("Creating new authenticated RESTClient")
         RESTClient restClient = createRestClient()
         def body = createFullCredentialsMap()
         try {
@@ -297,6 +318,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 throw e
             }
         }
+        mAuthenticatedRestClient = restClient
+        mCreatedTimestamp = mLastAccessTimestamp = now
         return restClient
     }
 
