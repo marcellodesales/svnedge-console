@@ -91,7 +91,9 @@ class SetupCloudServicesController {
         }
         // else, check remote availability
         else {
-            loginAvailable = cloudServicesRemoteClientService.isLoginNameAvailable(cmd.username, null)
+            CloudServicesConfiguration cloudConf = CloudServicesConfiguration.getCurrentConfig()
+            String domain = (cloudConf?.domain) ?: null
+            loginAvailable = cloudServicesRemoteClientService.isLoginNameAvailable(cmd.username, domain)
         }
 
         render(contentType: "text/json") {
