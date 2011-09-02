@@ -430,12 +430,10 @@ class RepoController {
         def model = [:]
         def repoBackupJobList = []
 
-        // fetch list of repositories using request params to page, then add backup trigger info
+        // fetch list of repositories using request params to sort if possible, then add backup trigger info
         def listParams = [:]
-        listParams.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
-        listParams.offset = params.offset ? params.offset.toInteger() : 0
-        listParams.sort = "name"
-        listParams.order = (params.sort == "repoName") ? params.order : "asc"
+        listParams.sort = (params.sort == "repoName") ? "name" : null
+        listParams.order = (params.sort == "repoName") ? params.order : null
         Repository.list(listParams).each {
             def job = [:]
             job.repoId = it.id
@@ -454,11 +452,14 @@ class RepoController {
             repoBackupJobList << job
         }
 
-        // sort the resulting job list according to params
-        repoBackupJobList = repoBackupJobList.sort { it."${params.sort}"}
-        if (params.order == "desc") {
-            repoBackupJobList = repoBackupJobList.reverse()
+        // sort the resulting job Collection according to params if needed
+        if (params.sort != "repoName") {
+            repoBackupJobList = repoBackupJobList.sort { it."${params.sort}"}
+            if (params.order == "desc") {
+                repoBackupJobList = repoBackupJobList.reverse()
+            }
         }
+
         // add to model
         model["dump"] = cmd
         model["repoBackupJobList"] = repoBackupJobList
