@@ -31,6 +31,7 @@
          <select id="type" name="type">
          <option value="dump" <g:if test="${params.type == 'dump' || (params.type != 'none' && !dump.deltas && !dump.cloud)}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
          <option value="dump_delta" <g:if test="${params.type == 'dump_delta' || dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
+         <option value="hotcopy" <g:if test="${params.type == 'hotcopy' || dump.hotcopy}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.hotcopy" /></option>
          <option value="cloud" <g:if test="${params.type == 'cloud' || dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
          <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
@@ -194,7 +195,8 @@
 <g:javascript>
   function typeHandler() {
       var typeSelect = $('type');
-      if (typeSelect.value == 'dump' || typeSelect.value == 'dump_delta') {
+      if (typeSelect.value == 'dump' || typeSelect.value == 'dump_delta' ||
+              typeSelect.value == 'hotcopy') {
           $('whenRow').style.display = '';
           $('keepRow').style.display = '';
           if ($('cloudRegister')) {

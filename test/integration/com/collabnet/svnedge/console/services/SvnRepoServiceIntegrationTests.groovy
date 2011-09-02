@@ -20,6 +20,7 @@ package com.collabnet.svnedge.console.services
 import grails.test.GrailsUnitTestCase
 import com.collabnet.svnedge.console.CommandLineService 
 import com.collabnet.svnedge.console.LifecycleService 
+import com.collabnet.svnedge.console.OperatingSystemService 
 import com.collabnet.svnedge.console.SvnRepoService
 import com.collabnet.svnedge.console.DumpBean 
 import com.collabnet.svnedge.domain.Repository 
@@ -30,6 +31,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     SvnRepoService svnRepoService
     CommandLineService commandLineService
+    OperatingSystemService operatingSystemService
     LifecycleService lifecycleService
     def repoParentDir
     boolean initialStarted
@@ -178,7 +180,63 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
     private File newDumpFile(filename, repo) {
         return new File(new File(Server.getServer().dumpDir, repo.name), filename)
     }
-    
+
+    public void testHotcopy() {
+        def testRepoName = "dump-test"
+        Repository repo = new Repository(name: testRepoName)
+        assertEquals "Failed to create repository.", 0,
+            svnRepoService.createRepository(repo, true)
+            
+        if (!operatingSystemService.isWindows()) {
+            File hookScript = new File(svnRepoService.getRepositoryHomePath(repo), 
+                                       "hooks/pre-commit.tmpl")
+            hookScript.setExecutable(true)
+        }
+        
+        // Earlier checkin was not deleting this file, so make sure it is
+        // gone before testing
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        File progressLogFile =
+                new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        if (progressLogFile.exists()) {
+            progressLogFile.delete()
+        }
+        
+        DumpBean params = new DumpBean()
+        def filename = svnRepoService.createHotcopy(params, repo)
+        File dumpFile = newDumpFile(filename, repo)
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+
+        if (!operatingSystemService.isWindows()) {
+            // not sure how to test a native zip extraction on windows
+
+            File extractDir = createTestDir("hotcopy")
+            def exitStatus = commandLineService.executeWithStatus(
+                    "unzip", dumpFile.canonicalPath, "-d", extractDir.canonicalPath)
+            assertEquals "Unable to extract archive", 0, exitStatus
+            
+            File copiedHookScript = new File(extractDir, "hooks/pre-commit.tmpl")
+            assertTrue "pre-commit.tmpl does not exist", copiedHookScript.exists()
+            if (!operatingSystemService.isWindows()) {
+                assertTrue "pre-commit.tmpl should be executable", 
+                        copiedHookScript.canExecute()
+            }
+            def contents = ['conf', 'db', 'format', 'hooks', 'locks', 'README.txt']
+            int i = 0
+            extractDir.eachFile { f ->
+                assertTrue "Found unexpected file/dir: " + f.name, 
+                        contents.contains(f.name)
+                i++
+            }
+            assertEquals "Number of files/directories did not match", 
+                    contents.size(), i
+
+            extractDir.deleteDir()        
+        }
+                
+        dumpFile.delete()
+    }
+
       private File createTestDir(String prefix) {
         def testDir = File.createTempFile(prefix + "-test", null)
         log.info("testDir = " + testDir.getCanonicalPath())

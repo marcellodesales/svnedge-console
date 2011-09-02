@@ -48,6 +48,9 @@ class RepoDumpJob {
                 if (dumpBean.cloud) {
                     cloudServicesRemoteClientService.synchronizeRepository(repo)
                     log.info("Synchronized cloud backup for " + repo.name)
+                } else if (dumpBean.hotcopy) {
+                    String file = svnRepoService.createHotcopy(dumpBean, repo)
+                    log.info("Creating repo hotcopy file: " + file)
                 } else {
                     String file = svnRepoService.createDump(dumpBean, repo)
                     log.info("Creating repo dump file: " + file)

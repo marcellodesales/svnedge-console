@@ -17,11 +17,12 @@
  */
 package com.collabnet.svnedge.console
 
-import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import org.hyperic.sigar.FileInfo
 
 import groovy.io.FileType;
 
@@ -286,9 +287,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return revision number.
      */
     def findHeadRev(Repository repo) {
-        def repoPath = this.getRepositoryHomePath(repo)
-
-        def f = new File(new File(repoPath, "db/current").canonicalPath)
+        return findHeadRev(this.getRepositoryHomePath(repo))
+    }
+    
+    private findHeadRev(String repoPath) {
+        def f = new File(repoPath, "db/current")
         if (!f.exists()) {
             log.warn("Missing $repoPath/db/current file...")
             return 0
@@ -360,8 +363,15 @@ class SvnRepoService extends AbstractSvnEdgeService {
     */
    def verifyRepository(Repository repo) {
        def repoPath = this.getRepositoryHomePath(repo)
-       def exitStatus = commandLineService.executeWithStatus(
-           ConfigUtil.svnadminPath(), "verify", repoPath)
+       return verifyRepository(repoPath)
+   }
+
+   private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
+       def exitStatus = (progress == null) ? 
+           commandLineService.executeWithStatus(
+               ConfigUtil.svnadminPath(), "verify", repoPath) :
+           commandLineService.execute([ConfigUtil.svnadminPath(), 
+               "verify", repoPath], progress, progress)[0] as Integer
        return (exitStatus == 0)
    }
 
@@ -822,7 +832,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
-                cleanupOldBackups(bean, finalDumpFile)
+                cleanupOldBackups(bean, repo)
             }
 
         } else {
@@ -834,7 +844,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     out.close()
                 }
                 finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
-                cleanupOldBackups(bean, repo, finalDumpFile)
+                cleanupOldBackups(bean, repo)
             }
         }
         return filename
@@ -874,7 +884,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         progressLogFile.delete()
     }
     
-    private cleanupOldBackups(dumpBean, repo, finalDumpFile) {
+    private cleanupOldBackups(dumpBean, repo) {
         int numToKeep = dumpBean.numberToKeep
         if (dumpBean.backup && numToKeep > 0) {
             def dumps = listDumpFiles(repo, "date", DESCENDING)
@@ -901,7 +911,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         SchedulerBean sched = bean.schedule
         String ts = ""
         ts += (sched.year < 1) ? cal.get(Calendar.YEAR) : sched.year
-        ts += pad((sched.month < 1) ? cal.get(Calendar.MONTH) : sched.month)
+        ts += pad((sched.month < 1) ? cal.get(Calendar.MONTH) + 1 : sched.month)
         ts += pad((sched.dayOfMonth < 1) ? 
             cal.get(Calendar.DAY_OF_MONTH) : sched.dayOfMonth)
         ts += pad((sched.hour < 0) ? cal.get(Calendar.HOUR_OF_DAY) : sched.hour)
@@ -921,6 +931,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         def zip = bean.compress ? ".zip" : ""
         def prefix = bean.backup ? repo.name + "-bkup" : repo.name
+        if (bean.hotcopy) {
+            prefix += "-hotcopy"
+        }
         return prefix + range + options + "-" + ts + ".dump" + zip
     }
     
@@ -955,5 +968,139 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
         }
 
+    }
+    
+    /**
+    * Method to invoke "svnadmin hotcopy", verify the result, and create
+    * an archive suitable for back up.
+    *
+    * @param bean dump options
+    * @param repo domain object
+    * @return archive filename
+    */
+    String createHotcopy(DumpBean bean, repo) throws ConcurrentBackupException {
+        bean.hotcopy = true
+        bean.compress = true
+        Server server = Server.getServer()
+        File repoDir = new File(server.repoParentDir, repo.name)
+        File dumpDir = new File(server.dumpDir, repo.name)
+        if (!dumpDir.exists()) {
+            dumpDir.mkdirs()
+        }
+        File tmpDir = new File(dumpDir, "hotcopy")
+        
+        File progressLogFile = prepareProgressLogFile(repo.name)
+        if (progressLogFile.exists()) {
+            throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
+        }
+
+        def cmd = [ConfigUtil.svnadminPath(), "hotcopy", 
+            repoDir.canonicalPath, tmpDir.canonicalPath]
+        FileOutputStream progress = null
+        String filename = null
+        try {
+            progress = new FileOutputStream(progressLogFile)
+            def result = commandLineService.execute(cmd, progress, progress)
+            boolean isVerified = false
+            if (result[0] == "0") {
+                progress << "Verifying hotcopy...\n"
+                isVerified = verifyRepositoryPath(tmpDir.canonicalPath, progress)
+                progress << "Hotcopy verification finished.\n"
+            }
+            if (isVerified) {
+                bean.revisionRange = "0:" + findHeadRev(tmpDir.canonicalPath)
+                filename = dumpFilename(bean, repo)
+                File finalZipFile = new File(dumpDir, filename)
+                File tempZipFile = new File(dumpDir, 
+                    filename.substring(0, filename.length() - 4) + "-processing.zip")        
+                progress << "Compressing hotcopy into archive file...\n"
+                archiveDirectory(tmpDir, tempZipFile, progress)
+                progress << "Finished archival.\nMoving archive to final location.\n"
+                if (!tempZipFile.renameTo(finalZipFile)) {
+                    log.warn("Rename of file " + tempZipFile?.name + " to " +
+                        finalZipFile?.name + " failed.")
+                }
+            } else {
+                progress << "Verification failed.\n"
+                log.warn("Hotcopy of ${repo.name} repository failed to verify")
+            }
+        } finally {
+            progress?.close()
+            progressLogFile.delete()
+            tmpDir.deleteDir()
+        }
+        cleanupOldBackups(bean, repo)
+        return filename
+    }
+   
+    protected void archiveDirectory(File directory, File zipFile, OutputStream progress = null) {
+        if (zipFile.parentFile.equals(directory)) {
+            throw new IllegalArgumentException(
+            "Archive should not be written into the directory being archived")
+        }
+        if (!directory.isDirectory()) {
+            throw new IllegalArgumentException("directory argument was not a directory")
+        }
+        boolean storePermissions = !operatingSystemService.isWindows()
+        
+        ZipArchiveOutputStream zos = null
+        try {
+            zos = new ZipArchiveOutputStream(zipFile)
+            recursiveArchiveDirectory(directory.canonicalPath.length() + 1, 
+                directory, zos, storePermissions, progress)
+        } finally {
+            zos?.close()
+        }        
+    }
+
+    private void recursiveArchiveDirectory(int topLevelPathLength, File directory, 
+            ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress) {
+        directory.eachFile { f ->
+            String fullPath = f.canonicalPath
+            String relativePath = fullPath
+                .substring(topLevelPathLength, fullPath.length())
+            if (f.isDirectory()) {
+                relativePath += "/"
+            }
+            if (progress) {
+                progress << relativePath + "\n"
+            }
+            ZipArchiveEntry ze = new ZipArchiveEntry(f, relativePath)
+            if (storePermissions) {
+                int perms = 0444
+                try {
+                    FileInfo fi = operatingSystemService.getSigar().getFileInfo(fullPath)
+                    log.debug(relativePath + " permString=" + fi.permissionsString + 
+                        " asInt=" + fi.mode)
+                    perms = Integer.parseInt(fi.mode.toString(), 8)
+                } catch (IllegalStateException e) {
+                    log.info("Sigar library not loaded, setting hotcopy file " +
+                        "permissions for owner only with group and other as defaults")
+                    if (f.isFile()) {
+                        perms = 0444
+                        if (f.canWrite() && f.canExecute()) {
+                            perms = 0744
+                        } else if (f.canWrite()) {
+                            perms = 0644
+                        } else if (f.canExecute()) {
+                            perms = 0544
+                        }
+                    } else {
+                        perms = 0755
+                    }
+                }
+                ze.setUnixMode(perms)
+            }
+            zos.putArchiveEntry(ze)
+            if (f.isFile()) {
+                f.withInputStream { zos << it }
+            }
+            zos.closeArchiveEntry()
+     
+            if (f.isDirectory()) {
+                recursiveArchiveDirectory(topLevelPathLength, f, zos, 
+                    storePermissions, progress)
+            } 
+        }
     }
 }

@@ -308,7 +308,8 @@ class RepoController {
         def repoIdList = (params.id) ? [params.id] : getListViewSelectedIds(params)
         def type = params.type
         try {
-            def projects = cloudServicesRemoteClientService.listProjects()
+            def projects = (type == "cloud") ?
+                cloudServicesRemoteClientService.listProjects() : null
             repoIdList.each {
                 Repository repo = Repository.get(it)
                 if (!repo) {
@@ -399,6 +400,7 @@ class RepoController {
     private void scheduleBackup(DumpBean cmd, Repository repo, def type) {
         try {
             cmd.userLocale = request.locale
+            cmd.hotcopy = (type == 'hotcopy')
             cmd.deltas = (type == 'dump_delta')
             cmd.backup = true
             if (cmd.hasErrors()) {

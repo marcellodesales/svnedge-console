@@ -39,6 +39,7 @@ public class DumpBean {
     SchedulerBean schedule = new SchedulerBean()
     boolean backup
     Boolean cloud
+    Boolean hotcopy
 
     // list of fieldnames to facilitate conversion to/from a JobDataMap for use
     // in Quartz scheduling
@@ -57,6 +58,7 @@ public class DumpBean {
         "numberToKeep",
         "backup",
         "cloud",
+        "hotcopy",
         "userLocale"
     ]
 
