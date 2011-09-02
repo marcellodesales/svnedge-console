@@ -167,10 +167,12 @@ class SetupCloudServicesController {
     }
 
     def selectUsers = {
-        if (!params.sort) {
-            params.sort = "username"
+        def listParams = new HashMap(params)
+        if (!params.sort || params.sort == "matchingRemoteUser") {
+            listParams.sort = "username"
         }
-        def localUsers = User.list(params)
+
+        def localUsers = User.list(listParams)
         def userList = []
         try {
             def remoteUsers = cloudServicesRemoteClientService.listUsers()
@@ -189,11 +191,19 @@ class SetupCloudServicesController {
                 user.selectForMigration = (remoteUserInfo == null && it.username != 'admin')
                 userList << user
             }
+
+            // sort the user list if needed
+            if (params.sort == "matchingRemoteUser") {
+                userList = userList.sort { it."${params.sort}"}
+                if (params.order == "desc") {
+                    userList = userList.reverse()
+                }
+            }
         } catch (AuthenticationCloudServicesException auth) {
             flash.unfiltered_error = message(code: auth.message, args: [0])
             redirect(action: 'credentials')
         }
-        [userList: userList, userListTotal: User.count()]
+        [userList: userList]
     }
 
     def createUserLogins = {

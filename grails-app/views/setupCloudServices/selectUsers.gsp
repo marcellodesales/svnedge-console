@@ -40,7 +40,7 @@
 <g:form>
   <table class="ItemDetailContainer">
     <tr>
-      <td class="ContainerBodyWithPaddedBorder" colspan="2">
+      <td class="ContainerBodyWithPaddedBorder">
         <p>
           <g:message code="setupCloudServices.page.selectUsers.p1"/>
         </p>
@@ -52,7 +52,8 @@
                               defaultOrder="asc"/>
             <g:sortableColumn property="realUserName" titleKey="setupCloudServices.page.selectUsers.realUsername"/>
             <g:sortableColumn property="email" titleKey="setupCloudServices.page.selectUsers.emailAddress"/>
-            <th><g:message code="setupCloudServices.page.selectUsers.matchingRemoteUser"/></th>
+            <g:sortableColumn property="matchingRemoteUser"
+                              titleKey="setupCloudServices.page.selectUsers.matchingRemoteUser"/>
           </tr>
           <g:each in="${userList}" status="i" var="user">
             <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
@@ -73,11 +74,6 @@
       </td>
     </tr>
     <tr class="ContainerFooter">
-      <td>
-        <div class="paginateButtons">
-          <g:paginate total="${userListTotal}" />
-        </div>
-      </td>
       <td>
         <div class="AlignRight">
           <g:listViewActionButton action="createUserLogins" minSelected="1">
