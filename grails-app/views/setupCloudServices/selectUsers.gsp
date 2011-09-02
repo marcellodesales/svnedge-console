@@ -40,7 +40,7 @@
 <g:form>
   <table class="ItemDetailContainer">
     <tr>
-      <td class="ContainerBodyWithPaddedBorder">
+      <td class="ContainerBodyWithPaddedBorder" colspan="2">
         <p>
           <g:message code="setupCloudServices.page.selectUsers.p1"/>
         </p>
@@ -50,17 +50,16 @@
             <th><g:listViewSelectAll/></th>
             <g:sortableColumn property="username" titleKey="setupCloudServices.page.selectUsers.username"
                               defaultOrder="asc"/>
-            <g:sortableColumn property="realUsername" titleKey="setupCloudServices.page.selectUsers.realUsername"/>
-            <g:sortableColumn property="emailAddress" titleKey="setupCloudServices.page.selectUsers.emailAddress"/>
-            <g:sortableColumn property="matchingRemoteUser"
-                              titleKey="setupCloudServices.page.selectUsers.matchingRemoteUser"/>
+            <g:sortableColumn property="realUserName" titleKey="setupCloudServices.page.selectUsers.realUsername"/>
+            <g:sortableColumn property="email" titleKey="setupCloudServices.page.selectUsers.emailAddress"/>
+            <th><g:message code="setupCloudServices.page.selectUsers.matchingRemoteUser"/></th>
           </tr>
           <g:each in="${userList}" status="i" var="user">
             <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
               <td><g:listViewSelectItem item="${user}" property="userId" selected="${user.selectForMigration}"/></td>
               <td>${user.username}</td>
-              <td>${user.realUsername}</td>
-              <td>${user.emailAddress}</td>
+              <td>${user.realUserName}</td>
+              <td>${user.email}</td>
               <td>${user.matchingRemoteUser}</td>
             </tr>
           </g:each>
@@ -74,7 +73,12 @@
       </td>
     </tr>
     <tr class="ContainerFooter">
-      <td colspan="3">
+      <td>
+        <div class="paginateButtons">
+          <g:paginate total="${userListTotal}" />
+        </div>
+      </td>
+      <td>
         <div class="AlignRight">
           <g:listViewActionButton action="createUserLogins" minSelected="1">
             <g:message code="setupCloudServices.page.selectUsers.createLogins"/>
