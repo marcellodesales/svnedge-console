@@ -442,9 +442,10 @@ class RepoController {
             def backups = svnRepoService.retrieveScheduledBackups(it)
             if (backups) {
                 DumpBean b = (DumpBean) backups[0]
-                job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : 'dump')
+                job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
                 job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
-                        message(code: "repository.page.bkupSchedule.type.fullDumpDelta") :
+                        message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
+                        message(code: "repository.page.bkupSchedule.type.hotcopy") :
                         message(code: "repository.page.bkupSchedule.type.fullDump")
                 job.keepNumber = b.numberToKeep
                 job.scheduledFor = formatSchedule(b.schedule)
