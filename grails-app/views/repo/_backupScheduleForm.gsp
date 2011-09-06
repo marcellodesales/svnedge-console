@@ -28,12 +28,16 @@
           <label for="type"><g:message code="repository.page.bkupSchedule.type" /></label>
         </td>
         <td valign="top" class="value ItemDetailValue">
+         <g:set var="isCloud" value="${params.type == 'cloud' || dump.cloud}"/>
+         <g:set var="isDumpDelta" value="${params.type == 'dump_delta' || dump.deltas}"/>
+         <g:set var="isHotcopy" value="${params.type == 'hotcopy' || dump.hotcopy}"/>
+         <g:set var="isNone" value="${params.type == 'none'}"/>
          <select id="type" name="type">
-         <option value="dump" <g:if test="${params.type == 'dump' || (params.type != 'none' && !dump.deltas && !dump.cloud)}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
-         <option value="dump_delta" <g:if test="${params.type == 'dump_delta' || dump.deltas}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
-         <option value="hotcopy" <g:if test="${params.type == 'hotcopy' || dump.hotcopy}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.hotcopy" /></option>
-         <option value="cloud" <g:if test="${params.type == 'cloud' || dump.cloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
-         <option value="none" <g:if test="${params.type == 'none'}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
+         <option value="cloud" <g:if test="${isCloud}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.cloud" /></option>
+         <option value="dump" <g:if test="${!isCloud && !isDumpDelta && !isHotcopy && !isNone}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDump" /></option>
+         <option value="dump_delta" <g:if test="${isDumpDelta}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
+         <option value="hotcopy" <g:if test="${isHotcopy}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.hotcopy" /></option>
+         <option value="none" <g:if test="${isNone}"> selected="selected"</g:if>><g:message code="repository.page.bkupSchedule.type.none" /></option>
          </select>
        <g:if test="${cloudRegistrationRequired}">
          <span id="cloudRegister" class="TextRequired">

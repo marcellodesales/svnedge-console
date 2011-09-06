@@ -722,9 +722,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         // data for reporting status to quartz job listeners
         def progressLogFileName = getProgressLogFileName(repo.name)
         def jobDataMap =
-                [id: (bean.cloud ? "cloudSync-" : "repoDump-") + repo.name, repoId: repo.id,
-                description: getMessage("repository.action.createDumpfile.job.description", [repo.name],
-                        bean.userLocale),
+                [id: (bean.cloud ? "cloudSync-" : (bean.hotcopy ? "repoHotcopy-" : "repoDump-")) + 
+                    repo.name, repoId: repo.id,
+                description: getMessage("repository.action.createDumpfile.job.description", 
+                    [repo.name], bean.userLocale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
                 urlResult: "/csvn/repo/dumpFileList/${repo.id}",
                 urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}" ]
@@ -831,7 +832,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 } finally {
                     out.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress, 
+                               progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
             }
 
@@ -843,17 +845,20 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 } finally {
                     out.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress, 
+                               progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
             }
         }
         return filename
     }
     
-    private finishDumpFile(finalDumpFile, tempDumpFile, progress, progressLogFile) {
+    private finishDumpFile(finalDumpFile, tempDumpFile, progress, 
+                           progressLogFile,  locale) {
         def dumpFilename = finalDumpFile.name
         if (dumpFilename.endsWith('.zip')) {
-            progress << "Compressing dump file...\n"
+            println('repository.service.bkup.progress.compress.dump.file', 
+                    progress, locale)
             File tempZipFile = new File(tempDumpFile.parentFile, 
                                         tempDumpFile.name + ".zip")
             def baseDumpFilename = 
@@ -870,16 +875,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     zos.close()
                 }
             }
-            progress << "Finished compressing dump file.\n"
+            println('repository.service.bkup.progress.compress.dump.file.done', 
+                    progress, locale)
             tempDumpFile.delete()
             tempDumpFile = tempZipFile
         }
-        progress << "Moving dump file to final location.\n"
+        println('repository.service.bkup.progress.rename.dump.file', 
+                progress, locale)
         if (!tempDumpFile.renameTo(finalDumpFile)) {
             log.warn("Rename of dump file " + tempDumpFile?.name + " to " +
                 finalDumpFile?.name + " failed.")
         }
-        progress << "Dump file " + finalDumpFile?.name + " is complete.\n"
+        println('repository.service.bkup.progress.dump.done', 
+                [finalDumpFile?.name], progress, locale)
         progress.close()
         progressLogFile.delete()
     }
@@ -993,6 +1001,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (progressLogFile.exists()) {
             throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
         }
+        Locale locale = bean.userLocale
 
         def cmd = [ConfigUtil.svnadminPath(), "hotcopy", 
             repoDir.canonicalPath, tmpDir.canonicalPath]
@@ -1000,12 +1009,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String filename = null
         try {
             progress = new FileOutputStream(progressLogFile)
+            println('repository.service.bkup.progress.hotcopy.start', 
+                    progress, locale)
             def result = commandLineService.execute(cmd, progress, progress)
             boolean isVerified = false
             if (result[0] == "0") {
-                progress << "Verifying hotcopy...\n"
+                println('repository.service.bkup.progress.verifying.hotcopy', 
+                        progress, locale)
                 isVerified = verifyRepositoryPath(tmpDir.canonicalPath, progress)
-                progress << "Hotcopy verification finished.\n"
+                println('repository.service.bkup.progress.hotcopy.verify.done', 
+                        progress, locale)
             }
             if (isVerified) {
                 bean.revisionRange = "0:" + findHeadRev(tmpDir.canonicalPath)
@@ -1013,15 +1026,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 File finalZipFile = new File(dumpDir, filename)
                 File tempZipFile = new File(dumpDir, 
                     filename.substring(0, filename.length() - 4) + "-processing.zip")        
-                progress << "Compressing hotcopy into archive file...\n"
+                println('repository.service.bkup.progress.compressing.hotcopy', 
+                        progress, locale)
                 archiveDirectory(tmpDir, tempZipFile, progress)
-                progress << "Finished archival.\nMoving archive to final location.\n"
+                println('repository.service.bkup.progress.compress.done.rename.file', 
+                        progress, locale)
                 if (!tempZipFile.renameTo(finalZipFile)) {
                     log.warn("Rename of file " + tempZipFile?.name + " to " +
                         finalZipFile?.name + " failed.")
                 }
             } else {
-                progress << "Verification failed.\n"
+                println('repository.service.bkup.progress.verify.failed', 
+                        progress, locale)
                 log.warn("Hotcopy of ${repo.name} repository failed to verify")
             }
         } finally {

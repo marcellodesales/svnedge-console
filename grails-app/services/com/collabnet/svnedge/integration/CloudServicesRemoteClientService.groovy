@@ -392,7 +392,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return repo.name
     }
 
-    boolean synchronizeRepository(Repository repo) 
+    boolean synchronizeRepository(Repository repo, Locale locale = null) 
         throws CloudServicesException, ConcurrentBackupException {
 
         File progressFile = svnRepoService.prepareProgressLogFile(repo.name)
@@ -402,13 +402,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         FileOutputStream fos
         try {
             fos = new FileOutputStream(progressFile)
-            String preamble = new Date().toString() +
-                " Synchronizing repository '" +
-                repo.name + "' with cloud services for backup" +
-                "\nExecution output below\n----------------------\n"
-            write(preamble, fos)
+            println('cloud.service.bkup.progress.preamble', 
+                [new Date().toString(), repo.name], fos, locale)
 
-            return synchronizeRepositoryWithProgress(repo, fos)
+            return synchronizeRepositoryWithProgress(repo, fos, locale)
         } finally {
             fos?.close()
             progressFile.delete()
@@ -475,11 +472,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
 
-    private void write(String s, OutputStream os) {
-        os.write((s + "\n").getBytes("UTF-8"))
-    }
-
-    private boolean synchronizeRepositoryWithProgress(repo, fos) 
+    private boolean synchronizeRepositoryWithProgress(repo, fos, locale) 
             throws CloudServicesException {
         // confirm that the project exists
         String projectId = null
@@ -491,11 +484,12 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             projectId = projectMap['projectId']
             projectName = projectMap['shortName']
             projectExists = true
-            write("Sync'ing project: " + projectName, fos)
+            println('cloud.service.bkup.progress.sync.project', 
+                  [projectName], fos, locale)
         } else {
             projectName = getProjectShortNameForRepository(repo)
-            write("Project did not exist, creating a new project: " +
-                projectName, fos)
+            println('cloud.service.bkup.progress.create.project',
+                  [projectName], fos, locale)
             projectId = createProject(repo, restClient)
             if (!projectId) {
                 throw new CloudServicesException('cloud.services.unable.to.create.project')
@@ -525,7 +519,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
 
         if (!serviceExists) {
-            write("SVN service did not exist, creating it.", fos)
+            println('cloud.service.bkup.progress.create.svn.service', fos, locale)
             serviceId = addSvnToProject(projectId, restClient)
             if (!serviceId) {
                 throw new CloudServicesException('cloud.services.unable.to.create.svn')
@@ -549,10 +543,11 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             while (waitTime < maxWaitTime) {
                 Thread.sleep(waitTime)
                 try {
+                    println("cloud.service.bkup.progress.svnsync.init", fos, locale)
                     svnsyncInit(repo, cloudSvnURI, username, password, fos)
                     break
                 } catch (CloudServicesException e) {
-                    write("Cloud service was not ready, trying svnsync init again", fos)
+                    println("cloud.service.bkup.progress.retry.svnsync.init", fos, locale)
                     waitTime *= 2
                 }
             }
@@ -567,10 +562,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             repo.save()
         }
 
-        String startSyncMessage = "Syncing repo '${repo.name}' at " +
-            "local timestamp: ${new Date()}..."
-        log.debug(startSyncMessage)
-        write(startSyncMessage, fos)
+        String startSyncMessage = 
+        log.debug("Syncing repo '${repo.name}' at local timestamp: ${new Date()}...")
+        println('cloud.service.bkup.progress.svnsync.sync', [repo.name], fos, locale)
         def command = [ConfigUtil.svnsyncPath(), "sync", cloudSvnURI,
             "--sync-username", username, "--sync-password", password,
             "--trust-server-cert",
@@ -582,10 +576,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             log.warn("Unable to svnsync sync.  stderr=" + result[2])
             throw new CloudServicesException("cloud.services.svnsync.sync.failure")
         }
+        println("cloud.service.bkup.progress.done", fos, locale)
     }
 
     private void svnsyncInit(repo, cloudSvnURI, username, password, fos) {
-        write("Initializing cloud repository for sync.", fos)
         File repoPath = new File(svnRepoService.getRepositoryHomePath(repo))
         def localRepoURI = commandLineService.createSvnFileURI(repoPath)
         def command = [ConfigUtil.svnsyncPath(), "init",

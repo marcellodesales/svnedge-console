@@ -77,5 +77,29 @@ abstract class AbstractSvnEdgeService {
        def appCtx = grailsApplication.getMainContext()
        return appCtx.getMessage(key, params as String[], locale)
    }
+   
+   /**
+    * Writes a localized message to the given stream followed by EOL char
+    * @param key is the key in the messages.properties file.
+    * @param os output stream
+    * @param locale optional indicator to specify message language
+    */
+   protected void println(String key, OutputStream os, Locale locale = null) {
+       os << getMessage(key, locale) + "\n"
+   }
+
+   /**
+    * Writes a localized message to the given stream followed by EOL char
+    * @param key is the key in the messages.properties file.
+    * @param params is the list of parameters to provide the i18n.
+    * @param os output stream
+    * @param locale optional indicator to specify message language
+    */
+   protected void println(String key, List<String> params, OutputStream os, 
+                          Locale locale = null) {
+       os << getMessage(key, params, locale) + "\n"
+   }
+
+
 
 }
