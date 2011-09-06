@@ -21,27 +21,28 @@ import java.text.SimpleDateFormat
 
 import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.console.DumpBean
-import com.collabnet.svnedge.domain.Repository 
-import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
-import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
 import com.collabnet.svnedge.integration.InvalidNameCloudServicesException;
 import com.collabnet.svnedge.integration.QuotaCloudServicesException;
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
+import com.collabnet.svnedge.util.ControllerUtil
 
 /**
  * Command class for 'saveAuthorization' action provides validation
  */
 class AuthzRulesCommand {
-   String accessRules
-   def errors
-   static constraints = {
-       accessRules(blank:false)
-   }
+    String accessRules
+    def errors
+    static constraints = {
+        accessRules(blank: false)
+    }
 }
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -54,14 +55,14 @@ class RepoController {
     def statisticsService
 
     @Secured(['ROLE_USER'])
-    def index = { redirect(action:list,params:params) }
+    def index = { redirect(action: list, params: params) }
 
     // the delete, save and update actions only accept POST requests
-    static allowedMethods = [delete:'POST', save:'POST', update:'POST']
+    static allowedMethods = [delete: 'POST', save: 'POST', update: 'POST']
 
     @Secured(['ROLE_USER'])
     def list = {
-        params.max = Math.min( params.max ? params.max.toInteger() : 10,  100)
+        params.max = Math.min(params.max ? params.max.toInteger() : 10, 100)
         params.offset = params.offset ? params.offset.toInteger() : 0
         if (!params.sort) {
             params.sort = "name"
@@ -77,12 +78,12 @@ class RepoController {
         } else {
             repoList = Repository.list(params)
         }
-        [ repositoryInstanceList: repoList,
-          repositoryInstanceTotal: Repository.count(),
-          server: server, isReplica: server.mode == ServerMode.REPLICA ]
+        [repositoryInstanceList: repoList,
+                repositoryInstanceTotal: Repository.count(),
+                server: server, isReplica: server.mode == ServerMode.REPLICA]
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def discover = {
 
         try {
@@ -94,18 +95,18 @@ class RepoController {
             log.error("Unable to discover repositories", e)
             flash.error = message(code: 'repository.action.discover.failure')
         }
-        redirect(action:list,params:params)
+        redirect(action: list, params: params)
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def dumpOptions = {
         def id = params.id
         def repo = Repository.get(id)
         if (!repo) {
-            def ids = getListViewSelectedIds(params)
+            def ids = ControllerUtil.getListViewSelectedIds(params)
             if (!ids) {
                 flash.error = message(code: 'repository.action.not.found',
-                    args: ['null'])
+                        args: ['null'])
                 redirect(action: list)
                 return
 
@@ -119,31 +120,31 @@ class RepoController {
             }
         }
         if (!repo) {
-            flash.error = message(code: 'repository.action.not.found', 
-                                  args: [id])
+            flash.error = message(code: 'repository.action.not.found',
+                    args: [id])
             redirect(action: list)
-            
+
         } else {
             def repoParentDir = serverConfService.server.repoParentDir
             def repoPath = new File(repoParentDir, repo.name).absolutePath
             def headRev = svnRepoService.findHeadRev(repo)
             def dumpDir = serverConfService.server.dumpDir
-            
+
             DumpBean cmd = flash.dumpBean
             if (!cmd) {
                 cmd = new DumpBean()
                 bindData(cmd, params)
             }
-            return [ repositoryInstance: repo,
-                repoPath: repoPath,
-                dumpDir: dumpDir,
-                headRev: headRev,
-                dump: cmd
-                ]
+            return [repositoryInstance: repo,
+                    repoPath: repoPath,
+                    dumpDir: dumpDir,
+                    headRev: headRev,
+                    dump: cmd
+            ]
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def createDumpFile = { DumpBean cmd ->
         if (params.cancelButton) {
             redirect(action: list)
@@ -151,22 +152,22 @@ class RepoController {
         }
         if (cmd.hasErrors()) {
             flash.dumpBean = cmd
-            redirect(action:'dumpOptions', params:params)
+            redirect(action: 'dumpOptions', params: params)
             return
         }
-        
+
         def repo = Repository.get(params.id)
         if (!repo) {
-            flash.error = message(code: 'repository.action.not.found', 
-                                  args: [params.id])
+            flash.error = message(code: 'repository.action.not.found',
+                    args: [params.id])
             redirect(action: list)
-            
+
         } else {
             try {
                 cmd.userLocale = request.locale
                 def filename = svnRepoService.scheduleDump(cmd, repo)
                 flash.message = message(code: 'repository.action.createDumpfile.success',
-                    args: [filename])
+                        args: [filename])
                 redirect(action: 'dumpFileList', params: [id: params.id])
             } catch (ValidationException e) {
                 log.debug "Rejecting " + e.field + " with message " + e.message
@@ -177,11 +178,11 @@ class RepoController {
                     flash.error = message(code: e.message)
                 }
                 flash.dumpBean = cmd
-                redirect(action:'dumpOptions', params:params)
+                redirect(action: 'dumpOptions', params: params)
             }
         }
     }
-    
+
     @Secured(['ROLE_USER'])
     def show = {
         redirect(action: 'dumpFileList', id: params.id)
@@ -189,12 +190,12 @@ class RepoController {
 
     @Secured(['ROLE_USER'])
     def reports = {
-        def repo = Repository.get( params.id )
+        def repo = Repository.get(params.id)
 
-        if(!repo) {
+        if (!repo) {
             flash.error = message(code: 'repository.action.not.found',
-                args: [params.id])
-            redirect(action:list)
+                    args: [params.id])
+            redirect(action: list)
 
         } else {
             def repoParentDir = serverConfService.server.repoParentDir
@@ -213,45 +214,45 @@ class RepoController {
             def repSharing = svnRepoService.getReposRepSharing(repo)
             def repoSupport = svnRepoService.getRepoFeatures(repo, fsFormat)
 
-            def timespans = [[index: 0, 
-                title: message(code: "statistics.graph.timespan.lastHour"),
-                        seconds: 60*60, pattern: "HH:mm"],
-                [index: 1, 
-                    title: message(code: "statistics.graph.timespan.lastDay"),
-                    seconds: 60*60*24, pattern: "HH:mm"],
-                [index: 2, 
-                    title: message(code: "statistics.graph.timespan.lastWeek"),
-                    seconds: 60*60*24*7, pattern: "MM/dd HH:mm"],
-                [index: 3, 
-                    title: message(code: "statistics.graph.timespan.lastMonth"),
-                    seconds: 60*60*24*30, pattern: "MM/dd"]]
+            def timespans = [[index: 0,
+                    title: message(code: "statistics.graph.timespan.lastHour"),
+                    seconds: 60 * 60, pattern: "HH:mm"],
+                    [index: 1,
+                            title: message(code: "statistics.graph.timespan.lastDay"),
+                            seconds: 60 * 60 * 24, pattern: "HH:mm"],
+                    [index: 2,
+                            title: message(code: "statistics.graph.timespan.lastWeek"),
+                            seconds: 60 * 60 * 24 * 7, pattern: "MM/dd HH:mm"],
+                    [index: 3,
+                            title: message(code: "statistics.graph.timespan.lastMonth"),
+                            seconds: 60 * 60 * 24 * 30, pattern: "MM/dd"]]
 
             def timespanSelect = timespans.inject([:]) { map, ts ->
-                map[ts.index] = ts.title 
+                map[ts.index] = ts.title
                 map
             }
 
-            return [ timespanSelect: timespanSelect, 
-                initialGraph : "DISKSPACE_CHART",
-                repositoryInstance : repo,
-                svnUser : username,
-                svnGroup : group,
-                repoPath : repoPath,
-                minPackedRev : minPackedRev,
-                headRev : headRev,
-                sharded : sharded,
-                fsType : fsType,
-                fsFormat : fsFormat,
-                repoFormat : repoFormat,
-                repoUUID : repoUUID,
-                svnVersion : svnVersion,
-                diskUsage : diskUsage,
-                repSharing : repSharing,
-                repoSupport: repoSupport]
+            return [timespanSelect: timespanSelect,
+                    initialGraph: "DISKSPACE_CHART",
+                    repositoryInstance: repo,
+                    svnUser: username,
+                    svnGroup: group,
+                    repoPath: repoPath,
+                    minPackedRev: minPackedRev,
+                    headRev: headRev,
+                    sharded: sharded,
+                    fsType: fsType,
+                    fsFormat: fsFormat,
+                    repoFormat: repoFormat,
+                    repoUUID: repoUUID,
+                    svnVersion: svnVersion,
+                    diskUsage: diskUsage,
+                    repSharing: repSharing,
+                    repoSupport: repoSupport]
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def dumpFileList = {
         def model = reports()
         def repo = Repository.get(params.id)
@@ -267,21 +268,21 @@ class RepoController {
             }
             def sortBy = params.sort
             boolean isAscending = params.order == "asc"
-            model["dumpFileList"] = 
+            model["dumpFileList"] =
                 svnRepoService.listDumpFiles(repo, sortBy, isAscending)
-        }        
+        }
         return model
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def bkupSchedule = {
         def model = reports()
         def repo = Repository.get(params.id)
         if (!repo) {
             flash.error = message(code: 'repository.action.not.found',
-                                  args: [id])
+                    args: [id])
             redirect(action: list)
-            
+
         } else {
             DumpBean cmd = flash.dumpBean
             if (!cmd) {
@@ -295,17 +296,17 @@ class RepoController {
                 }
             }
             model["dump"] = cmd
-        }        
-        model['cloudRegistrationRequired'] = 
+        }
+        model['cloudRegistrationRequired'] =
             CloudServicesConfiguration.getCurrentConfig() == null
         return model
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def updateBkupSchedule = { DumpBean cmd ->
         params.remove('_action_updateBkupSchedule')
         // handle single or multiple repo backups with same action
-        def repoIdList = (params.id) ? [params.id] : getListViewSelectedIds(params)
+        def repoIdList = (params.id) ? [params.id] : ControllerUtil.getListViewSelectedIds(params)
         def type = params.type
         try {
             def projects = (type == "cloud") ?
@@ -318,18 +319,18 @@ class RepoController {
                     redirect(action: list)
                     return
                 }
-                
+
                 if (type == "cloud") {
                     if (!CloudServicesConfiguration.getCurrentConfig()) {
                         flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
-                        redirect(controller: 'setupCloudServices', action:'index')
+                        redirect(controller: 'setupCloudServices', action: 'index')
                         return
                     }
-                    
+
                     if (confirmCloudProject(repo, projects)) {
                         cmd.cloud = true
                         scheduleBackup(cmd, repo, type)
-                    } 
+                    }
                 } else if (type == "none") {
                     svnRepoService.clearScheduledDumps(repo)
                     flash.message = message(code: 'repository.action.updateBkupSchedule.none')
@@ -340,8 +341,8 @@ class RepoController {
         } catch (QuotaCloudServicesException quota) {
             flash.error = message(code: 'repository.action.bkupSchedule.cloud.quota.met')
         } catch (AuthenticationCloudServicesException auth) {
-            flash.unfiltered_error = message(code: auth.message, 
-                args: [1, createLink(controller: 'setupCloudServices', action: 'index')])
+            flash.unfiltered_error = message(code: auth.message,
+                    args: [1, createLink(controller: 'setupCloudServices', action: 'index')])
         }
 
         // redirect based on origin (single repo or multiple-repo backup)
@@ -363,11 +364,11 @@ class RepoController {
     private boolean confirmCloudProject(repo, projects) throws QuotaCloudServicesException {
         def cloudName = params["cloudName${repo.id}"]
         if (cloudName) {
-            for (def p : projects) {
+            for (def p: projects) {
                 if (p['shortName'] == cloudName) {
-                    flash.error = message(code: 
-                        "repository.action.bkupSchedule.cloud.existing.project", 
-                        args: [cloudName])
+                    flash.error = message(code:
+                    "repository.action.bkupSchedule.cloud.existing.project",
+                            args: [cloudName])
                     return false
                 }
             }
@@ -375,14 +376,14 @@ class RepoController {
             repo.save()
             return createProject(repo)
         }
-            
+
         cloudName = repo.cloudName ?: repo.name
-        for (def p : projects) {
+        for (def p: projects) {
             if (p['shortName'] == cloudName) {
                 return true
             }
         }
-        return createProject(repo)        
+        return createProject(repo)
     }
 
     private boolean createProject(repo) throws QuotaCloudServicesException {
@@ -391,12 +392,12 @@ class RepoController {
             return true
         } catch (InvalidNameCloudServicesException invalidName) {
             flash.error = message(code: 'repository.action.bkupSchedule.cloud.name.invalid',
-                args: [(repo.cloudName ?: repo.name)])
+                    args: [(repo.cloudName ?: repo.name)])
             flash["nameAdjustmentRequired${repo.id}"] = true
         }
         return false
     }
-    
+
     private void scheduleBackup(DumpBean cmd, Repository repo, def type) {
         try {
             cmd.userLocale = request.locale
@@ -424,7 +425,7 @@ class RepoController {
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def bkupScheduleMultiple = { DumpBean cmd ->
 
         def model = [:]
@@ -444,11 +445,12 @@ class RepoController {
                 DumpBean b = (DumpBean) backups[0]
                 job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
                 job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
-                        message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
+                    message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
                         message(code: "repository.page.bkupSchedule.type.hotcopy") :
                         message(code: "repository.page.bkupSchedule.type.fullDump")
                 job.keepNumber = b.numberToKeep
-                job.scheduledFor = formatSchedule(b.schedule)
+                job.schedule = b.schedule
+                job.scheduleFormatted = formatSchedule(b.schedule)
             }
             repoBackupJobList << job
         }
@@ -467,12 +469,12 @@ class RepoController {
         model['cloudRegistrationRequired'] = CloudServicesConfiguration.getCurrentConfig() == null
         return model
     }
-    
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def downloadDumpFile = {
         def repo = Repository.get(params.id)
         if (repo) {
-            def ids = getListViewSelectedIds(params)
+            def ids = ControllerUtil.getListViewSelectedIds(params)
             def filename = ids ? ids[0] : params.filename
             if (filename) {
                 try {
@@ -480,13 +482,13 @@ class RepoController {
                         "application/zip" : "application/octet-stream"
                     response.setContentType(contentType)
                     response.setHeader("Content-disposition",
-                        'attachment;filename="' + filename + '"')
+                            'attachment;filename="' + filename + '"')
                     if (!svnRepoService.copyDumpFile(filename, repo, response.outputStream)) {
                         throw new FileNotFoundException()
                     }
                 } catch (FileNotFoundException e) {
                     flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
-                        args: [filename])
+                            args: [filename])
                     redirect(action: 'dumpFileList', id: params.id)
                 }
             } else {
@@ -496,17 +498,17 @@ class RepoController {
             }
         } else {
             flash.error = message(code: 'repository.action.not.found',
-                args: [params.id])
+                    args: [params.id])
             redirect(action: 'dumpFileList', id: params.id)
         }
         return null
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def deleteDumpFiles = {
         def repo = Repository.get(params.id)
         if (repo) {
-            def ids = getListViewSelectedIds(params)
+            def ids = ControllerUtil.getListViewSelectedIds(params)
             if (ids) {
                 ids.each { filename ->
                     try {
@@ -514,15 +516,15 @@ class RepoController {
                         // multiple file delete
                         if (svnRepoService.deleteDumpFile(filename, repo)) {
                             flash.message = message(code: 'repository.action.deleteDumpFile.success',
-                                args: [filename])
+                                    args: [filename])
 
                         } else {
                             flash.error = message(code: 'repository.action.deleteDumpFile.fail',
-                                args: [filename])
+                                    args: [filename])
                         }
                     } catch (FileNotFoundException e) {
                         flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
-                            args: [filename])
+                                args: [filename])
                     }
                 }
             } else {
@@ -531,39 +533,39 @@ class RepoController {
             }
         } else {
             flash.error = message(code: 'repository.action.not.found',
-                args: [params.id])
+                    args: [params.id])
         }
         redirect(action: 'dumpFileList', id: params.id)
     }
-    
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def delete = {
-        def repo = Repository.get( params.id )
-        if(repo) {
+        def repo = Repository.get(params.id)
+        if (repo) {
             try {
                 svnRepoService.archivePhysicalRepository(repo)
                 def msg = svnRepoService.removeRepository(repo)
                 flash.message = msg
-                redirect(action:list)
+                redirect(action: list)
             }
-            catch(org.springframework.dao.DataIntegrityViolationException e) {
-                flash.error = message(code:'repository.action.cant.delete',
-                    [params.id] as String[])
-                redirect(action:show,id:params.id)
+            catch (org.springframework.dao.DataIntegrityViolationException e) {
+                flash.error = message(code: 'repository.action.cant.delete',
+                        [params.id] as String[])
+                redirect(action: show, id: params.id)
             }
         }
         else {
             flash.error = message(code: 'repository.action.not.found',
-                [params.id] as String[])
-            redirect(action:list)
+                    [params.id] as String[])
+            redirect(action: list)
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def deleteMultiple = {
-        getListViewSelectedIds(params).each {
-            def repo = Repository.get( it )
-            if(repo) {
+        ControllerUtil.getListViewSelectedIds(params).each {
+            def repo = Repository.get(it)
+            if (repo) {
                 def repoName = repo.name
                 try {
                     svnRepoService.deletePhysicalRepository(repo)
@@ -574,8 +576,8 @@ class RepoController {
                     }
                     flash.message = msg
                 }
-                catch(org.springframework.dao.DataIntegrityViolationException e) {
-                    def msg = message(code:'repository.not.deleted.message', args: [repoName])
+                catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    def msg = message(code: 'repository.not.deleted.message', args: [repoName])
                     if (flash.error) {
                         msg = flash.error + "\n" + msg
                     }
@@ -590,45 +592,44 @@ class RepoController {
                 flash.error = msg
             }
         }
-        redirect(action:list)
+        redirect(action: list)
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def updatePermissions = {
 
-        def repo = Repository.get( params.id )
+        def repo = Repository.get(params.id)
         if (repo && svnRepoService.validateRepositoryPermissions(repo)) {
-            repo.setPermissionsOk (true)
-            repo.save(validate:false, flush:true)
-            flash.message = message(code:'repository.action.permissions.set.ok')
-            redirect(action:show,id:params.id)
+            repo.setPermissionsOk(true)
+            repo.save(validate: false, flush: true)
+            flash.message = message(code: 'repository.action.permissions.set.ok')
+            redirect(action: show, id: params.id)
         }
         else {
-            flash.error =message(code: 'repository.action.permissions.set.notOk')
-            redirect(action:show,id:params.id)
+            flash.error = message(code: 'repository.action.permissions.set.notOk')
+            redirect(action: show, id: params.id)
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def create = {
         def repo = new Repository()
         repo.properties = params
-        return [repo:repo]
+        return [repo: repo]
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def save = {
         def repo = new Repository(params)
         def success = false
         repo.validate()
 
         if (repo.validateName() && !repo.hasErrors()) {
-            def result = svnRepoService
-                .createRepository(repo, params.isTemplate == 'true')
+            def result = svnRepoService.createRepository(repo, params.isTemplate == 'true')
             if (result == 0) {
-                flash.message = message(code:'repository.action.save.success')
+                flash.message = message(code: 'repository.action.save.success')
                 repo.save()
-                redirect(action:show, id:repo.id)
+                redirect(action: show, id: repo.id)
                 success = true
             } else {
                 repo.errors.reject('repository.action.save.failure')
@@ -636,42 +637,42 @@ class RepoController {
         }
         if (!success) {
             flash.error = message(code: 'default.errors.summary')
-            render(view:'create', model:[repo:repo])
+            render(view: 'create', model: [repo: repo])
         }
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def editAuthorization = {
         flash.clear()
         String accessRules = serverConfService.readSvnAccessFile()
         def command = new AuthzRulesCommand(accessRules: accessRules)
-        [ authRulesCommand : command]
+        [authRulesCommand: command]
 
     }
 
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_REPO'])
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def saveAuthorization = { AuthzRulesCommand cmd ->
         def result = serverConfService.validateSvnAccessFile(
                 cmd.accessRules)
-        def exitStatus = Integer.parseInt(result[0]) 
+        def exitStatus = Integer.parseInt(result[0])
 
         if (exitStatus != 0) {
             def err = result[2].split(": ")
             if (err.length == 3) {
                 def line = err[1].split(":")
                 flash.error = message(code:
-                  'repository.action.saveAuthorization.validate.failure.lineno',
-                   args: [line[line.length-1], err[2]])
+                'repository.action.saveAuthorization.validate.failure.lineno',
+                        args: [line[line.length - 1], err[2]])
             } else {
                 flash.error = message(code:
-                  'repository.action.saveAuthorization.validate.failure.nolineno',
-                   args: [err[err.length-1]])
+                'repository.action.saveAuthorization.validate.failure.nolineno',
+                        args: [err[err.length - 1]])
             }
-                 
+
             flash.message = null
         } else {
             if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
-                     cmd.accessRules)) {
+                    cmd.accessRules)) {
                 flash.message = message(
                         code: 'repository.action.saveAuthorization.success')
                 flash.error = null
@@ -682,21 +683,7 @@ class RepoController {
             }
         }
 
-        render(view : 'editAuthorization', model : [authRulesCommand : cmd])
-    }
-
-    private List getListViewSelectedIds(Map params) {
-        def ids = []
-        params.each() {
-            def matcher = it.key =~ /listViewItem_(.+)/
-            if (matcher && matcher[0][1]) {
-                def id = matcher[0][1]
-                if (it.value == "on") {
-                    ids << id
-                }
-            }
-        }
-        return ids
+        render(view: 'editAuthorization', model: [authRulesCommand: cmd])
     }
 
     /**
@@ -720,7 +707,7 @@ class RepoController {
             case SchedulerBean.Frequency.WEEKLY:
                 def daysOfWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
                 int dayOfWeekIndex = s.dayOfWeek - 1
-                String scheduleDayOfWeek = message( code: "default.dayOfWeek.${daysOfWeek[dayOfWeekIndex]}")
+                String scheduleDayOfWeek = message(code: "default.dayOfWeek.${daysOfWeek[dayOfWeekIndex]}")
                 output = message(code: "repository.page.bkupSchedule.schedule.weekly",
                         args: [scheduleDayOfWeek, hour, minutes])
                 break

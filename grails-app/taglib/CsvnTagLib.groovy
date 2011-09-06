@@ -18,10 +18,10 @@
 
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.integration.command.AbstractCommand
- 
+
 class CsvnTagLib {
 
-     def securityService
+    def securityService
 
     /**
      * this custom tag will format the "size" input (bytes from file.length) into
@@ -49,7 +49,7 @@ class CsvnTagLib {
         if (request.scheme == 'http' && Server.getServer().useSslConsole) {
             def port = System.getProperty("jetty.ssl.port", "4434")
             def sslUrl = "https://${request.serverName}${port != "443" ? ":" + port : ""}${request.forwardURI}"
-          out << "<meta http-equiv=\"refresh\" content=\"0;url=${sslUrl}\"/>"
+            out << "<meta http-equiv=\"refresh\" content=\"0;url=${sslUrl}\"/>"
         }
     }
 
@@ -60,13 +60,13 @@ class CsvnTagLib {
      */
     def passwordFieldWithChangeNotification = { attrs ->
 
-      String fieldName = attrs.name ?: ""
-      String fieldValue = attrs.value ?: ""
-      String size = attrs.size ?: ""
-      def fieldValueLength = fieldValue?.length()
-      String pwdToken = (fieldValueLength) ? securityService.generateAlphaNumericPassword(fieldValueLength) : ""
+        String fieldName = attrs.name ?: ""
+        String fieldValue = attrs.value ?: ""
+        String size = attrs.size ?: ""
+        def fieldValueLength = fieldValue?.length()
+        String pwdToken = (fieldValueLength) ? securityService.generateAlphaNumericPassword(fieldValueLength) : ""
 
-      out << """
+        out << """
         <input type="hidden" name="${fieldName}_changed" id="${fieldName}_changed" value="false"/>
         <input type="password" name="${fieldName}" id="${fieldName}" value="${pwdToken}" size="${size}"/>
         <script type="text/javascript">
@@ -84,17 +84,17 @@ class CsvnTagLib {
         def className = attrs.className ?: ""
         out << className ? AbstractCommand.makeCodeName(className).trim() : className.trim()
     }
-    
+
     /**
      * @return the description of a command with a link to the repo name.
      */
-   def replicaCommandDescription = { attrs ->
-       def repoName = attrs.repoName ?: ""
-       def masterUrl = attrs.masterUrl ?: ""
-       def commandDescription = attrs.commandDescription ?: ""
-       def repoNameLink = "<a target=\"${repoName}\" href=\"${masterUrl}/${repoName}\">${repoName}</a>"
-       out << commandDescription.replace(repoName, repoNameLink)
-   }
+    def replicaCommandDescription = { attrs ->
+        def repoName = attrs.repoName ?: ""
+        def masterUrl = attrs.masterUrl ?: ""
+        def commandDescription = attrs.commandDescription ?: ""
+        def repoNameLink = "<a target=\"${repoName}\" href=\"${masterUrl}/${repoName}\">${repoName}</a>"
+        out << commandDescription.replace(repoName, repoNameLink)
+    }
 
     /**
      * this tag will output the check box for a list view "select all" checkbox
@@ -117,16 +117,19 @@ class CsvnTagLib {
         def prop = attrs.property ?: "id"
         def name = "listViewItem_${attrs.item[prop]}"
         if (attrs.hidden) {
-           out << "<input type='hidden' class='listViewSelectItem' id='${name}' name='${name}' value='on'"
+            out << "<input type=\"hidden\" class=\"listViewSelectItem\" id=\"${name}\" name=\"${name}\" value=\"on\""
         }
         else {
-            out << "<input type='checkbox' class='listViewSelectItem' id='${name}' name='${name}'"
+            out << "<input type=\"checkbox\" class=\"listViewSelectItem\" id=\"${name}\" name=\"${name}\""
             if (attrs.disabled) {
                 out << " disabled"
             }
             if (attrs.selected) {
                 out << " checked"
             }
+        }
+        if (attrs.onClick) {
+            out << " onClick=\"${attrs.onClick}\""
         }
         out << "/>"
     }
@@ -150,7 +153,7 @@ class CsvnTagLib {
             out << "<div id='_confirm_${attrs.action}' style='display:none'>"
             out << "<p>${attrs.confirmMessage}</p>"
             if (attrs.confirmByTypingThis) {
-                out << "<p>${message(code:'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>"
+                out << "<p>${message(code: 'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>"
                 out << "<p><input id='_confirmTypeThis_${attrs.action}' type='text' size='20'/></p>"
             }
             out << "</div>"
