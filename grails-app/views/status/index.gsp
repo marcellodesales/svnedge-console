@@ -3,11 +3,68 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main" />
     <title>CollabNet Subversion Edge</title>
+    <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
+    <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
+    <style>
+      p.dialogTitle {
+        padding-top: 0px;
+        margin-top: 5px;
+      }
+      p.dialogBogy {
+        margin-top: 10px;
+      }
+    </style>
+    <g:javascript library="prototype" />
+    <g:javascript library="window" />
+    <script type="text/javascript">
 
-  <g:if test="${isReplicaMode}">
+      // add restart support for unapplied updates
+      Event.observe(window, 'load', function() {
+          $('restartLink').observe('click', function(event){
+            // show modal info dialog
+            var title = "<p class='dialogTitle'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting')}</p>"
+            var msg = "<p class='dialogBody'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip')}"
+            msg += " ${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip2')}</p>"
+            msg += "<img src=\"${resource(dir:'images',file:'spinner-gray-bg.gif')}\" align=\"baseline\"/>"
+            Dialog.info(msg, {title: title, width:250, height: 90, showProgress: false, className: "bluelighting"});
 
-      <g:javascript library="prototype" />
-      <script type="text/javascript">
+            // execute restart
+            new Ajax.Request('/csvn/status/restartConsole', {
+                method:'post',
+                requestHeaders: {Accept: 'text/json'},
+                onSuccess: function(transport) {
+                   responseData = transport.responseText.evalJSON(true);
+                   status = responseData.result.restart
+                   timeoutId = window.setTimeout('waitForRestart()', 5000);
+                },
+                onFailure: function(transport) {
+                   Dialog.setInfoMessage("<p class='dialogBody'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.failed')}</p>");
+                }
+            })
+          });
+      })
+
+      var pingUrl = "/csvn/images/project/project-homeicon.gif";
+      var timeoutId
+
+      function waitForRestart() {
+        var image = new Image();
+        var uniqueUrl = pingUrl + "?s=" + Math.random();
+        image.onload = function() {
+          if (this.height > 0)  {
+            window.location = "/csvn"
+          }
+          else {
+            timeoutId = window.setTimeout('waitForRestart()', 5000);
+          }
+        }
+        image.onerror = function() {
+          timeoutId = window.setTimeout('waitForRestart()', 5000);
+        }
+        image.src = uniqueUrl
+      }
+
+    <g:if test="${isReplicaMode}">
 
         /** Handle for the polling function */
         var periodicUpdater
@@ -43,8 +100,8 @@
                 $('commandsCount').innerHTML = '<g:message code="status.page.status.replication.no_commands"/>'; 
             }
         }
+    </g:if>
     </script>
-   </g:if>
 
   </head>
   <body>
@@ -133,7 +190,6 @@
 
     </content>
 
-    <div class="dialog">
       <table align="center" width="99%">
         <tbody>
           <tr><td>
@@ -166,6 +222,5 @@
           </td></tr>
         </tbody>
       </table>
-    </div>
   </body>
 </html>

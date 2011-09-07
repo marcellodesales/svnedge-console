@@ -47,7 +47,8 @@ class StatusController {
     // start and stop actions use POST requests
     static allowedMethods = [start:'POST', stop:'POST',
                              showCertificate:'GET',
-                             acceptCertificate:'POST']
+                             acceptCertificate:'POST',
+                             restartConsole:'POST']
 
     def getUpdateMessage() {
         return message(code: 'packagesUpdate.status.updates.available.download', 
@@ -186,7 +187,7 @@ class StatusController {
                }
                //system restart has priority over the updates
                if (this.packagesUpdateService.systemNeedsRestart()) {
-                   flash.warn = message(
+                   flash.unfiltered_warn = message(
                        code: 'packagesUpdate.status.updates.requiresRestart')
                }
                //if the system has recently been updated
@@ -346,4 +347,20 @@ class StatusController {
             relicaServerInfo(runningCmdsSize: runningCmdsSize)
         }
     }
+
+    @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
+    def restartConsole = {
+
+        runAsync{
+            Thread.sleep(2000)
+            // restart the csvn app server -- exit-code 5 instructs
+            // the wrapper to install updates and restart
+            System.exit(5)
+        }
+
+        render(contentType: "text/json") {
+            result(restart: "ok")
+        }
+    }
+
 }
