@@ -567,7 +567,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         println('cloud.service.bkup.progress.svnsync.sync', [repo.name], fos, locale)
         def command = [ConfigUtil.svnsyncPath(), "sync", cloudSvnURI,
             "--sync-username", username, "--sync-password", password,
-            "--trust-server-cert",
+            "--config-option=servers:global:ssl-authority-files=" +  
+            new File(ConfigUtil.dataDirPath(),  
+                     "certs/cloud_services_root_ca.crt").canonicalPath,
             "--non-interactive", "--no-auth-cache", "--disable-locking",
             "--config-dir", ConfigUtil.svnConfigDirPath()]
         def result =
@@ -584,8 +586,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         def localRepoURI = commandLineService.createSvnFileURI(repoPath)
         def command = [ConfigUtil.svnsyncPath(), "init",
             cloudSvnURI, localRepoURI, "--allow-non-empty",
-            "--trust-server-cert",
             "--sync-username", username, "--sync-password", password,
+            "--config-option=servers:global:ssl-authority-files=" +  
+            new File(ConfigUtil.dataDirPath(),  
+                     "certs/cloud_services_root_ca.crt").canonicalPath,
             "--non-interactive", "--no-auth-cache",
             "--config-dir", ConfigUtil.svnConfigDirPath()]
         def result =
