@@ -10,7 +10,7 @@
         padding-top: 0px;
         margin-top: 5px;
       }
-      p.dialogBogy {
+      p.dialogBody {
         margin-top: 10px;
       }
     </style>
