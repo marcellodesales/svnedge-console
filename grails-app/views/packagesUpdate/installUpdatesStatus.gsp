@@ -95,6 +95,7 @@
                         dojo.byId('roller').style.display = 'none';
                         dojo.byId('restartServer').innerHTML = "${restartServer}";
                         dojo.byId('progressStatus_phase').innerHTML = "${installFinished}"
+                        dojo.byId('progressStatus_statusMessage').innerHTML = "";
                         destroy()
                     }
 
@@ -104,7 +105,7 @@
                         dojo.byId('progressStatus_phase').innerHTML = o.phase;
                     }
                     if (o.statusMessage != "") {
-                        dojo.byId('progressStatus_statusMessage').value += '\n' + o.statusMessage;
+                        dojo.byId('progressStatus_statusMessage').innerHTML = o.statusMessage;
                         dojo.byId('progressStatus_statusMessage').scrollTop = dojo.byId('progressStatus_statusMessage').scrollHeight;
                     }
                 }
@@ -186,6 +187,16 @@
     <style type="text/css">
         @import "/csvn/plugins/cometd-0.1.5/dojo/resources/dojo.css";
         .dijitDialogCloseIcon { display:none }
+
+        div#progressStatus_statusMessage {
+          width:350px;
+          height: 35px;
+          background-color: #dddddd;
+          margin-top: 10px;
+          padding: 5px 2px 0px 5px;
+          overflow: hidden;
+        }
+
     </style>
     <link rel="stylesheet"
         href="/csvn/plugins/cometd-0.1.5/dijit/themes/tundra/tundra.css" />
@@ -221,10 +232,8 @@
         </tr>
         <tr>
           <td>
-            <textarea id="progressStatus_statusMessage" name="progressStatus_statusMessage" 
-                    style="width:350px; height: 100px; background-color: white;" 
-                    cols="300" rows="10" disabled="disabled">
-            </textarea>
+            <div id="progressStatus_statusMessage" name="progressStatus_statusMessage">
+            </div>
           </td>
         </tr>
         <tr>
