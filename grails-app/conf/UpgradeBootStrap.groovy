@@ -15,7 +15,14 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.statistics.Statistic
+import com.collabnet.svnedge.domain.quartz.QrtzLocks
 import com.collabnet.svnedge.util.ConfigUtil
 
 /**
@@ -23,44 +30,131 @@ import com.collabnet.svnedge.util.ConfigUtil
  */
 class UpgradeBootStrap {
 
+    def operatingSystemService
+    def fileSystemStatisticsService
     def dataSource
     def lifecycleService
     def serverConfService
-    
+
 
     def init = { servletContext ->
+        log.info("Applying updates")
+        release1_1_0()
+        release1_2_0()
+        release1_3_1()
         release2_1_0()
     }
 
+    private boolean isSchemaCurrent(int major, int minor, int revision) {
 
-    def void release2_1_0() {
+        def v = SchemaVersion.createCriteria()
+        def resultCount = v.get {
+            and {
+                eq("major", major)
+                eq("minor", minor)
+                eq("revision", revision)
+            }
+            projections {
+                rowCount()
+            }
+        }
+        return (resultCount > 0)
+    }
 
-        log.info("Applying 2.1.0 updates if needed")
-        Server s = Server.getServer()
+    private def release1_1_0() {
 
-        // If this is a new install, Server instance will be created correctly so we can exit
-        if (!s) {
+        if (isSchemaCurrent(1, 1, 0)) {
+            // result found at version, assume this is applied
             return
         }
 
-        // otherwise, initialize new fields
-        if (s.useHttpV2 == null) {
+        log.info("Applying 1.1.0 updates")
+
+        def server = Server.getServer()
+        if (server) {
+            log.info("Initializing new fields on Server instance")
+            server.mode = ServerMode.STANDALONE
+            server.consoleLogLevel = ConsoleLogLevel.WARN
+            server.apacheLogLevel = ApacheLogLevel.WARN
+            server.save()
+        }
+
+        SchemaVersion v = new SchemaVersion(major: 1, minor: 1, revision: 0,
+                description: "1.1.0 added Server fields: mode, consoleLogLevel, " +
+                        "apacheLogLevel")
+        v.save()
+    }
+
+    def void release1_2_0() {
+
+        if (isSchemaCurrent(1, 2, 0)) {
+            return
+        }
+
+        // the current changes necessary are only for windows.
+        if (!operatingSystemService.isWindows()) {
+            return
+        }
+
+        log.info("Applying 1.2.0 updates")
+
+        Statistic.executeUpdate("UPDATE Statistic s SET s.name='BytesIn' " +
+                "WHERE s.name='WinBytesIn'")
+        Statistic.executeUpdate("UPDATE Statistic s SET " +
+                "s.name='BytesOut' WHERE s.name='WinBytesOut'")
+
+        SchemaVersion v = new SchemaVersion(major: 1, minor: 2, revision: 0,
+                description: "1.2.0 updated Statistic values: name. " +
+                        "(WinBytesIn -> BytesIn), (WinBytesOut -> BytesOut).")
+        v.save()
+    }
+
+    def void release1_3_1() {
+
+        if (isSchemaCurrent(1, 3, 1)) {
+            return
+        }
+
+        log.info("Applying 1.3.1 updates")
+
+        Server.executeUpdate("UPDATE Server s SET s.ldapEnabledConsole = " +
+                "s.ldapEnabled")
+
+        SchemaVersion v = new SchemaVersion(major: 1, minor: 3, revision: 1,
+                description: "1.3.1 updated Server adding field " +
+                        "'ldapEnabledConsole'.")
+        v.save()
+    }
+
+    def void release2_1_0() {
+        if (isSchemaCurrent(2, 1, 0)) {
+            return
+        }
+        log.info("Applying 2.1.0 updates")
+
+        // initialize new useHttpV2 field; 
+        // if we are a replica and have replicated repos, the local HttpV2 usage needs to be 
+        // synced with the master
+        Server s = Server.getServer()
+        if (s) {
             s.useHttpV2 = true
+            s.dumpDir = ConfigUtil.dumpDirPath()
+            s.save(flush: true)
+
             if (serverConfService.syncReplicaConfigurationWithMaster()) {
                 lifecycleService.gracefulRestartServer()
             }
-        }
 
-        if (s.dumpDir == null) {
-            s.dumpDir = ConfigUtil.dumpDirPath()
             File dumpDir = new File(s.dumpDir)
             if (!dumpDir.exists()) {
                 dumpDir.mkdir()
             }
         }
 
-        s.save(flush:true)
+        SchemaVersion v = new SchemaVersion(major: 2, minor: 1, revision: 0,
+                description: "2.1.0 added Quartz tables and data; initialized Server.useHttpV2 field")
 
+        v.save()
 
     }
 }
