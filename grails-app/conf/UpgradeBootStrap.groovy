@@ -152,7 +152,7 @@ class UpgradeBootStrap {
         }
 
         SchemaVersion v = new SchemaVersion(major: 2, minor: 1, revision: 0,
-                description: "2.1.0 added Quartz tables and data; initialized Server.useHttpV2 field")
+                description: "2.1.0 added Quartz tables and data; initialized Server.useHttpV2 and Server.dumpDir fields")
 
         v.save()
 
