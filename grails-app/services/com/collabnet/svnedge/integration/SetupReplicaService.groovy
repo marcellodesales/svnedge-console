@@ -456,28 +456,52 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         }
     }
 
-    def saveCertificate(String currentlyAcceptedFingerPrint) {
+    def saveCertificate(String viewedFingerprint) {
         def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
         if (replicaConfiguration) {
             def ctfServer = CtfServer.getServer()
             def username = ctfServer.ctfUsername
             def password = securityService.decrypt(ctfServer.ctfPassword)
+            def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
+            if (acceptSslCertificate(svnUrl, username, password, viewedFingerprint)) {
+                replicaConfiguration.acceptedCertFingerPrint = viewedFingerprint
+                replicaConfiguration.save()
+            }            
+        }
+    }
+    
+    private boolean acceptSslCertificate(svnUrl, username, password, viewedFingerprint) {
+        if (!viewedFingerprint) {
+            throw new IllegalArgumentException("viewedFingerprint cannot be null")
+        }
+
+        boolean isAccepted = false
+        def command = [ConfigUtil.svnPath(), "--config-dir",
+            ConfigUtil.svnConfigDirPath(), "ls", svnUrl,
+            "--username", username, "--password", password]
+        Process p = commandLineService.startProcess(command, [LANG:"en_US.utf8"], true)
+        StringBuffer outBuffer = new StringBuffer(512)
+        StringBuffer errorBuffer = new StringBuffer(512)
+        p.consumeProcessOutput(outBuffer, errorBuffer)
+
+        def currentFingerprint = null
+        // give several minutes for response
+        def limit = 300 * 1000
+        def waitTime = 400
+        while (viewedFingerprint != currentFingerprint && waitTime < limit) {
+            Thread.sleep(waitTime)
+            def cert = parseCertificate(errorBuffer.toString())
+            currentFingerprint = cert.fingerprint
+            waitTime *= 2
+        }
+
+        if (viewedFingerprint == currentFingerprint) {
             def lineEnd = System.getProperty("line.separator")
             def acceptPermanently = "p" + lineEnd
-
-            def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
-            def certDetails = getCertDetails(svnUrl, username, password)
-            String currentFingerPrint = certDetails.fingerprint
-            if (currentFingerPrint == currentlyAcceptedFingerPrint) {
-                def command = [ConfigUtil.svnPath(), "--config-dir",
-                               ConfigUtil.svnConfigDirPath(), "ls", svnUrl,
-                               "--username", username, "--password", password]
-
-                String[] commandresponse =
-                    commandLineService.execute(command.toArray(new String[0]),
-                                               null, acceptPermanently, true)
-                replicaConfiguration.acceptedCertFingerPrint = currentFingerPrint
-            }
+            p.withWriter { it << acceptPermanently }
+            isAccepted = true
+            p.waitFor()
         }
+        return isAccepted
     }
 }
