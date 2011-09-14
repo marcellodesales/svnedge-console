@@ -40,8 +40,11 @@ goto loop2
 REM exit now if there are no updates
 if not exist "%_REALPATH%..\updates" goto noaction
 echo "Copying contents of updates folder" >> "%_LOG%"
-xcopy /S/E/R/Y/C "%_REALPATH%..\updates" "%_REALPATH%..\"  >> "%_LOG%" 2>&1
-goto cleanup
+xcopy /S/E/R/Y "%_REALPATH%..\updates" "%_REALPATH%..\"  >> "%_LOG%" 2>&1
+set _XCOPY_ERRORLEVEL=%ERRORLEVEL%
+if %_XCOPY_ERRORLEVEL% GEQ 2 goto logerror
+if %_XCOPY_ERRORLEVEL% EQU 1 goto noaction
+if %_XCOPY_ERRORLEVEL% EQU 0 goto cleanup
 
 :noaction
 echo "No updates on file system, exiting without taking any action" >> "%_LOG%"
@@ -51,6 +54,11 @@ goto exit
 REM Delete the updates folder
 echo "No errors.  Deleting updates folder." >> "%_LOG%"
 rmdir "%_REALPATH%..\updates" /Q/S >> "%_LOG%"
+goto exit
+
+:logerror
+echo "There was an XCOPY error applying the updates. Exit code: %_XCOPY_ERRORLEVEL%" >> "%_LOG%"
+goto exit
 
 :exit
 if %_APACHE_UPDATE%.==true. goto startserver
