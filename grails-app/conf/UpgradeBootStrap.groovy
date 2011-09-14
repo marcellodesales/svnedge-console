@@ -137,17 +137,17 @@ class UpgradeBootStrap {
         // synced with the master
         Server s = Server.getServer()
         if (s) {
+            File dumpDir = new File(ConfigUtil.dumpDirPath())
+            if (!dumpDir.exists()) {
+                dumpDir.mkdir()
+            }
+
             s.useHttpV2 = true
             s.dumpDir = ConfigUtil.dumpDirPath()
             s.save(flush: true)
 
             if (serverConfService.syncReplicaConfigurationWithMaster()) {
                 lifecycleService.gracefulRestartServer()
-            }
-
-            File dumpDir = new File(s.dumpDir)
-            if (!dumpDir.exists()) {
-                dumpDir.mkdir()
             }
         }
 
