@@ -816,7 +816,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                      Map options, OutputStream progress) {
 
         def cmd = [ConfigUtil.svnadminPath(), "load"]
-        if (options["ignoreUuid"] == "false") {
+        if (options["ignoreUuid"]) {
             cmd << "--ignore-uuid"
         }
         cmd << getRepositoryHomePath(repo)
