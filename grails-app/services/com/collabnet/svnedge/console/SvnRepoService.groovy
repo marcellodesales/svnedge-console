@@ -42,6 +42,7 @@ import org.quartz.CronTrigger;
 import org.quartz.SimpleTrigger
 import com.collabnet.svnedge.admin.RepoDumpJob
 import org.quartz.JobDataMap
+import com.collabnet.svnedge.admin.RepoLoadJob
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -763,33 +764,58 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return loadDir
     }
 
-    def scheduleLoad(Repository repo, Properties options) {
-        // TODO This should be handled via async job, but quick and dirty
-        // implementation ...
-        File progress = File.createTempFile("load-progress", ".txt")
-        progress.withOutputStream {
-            loadDumpFile(repo, options, it)
+    /**
+     * schedules the repo load operation for 5 seconds out, and returns
+     * @param repo the Repository to load
+     * @param options any parameters needed by the
+     * @return
+     */
+    def scheduleLoad(Repository repo, Map options) {
+        long startTime = System.currentTimeMillis() + 5000L;
+        def tName = "RepoLoad-${repo.name}"
+        def tGroup = "AdhocLoad"
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdir()
         }
+        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        def trigger = new SimpleTrigger(tName, tGroup, new Date(startTime))
+
+        trigger.setJobName(RepoLoadJob.name)
+        trigger.setJobGroup(RepoLoadJob.group)
+        def jobDataMap =
+                [id: "repoLoad-${repo.name}",
+                repoId: repo.id,
+                description: getMessage("repository.action.loadDumpFile.job.description",
+                    [repo.name], (options["locale"] ?: Locale.default) as Locale),
+                urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
+                progressLogFile: progressFile.absolutePath]
+
+        trigger.setJobDataMap(new JobDataMap(jobDataMap))
+
+        jobsAdminService.createOrReplaceTrigger(trigger)
     }
 
-    def loadDumpFile(Repository repo, Properties options, OutputStream progress) {
+    def loadDumpFile(Repository repo, Map options) {
+        File progress = new File(options["progressLogFile"])
         File loadDir = getLoadDirectory(repo)
         File[] files = loadDir.listFiles({ return it.isFile() } as FileFilter)
         if (files.length > 0) {
             File dumpFile = files[0]
             try {
-                loadDumpFile(dumpFile, repo, options, progress)
+                loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
             } finally {
                 dumpFile.delete()
+                progress.delete()
             }
         }
     }
        
     def loadDumpFile(File dumpFile, Repository repo, 
-                     Properties options, OutputStream progress) {
+                     Map options, OutputStream progress) {
 
         def cmd = [ConfigUtil.svnadminPath(), "load"]
-        if (options.getProperty("ignore-uuid", "false") == "true") {
+        if (options["ignore-uuid"] == "false") {
             cmd << "--ignore-uuid"
         }
         cmd << getRepositoryHomePath(repo)

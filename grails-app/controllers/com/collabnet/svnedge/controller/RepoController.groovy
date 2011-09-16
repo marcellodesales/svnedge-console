@@ -171,8 +171,9 @@ class RepoController {
                         .length == 0) {
                     uploadedFile.transferTo(
                         new File(loadDir, uploadedFile.originalFilename))
-                    Properties props = new Properties()
-                    props.setProperty("ignoreUUID", String.valueOf(ignoreUUID))
+                    def props = [:]
+                    props.put("ignoreUUID", String.valueOf(ignoreUUID))
+                    props.put("locale", request.locale)
                     svnRepoService.scheduleLoad(repo, props)
                     flash.unfiltered_message = message(
                         code: 'loadFileUpload.action.success', 

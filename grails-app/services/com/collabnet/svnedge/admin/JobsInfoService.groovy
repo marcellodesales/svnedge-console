@@ -37,7 +37,7 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     String name = "JobsInfoService"
 
     // Jobs we wish to observe
-    def interestingJobs = [RepoDumpJob]
+    def interestingJobs = [RepoDumpJob, RepoLoadJob]
 
     // scheduler upon which to register listener
     def quartzScheduler
