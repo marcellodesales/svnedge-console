@@ -89,6 +89,9 @@
                              <g:listViewActionButton action="dumpOptions" minSelected="1" maxSelected="1">
                                <g:message code="repository.page.list.button.dump.label"/>
                              </g:listViewActionButton>
+                             <g:listViewActionButton action="loadOptions" minSelected="1" maxSelected="1">
+                               <g:message code="repository.page.list.button.load.label"/>
+                             </g:listViewActionButton>
                          </div>
                          </g:ifAnyGranted>
 

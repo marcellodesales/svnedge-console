@@ -753,7 +753,55 @@ class SvnRepoService extends AbstractSvnEdgeService {
     private String getProgressLogFileName(repoName) {
         return "bkup-progress-" + repoName + ".log"
     }
-                
+
+    File getLoadDirectory(Repository repo) {
+        File dumpDir = new File(Server.getServer().dumpDir, repo.name)
+        File loadDir = new File(dumpDir, "load")
+        if (!loadDir.exists()) {
+            loadDir.mkdirs()
+        }
+        return loadDir
+    }
+
+    def scheduleLoad(Repository repo, Properties options) {
+        // TODO This should be handled via async job, but quick and dirty
+        // implementation ...
+        File progress = File.createTempFile("load-progress", ".txt")
+        progress.withOutputStream {
+            loadDumpFile(repo, options, it)
+        }
+    }
+
+    def loadDumpFile(Repository repo, Properties options, OutputStream progress) {
+        File loadDir = getLoadDirectory(repo)
+        File[] files = loadDir.listFiles({ return it.isFile() } as FileFilter)
+        if (files.length > 0) {
+            File dumpFile = files[0]
+            try {
+                loadDumpFile(dumpFile, repo, options, progress)
+            } finally {
+                dumpFile.delete()
+            }
+        }
+    }
+       
+    def loadDumpFile(File dumpFile, Repository repo, 
+                     Properties options, OutputStream progress) {
+
+        def cmd = [ConfigUtil.svnadminPath(), "load"]
+        if (options.getProperty("ignore-uuid", "false") == "true") {
+            cmd << "--ignore-uuid"
+        }
+        cmd << getRepositoryHomePath(repo)
+        Process p = null
+        dumpFile.withInputStream {
+            p = commandLineService
+                .startProcessWithInputStream(cmd, it, progress)
+        }
+        p.waitFor()
+    }
+    
+    
     /**
      * Method to invoke "svnadmin dump" possibly piped through svndumpfilter
      * 

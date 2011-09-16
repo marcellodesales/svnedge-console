@@ -98,10 +98,9 @@ class RepoController {
         redirect(action: list, params: params)
     }
 
-    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
-    def dumpOptions = {
+    private Repository selectRepository() {
         def id = params.id
-        def repo = Repository.get(id)
+        Repository repo = Repository.get(id)
         if (!repo) {
             def ids = ControllerUtil.getListViewSelectedIds(params)
             if (!ids) {
@@ -119,12 +118,81 @@ class RepoController {
                 repo = Repository.get(id)
             }
         }
-        if (!repo) {
+        if (!repo && !flash.error) {
             flash.error = message(code: 'repository.action.not.found',
-                    args: [id])
+                args: [id])
             redirect(action: list)
+        }
+        return repo
+    }
 
-        } else {
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def loadOptions = {
+        def repo = selectRepository()
+        if (repo) {
+            File loadDir = svnRepoService.getLoadDirectory(repo)
+            if (loadDir.listFiles({ return it.isFile() } as FileFilter)
+                    .length == 0) {
+                def repoParentDir = serverConfService.server.repoParentDir
+                def repoPath = new File(repoParentDir, repo.name).absolutePath
+                def headRev = svnRepoService.findHeadRev(repo)
+                def repoUUID = svnRepoService.getReposUUID(repo)
+                return [repositoryInstance: repo,
+                    repoPath: repoPath,
+                    headRev: headRev,
+                    repoUUID: repoUUID
+                ]
+            } else {
+                flash.unfiltered_error =  message(
+                    code: 'loadFileUpload.action.multiple.load.unsupported',
+                    args: [createLink(controller: 'job', action: 'list')])
+                redirect(action: list)                
+            }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def loadFileUpload = {
+        if (params.cancelButton) {
+            redirect(action: list)
+            return
+        }
+        def repo = selectRepository()
+        if (repo) {
+            boolean ignoreUUID = params.ignoreUuid
+            def uploadedFile = request.getFile('dumpFile')
+            if (uploadedFile.empty) {
+                flash.error = message(code:
+                    'loadFileUpload.action.no.file')
+                redirect(action: loadOptions, id: repo.id)
+            } else {
+                File loadDir = svnRepoService.getLoadDirectory(repo)
+                if (loadDir.listFiles({ return it.isFile() } as FileFilter)
+                        .length == 0) {
+                    uploadedFile.transferTo(
+                        new File(loadDir, uploadedFile.originalFilename))
+                    Properties props = new Properties()
+                    props.setProperty("ignoreUUID", String.valueOf(ignoreUUID))
+                    svnRepoService.scheduleLoad(repo, props)
+                    flash.unfiltered_message = message(
+                        code: 'loadFileUpload.action.success', 
+                        args: [repo.name.encodeAsHTML(), 
+                               createLink(controller: 'job', action: 'list')])
+                    redirect(action: list)
+                } else {
+                    flash.error = message(code: 
+                        'loadFileUpload.action.multiple.load.unsupported',
+                        args: [createLink(controller: 'job', action: 'list')])
+                    redirect(action: list)
+                }
+            }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def dumpOptions = {
+        def repo = selectRepository()
+        if (repo) {
             def repoParentDir = serverConfService.server.repoParentDir
             def repoPath = new File(repoParentDir, repo.name).absolutePath
             def headRev = svnRepoService.findHeadRev(repo)

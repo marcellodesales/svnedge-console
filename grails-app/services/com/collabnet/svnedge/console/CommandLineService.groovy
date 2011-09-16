@@ -158,6 +158,36 @@ class CommandLineService {
         }
         return pb.start()
     }
+
+    Process startProcessWithInputStream(List command, InputStream input, 
+        OutputStream out = null, OutputStream err = null, Map<String, String> addEnv=null,
+        boolean quiet=false) {
+    
+        Process p = startProcess(command as String[], addEnv, quiet)
+        if (input) {
+            runAsync { 
+                try {
+                    p.out << input
+                } catch (IOException e) {
+                    if (e.message == "Stream closed") {
+                        log.warn("Command line stdin closed before input was consumed.")
+                    } else {
+                        log.warn(e.message, e)
+                    }
+                } finally {
+                    p.out.close()
+                }
+            }
+        }
+        if (out && err) {
+            p.consumeProcessOutput(out, err)
+        } else if (out) {
+            p.consumeProcessOutput(out, out)
+        } else {
+            p.consumeProcessOutput()
+        }
+        return p
+    }
     
     private static final Pattern PASSWORD_PATTERN = 
         Pattern.compile("sorry|password", Pattern.CASE_INSENSITIVE)
