@@ -786,6 +786,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def jobDataMap =
                 [id: "repoLoad-${repo.name}",
                 repoId: repo.id,
+                ignoreUuid: options["ignoreUuid"],
                 description: getMessage("repository.action.loadDumpFile.job.description",
                     [repo.name], (options["locale"] ?: Locale.default) as Locale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
@@ -815,7 +816,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                      Map options, OutputStream progress) {
 
         def cmd = [ConfigUtil.svnadminPath(), "load"]
-        if (options["ignore-uuid"] == "false") {
+        if (options["ignoreUuid"] == "false") {
             cmd << "--ignore-uuid"
         }
         cmd << getRepositoryHomePath(repo)
