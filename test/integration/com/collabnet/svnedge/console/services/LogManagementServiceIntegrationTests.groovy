@@ -87,5 +87,19 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
 
     }
 
+    void testBootstrap() {
+
+        File tempLogs = new File(ConfigUtil.logsDirPath(), "temp")
+        if (tempLogs.exists()) {
+            tempLogs.eachFile { it.delete() }
+            tempLogs.deleteDir()
+        }
+
+        assertFalse("The temp log folder should not exist", tempLogs.exists())
+        logManagementService.bootstrap()
+        assertTrue("The temp log dir should now exist", tempLogs.exists())
+
+    }
+
 }
 
