@@ -271,7 +271,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         def output = commandLineService.executeWithOutput(
             ConfigUtil.svnPath(), "info",
             "--no-auth-cache", "--non-interactive",
-                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "/trunk")
+                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
         assertFalse "svn info output should not contain node info for 'trunk'", output.contains("Node Kind: directory")
 
@@ -297,7 +297,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         output = commandLineService.executeWithOutput(
             ConfigUtil.svnPath(), "info",
             "--no-auth-cache", "--non-interactive",
-                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "/trunk")
+                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
         assertTrue "svn info output should now contain node info for 'trunk'", output.contains("Node Kind: directory")
     }
