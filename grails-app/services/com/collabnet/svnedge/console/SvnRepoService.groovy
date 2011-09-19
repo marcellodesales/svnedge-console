@@ -745,9 +745,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
         
     File prepareProgressLogFile(repoName) {        
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        if (!tempLogDir.exists()) {
-            tempLogDir.mkdir()
-        }
         return new File(tempLogDir, getProgressLogFileName(repoName))
     }
 
@@ -775,9 +772,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def tName = "RepoLoad-${repo.name}"
         def tGroup = "AdhocLoad"
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        if (!tempLogDir.exists()) {
-            tempLogDir.mkdir()
-        }
         def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
         def trigger = new SimpleTrigger(tName, tGroup, new Date(startTime))
 

@@ -575,9 +575,6 @@ abstract class AbstractCommand {
     protected File getCommandOutputFile() {
         File logDir = new File(ConfigUtil.dataDirPath(), "logs")
         File tempLogDir = new File("temp", logDir)
-        if (!tempLogDir.exists()) {
-            tempLogDir.mkdir()
-        }
         return new File("${this.id}.log", tempLogDir)
     }
 

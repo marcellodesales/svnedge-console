@@ -61,6 +61,12 @@ class LogManagementService {
             setConsoleLevel(consoleLogLevel)
         }
         jobsAdminService.createOrReplaceTrigger(LogRotateJob.createTrigger())
+
+        // ensure the existence of the temp logs directory
+        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdir()
+        }
     }
 
     /**
