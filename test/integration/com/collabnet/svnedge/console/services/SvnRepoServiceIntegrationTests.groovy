@@ -245,6 +245,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         Repository repoSrc = new Repository(name: testRepoNameSrc)
         assertEquals "Failed to create src repository.", 0,
             svnRepoService.createRepository(repoSrc, true)
+        repoSrc.save()
 
         DumpBean params = new DumpBean()
         params.compress = false
@@ -267,31 +268,39 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         Repository repoTarget = new Repository(name: testRepoNameTarget)
         assertEquals "Failed to create target repository.", 0,
             svnRepoService.createRepository(repoTarget, false)
+        repoTarget.save(flush:true)
 
         def output = commandLineService.executeWithOutput(
             ConfigUtil.svnPath(), "info",
             "--no-auth-cache", "--non-interactive",
                 commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
+        // verify no 'trunk' folder
         assertFalse "svn info output should not contain node info for 'trunk'", output.contains("Node Kind: directory")
 
-
-        // move src dump file to the expected location for target
+        // move src dump file to the expected load location for target
         File loadDir = svnRepoService.getLoadDirectory(repoTarget)
-        File dest = new File(loadDir, dumpFile.name)
-        boolean loadFileCreated = dumpFile.renameTo(dest)
+        // delete any residual load files
+        loadDir.eachFile {
+            it.delete()
+        }
+        File loadFile = new File(loadDir, dumpFile.name)
+        boolean loadFileCreated = dumpFile.renameTo(loadFile)
         assertTrue "should be able to move dumpfile to load directory", loadFileCreated
+        assertTrue "loadFile should exist", loadFile.exists()
 
         // load it
         def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
         def options = ["progressLogFile": progressFile.absolutePath]
-        svnRepoService.loadDumpFile(repoTarget, options)
+        options << ["ignoreUuid": true]
+        svnRepoService.scheduleLoad(repoTarget, options)
         // Async so wait for it
-        while (dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
+        timeLimit = System.currentTimeMillis() + 30000
+        while (loadFile.exists() && System.currentTimeMillis() < timeLimit) {
             Thread.sleep(250)
         }
-        assertFalse ("load file should be deleted after loading", dumpFile.exists())
+        assertFalse ("load file should be deleted after loading", loadFile.exists())
 
         // verify target repo and check for trunk/tags/branches which should have been imported
         output = commandLineService.executeWithOutput(
