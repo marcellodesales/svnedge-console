@@ -297,24 +297,27 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
         def options = ["progressLogFile": progressFile.absolutePath]
-        options << ["ignoreUuid": true]
+        options << ["ignoreUuid": false]
         svnRepoService.scheduleLoad(repoTarget, options)
-        // Async so wait for it
+
+        // verify that repo load has run (trunk/tags/branches which should have been imported)
+        Thread.sleep(5000)
+        boolean loadSuccess = false
         timeLimit = System.currentTimeMillis() + 60000
-        while (loadFile.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
+        while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(500)
+            output = commandLineService.executeWithOutput(
+                    ConfigUtil.svnPath(), "info",
+                    "--no-auth-cache", "--non-interactive",
+                    commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+            loadSuccess = output.contains("Node Kind: directory")
         }
+
         println "======> load progress"
         println progressFile.text
-        assertFalse("load file should be deleted after loading", loadFile.exists())
-
-        // verify target repo and check for trunk/tags/branches which should have been imported
-        output = commandLineService.executeWithOutput(
-                ConfigUtil.svnPath(), "info",
-                "--no-auth-cache", "--non-interactive",
-                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
-
-        assertTrue "svn info output should now contain node info for 'trunk'", output.contains("Node Kind: directory")
+        assertFalse "load file should be deleted after loading", loadFile.exists()
+        assertTrue "the target repo should have nodes from the src after loading", loadSuccess
     }
 
     private File createTestDir(String prefix) {
