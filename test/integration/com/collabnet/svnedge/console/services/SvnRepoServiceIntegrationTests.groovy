@@ -33,6 +33,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
     CommandLineService commandLineService
     OperatingSystemService operatingSystemService
     LifecycleService lifecycleService
+    def quartzScheduler
     def repoParentDir
     boolean initialStarted
 
@@ -239,8 +240,12 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     public void testLoad() {
 
-        // first create a dump file of a src repo with branches/tags/trunk nodes
+        // upper limit on time to run async code
         long timeLimit = System.currentTimeMillis() + 30000
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+
+        // create a dump file of a src repo with branches/tags/trunk nodes
         def testRepoNameSrc = "load-test-src"
         Repository repoSrc = new Repository(name: testRepoNameSrc)
         assertEquals "Failed to create src repository.", 0,
