@@ -19,6 +19,9 @@
 import grails.util.Environment
 
 beans = {
+    multipartResolver(com.collabnet.svnedge.util.ProgressCommonsMultipartResolver) {
+    }
+
     ctfAuthenticationProvider(com.collabnet.svnedge.integration.security.CtfAuthenticationProvider) {
         ctfRemoteClientService = ref("ctfRemoteClientService")
     }

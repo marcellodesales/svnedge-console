@@ -131,8 +131,8 @@ class RepoController {
         def repo = selectRepository()
         if (repo) {
             File loadDir = svnRepoService.getLoadDirectory(repo)
-            if (loadDir.listFiles({ return it.isFile() } as FileFilter)
-                    .length == 0) {
+            if (!session["loadRepo" + repo.id] &&
+                    !isLoadInProgress(repo, loadDir)) {
                 def repoParentDir = serverConfService.server.repoParentDir
                 def repoPath = new File(repoParentDir, repo.name).absolutePath
                 def headRev = svnRepoService.findHeadRev(repo)
@@ -140,7 +140,8 @@ class RepoController {
                 return [repositoryInstance: repo,
                     repoPath: repoPath,
                     headRev: headRev,
-                    repoUUID: repoUUID
+                    repoUUID: repoUUID,
+                    uploadProgressKey: "loadRepo" + repo.id
                 ]
             } else {
                 flash.unfiltered_error =  message(
@@ -158,37 +159,57 @@ class RepoController {
             return
         }
         def repo = selectRepository()
-        if (repo) {
-            boolean ignoreUUID = params.ignoreUuid
-            def uploadedFile = request.getFile('dumpFile')
-            if (uploadedFile.empty) {
-                flash.error = message(code:
-                    'loadFileUpload.action.no.file')
-                redirect(action: loadOptions, id: repo.id)
+        try {
+            if (repo) {
+                handleLoadFileUpload(repo)
+            }
+        } finally {
+            session.removeAttribute("loadRepo" + repo.id)
+        }
+    }
+
+    private void handleLoadFileUpload(repo) {
+        boolean ignoreUUID = params.ignoreUuid
+        def uploadedFile = request.getFile('dumpFile')
+        if (uploadedFile.empty) {
+            flash.error = message(code: 'loadFileUpload.action.no.file')
+            redirect(action: loadOptions, id: repo.id)
+        } else {
+            File loadDir = svnRepoService.getLoadDirectory(repo)
+            if (!isLoadInProgress(repo, loadDir)) {
+                uploadedFile.transferTo(
+                    new File(loadDir, uploadedFile.originalFilename))
+                def props = [:]
+                props.put("ignoreUuid", ignoreUUID)
+                props.put("locale", request.locale)
+                svnRepoService.scheduleLoad(repo, props)
+                flash.unfiltered_message = message(
+                    code: 'loadFileUpload.action.success', 
+                    args: [repo.name.encodeAsHTML(), 
+                           createLink(controller: 'job', action: 'list')])
+                redirect(action: list)
             } else {
-                File loadDir = svnRepoService.getLoadDirectory(repo)
-                if (loadDir.listFiles({ return it.isFile() } as FileFilter)
-                        .length == 0) {
-                    uploadedFile.transferTo(
-                        new File(loadDir, uploadedFile.originalFilename))
-                    def props = [:]
-                    props.put("ignoreUuid", ignoreUUID)
-                    props.put("locale", request.locale)
-                    svnRepoService.scheduleLoad(repo, props)
-                    flash.unfiltered_message = message(
-                        code: 'loadFileUpload.action.success', 
-                        args: [repo.name.encodeAsHTML(), 
-                               createLink(controller: 'job', action: 'list')])
-                    redirect(action: list)
-                } else {
-                    flash.error = message(code: 
-                        'loadFileUpload.action.multiple.load.unsupported',
-                        args: [createLink(controller: 'job', action: 'list')])
-                    redirect(action: list)
-                }
+                flash.unfiltered_error = message(code: 
+                    'loadFileUpload.action.multiple.load.unsupported',
+                    args: [createLink(controller: 'job', action: 'list')])
+                redirect(action: list)
             }
         }
     }
+
+    private boolean isLoadInProgress(repo, loadDir) {
+        return loadDir.listFiles({ return it.isFile() } as FileFilter)
+            .length > 0
+    }
+
+    def uploadProgress = {
+        def key = params.uploadProgressKey
+        response.addHeader("Cache-Control", "max-age=0,no-cache,no-store")
+        render(contentType:"text/json") {
+            uploadStats(session[key])
+        }
+    }
+
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def dumpOptions = {

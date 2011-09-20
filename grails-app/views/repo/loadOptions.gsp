@@ -4,6 +4,43 @@
         <meta name="layout" content="main" />
         <title><g:message code="repository.page.load.title" /></title>
         <g:javascript library="prototype" />
+        
+        <g:javascript>
+/** Handle for the polling function */
+var periodicUpdater
+
+// instantiate the polling task on load
+Event.observe(window, 'load', function() {
+    $('loadButton').onclick = function() {
+        // doing this in a timer to workaround FF issue where image will not load
+        setTimeout(function() { 
+            $('uploadProgress').innerHTML = 
+                '<img class="spinner" align="absmiddle" src="/csvn/images/spinner.gif" alt="" /><g:message code="repository.page.load.uploading.ellipses"/>&nbsp;<span id="percentComplete"></span>';
+        }, 100);
+        return true;
+    }
+    
+    $('loadFileUpload').onsubmit = function() {
+        $('loadButton').disabled = true;
+        periodicUpdater = new PeriodicalExecuter(fetchUploadProgress, 5);
+        return true;
+    }        
+})
+
+/** function to fetch replication info and update ui */
+function fetchUploadProgress() {
+    new Ajax.Request('/csvn/repo/uploadProgress', {
+        method:'get',
+        parameters: {uploadProgressKey:'${uploadProgressKey}', avoidCache: new Date().getTime()},
+        requestHeaders: {Accept: 'text/json'},
+        onSuccess: function(transport) {
+            responseData = transport.responseText.evalJSON(true);
+            percentComplete = responseData.uploadStats.percentComplete;
+            $('percentComplete').innerHTML = percentComplete + '%';
+        }
+    })
+}
+        </g:javascript>
     </head>
 
 <g:render template="leftNav" />
@@ -58,7 +95,7 @@
       </tbody>
     </table>
 
-    <g:uploadForm action="loadFileUpload">
+    <g:uploadForm action="loadFileUpload" name="loadFileUpload" params="${[uploadProgressKey: uploadProgressKey]}">
     <table id="dumpOptionsTable" class="ItemDetailContainer">
       <thead>
         <tr class="ContainerHeader">
@@ -75,16 +112,19 @@
                     <label for="dumpFile"><g:message code="repository.page.load.fileupload.label" /></label>
                   </td>
                   <td valign="top" class="value">
-                    <input name="dumpFile" id="dumpFile" type="file"/>
+                    <input style="float: left" name="dumpFile" id="dumpFile" type="file"/>
                   </td>
-                  <td class="ItemDetailValue"><g:message code="repository.page.load.fileupload.tip" /></td>
+                  <td valign="top" class="value">                  
+                        <span id="uploadProgress"></span>
+                   </td>
+                  <td class="ItemDetailValue"><g:message code="repository.page.load.fileupload.tip" /> </td>
                 </tr>
 
                 <tr>
                   <td class="ItemDetailName">
                     <label for="ignoreUuid"><g:message code="repository.page.load.ignoreUuid.label" /></label>
                   </td>
-                  <td class="value">
+                  <td class="value" colspan="2">
                     <g:checkBox name="ignoreUuid" id="ignoreUuid" value="${params.ignoreUuid}"/>
                   </td>
                   <td class="ItemDetailValue">
@@ -97,7 +137,7 @@
                     <div class="AlignRight">
                         <input type="hidden" name="id" value="${repositoryInstance?.id}" />
                         <span><g:submitButton name="cancelButton" value="${message(code:'default.confirmation.cancel')}" class="Button"/></span>
-                        <span><g:submitButton name="dumpButton" value="${message(code:'repository.page.load.button.label')}" class="Button"/></span>
+                        <span><g:submitButton id="loadButton" name="loadButton" value="${message(code:'repository.page.load.button.label')}" class="Button"/></span>
                     </div>
                   </td>
                 </tr>
@@ -109,27 +149,6 @@
   </table> <!-- loadOptionsTable -->
   </g:uploadForm>                
 
-</div>  
-
-<g:javascript>
-    function filterHandler() {
-      if ($('filter').checked) {
-        $('filterOptions').style.display = 'block';
-        $('filterOptionsSpacer').style.display = 'block';
-      } else {
-        $('filterOptions').style.display = 'none';
-        $('filterOptionsSpacer').style.display = 'none';
-      }
-    }
-    //$('filter').onchange = filterHandler
-
-    function loadHandler() {
-        //filterHandler();
-    }
-    Event.observe(window, 'load', loadHandler);    
-
-  </g:javascript>
-
-
+</div>
 </body>
 </html>
