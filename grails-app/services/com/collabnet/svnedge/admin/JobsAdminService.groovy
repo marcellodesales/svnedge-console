@@ -18,8 +18,8 @@
 package com.collabnet.svnedge.admin
 
 
-import com.collabnet.svnedge.domain.Server 
-import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 import java.text.SimpleDateFormat
 import org.quartz.Trigger
 
@@ -33,12 +33,12 @@ class JobsAdminService {
     boolean transactional = true
 
     def quartzScheduler
-    
+
     def anyJobsRunning
     def anyJobsPaused
 
     private static final SimpleDateFormat FORMATTER = new SimpleDateFormat(
-            "MMM dd, yyyy HH:mm:ss") 
+            "MMM dd, yyyy HH:mm:ss")
 
     def bootStrap = {
         log.info("Bootstrapping jobs...")
@@ -52,7 +52,7 @@ class JobsAdminService {
         if (server.mode != ServerMode.REPLICA) {
             log.info("Replication jobs are paused in server mode ${server.mode}")
             pauseGroup(REPLICA_GROUP)
-        } 
+        }
         else {
             log.info("Replication jobs are running")
         }
@@ -66,14 +66,14 @@ class JobsAdminService {
     def getHumanReadableSummary() {
         def metaData = quartzScheduler.getMetaData()
         return "Running since: ${metaData.runningSince}<br/>" +
-            "Standby mode: ${metaData.inStandbyMode}<br/>" +
-            "Number of jobs executed: ${metaData.numberOfJobsExecuted}"
+                "Standby mode: ${metaData.inStandbyMode}<br/>" +
+                "Number of jobs executed: ${metaData.numberOfJobsExecuted}"
     }
 
     def getJobSimpleDetails(executingContext) {
         def jobDetail = [name: executingContext.getJobDetail().getName(),
                 group: executingContext.getJobDetail().getGroup(),
-                description:executingContext.getJobDetail().getDescription()] 
+                description: executingContext.getJobDetail().getDescription()]
         return jobDetail
     }
 
@@ -104,18 +104,18 @@ class JobsAdminService {
         return [name: trigger.getName(), group: trigger.getGroup(),
                 jobName: trigger.getJobName(), jobGroup: trigger.getJobGroup(),
                 description: description, startTime: startTime,
-                nextFireTime: nextFireTime, previousFireTime: previousFireTime] 
+                nextFireTime: nextFireTime, previousFireTime: previousFireTime]
     }
 
     def getTriggerStateString(stateInt) {
         switch (stateInt) {
-            case Trigger.STATE_NORMAL : 
+            case Trigger.STATE_NORMAL:
                 anyJobsRunning = true
                 return "Running"
-            case Trigger.STATE_PAUSED : 
+            case Trigger.STATE_PAUSED:
                 anyJobsPaused = true
                 return "Paused"
-            case Trigger.STATE_COMPLETE : return "Just finished"
+            case Trigger.STATE_COMPLETE: return "Just finished"
         }
     }
 
@@ -128,7 +128,7 @@ class JobsAdminService {
     }
 
     def getTriggerDetailsFromScheduler(trigger) {
-        def stateInt = quartzScheduler.getTriggerState(trigger.getName(), 
+        def stateInt = quartzScheduler.getTriggerState(trigger.getName(),
                 trigger.getGroup())
         return [state: getTriggerStateString(stateInt)]
     }
@@ -138,30 +138,30 @@ class JobsAdminService {
         //trigger group names (paused or not)
         def triggerGroupNames = quartzScheduler.getTriggerGroupNames()
         for (triggerGroupName in triggerGroupNames) {
-                def triggerNames = quartzScheduler.getTriggerNames(triggerGroupName)
-                anyJobsRunning = false
-                anyJobsPaused = false
-                for (triggerName in triggerNames) {
-                    def trigger = getTrigger(triggerName, triggerGroupName)
-                    def triggerDetails = getTriggerDetailsFromInstance(trigger)
-                    triggerDetails.putAll(getTriggerDetailsFromScheduler(trigger))
-            
-                    def group = jobsTriggers[triggerDetails.jobGroup] ?: [:]
-                    group["triggerState"] = triggerDetails.state
-                    def job = group[triggerDetails.jobName] ?: []
-                    job << triggerDetails
-                    group[triggerDetails.jobName] = job
-                    jobsTriggers[triggerDetails.jobGroup] = group
-                }
+            def triggerNames = quartzScheduler.getTriggerNames(triggerGroupName)
+            anyJobsRunning = false
+            anyJobsPaused = false
+            for (triggerName in triggerNames) {
+                def trigger = getTrigger(triggerName, triggerGroupName)
+                def triggerDetails = getTriggerDetailsFromInstance(trigger)
+                triggerDetails.putAll(getTriggerDetailsFromScheduler(trigger))
+
+                def group = jobsTriggers[triggerDetails.jobGroup] ?: [:]
+                group["triggerState"] = triggerDetails.state
+                def job = group[triggerDetails.jobName] ?: []
+                job << triggerDetails
+                group[triggerDetails.jobName] = job
+                jobsTriggers[triggerDetails.jobGroup] = group
+            }
         }
 
-        
+
         return jobsTriggers
     }
 
     def getJobExecutionDetails(context) {
         return [fireTime: FORMATTER.format(context.getFireTime()),
-                ranTime: context.getJobRunTime(), 
+                ranTime: context.getJobRunTime(),
                 nextFireTime: FORMATTER.format(context.getNextFireTime()),
                 prevFireTime: FORMATTER.format(context.getPreviousFireTime()),
                 fireCounter: context.getRefireCount()]
@@ -178,14 +178,14 @@ class JobsAdminService {
                     def simpleDetails = getJobSimpleDetails(execContext)
                     def executionDetails = getJobExecutionDetails(execContext)
                     executionDetails.putAll(simpleDetails)
-    
+
                     //building the response map
                     def previousList = groups[simpleDetails.group]
                     previousList << executionDetails
                     groups[simpleDetails.group] = previousList
-                } 
+                }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error(e)
         }
         return groups
@@ -193,19 +193,19 @@ class JobsAdminService {
 
     def updateJobsScheduler(groupName, operation) {
         if (operation == "pauseAll") {
-              if (groupName) {
-                  pauseGroup(groupName)
-              } else {
-                  pauseAll()
-              }
+            if (groupName) {
+                pauseGroup(groupName)
+            } else {
+                pauseAll()
+            }
         } else
         if (operation == "resumeAll") {
             if (groupName) {
                 resumeGroup(groupName)
             } else {
                 resumeAll()
-            } 
-        } 
+            }
+        }
     }
 
     def pauseGroup(groupName) {
@@ -223,11 +223,13 @@ class JobsAdminService {
         def paused = quartzScheduler.getPausedTriggerGroups()
         def groups = []
         if (paused) {
-            for (def triggerGroup : paused) {
+            for (def triggerGroup: paused) {
                 def index = triggerGroup.indexOf("_Triggers")
-                def g = triggerGroup.substring(0, index)
-                if (index > 0 && groupsWithTriggers.contains(g)) {
-                    groups << g
+                if (index > 0) {
+                    def g = triggerGroup.substring(0, index)
+                    if (groupsWithTriggers.contains(g)) {
+                        groups << g
+                    }
                 }
             }
         }
@@ -257,8 +259,8 @@ class JobsAdminService {
             log.debug("Found trigger object ${trigger}")
             trigger.setRepeatInterval(newInterval)
             log.debug("Updated trigger with new interval of ${newInterval}")
-            quartzScheduler.rescheduleJob(triggerName, triggerGroupName, 
-                trigger);
+            quartzScheduler.rescheduleJob(triggerName, triggerGroupName,
+                    trigger);
             log.debug("Rescheduled the job for the trigger ${newInterval}")
         }
     }
@@ -270,7 +272,7 @@ class JobsAdminService {
      */
     def createOrReplaceTrigger(Trigger trigger) {
         def existingTrigger = getTrigger(trigger.name, trigger.group)
-        if (existingTrigger){
+        if (existingTrigger) {
             log.info("Updating ${trigger.name}")
             quartzScheduler.rescheduleJob(trigger.name, trigger.group, trigger)
         }
@@ -279,7 +281,6 @@ class JobsAdminService {
             quartzScheduler.scheduleJob(trigger)
         }
     }
-
 
     // reschedule unscheduled trigger (which should be associated with a job)
     def scheduleTrigger(Trigger trigger) {
@@ -298,7 +299,7 @@ class JobsAdminService {
     def getTriggerNamesInGroup(triggerGroup) {
         quartzScheduler.getTriggerNames(triggerGroup)
     }
-    
+
     def removeTrigger(triggerName, triggerGroup) {
         quartzScheduler.unscheduleJob(triggerName, triggerGroup)
     }
@@ -307,11 +308,10 @@ class JobsAdminService {
      * Returns job groups which include at least one job with a trigger.
      */
     def getJobGroupNames() {
-        def allGroups = quartzScheduler.getJobGroupNames() as List 
+        def allGroups = quartzScheduler.getJobGroupNames() as List
         return allGroups ? allGroups.findAll {
-            def triggerNames = quartzScheduler
-            .getTriggerNames(it + "_Triggers")
-            triggerNames && triggerNames.length > 0 
+            def triggerNames = quartzScheduler.getTriggerNames(it + "_Triggers")
+            triggerNames && triggerNames.length > 0
         } : []
     }
 
