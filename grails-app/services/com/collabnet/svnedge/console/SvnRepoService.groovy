@@ -30,12 +30,12 @@ import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
-import com.collabnet.svnedge.domain.Repository 
-import com.collabnet.svnedge.domain.Server 
-import com.collabnet.svnedge.domain.ServerMode 
-import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
-import com.collabnet.svnedge.domain.statistics.StatValue 
-import com.collabnet.svnedge.domain.statistics.Statistic 
+import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
+import com.collabnet.svnedge.domain.statistics.StatValue
+import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.util.ConfigUtil;
 
 import org.quartz.CronTrigger;
@@ -49,7 +49,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
     private static final String BACKUP_TRIGGER_GROUP = "Backup"
     private static final boolean ASCENDING = true
     private static final boolean DESCENDING = false
-    
 
     // service dependencies
     def operatingSystemService
@@ -61,7 +60,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
     boolean transactional = false
 
-
     /**
      * Returns repository feature for give FS format.
      *
@@ -72,27 +70,26 @@ class SvnRepoService extends AbstractSvnEdgeService {
      */
     def getRepoFeatures(Repository repo, int fsFormat) {
         def list = [
-         "",
-         "svndiff0",
-         "svndiff1",
-         "svndiff1, sharding, mergeinfo",
-         "svndiff1, sharding, mergeinfo, rep-sharing, packed revs",
-         "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
+                "",
+                "svndiff0",
+                "svndiff1",
+                "svndiff1, sharding, mergeinfo",
+                "svndiff1, sharding, mergeinfo, rep-sharing, packed revs",
+                "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
         ]
 
         def feature = ""
 
-        if (fsFormat <=1) {
-          feature = list.get(1)
+        if (fsFormat <= 1) {
+            feature = list.get(1)
         } else if (fsFormat >= list.size()) {
-          feature = list.get(list.size() -1) 
+            feature = list.get(list.size() - 1)
         } else {
-          feature = list.get(fsFormat)
+            feature = list.get(fsFormat)
         }
 
         return feature
     }
-
 
     /**
      * Returns repository UUID.
@@ -108,13 +105,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/uuid").canonicalPath)
         if (f.exists()) {
-           uuid = f.readLines()[0]
+            uuid = f.readLines()[0]
         } else {
-           log.warn("Missing $repoPath/db/uuid file...")
+            log.warn("Missing $repoPath/db/uuid file...")
         }
         return uuid
     }
-
 
     /**
      * Returns repository fstype.
@@ -130,17 +126,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         def f = new File(new File(repoPath, "db/fs-type").canonicalPath)
         if (f.exists()) {
-           try {
-               fsType = f.readLines()[0].toUpperCase()
-           } catch (e) {
-               log.debug("Reading from $repoPath/db/fs-type (" +
-                         e.getMessage() +  "), Assuming FSFS as FS-Type.")
-           }
+            try {
+                fsType = f.readLines()[0].toUpperCase()
+            } catch (e) {
+                log.debug("Reading from $repoPath/db/fs-type (" +
+                        e.getMessage() + "), Assuming FSFS as FS-Type.")
+            }
         } else {
-           log.warn("Missing $repoPath/db/fs-type file..." +
+            log.warn("Missing $repoPath/db/fs-type file..." +
                     ", Assuming FSFS as FS-Type.")
         }
-          
+
         return fsType
     }
 
@@ -159,20 +155,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def fsFormat = 1
         def f = new File(new File(repoPath, "db/format").canonicalPath)
         if (f.exists()) {
-           try {
-               fsFormat = f.readLines()[0].toInteger()
-           } catch (e) {
-               log.debug("Reading from $repoPath/db/format (" + e.getMessage() +
-                         "), Assuming repository fs format to be '1'.")
-               fsFormat = 1
-           }
+            try {
+                fsFormat = f.readLines()[0].toInteger()
+            } catch (e) {
+                log.debug("Reading from $repoPath/db/format (" + e.getMessage() +
+                        "), Assuming repository fs format to be '1'.")
+                fsFormat = 1
+            }
         } else {
-           log.warn("Missing $repoPath/db/format file..." +
+            log.warn("Missing $repoPath/db/format file..." +
                     ", Assuming repository fs format to be '1'.")
         }
         return fsFormat
     }
-
 
     /**
      * Checks rep-sharing is enabled or disabled.
@@ -186,32 +181,31 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repSharing = true
         def f = new File(new File(repoPath, "db/fsfs.conf").canonicalPath)
         if (!f.exists()) {
-           log.warn("Missing $repoPath/db/fsfs.conf file...")
-           return false
+            log.warn("Missing $repoPath/db/fsfs.conf file...")
+            return false
         }
         f.withReader {reader ->
-             String line
-             while ( (line = reader.readLine() ) != null ) {
-                    line = line.trim()
-                    if (line.matches("[# ]*enable-rep-sharing[ ]*=.*")) {
-                        if (line.startsWith("#")) {
-                            repSharing = true
+            String line
+            while ((line = reader.readLine()) != null) {
+                line = line.trim()
+                if (line.matches("[# ]*enable-rep-sharing[ ]*=.*")) {
+                    if (line.startsWith("#")) {
+                        repSharing = true
+                    } else {
+                        String[] strsplit = line.split("=")
+                        if (strsplit.length <= 2) {
+                            repSharing = Boolean.parseBoolean(strsplit[1].trim())
                         } else {
-                           String[] strsplit = line.split("=")
-                           if (strsplit.length <= 2){
-                              repSharing = Boolean.parseBoolean(strsplit[1].trim())
-                           } else {
-                              repSharing = true
-                           } 
+                            repSharing = true
                         }
-                        break
                     }
-             }
+                    break
+                }
+            }
         }
 
         return repSharing
     }
-
 
     /**
      * Returns repository format
@@ -225,20 +219,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def repoFormat = 0
         def f = new File(new File(repoPath, "format").canonicalPath)
         if (f.exists()) {
-           try {
-               repoFormat = f.readLines()[0].toInteger()
-           } catch (e) {
-               repoFormat = 0
-               log.debug("Reading from $repoPath/format (" + e.getMessage() +
-                         "), Assuming repository format to be '0'.")
-           }
+            try {
+                repoFormat = f.readLines()[0].toInteger()
+            } catch (e) {
+                repoFormat = 0
+                log.debug("Reading from $repoPath/format (" + e.getMessage() +
+                        "), Assuming repository format to be '0'.")
+            }
         } else {
-           log.warn("Missing $repoPath/format file..." +
+            log.warn("Missing $repoPath/format file..." +
                     ", Assuming repository format to be '0'.")
         }
         return repoFormat
     }
-
 
     /**
      * Returns Sharding information.
@@ -252,34 +245,33 @@ class SvnRepoService extends AbstractSvnEdgeService {
         def sharded = -1
 
         def f = new File(new File(repoPath, "db/format").canonicalPath)
-        if (! f.exists()) {
+        if (!f.exists()) {
             log.warn("Missing $repoPath/db/format file...")
             return -1
         }
 
-        try { 
+        try {
             f.withReader { reader ->
-                 String line
-                 while ( (line = reader.readLine() ) != null ) {
-                        line = line.trim()
-                        if (line.matches("^layout\\ sharded.*")) {
-                            String[] strsplit = line.split("\\ ")
-                            if (strsplit.length == 3) {
-                                sharded = strsplit[2].toLong()
-                            }
-                            break
+                String line
+                while ((line = reader.readLine()) != null) {
+                    line = line.trim()
+                    if (line.matches("^layout\\ sharded.*")) {
+                        String[] strsplit = line.split("\\ ")
+                        if (strsplit.length == 3) {
+                            sharded = strsplit[2].toLong()
                         }
-                 }
+                        break
+                    }
+                }
             }
         } catch (e) {
             sharded = -1
             log.debug("Reading from $repoPath/db/format (" + e.getMessage() +
-                      "), Assuming repository sharding disabled.")
+                    "), Assuming repository sharding disabled.")
         }
 
         return sharded
     }
-
 
     /**
      * Returns the current head revision.
@@ -290,7 +282,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def findHeadRev(Repository repo) {
         return findHeadRev(this.getRepositoryHomePath(repo))
     }
-    
+
     private findHeadRev(String repoPath) {
         def f = new File(repoPath, "db/current")
         if (!f.exists()) {
@@ -299,10 +291,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
 
         try {
-           String[] strsplit = f.readLines()[0].split("\\ ")
-           return strsplit[0].toInteger()
+            String[] strsplit = f.readLines()[0].split("\\ ")
+            return strsplit[0].toInteger()
         } catch (Exception e) {
-            log.error("Can't find head revision for repository " +  repoPath)
+            log.error("Can't find head revision for repository " + repoPath)
             return 0
         }
     }
@@ -324,9 +316,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         try {
             return (f.readLines()[0]).toInteger()
-        } catch (e) {  
+        } catch (e) {
             log.debug("Reading from $repoPath/db/min-unpacked-rev (" +
-                     e.getMessage() + "), Assuming min-unpacked-rev to be '0'.")
+                    e.getMessage() + "), Assuming min-unpacked-rev to be '0'.")
             return 0
         }
     }
@@ -340,7 +332,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def createRepository(Repository repo, boolean useTemplate) {
         def repoPath = this.getRepositoryHomePath(repo)
         def exitStatus = commandLineService.executeWithStatus(
-            ConfigUtil.svnadminPath(), "create", repoPath)
+                ConfigUtil.svnadminPath(), "create", repoPath)
         if (exitStatus == 0 && useTemplate) {
             log.debug("Created repository " + repoPath +
                     ". Adding default paths...")
@@ -358,23 +350,23 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
-    * Runs svnadmin verify on a repository.
-    *
-    * @return true, if no errors
-    */
-   def verifyRepository(Repository repo) {
-       def repoPath = this.getRepositoryHomePath(repo)
-       return verifyRepository(repoPath)
-   }
+     * Runs svnadmin verify on a repository.
+     *
+     * @return true , if no errors
+     */
+    def verifyRepository(Repository repo) {
+        def repoPath = this.getRepositoryHomePath(repo)
+        return verifyRepository(repoPath)
+    }
 
-   private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
-       def exitStatus = (progress == null) ? 
-           commandLineService.executeWithStatus(
-               ConfigUtil.svnadminPath(), "verify", repoPath) :
-           commandLineService.execute([ConfigUtil.svnadminPath(), 
-               "verify", repoPath], progress, progress)[0] as Integer
-       return (exitStatus == 0)
-   }
+    private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
+        def exitStatus = (progress == null) ?
+            commandLineService.executeWithStatus(
+                    ConfigUtil.svnadminPath(), "verify", repoPath) :
+            commandLineService.execute([ConfigUtil.svnadminPath(),
+                    "verify", repoPath], progress, progress)[0] as Integer
+        return (exitStatus == 0)
+    }
 
     /**
      * @param repo is the instance of a repository.
@@ -394,8 +386,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def archivePhysicalRepository(Repository repo) {
         def server = lifecycleService.getServer()
         File repoToDelete = new File(this.getRepositoryHomePath(repo))
-        File f = new File(new File(server.repoParentDir).getParentFile(), 
-            "deleted-repos")
+        File f = new File(new File(server.repoParentDir).getParentFile(),
+                "deleted-repos")
         if (!f.exists()) {
             f.mkdir()
         }
@@ -419,11 +411,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return repoToDelete.deleteDir();
     }
 
-   /**
-    * Removes a Repository from the DB (no SVN or filesystem action is taken) by
-    * properly handling constraints that prevent direct delete
-    * @param r
-    */
+    /**
+     * Removes a Repository from the DB (no SVN or filesystem action is taken) by
+     * properly handling constraints that prevent direct delete
+     * @param r
+     */
     def removeRepository(Repository repo) {
 
         // delete FK'd stats first
@@ -435,11 +427,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
             repo.removeFromStatValues(it)
             it.delete()
         }
-        
+
         // delete FK'd ReplicatedRepository
         def replicatedRepos = ReplicatedRepository.findAllByRepo(repo)
         replicatedRepos.each() {
-           it.delete()
+            it.delete()
         }
 
         // remove scheduled jobs
@@ -447,7 +439,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         // delete the repo entity
         repo.delete()
-     }
+    }
 
     /**
      * Syncs the Repository table with the contents of the svn server 
@@ -460,7 +452,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         // fetch the repo directories (skipping hidden)
         def files = Arrays.asList(new File(server.repoParentDir).listFiles(
-            {file -> isRepository(file) }  as FileFilter))
+                {file -> isRepository(file) } as FileFilter))
 
         def repoFolderNames = files.collect { it.name }
 
@@ -468,8 +460,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         repoFolderNames.each { folder ->
             if (!Repository.findByName(folder)) {
                 log.debug("Adding Respository row to represent folder: " +
-                    "${folder}")
-                def r = new Repository(name : folder, permissionsOk : true)
+                        "${folder}")
+                def r = new Repository(name: folder, permissionsOk: true)
 
                 // if Windows, assume permissions are OK; otherwise, validate
                 if (!operatingSystemService.isWindows()) {
@@ -481,16 +473,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         // remove DB rows for repositories NOT IN SVN
         def reposToDelete = []
-        Repository.list().each  { repo ->
+        Repository.list().each { repo ->
             if (!repoFolderNames.contains(repo.name)) {
                 log.debug("Deleting Repository row with no matching folder: " +
-                    "${repo.name}")
+                        "${repo.name}")
                 reposToDelete << repo.name
             }
         }
-        
+
         reposToDelete.each { it ->
-           removeRepository(Repository.findByName(it))
+            removeRepository(Repository.findByName(it))
         }
 
     }
@@ -504,22 +496,21 @@ class SvnRepoService extends AbstractSvnEdgeService {
         boolean hasFormat = false
         boolean hasDb = false
         if (isDirectory) {
-            f.eachFile {file -> 
-                hasFormat |= (file.isFile() && file.name == "format") 
-                hasDb |= (file.isDirectory() && file.name == "db") 
+            f.eachFile {file ->
+                hasFormat |= (file.isFile() && file.name == "format")
+                hasDb |= (file.isDirectory() && file.name == "db")
             }
         }
         return hasFormat && hasDb
     }
-
 
     /**
      * This action will merely set Repo.permissionsOk = true
      * TODO in a future story it should sudo chown the repo directory
      */
     def updateRepositoryPermissions(Repository repo) {
-         repo.permissionsOk = true
-         repo.save(flush:true)
+        repo.permissionsOk = true
+        repo.save(flush: true)
     }
 
     /**
@@ -539,30 +530,30 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     buffer.append getMessage("repository.status.noRepos", locale)
                 } else {
                     buffer.append getMessage("repository.status.totalNumber",
-                        [num], locale)
+                            [num], locale)
                 }
                 if (server.mode == ServerMode.STANDALONE) {
-                   buffer.append " " + 
-                       getMessage("repository.status.createNew", locale)
+                    buffer.append " " +
+                            getMessage("repository.status.createNew", locale)
                 }
                 return buffer.toString()
-           }
-       }
-       repoStatus.eachWithIndex { it, index ->
-           buffer.append(it.count + " " + it.status)
-           if (index < repoStatus.size() - 1) {
-               buffer.append(", ")
-           }
-       }
-       return buffer.toString()
-   }
+            }
+        }
+        repoStatus.eachWithIndex { it, index ->
+            buffer.append(it.count + " " + it.status)
+            if (index < repoStatus.size() - 1) {
+                buffer.append(", ")
+            }
+        }
+        return buffer.toString()
+    }
 
-     /**
-      * Validates whether the httpdUser and group match the ownership of the 
-      * input Repo dir
-      * @param repo
-      * @return boolean indicator
-      */
+    /**
+     * Validates whether the httpdUser and group match the ownership of the
+     * input Repo dir
+     * @param repo
+     * @return boolean indicator
+     */
     boolean validateRepositoryPermissions(Repository repo) {
         def repoPath = this.getRepositoryHomePath(repo)
 
@@ -570,14 +561,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
         //For ex drwxr-xr-x  7 rajeswari __cubitu 4096 May 14 01:45 data/
 
         String[] result = commandLineService.executeWithOutput("ls", "-dl",
-            repoPath).replaceAll(" +", " ").split(" ")
+                repoPath).replaceAll(" +", " ").split(" ")
         String user = result.length > 2 ? result[2] : "nobody"
         String group = result.length > 3 ? result[3] : "nobody"
 
-        return (user == serverConfService.httpdUser && 
-            group == serverConfService.httpdGroup)
+        return (user == serverConfService.httpdUser &&
+                group == serverConfService.httpdGroup)
     }
-    
+
     /**
      * Lists all the dump files generated for the given repository
      * @param repo A Repository object
@@ -615,10 +606,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
     /**
      * Hard delete of the specified repository dump file
-     * 
+     *
      * @param filename
      * @param repo Repository object
-     * @return true, if the delete was successful; false otherwise
+     * @return true , if the delete was successful; false otherwise
      */
     boolean deleteDumpFile(filename, repo) throws FileNotFoundException {
         return getDumpFile(filename, repo).delete()
@@ -627,21 +618,21 @@ class SvnRepoService extends AbstractSvnEdgeService {
     /**
      * Copies the contents of the specified repository dump file to the 
      * given stream
-     *     
+     *
      * @param filename
      * @param repo Repository object
      * @param outputStream
-     * @return true, if the file could be read
+     * @return true , if the file could be read
      */
-    boolean copyDumpFile(filename, repo, outputStream) 
-            throws FileNotFoundException {
+    boolean copyDumpFile(filename, repo, outputStream)
+    throws FileNotFoundException {
         File dumpFile = getDumpFile(filename, repo)
         if (dumpFile.canRead()) {
             dumpFile.withInputStream {
                 outputStream << it
             }
             return true
-        } 
+        }
         return false
     }
 
@@ -666,7 +657,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         return backups
     }
-    
+
     /**
      * method to schedule a RepoDump quartz job
      * @param bean the parameters for the dump job
@@ -697,7 +688,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String month = " *"
         String dayOfWeek = " ?"
         String year = ""
-        switch(schedule.frequency) {
+        switch (schedule.frequency) {
             case Frequency.WEEKLY:
                 dayOfWeek = " ${schedule.dayOfWeek}"
                 dayOfMonth = " ?"
@@ -713,7 +704,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 year = " ${schedule.year}"
         }
         String cron = seconds + minute + hour + dayOfMonth +
-            month + dayOfWeek + year
+                month + dayOfWeek + year
         log.debug("Scheduling backup dump using cron expression: " + cron)
         trigger = new CronTrigger(tName, tGroup, cron)
         log.debug("cron expression summary:\n" + trigger.expressionSummary)
@@ -723,17 +714,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
         // data for reporting status to quartz job listeners
         def progressLogFileName = getProgressLogFileName(repo.name)
         def jobDataMap =
-                [id: (bean.cloud ? "cloudSync-" : (bean.hotcopy ? "repoHotcopy-" : "repoDump-")) + 
-                    repo.name, repoId: repo.id,
-                description: getMessage("repository.action.createDumpfile.job.description", 
-                    [repo.name], bean.userLocale),
+        [id: (bean.cloud ? "cloudSync-" : (bean.hotcopy ? "repoHotcopy-" : "repoDump-")) +
+                repo.name, repoId: repo.id,
+                description: getMessage("repository.action.createDumpfile.job.description",
+                        [repo.name], bean.userLocale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
                 urlResult: "/csvn/repo/dumpFileList/${repo.id}",
-                urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}" ]
+                urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}"]
         if (bean.cloud) {
             jobDataMap['urlResult'] = repo.cloudSvnUri
-            jobDataMap['description'] = getMessage("repository.action.cloudSync.job.description", 
-                [repo.name], bean.userLocale)
+            jobDataMap['description'] = getMessage("repository.action.cloudSync.job.description",
+                    [repo.name], bean.userLocale)
         }
         // data for generating the dump file
         jobDataMap.putAll(bean.toMap())
@@ -742,8 +733,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         jobsAdminService.createOrReplaceTrigger(trigger)
         return bean.cloud ? null : dumpFilename(bean, repo)
     }
-        
-    File prepareProgressLogFile(repoName) {        
+
+    File prepareProgressLogFile(repoName) {
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         return new File(tempLogDir, getProgressLogFileName(repoName))
     }
@@ -778,11 +769,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobName(RepoLoadJob.name)
         trigger.setJobGroup(RepoLoadJob.group)
         def jobDataMap =
-                [id: "repoLoad-${repo.name}",
+        [id: "repoLoad-${repo.name}",
                 repoId: repo.id,
                 ignoreUuid: options["ignoreUuid"],
                 description: getMessage("repository.action.loadDumpFile.job.description",
-                    [repo.name], (options["locale"] ?: Locale.default) as Locale),
+                        [repo.name], (options["locale"] ?: Locale.default) as Locale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
                 progressLogFile: progressFile.absolutePath]
 
@@ -805,10 +796,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
         }
     }
-       
-    def loadDumpFile(File dumpFile, Repository repo, 
+
+    def loadDumpFile(File dumpFile, Repository repo,
                      Map options, OutputStream progress) {
 
+        log.debug("Loading dumpfile '${dumpFile.canonicalPath}' to repo '${repo.name}'")
         def cmd = [ConfigUtil.svnadminPath(), "load"]
         if (options["ignoreUuid"]) {
             cmd << "--ignore-uuid"
@@ -816,16 +808,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
         cmd << getRepositoryHomePath(repo)
         Process p = null
         dumpFile.withInputStream {
-            p = commandLineService
-                .startProcessWithInputStream(cmd, it, progress)
+            p = commandLineService.startProcessWithInputStream(cmd, it, progress)
         }
         p.waitFor()
     }
-    
-    
+
     /**
      * Method to invoke "svnadmin dump" possibly piped through svndumpfilter
-     * 
+     *
      * @param bean dump options
      * @param repo domain object
      * @return dump filename
@@ -850,19 +840,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (!dumpDir.exists()) {
             dumpDir.mkdirs()
         }
-                
+
         File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
             throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
         }
-    
+
         String filename = dumpFilename(bean, repo)
         File tempDumpFile = new File(dumpDir, filename + "-processing")
         File finalDumpFile = new File(dumpDir, filename)
         if (tempDumpFile.exists() || finalDumpFile.exists()) {
             throw new ValidationException("dumpBean.filename.exists", "filename")
         }
-        
+
         log.debug("Dump command: " + cmd)
         Process dumpProcess = commandLineService.startProcess(cmd)
         FileOutputStream progress = new FileOutputStream(progressLogFile)
@@ -871,7 +861,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (!bean.deltas && bean.filter && (bean.includePath || bean.excludePath)) {
             log.debug("Dump: With filter")
             String svndumpfilterPath = new File(new File(
-                ConfigUtil.svnadminPath()).parent, "svndumpfilter").canonicalPath
+                    ConfigUtil.svnadminPath()).parent, "svndumpfilter").canonicalPath
             def threads = []
             threads << dumpProcess.consumeProcessErrorStream(progress)
             if (bean.includePath) {
@@ -895,14 +885,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
                         try {
                             t.join()
                         } catch (InterruptedException e) {
-                             log.debug("Process consuming thread was interrupted")
+                            log.debug("Process consuming thread was interrupted")
                         }
                     }
                 } finally {
                     out.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile, progress, 
-                               progressLogFile, bean.userLocale)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress,
+                        progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
             }
 
@@ -914,24 +904,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 } finally {
                     out.close()
                 }
-                finishDumpFile(finalDumpFile, tempDumpFile, progress, 
-                               progressLogFile, bean.userLocale)
+                finishDumpFile(finalDumpFile, tempDumpFile, progress,
+                        progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
             }
         }
         return filename
     }
-    
-    private finishDumpFile(finalDumpFile, tempDumpFile, progress, 
-                           progressLogFile,  locale) {
+
+    private finishDumpFile(finalDumpFile, tempDumpFile, progress,
+                           progressLogFile, locale) {
         def dumpFilename = finalDumpFile.name
         if (dumpFilename.endsWith('.zip')) {
-            println('repository.service.bkup.progress.compress.dump.file', 
+            println('repository.service.bkup.progress.compress.dump.file',
                     progress, locale)
-            File tempZipFile = new File(tempDumpFile.parentFile, 
-                                        tempDumpFile.name + ".zip")
-            def baseDumpFilename = 
-                dumpFilename.substring(0, dumpFilename.length() - 4)       
+            File tempZipFile = new File(tempDumpFile.parentFile,
+                    tempDumpFile.name + ".zip")
+            def baseDumpFilename =
+            dumpFilename.substring(0, dumpFilename.length() - 4)
             ZipOutputStream zos = null
             try {
                 zos = new ZipOutputStream(tempZipFile.newOutputStream())
@@ -944,23 +934,23 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     zos.close()
                 }
             }
-            println('repository.service.bkup.progress.compress.dump.file.done', 
+            println('repository.service.bkup.progress.compress.dump.file.done',
                     progress, locale)
             tempDumpFile.delete()
             tempDumpFile = tempZipFile
         }
-        println('repository.service.bkup.progress.rename.dump.file', 
+        println('repository.service.bkup.progress.rename.dump.file',
                 progress, locale)
         if (!tempDumpFile.renameTo(finalDumpFile)) {
             log.warn("Rename of dump file " + tempDumpFile?.name + " to " +
-                finalDumpFile?.name + " failed.")
+                    finalDumpFile?.name + " failed.")
         }
-        println('repository.service.bkup.progress.dump.done', 
+        println('repository.service.bkup.progress.dump.done',
                 [finalDumpFile?.name], progress, locale)
         progress.close()
         progressLogFile.delete()
     }
-    
+
     private cleanupOldBackups(dumpBean, repo) {
         int numToKeep = dumpBean.numberToKeep
         if (dumpBean.backup && numToKeep > 0) {
@@ -968,33 +958,33 @@ class SvnRepoService extends AbstractSvnEdgeService {
             int i = 0
             for (dumpFile in dumps) {
                 def name = dumpFile.name
-                if (name.startsWith(repo.name + "-bkup") && 
-                    !name.endsWith("-processing") && 
-                    !name.endsWith("-processing.zip") &&
-                    (++i > numToKeep)) {
-                    
-                    dumpFile.delete()    
+                if (name.startsWith(repo.name + "-bkup") &&
+                        !name.endsWith("-processing") &&
+                        !name.endsWith("-processing.zip") &&
+                        (++i > numToKeep)) {
+
+                    dumpFile.delete()
                 }
             }
         }
     }
-    
+
     private String pad(int value) {
         return (value < 10) ? "0" + value : String.valueOf(value)
     }
-    
+
     private String dumpFilename(DumpBean bean, repo) {
         Calendar cal = Calendar.getInstance()
         SchedulerBean sched = bean.schedule
         String ts = ""
         ts += (sched.year < 1) ? cal.get(Calendar.YEAR) : sched.year
         ts += pad((sched.month < 1) ? cal.get(Calendar.MONTH) + 1 : sched.month)
-        ts += pad((sched.dayOfMonth < 1) ? 
+        ts += pad((sched.dayOfMonth < 1) ?
             cal.get(Calendar.DAY_OF_MONTH) : sched.dayOfMonth)
         ts += pad((sched.hour < 0) ? cal.get(Calendar.HOUR_OF_DAY) : sched.hour)
-        ts += pad((sched.minute < 0) ? cal.get(Calendar.MINUTE): sched.minute)
+        ts += pad((sched.minute < 0) ? cal.get(Calendar.MINUTE) : sched.minute)
         ts += pad((sched.second < 0) ? cal.get(Calendar.SECOND) : sched.second)
-        def range = bean.revisionRange ?  
+        def range = bean.revisionRange ?
             "-r" + bean.revisionRange.replace(":", "_") : ""
         def options = ""
         if (bean.incremental) {
@@ -1013,7 +1003,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         return prefix + range + options + "-" + ts + ".dump" + zip
     }
-    
+
     private addFilterOptions(DumpBean bean, filterCmd) {
         if (bean.dropEmptyRevs) {
             filterCmd << "--drop-empty-revs"
@@ -1023,20 +1013,19 @@ class SvnRepoService extends AbstractSvnEdgeService {
         } else if (bean.preserveRevprops) {
             filterCmd << "--preserve-revprops"
         }
-        
+
         if (bean.skipMissingMergeSources) {
             filterCmd << "--skip-missing-merge-sources"
         }
     }
-    
+
     /**
      * Removes all triggers for backup jobs on the given repository
-     * 
+     *
      * @param repo Repository domain object
      */
     def clearScheduledDumps(repo) {
-        def triggerNames = jobsAdminService
-            .getTriggerNamesInGroup(BACKUP_TRIGGER_GROUP)
+        def triggerNames = jobsAdminService.getTriggerNamesInGroup(BACKUP_TRIGGER_GROUP)
         if (triggerNames) {
             triggerNames.each {
                 if (it.startsWith("RepoDump-${repo.name}")) {
@@ -1046,15 +1035,15 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
 
     }
-    
+
     /**
-    * Method to invoke "svnadmin hotcopy", verify the result, and create
-    * an archive suitable for back up.
-    *
-    * @param bean dump options
-    * @param repo domain object
-    * @return archive filename
-    */
+     * Method to invoke "svnadmin hotcopy", verify the result, and create
+     * an archive suitable for back up.
+     *
+     * @param bean dump options
+     * @param repo domain object
+     * @return archive filename
+     */
     String createHotcopy(DumpBean bean, repo) throws ConcurrentBackupException {
         bean.hotcopy = true
         bean.compress = true
@@ -1065,47 +1054,47 @@ class SvnRepoService extends AbstractSvnEdgeService {
             dumpDir.mkdirs()
         }
         File tmpDir = new File(dumpDir, "hotcopy")
-        
+
         File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
             throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
         }
         Locale locale = bean.userLocale
 
-        def cmd = [ConfigUtil.svnadminPath(), "hotcopy", 
-            repoDir.canonicalPath, tmpDir.canonicalPath]
+        def cmd = [ConfigUtil.svnadminPath(), "hotcopy",
+                repoDir.canonicalPath, tmpDir.canonicalPath]
         FileOutputStream progress = null
         String filename = null
         try {
             progress = new FileOutputStream(progressLogFile)
-            println('repository.service.bkup.progress.hotcopy.start', 
+            println('repository.service.bkup.progress.hotcopy.start',
                     progress, locale)
             def result = commandLineService.execute(cmd, progress, progress)
             boolean isVerified = false
             if (result[0] == "0") {
-                println('repository.service.bkup.progress.verifying.hotcopy', 
+                println('repository.service.bkup.progress.verifying.hotcopy',
                         progress, locale)
                 isVerified = verifyRepositoryPath(tmpDir.canonicalPath, progress)
-                println('repository.service.bkup.progress.hotcopy.verify.done', 
+                println('repository.service.bkup.progress.hotcopy.verify.done',
                         progress, locale)
             }
             if (isVerified) {
                 bean.revisionRange = "0:" + findHeadRev(tmpDir.canonicalPath)
                 filename = dumpFilename(bean, repo)
                 File finalZipFile = new File(dumpDir, filename)
-                File tempZipFile = new File(dumpDir, 
-                    filename.substring(0, filename.length() - 4) + "-processing.zip")        
-                println('repository.service.bkup.progress.compressing.hotcopy', 
+                File tempZipFile = new File(dumpDir,
+                        filename.substring(0, filename.length() - 4) + "-processing.zip")
+                println('repository.service.bkup.progress.compressing.hotcopy',
                         progress, locale)
                 archiveDirectory(tmpDir, tempZipFile, progress)
-                println('repository.service.bkup.progress.compress.done.rename.file', 
+                println('repository.service.bkup.progress.compress.done.rename.file',
                         progress, locale)
                 if (!tempZipFile.renameTo(finalZipFile)) {
                     log.warn("Rename of file " + tempZipFile?.name + " to " +
-                        finalZipFile?.name + " failed.")
+                            finalZipFile?.name + " failed.")
                 }
             } else {
-                println('repository.service.bkup.progress.verify.failed', 
+                println('repository.service.bkup.progress.verify.failed',
                         progress, locale)
                 log.warn("Hotcopy of ${repo.name} repository failed to verify")
             }
@@ -1117,33 +1106,32 @@ class SvnRepoService extends AbstractSvnEdgeService {
         cleanupOldBackups(bean, repo)
         return filename
     }
-   
+
     protected void archiveDirectory(File directory, File zipFile, OutputStream progress = null) {
         if (zipFile.parentFile.equals(directory)) {
             throw new IllegalArgumentException(
-            "Archive should not be written into the directory being archived")
+                    "Archive should not be written into the directory being archived")
         }
         if (!directory.isDirectory()) {
             throw new IllegalArgumentException("directory argument was not a directory")
         }
         boolean storePermissions = !operatingSystemService.isWindows()
-        
+
         ZipArchiveOutputStream zos = null
         try {
             zos = new ZipArchiveOutputStream(zipFile)
-            recursiveArchiveDirectory(directory.canonicalPath.length() + 1, 
-                directory, zos, storePermissions, progress)
+            recursiveArchiveDirectory(directory.canonicalPath.length() + 1,
+                    directory, zos, storePermissions, progress)
         } finally {
             zos?.close()
-        }        
+        }
     }
 
-    private void recursiveArchiveDirectory(int topLevelPathLength, File directory, 
-            ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress) {
+    private void recursiveArchiveDirectory(int topLevelPathLength, File directory,
+                                           ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress) {
         directory.eachFile { f ->
             String fullPath = f.canonicalPath
-            String relativePath = fullPath
-                .substring(topLevelPathLength, fullPath.length())
+            String relativePath = fullPath.substring(topLevelPathLength, fullPath.length())
             if (f.isDirectory()) {
                 relativePath += "/"
             }
@@ -1155,12 +1143,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 int perms = 0444
                 try {
                     FileInfo fi = operatingSystemService.getSigar().getFileInfo(fullPath)
-                    log.debug(relativePath + " permString=" + fi.permissionsString + 
-                        " asInt=" + fi.mode)
+                    log.debug(relativePath + " permString=" + fi.permissionsString +
+                            " asInt=" + fi.mode)
                     perms = Integer.parseInt(fi.mode.toString(), 8)
                 } catch (IllegalStateException e) {
                     log.info("Sigar library not loaded, setting hotcopy file " +
-                        "permissions for owner only with group and other as defaults")
+                            "permissions for owner only with group and other as defaults")
                     if (f.isFile()) {
                         perms = 0444
                         if (f.canWrite() && f.canExecute()) {
@@ -1181,11 +1169,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 f.withInputStream { zos << it }
             }
             zos.closeArchiveEntry()
-     
+
             if (f.isDirectory()) {
-                recursiveArchiveDirectory(topLevelPathLength, f, zos, 
-                    storePermissions, progress)
-            } 
+                recursiveArchiveDirectory(topLevelPathLength, f, zos,
+                        storePermissions, progress)
+            }
         }
     }
 }

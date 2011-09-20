@@ -18,13 +18,13 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.GrailsUnitTestCase
-import com.collabnet.svnedge.console.CommandLineService 
-import com.collabnet.svnedge.console.LifecycleService 
-import com.collabnet.svnedge.console.OperatingSystemService 
+import com.collabnet.svnedge.console.CommandLineService
+import com.collabnet.svnedge.console.LifecycleService
+import com.collabnet.svnedge.console.OperatingSystemService
 import com.collabnet.svnedge.console.SvnRepoService
-import com.collabnet.svnedge.console.DumpBean 
-import com.collabnet.svnedge.domain.Repository 
-import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.console.DumpBean
+import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.util.ConfigUtil;
 
 class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
@@ -33,6 +33,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
     CommandLineService commandLineService
     OperatingSystemService operatingSystemService
     LifecycleService lifecycleService
+    def jobsAdminService
     def quartzScheduler
     def repoParentDir
     boolean initialStarted
@@ -52,8 +53,6 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         server.save()
 
 
-
-
     }
 
     protected void tearDown() {
@@ -64,30 +63,29 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     void testUpdateRepositoryPermissions() {
 
-       // first create a repository
-       def testRepository = new Repository(name: "testrepo")
+        // first create a repository
+        def testRepository = new Repository(name: "testrepo")
 
-       int exitStatus = svnRepoService.createRepository(testRepository, false)
-       // assertEquals("Create Repo should succeed", 0, exitStatus)
+        int exitStatus = svnRepoService.createRepository(testRepository, false)
+        // assertEquals("Create Repo should succeed", 0, exitStatus)
 
-       svnRepoService.updateRepositoryPermissions(testRepository)
+        svnRepoService.updateRepositoryPermissions(testRepository)
 
     }
 
-     void testCreateRepository() {
+    void testCreateRepository() {
         def testRepoName = "lifecycle-test"
         Repository repo = new Repository(name: testRepoName)
         assertEquals "Failed to create repository.", 0,
-            svnRepoService.createRepository(repo, true)
+                svnRepoService.createRepository(repo, true)
 
         // checkout the repo
         def wcDir = createTestDir("wc")
         def testRepoFile = new File(wcDir, testRepoName)
         def status = commandLineService.executeWithStatus(
-            ConfigUtil.svnPath(), "checkout",
-            "--no-auth-cache", "--non-interactive", commandLineService
-            .createSvnFileURI(new File(repoParentDir, testRepoName)),
-            testRepoFile.canonicalPath)
+                ConfigUtil.svnPath(), "checkout",
+                "--no-auth-cache", "--non-interactive", commandLineService.createSvnFileURI(new File(repoParentDir, testRepoName)),
+                testRepoFile.canonicalPath)
         assertEquals "Failed to checkout repository.", 0, status
         def topDirs = testRepoFile.listFiles()
         def expectedDirs = ['.svn', 'branches', 'tags', 'trunk']
@@ -111,17 +109,17 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         def testRepoName = "dump-test"
         Repository repo = new Repository(name: testRepoName)
         assertEquals "Failed to create repository.", 0,
-            svnRepoService.createRepository(repo, true)
+                svnRepoService.createRepository(repo, true)
 
         // Earlier checkin was not deleting this file, so make sure it is
         // gone before testing
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         File progressLogFile =
-                new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        new File(tempLogDir, "dump-progress-" + repo.name + ".log")
         if (progressLogFile.exists()) {
             progressLogFile.delete()
         }
-        
+
         DumpBean params = new DumpBean()
         params.compress = false
         def filename = svnRepoService.createDump(params, repo)
@@ -136,7 +134,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
         Thread.sleep(250)
-        
+
         // test exclusion filter
         params = new DumpBean()
         params.compress = false
@@ -171,12 +169,12 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertFalse "branches exists in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
-        
+
         dumpFile.delete()
         dumpFile2.delete()
         dumpFile3.delete()
         Thread.sleep(200)
-    } 
+    }
 
     private File newDumpFile(filename, repo) {
         return new File(new File(Server.getServer().dumpDir, repo.name), filename)
@@ -186,23 +184,23 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         def testRepoName = "dump-test"
         Repository repo = new Repository(name: testRepoName)
         assertEquals "Failed to create repository.", 0,
-            svnRepoService.createRepository(repo, true)
-            
+                svnRepoService.createRepository(repo, true)
+
         if (!operatingSystemService.isWindows()) {
-            File hookScript = new File(svnRepoService.getRepositoryHomePath(repo), 
-                                       "hooks/pre-commit.tmpl")
+            File hookScript = new File(svnRepoService.getRepositoryHomePath(repo),
+                    "hooks/pre-commit.tmpl")
             hookScript.setExecutable(true)
         }
-        
+
         // Earlier checkin was not deleting this file, so make sure it is
         // gone before testing
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         File progressLogFile =
-                new File(tempLogDir, "dump-progress-" + repo.name + ".log")
+        new File(tempLogDir, "dump-progress-" + repo.name + ".log")
         if (progressLogFile.exists()) {
             progressLogFile.delete()
         }
-        
+
         DumpBean params = new DumpBean()
         def filename = svnRepoService.createHotcopy(params, repo)
         File dumpFile = newDumpFile(filename, repo)
@@ -215,26 +213,26 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             def exitStatus = commandLineService.executeWithStatus(
                     "unzip", dumpFile.canonicalPath, "-d", extractDir.canonicalPath)
             assertEquals "Unable to extract archive", 0, exitStatus
-            
+
             File copiedHookScript = new File(extractDir, "hooks/pre-commit.tmpl")
             assertTrue "pre-commit.tmpl does not exist", copiedHookScript.exists()
             if (!operatingSystemService.isWindows()) {
-                assertTrue "pre-commit.tmpl should be executable", 
+                assertTrue "pre-commit.tmpl should be executable",
                         copiedHookScript.canExecute()
             }
             def contents = ['conf', 'db', 'format', 'hooks', 'locks', 'README.txt']
             int i = 0
             extractDir.eachFile { f ->
-                assertTrue "Found unexpected file/dir: " + f.name, 
+                assertTrue "Found unexpected file/dir: " + f.name,
                         contents.contains(f.name)
                 i++
             }
-            assertEquals "Number of files/directories did not match", 
+            assertEquals "Number of files/directories did not match",
                     contents.size(), i
 
-            extractDir.deleteDir()        
+            extractDir.deleteDir()
         }
-                
+
         dumpFile.delete()
     }
 
@@ -244,12 +242,14 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         long timeLimit = System.currentTimeMillis() + 30000
         // make sure the quartz scheduler is running, is put in standby by other tests
         quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
 
         // create a dump file of a src repo with branches/tags/trunk nodes
         def testRepoNameSrc = "load-test-src"
         Repository repoSrc = new Repository(name: testRepoNameSrc)
         assertEquals "Failed to create src repository.", 0,
-            svnRepoService.createRepository(repoSrc, true)
+                svnRepoService.createRepository(repoSrc, true)
         repoSrc.save()
 
         DumpBean params = new DumpBean()
@@ -266,18 +266,17 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
 
-
         // create a target repo WITHOUT branches/tags/trunk nodes
         def testRepoNameTarget = "load-test-target"
 
         Repository repoTarget = new Repository(name: testRepoNameTarget)
         assertEquals "Failed to create target repository.", 0,
-            svnRepoService.createRepository(repoTarget, false)
-        repoTarget.save(flush:true)
+                svnRepoService.createRepository(repoTarget, false)
+        repoTarget.save(flush: true)
 
         def output = commandLineService.executeWithOutput(
-            ConfigUtil.svnPath(), "info",
-            "--no-auth-cache", "--non-interactive",
+                ConfigUtil.svnPath(), "info",
+                "--no-auth-cache", "--non-interactive",
                 commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
         // verify no 'trunk' folder
@@ -301,22 +300,24 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         options << ["ignoreUuid": true]
         svnRepoService.scheduleLoad(repoTarget, options)
         // Async so wait for it
-        timeLimit = System.currentTimeMillis() + 30000
+        timeLimit = System.currentTimeMillis() + 60000
         while (loadFile.exists() && System.currentTimeMillis() < timeLimit) {
             Thread.sleep(250)
         }
-        assertFalse ("load file should be deleted after loading", loadFile.exists())
+        println "======> load progress"
+        println progressFile.text
+        assertFalse("load file should be deleted after loading", loadFile.exists())
 
         // verify target repo and check for trunk/tags/branches which should have been imported
         output = commandLineService.executeWithOutput(
-            ConfigUtil.svnPath(), "info",
-            "--no-auth-cache", "--non-interactive",
+                ConfigUtil.svnPath(), "info",
+                "--no-auth-cache", "--non-interactive",
                 commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
         assertTrue "svn info output should now contain node info for 'trunk'", output.contains("Node Kind: directory")
     }
 
-      private File createTestDir(String prefix) {
+    private File createTestDir(String prefix) {
         def testDir = File.createTempFile(prefix + "-test", null)
         log.info("testDir = " + testDir.getCanonicalPath())
         // we want a dir, not a file, so delete and mkdir
