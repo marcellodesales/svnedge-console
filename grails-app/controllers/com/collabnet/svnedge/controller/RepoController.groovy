@@ -120,7 +120,7 @@ class RepoController {
         }
         if (!repo && !flash.error) {
             flash.error = message(code: 'repository.action.not.found',
-                args: [id])
+                    args: [id])
             redirect(action: list)
         }
         return repo
@@ -138,16 +138,16 @@ class RepoController {
                 def headRev = svnRepoService.findHeadRev(repo)
                 def repoUUID = svnRepoService.getReposUUID(repo)
                 return [repositoryInstance: repo,
-                    repoPath: repoPath,
-                    headRev: headRev,
-                    repoUUID: repoUUID,
-                    uploadProgressKey: "loadRepo" + repo.id
+                        repoPath: repoPath,
+                        headRev: headRev,
+                        repoUUID: repoUUID,
+                        uploadProgressKey: "loadRepo" + repo.id
                 ]
             } else {
-                flash.unfiltered_error =  message(
-                    code: 'loadFileUpload.action.multiple.load.unsupported',
-                    args: [createLink(controller: 'job', action: 'list')])
-                redirect(action: list)                
+                flash.unfiltered_error = message(
+                        code: 'loadFileUpload.action.multiple.load.unsupported',
+                        args: [createLink(controller: 'job', action: 'list')])
+                redirect(action: list)
             }
         }
     }
@@ -178,34 +178,33 @@ class RepoController {
             File loadDir = svnRepoService.getLoadDirectory(repo)
             if (!isLoadInProgress(repo, loadDir)) {
                 uploadedFile.transferTo(
-                    new File(loadDir, uploadedFile.originalFilename))
+                        new File(loadDir, uploadedFile.originalFilename))
                 def props = [:]
                 props.put("ignoreUuid", ignoreUUID)
                 props.put("locale", request.locale)
                 svnRepoService.scheduleLoad(repo, props)
                 flash.unfiltered_message = message(
-                    code: 'loadFileUpload.action.success', 
-                    args: [repo.name.encodeAsHTML(), 
-                           createLink(controller: 'job', action: 'list')])
+                        code: 'loadFileUpload.action.success',
+                        args: [repo.name.encodeAsHTML(),
+                                createLink(controller: 'job', action: 'list')])
                 redirect(action: list)
             } else {
-                flash.unfiltered_error = message(code: 
-                    'loadFileUpload.action.multiple.load.unsupported',
-                    args: [createLink(controller: 'job', action: 'list')])
+                flash.unfiltered_error = message(code:
+                'loadFileUpload.action.multiple.load.unsupported',
+                        args: [createLink(controller: 'job', action: 'list')])
                 redirect(action: list)
             }
         }
     }
 
     private boolean isLoadInProgress(repo, loadDir) {
-        return loadDir.listFiles({ return it.isFile() } as FileFilter)
-            .length > 0
+        return loadDir.listFiles({ return it.isFile() } as FileFilter).length > 0
     }
 
     def uploadProgress = {
         def key = params.uploadProgressKey
         response.addHeader("Cache-Control", "max-age=0,no-cache,no-store")
-        render(contentType:"text/json") {
+        render(contentType: "text/json") {
             uploadStats(session[key])
         }
     }
@@ -523,7 +522,7 @@ class RepoController {
 
         // fetch list of repositories using request params to sort if possible, then add backup trigger info
         def listParams = [:]
-        listParams.sort = (params.sort == "repoName") ? "name" : null
+        listParams.sort = "name"
         listParams.order = (params.sort == "repoName") ? params.order : null
         Repository.list(listParams).each {
             def job = [:]
@@ -546,7 +545,7 @@ class RepoController {
         }
 
         // sort the resulting job Collection according to params if needed
-        if (params.sort != "repoName") {
+        if (params.sort && params.sort != "repoName") {
             repoBackupJobList = repoBackupJobList.sort { it."${params.sort}"}
             if (params.order == "desc") {
                 repoBackupJobList = repoBackupJobList.reverse()
