@@ -174,6 +174,8 @@ class CommandLineService {
                     } else {
                         log.warn(e.message, e)
                     }
+                    // exit the process with an error code
+                    p.destroy()
                 } finally {
                     p.out.close()
                 }

@@ -17,7 +17,6 @@
  */
 package com.collabnet.svnedge.console
 
-import java.text.SimpleDateFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -28,7 +27,8 @@ import groovy.io.FileType;
 
 import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.ValidationException;
-import com.collabnet.svnedge.console.SchedulerBean
+
+
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
@@ -43,6 +43,8 @@ import org.quartz.SimpleTrigger
 import com.collabnet.svnedge.admin.RepoDumpJob
 import org.quartz.JobDataMap
 import com.collabnet.svnedge.admin.RepoLoadJob
+
+import com.collabnet.svnedge.RepoLoadException
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -782,18 +784,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
         jobsAdminService.createOrReplaceTrigger(trigger)
     }
 
-    def loadDumpFile(Repository repo, Map options) throws FileNotFoundException {
+    def loadDumpFile(Repository repo, Map options) throws FileNotFoundException, RepoLoadException {
         File progress = new File(options["progressLogFile"])
         File loadDir = getLoadDirectory(repo)
         File[] files = loadDir.listFiles({ return it.isFile() } as FileFilter)
         if (files.length > 0) {
             File dumpFile = files[0]
-            try {
-                loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
-            } finally {
-                dumpFile.delete()
-                progress.delete()
-            }
+            // load the dump file, cleaning up only on success exit code
+            loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
+            dumpFile.delete()
+            progress.delete()
         }
         else {
             def message = "No dumpfile found in the load location '${loadDir.absolutePath}' for repo '${repo.name}'"
@@ -803,7 +803,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     def loadDumpFile(File dumpFile, Repository repo,
-                     Map options, OutputStream progress) throws FileNotFoundException {
+                     Map options, OutputStream progress) throws FileNotFoundException, RepoLoadException {
 
         log.debug("Loading dumpfile '${dumpFile.canonicalPath}' to repo '${repo.name}'")
         if (!dumpFile.exists()) {
@@ -821,6 +821,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
             p = commandLineService.startProcessWithInputStream(cmd, it, progress)
         }
         p.waitFor()
+        if (p.exitValue() != 0) {
+            log.error("Unable to load the dump file")
+            throw new RepoLoadException(p.text)
+        }
     }
 
     /**

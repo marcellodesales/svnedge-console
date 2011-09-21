@@ -38,12 +38,15 @@ class RepoLoadJob {
         log.info("Executing scheduled RepoLoad ...")
         def dataMap = context.getMergedJobDataMap()
         Repository repo = Repository.get(dataMap.get("repoId"))
-        if (repo) {
-            svnRepoService.loadDumpFile(repo, dataMap)
-            log.info("Loading dump file for repo: ${repo.name}")
+        if (!repo) {
+            log.error("Unable to execute the repo load: repoId not found")
         }
-        else {
-            log.warn("Unable to execute the repo load: repoId not found")
+        try {
+            log.info("Loading dump file for repo: ${repo.name}")
+            svnRepoService.loadDumpFile(repo, dataMap)
+        }
+        catch (Exception e) {
+            log.error("Unable to load the dump file", e)
         }
     }
 }
