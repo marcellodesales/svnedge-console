@@ -205,7 +205,7 @@ class RepoController {
         def key = params.uploadProgressKey
         response.addHeader("Cache-Control", "max-age=0,no-cache,no-store")
         render(contentType: "text/json") {
-            uploadStats(session[key])
+            uploadStats(session[key] ?: [:])
         }
     }
 

@@ -12,10 +12,10 @@ var periodicUpdater
 // instantiate the polling task on load
 Event.observe(window, 'load', function() {
     $('loadButton').onclick = function() {
-        // doing this in a timer to workaround FF issue where image will not load
+        $('uploadProgress').style.display = '';
+        // re-animate IE
         setTimeout(function() { 
-            $('uploadProgress').innerHTML = 
-                '<img class="spinner" align="absmiddle" src="/csvn/images/spinner.gif" alt="" /><g:message code="repository.page.load.uploading.ellipses"/>&nbsp;<span id="percentComplete"></span>';
+            $('uploadSpinner').src = '/csvn/images/spinner.gif';
         }, 100);
         return true;
     }
@@ -34,8 +34,8 @@ function fetchUploadProgress() {
         parameters: {uploadProgressKey:'${uploadProgressKey}', avoidCache: new Date().getTime()},
         requestHeaders: {Accept: 'text/json'},
         onSuccess: function(transport) {
-            responseData = transport.responseText.evalJSON(true);
-            percentComplete = responseData.uploadStats.percentComplete;
+            var responseData = transport.responseText.evalJSON(true);
+            var percentComplete = responseData.uploadStats.percentComplete;
             $('percentComplete').innerHTML = percentComplete + '%';
         }
     })
@@ -107,6 +107,13 @@ function fetchUploadProgress() {
           <td class="ContainerBodyWithPaddedBorder">
             <table id="loadOptionsInnerTable" class="ItemDetailContainer">
               <tbody>
+                <g:if test="${headRev > 0}">
+                  <tr>
+                    <td colspan="4">
+                      <div class="instructionText"><g:message code="repository.page.load.not.empty.message"/></div>
+                    </td>
+                  <tr>
+                </g:if>
                 <tr>
                   <td class="ItemDetailName">
                     <label for="dumpFile"><g:message code="repository.page.load.fileupload.label" /></label>
@@ -115,12 +122,14 @@ function fetchUploadProgress() {
                     <input style="float: left" name="dumpFile" id="dumpFile" type="file"/>
                   </td>
                   <td valign="top" class="value">                  
-                        <span id="uploadProgress"></span>
+                        <span id="uploadProgress" style="display: none;">
+                          <img id="uploadSpinner" class="spinner" align="middle"  src="/csvn/images/spinner.gif" /><g:message 
+                              code="repository.page.load.uploading.ellipses"/>&nbsp;<span id="percentComplete"></span></span>
                    </td>
                   <td class="ItemDetailValue"><g:message code="repository.page.load.fileupload.tip" /> </td>
                 </tr>
-
-                <tr>
+                 <g:if test="${headRev == 0}">
+                  <tr>
                   <td class="ItemDetailName">
                     <label for="ignoreUuid"><g:message code="repository.page.load.ignoreUuid.label" /></label>
                   </td>
@@ -130,7 +139,8 @@ function fetchUploadProgress() {
                   <td class="ItemDetailValue">
                     <g:message code="repository.page.load.ignoreUuid.tip" />
                   </td>
-                </tr>
+                  </tr>
+                 </g:if>
 
                 <tr class="ContainerFooter">
                   <td colspan="5">
