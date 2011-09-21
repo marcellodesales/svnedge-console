@@ -305,7 +305,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         boolean loadSuccess = false
         timeLimit = System.currentTimeMillis() + 60000
         while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(500)
+            Thread.sleep(2000)
             output = commandLineService.executeWithOutput(
                     ConfigUtil.svnPath(), "info",
                     "--no-auth-cache", "--non-interactive",
