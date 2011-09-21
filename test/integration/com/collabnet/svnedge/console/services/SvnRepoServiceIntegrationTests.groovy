@@ -315,8 +315,86 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             loadSuccess = output.contains("Node Kind: directory")
         }
 
-        log.info "======> load progress"
-        log.info progressFile.text
+        assertFalse "load file should be deleted after loading", loadFile.exists()
+        assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
+    }
+
+    public void testLoadZip() {
+
+        // upper limit on time to run async code
+        long timeLimit = System.currentTimeMillis() + 30000
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
+
+        // create a dump file of a src repo with branches/tags/trunk nodes
+        def testRepoNameSrc = "load-test-src"
+        Repository repoSrc = new Repository(name: testRepoNameSrc)
+        assertEquals "Failed to create src repository.", 0,
+                svnRepoService.createRepository(repoSrc, true)
+        repoSrc.save()
+
+        DumpBean params = new DumpBean()
+        params.compress = true
+        def filename = svnRepoService.createDump(params, repoSrc)
+        File dumpFile = newDumpFile(filename, repoSrc)
+        // Async so wait for it
+        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        assertTrue "The Dump file should be a zip file", dumpFile.name.endsWith(".zip")
+        log.info "The dumpfile original location: '${dumpFile.absolutePath}'"
+
+        // create a target repo WITHOUT branches/tags/trunk nodes
+        def testRepoNameTarget = "load-test-target"
+
+        Repository repoTarget = new Repository(name: testRepoNameTarget)
+        assertEquals "Failed to create target repository.", 0,
+                svnRepoService.createRepository(repoTarget, false)
+        repoTarget.save(flush: true)
+
+        def output = commandLineService.executeWithOutput(
+                ConfigUtil.svnPath(), "info",
+                "--no-auth-cache", "--non-interactive",
+                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+        // verify no 'trunk' folder
+        assertFalse "svn info output should not contain node info for 'trunk'", output.contains("Node Kind: directory")
+
+        // move src dump file to the expected load location for target
+        File loadDir = svnRepoService.getLoadDirectory(repoTarget)
+        // delete any residual load files
+        loadDir.eachFile {
+            it.delete()
+        }
+        File loadFile = new File(loadDir, dumpFile.name)
+        boolean loadFileCreated = dumpFile.renameTo(loadFile)
+        assertTrue "should be able to move dumpfile to load directory", loadFileCreated
+        assertTrue "loadFile should exist", loadFile.exists()
+        log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
+
+        // load it
+        def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        def options = ["progressLogFile": progressFile.absolutePath]
+        options << ["ignoreUuid": false]
+        svnRepoService.scheduleLoad(repoTarget, options)
+
+        // verify that repo load has run (trunk/tags/branches which should have been imported)
+        boolean loadSuccess = false
+        timeLimit = System.currentTimeMillis() + 60000
+        while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(5000)
+            output = commandLineService.executeWithOutput(
+                    ConfigUtil.svnPath(), "info",
+                    "--no-auth-cache", "--non-interactive",
+                    commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+            loadSuccess = output.contains("Node Kind: directory")
+        }
+
         assertFalse "load file should be deleted after loading", loadFile.exists()
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
     }

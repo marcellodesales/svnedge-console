@@ -792,8 +792,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
             File dumpFile = files[0]
             // load the dump file, cleaning up only on success exit code
             loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
-            dumpFile.delete()
-            progress.delete()
+            boolean dumpFileDeleted = dumpFile.delete()
+            boolean progressFileDeleted = progress.delete()
+            log.debug("Deleted the dump file? ${dumpFileDeleted}; Deleted the progress file? ${progressFileDeleted}")
         }
         else {
             def message = "No dumpfile found in the load location '${loadDir.absolutePath}' for repo '${repo.name}'"
@@ -816,11 +817,27 @@ class SvnRepoService extends AbstractSvnEdgeService {
             cmd << "--ignore-uuid"
         }
         cmd << getRepositoryHomePath(repo)
+
         Process p = null
-        dumpFile.withInputStream {
-            p = commandLineService.startProcessWithInputStream(cmd, it, progress)
+        InputStream is = null
+        // if the dumpfile ends in .zip, stream in the first ZipEntry to the load process
+        def zipFile = null
+        if (dumpFile.name.endsWith(".zip")) {
+            zipFile = new java.util.zip.ZipFile(dumpFile)
+            is = zipFile.getInputStream(zipFile.entries().nextElement())
         }
+        else {
+            is = dumpFile.newInputStream()
+        }
+        p = commandLineService.startProcessWithInputStream(cmd, is, progress)
         p.waitFor()
+        // close resources
+        is.close()
+        progress.close()
+        if (zipFile) {
+            zipFile.close()
+        }
+        // signal errors
         if (p.exitValue() != 0) {
             log.error("Unable to load the dump file '${dumpFile.absolutePath}'")
             throw new RepoLoadException(p.text)
