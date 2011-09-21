@@ -314,8 +314,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             loadSuccess = output.contains("Node Kind: directory")
         }
 
-        println "======> load progress"
-        println progressFile.text
+        log.info "======> load progress"
+        log.info progressFile.text
         assertFalse "load file should be deleted after loading", loadFile.exists()
         assertTrue "the target repo should have nodes from the src after loading", loadSuccess
     }

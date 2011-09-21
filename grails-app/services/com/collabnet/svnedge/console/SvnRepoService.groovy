@@ -782,7 +782,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         jobsAdminService.createOrReplaceTrigger(trigger)
     }
 
-    def loadDumpFile(Repository repo, Map options) {
+    def loadDumpFile(Repository repo, Map options) throws FileNotFoundException {
         File progress = new File(options["progressLogFile"])
         File loadDir = getLoadDirectory(repo)
         File[] files = loadDir.listFiles({ return it.isFile() } as FileFilter)
@@ -795,12 +795,22 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 progress.delete()
             }
         }
+        else {
+            def message = "No dumpfile found in the load location '${loadDir.absolutePath}' for repo '${repo.name}'"
+            log.error(message)
+            throw new FileNotFoundException(message)
+        }
     }
 
     def loadDumpFile(File dumpFile, Repository repo,
-                     Map options, OutputStream progress) {
+                     Map options, OutputStream progress) throws FileNotFoundException {
 
         log.debug("Loading dumpfile '${dumpFile.canonicalPath}' to repo '${repo.name}'")
+        if (!dumpFile.exists()) {
+            def message = "No dumpfile found in the load location '${dumpFile.absolutePath}' for repo '${repo.name}'"
+            log.error(message)
+            throw new FileNotFoundException(message)
+        }
         def cmd = [ConfigUtil.svnadminPath(), "load"]
         if (options["ignoreUuid"]) {
             cmd << "--ignore-uuid"
