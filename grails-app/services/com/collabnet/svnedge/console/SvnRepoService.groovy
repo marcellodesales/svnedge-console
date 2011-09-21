@@ -805,9 +805,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def loadDumpFile(File dumpFile, Repository repo,
                      Map options, OutputStream progress) throws FileNotFoundException, RepoLoadException {
 
-        log.debug("Loading dumpfile '${dumpFile.canonicalPath}' to repo '${repo.name}'")
-        if (!dumpFile.exists()) {
-            def message = "No dumpfile found in the load location '${dumpFile.absolutePath}' for repo '${repo.name}'"
+        log.info("Loading dumpfile '${dumpFile?.absolutePath}' to repo '${repo?.name}'")
+        if (!dumpFile?.exists()) {
+            def message = "No dumpfile found in the load location '${dumpFile?.absolutePath}' for repo '${repo?.name}'"
             log.error(message)
             throw new FileNotFoundException(message)
         }
@@ -822,7 +822,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         p.waitFor()
         if (p.exitValue() != 0) {
-            log.error("Unable to load the dump file")
+            log.error("Unable to load the dump file '${dumpFile.absolutePath}'")
             throw new RepoLoadException(p.text)
         }
     }

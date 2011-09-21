@@ -261,6 +261,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             Thread.sleep(250)
         }
         assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        log.info "The dumpfile original location: '${dumpFile.absolutePath}'"
         String contents = dumpFile.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
@@ -292,6 +293,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         boolean loadFileCreated = dumpFile.renameTo(loadFile)
         assertTrue "should be able to move dumpfile to load directory", loadFileCreated
         assertTrue "loadFile should exist", loadFile.exists()
+        log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
 
         // load it
         def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
@@ -301,11 +303,10 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         svnRepoService.scheduleLoad(repoTarget, options)
 
         // verify that repo load has run (trunk/tags/branches which should have been imported)
-        Thread.sleep(5000)
         boolean loadSuccess = false
         timeLimit = System.currentTimeMillis() + 60000
         while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(2000)
+            Thread.sleep(5000)
             output = commandLineService.executeWithOutput(
                     ConfigUtil.svnPath(), "info",
                     "--no-auth-cache", "--non-interactive",
@@ -317,7 +318,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         log.info "======> load progress"
         log.info progressFile.text
         assertFalse "load file should be deleted after loading", loadFile.exists()
-        assertTrue "the target repo should have nodes from the src after loading", loadSuccess
+        assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
     }
 
     private File createTestDir(String prefix) {
