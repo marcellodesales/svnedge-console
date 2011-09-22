@@ -334,6 +334,8 @@ Content-Length: 107
         if (isWindows()) {
             return
         }
+
+        //Removing existing 'svn-python' directory/link and recreating as symlink.
         String libDir = new File(appHome, "lib").absolutePath
         File pythonBindingDir = new File(libDir, "svn-python")
         if (pythonBindingDir.exists()) {
@@ -342,9 +344,10 @@ Content-Length: 107
         }
         File actualPythonBindingDir = new File(libDir,
             "svn-python${getPythonVersion()}")
-        commandLineService.executeWithOutput("ln", "-s", 
+        commandLineService.executeWithOutput("ln", "-sf", 
             actualPythonBindingDir.absolutePath, pythonBindingDir.absolutePath)
 
+        //Removing existing 'mod_python' directory/link and recreating as symlink.
         File modpyLibDir = new File(libDir, "mod_python")
         if (modpyLibDir.exists()) {
             commandLineService.executeWithOutput("rm", "-rf", 
@@ -352,17 +355,37 @@ Content-Length: 107
         }
         File actualModpyLibDir = new File(libDir,
             "mod_python${getPythonVersion()}")
-        commandLineService.executeWithOutput("ln", "-s", 
+        commandLineService.executeWithOutput("ln", "-sf", 
             actualModpyLibDir.absolutePath, modpyLibDir.absolutePath)
 
+        //Recreateing 'libsvn_swig_py-1' real library name as symlink.
         File swigPythonLibPath = new File(libDir, "libsvn_swig_py-1.so.0.0.0")
+        if (swigPythonLibPath.exists()) {
+            commandLineService.executeWithOutput("rm", "-rf", 
+                swigPythonLibPath.absolutePath)
+        }
         File actualSwigPythonLibPath = new File(libDir, 
             "libsvn_swig_py-1.so.0.0.0${getPythonVersion()}")
         commandLineService.executeWithOutput("ln", "-sf",
             actualSwigPythonLibPath.absolutePath, swigPythonLibPath.absolutePath)
+
+        //Recreating 'libsvn_swig_py-1' soname as symlink.
         File swigPythonLibPath1 = new File(libDir, "libsvn_swig_py-1.so.0")
+        if (swigPythonLibPath1.exists()) {
+            commandLineService.executeWithOutput("rm", "-rf", 
+                swigPythonLibPath1.absolutePath)
+        }
         commandLineService.executeWithOutput("ln", "-sf", 
             swigPythonLibPath.absolutePath, swigPythonLibPath1.absolutePath)
+
+        //Recreateing 'libsvn_swig_py-1' linker name as symlink.
+        File swigPythonLibPath2 = new File(libDir, "libsvn_swig_py-1.so")
+        if (swigPythonLibPath2.exists()) {
+            commandLineService.executeWithOutput("rm", "-rf", 
+                swigPythonLibPath2.absolutePath)
+        }
+        commandLineService.executeWithOutput("ln", "-sf", 
+            swigPythonLibPath.absolutePath, swigPythonLibPath2.absolutePath)
     }
     
     private def conditionalWriteHttpdConf() {
