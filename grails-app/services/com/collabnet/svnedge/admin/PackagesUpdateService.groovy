@@ -27,6 +27,7 @@ import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth
 import com.collabnet.svnedge.admin.pkgsupdate.PackageInfo 
 import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateProgressTracker 
 import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateSecurityPolicy 
+import com.collabnet.svnedge.util.ConfigUtil;
 import com.sun.pkg.client.Image
 import com.sun.pkg.client.Image.FmriState
 import com.sun.pkg.client.Image.ImagePlan
@@ -934,6 +935,15 @@ public final class PackagesUpdateService implements InitializingBean {
         return this.systemNeedsRestart
     }
 
+    /**
+     * @return true if the update did not complete and the updates directory
+     * still exists
+     */
+    def isIncompleteWindowsUpdate() {
+        File f = new File(ConfigUtil.appHome(), 'updates')
+        return f.exists()
+    }
+    
     /**
      * Restart the web context by calling System.exit(5). The Wrapper code
      * will restart the server.

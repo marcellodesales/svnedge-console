@@ -588,7 +588,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             exception = scmMightNotBeReachable
 
         } catch (Exception e) {
-            log.error("CTF mode conversion failed: " + e.message)
+            log.error("CTF mode conversion failed: " + e.message, e)
             if (e.message) {
                 errors << "An exception occured: " + e.message
             } else {

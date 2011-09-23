@@ -33,6 +33,7 @@ import java.text.SimpleDateFormat
 @Secured(['ROLE_USER'])
 class StatusController {
 
+    def authenticateService
     def operatingSystemService
     def networkingService
     def svnRepoService
@@ -214,6 +215,22 @@ class StatusController {
            def msg = message(code: 'packagesUpdate.error.general')
            flash.error = msg + ":" + e.getMessage()
        }
+       
+       if(authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM") &&
+               packagesUpdateService.isIncompleteWindowsUpdate()) {
+               
+           String msg = message(
+               code: 'packagesUpdate.error.incomplete.windows.update',
+               args: [createLink(controller: 'log', action: 'show', 
+                                 params: [fileName: 'updates.log'])
+                     ])
+           if (flash.unfiltered_error) {
+               flash.unfiltered_error += ' ' + msg
+           } else {
+               flash.unfiltered_error = msg
+           }
+       }
+        
        def runningCmdsSize = 0
        if (server.mode == ServerMode.REPLICA) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
