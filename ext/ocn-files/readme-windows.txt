@@ -42,13 +42,7 @@ Contents
    Subversion Edge works on all versions of Windows XP and later, including
    Windows Vista and Windows 7.
    
-   There are separate downloads for 32-bit and 64-bit Windows.  The 64-bit
-   Windows installer detects and installs the 64-bit Java 1.6 JRE if not
-   installed.  However, the native Apache and Subversion binaries are currently
-   32-bit binaries.  These have been tested and verified to work well on 64-bit
-   Windows.  We will be updating the binaries to 64-bit later this year.  By
-   using the 64-bit Windows installer you will be connected to the proper
-   update repository to receive these updates when they are available.
+   There are separate downloads for 32-bit and 64-bit Windows.
    
    Prerequisite: You must have administrative privileges to install
    and uninstall CollabNet Subversion Edge.
