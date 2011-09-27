@@ -30,7 +30,7 @@ class OcnController {
     def index = {
         try {
             def page = AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
-                'csvn.html' : 'csvn.html'
+                'svnedge-extensions.html' : 'svnedge-user.html'
             def ocnContent = ('http://tab.open.collab.net/nonav/' + page)
                     .toURL().text
             [ocnContent: ocnContent]
