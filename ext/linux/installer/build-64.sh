@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=2.1.0
+VERSION=2.2.0
 OS=linux-x86_64
 PKG=/u1/hudson/pkg-tools/bin/pkg
 BUILD_TEMP=/u1/hudson/linux64/trunk
