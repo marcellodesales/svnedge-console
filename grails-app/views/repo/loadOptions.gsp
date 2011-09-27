@@ -46,7 +46,7 @@ function fetchUploadProgress() {
 <g:render template="leftNav" />
 
 <content tag="title">
-     <g:message code="repository.page.load.title" />
+     <g:message code="repository.page.leftnav.title" />
 </content>
 
     <body>
