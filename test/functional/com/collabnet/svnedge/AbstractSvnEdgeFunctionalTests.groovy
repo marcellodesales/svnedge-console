@@ -67,6 +67,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
     }
 
     protected void login(username, password) {
+        javaScriptEnabled = false
         get('/login/auth')
         assertStatus(200)
 
@@ -81,6 +82,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
             click login
         }
         assertStatus(200)
+        javaScriptEnabled = true
     }
 
     /**
