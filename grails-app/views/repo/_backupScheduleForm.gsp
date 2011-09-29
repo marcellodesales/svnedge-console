@@ -46,7 +46,7 @@
                         code="repository.page.bkupSchedule.type.none"/></option>
               </select>
               <g:if test="${cloudRegistrationRequired}">
-                <span id="cloudRegister" class="TextRequired">
+                <span id="cloudRegister" class="TextRequired" style="display: none;">
                   <img width="15" height="15" alt="Warning" align="bottom"
                        src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
                   <g:message code="repository.page.bkupSchedule.cloud.not.configured"
