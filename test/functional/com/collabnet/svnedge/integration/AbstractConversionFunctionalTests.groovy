@@ -132,7 +132,9 @@ abstract class AbstractConversionFunctionalTests extends
     * @return if the status page contains the link to a TeamForge server.
     */
    protected boolean isServerOnTeamForgeMode() {
+       javaScriptEnabled = false
        get('/status/index')
+       javaScriptEnabled = true
        return this.response.contentAsString.contains(
            getMessage("status.page.url.teamforge"))
    }
