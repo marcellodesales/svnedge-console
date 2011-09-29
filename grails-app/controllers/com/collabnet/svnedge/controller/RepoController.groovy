@@ -398,7 +398,8 @@ class RepoController {
         def repoIdList = (params.id) ? [params.id] : ControllerUtil.getListViewSelectedIds(params)
         def type = params.type
         try {
-            def projects = (type == "cloud") ?
+            def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+            def projects = (type == "cloud" && cloudConfig) ?
                 cloudServicesRemoteClientService.listProjects() : null
             repoIdList.each {
                 Repository repo = Repository.get(it)
@@ -410,7 +411,7 @@ class RepoController {
                 }
 
                 if (type == "cloud") {
-                    if (!CloudServicesConfiguration.getCurrentConfig()) {
+                    if (!cloudConfig) {
                         flash.error = message(code: 'repository.action.bkupSchedule.cloud.not.configured')
                         redirect(controller: 'setupCloudServices', action: 'index')
                         return
