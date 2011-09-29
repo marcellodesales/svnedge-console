@@ -59,6 +59,7 @@ class DiscoveryServiceFunctionalTests extends AbstractSvnEdgeFunctionalTests  {
     void testGotoCsvnUrl() {
 
         loginAdmin()
+        javaScriptEnabled = false
 
         // verify the status page
         get(getSchemeHostPort() + discoveryService.getCsvnContextPath())
