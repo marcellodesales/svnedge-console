@@ -755,6 +755,26 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
+     * File delete utility which will retry 5 times, pausing the thread 1 second between attempts
+     * @param f the file to delete
+     * @return boolean indicating success or failure
+     */
+    private boolean deleteWithRetry(File f) {
+
+        int retryLimit = 5
+        int retryCount = 0
+        boolean deleted = false
+        while (!deleted && ++retryCount < retryLimit) {
+            deleted = (f?.delete() == true)
+            if (!deleted) {
+                Thread.sleep(1000)
+            }
+        }
+        return deleted
+
+    }
+
+    /**
      * schedules the repo load operation for 5 seconds out, and returns
      * @param repo the Repository to load
      * @param options any parameters needed by the
@@ -792,8 +812,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
             File dumpFile = files[0]
             // load the dump file, cleaning up only on success exit code
             loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
-            boolean dumpFileDeleted = dumpFile.delete()
-            boolean progressFileDeleted = progress.delete()
+            boolean dumpFileDeleted = deleteWithRetry(dumpFile)
+            boolean progressFileDeleted = deleteWithRetry(progress)
             log.debug("Deleted the dump file? ${dumpFileDeleted}; Deleted the progress file? ${progressFileDeleted}")
         }
         else {
