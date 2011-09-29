@@ -20,7 +20,11 @@
 
       // add restart support for unapplied updates
       Event.observe(window, 'load', function() {
-          $('restartLink').observe('click', function(event){
+          var restartLinkElement = $('restartLink')
+          if (restartLinkElement == null) {
+              return
+          }
+          restartLinkElement.observe('click', function(event){
             // show modal info dialog
             var title = "<p class='dialogTitle'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting')}</p>"
             var msg = "<p class='dialogBody'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip')}"
