@@ -98,7 +98,7 @@ function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
     this.onFailure = null
     this.loginAvailable = false
     this.doAjaxRequest = function(checker) {
-        checker.messageElement.innerHTML = usernameAvailableMessages.checking
+        checker.messageElement.innerHTML = messages.checking
         checker.ajaxInstance = new Ajax.Request('/csvn/setupCloudServices/checkLoginAvailability', {
                     method:'get',
                     requestHeaders: {Accept: 'text/json'},
@@ -106,14 +106,14 @@ function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
                     onSuccess: function(transport) {
                         var responseJson = transport.responseText.evalJSON(true);
                         if (responseJson.result.loginAvailable == 'true') {
-                            checker.messageElement.innerHTML = usernameAvailableMessages.available
+                            checker.messageElement.innerHTML = messages.loginAvailable
                             checker.loginAvailable = true
                             if (checker.onSuccess != null) {
                                 checker.onSuccess()
                             }
                         }
                         else {
-                            checker.messageElement.innerHTML = usernameAvailableMessages.notAvailable
+                            checker.messageElement.innerHTML = messages.loginNotAvailable
                             checker.loginAvailable = false
                             if (checker.onFailure != null) {
                                 checker.onFailure()
@@ -128,5 +128,52 @@ function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
         this.delayCheckTimer = setTimeout(checkLoginAvailability, 1000)
     }
 
-    this.messageElement.innerHTML = usernameAvailableMessages.prompt
+    this.messageElement.innerHTML = messages.prompt
 }
+
+/**
+ * A class for validating that a given domain is available in CollabNet cloud services via ajax
+ * @param inputElement the input field to validate (element)
+ * @param messageElement the message field in which to indicate result (element)
+ */
+function CloudDomainAvailabilityChecker(inputElement, messageElement) {
+    this.inputElement = inputElement
+    this.messageElement = messageElement
+    this.delayCheckTimer = null
+    this.onSuccess = null
+    this.onFailure = null
+    this.domainAvailable = false
+    this.doAjaxRequest = function(checker) {
+        checker.messageElement.innerHTML = messages.checking
+        checker.ajaxInstance = new Ajax.Request('/csvn/setupCloudServices/checkDomainAvailability', {
+                    method:'get',
+                    requestHeaders: {Accept: 'text/json'},
+                    parameters: {domain: checker.inputElement.value },
+                    onSuccess: function(transport) {
+                        var responseJson = transport.responseText.evalJSON(true);
+                        if (responseJson.result.domainAvailable == 'true') {
+                            checker.messageElement.innerHTML = messages.domainAvailable
+                            checker.loginAvailable = true
+                            if (checker.onSuccess != null) {
+                                checker.onSuccess()
+                            }
+                        }
+                        else {
+                            checker.messageElement.innerHTML = messages.domainNotAvailable
+                            checker.loginAvailable = false
+                            if (checker.onFailure != null) {
+                                checker.onFailure()
+                            }
+                        }
+                    }
+                })
+    }
+    this.keypressHandler = function() {
+        clearTimeout(this.delayCheckTimer)
+        var checkAvailability = this.doAjaxRequest.curry(this)
+        this.delayCheckTimer = setTimeout(checkAvailability, 1000)
+    }
+
+    this.messageElement.innerHTML = messages.prompt
+}
+

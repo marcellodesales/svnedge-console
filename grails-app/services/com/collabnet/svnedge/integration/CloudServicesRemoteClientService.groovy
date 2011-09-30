@@ -103,6 +103,30 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     /**
+     * Find out if a given organization domain name is already in use or not
+     * @param domain the proposed domain name
+     * @return boolean indicating availability
+     */
+    def isDomainAvailable(String domain) throws CloudServicesException {
+
+        def restClient = createRestClient()
+        def params = createApiCredentialsMap()
+        params["domain"] = domain
+        try {
+            def resp = restClient.get(path: "organizations/isDomainUnique.json",
+                    query: params,
+                    requestContentType: URLENC)
+
+            return Boolean.valueOf(resp.responseData["domainIsUnique"])
+        }
+        catch (Exception e) {
+            String error = e.response.responseData.error
+            log.error("Unable to evaluate domain uniqueness: ${e.message} ${error} ")
+        }
+        return false
+    }
+
+    /**
      * creates the cloud services account if possible (organization + admin user)
      * @param cmd CloudServicesAccountCommand from the controller
      * @return boolean indicating success or failure

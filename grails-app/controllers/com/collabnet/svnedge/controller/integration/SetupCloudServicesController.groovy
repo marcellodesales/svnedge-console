@@ -59,6 +59,24 @@ class SetupCloudServicesController {
         }
     }
 
+     def checkDomainAvailability = { CloudServicesAccountCommand cmd ->
+
+        // first validate according to local rules to save roundtrip to api
+        def domainAvailable = true
+        cmd.validate()
+        if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("domain"))) {
+            domainAvailable = false
+        }
+        // else, check remote availability
+        else {
+            domainAvailable = cloudServicesRemoteClientService.isDomainAvailable(cmd.domain)
+        }
+
+        render(contentType: "text/json") {
+            result(domainAvailable: domainAvailable.toString())
+        }
+    }
+
     def createAccount = { CloudServicesAccountCommand cmd ->
         cmd.requestLocale = request.locale
         cmd.validate()

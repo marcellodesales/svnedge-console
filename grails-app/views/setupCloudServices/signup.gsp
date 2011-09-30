@@ -24,19 +24,28 @@
 
   <script type="text/javascript">
 
-    var usernameAvailableMessages = {
+    var messages = {
         prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
         checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
-        available: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
-        notAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>'
+        loginAvailable: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
+        loginNotAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>',
+        domainAvailable: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.domain.available.yes"/>',
+        domainNotAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.domain.available.no"/>'
     }
 
     Event.observe(window, 'load', function() {
       var usernameField = $('username')
       var usernameMsgElement = $('usernameUniquenessMessage')
-      var checker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
+      var loginChecker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
       Event.observe(usernameField, 'keydown', function(e) {
-        checker.keypressHandler()
+        loginChecker.keypressHandler()
+      })
+
+      var domainField = $('domain')
+      var domainMsgElement = $('domainUniquenessMessage')
+      var domainChecker = new CloudDomainAvailabilityChecker(domainField, domainMsgElement)
+      Event.observe(domainField, 'keydown', function(e) {
+        domainChecker.keypressHandler()
       })
     })
 
@@ -233,7 +242,8 @@
            value="${fieldValue(bean: cmd, field: 'domain')}"/>
   </td>
   <td>
-    <em><g:message code="setupCloudServices.page.signup.domain.label.tip"/></em>
+    <em><g:message code="setupCloudServices.page.signup.domain.label.tip"/></em> <br/>
+    <span id="domainUniquenessMessage"></span>
   </td>
 </tr>
 <tr>
