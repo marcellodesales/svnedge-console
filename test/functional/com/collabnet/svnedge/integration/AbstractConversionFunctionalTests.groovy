@@ -48,7 +48,6 @@ abstract class AbstractConversionFunctionalTests extends
     @Override
     protected void setUp() {
         super.setUp();
-        javaScriptEnabled = false
 
         //running on a machine that does not have a name does not work.
         if (server.hostname == "localhost" || server.hostname == "127.0.0.1") {
@@ -133,7 +132,6 @@ abstract class AbstractConversionFunctionalTests extends
     * @return if the status page contains the link to a TeamForge server.
     */
    protected boolean isServerOnTeamForgeMode() {
-       javaScriptEnabled = false
        get('/status/index')
        return this.response.contentAsString.contains(
            getMessage("status.page.url.teamforge"))
