@@ -76,7 +76,7 @@ class RepoControllerTests extends ControllerUnitTestCase {
         def model = controller.save()
         def redirArg = controller.redirectArgs["action"]
         assertEquals "Expected redirect to 'show' view on successful repo " +
-            "create", controller.show, redirArg
+            "create", 'dumpFileList', redirArg
 
         // this should fail (validation error)
         model = controller.save()
