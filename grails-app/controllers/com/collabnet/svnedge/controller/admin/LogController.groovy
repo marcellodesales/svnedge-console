@@ -27,23 +27,6 @@ import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 /**
- * Command class for 'saveConfiguration' action. Provides validation rules.
- */
-class LogConfigurationCommand {
-
-    def operatingSystemService
-    ConsoleLogLevel consoleLevel
-    ApacheLogLevel apacheLevel
-    Integer pruneLogsOlderThan
-    
-    static constraints = {
-        consoleLevel(nullable : false)
-        apacheLevel(nullable : false)
-        pruneLogsOlderThan(nullable : false, min : 0)
-    }
-}
-
-/**
  * This Controller manages views and actions related to application logging.
  * This includes listing and viewing log files and configuring the apache and
  * console log levels.
@@ -213,5 +196,22 @@ class LogController {
                 )
             }
         }
+    }
+}
+
+/**
+ * Command class for 'saveConfiguration' action. Provides validation rules.
+ */
+class LogConfigurationCommand {
+
+    def operatingSystemService
+    ConsoleLogLevel consoleLevel
+    ApacheLogLevel apacheLevel
+    Integer pruneLogsOlderThan
+    
+    static constraints = {
+        consoleLevel(nullable : false)
+        apacheLevel(nullable : false)
+        pruneLogsOlderThan(nullable : false, min : 0)
     }
 }

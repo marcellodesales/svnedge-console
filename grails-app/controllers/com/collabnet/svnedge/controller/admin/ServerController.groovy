@@ -30,15 +30,6 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.util.ConfigUtil;
 
-class CtfCredentialCommand {
-    String ctfUsername
-    String ctfPassword
-    static constraints = {
-        ctfUsername(blank:false)
-        ctfPassword(blank:false)
-    }
-}
-
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class ServerController {
 
@@ -269,5 +260,14 @@ class ServerController {
             httpd_group: serverConfService.httpdGroup,
             isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
+    }
+}
+
+class CtfCredentialCommand {
+    String ctfUsername
+    String ctfPassword
+    static constraints = {
+        ctfUsername(blank:false)
+        ctfPassword(blank:false)
     }
 }

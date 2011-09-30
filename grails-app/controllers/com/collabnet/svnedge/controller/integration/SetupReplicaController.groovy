@@ -33,33 +33,6 @@ import org.springframework.beans.BeanUtils
 import javax.net.ssl.SSLHandshakeException
 
 
-class CtfConnectionCommand {
-
-    String ctfURL
-    String ctfUsername
-    String ctfPassword
-
-    static constraints = {
-        ctfURL(blank: false)
-        ctfUsername(blank: false)
-        ctfPassword(blank: false)
-    }
-}
-
-class ReplicaInfoCommand {
-
-    String masterExternalSystemId
-    String name
-    String description
-    String message
-
-    static constraints = {
-        masterExternalSystemId(blank: false)
-        name(blank: false)
-        description(blank: false)
-    }
-}
-
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class SetupReplicaController {
 
@@ -408,4 +381,31 @@ class SetupReplicaController {
         return b
     }
 
+}
+
+class CtfConnectionCommand {
+    
+    String ctfURL
+    String ctfUsername
+    String ctfPassword
+    
+    static constraints = {
+        ctfURL(blank: false)
+        ctfUsername(blank: false)
+        ctfPassword(blank: false)
+    }
+}
+
+class ReplicaInfoCommand {
+    
+    String masterExternalSystemId
+    String name
+    String description
+    String message
+    
+    static constraints = {
+        masterExternalSystemId(blank: false)
+        name(blank: false)
+        description(blank: false)
+    }
 }

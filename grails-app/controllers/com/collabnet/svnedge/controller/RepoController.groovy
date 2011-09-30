@@ -34,16 +34,6 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.util.ControllerUtil
 
-/**
- * Command class for 'saveAuthorization' action provides validation
- */
-class AuthzRulesCommand {
-    String accessRules
-    def errors
-    static constraints = {
-        accessRules(blank: false)
-    }
-}
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
 class RepoController {
@@ -803,5 +793,16 @@ class RepoController {
                 break
         }
         return output
+    }
+}
+
+/**
+* Command class for 'saveAuthorization' action provides validation
+*/
+class AuthzRulesCommand {
+    String accessRules
+    def errors
+    static constraints = {
+        accessRules(blank: false)
     }
 }

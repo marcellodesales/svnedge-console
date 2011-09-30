@@ -23,48 +23,6 @@ import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
 import com.collabnet.svnedge.util.ControllerUtil
 
-class CloudServicesAccountCommand {
-    String username
-    String password
-    String passwordConfirm
-    String domain
-
-    String firstName
-    String lastName
-    String emailAddress
-    String phoneNumber
-    String organization
-    Boolean acceptTerms
-
-    Locale requestLocale = Locale.default
-
-    static constraints = {
-        username(blank: false, matches: "[a-zA-Z0-9_]+", minSize: 3, maxSize: 16)
-        password(blank: false, minSize: 6, maxSize: 64)
-        passwordConfirm(blank: false,
-                validator: { String val, CloudServicesAccountCommand cmd ->
-                    if (val != cmd.password) {
-                        return "cloudServicesAccountCommand.passwordConfirm.mismatch"
-                    }
-                }
-        )
-        domain(blank: false, matches: "[a-zA-Z0-9]+", minSize: 3, maxSize: 32)
-        firstName(blank: false)
-        lastName(blank: false)
-        emailAddress(blank: false, email: true)
-        phoneNumber(matches: "[0-9 #()\\+-]+")
-        organization(blank: false, minSize: 1, maxSize: 256)
-        acceptTerms(
-                validator: { Boolean val ->
-                    if (val != new Boolean(true)) {
-                        return "cloudServicesAccountCommand.acceptTerms.notAccepted"
-                    }
-                }
-        )
-    }
-}
-
-
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
 class SetupCloudServicesController {
 
@@ -233,4 +191,45 @@ class SetupCloudServicesController {
         forward(action: 'selectUsers')
     }
 
+}
+
+class CloudServicesAccountCommand {
+    String username
+    String password
+    String passwordConfirm
+    String domain
+
+    String firstName
+    String lastName
+    String emailAddress
+    String phoneNumber
+    String organization
+    Boolean acceptTerms
+
+    Locale requestLocale = Locale.default
+
+    static constraints = {
+        username(blank: false, matches: "[a-zA-Z0-9_]+", minSize: 3, maxSize: 16)
+        password(blank: false, minSize: 6, maxSize: 64)
+        passwordConfirm(blank: false,
+                validator: { String val, CloudServicesAccountCommand cmd ->
+                    if (val != cmd.password) {
+                        return "cloudServicesAccountCommand.passwordConfirm.mismatch"
+                    }
+                }
+        )
+        domain(blank: false, matches: "[a-zA-Z0-9]+", minSize: 3, maxSize: 32)
+        firstName(blank: false)
+        lastName(blank: false)
+        emailAddress(blank: false, email: true)
+        phoneNumber(matches: "[0-9 #()\\+-]+")
+        organization(blank: false, minSize: 1, maxSize: 256)
+        acceptTerms(
+                validator: { Boolean val ->
+                    if (val != new Boolean(true)) {
+                        return "cloudServicesAccountCommand.acceptTerms.notAccepted"
+                    }
+                }
+        )
+    }
 }
