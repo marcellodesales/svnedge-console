@@ -719,7 +719,7 @@ class RepoController {
             if (result == 0) {
                 flash.message = message(code: 'repository.action.save.success')
                 repo.save()
-                redirect(action: show, id: repo.id)
+                redirect(action: 'dumpFileList', id: repo.id)
                 success = true
             } else {
                 repo.errors.reject('repository.action.save.failure')

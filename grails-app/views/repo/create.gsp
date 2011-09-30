@@ -3,6 +3,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title><g:message code="repository.page.create.title" /></title>
+        <g:javascript library="prototype" />
+        <script type="text/javascript">
+          // add restart support for unapplied updates
+          Event.observe(window, 'load', function() {
+              $('name').focus();
+          });
+        </script>
     </head>
 
 <content tag="title">
