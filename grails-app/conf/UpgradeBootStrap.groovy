@@ -22,7 +22,6 @@ import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.statistics.Statistic
-import com.collabnet.svnedge.domain.quartz.QrtzLocks
 import com.collabnet.svnedge.util.ConfigUtil
 
 /**
