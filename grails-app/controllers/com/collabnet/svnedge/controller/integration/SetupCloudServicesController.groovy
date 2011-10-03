@@ -43,6 +43,7 @@ class SetupCloudServicesController {
 
         // first validate according to local rules to save roundtrip to api
         def loginAvailable = true
+        cmd.username = params.token
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username"))) {
             loginAvailable = false
@@ -55,7 +56,7 @@ class SetupCloudServicesController {
         }
 
         render(contentType: "text/json") {
-            result(loginAvailable: loginAvailable.toString())
+            result(available: loginAvailable.toString())
         }
     }
 
@@ -63,6 +64,7 @@ class SetupCloudServicesController {
 
         // first validate according to local rules to save roundtrip to api
         def domainAvailable = true
+        cmd.domain = params.token
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("domain"))) {
             domainAvailable = false
@@ -73,7 +75,7 @@ class SetupCloudServicesController {
         }
 
         render(contentType: "text/json") {
-            result(domainAvailable: domainAvailable.toString())
+            result(available: domainAvailable.toString())
         }
     }
 

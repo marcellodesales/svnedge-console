@@ -36,14 +36,14 @@
     Event.observe(window, 'load', function() {
       var usernameField = $('username')
       var usernameMsgElement = $('usernameUniquenessMessage')
-      var loginChecker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
+      var loginChecker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.loginAvailable,  messages.loginNotAvailable, messages.checking, messages.prompt)
       Event.observe(usernameField, 'keydown', function(e) {
         loginChecker.keypressHandler()
       })
 
       var domainField = $('domain')
       var domainMsgElement = $('domainUniquenessMessage')
-      var domainChecker = new CloudDomainAvailabilityChecker(domainField, domainMsgElement)
+      var domainChecker = new CloudTokenAvailabilityChecker(domainField, domainMsgElement, '/csvn/setupCloudServices/checkDomainAvailability', messages.domainAvailable,  messages.domainNotAvailable, messages.checking, messages.prompt)
       Event.observe(domainField, 'keydown', function(e) {
         domainChecker.keypressHandler()
       })

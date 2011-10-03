@@ -84,83 +84,37 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
 }
 
 /**
- * A class for validating that a given login username is available in CollabNet cloud services via ajax
- * @param usernameElement the input field to validate (element)
- * @param messageElement the message field in which to indicate result (element)
- */
-function CloudLoginAvailabilityChecker(usernameElement, messageElement) {
-
-
-    this.usernameElement = usernameElement
-    this.messageElement = messageElement
-    this.delayCheckTimer = null
-    this.onSuccess = null
-    this.onFailure = null
-    this.loginAvailable = false
-    this.doAjaxRequest = function(checker) {
-        checker.messageElement.innerHTML = messages.checking
-        checker.ajaxInstance = new Ajax.Request('/csvn/setupCloudServices/checkLoginAvailability', {
-                    method:'get',
-                    requestHeaders: {Accept: 'text/json'},
-                    parameters: {username: checker.usernameElement.value },
-                    onSuccess: function(transport) {
-                        var responseJson = transport.responseText.evalJSON(true);
-                        if (responseJson.result.loginAvailable == 'true') {
-                            checker.messageElement.innerHTML = messages.loginAvailable
-                            checker.loginAvailable = true
-                            if (checker.onSuccess != null) {
-                                checker.onSuccess()
-                            }
-                        }
-                        else {
-                            checker.messageElement.innerHTML = messages.loginNotAvailable
-                            checker.loginAvailable = false
-                            if (checker.onFailure != null) {
-                                checker.onFailure()
-                            }
-                        }
-                    }
-                })
-    }
-    this.keypressHandler = function() {
-        clearTimeout(this.delayCheckTimer)
-        var checkLoginAvailability = this.doAjaxRequest.curry(this)
-        this.delayCheckTimer = setTimeout(checkLoginAvailability, 1000)
-    }
-
-    this.messageElement.innerHTML = messages.prompt
-}
-
-/**
- * A class for validating that a given domain is available in CollabNet cloud services via ajax
+ * A class for validating that a given token (username, domain name) is available in CollabNet cloud services via ajax
  * @param inputElement the input field to validate (element)
  * @param messageElement the message field in which to indicate result (element)
+ * @param ajaxUrl the ajax endpoint for validating availability
+ * @param availableString message when name is available
+ * @param unvailableString message when name is not available
+ * @param checkingString message when talking to the server
+ * @param promptString message for initial state
  */
-function CloudDomainAvailabilityChecker(inputElement, messageElement) {
+function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, availableString, unavailableString, checkingString, promptString ) {
     this.inputElement = inputElement
     this.messageElement = messageElement
     this.delayCheckTimer = null
     this.onSuccess = null
     this.onFailure = null
-    this.domainAvailable = false
     this.doAjaxRequest = function(checker) {
-        checker.messageElement.innerHTML = messages.checking
-        checker.ajaxInstance = new Ajax.Request('/csvn/setupCloudServices/checkDomainAvailability', {
+        checker.messageElement.innerHTML = checkingString
+        checker.ajaxInstance = new Ajax.Request(ajaxUrl, {
                     method:'get',
                     requestHeaders: {Accept: 'text/json'},
-                    parameters: {domain: checker.inputElement.value },
+                    parameters: {token: checker.inputElement.value },
                     onSuccess: function(transport) {
                         var responseJson = transport.responseText.evalJSON(true);
-                        if (responseJson.result.domainAvailable == 'true') {
-                            checker.messageElement.innerHTML = messages.domainAvailable
-                            checker.loginAvailable = true
+                        if (responseJson.result.available == 'true') {
+                            checker.messageElement.innerHTML = availableString
                             if (checker.onSuccess != null) {
                                 checker.onSuccess()
                             }
                         }
                         else {
-                            checker.messageElement.innerHTML = messages.domainNotAvailable
-                            checker.loginAvailable = false
+                            checker.messageElement.innerHTML = unavailableString
                             if (checker.onFailure != null) {
                                 checker.onFailure()
                             }
@@ -174,6 +128,6 @@ function CloudDomainAvailabilityChecker(inputElement, messageElement) {
         this.delayCheckTimer = setTimeout(checkAvailability, 1000)
     }
 
-    this.messageElement.innerHTML = messages.prompt
+    this.messageElement.innerHTML = promptString
 }
 
