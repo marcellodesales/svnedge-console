@@ -88,33 +88,31 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
  * @param inputElement the input field to validate (element)
  * @param messageElement the message field in which to indicate result (element)
  * @param ajaxUrl the ajax endpoint for validating availability
- * @param availableString message when name is available
- * @param unvailableString message when name is not available
  * @param checkingString message when talking to the server
  * @param promptString message for initial state
  */
-function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, availableString, unavailableString, checkingString, promptString ) {
+function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, checkingString, promptString) {
     this.inputElement = inputElement
     this.messageElement = messageElement
     this.delayCheckTimer = null
     this.onSuccess = null
     this.onFailure = null
     this.doAjaxRequest = function(checker) {
-        checker.messageElement.innerHTML = checkingString
+        checker.messageElement.innerHTML = '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> ' + checkingString
         checker.ajaxInstance = new Ajax.Request(ajaxUrl, {
                     method:'get',
                     requestHeaders: {Accept: 'text/json'},
                     parameters: {token: checker.inputElement.value },
                     onSuccess: function(transport) {
                         var responseJson = transport.responseText.evalJSON(true);
-                        if (responseJson.result.available == 'true') {
-                            checker.messageElement.innerHTML = availableString
+                        if (responseJson.result.tokenStatus == 'ok') {
+                            checker.messageElement.innerHTML = '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> ' + responseJson.result.message
                             if (checker.onSuccess != null) {
                                 checker.onSuccess()
                             }
                         }
                         else {
-                            checker.messageElement.innerHTML = unavailableString
+                            checker.messageElement.innerHTML = '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> ' + responseJson.result.message
                             if (checker.onFailure != null) {
                                 checker.onFailure()
                             }

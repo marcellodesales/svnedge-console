@@ -25,25 +25,21 @@
   <script type="text/javascript">
 
     var messages = {
-        prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
-        checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
-        loginAvailable: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
-        loginNotAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>',
-        domainAvailable: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.domain.available.yes"/>',
-        domainNotAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.domain.available.no"/>'
+      prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
+      checking: '<g:message code="setupCloudServices.login.available.checking"/>',
     }
 
     Event.observe(window, 'load', function() {
       var usernameField = $('username')
       var usernameMsgElement = $('usernameUniquenessMessage')
-      var loginChecker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.loginAvailable,  messages.loginNotAvailable, messages.checking, messages.prompt)
+      var loginChecker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.checking, messages.prompt)
       Event.observe(usernameField, 'keydown', function(e) {
         loginChecker.keypressHandler()
       })
 
       var domainField = $('domain')
       var domainMsgElement = $('domainUniquenessMessage')
-      var domainChecker = new CloudTokenAvailabilityChecker(domainField, domainMsgElement, '/csvn/setupCloudServices/checkDomainAvailability', messages.domainAvailable,  messages.domainNotAvailable, messages.checking, messages.prompt)
+      var domainChecker = new CloudTokenAvailabilityChecker(domainField, domainMsgElement, '/csvn/setupCloudServices/checkDomainAvailability', messages.checking, messages.prompt)
       Event.observe(domainField, 'keydown', function(e) {
         domainChecker.keypressHandler()
       })
@@ -193,7 +189,7 @@
 <tr>
   <td class="ItemDetailName">
     <label for="passwordConfirm"><g:message
-        code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
+            code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
   </td>
   <td valign="top">
     <input size="40" type="password" id="passwordConfirm" name="passwordConfirm"

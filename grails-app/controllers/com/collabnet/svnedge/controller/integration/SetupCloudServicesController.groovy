@@ -28,6 +28,7 @@ class SetupCloudServicesController {
 
     def securityService
     def cloudServicesRemoteClientService
+    def messageSource
 
     def index = {
         if (CloudServicesConfiguration.getCurrentConfig()) {
@@ -42,40 +43,50 @@ class SetupCloudServicesController {
     def checkLoginAvailability = { CloudServicesAccountCommand cmd ->
 
         // first validate according to local rules to save roundtrip to api
-        def loginAvailable = true
+        String response = message(code: "setupCloudServices.login.available.yes")
+        boolean tokenOk = true
         cmd.username = params.token
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("username"))) {
-            loginAvailable = false
+            tokenOk = false
+            response = messageSource.getMessage(cmd.errors.getFieldError("username"), request.locale)
         }
         // else, check remote availability
         else {
             CloudServicesConfiguration cloudConf = CloudServicesConfiguration.getCurrentConfig()
             String domain = (cloudConf?.domain) ?: null
-            loginAvailable = cloudServicesRemoteClientService.isLoginNameAvailable(cmd.username, domain)
+            if (!cloudServicesRemoteClientService.isLoginNameAvailable(cmd.username, domain)) {
+                tokenOk = false
+                response = message(code: "setupCloudServices.login.available.no")
+            }
         }
 
         render(contentType: "text/json") {
-            result(available: loginAvailable.toString())
+            result(tokenStatus: tokenOk ? "ok" : "error", message: response)
         }
     }
 
-     def checkDomainAvailability = { CloudServicesAccountCommand cmd ->
+    def checkDomainAvailability = { CloudServicesAccountCommand cmd ->
 
         // first validate according to local rules to save roundtrip to api
-        def domainAvailable = true
+        String response = message(code: "setupCloudServices.domain.available.yes")
+        boolean tokenOk = true
         cmd.domain = params.token
         cmd.validate()
         if (cmd.hasErrors() && (cmd.errors.hasFieldErrors("domain"))) {
-            domainAvailable = false
+            tokenOk = false
+            response = messageSource.getMessage(cmd.errors.getFieldError("domain"), request.locale)
         }
         // else, check remote availability
         else {
-            domainAvailable = cloudServicesRemoteClientService.isDomainAvailable(cmd.domain)
+            if (!cloudServicesRemoteClientService.isDomainAvailable(cmd.domain)) {
+                tokenOk = false
+                response = message(code: "setupCloudServices.domain.available.no")
+            }
         }
 
         render(contentType: "text/json") {
-            result(available: domainAvailable.toString())
+            result(tokenStatus: tokenOk ? "ok" : "error", message: response)
         }
     }
 
