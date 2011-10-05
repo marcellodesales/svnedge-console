@@ -87,5 +87,4 @@ target(enableDebugging: 'Modify wrapper scripts for debugging the target JVM') {
 
 }
 
-//setDefaultTarget("createDebuggingRelease")
-setDefaultTarget("enableDebugging")
+setDefaultTarget("createDebuggingRelease")
