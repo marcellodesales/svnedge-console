@@ -40,6 +40,12 @@ target(explodeWar: 'Expands the csvn.war file to a directory, excluding the prec
     ant.echo(message: "DEBUG DIST: Expanding csvn.war file to directory of same name, excluding precompiled gsps")
     distDir = "${basedir}/dist"
     webAppsDir = "${distDir}/appserver/webapps"
+    if (osName == "windows") {
+        // for windows, delete "dist/appserver/webapps/csvn.war"
+        // and instead unpack the artifact in the "updates" dir
+        ant.delete (file: "${webAppsDir}/csvn.war")
+        webAppsDir = "${distDir}/updates/appserver/webapps"
+    }
 
     // explode the war file to a same-named directory, but exclude the precompiled gsps
     csvnWar = "${webAppsDir}/csvn.war"
@@ -66,6 +72,11 @@ target(enableDebugging: 'Modify wrapper scripts for debugging the target JVM') {
     distDir = "${basedir}/dist"
     confDir = "${distDir}/temp-data/conf"
     wrapperConf = "${confDir}/csvn-wrapper.conf"
+    if (osName == "windows") {
+        confDir = "${distDir}/updates/svcwrapper/conf"
+        wrapperConf = "${confDir}/wrapper.conf"
+    }
+
     wrapperConfTemp = "${confDir}/csvn-wrapper.conf.temp"
 
     def confFile = new File(wrapperConf)
