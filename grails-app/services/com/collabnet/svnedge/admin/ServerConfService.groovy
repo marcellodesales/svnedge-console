@@ -123,7 +123,8 @@ private static final String DONT_EDIT_VIEWVC = """#
             log.debug("Not a replica, no reason to sync configuration with master svn")
             return false
         }
-        ReplicatedRepository rr = ReplicatedRepository.list()?.get(0)
+        def rrList = ReplicatedRepository.list()
+        ReplicatedRepository rr = (rrList) ? rrList.get(0) : null
         if (!rr) {
             log.warn("No replicated repositories, this configuration cannot be compared to the master")
             return false
