@@ -26,7 +26,7 @@
 
     var messages = {
       prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
-      checking: '<g:message code="setupCloudServices.login.available.checking"/>',
+      checking: '<g:message code="setupCloudServices.login.available.checking"/>'
     }
 
     Event.observe(window, 'load', function() {

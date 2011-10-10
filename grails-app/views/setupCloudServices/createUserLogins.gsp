@@ -26,11 +26,9 @@
 
   <script type="text/javascript">
 
-    var usernameAvailableMessages = {
+    var messages = {
       prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
-      checking: '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> <g:message code="setupCloudServices.login.available.checking"/>',
-      available: '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> <g:message code="setupCloudServices.login.available.yes"/>',
-      notAvailable: '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> <g:message code="setupCloudServices.login.available.no"/>'
+      checking: '<g:message code="setupCloudServices.login.available.checking"/>'
     }
 
     var usernameAvailabilityCheckers = []
@@ -38,7 +36,7 @@
       $$('input.CheckForLoginUniqueness').each(function(s) {
         var usernameField = s
         var usernameMsgElement = s.next()
-        var checker = new CloudLoginAvailabilityChecker(usernameField, usernameMsgElement)
+        var checker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.checking, messages.prompt)
         usernameAvailabilityCheckers.push(checker)
         checker.onSuccess = updateActionButtons
         checker.onFailure = updateActionButtons
@@ -54,7 +52,7 @@
     function updateActionButtons() {
       var enableActions = true
       for (var i = 0; i < usernameAvailabilityCheckers.length; i++) {
-        if (usernameAvailabilityCheckers[i].loginAvailable != true) {
+        if (usernameAvailabilityCheckers[i].tokenAvailable != true) {
           enableActions = false
           break
         }

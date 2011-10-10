@@ -97,6 +97,7 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
     this.delayCheckTimer = null
     this.onSuccess = null
     this.onFailure = null
+    this.tokenAvailable = false
     this.doAjaxRequest = function(checker) {
         checker.messageElement.innerHTML = '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> ' + checkingString
         checker.ajaxInstance = new Ajax.Request(ajaxUrl, {
@@ -107,12 +108,14 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
                         var responseJson = transport.responseText.evalJSON(true);
                         if (responseJson.result.tokenStatus == 'ok') {
                             checker.messageElement.innerHTML = '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> ' + responseJson.result.message
+                            checker.tokenAvailable = true
                             if (checker.onSuccess != null) {
                                 checker.onSuccess()
                             }
                         }
                         else {
                             checker.messageElement.innerHTML = '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> ' + responseJson.result.message
+                            checker.tokenAvailable = false
                             if (checker.onFailure != null) {
                                 checker.onFailure()
                             }

@@ -468,12 +468,16 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     def createUser(user, login) {
 
         def restClient = getAuthenticatedRestClient()
-        String[] names = user.realUserName?.split(" ")
         def body = [:]
+        // convert the "realUserName" field to first and last name
+        String[] names = user.realUserName?.split(" ")
         if (names && names.length > 0) {
+            // use name[0] for first and last if only one token
             body.put("firstName", names[0])
+            body.put("lastName", names[0])
         }
         if (names && names.length > 1) {
+            // if more than one token, take last for last name
             body.put("lastName", names[names.length - 1])
         }
         body.put("login", (login) ?: user.username)
@@ -490,7 +494,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
         catch (Exception e) {
             String error = e.response.responseData.error
-            log.error("Unable to create Cloud account: ${e.message} - ${error}", e)
+            log.error("Unable to create Cloud account for login '${(login) ?: user.username}': ${e.message} - ${error}", e)
         }
         return false
     }
