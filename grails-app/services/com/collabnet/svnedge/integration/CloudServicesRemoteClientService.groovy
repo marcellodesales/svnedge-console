@@ -295,7 +295,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     boolean deleteProject(projectId) throws CloudServicesException {
         def restClient = getAuthenticatedRestClient()
         try {
-            resp = restClient.delete(path: "projects/" + projectId + ".json")
+            def resp = restClient.delete(path: "projects/" + projectId + ".json")
 
             // sc 200 = deleted
             if (resp.status == 200) {
@@ -495,6 +495,27 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         catch (Exception e) {
             String error = e.response.responseData.error
             log.error("Unable to create Cloud account for login '${(login) ?: user.username}': ${e.message} - ${error}", e)
+        }
+        return false
+    }
+
+    /**
+     * Deletes a user by the given cloud user ID.
+     * @param userId cloud userId
+     * @return true if the deletion was successful
+     */
+    boolean deleteUser(userId) throws CloudServicesException {
+        def restClient = getAuthenticatedRestClient()
+        try {
+            def resp = restClient.delete(path: "users/" + userId + ".json")
+
+            // sc 200 = deleted
+            if (resp.status == 200) {
+                return true
+            }
+        }
+        catch (Exception e) {
+            log.warn("Unable to delete Cloud userId: " + userId, e)
         }
         return false
     }
