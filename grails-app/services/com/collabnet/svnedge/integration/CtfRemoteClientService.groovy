@@ -580,6 +580,13 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                 throw new CtfSessionExpiredException(ctfUrl, userSessionId,
                     getMessage("ctfRemoteClientService.remote.sessionExpired", 
                         locale), e)
+
+            } else if (faultMsg.contains("Security exception")) {
+                throw new InvalidSecurityKeyException(ctfUrl, faultMsg, e)
+            } else {
+                def msg = getMessage(
+                    "ctfRemoteClientService.createExternalSystem.error", locale)
+                throw new RemoteMasterException(ctfUrl, msg + " " + faultMsg, e)
             }
 
         } catch (Exception e) {

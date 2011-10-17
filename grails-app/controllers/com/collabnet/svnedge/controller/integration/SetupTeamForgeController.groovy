@@ -27,6 +27,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConversionBean;
 import com.collabnet.svnedge.integration.CtfSessionExpiredException;
+import com.collabnet.svnedge.integration.InvalidSecurityKeyException;
 import com.collabnet.svnedge.integration.RemoteAndLocalConversationException;
 import com.collabnet.svnedge.integration.RemoteMasterException;
 import com.collabnet.svnedge.integration.SetupTeamForgeService;
@@ -552,6 +553,12 @@ class SetupTeamForgeController {
             flash.error = msg + " " + 
                 sessionExpiredDuringConversion.getMessage()
             session[WIZARD_BEAN_KEY] = null
+            redirect(action: 'ctfInfo')
+
+        } catch (InvalidSecurityKeyException remoteCommProblem) {
+            con.requiresServerKey = true
+            flash.error = message(code: 
+                'setupTeamForge.action.convert.apiKeyMessage')
             redirect(action: 'ctfInfo')
 
         } catch (RemoteMasterException remoteCommProblem) {

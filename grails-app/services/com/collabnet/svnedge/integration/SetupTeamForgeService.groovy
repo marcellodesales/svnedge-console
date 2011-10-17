@@ -564,6 +564,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         } catch (SSLHandshakeException sslException) {
             exception = sslException
 
+        } catch (InvalidSecurityKeyException keyException) {
+            exception = keyException
+
         } catch (CantBindPortException cantRestartServer) {
             if (!this.isFreshInstall()) {
                 this.undoLocalServerConfiguration(server)
@@ -593,6 +596,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 errors << "An exception occured: " + e.message
             } else {
                 errors << "An exception occured: " + e.getClass().name
+            }
+            if (!conversionData.exSystemId) {
+                exception = e
             }
         }
 
