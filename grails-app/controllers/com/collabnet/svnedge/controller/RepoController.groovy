@@ -353,6 +353,35 @@ class RepoController {
         return model
     }
 
+    /**
+     * fetches a JSON representation of all the dumps / backups for all repos
+     */
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def dumpFileListAll = {
+        // set default sort to be date descending, if neither sort
+        // parameter is present
+        if (!params.sort) {
+            params.sort = "name"
+            params.order = "asc"
+        }
+        if (!params.order) {
+            params.order = "asc"
+        }
+        def sortBy = params.sort
+        boolean isAscending = params.order == "asc"
+
+        def repoDumps = [:]
+        Repository.list().each() {
+            repoDumps.put(it.name, svnRepoService.listDumpFiles(it, sortBy, isAscending).collect {
+                it.name
+            })
+        }
+
+        render(contentType: "text/json") {
+            result(repoDumps: repoDumps)
+        }
+    }
+
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def bkupSchedule = {
         def model = reports()
@@ -797,8 +826,8 @@ class RepoController {
 }
 
 /**
-* Command class for 'saveAuthorization' action provides validation
-*/
+ * Command class for 'saveAuthorization' action provides validation
+ */
 class AuthzRulesCommand {
     String accessRules
     def errors
