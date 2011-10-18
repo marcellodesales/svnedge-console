@@ -30,6 +30,20 @@ beans = {
         daoAuthenticationProvider = ref("daoAuthenticationProvider")
     }
 
+    noHttpSessionContextIntegrationFilter(org.springframework.security.context.HttpSessionContextIntegrationFilter) {
+        allowSessionCreation = false
+    }
+    
+    basicAuthenticationEntryPoint(org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint) {
+        realmName = 'CollabNet Subversion Edge API Realm'
+    }
+        
+    basicExceptionTranslationFilter(org.springframework.security.ui.ExceptionTranslationFilter) {
+        authenticationEntryPoint = ref('basicAuthenticationEntryPoint')
+        accessDeniedHandler = ref('accessDeniedHandler')
+        portResolver = ref('portResolver')
+    }
+
     // use the db-based statistics service
     statisticsService(com.collabnet.svnedge.statistics.LastCollectedStatisticsService) { bean ->
         bean.autowire = 'byName'

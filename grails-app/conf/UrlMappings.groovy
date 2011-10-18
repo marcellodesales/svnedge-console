@@ -25,6 +25,13 @@ class UrlMappings {
             }
         }
 
+
+        "/api/$apiVersion/$controller/$id?" (parseRequest: true) {
+            action = [GET:"restRetrieve", PUT:"restUpdate", 
+                      DELETE:"restDelete", POST:"restSave"]
+        }
+
+
         "/$controller/$action?/$id?"{
             constraints {
             // apply constraints here

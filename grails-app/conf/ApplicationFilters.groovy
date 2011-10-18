@@ -33,6 +33,22 @@ class ApplicationFilters {
     def filters = {
 
         /**
+         * Filtering when requesting via http scheme and console is configured
+         * to require ssl.
+         */
+        requireSsl(controller: '*', action: '*') {
+            before = {
+                if (request.scheme == 'http' && Server.getServer().useSslConsole) {
+                    def port = System.getProperty("jetty.ssl.port", "4434")
+                    def sslUrl = "https://${request.serverName}${port != "443" ? ":" + port : ""}${request.forwardURI}"
+                    redirect(url: sslUrl)
+                    return false
+                }
+                return true
+            }
+        }
+
+        /**
          * Filtering when the server has not loaded the libraries correctly.
          */
         verifyOperatingSystemLibraries(controller: '*', action: '*') {

@@ -32,12 +32,17 @@ security {
  
     providerNames = ['csvnAuthenticationProvider']
 
-    filterNames = [
-        'httpSessionContextIntegrationFilter',
-        'logoutFilter',
-        'authenticationProcessingFilter',
-        'anonymousProcessingFilter',
-        'exceptionTranslationFilter',
-        'filterInvocationInterceptor'
-    ]
+    filterInvocationDefinitionSourceMap = [
+        '/api/**': 'noHttpSessionContextIntegrationFilter,' +
+                   'basicProcessingFilter,' +
+                   'anonymousProcessingFilter,' +
+                   'basicExceptionTranslationFilter,' +
+                   'filterInvocationInterceptor',
+        '/**': 'httpSessionContextIntegrationFilter,' +
+               'logoutFilter,' +
+               'authenticationProcessingFilter,' +
+               'anonymousProcessingFilter,' +
+               'exceptionTranslationFilter,' +
+               'filterInvocationInterceptor'
+     ]
 }
