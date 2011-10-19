@@ -159,9 +159,15 @@ class BootStrap {
 
         // If the svn server is configured to start with the console app,
         // start it now
-        if (server && server.defaultStart && !lifecycleService.isStarted()) {
-            lifecycleService.startServer()
+        try {
+            if (server && server.defaultStart && !lifecycleService.isStarted()) {
+                lifecycleService.startServer()
+            }
+        } catch (Exception e) {
+            log.error("Failed to start the subversion server: " + 
+                e.getMessage(), e)
         }
+        
 
         log.info("Bootstrapping discoveryService...")
         try {
