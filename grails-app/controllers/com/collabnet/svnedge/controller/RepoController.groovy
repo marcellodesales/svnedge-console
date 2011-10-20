@@ -33,6 +33,7 @@ import com.collabnet.svnedge.integration.QuotaCloudServicesException;
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.util.ControllerUtil
+import org.apache.commons.io.FileUtils
 
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -734,10 +735,29 @@ class RepoController {
         repo.validate()
 
         if (repo.validateName() && !repo.hasErrors()) {
-            def result = svnRepoService.createRepository(repo, params.isTemplate == 'true')
+            def isTemplate = (params.initOption == 'useTemplate' && params.isTemplate == 'true')
+            def result = svnRepoService.createRepository(repo, isTemplate)
             if (result == 0) {
-                flash.message = message(code: 'repository.action.save.success')
-                repo.save()
+                repo.save(flush:true)
+                if (params.initOption == 'useBackup' && params.initOptionSelected) {
+                    File loadDir = svnRepoService.getLoadDirectory(repo)
+                    String backupDir = params.initOptionSelected.split("/")[0]
+                    String dumpFileName = params.initOptionSelected.split("/")[1]
+                    def dumpFile = new File(new File(Server.getServer().dumpDir, backupDir), dumpFileName)
+                    FileUtils.copyFileToDirectory(dumpFile, loadDir)
+
+                    def props = [:]
+                    props.put("ignoreUuid", true)
+                    props.put("locale", request.locale)
+                    svnRepoService.scheduleLoad(repo, props)
+                    flash.unfiltered_message = message(
+                        code: 'repository.action.save.success.loading',
+                        args: [createLink(controller: 'job', action: 'list')])
+                }
+                else {
+                    flash.message = message(code: 'repository.action.save.success')
+                }
+
                 redirect(action: 'dumpFileList', id: repo.id)
                 success = true
             } else {
