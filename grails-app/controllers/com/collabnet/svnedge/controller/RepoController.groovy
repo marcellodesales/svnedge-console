@@ -746,7 +746,7 @@ class RepoController {
                     FileUtils.copyFileToDirectory(dumpFile, loadDir)
 
                     def props = [:]
-                    props.put("ignoreUuid", true)
+                    props.put("ignoreUuid", false)
                     props.put("locale", request.locale)
                     svnRepoService.scheduleLoad(repo, props)
                     flash.unfiltered_message = message(
