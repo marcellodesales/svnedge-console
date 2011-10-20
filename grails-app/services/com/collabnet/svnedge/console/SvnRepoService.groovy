@@ -607,6 +607,47 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
+     * Lists all the dumps on the file system, which can include those of deleted repos
+     * @param sortBy sort column (name is default)
+     * @param isAscending sort direction (true)
+     * @return Map of String (repo name) keying a List of File objects
+     */
+    Map<String, List<File>> listBackupsOnFilesystem(sortBy = "name", isAscending = true) {
+        def fileMap = [:]
+
+        Server server = Server.getServer()
+        File dumpDir = new File(server.dumpDir)
+        if (dumpDir.exists()) {
+            dumpDir.eachFile(FileType.DIRECTORIES) { d ->
+                def files = []
+                d.eachFile(FileType.FILES) { f ->
+                    def name = f.name
+                    if (!name.endsWith("-processing") && !name.endsWith("-processing.zip")) {
+                        files << f
+                    }
+                }
+                int sign = isAscending ? 1 : -1
+                switch (sortBy) {
+                    case "name":
+                        files = files.sort { a, b -> sign * (a.name <=> b.name) }
+                        break
+                    case "size":
+                        files = files.sort { f -> sign * f.length() }
+                        break
+                    case "date":
+                        files = files.sort { f -> sign * f.lastModified() }
+                        break
+                    default:
+                        files = files.sort { f -> -1 * f.lastModified() }
+                }
+
+                fileMap.put(d.name, files)
+            }
+        }
+        return fileMap
+    }
+
+    /**
      * Hard delete of the specified repository dump file
      *
      * @param filename

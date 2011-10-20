@@ -371,15 +371,14 @@ class RepoController {
         def sortBy = params.sort
         boolean isAscending = params.order == "asc"
 
-        def repoDumps = [:]
-        Repository.list().each() {
-            repoDumps.put(it.name, svnRepoService.listDumpFiles(it, sortBy, isAscending).collect {
-                it.name
-            })
+        def repoDumps = svnRepoService.listBackupsOnFilesystem(sortBy, isAscending)
+        def repoDumpNames = [:]
+        repoDumps.each { k, v ->
+            repoDumpNames.put(k, v.collect { it.name })
         }
 
         render(contentType: "text/json") {
-            result(repoDumps: repoDumps)
+            result(repoDumps: repoDumpNames)
         }
     }
 
@@ -738,7 +737,7 @@ class RepoController {
             def isTemplate = (params.initOption == 'useTemplate' && params.isTemplate == 'true')
             def result = svnRepoService.createRepository(repo, isTemplate)
             if (result == 0) {
-                repo.save(flush:true)
+                repo.save(flush: true)
                 if (params.initOption == 'useBackup' && params.initOptionSelected) {
                     File loadDir = svnRepoService.getLoadDirectory(repo)
                     String backupDir = params.initOptionSelected.split("/")[0]
@@ -751,8 +750,8 @@ class RepoController {
                     props.put("locale", request.locale)
                     svnRepoService.scheduleLoad(repo, props)
                     flash.unfiltered_message = message(
-                        code: 'repository.action.save.success.loading',
-                        args: [createLink(controller: 'job', action: 'list')])
+                            code: 'repository.action.save.success.loading',
+                            args: [createLink(controller: 'job', action: 'list')])
                 }
                 else {
                     flash.message = message(code: 'repository.action.save.success')
