@@ -54,6 +54,7 @@ class BootStrap {
 
     // Replication-related services for future CTF versions
     def jobsAdminService
+    def jobsInfoService
     def grailsApplication
 
     def init = { servletContext ->
