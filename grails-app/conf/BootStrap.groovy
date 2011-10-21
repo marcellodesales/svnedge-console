@@ -20,6 +20,7 @@ import com.collabnet.svnedge.util.ConfigUtil
 
 import grails.util.GrailsUtil
 
+
 /**
  * Regular BootStrap for Grails.
  */
@@ -53,7 +54,6 @@ class BootStrap {
 
     // Replication-related services for future CTF versions
     def jobsAdminService
-    def jobsInfoService
     def grailsApplication
 
     def init = { servletContext ->
@@ -61,13 +61,13 @@ class BootStrap {
         def config = grailsApplication.config
         log.debug("Bootstrap config: " + config)
         ConfigUtil.configuration = config
-
+        
         log.info("Bootstrap logging with consoleLogLevel from the Server...")
         try {
             logManagementService.bootstrap()
         } catch (Exception e) {
-            log.error("Failed to intitialize LogManagementService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize LogManagementService: " + 
+                e.getMessage(), e)
         }
 
         def env = GrailsUtil.environment
@@ -80,30 +80,30 @@ class BootStrap {
         try {
             operatingSystemService.bootstrap(appHome)
         } catch (Exception e) {
-            log.error("Failed to intitialize OperatingSystemService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize OperatingSystemService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Network Information services...")
         try {
             networkingService.bootStrap()
         } catch (Exception e) {
-            log.error("Failed to intitialize NetworkingService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize NetworkingService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Statistics services...")
         try {
             networkStatisticsService.bootStrap()
         } catch (Exception e) {
-            log.error("Failed to intitialize NetworkStatisticsService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize NetworkStatisticsService: " + 
+                e.getMessage(), e)
         }
         try {
             fileSystemStatisticsService.bootStrap()
         } catch (Exception e) {
-            log.error("Failed to intitialize FileSystemStatisticsService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize FileSystemStatisticsService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping Servers...")
@@ -111,16 +111,16 @@ class BootStrap {
         try {
             server = lifecycleService.bootstrapServer(config)
         } catch (Exception e) {
-            log.error("Failed to intitialize Server instance: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize Server instance: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping the ServerConfigService...")
         try {
             serverConfService.bootstrap(server)
         } catch (Exception e) {
-            log.error("Failed to intitialize ServerConfService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize ServerConfService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrap integration server configuration...")
@@ -132,16 +132,16 @@ class BootStrap {
             commandResultDeliveryService.bootStrap()
 
         } catch (Exception e) {
-            log.error("Failed to intitialize SetupTeamForgeService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize SetupTeamForgeService: " + 
+                e.getMessage(), e)
         }
 
         log.info("Bootstrapping packagesUpdateService...")
         try {
             packagesUpdateService.bootstrap(config)
         } catch (Exception e) {
-            log.error("Failed to intitialize PackagesUpdateService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize PackagesUpdateService: " + 
+                e.getMessage(), e)
         }
 
         if (server.managedByCtf()) {
@@ -153,8 +153,8 @@ class BootStrap {
         try {
             userAccountService.bootStrap(GrailsUtil.environment)
         } catch (Exception e) {
-            log.error("Failed to intitialize UserAccountService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize UserAccountService: " + 
+                e.getMessage(), e)
         }
 
         // If the svn server is configured to start with the console app,
@@ -164,10 +164,10 @@ class BootStrap {
                 lifecycleService.startServer()
             }
         } catch (Exception e) {
-            log.error("Failed to start the subversion server: " +
-                    e.getMessage(), e)
+            log.error("Failed to start the subversion server: " + 
+                e.getMessage(), e)
         }
-
+        
 
         log.info("Bootstrapping discoveryService...")
         try {
@@ -175,16 +175,16 @@ class BootStrap {
                 discoveryService.bootStrap(config)
             }
         } catch (Exception e) {
-            log.error("Failed to intitialize DiscoveryService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize DiscoveryService: " + 
+                e.getMessage(), e)
         }
-
+        
         log.info("Bootstrapping jobsAdminService...")
         try {
             jobsAdminService.bootStrap()
         } catch (Exception e) {
-            log.error("Failed to intitialize JobsAdminService: " +
-                    e.getMessage(), e)
+            log.error ("Failed to intitialize JobsAdminService: " + 
+                e.getMessage(), e)
         }
     }
 
@@ -201,7 +201,7 @@ class BootStrap {
         log.info("Releasing resources from the Operating System service.")
         operatingSystemService.destroy()
 
-        log.info("Stopping background threads")
+        log.info("Stopping background threads")        
         executorService.shutdownNow()
     }
 } 
