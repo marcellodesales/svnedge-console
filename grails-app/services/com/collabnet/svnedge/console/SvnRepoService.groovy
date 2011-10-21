@@ -358,7 +358,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      */
     def verifyRepository(Repository repo) {
         def repoPath = this.getRepositoryHomePath(repo)
-        return verifyRepository(repoPath)
+        return verifyRepositoryPath(repoPath)
     }
 
     private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
