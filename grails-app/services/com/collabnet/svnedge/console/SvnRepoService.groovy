@@ -45,6 +45,9 @@ import org.quartz.JobDataMap
 import com.collabnet.svnedge.admin.RepoLoadJob
 
 import com.collabnet.svnedge.RepoLoadException
+import java.util.zip.ZipFile
+import com.collabnet.svnedge.util.FileUtil
+import org.apache.commons.io.FileUtils
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -112,6 +115,20 @@ class SvnRepoService extends AbstractSvnEdgeService {
             log.warn("Missing $repoPath/db/uuid file...")
         }
         return uuid
+    }
+
+    /**
+     * replaces the UUID of a repo, generating anew or applying the param value
+     * @param repo to update
+     * @param uuid optional string uuid to set the repo to
+     * @return void
+     */
+    def setReposUUID(Repository repo, String uuid = null) {
+        def cmd = [ConfigUtil.svnadminPath(), "setUUID", getRepositoryHomePath(repo)]
+        if (uuid) {
+            cmd << uuid
+        }
+        commandLineService.execute(cmd, null, null)
     }
 
     /**
@@ -490,11 +507,13 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
-     * determine if a File resembles an SVN repo
+     * determine if a File resembles an SVN repo. Can be used with a zip file (hotcopy backup) or directory
+     * @return boolean assessment
      */
     boolean isRepository(File f) {
 
         boolean isDirectory = f.exists() && f.isDirectory()
+        boolean isZip = f.exists() && f.isFile() && f.name.toLowerCase().endsWith(".zip")
         boolean hasFormat = false
         boolean hasDb = false
         if (isDirectory) {
@@ -502,6 +521,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 hasFormat |= (file.isFile() && file.name == "format")
                 hasDb |= (file.isDirectory() && file.name == "db")
             }
+        }
+        else if (isZip) {
+            def zipFile = new ZipFile(f)
+            zipFile.entries().each {
+                hasFormat |= (!it.isDirectory() && it.name == "format")
+                hasDb |= (it.isDirectory() && it.name == "db/")
+            }
+            zipFile.close()
         }
         return hasFormat && hasDb
     }
@@ -852,7 +879,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (files.length > 0) {
             File dumpFile = files[0]
             // load the dump file, cleaning up only on success exit code
-            loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
+            if (isRepository(dumpFile)) {
+                loadHotcopy(dumpFile, repo, options, progress.newOutputStream())
+            }
+            else {
+                loadDumpFile(dumpFile, repo, options, progress.newOutputStream())
+            }
             boolean dumpFileDeleted = deleteWithRetry(dumpFile)
             boolean progressFileDeleted = deleteWithRetry(progress)
             log.debug("Deleted the dump file? ${dumpFileDeleted}; Deleted the progress file? ${progressFileDeleted}")
@@ -902,6 +934,99 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (p.exitValue() != 0) {
             log.error("Unable to load the dump file '${dumpFile.absolutePath}'")
             throw new RepoLoadException(p.text)
+        }
+    }
+
+    /**
+     * replaces a repository with the supplied hotcopy
+     * @param source the hotcopy (either a zip or a repo directory location)
+     * @param target the target Repository to replace
+     * @param options
+     * @param progress
+     * @return
+     * @throws RepoLoadException
+     */
+    def loadHotcopy(File source, Repository target,
+                    Map options, OutputStream progress) throws RepoLoadException {
+
+        log.info("Loading dumpfile '${source?.absolutePath}' to repo '${target?.name}'")
+        if (!source?.exists() || !isRepository(source)) {
+            def message = "No repository hotcopy found in the load location '${source?.absolutePath}' for repo '${repo?.name}'"
+            log.error(message)
+            throw new RepoLoadException(message)
+        }
+
+        // store the original repo uuid if needed -- will set the unzipped hotcopy to this if ignore-uuid is true
+        String uuid = getReposUUID(target)
+
+        boolean isDirectory = source.exists() && source.isDirectory()
+        boolean isZip = source.exists() && source.isFile() && source.name.toLowerCase().endsWith(".zip")
+
+        File hotcopyLocation
+
+        // unzip an archived hotcopy to the temp location
+        if (isZip) {
+            // create temp location
+            hotcopyLocation = File.createTempFile(source.name, "")
+            // delete empty file and mkdir instead
+            hotcopyLocation.delete()
+            hotcopyLocation.mkdir()
+            // unzip into this dir
+            FileUtil.unzipFileIntoDirectory(new ZipFile(source), hotcopyLocation)
+            // find the repo root
+            hotcopyLocation = findRepoRoot(hotcopyLocation)
+        }
+        // or, if hotcopy is already unzipped
+        else if (isDirectory) {
+            hotcopyLocation = source
+        }
+
+        // now move the hotcopy into place
+        File repoLocation = new File(getRepositoryHomePath(target))
+        if (!repoLocation.deleteDir()) {
+            throw new RepoLoadException("Unable to move original repo out of the way for load")
+        }
+        try {
+            FileUtils.copyDirectory(hotcopyLocation, repoLocation)
+        }
+        catch (IOException e) {
+            throw new RepoLoadException("Unable to move hotcopy repo to the repo location")
+        }
+        if (isZip) {
+            hotcopyLocation.deleteDir()
+        }
+
+        // if load option "ignoreUuid" is true, we should restore the UUID of the original repo (ignoring UUID of the
+        // hotcopy backup)
+        if (options["ignoreUuid"]) {
+            setReposUUID(target, uuid)
+        }
+    }
+
+    /**
+     * given a file location, will find the repo root dir at this location or beneath. mainly,
+     * this is intended to find the root of an unzipped hotcopy, which might include a repo name parent dir
+     * containing the svn artifacts
+     * @param file a directory
+     * @return the File which is the repository root
+     * @throws FileNotFoundException if no repo root can be found in the hierarchy
+     */
+    File findRepoRoot(File file) throws FileNotFoundException {
+        if (!file || !file.exists() || !file.isDirectory()) {
+            throw new FileNotFoundException("the root file is not a directory or does not exist")
+        }
+        // collect candidate directories, starting with root provided
+        def repoRootCandidates = [file]
+        file.eachDir() { it ->
+            repoRootCandidates << it
+        }
+        // find first with repo characteristics
+        def rootToReturn = repoRootCandidates.find({isRepository(it)})
+        if (rootToReturn) {
+            return rootToReturn
+        }
+        else {
+            throw new FileNotFoundException("the root and its subdirs do not appear to be repo hotcopies")
         }
     }
 
