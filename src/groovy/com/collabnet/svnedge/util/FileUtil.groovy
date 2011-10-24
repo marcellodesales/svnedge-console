@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.util
 
-import java.util.zip.ZipFile
-import java.util.zip.ZipEntry
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 
@@ -31,41 +29,13 @@ public class FileUtil {
 
     /**
      * Utility method to unzip an archive to a given directory
-     * @param zipFile
-     * @param parentDir
+     * @param zipFile the archive to unzip
+     * @param parentDir the location into which to unzip
      */
-    public static void unzipFileIntoDirectory(ZipFile zipFile, File parentDir) {
-
-        File f
-        InputStream eis
-        byte[] buffer
-        int bytesRead
-
-        zipFile.entries().each { entry ->
-            try {
-                eis = zipFile.getInputStream(entry)
-                buffer = new byte[1024]
-                bytesRead = 0
-
-                f = new File(parentDir.getAbsolutePath() + File.separator + entry.getName())
-                if (entry.isDirectory()) {
-                    f.mkdirs()
-                }
-                else {
-                    f.parentFile.mkdirs()
-                    while ((bytesRead = eis.read(buffer)) != -1) {
-                        f.append(buffer)
-                    }
-                }
-            } catch (IOException e) {
-                log.error ("unable to write zip entry: " + e.getMessage(), e)
-            }
-        }
-        try {
-            zipFile.close()
-        } catch (IOException e) {
-            log.error ("unable to close zip file", e)
-        }
+    public static void unzipFileIntoDirectory(File zipFile, File parentDir) {
+        def ant = new AntBuilder()
+        ant.unzip(src: zipFile.absolutePath,
+              dest: parentDir.absolutePath,
+              overwrite: "true")
     }
-
 }

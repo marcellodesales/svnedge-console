@@ -124,11 +124,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return void
      */
     def setReposUUID(Repository repo, String uuid = null) {
-        def cmd = [ConfigUtil.svnadminPath(), "setUUID", getRepositoryHomePath(repo)]
+        def cmd = [ConfigUtil.svnadminPath(), "setuuid", getRepositoryHomePath(repo)]
         if (uuid) {
             cmd << uuid
         }
-        commandLineService.execute(cmd, null, null)
+        String[] rslt = commandLineService.execute(cmd, null, null)
+        log.debug("Result of setting UUID: ${rslt}" )
     }
 
     /**
@@ -972,7 +973,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             hotcopyLocation.delete()
             hotcopyLocation.mkdir()
             // unzip into this dir
-            FileUtil.unzipFileIntoDirectory(new ZipFile(source), hotcopyLocation)
+            FileUtil.unzipFileIntoDirectory(source, hotcopyLocation)
             // find the repo root
             hotcopyLocation = findRepoRoot(hotcopyLocation)
         }
