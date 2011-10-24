@@ -106,6 +106,7 @@
         <g:set var="controllerButtonMap"
                value="${[status: 'status',
                       repo: 'repo',
+                      repoTemplate: 'repo',
                       user: 'user',
                       role: 'user',
                       job: 'job',

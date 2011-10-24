@@ -86,7 +86,8 @@ public class DatabaseInitializer implements InitializingBean {
         return new MigrationScript[] {
             new MS001CreateDatabase(),
             new MS002MigrateTo200(),
-            new MS003Migrate200To210()
+            new MS003Migrate200To210(),
+            new MS004RepoTemplate()
         };
     }
 

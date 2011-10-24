@@ -9,32 +9,45 @@
   <g:else>
     <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
 
-      <div class="${actionName == 'list' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${(controllerName == 'repo' && actionName == 'list') ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
             <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-            <g:link action="list"><g:message code="repository.page.leftnav.list" /></g:link>
+            <g:link controller="repo" action="list"><g:message code="repository.page.leftnav.list" /></g:link>
       </div>
 
-      <div class="${actionName == 'discover' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName == 'discover' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-          <g:link action="discover"><g:message code="repository.page.leftnav.discover" /></g:link>
+          <g:link controller="repo" action="discover"><g:message code="repository.page.leftnav.discover" /></g:link>
       </div>
 
 
-      <div class="${actionName == 'create' || actionName == 'save' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName == 'create' || actionName == 'save' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-          <g:link action="create"><g:message code="repository.page.leftnav.new" /></g:link>
+          <g:link controller="repo" action="create"><g:message code="repository.page.leftnav.new" /></g:link>
       </div>
 
 
-      <div class="${actionName == 'editAuthorization' || actionName == 'saveAuthorization' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName == 'editAuthorization' || actionName == 'saveAuthorization' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-          <g:link action="editAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>
+          <g:link controller="repo" action="editAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>
       </div>
 
-      <div class="${actionName == 'bkupScheduleMultiple' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName == 'bkupScheduleMultiple' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-          <g:link action="bkupScheduleMultiple"><g:message code="repository.page.leftnav.backup" /></g:link>
+          <g:link controller="repo" action="bkupScheduleMultiple"><g:message code="repository.page.leftnav.backup" /></g:link>
       </div>
+
+      <div class="${controllerName == 'repoTemplate' && actionName != 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+          <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+          <g:link controller="repoTemplate" action="list"><g:message code="repoTemplate.leftnav.manageRepoTemplates" /></g:link>
+      </div>
+
+          
+          <g:if test="${controllerName == 'repoTemplate'}">
+            <div class="${controllerName == 'repoTemplate' && actionName == 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+              <g:link controller="repoTemplate" action="create"><g:message code="repoTemplate.leftNav.create.new" /></g:link>
+            </div>
+          </g:if>
 
     </g:ifAnyGranted>
   </g:else>
