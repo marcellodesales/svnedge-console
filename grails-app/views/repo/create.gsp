@@ -187,7 +187,10 @@
       </div>
 
       <div id="templateChooser" class="initOptionDetail useTemplate" style="display:none">
-        <g:checkBox name="isTemplate" value="true"></g:checkBox><g:message code="repository.page.create.defaultDirs"/>
+        <g:each in="${templateList}" status="i" var="template">
+            <div><label><g:radio name="templateId" value="${template.id}" 
+              checked="${(params.templateId == template.id as String) || (i == 0 && !params.templateId)}"/>${template.name}</label></div>
+        </g:each>
       </div>
     </td>
   </tr>

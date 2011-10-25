@@ -18,7 +18,8 @@
 package com.collabnet.svnedge.domain
 
 class RepoTemplate {
-
+    public static final int STANDARD_LAYOUT_ID = 2
+    
     String name
     String location
     boolean active

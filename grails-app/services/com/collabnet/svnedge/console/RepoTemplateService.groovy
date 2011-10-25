@@ -95,4 +95,9 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         template.save()
         return true
     }
+        
+    def retrieveActiveTemplates() {
+        def templates = RepoTemplate.findAllByActive(true, [sort: 'name'])
+        return templates
+    }
 }

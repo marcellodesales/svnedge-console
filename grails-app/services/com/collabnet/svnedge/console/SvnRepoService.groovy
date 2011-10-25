@@ -525,9 +525,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         else if (isZip) {
             def zipFile = new ZipFile(f)
+            def firstEntry = null
             zipFile.entries().each {
-                hasFormat |= (!it.isDirectory() && it.name == "format")
-                hasDb |= (it.isDirectory() && it.name == "db/")
+                if (!firstEntry) {
+                    firstEntry = it.name
+                }
+                hasFormat |= (!it.isDirectory() && 
+                        (it.name == "format" || 
+                         it.name == firstEntry + "format"))
+                hasDb |= (it.isDirectory() && 
+                        (it.name == "db/" || it.name == firstEntry + "db/"))
             }
             zipFile.close()
         }

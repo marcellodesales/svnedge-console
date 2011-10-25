@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat
 
 import com.collabnet.svnedge.ValidationException;
 import com.collabnet.svnedge.console.DumpBean
+import com.collabnet.svnedge.domain.RepoTemplate;
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
@@ -43,6 +44,7 @@ class RepoController {
     def svnRepoService
     def serverConfService
     def packagesUpdateService
+    def repoTemplateService
     def statisticsService
 
     @Secured(['ROLE_USER'])
@@ -722,9 +724,14 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def create = {
-        def repo = new Repository()
-        repo.properties = params
-        return [repo: repo]
+        def repo = flash.repo
+        if (!repo) {
+            repo = new Repository()
+            repo.properties = params
+        }
+        
+        def templates = repoTemplateService.retrieveActiveTemplates()
+        return [repo: repo, templateList: templates]
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -734,24 +741,35 @@ class RepoController {
         repo.validate()
 
         if (repo.validateName() && !repo.hasErrors()) {
-            def isTemplate = (params.initOption == 'useTemplate' && params.isTemplate == 'true')
+            
+            if (params.initOption == 'useBackup' && !params.initOptionSelected) {
+                flash.error = message(code: 'repository.action.save.no.backup.selected')
+                flash.repo = repo
+                redirect(action: 'create', params: params)
+                return
+            }
+
+            int templateId = params.templateId as int
+            def isTemplate = (params.initOption == 'useTemplate' && 
+                    templateId == RepoTemplate.STANDARD_LAYOUT_ID)
             def result = svnRepoService.createRepository(repo, isTemplate)
             if (result == 0) {
                 repo.save(flush: true)
                 if (params.initOption == 'useBackup' && params.initOptionSelected) {
-                    File loadDir = svnRepoService.getLoadDirectory(repo)
                     String backupDir = params.initOptionSelected.split("/")[0]
                     String dumpFileName = params.initOptionSelected.split("/")[1]
-                    def dumpFile = new File(new File(Server.getServer().dumpDir, backupDir), dumpFileName)
-                    FileUtils.copyFileToDirectory(dumpFile, loadDir)
+                    File dumpFile = new File(new File(Server.getServer()
+                            .dumpDir, backupDir), dumpFileName)
+                    scheduleLoad(repo, dumpFile, false)
+                    
+                } else if (params.initOption == 'useTemplate' && 
+                        templateId > RepoTemplate.STANDARD_LAYOUT_ID) {
+                    String templateDir = repoTemplateService.getTemplateDirectory()
+                    String filename = RepoTemplate.get(templateId).location
+                    File templateFile = new File(templateDir, filename)
+                    log.debug(templateDir + " file=" + filename)
+                    scheduleLoad(repo, templateFile, true)
 
-                    def props = [:]
-                    props.put("ignoreUuid", false)
-                    props.put("locale", request.locale)
-                    svnRepoService.scheduleLoad(repo, props)
-                    flash.unfiltered_message = message(
-                            code: 'repository.action.save.success.loading',
-                            args: [createLink(controller: 'job', action: 'list')])
                 }
                 else {
                     flash.message = message(code: 'repository.action.save.success')
@@ -765,10 +783,25 @@ class RepoController {
         }
         if (!success) {
             flash.error = message(code: 'default.errors.summary')
-            render(view: 'create', model: [repo: repo])
+            flash.repo = repo
+            redirect(action: 'create', params: params)
         }
     }
 
+    private void scheduleLoad(Repository repo, 
+            File dumpFile, boolean ignoreUUID) {
+        File loadDir = svnRepoService.getLoadDirectory(repo)
+        FileUtils.copyFileToDirectory(dumpFile, loadDir)
+        
+        def props = [:]
+        props.put("ignoreUuid", ignoreUUID)
+        props.put("locale", request.locale)
+        svnRepoService.scheduleLoad(repo, props)
+        flash.unfiltered_message = message(
+                code: 'repository.action.save.success.loading',
+                args: [createLink(controller: 'job', action: 'list')])
+    }
+    
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def editAuthorization = {
         flash.clear()
