@@ -34,7 +34,7 @@
               <label for="name"><g:message code="repoTemplate.name.label" default="Name" /></label>
             </td>
             <td valign="top" class="value ${hasErrors(bean: repoTemplateInstance, field: 'name', 'errors')}">
-              <g:textField name="name" maxlength="120" value="${repoTemplateInstance?.name}" size="80"/>
+              <g:textField name="name" maxlength="120" value="${fieldValue(bean: repoTemplateInstance, field: 'name')}" size="80"/>
             </td>
             <td>&nbsp;</td>
           </tr>

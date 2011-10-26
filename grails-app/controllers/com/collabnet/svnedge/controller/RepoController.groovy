@@ -731,7 +731,11 @@ class RepoController {
         }
         
         def templates = repoTemplateService.retrieveActiveTemplates()
-        if (!templates) {
+        if (templates) {
+            for (RepoTemplate t : templates) {
+                substituteL10nName(t)
+            }
+        } else {
             RepoTemplate t = new RepoTemplate(
                     name: message(code: 'repoTemplate.default.empty.label'))
             // can't set id in ctor, not sure why
@@ -740,6 +744,13 @@ class RepoController {
         }
 
         return [repo: repo, templateList: templates]
+    }
+
+    private void substituteL10nName(RepoTemplate template) {
+        if (template.name.startsWith('l10n_')) {
+            template.discard()
+            template.name = message(code: template.name[5..-1])
+        }
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])

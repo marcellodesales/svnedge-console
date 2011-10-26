@@ -44,8 +44,7 @@
         <g:each in="${repoTemplateInstanceList}" status="i" var="repoTemplateInstance">
           <tr id="repoTemplate_${repoTemplateInstance.id}" class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}" style="cursor: move">
             <!-- <td><g:listViewSelectItem item="${repoTemplateInstance}"/></td> -->
-            <td><g:link action="edit" id="${repoTemplateInstance.id}">${fieldValue(bean: repoTemplateInstance, field: "name")}</g:link></td>
-            <!--  <td>${fieldValue(bean: repoTemplateInstance, field: "displayOrder")}</td>  -->                        
+            <td><g:link action="edit" id="${repoTemplateInstance.id}">${repoTemplateInstance.name}</g:link></td>
             <td><g:formatBoolean boolean="${repoTemplateInstance.active}" /></td>
           </tr>
         </g:each>

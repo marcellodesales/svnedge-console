@@ -45,18 +45,26 @@ public class MS004RepoTemplate implements MigrationScript {
             db.executeUpdate(createTable);
         }
 
-        db.executeUpdate("insert into REPO_TEMPLATE " +
-                "(version, name, location, dump_file, active, display_order)" +
-                " values (1, 'Empty repository', 'special1', false, true, 1)");
-        db.executeUpdate("insert into REPO_TEMPLATE " +
-                "(version, name, location, dump_file, active, display_order)" +
-                " values (1, 'Create standard trunk/branches/tags structure'" +
-                ", 'special2', false, true, 2)");
+        int[] version1 = {2,2,1};
+        if (!db.isSchemaCurrent(version1)) {
+            db.executeUpdate("insert into REPO_TEMPLATE " +
+                    "(version, name, location, dump_file, active, display_order)" +
+            " values (1, 'Empty repository', 'special1', false, true, 1)");
+            db.executeUpdate("insert into REPO_TEMPLATE " +
+                    "(version, name, location, dump_file, active, display_order)" +
+                    " values (1, 'Create standard trunk/branches/tags structure'" +
+            ", 'special2', false, true, 2)");
+        }
+        
+        db.executeUpdate("update REPO_TEMPLATE set NAME = " + 
+                "'l10n_repoTemplate.default.empty.label' where ID = 1");
+        db.executeUpdate("update REPO_TEMPLATE set NAME = " + 
+                "'l10n_repoTemplate.default.create.defaultDirs' where ID = 2");
 
         return false;
     }
 
     public int[] getVersion() {
-        return new int[] {2,2,1};
+        return new int[] {2,2,2};
     }
 }

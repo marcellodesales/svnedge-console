@@ -15,7 +15,12 @@ class RepoTemplateController {
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def list = {
         params.sort = 'displayOrder'
-        [repoTemplateInstanceList: RepoTemplate.list(params), repoTemplateInstanceTotal: RepoTemplate.count()]
+        def templateList = RepoTemplate.list(params)
+        for (RepoTemplate t : templateList) {
+            substituteL10nName(t)
+        }
+        [repoTemplateInstanceList: templateList, 
+                repoTemplateInstanceTotal: RepoTemplate.count()]
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -72,7 +77,15 @@ class RepoTemplateController {
             redirect(action: "list")
         }
         else {
+            substituteL10nName(repoTemplateInstance)
             return [repoTemplateInstance: repoTemplateInstance]
+        }
+    }
+
+    private void substituteL10nName(RepoTemplate template) {
+        if (template.name.startsWith('l10n_')) {
+            template.discard()
+            template.name = message(code: template.name[5..-1])
         }
     }
 
