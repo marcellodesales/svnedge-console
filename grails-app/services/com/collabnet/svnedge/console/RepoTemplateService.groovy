@@ -96,8 +96,12 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         return true
     }
         
+    /**
+     * Retrieves a list of all active templates sorted by name. 
+     * @return List of RepoTemplate
+     */
     def retrieveActiveTemplates() {
-        def templates = RepoTemplate.findAllByActive(true, [sort: 'name'])
+        def templates = RepoTemplate.findAllByActive(true, [sort: 'displayOrder'])
         return templates
     }
 }

@@ -4,7 +4,8 @@
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repoTemplate.page.list.header.title /></title>
         <g:render template="/common/listViewResources"/>
-
+        <g:javascript library="prototype"/>
+        <g:javascript library="prototype/dragdrop"/>
     </head>
 
 <g:render template="/repo/leftNav" />
@@ -28,6 +29,9 @@
         <tr class="ContainerHeader">
           <td colspan="3"><g:message code="repoTemplate.page.list.header.title" /></td>
         </tr>
+        <tr class="InstructionHeader">
+          <td colspan="3"><g:message code="repoTemplate.page.list.sort.instructions"/></td>
+        </tr>
         <tr class="ItemListHeader">
           <!-- <th><g:listViewSelectAll/></th>
           <g:sortableColumn property="name" title="${message(code: 'repoTemplate.name.label', default: 'Name')}" />
@@ -36,9 +40,9 @@
           <th><g:message code="repoTemplate.active.label"/></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="templates">
         <g:each in="${repoTemplateInstanceList}" status="i" var="repoTemplateInstance">
-          <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+          <tr id="repoTemplate_${repoTemplateInstance.id}" class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}" style="cursor: move">
             <!-- <td><g:listViewSelectItem item="${repoTemplateInstance}"/></td> -->
             <td><g:link action="edit" id="${repoTemplateInstance.id}">${fieldValue(bean: repoTemplateInstance, field: "name")}</g:link></td>
             <!--  <td>${fieldValue(bean: repoTemplateInstance, field: "displayOrder")}</td>  -->                        
@@ -47,9 +51,18 @@
         </g:each>
       </tbody>
       </table>
-    </div>
-    <div class="paginateButtons">
-      <g:paginate total="${repoTemplateInstanceTotal}" />
+      <g:javascript>
+        function sendUpdatedOrder(container) {
+            new Ajax.Request("/csvn/repoTemplate/updateListOrder", {
+                method: "post", parameters: Sortable.serialize(container.id)
+                });
+            var rows = $('templates').childElements();
+            for (var i = 0; i < rows.length; i++) {
+                rows[i].className = (i % 2) == 0 ? 'EvenRow' : 'OddRow';
+            }
+        }
+        Sortable.create('templates',{tag: 'tr', ghosting:true, onUpdate: sendUpdatedOrder})
+      </g:javascript>
     </div>
     </g:if>
     <g:else>

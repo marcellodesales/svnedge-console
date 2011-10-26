@@ -14,8 +14,7 @@ class RepoTemplateController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        params.sort = 'name' //'displayOrder'
+        params.sort = 'displayOrder'
         [repoTemplateInstanceList: RepoTemplate.list(params), repoTemplateInstanceTotal: RepoTemplate.count()]
     }
 
@@ -102,6 +101,20 @@ class RepoTemplateController {
         else {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'repoTemplate.label', default: 'RepoTemplate'), params.id])}"
             redirect(action: "list")
+        }
+    }
+    
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def updateListOrder = {
+        log.debug("Updating repository template list order: " + 
+            params['templates[]'])
+        def order = params['templates[]']
+        //for (int i = 0; i < order.length; i++)
+        int i = 1
+        for (String id : order) {
+            RepoTemplate t = RepoTemplate.get(id)
+            t.displayOrder = i++
+            t.save()
         }
     }
 
