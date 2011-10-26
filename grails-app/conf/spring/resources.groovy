@@ -53,6 +53,10 @@ beans = {
         bean.autowire = 'byName'
     }
 
+    fileUtil(com.collabnet.svnedge.util.FileUtil) { bean ->
+        bean.autowire = 'byName'
+    }
+
     switch(Environment.current) {
     case Environment.TEST:
         databaseInit(com.collabnet.svnedge.schema.DatabaseInitializer) {

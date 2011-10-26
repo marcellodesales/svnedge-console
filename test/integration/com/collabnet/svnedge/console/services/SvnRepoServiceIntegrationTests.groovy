@@ -416,6 +416,18 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         repoSrc.save()
         String sourceUuid = svnRepoService.getReposUUID(repoSrc)
 
+        // test permissions retention on *nix
+        if (!operatingSystemService.isWindows()) {
+            File repoHome = new File(svnRepoService.getRepositoryHomePath(repoSrc))
+            File hooks = new File(repoHome, "hooks")
+            File startCommit = new File(hooks, "start-commit.tmpl")
+            def chmodCmd = ["chmod", "a+x", "${startCommit.absolutePath}"]
+            String[] result = commandLineService.execute(chmodCmd, null, null)
+            boolean setModeSuccess = result[0] == "0"
+            assertTrue "the start-commit.tmpl should be executable", setModeSuccess
+            assertTrue "the start-commit.tmpl should be executable", startCommit.canExecute()
+        }
+
         DumpBean params = new DumpBean()
         params.compress = true
         def filename = svnRepoService.createHotcopy(params, repoSrc)
@@ -477,9 +489,19 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             loadSuccess = output.contains("Node Kind: directory")
         }
 
+
         assertFalse "load file should be deleted after loading", loadFile.exists()
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
         assertEquals "the target repo should now have the original source UUID", sourceUuid, svnRepoService.getReposUUID(repoTarget)
+
+        // test permissions retention on *nix
+        if (!operatingSystemService.isWindows()) {
+            File repoHome = new File(svnRepoService.getRepositoryHomePath(repoTarget))
+            File hooks = new File(repoHome, "hooks")
+            File startCommit = new File(hooks, "start-commit.tmpl")
+            boolean setModeSuccess = startCommit.canExecute()
+            assertTrue "the start-commit.tmpl of the new repo should be executable", setModeSuccess
+        }
     }
 
     public void testLoadHotcopyAsTemplate() {

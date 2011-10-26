@@ -46,7 +46,6 @@ import com.collabnet.svnedge.admin.RepoLoadJob
 
 import com.collabnet.svnedge.RepoLoadException
 import java.util.zip.ZipFile
-import com.collabnet.svnedge.util.FileUtil
 import org.apache.commons.io.FileUtils
 
 class SvnRepoService extends AbstractSvnEdgeService {
@@ -55,13 +54,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
     private static final boolean ASCENDING = true
     private static final boolean DESCENDING = false
 
-    // service dependencies
+    // dependencies
     def operatingSystemService
     def lifecycleService
     def commandLineService
     def serverConfService
     def statisticsService
     def jobsAdminService
+    def fileUtil
 
     boolean transactional = false
 
@@ -980,7 +980,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             hotcopyLocation.delete()
             hotcopyLocation.mkdir()
             // unzip into this dir
-            FileUtil.unzipFileIntoDirectory(source, hotcopyLocation)
+            fileUtil.extractArchive(source, hotcopyLocation)
             // find the repo root
             hotcopyLocation = findRepoRoot(hotcopyLocation)
         }
@@ -1311,7 +1311,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                         filename.substring(0, filename.length() - 4) + "-processing.zip")
                 println('repository.service.bkup.progress.compressing.hotcopy',
                         progress, locale)
-                archiveDirectory(tmpDir, tempZipFile, progress)
+                fileUtil.archiveDirectory(tmpDir, tempZipFile, progress)
                 println('repository.service.bkup.progress.compress.done.rename.file',
                         progress, locale)
                 if (!tempZipFile.renameTo(finalZipFile)) {
@@ -1332,73 +1332,5 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return filename
     }
 
-    protected void archiveDirectory(File directory, File zipFile, OutputStream progress = null) {
-        if (zipFile.parentFile.equals(directory)) {
-            throw new IllegalArgumentException(
-                    "Archive should not be written into the directory being archived")
-        }
-        if (!directory.isDirectory()) {
-            throw new IllegalArgumentException("directory argument was not a directory")
-        }
-        boolean storePermissions = !operatingSystemService.isWindows()
 
-        ZipArchiveOutputStream zos = null
-        try {
-            zos = new ZipArchiveOutputStream(zipFile)
-            recursiveArchiveDirectory(directory.canonicalPath.length() + 1,
-                    directory, zos, storePermissions, progress)
-        } finally {
-            zos?.close()
-        }
-    }
-
-    private void recursiveArchiveDirectory(int topLevelPathLength, File directory,
-                                           ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress) {
-        directory.eachFile { f ->
-            String fullPath = f.canonicalPath
-            String relativePath = fullPath.substring(topLevelPathLength, fullPath.length())
-            if (f.isDirectory()) {
-                relativePath += "/"
-            }
-            if (progress) {
-                progress << relativePath + "\n"
-            }
-            ZipArchiveEntry ze = new ZipArchiveEntry(f, relativePath)
-            if (storePermissions) {
-                int perms = 0444
-                try {
-                    FileInfo fi = operatingSystemService.getSigar().getFileInfo(fullPath)
-                    log.debug(relativePath + " permString=" + fi.permissionsString +
-                            " asInt=" + fi.mode)
-                    perms = Integer.parseInt(fi.mode.toString(), 8)
-                } catch (IllegalStateException e) {
-                    log.info("Sigar library not loaded, setting hotcopy file " +
-                            "permissions for owner only with group and other as defaults")
-                    if (f.isFile()) {
-                        perms = 0444
-                        if (f.canWrite() && f.canExecute()) {
-                            perms = 0744
-                        } else if (f.canWrite()) {
-                            perms = 0644
-                        } else if (f.canExecute()) {
-                            perms = 0544
-                        }
-                    } else {
-                        perms = 0755
-                    }
-                }
-                ze.setUnixMode(perms)
-            }
-            zos.putArchiveEntry(ze)
-            if (f.isFile()) {
-                f.withInputStream { zos << it }
-            }
-            zos.closeArchiveEntry()
-
-            if (f.isDirectory()) {
-                recursiveArchiveDirectory(topLevelPathLength, f, zos,
-                        storePermissions, progress)
-            }
-        }
-    }
 }
