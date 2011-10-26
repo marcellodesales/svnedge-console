@@ -731,6 +731,14 @@ class RepoController {
         }
         
         def templates = repoTemplateService.retrieveActiveTemplates()
+        if (!templates) {
+            RepoTemplate t = new RepoTemplate(
+                    name: message(code: 'repoTemplate.default.empty.label'))
+            // can't set id in ctor, not sure why
+            t.id = 1
+            templates = [t]
+        }
+
         return [repo: repo, templateList: templates]
     }
 
