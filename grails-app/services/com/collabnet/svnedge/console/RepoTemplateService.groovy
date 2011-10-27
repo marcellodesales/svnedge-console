@@ -104,4 +104,46 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         def templates = RepoTemplate.findAllByActive(true, [sort: 'displayOrder'])
         return templates
     }
+
+    /**
+     * Updates the templates to match the order given by the list of IDs.
+     * Templates not referenced will be put at the end.
+     * 
+     * @param templateIdList List of String IDs
+     */
+    void reorderTemplates(def templateIdList) {
+        def currentOrder = RepoTemplate.list(sort: 'displayOrder')
+        int i = 1
+        for (String id : templateIdList) {
+            RepoTemplate t = RepoTemplate.get(id)
+            t.displayOrder = i++
+            t.save()
+            currentOrder.remove(t)
+        }
+        for (RepoTemplate t : currentOrder) {
+            t.displayOrder = i++
+            t.save()
+        }
+    }
+    
+    /**
+     * Deletes the template from the database and filesystem
+     * @param templateId DB PK
+     * @return false, if no template is associated with the given templateId
+     */
+    boolean deleteTemplate(String templateId) {        
+        def template = RepoTemplate.get(templateId)
+        if (template) {
+            File f = new File(getTemplateDirectory(), template.location)
+            if (!f.delete()) {
+                log.warn("Template '" + template.name + "'is being deleted," +
+                        " but the associated file " + f.canonicalPath +
+                        " could not be deleted.")
+            }
+            template.delete(flush: true)
+        } else {
+            return false
+        }
+        return true
+    }
 }

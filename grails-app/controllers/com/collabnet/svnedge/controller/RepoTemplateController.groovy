@@ -121,32 +121,35 @@ class RepoTemplateController {
     def updateListOrder = {
         log.debug("Updating repository template list order: " + 
             params['templates[]'])
-        def order = params['templates[]']
-        //for (int i = 0; i < order.length; i++)
-        int i = 1
-        for (String id : order) {
-            RepoTemplate t = RepoTemplate.get(id)
-            t.displayOrder = i++
-            t.save()
-        }
+        repoTemplateService.reorderTemplates(params['templates[]'])
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def delete = {
-        def repoTemplateInstance = RepoTemplate.get(params.id)
-        if (repoTemplateInstance) {
+        if (params.id) {
             try {
-                repoTemplateInstance.delete(flush: true)
-                flash.message = "${message(code: 'repoTemplate.action.deleted.message')}"
-                redirect(action: "list")
+                if (repoTemplateService.deleteTemplate(params.id)) {
+                    flash.message = 
+                            message(code: 'repoTemplate.action.deleted.message')
+                    redirect(action: "list")
+                } else {
+                    flash.message = message(code: 'default.not.found.message', 
+                            args: [message(code: 'repoTemplate.label', 
+                            default: 'RepoTemplate'), params.id])
+                    redirect(action: "list")
+                }
             }
             catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'repoTemplate.label', default: 'RepoTemplate'), params.id])}"
+                flash.message = message(code: 'default.not.deleted.message', 
+                        args: [message(code: 'repoTemplate.label', 
+                        default: 'RepoTemplate'), params.id])
                 redirect(action: "edit", id: params.id)
             }
         }
         else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'repoTemplate.label', default: 'RepoTemplate'), params.id])}"
+            flash.message = message(code: 'default.not.found.message', 
+                    args: [message(code: 'repoTemplate.label', 
+                    default: 'RepoTemplate'), params.id])
             redirect(action: "list")
         }
     }
