@@ -970,18 +970,20 @@ class SvnRepoService extends AbstractSvnEdgeService {
         boolean isDirectory = source.exists() && source.isDirectory()
         boolean isZip = source.exists() && source.isFile() && source.name.toLowerCase().endsWith(".zip")
 
-        File hotcopyLocation
+        File hotcopyLocation = null
+        File originalHotcopyLocation = null
 
         // unzip an archived hotcopy to the temp location
         if (isZip) {
             // create temp location
-            hotcopyLocation = File.createTempFile(source.name, "")
+            hotcopyLocation = new File(getRepositoryHomePath(target) + "_tmp")
             // delete empty file and mkdir instead
             hotcopyLocation.delete()
             hotcopyLocation.mkdir()
             // unzip into this dir
             fileUtil.extractArchive(source, hotcopyLocation)
             // find the repo root
+            originalHotcopyLocation = hotcopyLocation
             hotcopyLocation = findRepoRoot(hotcopyLocation)
         }
         // or, if hotcopy is already unzipped
@@ -994,14 +996,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (!repoLocation.deleteDir()) {
             throw new RepoLoadException("Unable to move original repo out of the way for load")
         }
-        try {
-            FileUtils.copyDirectory(hotcopyLocation, repoLocation)
+        if (!hotcopyLocation.renameTo(new File(getRepositoryHomePath(target)))) {
+            throw new RepoLoadException("Unable to move hotcopy into place")
         }
-        catch (IOException e) {
-            throw new RepoLoadException("Unable to move hotcopy repo to the repo location")
-        }
-        if (isZip) {
-            hotcopyLocation.deleteDir()
+        // delete the hotcopy unzip location, if any dirs are left behind
+        if (originalHotcopyLocation?.exists()) {
+            originalHotcopyLocation.deleteDir()
         }
 
         // if load option "ignoreUuid" is true, we should restore the UUID of the original repo (ignoring UUID of the

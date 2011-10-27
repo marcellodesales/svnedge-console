@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.hyperic.sigar.FileInfo
-import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
+import org.apache.commons.compress.archivers.zip.ZipFile
 
 /**
  * General file-handling util methods. This class must be used as via spring bean "fileUtil", as it has
@@ -34,48 +34,18 @@ public class FileUtil {
     def operatingSystemService
     def commandLineService
 
-
-    /**
-     * Utility method to unzip an archive to a given directory
-     * @param zipFile the archive to unzip
-     * @param parentDir the location into which to unzip
-     * @param progress the output stream for capturing output
-     */
-    public void extractArchive(File zipFile, File parentDir, OutputStream progress = null) {
-
-        // use ant builder for windows
-        if (operatingSystemService.isWindows()) {
-            def ant = new AntBuilder()
-            ant.unzip(src: zipFile.absolutePath,
-                  dest: parentDir.absolutePath,
-                  overwrite: "true")
-            if (progress) {
-                progress << "Unzipping '${zipFile.name}' to '${parentDir.absolutePath}'"
-            }
-        }
-        // for unix, use the unzip util
-        else {
-            def cmd = ["unzip", zipFile.absolutePath, "-d", parentDir.absolutePath]
-            commandLineService.execute(cmd, progress, progress)
-        }
-
-    }
-
-
     /**
      * Utility method to unzip an archive to a given directory using Apache Commons Compress
      * @param zipFile the archive to unzip
      * @param parentDir the location into which to unzip
      * @param progress the output stream for capturing output
      */
-    public void extractArchiveCommonsCompress(File zipFile, File parentDir, OutputStream progress = null) {
+    public void extractArchive(File zipFile, File parentDir, OutputStream progress = null) {
 
-        ZipArchiveInputStream zis = null
+        ZipFile zf = null
         try {
-            zis = new ZipArchiveInputStream(new FileInputStream(zipFile))
-            ZipArchiveEntry entry = null
-            while ((entry = zis.getNextZipEntry()) != null) {
-
+            zf = new ZipFile(zipFile)
+            for (ZipArchiveEntry entry : zf.entries) {
                 File f = new File(parentDir.getAbsolutePath() + File.separator + entry.name)
                 if (entry.isDirectory()) {
                     f.mkdirs()
@@ -88,19 +58,18 @@ public class FileUtil {
                     if (progress) {
                         progress << "Inflating file: ${f.absolutePath}"
                     }
-                    FileOutputStream out = new FileOutputStream(f)
-                    out << zis
+                    f.withOutputStream { it << zf.getInputStream(entry) }
                 }
 
                 def mode = entry.getUnixMode()
                 if (!operatingSystemService.isWindows() && mode > 0) {
-                    def chmodCmd = ["chmod", "${mode}", "${f.absolutePath}"]
+                    def chmodCmd = ["chmod", Integer.toString(mode, 8), f.absolutePath]
                     String[] result = commandLineService.execute(chmodCmd, progress, progress)
                 }
             }
         }
         finally {
-            zis?.close()
+            zf?.close()
         }
     }
 

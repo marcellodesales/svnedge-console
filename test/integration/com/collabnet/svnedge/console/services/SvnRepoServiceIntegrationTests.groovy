@@ -25,7 +25,8 @@ import com.collabnet.svnedge.console.SvnRepoService
 import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
+import org.apache.commons.io.FileUtils;
 
 class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -399,7 +400,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
     }
 
-    public void testLoadHotcopyAsBackup() {
+    public void testLoadHotcopy() {
 
         // upper limit on time to run async code
         long timeLimit = System.currentTimeMillis() + 30000
@@ -408,7 +409,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         // but pause jobs likely to start running to ensure a thread is available
         jobsAdminService.pauseGroup("Statistics")
 
-        // create a dump file of a src repo with branches/tags/trunk nodes
+        // create a hotcopy backup  file of a src repo with branches/tags/trunk nodes
+
         def testRepoNameSrc = "load-test-src"
         Repository repoSrc = new Repository(name: testRepoNameSrc)
         assertEquals "Failed to create src repository.", 0,
@@ -416,7 +418,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         repoSrc.save()
         String sourceUuid = svnRepoService.getReposUUID(repoSrc)
 
-        // test permissions retention on *nix
+        // setup to test permissions retention on *nix
         if (!operatingSystemService.isWindows()) {
             File repoHome = new File(svnRepoService.getRepositoryHomePath(repoSrc))
             File hooks = new File(repoHome, "hooks")
@@ -439,6 +441,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
         assertTrue "The Dump file should be a zip file", dumpFile.name.endsWith(".zip")
         log.info "The dumpfile original location: '${dumpFile.absolutePath}'"
+
+        // test loading hotcopy as backup (keep UUID from the file)
 
         // create a target repo WITHOUT branches/tags/trunk nodes
         def testRepoNameTarget = "load-test-target"
@@ -464,8 +468,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             it.delete()
         }
         File loadFile = new File(loadDir, dumpFile.name)
-        boolean loadFileCreated = dumpFile.renameTo(loadFile)
-        assertTrue "should be able to move dumpfile to load directory", loadFileCreated
+        FileUtils.copyFile(dumpFile, loadFile)
         assertTrue "loadFile should exist", loadFile.exists()
         log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
 
@@ -502,47 +505,19 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             boolean setModeSuccess = startCommit.canExecute()
             assertTrue "the start-commit.tmpl of the new repo should be executable", setModeSuccess
         }
-    }
 
-    public void testLoadHotcopyAsTemplate() {
-
-        // upper limit on time to run async code
-        long timeLimit = System.currentTimeMillis() + 30000
-        // make sure the quartz scheduler is running, is put in standby by other tests
-        quartzScheduler.start()
-        // but pause jobs likely to start running to ensure a thread is available
-        jobsAdminService.pauseGroup("Statistics")
-
-        // create a dump file of a src repo with branches/tags/trunk nodes
-        def testRepoNameSrc = "load-test-src"
-        Repository repoSrc = new Repository(name: testRepoNameSrc)
-        assertEquals "Failed to create src repository.", 0,
-                svnRepoService.createRepository(repoSrc, true)
-        repoSrc.save()
-        String sourceUuid = svnRepoService.getReposUUID(repoSrc)
-
-        DumpBean params = new DumpBean()
-        params.compress = true
-        def filename = svnRepoService.createHotcopy(params, repoSrc)
-        File dumpFile = newDumpFile(filename, repoSrc)
-        // Async so wait for it
-        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
-        }
-        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
-        assertTrue "The Dump file should be a zip file", dumpFile.name.endsWith(".zip")
-        log.info "The dumpfile original location: '${dumpFile.absolutePath}'"
+        // test loading hotcopy as template (with UUID of target repo preserved)
 
         // create a target repo WITHOUT branches/tags/trunk nodes
-        def testRepoNameTarget = "load-test-target"
+        testRepoNameTarget = "load-test-target2"
 
-        Repository repoTarget = new Repository(name: testRepoNameTarget)
+        repoTarget = new Repository(name: testRepoNameTarget)
         assertEquals "Failed to create target repository.", 0,
                 svnRepoService.createRepository(repoTarget, false)
         repoTarget.save(flush: true)
-        String targetUuid = svnRepoService.getReposUUID(repoTarget)
+        targetUuid = svnRepoService.getReposUUID(repoTarget)
 
-        def output = commandLineService.executeWithOutput(
+        output = commandLineService.executeWithOutput(
                 ConfigUtil.svnPath(), "info",
                 "--no-auth-cache", "--non-interactive",
                 commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
@@ -551,26 +526,25 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse "svn info output should not contain node info for 'trunk'", output.contains("Node Kind: directory")
 
         // move src dump file to the expected load location for target
-        File loadDir = svnRepoService.getLoadDirectory(repoTarget)
+        loadDir = svnRepoService.getLoadDirectory(repoTarget)
         // delete any residual load files
         loadDir.eachFile {
             it.delete()
         }
-        File loadFile = new File(loadDir, dumpFile.name)
-        boolean loadFileCreated = dumpFile.renameTo(loadFile)
-        assertTrue "should be able to move dumpfile to load directory", loadFileCreated
+        loadFile = new File(loadDir, dumpFile.name)
+        FileUtils.copyFile(dumpFile, loadFile)
         assertTrue "loadFile should exist", loadFile.exists()
         log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
 
         // load it
-        def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
-        def options = ["progressLogFile": progressFile.absolutePath]
+        tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        options = ["progressLogFile": progressFile.absolutePath]
         options << ["ignoreUuid": true]   // our target repo should keep its original uuid
         svnRepoService.scheduleLoad(repoTarget, options)
 
         // verify that repo load has run (trunk/tags/branches which should have been imported)
-        boolean loadSuccess = false
+        loadSuccess = false
         timeLimit = System.currentTimeMillis() + 60000
         while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
             Thread.sleep(5000)
@@ -585,7 +559,9 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse "load file should be deleted after loading", loadFile.exists()
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
         assertEquals "the target repo should still have its own UUID", targetUuid, svnRepoService.getReposUUID(repoTarget)
+
     }
+
 
     private File createTestDir(String prefix) {
         def testDir = File.createTempFile(prefix + "-test", null)
