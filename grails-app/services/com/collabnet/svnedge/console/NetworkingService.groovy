@@ -22,6 +22,7 @@ import java.net.InetAddress
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.util.Collections
+import com.collabnet.svnedge.domain.Server
 
 /**
  * The networking service is responsible for the network layer of the app. It
@@ -66,6 +67,11 @@ public class NetworkingService extends AbstractSvnEdgeService {
             log.info("# HTTP PROXY: ${httpProxy}")
         }
         log.info("########################################")
+        
+        Server server = Server.getServer()
+        if (server && server.netInterface) {
+            setSelectedInterface(server.netInterface)
+        }
     }
 
     String getHostname() {
@@ -114,6 +120,17 @@ public class NetworkingService extends AbstractSvnEdgeService {
             this.selectedInterface = this.getDefaultNetworkInterface()
         }
         return this.selectedInterface
+    }
+
+    /**
+     * Sets the selected interface
+     * @param interfaceName the interface name
+     * @return void
+     */
+    def setSelectedInterface(String interfaceName) {
+        if (interfaceName && (interfaceName != selectedInterface.name)) {
+            selectedInterface = getNetworkInterfacesWithIPAddresses().find() { it.name == interfaceName }
+        }
     }
 
     /**

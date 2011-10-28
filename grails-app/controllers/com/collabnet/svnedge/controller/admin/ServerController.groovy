@@ -216,6 +216,10 @@ class ServerController {
                 serverConfService.writeConfigFiles()
                 flash.message = message(code:"server.action.update.changesMade")
             }
+
+            // update networkingService.selectedInterface
+            networkingService.setSelectedInterface(server.netInterface)
+
             render(view: params.view, model : prepareServerViewModel(server))
 
         } else {
