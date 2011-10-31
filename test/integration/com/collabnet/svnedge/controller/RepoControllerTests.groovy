@@ -19,8 +19,8 @@ package com.collabnet.svnedge.controller
 
 import grails.test.*
 
-import com.collabnet.svnedge.controller.AuthzRulesCommand
-import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.controller.AuthzRulesCommand 
+import com.collabnet.svnedge.domain.Repository 
 
 class RepoControllerTests extends ControllerUnitTestCase {
 
@@ -29,22 +29,22 @@ class RepoControllerTests extends ControllerUnitTestCase {
 
     def repoNameNew = "integration_test_new_repo"
     def repoNameExisting = "integration_test_existing_repo"
-
-    def repoNew
-    def repoExisting
+    
+    def repoNew 
+    def repoExisting 
 
     protected void setUp() {
 
         super.setUp()
         // mock the i18n "message" map available to controller
-        controller.metaClass.messageSource = [getMessage: {
-            errors, locale -> return "message"
-        }]
+        controller.metaClass.messageSource = [getMessage: { 
+            errors, locale -> return "message" }]
         controller.metaClass.message = { it -> return "message" }
-
+        
         repoNew = new Repository(name: repoNameNew)
         repoExisting = new Repository(name: repoNameExisting)
-
+        
+       
         // make sure the supposedly new repo is not in the way
         svnRepoService.archivePhysicalRepository(repoNew)
 
@@ -76,18 +76,18 @@ class RepoControllerTests extends ControllerUnitTestCase {
         def model = controller.save()
         def redirArg = controller.redirectArgs["action"]
         assertEquals "Expected redirect to 'show' view on successful repo " +
-                "create", 'dumpFileList', redirArg
+            "create", 'dumpFileList', redirArg
 
         // this should fail (validation error)
         model = controller.save()
-        assertTrue "Expected error for creating a known existing repo",
-                controller.flash.repo.hasErrors()
+        assertTrue "Expected error for creating a known existing repo", 
+            model.repo.hasErrors()
 
         // this should fail (validation error)
         controller.params.name = repoNameExisting
         model = controller.save()
-        assertTrue "Expected error for creating an unknown existing repo",
-                controller.flash.repo.hasErrors()
+        assertTrue "Expected error for creating an unknown existing repo", 
+            model.repo.hasErrors()
     }
 
     void testEditAuthorization() {
@@ -96,8 +96,8 @@ class RepoControllerTests extends ControllerUnitTestCase {
 
         // should fetch an svn_access_file from services
         def model = controller.editAuthorization()
-        assertNotNull "Expected 'authRulesCommand' model object",
-                model.authRulesCommand
+        assertNotNull "Expected 'authRulesCommand' model object", 
+            model.authRulesCommand
     }
 
     void testSaveAuthorization() {
@@ -117,13 +117,13 @@ class RepoControllerTests extends ControllerUnitTestCase {
 
         def cmd = new AuthzRulesCommand(accessRules: testFile)
         controller.saveAuthorization(cmd)
-        assertNotNull "Controller should provide a success message",
-                controller.flash.message
+        assertNotNull "Controller should provide a success message", 
+            controller.flash.message
         assertNull "Controller should not return errors", controller.flash.error
 
         String modified = serverConfService.readSvnAccessFile()
         assertEquals "Access file should now equal the parameter given to " +
-                "controller", testFile.trim(), modified
+            "controller", testFile.trim(), modified
 
         // restore original
         serverConfService.writeSvnAccessFile(original)
