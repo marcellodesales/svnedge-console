@@ -17,7 +17,7 @@
  */
 class UrlMappings {
     static mappings = {
-        "/integration/viewvc/viewvc.cgi/$cgiPathInfo**?"{
+        "/integration/viewvc/viewvc.cgi/$cgiPathInfo**?" {
             controller = "integration"
             action = "viewvc"
             constraints {
@@ -26,15 +26,16 @@ class UrlMappings {
         }
 
 
-        "/api/$apiVersion/$controller/$id?" (parseRequest: true) {
-            action = [GET:"restRetrieve", PUT:"restUpdate", 
-                      DELETE:"restDelete", POST:"restSave"]
+        "/api/$apiVersion/$entity/$id?"(parseRequest: true) {
+            controller = { "${params.entity}Rest" }
+            action = [GET: "restRetrieve", PUT: "restUpdate",
+                    DELETE: "restDelete", POST: "restSave"]
         }
 
 
-        "/$controller/$action?/$id?"{
+        "/$controller/$action?/$id?" {
             constraints {
-            // apply constraints here
+                // apply constraints here
             }
         }
 
@@ -43,7 +44,7 @@ class UrlMappings {
             action = "index"
         }
 
-        "500"(view:'/error')
+        "500"(view: '/error')
 
     }
 }
