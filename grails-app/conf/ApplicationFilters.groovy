@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import com.collabnet.svnedge.domain.Server 
-import com.collabnet.svnedge.domain.ServerMode 
+
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 import grails.util.GrailsUtil
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
@@ -34,11 +35,19 @@ class ApplicationFilters {
 
         /**
          * Filtering when requesting via http scheme and console is configured
-         * to require ssl.
+         * to require ssl. This applies to all controllers/actions *except* the
+         * rest api endpoint to fetch the securePort. This is because the mDNS service only
+         * advertises the plain http port, and rest clients may not handle the redirect
+         * which gets us from there to https
          */
         requireSsl(controller: '*', action: '*') {
             before = {
-                if (request.scheme == 'http' && Server.getServer().useSslConsole) {
+                // api to get securePort is always allowed 
+                if (request.method == "GET" && request.forwardURI.contains("/api") &&
+                        request.forwardURI.contains("/securePort")) {
+                    return true
+                }
+                else if (request.scheme == 'http' && Server.getServer().useSslConsole) {
                     def port = System.getProperty("jetty.ssl.port", "4434")
                     def sslUrl = "https://${request.serverName}${port != "443" ? ":" + port : ""}${request.forwardURI}"
                     redirect(url: sslUrl)
@@ -55,13 +64,13 @@ class ApplicationFilters {
             after = {
                 if (!operatingSystemService.isReady()) {
                     switch (controllerName) {
-                    case "status":
-                    case "statistics":
-                    case "server":
-                        flash.error = app.getMainContext().getMessage(
-                            "server.failed.loading.libraries", [] as String[],
-                            Locale.getDefault())
-                        break;
+                        case "status":
+                        case "statistics":
+                        case "server":
+                            flash.error = app.getMainContext().getMessage(
+                                    "server.failed.loading.libraries", [] as String[],
+                                    Locale.getDefault())
+                            break;
                     }
                 }
             }
@@ -72,25 +81,25 @@ class ApplicationFilters {
          * (represented by buttons on the main toolbar) based on user roles and server mode
          */
         featureAvailability(controller: '*', action: '*') {
-            
+
             before = {
 
                 boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
                         || ServerMode.REPLICA == Server.getServer().mode)
 
                 if (!isManagedMode &&
-                    "server" == controllerName && (
-                        "editIntegration" == actionName || "revert" == actionName)) {
+                        "server" == controllerName && (
+                "editIntegration" == actionName || "revert" == actionName)) {
 
                     flash.error = app.getMainContext().getMessage(
-                        "filter.probihited.mode.standalone", null,
+                            "filter.probihited.mode.standalone", null,
                             Locale.getDefault())
                     redirect(controller: "status")
                     return false
                 }
                 if (isManagedMode &&
-                (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
-                ("server" == controllerName && "editAuthentication" == actionName))) {
+                        (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
+                                ("server" == controllerName && "editAuthentication" == actionName))) {
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.managed", null,
                             Locale.getDefault())
@@ -98,10 +107,10 @@ class ApplicationFilters {
                     return false
                 }
             }
-            
+
             // after running the action, add "featureList" to the page model
             after = {model ->
-                
+
                 boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
                         || ServerMode.REPLICA == Server.getServer().mode)
 
@@ -156,8 +165,8 @@ class ApplicationFilters {
                         "user": "/topic/csvn/action/manageusers_csvn.html",
                         "repo": "/topic/csvn/action/managerepositories.html",
                         "server": "/topic/csvn/action/configurecsvn.html",
-                        "packagesUpdate" : "/topic/csvn/action/upgradecsvn.html",
-                        "statistics" : "/topic/csvn/action/maintainserver_csvn.html"
+                        "packagesUpdate": "/topic/csvn/action/upgradecsvn.html",
+                        "statistics": "/topic/csvn/action/maintainserver_csvn.html"
                 ]
 
                 // default help url
@@ -183,15 +192,15 @@ class ApplicationFilters {
          */
         dbUtilPluginRestriction(controller: 'dbUtil', action: '*') {
             before = {
-                if (GrailsUtil.environment != "production" || 
-                        (authenticateService.isLoggedIn() && 
-                         authenticateService.ifAnyGranted("ROLE_ADMIN"))) {
+                if (GrailsUtil.environment != "production" ||
+                        (authenticateService.isLoggedIn() &&
+                                authenticateService.ifAnyGranted("ROLE_ADMIN"))) {
                     return true
                 } else {
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.credentials", null,
                             Locale.getDefault())
-                    redirect(uri:'/')
+                    redirect(uri: '/')
                     return false
                 }
             }
