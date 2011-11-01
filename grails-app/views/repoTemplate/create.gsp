@@ -15,11 +15,6 @@
     
   <body>
     <div class="body">
-      <g:hasErrors bean="${repoTemplateInstance}">
-        <div class="errors">
-          <g:renderErrors bean="${repoTemplateInstance}" as="list" />
-        </div>
-      </g:hasErrors>
       <g:uploadForm>
       <div class="dialog">
         <table class="Container">
@@ -53,7 +48,7 @@
             <td valign="top" class="name">
               <label for="templateUpload"><g:message code="repoTemplate.templateUpload.label" /></label>
             </td>
-            <td valign="top" class="value ${hasErrors(bean: repoTemplateInstance, field: 'location', 'errors')}">
+            <td valign="top" class="value">
                <input type="file" name="templateUpload" />
                <div><g:message code="repoTemplate.templateUpload.description" /></div>
             </td>

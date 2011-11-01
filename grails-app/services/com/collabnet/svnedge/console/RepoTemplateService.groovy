@@ -17,22 +17,12 @@
  */
 package com.collabnet.svnedge.console
 
-import java.io.File;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.hyperic.sigar.FileInfo
+import java.util.zip.ZipFile;
 
 import com.collabnet.svnedge.util.ConfigUtil;
 import com.collabnet.svnedge.domain.RepoTemplate
 
 class RepoTemplateService extends AbstractSvnEdgeService {
-
-    // service dependencies
-    def operatingSystemService
-    def lifecycleService
-    def commandLineService
 
     File getTemplateDirectory() {
         File templateDir = new File(ConfigUtil.dataDirPath(), 'repoTemplates')
@@ -54,7 +44,7 @@ class RepoTemplateService extends AbstractSvnEdgeService {
 
         boolean isArchive = templateFile.name.endsWith(".zip")
         if (isArchive) {
-            def zipFile = new java.util.zip.ZipFile(templateFile)
+            def zipFile = new ZipFile(templateFile)
             template.dumpFile = (zipFile.size() == 1)
     
         } else {
@@ -64,8 +54,9 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         def currentTemplates = RepoTemplate.list()
         if (isInsert) {
             template.displayOrder = 1
+            int i = 2
             for (RepoTemplate t in currentTemplates) {
-                t.displayOrder++
+                t.displayOrder = i++
                 t.save()
             }
         } else {
@@ -75,25 +66,26 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         // give a temp name to allow saving the record
         template.location = "temp/" + templateFile.name
         template.active = true
-        template.save()
-        
-        String filename = (template.dumpFile ? "dump" : "repoArchive") +
-            template.id
-        if (isArchive) {
-            filename += ".zip"
+        boolean success = template.save()
+        if (success) {
+            String filename = (template.dumpFile ? "dump" : "repoArchive") +
+                    template.id
+            if (isArchive) {
+                filename += ".zip"
+            }
+            File finalFile = new File(getTemplateDirectory(), filename)
+            if (finalFile.exists()) {
+                finalFile.delete()
+            }
+            if (!templateFile.renameTo(finalFile)) {
+                finalFile.withOutputStream { out -> 
+                    templateFile.withInputStream { instrm -> out << instrm } }
+                templateFile.delete()
+            }
+            template.location = finalFile.name
+            success = template.save()
         }
-        File finalFile = new File(getTemplateDirectory(), filename)
-        if (finalFile.exists()) {
-            finalFile.delete()
-        }
-        if (!templateFile.renameTo(finalFile)) {
-            finalFile.withOutputStream { out -> 
-                templateFile.withInputStream { instrm -> out << instrm } }
-            templateFile.delete()
-        }
-        template.location = finalFile.name
-        template.save()
-        return true
+        return success
     }
         
     /**

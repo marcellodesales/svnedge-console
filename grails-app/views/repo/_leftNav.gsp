@@ -20,7 +20,7 @@
       </div>
 
 
-      <div class="${controllerName == 'repo' && actionName == 'create' || actionName == 'save' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName == 'create' || controllerName == 'repo' && actionName == 'save' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
           <g:link controller="repo" action="create"><g:message code="repository.page.leftnav.new" /></g:link>
       </div>
@@ -36,14 +36,15 @@
           <g:link controller="repo" action="bkupScheduleMultiple"><g:message code="repository.page.leftnav.backup" /></g:link>
       </div>
 
-      <div class="${controllerName == 'repoTemplate' && actionName != 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <g:set var="isNewTemplate" value="${controllerName == 'repoTemplate' && (actionName == 'create' || actionName == 'save')}"/>
+      <div class="${controllerName == 'repoTemplate' && !isNewTemplate ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
           <g:link controller="repoTemplate" action="list"><g:message code="repoTemplate.leftnav.manageRepoTemplates" /></g:link>
       </div>
 
           
           <g:if test="${controllerName == 'repoTemplate'}">
-            <div class="${controllerName == 'repoTemplate' && actionName == 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+            <div class="${isNewTemplate ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
               <g:link controller="repoTemplate" action="create"><g:message code="repoTemplate.leftNav.create.new" /></g:link>
             </div>

@@ -38,35 +38,44 @@ class RepoTemplateController {
         }
 
         def repoTemplateInstance = new RepoTemplate(params)
-        if (repoTemplateInstance.hasErrors()) {
-            render(view: "create", model: [repoTemplateInstance: repoTemplateInstance])
+        File templateFile = handleFileUpload(repoTemplateInstance)        
+        if (templateFile &&
+                 repoTemplateService.saveTemplate(repoTemplateInstance, 
+                 templateFile, params.displayFirst ? true : false)) {
 
-        } else {
-        
-            handleFileUpload(repoTemplateInstance)
-            if (repoTemplateInstance.save(flush: true)) {
-                flash.message = "${message(code: 'repoTemplate.action.created.message', args: [repoTemplateInstance.name])}"
-                redirect(action: "list")
+            flash.message = message(code: 'repoTemplate.action.created.message',
+                    args: [repoTemplateInstance.name])
+            redirect(action: "list")
+        }
+        else {
+            if (templateFile && templateFile.exists()) {
+                templateFile.delete()
             }
-            else {
-                render(view: "create", model: [repoTemplateInstance: repoTemplateInstance])
-            }
+            request.error = message(code: 'default.errors.summary')
+            render(view: "create", model: [repoTemplateInstance: repoTemplateInstance])
         }
     }
 
-    private boolean handleFileUpload(repoTemplateInstance) {
+    private static final List VALID_TEMPLATE_TYPES = 
+            ['application/octet-stream', 'application/zip']
+
+    private File handleFileUpload(repoTemplateInstance) {
         def uploadedFile = request.getFile('templateUpload')
-        if (uploadedFile.empty) {
-            flash.error = message(code: 'repoTemplate.action.save.no.file')
-            redirect(action: create)
+        log.debug "templateUpload mime-type = " + uploadedFile.contentType
+        if (!uploadedFile || uploadedFile.empty) {
+            repoTemplateInstance.errors.rejectValue('location', 'repoTemplate.action.save.no.file')
+
+        } else if (!VALID_TEMPLATE_TYPES.contains(uploadedFile.contentType)) {
+            repoTemplateInstance.errors.rejectValue('location', 
+                    'repoTemplate.action.save.invalid.type')
+        
         } else {
             File templateDir = repoTemplateService.getUploadDirectory()
             File templateFile = new File(templateDir, uploadedFile.originalFilename)
             uploadedFile.transferTo(templateFile)
-            return repoTemplateService.saveTemplate(repoTemplateInstance, 
-                templateFile, params.displayFirst ? true : false)
+            return templateFile
         }
-        return false
+        return null
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
