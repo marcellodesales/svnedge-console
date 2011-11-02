@@ -49,6 +49,7 @@ $PKG -R `pwd`/csvn set-authority -O $REPOS collab.net
 # Install our application and required packages
 $PKG -R `pwd`/csvn install pkg
 $PKG -R `pwd`/csvn install csvn
+$PKG -R `pwd`/csvn image-update
 
 # Now prepare image for distribution
 $PKG -R `pwd`/csvn set-authority -O $UPDATES collab.net
