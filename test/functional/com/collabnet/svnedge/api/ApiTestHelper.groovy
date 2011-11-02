@@ -11,36 +11,39 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- *
+ *  
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
 
-package com.collabnet.svnedge.controller.api
+package com.collabnet.svnedge.api
 
-import com.collabnet.svnedge.domain.Server
-import grails.converters.JSON
-import grails.converters.XML
-import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import sun.misc.BASE64Encoder
 
 /**
- * Secure Port access info for the API 
+ * Helper for API functional tests
  */
+class ApiTestHelper {
 
-@Secured(['ROLE_USER'])
-class SecurePortRestController extends AbstractRestController {
-
-    @Secured(['IS_AUTHENTICATED_ANONYMOUSLY'])
-    def restRetrieve = {
-        String port = System.getProperty("jetty.ssl.port", "4434")
-        Server s = Server.getServer()
-        def result = [SSLPort: port, SSLRequired: s.useSslConsole]
-        withFormat {
-            json { render result as JSON }
-            xml { render result as XML }
-            html { render result as XML }
-        }
+    static def encodeBase64(input) {
+        BASE64Encoder encoder = new BASE64Encoder();
+        String output = encoder.encode(input.toString().getBytes());
+        return output
     }
+
+    static def makeAuthorization(username, password) {
+        return encodeBase64("${username}:${password}")
+    }
+
+    static def makeAdminAuthorization() {
+        return makeAuthorization("admin", "admin")
+    }
+
+    static def makeUserAuthorization() {
+        return makeAuthorization("user", "admin")
+
+    }
+
 }
