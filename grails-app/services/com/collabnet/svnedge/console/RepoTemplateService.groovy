@@ -39,7 +39,7 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         return new File(getTemplateDirectory(), 'temp')
     }
     
-    boolean saveTemplate(RepoTemplate template, File templateFile, 
+    int saveTemplate(RepoTemplate template, File templateFile, 
         boolean isInsert) {
 
         boolean isArchive = templateFile.name.endsWith(".zip")
@@ -51,7 +51,7 @@ class RepoTemplateService extends AbstractSvnEdgeService {
             template.dumpFile = true
         }
         
-        def currentTemplates = RepoTemplate.list()
+        def currentTemplates = RepoTemplate.list(sort: 'displayOrder')
         if (isInsert) {
             template.displayOrder = 1
             int i = 2
@@ -66,8 +66,8 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         // give a temp name to allow saving the record
         template.location = "temp/" + templateFile.name
         template.active = true
-        boolean success = template.save()
-        if (success) {
+        int id = 0
+        if (template.save()) {
             String filename = (template.dumpFile ? "dump" : "repoArchive") +
                     template.id
             if (isArchive) {
@@ -83,9 +83,11 @@ class RepoTemplateService extends AbstractSvnEdgeService {
                 templateFile.delete()
             }
             template.location = finalFile.name
-            success = template.save()
+            if (template.save()) {
+                id = template.id
+            }            
         }
-        return success
+        return id
     }
         
     /**

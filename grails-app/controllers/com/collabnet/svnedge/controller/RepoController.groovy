@@ -724,7 +724,7 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def create = {
-        def repo = flash.repo
+        def repo = request.repo
         if (!repo) {
             repo = new Repository()
             repo.properties = params
@@ -762,10 +762,10 @@ class RepoController {
         if (repo.validateName() && !repo.hasErrors()) {
             
             if (params.initOption == 'useBackup' && !params.initOptionSelected) {
-                flash.error = message(code: 'repository.action.save.no.backup.selected')
-                flash.repo = repo
-                redirect(action: 'create', params: params)
-                return
+                request.error = message(code: 'repository.action.save.no.backup.selected')
+                request.repo = repo
+                forward(action: 'create')
+                return  
             }
 
             int templateId = params.templateId as int
@@ -801,9 +801,9 @@ class RepoController {
             }
         }
         if (!success) {
-            flash.error = message(code: 'default.errors.summary')
-            flash.repo = repo
-            redirect(action: 'create', params: params)
+            request.error = message(code: 'default.errors.summary')
+            request.repo = repo
+            forward(action: 'create')
         }
     }
 

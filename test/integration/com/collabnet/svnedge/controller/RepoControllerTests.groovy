@@ -79,15 +79,15 @@ class RepoControllerTests extends ControllerUnitTestCase {
             "create", 'dumpFileList', redirArg
 
         // this should fail (validation error)
-        model = controller.save()
+        controller.save()
         assertTrue "Expected error for creating a known existing repo", 
-            model.repo.hasErrors()
+            controller.request.repo.hasErrors()
 
         // this should fail (validation error)
         controller.params.name = repoNameExisting
-        model = controller.save()
+        controller.save()
         assertTrue "Expected error for creating an unknown existing repo", 
-            model.repo.hasErrors()
+            controller.request.repo.hasErrors()
     }
 
     void testEditAuthorization() {
