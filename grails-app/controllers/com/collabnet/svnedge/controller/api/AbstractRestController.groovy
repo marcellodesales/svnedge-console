@@ -18,24 +18,51 @@
 
 package com.collabnet.svnedge.controller.api
 
+import grails.converters.JSON
+import grails.converters.XML
+
 /**
  * Default "not-implemented" endpoints for rest controllers
  */
 abstract class AbstractRestController {
 
     def restRetrieve = {
-        response.sendError(405, "Method not allowed")
+        response.status = 405
+        def result = [errorMessage: message(code: "api.error.405")]
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+            html { render result as XML }
+        }
     }
 
     def restUpdate = {
-        response.sendError(405, "Method not allowed")
+        response.status = 405
+        def result = [errorMessage: message(code: "api.error.405")]
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+            html { render result as XML }
+        }
     }
 
     def restDelete = {
-        response.sendError(405, "Method not allowed")
+        response.status = 405
+        def result = [errorMessage: message(code: "api.error.405")]
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+            html { render result as XML }
+        }
     }
 
     def restSave = {
-        response.sendError(405, "Method not allowed")
+        response.status = 405
+        def result = [errorMessage: message(code: "api.error.405")]
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+            html { render result as XML }
+        }
     }
 }

@@ -35,27 +35,30 @@ import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 class RepositoryRestController extends AbstractRestController {
 
     def restRetrieve = {
-        def repoList
-        def params = [sort: "name"]
+        def result
         Server server = Server.getServer()
-        if (server.mode == ServerMode.REPLICA) {
-            repoList = ReplicatedRepository.listSortedByName(params).collect { it.repo }
-        } 
+
+        // only list repos in standalone mode; no detail view allowed yet
+        if (server.mode != ServerMode.STANDALONE || params.id) {
+            response.status = 405
+            result = [errorMessage: message(code: "api.error.405")]
+        }
         else {
-            repoList = Repository.list(params)
+            def repositories = []
+            def params = [sort: "name"]
+            Repository.list(params)?.each {
+                def repository = [id: it.id,
+                        name: it.name,
+                        status: (it.permissionsOk ?
+                            message(code: "repository.page.list.instance.permission.ok") :
+                            message(code: "repository.page.list.instance.permission.needFix")),
+                        svnUrl: "${server.svnURL()}${it.name}",
+                        viewvcUrl: "${server.viewvcURL(it.name)}"]
+                repositories.add(repository)
+            }
+            result = [repositories: repositories]
         }
-        def repositories = []
-        repoList.each {
-            def repository = [id: it.id, 
-                    name: it.name, 
-                    status: (it.permissionsOk ? 
-                        message(code: "repository.page.list.instance.permission.ok") : 
-                        message(code: "repository.page.list.instance.permission.needFix")),
-                    svnUrl: "${server.svnURL()}${it.name}", 
-                    viewvcUrl: "${server.viewvcURL(it.name)}" ]
-            repositories.add(repository)
-        }
-        def result = [ repositories: repositories ]
+
         withFormat {
             json { render result as JSON }
             xml { render result as XML }
