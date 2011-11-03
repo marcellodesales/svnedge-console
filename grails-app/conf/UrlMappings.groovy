@@ -30,21 +30,25 @@ class UrlMappings {
             controller = { "${params.entity}Rest" }
             action = [GET: "restRetrieve", PUT: "restUpdate",
                     DELETE: "restDelete", POST: "restSave"]
+            constraints {
+                apiVersion(matches: /1/)
+            }
         }
 
 
-        "/$controller/$action?/$id?" {
+        "/$controller/$action?/$id?"
+        {
             constraints {
                 // apply constraints here
             }
         }
 
-        "/" {
-            controller = "status"
-            action = "index"
-        }
+                "/" {
+                    controller = "status"
+                    action = "index"
+                }
 
-        "500"(view: '/error')
+                "500"(view: '/error')
 
     }
 }

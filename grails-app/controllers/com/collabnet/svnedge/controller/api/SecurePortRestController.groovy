@@ -40,7 +40,6 @@ class SecurePortRestController extends AbstractRestController {
         withFormat {
             json { render result as JSON }
             xml { render result as XML }
-            html { render result as XML }
         }
     }
 }
