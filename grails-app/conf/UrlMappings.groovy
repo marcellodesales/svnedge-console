@@ -30,6 +30,9 @@ class UrlMappings {
             controller = { "${params.entity}Rest" }
             action = [GET: "restRetrieve", PUT: "restUpdate",
                     DELETE: "restDelete", POST: "restSave"]
+            constraints {
+                apiVersion(matches: /1/)
+            }
         }
 
 
