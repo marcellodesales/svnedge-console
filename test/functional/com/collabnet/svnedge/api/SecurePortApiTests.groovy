@@ -25,7 +25,7 @@ class SecurePortApiTests extends AbstractSvnEdgeFunctionalTests {
 
     void testSecurePortGet() {
 
-        get('/api/1/securePort')
+        get('/api/1/securePort?format=xml')
         assertStatus 200
         assertContentContains '<entry key="SSLPort">4434</entry>'
         assertContentContains '<entry key="SSLRequired">false</entry>'
@@ -84,7 +84,7 @@ class SecurePortApiTests extends AbstractSvnEdgeFunctionalTests {
         assertHeader("Location", "https://localhost:4434/csvn/api/1/securePort")
       
         // but the GET method should continue to function on the non-secure port 
-        get('/api/1/securePort') 
+        get('/api/1/securePort?format=xml')
         assertStatus 200
         assertContentContains '<entry key="SSLPort">4434</entry>'
         assertContentContains '<entry key="SSLRequired">true</entry>'
