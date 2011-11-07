@@ -22,13 +22,16 @@ import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 import org.codehaus.groovy.grails.web.converters.JSONParsingParameterCreationListener
+import org.codehaus.groovy.grails.web.converters.XMLParsingParameterCreationListener
+import grails.converters.deep.XML
 
 /**
  * Default "not-implemented" endpoints for rest controllers
  */
 abstract class AbstractRestController {
 
-    JSONParsingParameterCreationListener jppcl = new JSONParsingParameterCreationListener()
+    JSONParsingParameterCreationListener jppcl = null
+    XMLParsingParameterCreationListener xppcl = null
     
     def restRetrieve = {
         response.status = 405
@@ -68,10 +71,21 @@ abstract class AbstractRestController {
 
     /**
      * This helper provides the same service as "parseRequest: true" in UrlMappings 
-     * (disabled now to avoid stacktraces) 
+     * (disabled in UrlMappings to avoid stacktraces) 
      * @param params the request params
      */
     void parseRequest(GrailsParameterMap params) {
-        jppcl.paramsCreated(params)
+        if (request.format == "json") {
+            if (!jppcl) {
+                jppcl = new JSONParsingParameterCreationListener()    
+            } 
+            jppcl.paramsCreated(params)
+        }
+        else if (request.format == "xml") {
+            if (!xppcl) {
+                xppcl = new XMLParsingParameterCreationListener()    
+            } 
+            xppcl.paramsCreated(params)
+        }
     }
 }
