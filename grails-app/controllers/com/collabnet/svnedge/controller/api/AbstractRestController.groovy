@@ -20,12 +20,16 @@ package com.collabnet.svnedge.controller.api
 
 import grails.converters.JSON
 import grails.converters.XML
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
+import org.codehaus.groovy.grails.web.converters.JSONParsingParameterCreationListener
 
 /**
  * Default "not-implemented" endpoints for rest controllers
  */
 abstract class AbstractRestController {
 
+    JSONParsingParameterCreationListener jppcl = new JSONParsingParameterCreationListener()
+    
     def restRetrieve = {
         response.status = 405
         def result = [errorMessage: message(code: "api.error.405")]
@@ -60,5 +64,14 @@ abstract class AbstractRestController {
             json { render result as JSON }
             xml { render result as XML }
         }
+    }
+
+    /**
+     * This helper provides the same service as "parseRequest: true" in UrlMappings 
+     * (disabled now to avoid stacktraces) 
+     * @param params the request params
+     */
+    void parseRequest(GrailsParameterMap params) {
+        jppcl.paramsCreated(params)
     }
 }
