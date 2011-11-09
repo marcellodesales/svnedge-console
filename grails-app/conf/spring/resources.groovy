@@ -35,7 +35,7 @@ beans = {
     }
     
     basicAuthenticationEntryPoint(org.springframework.security.ui.basicauth.BasicProcessingFilterEntryPoint) {
-        realmName = 'CollabNet Subversion Edge API Realm'
+        realmName = 'CollabNet Subversion Edge Console'
     }
         
     basicExceptionTranslationFilter(org.springframework.security.ui.ExceptionTranslationFilter) {
