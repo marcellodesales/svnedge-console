@@ -18,6 +18,12 @@ sfmain.integration.listener_host=${ctf.hostname}
 sfmain.integration.listener_port=${ctf.port}
 sfmain.integration.listener_ssl=${ctf.useSsl}
 
+# Proxy server config
+sfmain.integration.http_proxy_host=${proxy.hostname}
+sfmain.integration.http_proxy_port=${proxy.port}
+sfmain.integration.http_proxy_username=${proxy.username}
+sfmain.integration.http_proxy_password=${proxy.password}
+
 # Integration miscellaneous keys
 sfmain.integration.os=${os.name}
 sfmain.integration.repository-archive=${repository.archive.dir}
