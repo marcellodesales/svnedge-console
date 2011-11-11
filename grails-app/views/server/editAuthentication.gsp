@@ -61,20 +61,12 @@
         document.getElementById('ldapDialog').style.display = 'none';
     }
     Event.observe(window, 'load', showHideLdapOptions, false);
-  
 
     function warnForUnSavedData() {
-
-        if (!fieldsChanged) {
-            document.location.href = "edit";
-            return true
-        }
-        var r=confirm("${editAuthConfirmMessage}");
-        if (r==true) {
-            document.location.href = "edit";
-        } else {
-            return false;
-        }
+      if (!fieldsChanged) {
+        return true
+      }
+      return confirm("${editAuthConfirmMessage}");
     }
 
     </g:javascript>
@@ -103,11 +95,13 @@
     </div>
     </g:if>
 
-  <g:set var="events" value="onclick='warnForUnSavedData()'" />
-  <g:set var="tabArray" value="${[[action:'edit', href:'#', events:events, label: message(code:'server.page.edit.tabs.general')]]}" />
+  <g:set var="events" value="onclick='return warnForUnSavedData()'" />
+  <g:set var="tabArray" value="${[[action: 'edit', events: events, label: message(code:'server.page.edit.tabs.general')]]}" />
   <g:if test="${!isManagedMode}">
-    <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', active: true, label: message(code:'server.page.edit.tabs.authentication')]}" />
+    <g:set var="tabArray" value="${tabArray << [action: 'editAuthentication', active: true, label: message(code:'server.page.edit.tabs.authentication')]}" />
   </g:if>
+  <g:set var="tabArray"
+      value="${tabArray << [action: 'editProxy', events: events, label: message(code:'server.page.edit.tabs.proxy')]}"/>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
   <g:form method="post" name="serverForm">
       <g:hiddenField name="view" value="editAuthentication"/>

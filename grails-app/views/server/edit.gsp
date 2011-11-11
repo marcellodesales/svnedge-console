@@ -104,18 +104,12 @@
         }
 
         function warnForUnSavedData() {
-          
-            if (!fieldsChanged) {
-                document.location.href = "editAuthentication";
-                return true
-            }
-            var r=confirm("${editAuthConfirmMessage}");
-            if (r==true) {
-                document.location.href = "editAuthentication";
-            } else {
-                return false;
-            }
+          if (!fieldsChanged) {
+            return true
+          }
+          return confirm("${editAuthConfirmMessage}");
         }
+        
       /* ]]> */
     </g:javascript>
     
@@ -205,11 +199,13 @@ $('bindInstructions').hide();
 </script>
     </div>
 </g:if>
-  <g:set var="events" value="onclick='warnForUnSavedData()'" />
-  <g:set var="tabArray" value="${[[action:'edit', href:'#', label: message(code:'server.page.edit.tabs.general'), active: true]]}" />
+  <g:set var="events" value="onclick='return warnForUnSavedData()'" />
+  <g:set var="tabArray" value="${[[action: 'edit', label: message(code:'server.page.edit.tabs.general'), active: true]]}" />
   <g:if test="${!isManagedMode}">
-    <g:set var="tabArray" value="${tabArray << [action:'editAuthentication', href:'#', events:events, label: message(code:'server.page.edit.tabs.authentication')]}" />
+    <g:set var="tabArray" value="${tabArray << [action: 'editAuthentication', events: events, label: message(code:'server.page.edit.tabs.authentication')]}" />
   </g:if>
+  <g:set var="tabArray"
+      value="${tabArray << [action: 'editProxy', events: events, label: message(code:'server.page.edit.tabs.proxy')]}"/>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
   <g:form method="post" onsubmit="javascript:check();" name="serverForm">
       <g:hiddenField name="view" value="edit"/>

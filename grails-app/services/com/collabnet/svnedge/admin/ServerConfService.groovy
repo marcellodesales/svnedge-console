@@ -33,7 +33,8 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import sun.misc.BASE64Encoder
-import com.collabnet.svnedge.util.SSLUtil;
+import com.collabnet.svnedge.util.SSLUtil
+import com.collabnet.svnedge.domain.NetworkConfiguration;
 
 class ServerConfService {
 
@@ -993,8 +994,9 @@ ${extraconf}
 
     private def writeTeamforgeConf(server, teamforgePropsTemplate) {
         CtfServer ctfServer = CtfServer.getServer()
+        NetworkConfiguration networkConfig = NetworkConfiguration.getCurrentConfig()
         String s = getTeamforgeConf(
-            teamforgePropsTemplate.text, ctfServer, server)
+            teamforgePropsTemplate.text, ctfServer, server, networkConfig)
         if (ctfServer && server.managedByCtf()) {
             s += "\nsfmain.integration.subversion.csvn=csvn-managed\n"
         } else {
@@ -1004,7 +1006,7 @@ ${extraconf}
         System.setProperty("csvnedge.resetTeamforgeProperties", "true")
     }
 
-    private def getTeamforgeConf(contents, ctfServer, server) {
+    private def getTeamforgeConf(contents, ctfServer, server, networkConfig) {
         if (isWindows()) {
             contents = contents.replace("\${os.name}", "windows")
         } else {
@@ -1063,6 +1065,16 @@ ${extraconf}
             contents = contents.replace("\${ctf.hostname}", host)
             contents = contents.replace("\${ctf.port}", port)
             contents = contents.replace("\${ctf.soap.url}", baseUrl)
+            
+            // if no NetworkConfig provided, use an empty map to simulate
+            if (!networkConfig) {
+                networkConfig = [:]
+            }
+            contents = contents.replace("\${proxy.hostname}", networkConfig.httpProxyHost ?: "")
+            contents = contents.replace("\${proxy.port}", networkConfig.httpProxyPort ?: "")
+            contents = contents.replace("\${proxy.username}", networkConfig.httpProxyUsername ?: "")
+            contents = contents.replace("\${proxy.password}", networkConfig.httpProxyPassword ?: "")
+            
             if (ctfServer.internalApiKey) {
                 contents += "\nsfmain.integration.security.shared_secret=" +
                     ctfServer.internalApiKey

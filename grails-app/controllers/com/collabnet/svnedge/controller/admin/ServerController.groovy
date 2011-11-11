@@ -28,7 +28,8 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
-import com.collabnet.svnedge.util.ConfigUtil;
+import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.domain.NetworkConfiguration;
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class ServerController {
@@ -133,6 +134,31 @@ class ServerController {
                 isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
     }
+    
+    def editProxy = {
+       def networkConfig = NetworkConfiguration.getCurrentConfig()
+       return [networkConfig: networkConfig]
+    }
+    
+    def updateProxy = {
+        def networkConfig = NetworkConfiguration.getCurrentConfig() ?: new NetworkConfiguration()
+        bindData(networkConfig, params)
+        networkConfig.validate()
+        if (!networkConfig.hasErrors() && networkConfig.save()) {
+            // TODO this service method should write the relevant configs
+            serverConfService.writeConfigFiles()
+            // TODO set java vm proxy params here
+            // TODO set java vm proxy params from NetworkConfiguration at bootstrap
+            flash.message = message(code:"server.action.updateProxy.success")
+            redirect(action: editProxy)
+        }
+        else {
+            networkConfig.discard()
+            request.error = message(code:"server.action.update.invalidSettings")
+            render(view: "editProxy", model: [networkConfig: networkConfig])
+        }
+    }
+    
 
     def update = {
         flash.clear()

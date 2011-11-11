@@ -1,5 +1,5 @@
 <content tag="leftMenu">
-  <div class="<g:if test="${actionName == 'edit' || actionName == 'editAuthentication'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
+  <div class="<g:if test="${['edit','editAuthentication', 'editProxy', 'updateProxy'].contains(actionName)}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
     <g:link controller="server" action="edit"><g:message code="server.page.leftNav.settings" /></g:link>
   </div>
