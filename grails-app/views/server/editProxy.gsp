@@ -143,7 +143,7 @@
             </td>
             <td valign="top" colspan="2"
                 class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyPassword', 'errors')}">
-              <input size="30" type="text" id="httpProxyPassword" name="httpProxyPassword"
+              <input size="30" type="password" id="httpProxyPassword" name="httpProxyPassword"
                      value="${fieldValue(bean: networkConfig, field: 'httpProxyPassword')}"/>
             </td>
           </tr>
@@ -164,6 +164,8 @@
     <tr class="ContainerFooter">
       <td>
         <div class="AlignRight">
+          <g:actionSubmit action="removeProxy" value="${message(code:'server.page.editProxy.button.clear')}"
+                          class="Button"/>
           <g:actionSubmit action="updateProxy" value="${message(code:'server.page.editAuthentication.button.save')}"
                           class="Button"/>
         </div>

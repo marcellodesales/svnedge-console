@@ -159,6 +159,18 @@ class ServerController {
         }
     }
     
+    def removeProxy = {
+        def networkConfig = NetworkConfiguration.getCurrentConfig() 
+        if (networkConfig) {
+            networkConfig.delete()
+        }
+        // TODO set java vm proxy params here
+        // TODO set java vm proxy params from NetworkConfiguration at bootstrap
+        // TODO this service method should write the relevant configs
+        serverConfService.writeConfigFiles()
+        flash.message = message(code:"server.action.updateProxy.removed")
+        redirect(action: editProxy)
+     }
 
     def update = {
         flash.clear()
