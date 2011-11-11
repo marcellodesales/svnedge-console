@@ -69,7 +69,7 @@ class SecurityService {
         def pool = ['a'..'z','A'..'Z',0..9,'_'].flatten()
         Random rand = new Random(System.currentTimeMillis())
 
-        def randomString = (0..length).collect { pool[rand.nextInt(pool.size())] }
+        def randomString = (1..length).collect { pool[rand.nextInt(pool.size())] }
         return randomString.join()
     }
 

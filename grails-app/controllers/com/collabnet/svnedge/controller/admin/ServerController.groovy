@@ -41,6 +41,7 @@ class ServerController {
     def setupTeamForgeService
     def setupReplicaService
     def csvnAuthenticationProvider
+    def securityService
 
     def index = { redirect(action:edit, params:params) }
 
@@ -137,12 +138,24 @@ class ServerController {
     
     def editProxy = {
        def networkConfig = NetworkConfiguration.getCurrentConfig()
+        // decrypt password from db so that the password field can show the correct number of dots
+        // (the gsp will generate a new random string of this length to write in the field)
+        if (networkConfig?.httpProxyPassword) {
+            networkConfig.httpProxyPassword = securityService.decrypt(networkConfig.httpProxyPassword)
+            networkConfig.discard()
+        }     
        return [networkConfig: networkConfig]
     }
     
     def updateProxy = {
+        // find or create NetworkConfiguration instance
         def networkConfig = NetworkConfiguration.getCurrentConfig() ?: new NetworkConfiguration()
-        bindData(networkConfig, params)
+        // bind data, excluding password         
+        bindData(networkConfig, params, ['httpProxyPassword'])
+        // if a new password has been input, copy to the entity 
+        if (params['httpProxyPassword_changed'] == 'true') {
+            networkConfig.httpProxyPassword = securityService.encrypt(params['httpProxyPassword'])
+        }     
         networkConfig.validate()
         if (!networkConfig.hasErrors() && networkConfig.save()) {
             // TODO this service method should write the relevant configs

@@ -143,8 +143,7 @@
             </td>
             <td valign="top" colspan="2"
                 class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyPassword', 'errors')}">
-              <input size="30" type="password" id="httpProxyPassword" name="httpProxyPassword"
-                     value="${fieldValue(bean: networkConfig, field: 'httpProxyPassword')}"/>
+              <g:passwordFieldWithChangeNotification name="httpProxyPassword" value="${fieldValue(bean:networkConfig, field:'httpProxyPassword')}" size="30"/>
             </td>
           </tr>
           <g:hasErrors bean="${networkConfig}" field="httpProxyPassword">
