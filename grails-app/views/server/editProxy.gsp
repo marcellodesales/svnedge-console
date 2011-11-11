@@ -72,7 +72,7 @@
   <table class="ItemDetailContainer">
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
-
+        <p><g:message code="server.page.editProxy.message"/></p>
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
