@@ -1073,7 +1073,8 @@ ${extraconf}
             contents = contents.replace("\${proxy.hostname}", networkConfig.httpProxyHost ?: "")
             contents = contents.replace("\${proxy.port}", networkConfig.httpProxyPort ?: "")
             contents = contents.replace("\${proxy.username}", networkConfig.httpProxyUsername ?: "")
-            contents = contents.replace("\${proxy.password}", securityService.decrypt(networkConfig.httpProxyPassword ?: ""))
+            contents = contents.replace("\${proxy.password}", networkConfig.httpProxyPassword ? 
+                securityService.decrypt(networkConfig.httpProxyPassword) : "")
             
             if (ctfServer.internalApiKey) {
                 contents += "\nsfmain.integration.security.shared_secret=" +
