@@ -118,6 +118,12 @@ class Complex(SchemaObject):
             if c.extension():
                 return True
         return False
+    
+    def mixed(self):
+        for c in self.rawchildren:
+            if isinstance(c, SimpleContent) and c.mixed():
+                return True
+        return False
 
 
 class Group(SchemaObject):
@@ -188,13 +194,16 @@ class Simple(SchemaObject):
     """
 
     def childtags(self):
-        return ('restriction', 'any',)
+        return ('restriction', 'any', 'list',)
     
     def enum(self):
         for child, ancestry in self.children():
             if isinstance(child, Enumeration):
                 return True
         return False
+    
+    def mixed(self):
+        return len(self)
 
     def description(self):
         return ('name',)
@@ -210,6 +219,21 @@ class Simple(SchemaObject):
             if c.restriction():
                 return True
         return False
+    
+
+class List(SchemaObject):
+    """
+    Represents an (xsd) schema <xs:list/> node
+    """
+
+    def childtags(self):
+        return ()
+
+    def description(self):
+        return ('name',)
+    
+    def xslist(self):
+        return True
 
    
 class Restriction(SchemaObject):
@@ -325,6 +349,9 @@ class SimpleContent(SchemaObject):
             if c.restriction():
                 return True
         return False
+    
+    def mixed(self):
+        return len(self)
 
 
 class Enumeration(Content):
@@ -455,7 +482,7 @@ class Extension(SchemaObject):
 
     def description(self):
         return ('ref',)
-
+    
 
 class Import(SchemaObject):
     """
@@ -687,7 +714,8 @@ class Factory:
         'complexType' : Complex,
         'group' : Group,
         'attributeGroup' : AttributeGroup, 
-        'simpleType' : Simple, 
+        'simpleType' : Simple,
+        'list' : List,
         'element' : Element,
         'attribute' : Attribute,
         'sequence' : Sequence,

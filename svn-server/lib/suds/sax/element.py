@@ -767,6 +767,29 @@ class Element:
         result.append('</%s>' % self.qname())
         result = ''.join(result)
         return result
+    
+    def plain(self):
+        """
+        Get a string representation of this XML fragment.
+        @return: A I{plain} string.
+        @rtype: basestring
+        """
+        result = []
+        result.append('<%s' % self.qname())
+        result.append(self.nsdeclarations())
+        for a in [unicode(a) for a in self.attributes]:
+            result.append(' %s' % a)
+        if self.isempty():
+            result.append('/>')
+            return ''.join(result)
+        result.append('>')
+        if self.hasText():
+            result.append(self.text.escape())
+        for c in self.children:
+            result.append(c.plain())
+        result.append('</%s>' % self.qname())
+        result = ''.join(result)
+        return result
 
     def nsdeclarations(self):
         """
@@ -923,6 +946,41 @@ class Element:
     
     def __unicode__(self):
         return self.str()
+    
+    def __iter__(self):
+        return NodeIterator(self)
+    
+
+class NodeIterator:
+    """
+    The L{Element} child node iterator.
+    @ivar pos: The current position
+    @type pos: int
+    @ivar children: A list of a child nodes.
+    @type children: [L{Element},..] 
+    """
+    
+    def __init__(self, parent):
+        """
+        @param parent: An element to iterate.
+        @type parent: L{Element}
+        """
+        self.pos = 0
+        self.children = parent.children
+        
+    def next(self):
+        """
+        Get the next child.
+        @return: The next child.
+        @rtype: L{Element}
+        @raise StopIterator: At the end.
+        """
+        try:
+            child = self.children[self.pos]
+            self.pos += 1
+            return child
+        except:
+            raise StopIteration()
 
 
 class PrefixNormalizer:
