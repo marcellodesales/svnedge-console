@@ -18,13 +18,18 @@ def main():
 def getProxyUrl():
     proxyUrl = "http://%s:%s@%s:%s" % (proxyUser, proxyPwd, proxyHost, proxyPort)
     return proxyUrl
+
+def getProxyProtocol(url):
+    if url.startswith("https"): 
+        return "https"
+    else: 
+        return "http" 
     
 def testProxy(url):
     req = urllib2.Request(url)
-    scheme = "https" if url.startswith("https") else "http" 
     
     # build a new opener that uses a proxy requiring authorization
-    proxy_support = urllib2.ProxyHandler({scheme : getProxyUrl()})
+    proxy_support = urllib2.ProxyHandler({getProxyProtocol(url) : getProxyUrl()})
     opener = urllib2.build_opener(proxy_support, urllib2.HTTPHandler)
     # install it
     urllib2.install_opener(opener)    
