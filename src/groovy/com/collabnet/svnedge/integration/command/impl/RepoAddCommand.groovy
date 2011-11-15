@@ -40,6 +40,11 @@ public class RepoAddCommand extends AbstractRepositoryCommand
         if (!this.params["repoName"]) {
             throw new IllegalArgumentException("The repo path is missing.")
         }
+        
+        def teamForgeService = getService("setupTeamForgeService")
+        if (!teamForgeService.confirmApiSecurityKey()) {
+            throw new IllegalStateException("API security key is invalid.")
+        }
     }
 
     def execute() {

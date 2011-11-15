@@ -433,7 +433,7 @@ class SetupTeamForgeController {
         }
 
         if (con.hasErrors()) {
-            flash.error = message(code: 'setupTeamForge.action.general.error')
+            request.error = message(code: 'setupTeamForge.action.general.error')
             log.error("An error occurred in the conversion process:" + 
                 con.errors)
             forward(action : 'ctfInfo')
@@ -559,7 +559,11 @@ class SetupTeamForgeController {
             con.requiresServerKey = true
             flash.error = message(code: 
                 'setupTeamForge.action.convert.apiKeyMessage')
-            redirect(action: 'ctfInfo')
+            if (setupTeamForgeService.isFreshInstall()) {
+                redirect(action:'ctfInfo')
+            } else {
+                redirect(action:'confirm')
+            }
 
         } catch (RemoteMasterException remoteCommProblem) {
             // general errors that the administrator needs to take action.

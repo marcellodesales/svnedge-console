@@ -108,7 +108,7 @@ class Server {
         def scheme = useSsl ? "https" : "http"
         String port = useSsl ? 
             (port == 443) ? "" : ":" + port : (port == 80) ? "" : ":" + port
-        return scheme + "://" + server.hostname + port   
+        return scheme + "://" + hostname + port   
     }
 
     static constraints = {

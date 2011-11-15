@@ -42,6 +42,7 @@ class StatusController {
     def lifecycleService
     def packagesUpdateService
     def setupReplicaService
+    def setupTeamForgeService
     def replicaServerStatusService
     def securityService
 
@@ -142,8 +143,16 @@ class StatusController {
                     code: 'replica.error.registration.serverCantRestart')
                 // clear the message until the user has restarted.
                 setupReplicaService.clearRegistrationError()
-            }
 
+            }
+                    
+            if (!setupTeamForgeService.confirmApiSecurityKey()) {
+                
+                request.unfiltered_warn = message(code: "replica.error.apiSecurityKey",
+                        args: [createLink(controller: 'setupReplica', 
+                                          action: 'editCredentials')])
+            }
+                
             ctfUrl = ctfServer.getWebAppUrl()
 
             /* get the certificate details of the master */

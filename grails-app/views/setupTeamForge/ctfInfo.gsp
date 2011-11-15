@@ -116,10 +116,29 @@
             </g:hasErrors>
          </td>
       </tr>
-      <g:if test="${con && con.requiresServerKey}">
-        <g:render template="serverKeyField"/>
-      </g:if>
-
+            <tr>
+        <td class="ItemDetailName">
+          <label for="serverKey"><g:message code="ctfConversionBean.serverKey.label" /></label>
+        </td>
+        <td valign="top" class="value ${hasErrors(bean: cmd, field: 'serverKey', 'errors')}">
+          <input size="40" type="text" id="serverKey" name="serverKey" 
+              value="${fieldValue(bean: cmd, field: 'serverKey')}"/>
+          <g:if test="${con && con.requiresServerKey}">
+            <div class="errorMessage">
+              <g:message code="setupReplica.action.updateCredentials.invalidApiKey" />
+            </div>
+          </g:if>
+        </td>
+        <td class="ItemDetailValue"><em><g:message code="ctfConversionBean.serverKey.error.missing" /></em>
+          <div>
+            <g:message code="setupReplica.page.apiKey.description" />
+            <ul>
+              <li><g:message code="setupReplica.page.apiKey.hosted" /></li>
+              <li><g:message code="setupReplica.page.apiKey.property" /></li>
+            </ul>
+          </div>
+        </td>
+      </tr>       
       </table>
       
       <tr class="ContainerFooter">

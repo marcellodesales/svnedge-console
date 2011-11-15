@@ -19,24 +19,6 @@
 <%@ page import="com.collabnet.svnedge.domain.ServerMode" %>
 <html>
 <head>
-  %{--
-  - CollabNet Subversion Edge
-  - Copyright (C) 2010, CollabNet Inc. All rights reserved.
-  -  
-  - This program is free software: you can redistribute it and/or modify
-  - it under the terms of the GNU Affero General Public License as published by
-  - the Free Software Foundation, either version 3 of the License, or
-  - (at your option) any later version.
-  -
-  - This program is distributed in the hope that it will be useful,
-  - but WITHOUT ANY WARRANTY; without even the implied warranty of
-  - MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  - GNU Affero General Public License for more details.
-  -
-  - You should have received a copy of the GNU Affero General Public License
-  - along with this program.  If not, see <http://www.gnu.org/licenses/>.
-  --}%
-
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
 </head>
@@ -59,10 +41,13 @@
       <td class="ContainerBodyWithPaddedBorder">
 
         <p>
-          <g:message code="setupReplica.page.editCredentials.p1"/>
+          <g:if test="${isReplica}">
+            <g:message code="setupReplica.page.editCredentials.p1"/>
+          </g:if>
         </p>
 
         <table class="ItemDetailContainer">
+         <g:if test="${isReplica}">
           <tr>
             <td class="ItemDetailName">
               <label for="ctfURL"><g:message code="setupReplica.page.ctfInfo.ctfURL.label"/></label>
@@ -126,6 +111,35 @@
               </g:hasErrors>
             </td>
           </tr>
+     </g:if>
+      <tr>
+        <td class="ItemDetailName">
+          <label for="serverKey"><g:message code="ctfConversionBean.serverKey.label" /></label>
+        </td>
+        <td valign="top" class="value ${hasErrors(bean: cmd, field: 'serverKey', 'errors')}">
+          <input size="40" type="text" id="serverKey" name="serverKey" 
+              value="${fieldValue(bean: cmd, field: 'serverKey')}"/>
+        </td>
+        <td class="ItemDetailValue"><em><g:message code="ctfConversionBean.serverKey.error.missing" /></em>
+          <div>
+            <g:message code="setupReplica.page.apiKey.description" />
+            <ul>
+              <li><g:message code="setupReplica.page.apiKey.hosted" /></li>
+              <li><g:message code="setupReplica.page.apiKey.property" /></li>
+            </ul>
+          </div>
+        </td>
+      </tr> 
+          <tr>
+            <td></td>
+            <td class="errors" colspan="2">
+              <g:hasErrors bean="${cmd}" field="serverKey">
+                <ul><g:eachError bean="${cmd}" field="serverKey">
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
+                </g:eachError></ul>
+              </g:hasErrors>
+            </td>
+          </tr>
 
         </table>
       </td>
@@ -134,6 +148,7 @@
     <tr class="ContainerFooter">
       <td colspan="3">
         <div class="AlignRight">
+        
           <g:actionSubmit action="updateCredentials" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
         </div>
       </td>

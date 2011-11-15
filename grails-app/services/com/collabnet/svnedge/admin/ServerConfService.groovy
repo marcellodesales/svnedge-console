@@ -634,13 +634,9 @@ RewriteEngine on
 
         String contextPath = "/svn"
         if (server.mode == ServerMode.REPLICA) {
-            def replicaConfig = ReplicaConfiguration.getCurrentConfig()
-            String masterSVNURI = replicaConfig.svnMasterUrl
-            if (masterSVNURI) {
-                contextPath = new URL(masterSVNURI).path
-                if (contextPath.endsWith("/")) {
-                    contextPath = contextPath.substring(0, contextPath.length() - 1)
-                }
+            def replicaConfig = ReplicaConfiguration.getCurrentConfig()            
+            if (replicaConfig.svnMasterUrl) {
+                contextPath = replicaConfig.contextPath()
             }
             if (server.useSsl) {
                 conf += "SSLProxyEngine on\n"

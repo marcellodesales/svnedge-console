@@ -53,17 +53,14 @@ class ServerController {
         def ctfServer = CtfServer.getServer()
         def server = Server.getServer()
         boolean isReplica = (server.mode == ServerMode.REPLICA)
-        String errorView = isReplica ?
-                "editReplica" :
-                "editIntegration"
+        String errorView = "editIntegration"
         
         if (ctfCredentials.hasErrors()) {
             def formError = message(code: 
                 "server.action.revert.error.credentials")
             render(view: errorView,
                     model: [ctfServerBaseUrl: CtfServer.getServer().baseUrl,
-                        ctfCredentials: ctfCredentials, formError: formError,
-                        canEditCredentials: isReplica])
+                        ctfCredentials: ctfCredentials, formError: formError])
         } else {
             try {
                 def errors = []
@@ -84,8 +81,7 @@ class ServerController {
                     render(view: errorView,
                         model: [ctfServerBaseUrl: ctfServer.baseUrl,
                             ctfCredentials: ctfCredentials,
-                            formError: formError, errorCause: errors,
-                            canEditCredentials: isReplica])
+                            formError: formError, errorCause: errors])
                 } else {
                     flash.message = message(code: 
                         "server.action.revert.success")
@@ -99,8 +95,7 @@ class ServerController {
                         model: [ctfServerBaseUrl: ctfBaseUrl,
                             ctfCredentials: ctfCredentials,
                             formError: formError, 
-                            errorCause: wrongCredentials.getMessage(),
-                            canEditCredentials: isReplica])
+                            errorCause: wrongCredentials.getMessage()])
             }
         }
     }
@@ -109,13 +104,9 @@ class ServerController {
         flash.warn = message(code: "server.action.revert.warn")
         def ctfCredentialsCmd = new CtfCredentialCommand()
         Server s = Server.getServer()
-        String view = (s.mode == ServerMode.REPLICA) ?
-                "editReplica" :
-                "editIntegration"
 
-        render (view : view, model: [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
-                ctfCredentials: ctfCredentialsCmd,
-                canEditCredentials: (s.mode == ServerMode.REPLICA)])
+        return [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
+                ctfCredentials: ctfCredentialsCmd]
     }
 
     def edit = {

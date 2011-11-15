@@ -107,7 +107,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      */
     public void registerReplica(ReplicaConversionBean replicaInfo) 
             throws RemoteMasterException, ReplicaConversionException,
-                CantBindPortException {
+            CantBindPortException, InvalidSecurityKeyException {
 
         log.debug("Attempting replica conversion...")
 
@@ -205,7 +205,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
      */
     public void updateCtfConnection(CtfConnectionBean ctfConn) throws 
         CtfAuthenticationException, RemoteMasterException,
-        UnknownHostException, NoRouteToHostException, MalformedURLException {
+        UnknownHostException, NoRouteToHostException, MalformedURLException,
+        InvalidSecurityKeyException {
 
         def ctfServer = CtfServer.getServer() 
         CtfConnectionBean oldCtfConn = new CtfConnectionBean(ctfURL: ctfServer.baseUrl, 
@@ -230,6 +231,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         ctfServer.save()
 
         ctfRemoteClientService.logoff(ctfServer.baseUrl, oldCtfConn.ctfUsername, oldCtfConn.soapSessionId)
+        setupTeamForgeService.updateCtfConnection(ctfConn)
     }
 
 

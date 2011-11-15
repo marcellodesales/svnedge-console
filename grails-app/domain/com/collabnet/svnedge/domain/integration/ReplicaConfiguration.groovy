@@ -64,6 +64,17 @@ public class ReplicaConfiguration {
      */
     String acceptedCertFingerPrint
 
+    String contextPath() {
+        String path = null
+        if (svnMasterUrl) {
+            path = new URL(svnMasterUrl).path
+            if (path.endsWith("/")) {
+                path = contextPath.substring(0, contextPath.length() - 1)
+            }
+        }
+        return path
+    }
+    
     static constraints = {
         svnMasterUrl(nullable:true)
         acceptedCertFingerPrint(nullable:true)

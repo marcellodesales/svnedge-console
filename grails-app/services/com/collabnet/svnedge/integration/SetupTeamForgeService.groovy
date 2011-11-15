@@ -37,6 +37,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.User 
 import com.collabnet.svnedge.domain.integration.CtfServer
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+
 import javax.net.ssl.SSLHandshakeException
 
 class SetupTeamForgeService extends AbstractSvnEdgeService {
@@ -787,6 +789,59 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             throw new CtfAuthenticationException(msg, 
                 "setupTeamForge.integration.ctf.auth.failed")
         }
+    }
+                              
+    /**
+     * Updates credentials needed for an integration server, namely
+     * the API key.
+     * @param ctfConn A bean with the serverKey property
+     */
+    void updateCtfConnection(CtfConnectionBean ctfConn) 
+            throws InvalidSecurityKeyException {
+        CtfServer ctfServer = CtfServer.getServer()
+        if (ctfServer.internalApiKey != ctfConn.serverKey) {
+            ctfServer.internalApiKey = ctfConn.serverKey
+            ctfServer.save()
+            if (lifecycleService.isStarted()) {
+                lifecycleService.restartServer()
+                if (!confirmApiSecurityKey()) {
+                    throw new InvalidSecurityKeyException(
+                            ctfConn.ctfURL, "API security key is invalid.", null)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Tests that svn can contact TF for auth/z
+     */
+    boolean confirmApiSecurityKey() {
+        if (lifecycleService.isStarted()) {
+            def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
+            def contextPath = "/svn"
+            if (replicaConfiguration) {
+                contextPath = replicaConfiguration.contextPath()
+            }
+            String dateStamp = new Date().format("yyyy_MM_dd")
+            File errorLog = new File(ConfigUtil.logsDirPath(),
+                    "error_" + dateStamp + ".log")
+            int initialSize = (int) errorLog.length()
+            
+            String username = "nonexistentUser"
+            String password = "myPassword"
+            def svnUrl = Server.getServer().urlPrefix() +
+                    contextPath + "/_junkrepos"
+            def command = [ConfigUtil.svnPath(), "ls", svnUrl,
+                "--non-interactive", "--username", username,
+                "--password", password,
+                "--config-dir", ConfigUtil.svnConfigDirPath()]
+            String[] commandOutput = commandLineService
+                    .execute(command.toArray(new String[0]), null, null, true)
+            String errorText = errorLog.text.substring(initialSize)
+            return !errorText.contains("Security exception")
+        }
+        log.debug "confirmApiSecurityKey returning true because server is not running."
+        return true
     }
 
     private static final String sfPrefix = 

@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.domain.Server;
+import com.collabnet.svnedge.domain.ServerMode
 
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
@@ -36,6 +38,7 @@ class LogController {
 
     def operatingSystemService
     def logManagementService
+    def setupTeamForgeService
 
     static allowedMethods = [saveConfiguration : 'POST']
 
@@ -115,6 +118,17 @@ class LogController {
             def requestFormatter = new SimpleDateFormat(dtFormat,
                 currentLocale)
             def logModifiedTime = requestFormatter.format(modifiedTime);
+            
+            // Help user in the event they are looking at a replica error
+            // due to invalid api key
+            if (logName.startsWith('replica') && params.highlight &&
+                    Server.getServer().mode == ServerMode.REPLICA &&
+                    !setupTeamForgeService.confirmApiSecurityKey()) {
+                    
+                request.unfiltered_warn = message(code: "replica.error.apiSecurityKey",
+                        args: [createLink(controller: 'setupReplica',
+                                          action: 'editCredentials')])
+            }
 
             render(view: view, contentType: contentType,
                 model: [ file: logFile, fileSize: logSize, fileSizeBytes: logFile.length(),

@@ -20,11 +20,13 @@ package com.collabnet.svnedge.controller.integration
 import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConnectionException
 import com.collabnet.svnedge.integration.CtfConnectionBean;
 import com.collabnet.svnedge.integration.CtfSessionExpiredException;
+import com.collabnet.svnedge.integration.InvalidSecurityKeyException;
 import com.collabnet.svnedge.integration.RemoteMasterException;
 import com.collabnet.svnedge.integration.ReplicaConversionBean 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
@@ -41,6 +43,7 @@ class SetupReplicaController {
     private static String REPLICA_CONVERSION_BEAN_SESSION_KEY = "replicaConversionBean"
 
     def setupReplicaService
+    def setupTeamForgeService
     def authenticateService
     def securityService
     
@@ -242,7 +245,6 @@ class SetupReplicaController {
                     ctfUsername: getCtfConnectionCommand().ctfUsername,
                     svnReplicaCheckout: "svn co ${server.svnURL()}${repoName}" +
                         " ${repoName} --username=${userName}"]
-
         } catch (Exception e) {
             log.error("Unable to register replica: " + (e.getMessage() ?: 
                 e.getCause().getMessage()), e)
@@ -265,7 +267,15 @@ class SetupReplicaController {
         def ctfServer = CtfServer.getServer()
         command.ctfUsername = ctfServer.ctfUsername
         command.ctfURL = ctfServer.baseUrl
-        [cmd: command]
+        command.serverKey = ctfServer.internalApiKey
+        def server = Server.getServer()
+        boolean isReplica = (server.mode == ServerMode.REPLICA)
+        if (!setupTeamForgeService.confirmApiSecurityKey()) {
+            command.errors.rejectValue('serverKey',
+                'setupReplica.action.updateCredentials.invalidApiKey')
+        }
+
+        [cmd: command, isReplica: isReplica]
     }
 
     /**
@@ -273,14 +283,20 @@ class SetupReplicaController {
      */
     def updateCredentials = { CtfConnectionCommand input ->
 
+        def server = Server.getServer()
+        boolean isReplica = (server.mode == ServerMode.REPLICA)
         if (!input.hasErrors()) {
 
             try {
                 // copy input params to the conversion bean
                 def bean = getConversionBean(input)
                 // persist the connection
-                setupReplicaService.updateCtfConnection(bean.ctfConn)
-
+                if (isReplica) {
+                    setupReplicaService.updateCtfConnection(bean.ctfConn)
+                } else {
+                    setupTeamForgeService.updateCtfConnection(bean.ctfConn)
+                }
+                
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
                 BeanUtils.copyProperties(input, cmd)
@@ -304,10 +320,15 @@ class SetupReplicaController {
                 input.errors.rejectValue('ctfUsername', 'ctfRemoteClientService.auth.error',
                         [input.ctfUsername] as Object[], 'bad credentials')
             }
+            catch (InvalidSecurityKeyException e) {
+                input.errors.rejectValue('serverKey', 
+                        'setupReplica.action.updateCredentials.invalidApiKey')
+            }
         }
 
         // return to input view with success or errors
-        render([view: "editCredentials", model: [cmd: input]])
+        render([view: "editCredentials", 
+                model: [cmd: input, isReplica: isReplica]])
     }
 
     private List fetchIntegrationServers() throws RemoteMasterException {
@@ -364,6 +385,7 @@ class SetupReplicaController {
         b.ctfConn.ctfURL = cmd.ctfURL
         b.ctfConn.ctfUsername = cmd.ctfUsername
         b.ctfConn.ctfPassword = cmd.ctfPassword
+        b.ctfConn.serverKey = cmd.serverKey
         return b
     }
 
@@ -388,11 +410,13 @@ class CtfConnectionCommand {
     String ctfURL
     String ctfUsername
     String ctfPassword
+    String serverKey
     
     static constraints = {
         ctfURL(blank: false)
         ctfUsername(blank: false)
         ctfPassword(blank: false)
+        serverKey(blank: true)
     }
 }
 
