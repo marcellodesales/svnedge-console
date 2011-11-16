@@ -1067,7 +1067,8 @@ ${extraconf}
                 networkConfig = [:]
             }
             contents = contents.replace("\${proxy.hostname}", networkConfig.httpProxyHost ?: "")
-            contents = contents.replace("\${proxy.port}", networkConfig.httpProxyPort ?: "")
+            contents = contents.replace("\${proxy.port}", 
+                    String.valueOf(networkConfig.httpProxyPort) ?: "")
             contents = contents.replace("\${proxy.username}", networkConfig.httpProxyUsername ?: "")
             contents = contents.replace("\${proxy.password}", networkConfig.httpProxyPassword ? 
                 securityService.decrypt(networkConfig.httpProxyPassword) : "")
