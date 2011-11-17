@@ -17,12 +17,8 @@
  */
 package com.collabnet.svnedge.console
 
-import java.net.NetworkInterface
-import java.net.InetAddress
-import java.net.Inet4Address
-import java.net.Inet6Address
-import java.util.Collections
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.NetworkConfiguration
 
 /**
  * The networking service is responsible for the network layer of the app. It
@@ -35,6 +31,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
     boolean transactional = false
 
     def operatingSystemService
+    def securityService
 
     /**
      * The default network interface is one that is not the loopback interface
@@ -72,6 +69,22 @@ public class NetworkingService extends AbstractSvnEdgeService {
         if (server && server.netInterface) {
             setSelectedInterface(server.netInterface)
         }
+          
+        // set the proxy configuration for the VM if needed.
+        // first use persistent setting from console
+        // and fallback to environment. If there is no 
+        // console config, but we do have an environment var, 
+        // we will parse that into the db for use 
+        // in the UI.
+        NetworkConfiguration nc = getNetworkConfiguration()
+        String envHttpProxy = getHttpProxyFromEnvironment()
+       
+        if (nc) {
+            setHttpProxy(nc.proxyUrl)
+        }
+        else if (envHttpProxy) {
+            setHttpProxy(envHttpProxy)
+        }
     }
 
     String getHostname() {
@@ -84,14 +97,134 @@ public class NetworkingService extends AbstractSvnEdgeService {
         }
         return this.hostname
     }
- 
+
+    /**
+     * returns the http proxy configuration for the VM using first the internal NetworkConfiguration,
+     * then the environment var
+     * @return
+     */
     String getHttpProxy() {
-        if (!httpProxy) {
-            httpProxy = System.getenv("http_proxy") ?: 
-                System.getenv("HTTP_PROXY")
-        }
-        return httpProxy
+        return getNetworkConfiguration()?.proxyUrl ?: getHttpProxyFromEnvironment()
     }
+    
+    String getHttpProxyFromEnvironment() {
+        return httpProxy = System.getenv("http_proxy") ?: System.getenv("HTTP_PROXY")
+    }
+
+    /**
+     * Sets the proxy configuration for the VM, with persistence.
+     * @param proxyUrl
+     * @return
+     */
+    void setHttpProxy(String proxyUrl) {
+        // clear proxy settings with empty or zero-len string
+        if (!proxyUrl) {
+            removeNetworkConfiguration()
+        }
+        else {
+            // else save the proxy url to our db representation
+            def netCfg = getNetworkConfiguration() ?: new NetworkConfiguration()
+            if (netCfg.proxyUrl != proxyUrl) {
+                netCfg.proxyUrl = proxyUrl
+                saveNetworkConfiguration(netCfg)
+            }
+        }
+        // set the vm properties
+        setHttpProxySystemProps()
+    }
+
+    /**
+     * using the NetworkConfiguration, set the java vm props
+     */
+    void setHttpProxySystemProps() {
+        def netCfg = getNetworkConfiguration()
+        if (!netCfg) {
+            ["http.proxyHost", "http.proxyPort", "http.proxyUser", "http.proxyPassword"].each {
+                System.clearProperty(it)
+            }
+        }
+        else {
+            System.setProperty("http.proxyHost", netCfg.httpProxyHost)
+            System.setProperty("http.proxyPort", "${netCfg.httpProxyPort}")
+            if (netCfg.httpProxyUsername) {
+                System.setProperty("http.proxyUser", netCfg.httpProxyUsername)
+                System.setProperty("http.proxyPassword", netCfg.httpProxyPassword)
+            }
+        }
+    }
+
+    /**
+     * Obtain the NetworkConfiguration instance, with proxy password decrypted
+     * @return pseudo singleton instance of NetworkConfiguration or null
+     */
+    def getNetworkConfiguration() {
+        def networkConfigs = NetworkConfiguration.list()
+        if (networkConfigs) {
+            def config = networkConfigs.last()
+            if (config.httpProxyPassword) {
+                try {
+                    // if encrypted this will succeed
+                    config.httpProxyPassword = securityService.decrypt(config.httpProxyPassword)
+                    config.discard()
+                }
+                catch (Exception e) {
+                    // on exception, assume that the password is not encrypted
+                    log.warn("NetworkConfiguration proxy password is stored in clear text")
+                }
+            }
+            return config
+        }
+        else {
+            return null
+        }
+    }
+
+    /**
+     * save the NetworkConfiguration, with proxy password encrypted
+     * @param config
+     * @return boolean indicating success
+     */
+    def saveNetworkConfiguration(NetworkConfiguration config) {
+        // encrypt the password if needed
+        if (config.httpProxyPassword) {
+            try {
+                // if already encrypted this will succeed so no additional
+                // encryption required
+                securityService.decrypt(config.httpProxyPassword)
+            }
+            catch (Exception e) {
+                // on exception, assume it's not encrypted and encrypt
+                config.httpProxyPassword = securityService.encrypt(config.httpProxyPassword)
+            }
+        }
+        // delete any stray rows
+        def toDelete = NetworkConfiguration.list()
+        if (toDelete) {
+            toDelete.findAll { it.id != config.id}*.delete(flush: true)
+        }
+        
+        // save this instance 
+        config = config.merge()
+        def saved = config.save(flush: true)
+        
+        // set the java props
+        if (saved) {
+            setHttpProxySystemProps()
+        }
+        // indicate persistence success
+        return saved
+    }
+
+    /**
+     * delete the proxy configuration 
+     * @return
+     */
+    def removeNetworkConfiguration() {
+        if (getNetworkConfiguration()) {
+            getNetworkConfiguration().delete(flush: true)
+        }
+    }
+        
        
     /**
      * @return the IPv4 (preferred, IPv6 if necessary) version assigned to the default 

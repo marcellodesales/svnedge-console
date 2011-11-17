@@ -20,7 +20,9 @@
 package com.collabnet.svnedge.domain
 
 /**
- * This class stores extra network configuration items
+ * This class stores extra network configuration items, in particular the proxy settings.
+ * Use NetworkingService.(get|save|remove)NetworkConfiguration() to handle persistence so 
+ * the proxy auth password will be transparently encrypted/decrypted
  */
 public class NetworkConfiguration {
 
@@ -30,18 +32,43 @@ public class NetworkConfiguration {
     String httpProxyPassword
     
     /**
-     * factory to obtain singleton row
-     * @return pseudo singleton instance or null
+     * convenience method to create proxy url from the persistent pieces
+     * @return the complete proxy server url, or null if no host element is defined
      */
-    static NetworkConfiguration getCurrentConfig() {
-        def networkConfigs = NetworkConfiguration.list()
-        if (networkConfigs) {
-            return networkConfigs.last()
+    String getProxyUrl() {
+        if (httpProxyHost) {
+            def hostPort = "${httpProxyHost}:${httpProxyPort}"
+            if (httpProxyUsername) {
+                return "http://${httpProxyUsername}:${httpProxyPassword}@${hostPort}"
+            }
+            else {
+                return "http://${hostPort}"
+            }
         }
         else {
             return null
         }
     }
+
+    /**
+     * convenience method to set the constituent fields from a single url
+     * @param url
+     */
+    void setProxyUrl(String url) {
+        URI uri =  new URI(url)
+        httpProxyHost = uri.host
+        httpProxyPort = uri.port > 0 ? uri.port : 80
+        if (uri.userInfo) {
+            def userInfoParts = uri.userInfo.split(":")
+            httpProxyUsername = userInfoParts[0]
+            httpProxyPassword = userInfoParts[1]
+        }
+        else {
+            httpProxyUsername = null
+            httpProxyPassword = null
+        }
+    }
+    
     
      static constraints = {
         httpProxyHost(nullable: false, blank: false)
@@ -49,6 +76,8 @@ public class NetworkConfiguration {
         httpProxyUsername(nullable: true, blank: true)
         httpProxyPassword(nullable: true, blank: true)
      }
+
+     static transients = [ "proxyUrl" ]
 
 }
 

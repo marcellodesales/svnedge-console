@@ -128,31 +128,23 @@ class ServerController {
     }
     
     def editProxy = {
-       def networkConfig = NetworkConfiguration.getCurrentConfig()
-        // decrypt password from db so that the password field can show the correct number of dots
-        // (the gsp will generate a new random string of this length to write in the field)
-        if (networkConfig?.httpProxyPassword) {
-            networkConfig.httpProxyPassword = securityService.decrypt(networkConfig.httpProxyPassword)
-            networkConfig.discard()
-        }     
+       def networkConfig = networkingService.getNetworkConfiguration()
        return [networkConfig: networkConfig]
     }
     
     def updateProxy = {
         // find or create NetworkConfiguration instance
-        def networkConfig = NetworkConfiguration.getCurrentConfig() ?: new NetworkConfiguration()
+        def networkConfig = networkingService.getNetworkConfiguration() ?: new NetworkConfiguration()
         // bind data, excluding password         
         bindData(networkConfig, params, ['httpProxyPassword'])
         // if a new password has been input, copy to the entity 
         if (params['httpProxyPassword_changed'] == 'true') {
-            networkConfig.httpProxyPassword = securityService.encrypt(params['httpProxyPassword'])
+            networkConfig.httpProxyPassword = params['httpProxyPassword']
         }     
         networkConfig.validate()
-        if (!networkConfig.hasErrors() && networkConfig.save()) {
+        if (!networkConfig.hasErrors() && networkingService.saveNetworkConfiguration(networkConfig)) {
             // TODO this service method should write the relevant configs
             serverConfService.writeConfigFiles()
-            // TODO set java vm proxy params here
-            // TODO set java vm proxy params from NetworkConfiguration at bootstrap
             flash.message = message(code:"server.action.updateProxy.success")
             redirect(action: editProxy)
         }
@@ -164,12 +156,7 @@ class ServerController {
     }
     
     def removeProxy = {
-        def networkConfig = NetworkConfiguration.getCurrentConfig() 
-        if (networkConfig) {
-            networkConfig.delete()
-        }
-        // TODO set java vm proxy params here
-        // TODO set java vm proxy params from NetworkConfiguration at bootstrap
+        networkingService.removeNetworkConfiguration() 
         // TODO this service method should write the relevant configs
         serverConfService.writeConfigFiles()
         flash.message = message(code:"server.action.updateProxy.removed")

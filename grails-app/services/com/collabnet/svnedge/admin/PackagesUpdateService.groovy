@@ -62,6 +62,11 @@ public final class PackagesUpdateService implements InitializingBean {
     def jobsAdminService
 
     /**
+     * the networking service
+     */
+    def networkingService
+
+    /**
      * Non-transactional service 
      */
     boolean transactional = false
@@ -253,8 +258,7 @@ public final class PackagesUpdateService implements InitializingBean {
     def setProxyFromSystemEnvironment() throws UnknownHostException, 
             IOException {
 
-        String proxyUrl = System.getenv("http_proxy") ?: 
-                System.getenv("HTTP_PROXY")
+        String proxyUrl = networkingService.httpProxy
         log.debug("Loading any proxy configuration... " + proxyUrl ?: "None")
         if (proxyUrl && proxyUrl.trim().length() > 0) {
             try {
