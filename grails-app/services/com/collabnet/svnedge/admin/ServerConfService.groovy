@@ -990,7 +990,7 @@ ${extraconf}
 
     private def writeTeamforgeConf(server, teamforgePropsTemplate) {
         CtfServer ctfServer = CtfServer.getServer()
-        NetworkConfiguration networkConfig = NetworkConfiguration.getCurrentConfig()
+        NetworkConfiguration networkConfig = networkingService.getNetworkConfiguration()
         String s = getTeamforgeConf(
             teamforgePropsTemplate.text, ctfServer, server, networkConfig)
         if (ctfServer && server.managedByCtf()) {
