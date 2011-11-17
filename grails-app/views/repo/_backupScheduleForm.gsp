@@ -33,8 +33,10 @@
               <g:set var="isHotcopy" value="${params.type == 'hotcopy' || dump.hotcopy}"/>
               <g:set var="isNone" value="${params.type == 'none'}"/>
               <select id="type" name="type" class="scheduleElement">
-                <option value="cloud" <g:if test="${isCloud}">selected="selected"</g:if>><g:message
-                        code="repository.page.bkupSchedule.type.cloud"/></option>
+                <g:if test="${cloudEnabled}">
+                  <option value="cloud" <g:if test="${isCloud}">selected="selected"</g:if>><g:message
+                          code="repository.page.bkupSchedule.type.cloud"/></option>
+                </g:if>
                 <option value="dump" <g:if
                         test="${!isCloud && !isDumpDelta && !isHotcopy && !isNone}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.fullDump"/></option>

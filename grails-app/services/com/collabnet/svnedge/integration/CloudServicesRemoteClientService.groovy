@@ -156,7 +156,11 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 return false
             }
 
-            def cloudConfig = new CloudServicesConfiguration()
+            def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+            if (!cloudConfig) {
+                cloudConfig = new CloudServicesConfiguration()
+                cloudConfig.enabled = true
+            }
             cloudConfig.username = cmd.username
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
@@ -695,7 +699,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      */
     private Map createFullCredentialsMap() {
         CloudServicesConfiguration csConf = CloudServicesConfiguration.getCurrentConfig()
-        if (!csConf) {
+        if (!csConf || !csConf.domain) {
             throw IllegalStateException("Credentials are unavailable")
         }
         String password = securityService.decrypt(csConf.password)

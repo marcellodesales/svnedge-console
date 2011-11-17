@@ -31,7 +31,8 @@ class SetupCloudServicesController {
     def messageSource
 
     def index = {
-        if (CloudServicesConfiguration.getCurrentConfig()) {
+        def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+        if (cloudConfig && cloudConfig.domain) {
             redirect(action: 'credentials')
         }
     }
@@ -111,7 +112,7 @@ class SetupCloudServicesController {
     def credentials = {
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         def cmd = new CloudServicesAccountCommand()
-        if (cloudConfig) {
+        if (cloudConfig && cloudConfig.domain) {
             cmd.password = securityService.decrypt(cloudConfig.password)
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
@@ -122,7 +123,7 @@ class SetupCloudServicesController {
     def updateCredentials = { CloudServicesAccountCommand cmd ->
         // with existing config, only password can be updated
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
-        def existingCredentials = (cloudConfig != null)
+        def existingCredentials = (cloudConfig && cloudConfig.domain)
         if (cloudConfig) {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
@@ -222,6 +223,40 @@ class SetupCloudServicesController {
         forward(action: 'selectUsers')
     }
 
+    def enable = {
+        flash.message = message(code: 'setupCloudServices.action.enable.success')
+        def cloudConfig = CloudServicesConfiguration.currentConfig
+        if (cloudConfig) {
+            if (cloudConfig.enabled) {
+                flash.message = message(
+                        code: 'setupCloudServices.action.enable.formerly')
+            }
+        } else {
+            cloudConfig = new CloudServicesConfiguration(
+                    username: '', password: '', domain: '')
+        }
+        cloudConfig.enabled = true
+        cloudConfig.save()
+        redirect(action: 'index')
+    }
+    
+    def disable = {
+        def cloudConfig = CloudServicesConfiguration.currentConfig
+        if (cloudConfig) {
+            cloudConfig.enabled = false
+            cloudConfig.domain = ''
+            cloudConfig.username = ''
+            cloudConfig.password = ''
+            cloudConfig.save()
+            flash.message = 
+                    message(code: 'setupCloudServices.action.disable.success')
+        } else {
+            flash.message =
+                message(code: 'setupCloudServices.action.disable.formerly')
+
+        }
+        redirect(controller: 'server', action: 'edit')
+    }
 }
 
 class CloudServicesAccountCommand {

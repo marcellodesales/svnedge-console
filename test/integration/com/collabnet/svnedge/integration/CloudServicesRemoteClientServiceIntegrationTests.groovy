@@ -53,7 +53,8 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
                 Properties up = new Properties()
                 f.withReader { up.load(it) }
                 csConf = new CloudServicesConfiguration(username: up['username'], 
-                password: up['password'], domain: up['domain'])
+                        password: up['password'], domain: up['domain'], 
+                        enabled: true)
                 csConf.save()
                 skipTests = false
             } else {

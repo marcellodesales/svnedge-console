@@ -20,6 +20,7 @@ package com.collabnet.svnedge.controller
 
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.codehaus.groovy.grails.plugins.springsecurity.AuthorizeTools
+import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
 
 /**
  * OpenCollabNet view controller
@@ -28,9 +29,12 @@ import org.codehaus.groovy.grails.plugins.springsecurity.AuthorizeTools
 class OcnController {
 
     def index = {
+        def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+        boolean cloudEnabled = cloudConfig?.enabled
         try {
-            def page = AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
-                'svnedge-extensions.html' : 'svnedge-user.html'
+            def page = cloudEnabled ?
+                    AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
+                    'svnedge-extensions.html' : 'svnedge-user.html' : 'csvn.html'
             def ocnContent = ('http://tab.open.collab.net/nonav/' + page)
                     .toURL().text
             [ocnContent: ocnContent]
@@ -41,7 +45,7 @@ class OcnController {
             //the browser instead (might be configured with proxy, if that's
             //the case)
             log.debug "Unable to contact url, using proxy", e
-            render(view:"index-proxy")
+            render(view: "index-proxy", model: ['cloudEnabled': cloudEnabled])
         }
     }
 }

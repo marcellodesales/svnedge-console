@@ -7,12 +7,17 @@
   <body>
 
     <iframe id="ocnContent" name="ocnContent" frameborder="0" width="100%" height="780"
+      <g:if test="${cloudEnabled}">
         <g:ifAnyGranted role='ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS'>      
             src="http://tab.open.collab.net/nonav/svnedge-extensions.html">
         </g:ifAnyGranted>
         <g:ifNotGranted role='ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS'>      
             src="http://tab.open.collab.net/nonav/svnedge-user.html">
         </g:ifNotGranted>
+      </g:if>
+      <g:else>
+            src="http://tab.open.collab.net/nonav/csvn.html">
+      </g:else>
         <p><g:message code="ocn.page.proxy.iframe.error" /></p>
     </iframe>
   </body>

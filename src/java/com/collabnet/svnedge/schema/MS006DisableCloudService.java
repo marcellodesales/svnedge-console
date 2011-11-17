@@ -11,35 +11,27 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- *
+ *  
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.collabnet.svnedge.domain.integration
+package com.collabnet.svnedge.schema;
 
-/**
- * This class stores the Cloud Services configuration.
- */
-public class CloudServicesConfiguration {
+import org.apache.log4j.Logger;
 
-    String username
-    String password
-    String domain
-    boolean enabled
+import java.sql.SQLException;
 
-    /**
-     * factory to obtain singleton row
-     * @return pseudo singleton instance or null
-     */
-    static CloudServicesConfiguration getCurrentConfig() {
-        def cloudSvcRows = CloudServicesConfiguration.list()
-        if (cloudSvcRows) {
-            return cloudSvcRows.last()
-        }
-        else {
-            return null
-        }
+public class MS006DisableCloudService implements MigrationScript {
+    private Logger log = Logger.getLogger(getClass());
+
+    public boolean migrate(SqlUtil db) throws SQLException {
+        
+        db.executeUpdateSql("alter table CLOUD_SERVICES_CONFIGURATION " +
+                "add column ENABLED BOOLEAN default false NOT NULL");
+        return false;
     }
-
+    
+    public int[] getVersion() {
+        return new int[] {2,2,4};
+    }
 }
-

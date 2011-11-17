@@ -407,8 +407,9 @@ class RepoController {
             }
             model["dump"] = cmd
         }
-        model['cloudRegistrationRequired'] =
-            CloudServicesConfiguration.getCurrentConfig() == null
+        def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+        model['cloudRegistrationRequired'] = !cloudConfig || !cloudConfig.domain
+        model['cloudEnabled'] = cloudConfig?.enabled
         return model
     }
 
@@ -420,7 +421,8 @@ class RepoController {
         def type = params.type
         try {
             def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
-            def projects = (type == "cloud" && cloudConfig) ?
+            def projects = (type == "cloud" && 
+                            cloudConfig && cloudConfig.domain) ?
                 cloudServicesRemoteClientService.listProjects() : null
             repoIdList.each {
                 Repository repo = Repository.get(it)
@@ -577,7 +579,9 @@ class RepoController {
         // add to model
         model["dump"] = cmd
         model["repoBackupJobList"] = repoBackupJobList
-        model['cloudRegistrationRequired'] = CloudServicesConfiguration.getCurrentConfig() == null
+        def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
+        model['cloudRegistrationRequired'] =  !cloudConfig || !cloudConfig.domain
+        model['cloudEnabled'] = cloudConfig?.enabled
         return model
     }
 
