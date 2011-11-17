@@ -133,6 +133,11 @@ class ServerController {
     }
     
     def updateProxy = {
+        // remove the network config when the fields are completely empty
+        if (!params.httpProxyHost && !params.httpProxyPort &&
+                !params.httpProxyUsername && !params.httpProxyPassword) {
+            forward(action: "removeProxy")
+        }        
         // find or create NetworkConfiguration instance
         def networkConfig = networkingService.getNetworkConfiguration() ?: new NetworkConfiguration()
         // bind data, excluding password         
