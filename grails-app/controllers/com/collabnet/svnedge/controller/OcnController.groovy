@@ -21,12 +21,19 @@ package com.collabnet.svnedge.controller
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.codehaus.groovy.grails.plugins.springsecurity.AuthorizeTools
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
+import groovyx.net.http.HTTPBuilder
+import static groovyx.net.http.Method.GET
+import static groovyx.net.http.ContentType.TEXT
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
 
 /**
  * OpenCollabNet view controller
  */
 @Secured(['ROLE_USER'])
 class OcnController {
+
+    def networkingService
 
     def index = {
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
@@ -35,17 +42,49 @@ class OcnController {
             def page = cloudEnabled ?
                     AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
                     'svnedge-extensions.html' : 'svnedge-user.html' : 'csvn.html'
-            def ocnContent = ('http://tab.open.collab.net/nonav/' + page)
-                    .toURL().text
+            def ocnContent = getPageContent('http://tab.open.collab.net/nonav/' + page)
             [ocnContent: ocnContent]
 
         } catch (Exception e) {
-            //No connection to the host... Probably because the user is behind
+            //No connection to the host... Possibly because the user is behind
             //a proxy or there's no Internet connectivity. Use the iframe on
             //the browser instead (might be configured with proxy, if that's
             //the case)
             log.debug "Unable to contact url, using proxy", e
             render(view: "index-proxy", model: ['cloudEnabled': cloudEnabled])
+        }
+    }
+
+    private getPageContent(String url) throws IOException {
+        def httpBuilder = new HTTPBuilder(url)
+
+         // if needed, add proxy and proxy auth support
+        def netCfg = networkingService.networkConfiguration
+        if (netCfg?.httpProxyHost) {
+            httpBuilder.setProxy(netCfg.httpProxyHost, netCfg.httpProxyPort, "http")
+            if (netCfg.httpProxyUsername) {
+                def httpClient = httpBuilder.getClient()
+                httpClient.getCredentialsProvider().setCredentials(
+                    new AuthScope(netCfg.httpProxyHost, netCfg.httpProxyPort),
+                    new UsernamePasswordCredentials(netCfg.httpProxyUsername, netCfg.httpProxyPassword)
+                )
+            }
+        }
+
+        httpBuilder.request(GET, TEXT) { req ->
+            headers.'User-Agent' = 'Mozilla/5.0'
+            req.getParams().setParameter("http.connection.timeout", new Integer(3000))
+            req.getParams().setParameter("http.socket.timeout", new Integer(3000))
+
+            response.success = { resp, reader ->
+                assert resp.status == 200
+                return reader.text
+            }
+
+            // called only for a 404 (not found) status code:
+            response.failure = { resp ->
+                throw new IOException("Could not fetch page")
+            }
         }
     }
 }

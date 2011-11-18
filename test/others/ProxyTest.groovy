@@ -69,21 +69,37 @@ def axisClient = {
         call.invoke([])
     }
     catch (Exception e) {
-        println "FAIL: ${e.message}"
+        if (e.message.contains("No such operation")) {
+            println "SUCCESS: received expected axis fault"
+        }
+        else {
+            println "FAIL: ${e.message}"
+        }
+
     }
 }
 
 def restClient = {
     println "Attempting use of proxy with auth via rest client..."
-    def t = new RESTClient("https://api01.codesion.com/1/")
-    t.setProxy "cu182.cloud.sp.collab.net", 80, "http"
-    def c = t.getClient()
-    c.getCredentialsProvider().setCredentials(
-            new AuthScope("cu182.cloud.sp.collab.net", 80),
-            new UsernamePasswordCredentials("proxyuser", "proxypass")
-    )
+    try {
+        def t = new RESTClient("https://api01.codesion.com/1/")
+        t.setProxy "cu182.cloud.sp.collab.net", 80, "http"
+        def c = t.getClient()
+        c.getCredentialsProvider().setCredentials(
+                new AuthScope("cu182.cloud.sp.collab.net", 80),
+                new UsernamePasswordCredentials("proxyuser", "proxypass")
+        )
+        t.get(path: "/")
+    }
+    catch (Exception e) {
+        if (e.message.contains("peer not authenticated")) {
+            println "SUCCESS: received expected SSL fault"
+        }
+        else {
+            println "FAIL: ${e.message}"
+        }
+    }
 
-    t.get(path: "/")
 
 
 //    BASE64Encoder encoder = new BASE64Encoder();

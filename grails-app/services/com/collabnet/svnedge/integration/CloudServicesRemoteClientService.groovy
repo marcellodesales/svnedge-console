@@ -32,6 +32,8 @@ import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 import com.collabnet.svnedge.controller.integration.CloudServicesAccountCommand
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
 
 /**
  * This class provides remote access to the Cloud  Services api
@@ -41,7 +43,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     def commandLineService
     def securityService
     def svnRepoService
-    
+    def networkingService
+
     private static final long CACHED_CLIENT_TIME_LIMIT = 300L
     private static final long CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT = 60L
     private long mLastAccessTimestamp = 0L
@@ -689,6 +692,18 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         def keyStore = SSLUtil.applicationKeyStore
         restClient.client.connectionManager.schemeRegistry.register(
                 new Scheme("https", new SSLSocketFactory(keyStore), 443))
+        // if needed, add proxy and proxy auth support
+        def netCfg = networkingService.networkConfiguration
+        if (netCfg?.httpProxyHost) {
+            restClient.setProxy(netCfg.httpProxyHost, netCfg.httpProxyPort, "http")
+            if (netCfg.httpProxyUsername) {
+                def httpClient = restClient.getClient()
+                httpClient.getCredentialsProvider().setCredentials(
+                    new AuthScope(netCfg.httpProxyHost, netCfg.httpProxyPort),
+                    new UsernamePasswordCredentials(netCfg.httpProxyUsername, netCfg.httpProxyPassword)
+                )
+            }
+        }
         return restClient
     }
 
