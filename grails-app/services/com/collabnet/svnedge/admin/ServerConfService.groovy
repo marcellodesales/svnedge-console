@@ -634,12 +634,18 @@ RewriteEngine on
 
         String contextPath = "/svn"
         if (server.mode == ServerMode.REPLICA) {
-            def replicaConfig = ReplicaConfiguration.getCurrentConfig()            
-            if (replicaConfig.svnMasterUrl) {
-                contextPath = replicaConfig.contextPath()
-            }
+            def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             if (server.useSsl) {
                 conf += "SSLProxyEngine on\n"
+            }
+            if (replicaConfig.svnMasterUrl) {
+                // proxy to the svn master might be needed
+                def netCfg = networkingService.getNetworkConfiguration()
+                if (netCfg?.httpProxyHost) {
+                    conf += "ProxyRemote ${replicaConfig.svnMasterUrl}"
+                    conf += " http://${netCfg.httpProxyHost}:${netCfg.httpProxyPort ?: 80}\n"
+                }
+                contextPath = replicaConfig.contextPath()
             }
             conf += "<Location " + contextPath + ">"
         } else {
@@ -827,11 +833,6 @@ LDAPVerifyServerCert Off
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
             conf += "   SVNMasterURI ${masterSVNURI}"
-            // proxy to the svn master might be needed
-            def netCfg = networkingService.getNetworkConfiguration()
-            if (netCfg?.httpProxyHost) {
-                conf += "   ProxyRemote ${masterSVNURI} http://${netCfg.httpProxyHost}:${netCfg.httpProxyPort ?: 80}"
-            }
         }
         conf += """
    AuthType Basic
