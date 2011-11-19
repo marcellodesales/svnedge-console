@@ -827,6 +827,11 @@ LDAPVerifyServerCert Off
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
             conf += "   SVNMasterURI ${masterSVNURI}"
+            // proxy to the svn master might be needed
+            def netCfg = networkingService.getNetworkConfiguration()
+            if (netCfg?.httpProxyHost) {
+                conf += "   ProxyRemote ${masterSVNURI} http://${netCfg.httpProxyHost}:${netCfg.httpProxyPort ?: 80}"
+            }
         }
         conf += """
    AuthType Basic
