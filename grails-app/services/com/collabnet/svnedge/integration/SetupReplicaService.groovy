@@ -367,7 +367,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
             def isIssuerNotTrusted = checkIssuer(svnUrl, username, password)
 
             if (isIssuerNotTrusted) {
-                def certDetails = getCertDetails(svnUrl, username, password)
+                def certDetails = svnRepoService
+                        .getCertDetails(svnUrl, username, password)
                 return [hostname: certDetails.hostname,
                         validity: certDetails.validity,
                         issuer: certDetails.issuer,
@@ -398,112 +399,22 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         return commandOutput[2].find("issuer is not trusted")
     }
 
-    def getCertDetails(String svnUrl, String username, String password) {
-
-        def command = [ConfigUtil.svnPath(), "ls", svnUrl,
-                       "--username", username, "--password", password,
-                       "--config-dir", ConfigUtil.svnConfigDirPath()]
-        String[] commandOutput =
-            commandLineService.execute(command.toArray(new String[0]),
-                                       [LANG:"en_US.utf8"], null, true)
-        String errorMessage = commandOutput[2]
-
-        if (errorMessage) {
-            def certificateDetails = parseCertificate(errorMessage)
-            return [hostname: certificateDetails.hostname,
-                    validity: certificateDetails.validity,
-                    issuer: certificateDetails.issuer,
-                    fingerprint: certificateDetails.fingerprint]
-        } else {
-            return [hostname: null, validity: null, issuer: null,
-                    fingerprint: null]
-        }
-    }
-
-    /**
-     * This function parses the raw certificate and returns the certificate
-     * credentials.
-     */
-    private def parseCertificate(String rawCertificate) {
-        if (rawCertificate.find("Certificate information:")) {
-            def certLines = rawCertificate.split("\n")
-            String hostname
-            String validity
-            String issuer
-            String fingerPrint
-            for (line in certLines) {
-                if(line.find("- Hostname:")) {
-                    def hostnameLine = line.split(" - Hostname: ")
-                    hostname = hostnameLine[1]
-                }
-                else if(line.find("- Valid:")) {
-                    def validLine = line.split(" - Valid: ")
-                    validity = validLine[1]
-                }
-                else if(line.find("- Issuer:")) {
-                    def issuerLine = line.split(" - Issuer: ")
-                    issuer = issuerLine[1]
-                }
-                else if(line.find("- Fingerprint:")) {
-                    def fingerPrintLine = line.split(" - Fingerprint: ")
-                    fingerPrint = fingerPrintLine[1]
-                }
-            }
-            return [hostname: hostname, validity: validity, issuer: issuer,
-                    fingerprint: fingerPrint]
-        }
-        else {
-            return [hostname: null, validity: null, issuer: null,
-                    fingerprint: null]
-        }
-    }
-
     def saveCertificate(String viewedFingerprint) {
+        if (!viewedFingerprint) {
+            throw new IllegalArgumentException("viewedFingerprint cannot be null")
+        }
+
         def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
         if (replicaConfiguration) {
             def ctfServer = CtfServer.getServer()
             def username = ctfServer.ctfUsername
             def password = securityService.decrypt(ctfServer.ctfPassword)
             def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
-            if (acceptSslCertificate(svnUrl, username, password, viewedFingerprint)) {
+            if (svnRepoService.acceptSslCertificate(
+                    svnUrl, username, password, viewedFingerprint)) {
                 replicaConfiguration.acceptedCertFingerPrint = viewedFingerprint
                 replicaConfiguration.save()
             }            
         }
-    }
-    
-    private boolean acceptSslCertificate(svnUrl, username, password, viewedFingerprint) {
-        if (!viewedFingerprint) {
-            throw new IllegalArgumentException("viewedFingerprint cannot be null")
-        }
-
-        boolean isAccepted = false
-        def command = [ConfigUtil.svnPath(), "--config-dir",
-            ConfigUtil.svnConfigDirPath(), "ls", svnUrl,
-            "--username", username, "--password", password]
-        Process p = commandLineService.startProcess(command, [LANG:"en_US.utf8"], true)
-        StringBuffer outBuffer = new StringBuffer(512)
-        StringBuffer errorBuffer = new StringBuffer(512)
-        p.consumeProcessOutput(outBuffer, errorBuffer)
-
-        def currentFingerprint = null
-        // give several minutes for response
-        def limit = 300 * 1000
-        def waitTime = 400
-        while (viewedFingerprint != currentFingerprint && waitTime < limit) {
-            Thread.sleep(waitTime)
-            def cert = parseCertificate(errorBuffer.toString())
-            currentFingerprint = cert.fingerprint
-            waitTime *= 2
-        }
-
-        if (viewedFingerprint == currentFingerprint) {
-            def lineEnd = System.getProperty("line.separator")
-            def acceptPermanently = "p" + lineEnd
-            p.withWriter { it << acceptPermanently }
-            isAccepted = true
-            p.waitFor()
-        }
-        return isAccepted
     }
 }

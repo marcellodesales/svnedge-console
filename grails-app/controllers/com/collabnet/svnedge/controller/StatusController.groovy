@@ -86,27 +86,6 @@ class StatusController {
      */
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
     def acceptCertificate = {
-        def server = Server.getServer()
-        def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
-        params.each{ key, value -> 
-            if (params[key] instanceof String) {
-                params[key] = ((String)(params[key])).trim()
-            }
-        }
-
-        setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
-        redirect(action:'index')
-     }
-
-    @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
-    def update = {
-        def server = Server.getServer()
-        def replicaDetails = setupReplicaService.getCertDetailsOfMaster()
-        params.each{ key, value -> 
-            if (params[key] instanceof String) {
-                params[key] = ((String)(params[key])).trim()
-            }
-        }
         setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
         redirect(action:'index')
      }
