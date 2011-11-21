@@ -56,8 +56,10 @@ class RepoTemplateController {
         }
     }
 
+    // dump files should not be text/plain, but we have to accommodate IE8
     private static final List VALID_TEMPLATE_TYPES = 
-            ['application/octet-stream', 'application/zip']
+            ['application/octet-stream', 'application/zip', 
+             'application/x-zip-compressed', 'text/plain']
 
     private File handleFileUpload(repoTemplateInstance) {
         def uploadedFile = request.getFile('templateUpload')
@@ -68,6 +70,8 @@ class RepoTemplateController {
         } else if (!VALID_TEMPLATE_TYPES.contains(uploadedFile.contentType)) {
             repoTemplateInstance.errors.rejectValue('location', 
                     'repoTemplate.action.save.invalid.type')
+            log.debug("Attempted to upload an invalid template type: " + 
+                    uploadedFile.contentType)
         
         } else {
             File templateDir = repoTemplateService.getUploadDirectory()
