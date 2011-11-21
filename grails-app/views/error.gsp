@@ -126,7 +126,7 @@
       <g:if test="${exception}">
         <input type="hidden" name="ExceptionMessage" value=""/>
         <strong>Exception Message:</strong>
-        ${exception.message} <br />
+        ${exception.message ?: 'null'} <br />
         <strong>Caused by:</strong>
         ${exception.cause?.message} <br />
         <strong>Class:</strong> ${exception.className} <br />

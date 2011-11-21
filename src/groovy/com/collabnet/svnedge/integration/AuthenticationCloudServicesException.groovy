@@ -28,4 +28,13 @@ class AuthenticationCloudServicesException extends CloudServicesException {
     public AuthenticationCloudServicesException() {
         super("cloud.services.authentication.failure.using.stored.credentials")
     }
+    
+    /**
+    * Creates a new exception with the given error message.
+    * @param key can be the messages key in the i18n messages.
+    */
+   public AuthenticationCloudServicesException(String key) {
+       super(key)
+   }
+
 }

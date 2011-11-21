@@ -568,7 +568,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     serviceExists = true
                     serviceId = serviceMap['serviceId']
                     if (serviceMap['ready']) {
-                        cloudSvnURI = serviceMap['access_url']
+                        cloudSvnURI = serviceMap['accessUrl']
                     }
                 }
             }
@@ -669,7 +669,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     log.debug("REST data " + data)                    
                     boolean isReady = data['service']['ready']
                     if (isReady) {
-                        return data['service']['access_url']
+                        return data['service']['accessUrl']
                     }
                 }
                 waitTime *= 2
@@ -715,7 +715,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     private Map createFullCredentialsMap() {
         CloudServicesConfiguration csConf = CloudServicesConfiguration.getCurrentConfig()
         if (!csConf || !csConf.domain) {
-            throw IllegalStateException("Credentials are unavailable")
+            throw new AuthenticationCloudServicesException(
+                    'cloud.services.authentication.failure.no.credentials')
         }
         String password = securityService.decrypt(csConf.password)
         return createFullCredentialsMap(csConf.username, password, csConf.domain)
