@@ -148,7 +148,6 @@ class ServerController {
         }     
         networkConfig.validate()
         if (!networkConfig.hasErrors() && networkingService.saveNetworkConfiguration(networkConfig)) {
-            // TODO this service method should write the relevant configs
             serverConfService.writeConfigFiles()
             flash.message = message(code:"server.action.updateProxy.success")
             redirect(action: editProxy)
@@ -162,7 +161,6 @@ class ServerController {
     
     def removeProxy = {
         networkingService.removeNetworkConfiguration() 
-        // TODO this service method should write the relevant configs
         serverConfService.writeConfigFiles()
         flash.message = message(code:"server.action.updateProxy.removed")
         redirect(action: editProxy)

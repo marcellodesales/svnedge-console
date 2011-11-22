@@ -34,7 +34,8 @@ import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import sun.misc.BASE64Encoder
 import com.collabnet.svnedge.util.SSLUtil
-import com.collabnet.svnedge.domain.NetworkConfiguration;
+import com.collabnet.svnedge.domain.NetworkConfiguration
+import org.ini4j.Ini
 
 class ServerConfService {
 
@@ -416,7 +417,8 @@ Content-Length: 107
         writeMainConf(server)
         writeLogConf()
         writeSvnViewvcConf(server)
-        File teamforgePropsTemplate = 
+        writeSvnClientConf()
+        File teamforgePropsTemplate =
             new File(confDirPath, "teamforge.properties.dist")
         if (teamforgePropsTemplate.exists()) {
             writeTeamforgeConf(server, teamforgePropsTemplate)
@@ -1090,6 +1092,54 @@ ${extraconf}
                 internalApiKey
         }
         contents
+    }
+
+    /**
+     * if needed, this method adds proxy configuration to the Svn "servers" configuration
+     * file in our client configuration
+     * @return
+     */
+    private def writeSvnClientConf() {
+        NetworkConfiguration nc = networkingService.getNetworkConfiguration()
+
+        // where no proxy is configured, or when server is not an approved replica,
+        // clean up may be needed
+        boolean noProxyNeeded = (nc?.httpProxyHost == null)
+
+        // svn client config dir
+        File svnConfigDir = new File(ConfigUtil.svnConfigDirPath())
+
+        // ensure that the config area has been created
+        if (!svnConfigDir.exists()) {
+            def command = [ConfigUtil.svnPath(),
+                       "--version", "--config-dir", ConfigUtil.svnConfigDirPath()]
+            String[] commandOutput =
+                commandLineService.execute(command.toArray(new String[0]), null, null, true)
+        }
+
+        File serversFile = new File(svnConfigDir, "servers")
+        String groupName = "global"
+
+        Ini ini = new Ini(serversFile)
+        if (noProxyNeeded) {
+            ini.remove(groupName, "http-proxy-host")
+            ini.remove(groupName, "http-proxy-port")
+            ini.remove(groupName, "http-proxy-username")
+            ini.remove(groupName, "http-proxy-password")
+        }
+        else {
+            ini.put(groupName, "http-proxy-host", nc.httpProxyHost)
+            ini.put(groupName, "http-proxy-port", nc.httpProxyPort)
+            if (nc.httpProxyUsername) {
+                ini.put(groupName, "http-proxy-username", nc.httpProxyUsername)
+                ini.put(groupName, "http-proxy-password", nc.httpProxyPassword)
+            }
+            else {
+                ini.remove(groupName, "http-proxy-username")
+                ini.remove(groupName, "http-proxy-password")
+            }
+        }
+        ini.store()
     }
 
     /**
