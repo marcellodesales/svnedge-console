@@ -196,13 +196,24 @@ class ServerController {
         }
         
         // copy form params to the entity, excluding ldapAuth password
-        bindData(server, params, ['ldapAuthBindPassword'])
+        bindData(server, params, ['ldapAuthBindPassword', 'ldapServerHost'])
 
         // if a new password has been input, copy to
         // the server entity
         if (params['ldapAuthBindPassword_changed'] == 'true') {
             server.ldapAuthBindPassword = params['ldapAuthBindPassword']
         }                                       
+
+        // ensure ldapServerHost is just ldapServerHost no extra stuff like 
+        //ldap:// or ldaps://
+        if (params['ldapServerHost']) {
+            int pos = params['ldapServerHost'].indexOf("://")
+            if (pos != -1) {
+                server.ldapServerHost = params['ldapServerHost'].substring(pos+3)
+            } else {
+                server.ldapServerHost = params['ldapServerHost']
+            }
+        }
 
         //In editAuthentication UI repoParentDir does not exist in Params.
         if (params.repoParentDir != null) {

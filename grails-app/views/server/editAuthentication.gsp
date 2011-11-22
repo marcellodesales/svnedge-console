@@ -164,13 +164,16 @@
         <td class="ItemDetailName">
           <label for="name"><g:message code="server.ldapServerHost.label" /></label>
         </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerHost','errors')}">
+        <td class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerHost','errors')}">
           <input size="30" type="text" id="ldapServerHost" name="ldapServerHost" value="${fieldValue(bean:server,field:'ldapServerHost')}"/>
           <g:hasErrors bean="${server}" field="ldapServerHost">
               <ul><g:eachError bean="${server}" field="ldapServerHost">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
           </g:hasErrors>
+        </td>
+        <td class="ItemDetailValue">
+          <i><strong><g:message code="server.page.editAuthentication.ldapServerHost.example" /></strong></i>
         </td>
       </tr>
       <tr>
