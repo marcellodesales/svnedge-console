@@ -84,7 +84,8 @@ class ApplicationFilters {
 
             before = {
 
-                boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
+                boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
+                boolean isManagedMode = (isIntegrationServer
                         || ServerMode.REPLICA == Server.getServer().mode)
 
                 if (!isManagedMode &&
@@ -99,7 +100,8 @@ class ApplicationFilters {
                 }
                 if (isManagedMode &&
                         (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
-                                ("server" == controllerName && "editAuthentication" == actionName))) {
+                         ("server" == controllerName && "editAuthentication" == actionName)) ||
+                        (isIntegrationServer && "job" == controllerName)) {
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.managed", null,
                             Locale.getDefault())
@@ -111,7 +113,8 @@ class ApplicationFilters {
             // after running the action, add "featureList" to the page model
             after = {model ->
 
-                boolean isManagedMode = (ServerMode.MANAGED == Server.getServer().mode
+                boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
+                boolean isManagedMode = (isIntegrationServer
                         || ServerMode.REPLICA == Server.getServer().mode)
 
                 // default list of features for all users
@@ -131,7 +134,10 @@ class ApplicationFilters {
 
                 // role-based additions
                 if (authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
-                    featureList << "job"
+                    if (!isIntegrationServer) {
+                        featureList << "job"
+                    }
+
                     if (lifecycleService.getServer().replica) {
                         featureList << "admin"
                     }
