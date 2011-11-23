@@ -39,6 +39,8 @@ import com.collabnet.ce.soap50.fault.UserLimitExceededFault;
 
 import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+import com.collabnet.svnedge.domain.NetworkConfiguration
+import com.collabnet.svnedge.util.SoapClient
 
 
 /**
@@ -46,17 +48,20 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
  */
 public class Soap50CtfRemoteStrategy extends CtfRemoteStrategy {
     private final String url
-    
-    public Soap50CtfRemoteStrategy(String url) {
+
+    public Soap50CtfRemoteStrategy(String url, NetworkConfiguration networkConfiguration) {
         this.url = url ?: CtfServer.getServer().baseUrl
+        this.networkConfiguration = networkConfiguration
     }
         
     public def makeCollabNetClient() {
-        return ClientSoapStubFactory.getSoapStub(ICollabNetSoap.class, url)
+        ClientSoapStubFactory.setConfig(SoapClient.getEngineConfiguration(this.networkConfiguration))
+        return ClientSoapStubFactory.getSoapStub(ICollabNetSoap.class, url, DEFAULT_TIMEOUT)
     }
 
     def makeScmAppClient() {
-        return ClientSoapStubFactory.getSoapStub(IScmAppSoap.class, url)
+        ClientSoapStubFactory.setConfig(SoapClient.getEngineConfiguration(this.networkConfiguration))
+        return ClientSoapStubFactory.getSoapStub(IScmAppSoap.class, url, DEFAULT_TIMEOUT)
     }
 
     def login(username, password, locale) 

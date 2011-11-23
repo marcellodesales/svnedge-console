@@ -29,6 +29,11 @@ import org.apache.axis.EngineConfiguration;
 import org.apache.axis.client.Call;
 import org.apache.axis.client.Service;
 import org.apache.axis.configuration.BasicClientConfig;
+import com.collabnet.svnedge.domain.NetworkConfiguration
+import org.apache.axis.configuration.SimpleProvider
+import org.apache.axis.SimpleTargetedChain
+import com.collabnet.svnedge.net.CommonsHTTPProxySender
+import org.apache.axis.transport.http.CommonsHTTPSender;
 
 /**
  * The <code>SoapClient</code> class provides helper methods for SOAP.
@@ -50,9 +55,10 @@ public class SoapClient {
      * Constructor with information on the remote SOAP service URL.
      * 
      * @param serviceUrl SOAP service URL.
+     * @param nc NetworkConfiguration to use for the connection
      * @throws MalformedURLException Thrown when the specified URL is malfored.
      */
-    public SoapClient(String serviceUrl) throws MalformedURLException {
+    public SoapClient(String serviceUrl, NetworkConfiguration nc) throws MalformedURLException {
         mServiceUrl = new URL(serviceUrl)
         int slash = serviceUrl.lastIndexOf("/")
         if (slash > 0 && slash < serviceUrl.length() - 2) {
@@ -61,7 +67,7 @@ public class SoapClient {
             throw new MalformedURLException(serviceUrl)
         }
 
-        final EngineConfiguration config = new BasicClientConfig()
+        final EngineConfiguration config = getEngineConfiguration(nc)
         mService = new Service(config)
     }
 
@@ -98,5 +104,34 @@ public class SoapClient {
         call.setTargetEndpointAddress(mServiceUrl)
         call.setOperationName(new QName(mServiceName, methodName))
         return call.invoke(params as Object[])
+    }
+
+    /**
+     * Utility method to construct an apache axis EngineConfiguration
+     * supporting the proxy settings of the NetworkConfiguration
+     * @param nc the NetworkConfiguration
+     * @return axis EngineConfiguration
+     */
+    public static def org.apache.axis.EngineConfiguration getEngineConfiguration(NetworkConfiguration nc) {
+        SimpleProvider config = new SimpleProvider();
+        if (nc?.httpProxyHost) {
+            config.deployTransport("http", new SimpleTargetedChain(new CommonsHTTPProxySender(
+                    nc.httpProxyHost,
+                    nc.httpProxyPort,
+                    nc.httpProxyUsername,
+                    nc.httpProxyPassword
+            )));
+            config.deployTransport("https", new SimpleTargetedChain(new CommonsHTTPProxySender(
+                    nc.httpProxyHost,
+                    nc.httpProxyPort,
+                    nc.httpProxyUsername,
+                    nc.httpProxyPassword
+            )));
+        }
+        else {
+            config.deployTransport("http", new SimpleTargetedChain(new CommonsHTTPSender()));
+            config.deployTransport("https", new SimpleTargetedChain(new CommonsHTTPSender()));
+        }
+		return config;
     }
 }

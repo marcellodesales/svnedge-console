@@ -42,6 +42,7 @@ class ServerController {
     def setupReplicaService
     def csvnAuthenticationProvider
     def securityService
+    def ctfRemoteClientService
 
     def index = { redirect(action:edit, params:params) }
 
@@ -149,6 +150,7 @@ class ServerController {
         networkConfig.validate()
         if (!networkConfig.hasErrors() && networkingService.saveNetworkConfiguration(networkConfig)) {
             serverConfService.writeConfigFiles()
+            ctfRemoteClientService.clearClientCache()
             flash.message = message(code:"server.action.updateProxy.success")
             redirect(action: editProxy)
         }
@@ -162,6 +164,7 @@ class ServerController {
     def removeProxy = {
         networkingService.removeNetworkConfiguration() 
         serverConfService.writeConfigFiles()
+        ctfRemoteClientService.clearClientCache()
         flash.message = message(code:"server.action.updateProxy.removed")
         redirect(action: editProxy)
      }

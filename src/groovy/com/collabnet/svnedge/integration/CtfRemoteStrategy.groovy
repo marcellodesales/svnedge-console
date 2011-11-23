@@ -19,10 +19,10 @@ package com.collabnet.svnedge.integration
 
 import org.apache.axis.AxisFault
 import com.collabnet.svnedge.console.AbstractSvnEdgeService;
-import com.collabnet.svnedge.domain.User 
-import com.collabnet.svnedge.domain.integration.ApprovalState 
-import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.domain.integration.ApprovalState
+import com.collabnet.svnedge.domain.integration.CtfServer
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.util.SoapClient
 
 import java.net.NoRouteToHostException
@@ -30,11 +30,15 @@ import java.net.UnknownHostException
 import java.net.MalformedURLException
 import javax.net.ssl.SSLHandshakeException
 
+import com.collabnet.svnedge.domain.NetworkConfiguration
 
 /**
  * Interface for using different soap versions
  */
 public abstract class CtfRemoteStrategy {
+
+    public static final int DEFAULT_TIMEOUT = 120 * 1000
+    protected NetworkConfiguration networkConfiguration
 
     public abstract def makeCollabNetClient()
     public abstract def makeScmAppClient()

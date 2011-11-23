@@ -27,7 +27,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 import grails.util.GrailsUtil
 import org.apache.axis.AxisFault
 import com.collabnet.svnedge.console.AbstractSvnEdgeService;
-import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.domain.integration.ApprovalState 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
@@ -41,6 +41,8 @@ import java.net.MalformedURLException
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.HttpsURLConnection
+import com.collabnet.svnedge.domain.NetworkConfiguration
+import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 
@@ -125,21 +127,30 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         return getStrategy(url).makeScmAppClient()
     }
 
+    /**
+     * clears any client or connection instances that may be cached
+     * @return
+     */
+    public def clearClientCache() {
+        mStrategyCache.clear()
+    }
+
     private def getStrategy(ctfBaseUrl) throws UnknownHostException, 
             NoRouteToHostException, MalformedURLException,
             SSLHandshakeException {
         def url = ctfBaseUrl ?: CtfServer.getServer().baseUrl
+        def networkConfiguration = networkingService.getNetworkConfiguration();
         def strategy = mStrategyCache.get(url)
         if (!strategy) {
-            strategy = new Soap60CtfRemoteStrategy(url)
+            strategy = new Soap60CtfRemoteStrategy(url, networkConfiguration)
             try {
                 // will throw an exception, if ce-soap60 namespace doesn't exist
                 strategy.makeCollabNetClient().getApiVersion()
             } catch (AxisFault e) {
-                strategy = new Soap50CtfRemoteStrategy(url)
+                strategy = new Soap50CtfRemoteStrategy(url, networkConfiguration)
             }
             catch (Exception e) {
-                strategy = new Soap50CtfRemoteStrategy(url)
+                strategy = new Soap50CtfRemoteStrategy(url, networkConfiguration)
                 log.debug("Defaulting to soap60 CTF API because of exception", e)
             }
             mStrategyCache.put(url, strategy)
@@ -148,8 +159,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     }
 
     private SoapClient makeScmListenerClient(ctfBaseUrl) {
+        NetworkConfiguration nc = networkingService.getNetworkConfiguration()
         return new SoapClient((ctfBaseUrl ?: CtfServer.getServer().baseUrl) + 
-                              "/ce-soap/services/ScmListener")
+                              "/ce-soap/services/ScmListener", nc)
     }
 
     private String authzBaseUrl() {
@@ -218,7 +230,8 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     "ctfRemoteClientService.host.unknown.error", 
                     [hostname.encodeAsHTML()], locale))
 
-            } else if (e.detail instanceof NoRouteToHostException) {
+            } else if (e.detail instanceof NoRouteToHostException ||
+                    e.faultString.contains("Connection refused")) {
                 def hostname = new URL(ctfUrl).host
                 throw new NoRouteToHostException(getMessage(
                     "ctfRemoteClientService.host.unreachable.error", 
@@ -1156,7 +1169,10 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
     }
 
     private setupConnection(String url, def paramMap, boolean followRedirect) {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        NetworkConfiguration nc = networkingService.getNetworkConfiguration()
+        HttpURLConnection conn = (nc?.httpProxyHost) ?
+            (HttpURLConnection) new URL(url).openConnection(HttpProxyAuth.newInstance(new URL(nc.proxyUrl))) :
+            (HttpURLConnection) new URL(url).openConnection()
         conn.setRequestMethod("POST")
         conn.setRequestProperty("Accept-Language", 'en');
         conn.setRequestProperty("Content-Type", 
