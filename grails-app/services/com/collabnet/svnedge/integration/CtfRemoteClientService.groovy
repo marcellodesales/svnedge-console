@@ -238,7 +238,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
                     [hostname.encodeAsHTML()], locale))
 
             } else {
-                def msg = getMessage("ctfRemoteClientService.auth.error",
+                def msg = getMessage("ctfRemoteClientService.general.error",
                     [ctfUrl.encodeAsHTML()], locale)
                 log.error(msg, e)
                 throw new RemoteMasterException(ctfUrl, msg, e)
@@ -247,7 +247,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
             throw e
         } catch (Exception otherErrors) {
             throw new MalformedURLException(getMessage(
-                "ctfRemoteClientService.host.malformedUrl", 
+                "ctfRemoteClientService.host.malformedUrl",
                 [ctfUrl.encodeAsHTML()], locale))
         }
     }

@@ -140,7 +140,7 @@ class SetupReplicaController {
             catch (RemoteMasterException e) {
                 session.setAttribute(REPLICA_CONVERSION_BEAN_SESSION_KEY, null)
                 input.errors.rejectValue('ctfURL', e.messageKey,
-                        [input.ctfURL] as Object[], 'older ctf')
+                        [input.ctfURL] as Object[], e.message)
             }
         }
 
