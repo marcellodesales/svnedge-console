@@ -317,8 +317,8 @@ class SetupReplicaController {
                         [input.ctfURL] as Object[], 'no route')
             }
             catch (CtfAuthenticationException e) {
-                input.errors.rejectValue('ctfUsername', 'ctfRemoteClientService.auth.error',
-                        [input.ctfUsername] as Object[], 'bad credentials')
+                input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.auth.error',
+                        [input.ctfURL] as Object[], 'bad credentials')
             }
             catch (InvalidSecurityKeyException e) {
                 input.errors.rejectValue('serverKey', 
