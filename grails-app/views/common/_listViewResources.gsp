@@ -22,7 +22,6 @@
 <g:javascript library="window"/>
 <g:javascript library="window_effects"/>
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
-<link rel="stylesheet" href="${resource(dir:'js/themes',file:'alert.css')}" type="text/css"/>
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
 <g:javascript>
 var listViewI18n = {
