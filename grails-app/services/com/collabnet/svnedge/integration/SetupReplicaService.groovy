@@ -208,30 +208,22 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         UnknownHostException, NoRouteToHostException, MalformedURLException,
         InvalidSecurityKeyException {
 
-        def ctfServer = CtfServer.getServer() 
-        CtfConnectionBean oldCtfConn = new CtfConnectionBean(ctfURL: ctfServer.baseUrl, 
-            ctfUsername: ctfServer.ctfUsername, ctfPassword: 
-            securityService.decrypt(ctfServer.ctfPassword), 
-            userLocale: ctfConn.userLocale)
-        // fill in the session id we will need
-        confirmCtfConnection(oldCtfConn);
-
         // confirm the new credentials work
         confirmCtfConnection(ctfConn);
         // if no exception above, then creds are valid
-        ctfRemoteClientService.logoff(ctfServer.baseUrl, ctfConn.ctfUsername, ctfConn.soapSessionId)
-
         ctfRemoteClientService.updateReplicaUser(
-            oldCtfConn.userSessionId, ctfConn.ctfUsername)
+                ctfConn.userSessionId, ctfConn.ctfUsername)
 
         // persist
-        log.warn("Updating the CTF credentials used for SVN Replication")
+        log.info("Updating the CTF credentials used for SVN Replication")
+        def ctfServer = CtfServer.getServer() 
         ctfServer.ctfUsername = ctfConn.ctfUsername
         ctfServer.ctfPassword = securityService.encrypt(ctfConn.ctfPassword)
         ctfServer.save()
 
-        ctfRemoteClientService.logoff(ctfServer.baseUrl, oldCtfConn.ctfUsername, oldCtfConn.soapSessionId)
         setupTeamForgeService.updateCtfConnection(ctfConn)
+        ctfRemoteClientService.logoff(ctfServer.baseUrl, 
+                ctfConn.ctfUsername, ctfConn.soapSessionId)
     }
 
 
