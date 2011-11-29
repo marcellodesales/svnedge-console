@@ -22,8 +22,8 @@ import java.io.FileNotFoundException;
 import java.net.NoRouteToHostException;
 import java.net.URL;
 import java.net.UnknownHostException;
- 
-import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth 
+
+import com.collabnet.svnedge.net.HttpProxyAuth
 import com.collabnet.svnedge.admin.pkgsupdate.PackageInfo 
 import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateProgressTracker 
 import com.collabnet.svnedge.admin.pkgsupdate.PackagesUpdateSecurityPolicy 

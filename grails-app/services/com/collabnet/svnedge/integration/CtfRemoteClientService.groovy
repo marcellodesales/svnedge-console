@@ -42,7 +42,7 @@ import java.security.cert.CertificateException
 import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.HttpsURLConnection
 import com.collabnet.svnedge.domain.NetworkConfiguration
-import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth
+import com.collabnet.svnedge.net.HttpProxyAuth
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 

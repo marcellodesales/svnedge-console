@@ -17,7 +17,7 @@
  */
 package com.collabnet.svnedge.admin.pkgsupdate
 
-import com.collabnet.svnedge.admin.pkgsupdate.HttpProxyAuth 
+import com.collabnet.svnedge.net.HttpProxyAuth
 import grails.test.*
 
 
