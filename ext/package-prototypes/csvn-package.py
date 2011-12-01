@@ -48,7 +48,7 @@ pkg = {
     },
 
     "depends" : {
-        "pkg:/csvn-svn@1.7.1" : {"type" : "require" },
+        "pkg:/csvn-svn@1.7.2" : {"type" : "require" },
     },
 
     "licenses" : {
