@@ -271,10 +271,10 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                     cantConnectCtfMaster.getMessage()
                 try {
                     ctfRemoteClientService.logoff(ctfServer.baseUrl,
-                        ctfServer.ctfUsername, soapId)
+                        ctfServer.ctfUsername, soapId, true)
                     soapId = null
                 } catch (Exception ignore) {
-                    log.warn("Exception trying to logoff soap session", e)
+                    log.debug("Exception trying to logoff soap session", ignore)
                 }
                 loginAndTransmitCommandResult(execContext, cmdResult, ctfServer)
             } finally {
@@ -284,7 +284,7 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
                     execContext.userSessionId = null
                     if (soapId) {
                         ctfRemoteClientService.logoff(ctfServer.baseUrl,
-                            ctfServer.ctfUsername, soapId)
+                            ctfServer.ctfUsername, soapId, true)
                     }
                 } else {
                     log.debug(activeCommands + 

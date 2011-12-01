@@ -169,7 +169,7 @@ class FetchReplicaCommandsJob implements ApplicationContextAware {
 
         } catch (Exception replicaManagerError) {
             log.error("There was a problem while trying to fetch queued " + 
-                "commands: " + replicaManagerError.getMessage())
+                "commands: " + replicaManagerError.getMessage(), replicaManagerError)
         } finally {
             if (isCloseSoapSession && soapId) {
                 ctfRemoteClientService.logoff(ctfServer.baseUrl, 

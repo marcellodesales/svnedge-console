@@ -264,11 +264,17 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         return login(CtfServer.server.baseUrl, username, password, locale)
     }
 
-    public void logoff(ctfUrl, username, sessionId) {
+    public void logoff(ctfUrl, username, sessionId, boolean quieter = false) {
         try {
             cnSoap(ctfUrl).logoff(username, sessionId)
         } catch (Exception e) {
-            log.warn("Logging off from session " + sessionId + " failed.", e)
+            if (quieter) {
+                log.debug("Logging off from session " + sessionId + 
+                          " failed.", e)
+            } else {
+                log.warn("Logging off from session " + sessionId + 
+                         " failed.", e)
+            }
         }
     }
     
@@ -1097,19 +1103,14 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
         } catch (AxisFault e) {
             String faultMsg = e.faultString
-            if (faultMsg.contains("The parameter type/value") &&
-                faultMsg.contains("is invalid for the adapter type")) {
-                // No such object: The parameter type/value
-                //'RepositoryBaseUrl=http://cu064.cloud.sp.collab.net:18080/svn'
-                // is invalid for the adapter type 'Subversion'
-                GrailsUtil.deepSanitize(e)
-    
-                if (faultMsg.contains("Session is invalid or timed out")) {
-                   throw new CtfSessionExpiredException(ctfUrl, userSessionId,
-                       getMessage("ctfRemoteClientService.remote.sessionExpired"
-                           , locale), e)
-                }
-             }
+            if (faultMsg.contains("Session is invalid or timed out") ||
+                faultMsg.contains("Invalid user session")) {
+                throw new CtfSessionExpiredException(ctfUrl, userSessionId,
+                   getMessage("ctfRemoteClientService.remote.sessionExpired",
+                        locale), e)
+            } else {
+                 throw new RemoteMasterException(ctfUrl, e.faultString, e)
+            }
 
          } catch (Exception e) {
             GrailsUtil.deepSanitize(e)

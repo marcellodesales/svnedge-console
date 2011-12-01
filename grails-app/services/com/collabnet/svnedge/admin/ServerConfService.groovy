@@ -230,7 +230,6 @@ Content-Length: 107
     private void bootstrapConfiguration(server ) {
         // remove unnecessary scm artifact
         switch(GrailsUtil.environment) {
-            case "development":
             case "test":
                 log.debug("Deleting older httpd.conf file")
                 new File(confDirPath(), "httpd.conf").delete()
