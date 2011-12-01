@@ -20,7 +20,7 @@ package com.collabnet.svnedge
 /**
  * An exception which may be thrown within a service to indicate an invalid input.
  */
-class ConcurrentBackupException extends RuntimeException {
+class ConcurrentBackupException extends SvnEdgeRuntimeException {
     
     String field
     

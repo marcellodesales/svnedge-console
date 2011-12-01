@@ -17,10 +17,12 @@
  */
 package com.collabnet.svnedge.integration
 
+import com.collabnet.svnedge.SvnEdgeException
+
 /**
  * Any problem related to cloud services
  */
-class CloudServicesException extends Exception {
+class CloudServicesException extends SvnEdgeException {
     /**
      * The key to the messages.properties used.
      */

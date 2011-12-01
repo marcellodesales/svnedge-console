@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.integration.command
 
+import com.collabnet.svnedge.SvnEdgeException
 
 /**
  * Exception raised when a command has been requested, but there is no 
@@ -26,7 +27,7 @@ package com.collabnet.svnedge.integration.command
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-public class CommandNotImplementedException extends Exception {
+public class CommandNotImplementedException extends SvnEdgeException {
 
     private String commandName
 

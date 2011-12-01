@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.integration
 
+import com.collabnet.svnedge.SvnEdgeException
 
 
 /**
@@ -26,7 +27,7 @@ package com.collabnet.svnedge.integration
  * @author Marcello de Sales (mdesales@collab.net).
  *
  */
-class RemoteMasterException extends Exception {
+class RemoteMasterException extends SvnEdgeException {
 
     /**
      * The hostname of the remote master that had the communication problem.

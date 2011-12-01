@@ -20,7 +20,7 @@ package com.collabnet.svnedge
 /**
  * An exception which indicates a failure loading an svn dump file
  */
-class RepoLoadException extends RuntimeException {
+class RepoLoadException extends SvnEdgeRuntimeException {
 
     /**
      * Creates a RepoLoadException with the given message

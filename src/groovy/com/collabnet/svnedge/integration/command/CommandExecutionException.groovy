@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.integration.command
 
+import com.collabnet.svnedge.SvnEdgeException
 
 /**
  * Exception for the Abstract Commands, which has references to
@@ -25,7 +26,7 @@ package com.collabnet.svnedge.integration.command
  * 
  * @author Marcello de Sales (mdesales@collab.net)
  */
-public class CommandExecutionException extends Exception {
+public class CommandExecutionException extends SvnEdgeException {
 
     def originatingCommand
 

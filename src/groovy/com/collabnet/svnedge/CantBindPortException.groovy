@@ -30,7 +30,7 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder;
  * @author Marcello de Sales (mdesales@collab.net)
  *
  */
-class CantBindPortException extends Exception {
+class CantBindPortException extends SvnEdgeException {
     
     def appHolder = ApplicationHolder.application
 

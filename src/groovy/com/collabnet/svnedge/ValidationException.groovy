@@ -20,7 +20,7 @@ package com.collabnet.svnedge
 /**
  * An exception which may be thrown within a service to indicate an invalid input.
  */
-class ValidationException extends RuntimeException {
+class ValidationException extends SvnEdgeRuntimeException {
     
     String field
     

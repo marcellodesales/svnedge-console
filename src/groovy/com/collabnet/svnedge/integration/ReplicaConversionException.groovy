@@ -1,12 +1,13 @@
 /* copyright */
 package com.collabnet.svnedge.integration
 
+import com.collabnet.svnedge.SvnEdgeException
 
 /**
  * This class represents an exception converting the system to
  * Replica mode
  */ 
-class ReplicaConversionException extends Exception {
+class ReplicaConversionException extends SvnEdgeException {
     
     public ReplicaConversionException() {
         super()
