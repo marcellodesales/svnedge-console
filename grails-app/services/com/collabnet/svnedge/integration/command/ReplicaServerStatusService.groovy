@@ -76,24 +76,6 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
      */
     private Set<ShortRunningCommand> allShortRunningIndexSet
 
-    /**
-     * Immutable command at a given state.
-     */
-    public static class CommandAtState {
-
-        private final AbstractCommand command
-        private final CommandState state
-
-        private CommandAtState(command, state) {
-            this.command = command
-            this.state = state
-        }
-
-        public static CommandAtState makeNew(command, state) {
-            return new CommandAtState(command, state)
-        }
-    }
-
     public ReplicaServerStatusService() {
         commandsByStateIndex = new ConcurrentHashMap<CommandState, 
             Set<AbstractCommand>>()
@@ -238,18 +220,24 @@ public final class ReplicaServerStatusService extends AbstractSvnEdgeService
                 allShortRunningIndexSet.remove(command)
             }
 
-            Set<AbstractCommand> commands = commandsByStateIndex.get(commandState)
-            if (commands && commands.size() > 0) {
-                synchronized (commands) {
-                    Iterator<AbstractCommand> iter = commands.iterator()
-                    while (iter.hasNext()) {
-                        def cmd = iter.next()
-                        if (cmd.id == command.id) {
-                            iter.remove()
-                            break
+            if (commandState) {
+                Set<AbstractCommand> commands = 
+                        commandsByStateIndex.get(commandState)
+                if (commands && commands.size() > 0) {
+                    synchronized (commands) {
+                        Iterator<AbstractCommand> iter = commands.iterator()
+                        while (iter.hasNext()) {
+                            def cmd = iter.next()
+                            if (cmd.id == command.id) {
+                                iter.remove()
+                                break
+                            }
                         }
                     }
                 }
+            } else {
+                log.warn("Processing CommandResultReportedEvent for command, " +
+                    command.id + ", which is not found in a prior state.")
             }
 
         } else {
