@@ -19,13 +19,32 @@ package com.collabnet.svnedge.services
 
 import com.collabnet.svnedge.console.NetworkingService 
 import grails.test.GrailsUnitTestCase;
+import com.collabnet.svnedge.domain.NetworkConfiguration
+import com.collabnet.svnedge.console.SecurityService;
 
 class NetworkingServiceTests extends GrailsUnitTestCase {
     def networkingService
 
     protected void setUp() {
         super.setUp()
+        // mock the NetworkConfiguration domain class behavior
+        def instanceList = [ new NetworkConfiguration() ]
+        mockDomain(NetworkConfiguration, instanceList)
+        NetworkConfiguration.metaClass.'static'.list = { instanceList }
+        NetworkConfiguration.metaClass.merge = { delegate }
+        
+        // setup the service for testing
+        mockLogging(NetworkingService)
         networkingService = new NetworkingService()
+        networkingService.securityService = new SecurityService()
+    }
+
+    void tearDown() {
+        super.tearDown()
+        NetworkConfiguration.metaClass = null
+        ["http.proxyHost", "http.proxyPort", "http.proxyUser", "http.proxyPassword"].each {
+            System.clearProperty(it)
+        }
     }
 
     void testGetNetworkInterfacesWithIPAddresses() {
@@ -66,5 +85,35 @@ class NetworkingServiceTests extends GrailsUnitTestCase {
                     interfaces.isEmpty()
             }
         }
+    }
+    
+    void testSetHttpProxy() {
+        
+        assertNull("there should not be proxy config system props", System.getProperty("http.proxyHost"))
+        assertNull("there should not be proxy config system props", System.getProperty("http.proxyPort"))
+        assertNull("there should not be proxy config system props", System.getProperty("http.proxyUser"))
+        assertNull("there should not be proxy config system props", System.getProperty("http.proxyPassword"))
+                 
+        NetworkConfiguration nc = NetworkConfiguration.list().last()
+        assertNull("there should not be proxy config domain props", nc?.httpProxyHost)
+        assertNull("there should not be proxy config domain props", nc?.httpProxyPort)
+        assertNull("there should not be proxy config domain props", nc?.httpProxyUsername)
+        assertNull("there should not be proxy config domain props", nc?.httpProxyPassword)
+        
+        String proxyUrl = "http://proxyuser:proxypass@proxy.net:81"
+        networkingService.setHttpProxy(proxyUrl)
+        
+        assertEquals("there *should* now be proxy config system props", "proxy.net", System.getProperty("http.proxyHost"))
+        assertEquals("there *should* now be proxy config system props", "81", System.getProperty("http.proxyPort"))
+        assertEquals("there *should* now be proxy config system props", "proxyuser", System.getProperty("http.proxyUser"))
+        assertEquals("there *should* now be proxy config system props", "proxypass", System.getProperty("http.proxyPassword"))
+        
+        nc = NetworkConfiguration.list().last()
+        assertEquals("there *should* now be proxy config domain props", "proxy.net", nc.httpProxyHost)
+        assertEquals("there *should* now be proxy config domain props", 81, nc.httpProxyPort)
+        assertEquals("there *should* now be proxy config domain props", "proxyuser", nc.httpProxyUsername)
+        assertEquals("there *should* now be proxy config domain props", "proxypass", nc.httpProxyPassword)
+        
+        assertEquals("The domain class should construct the same proxyurl", proxyUrl, nc.proxyUrl)
     }
 }
