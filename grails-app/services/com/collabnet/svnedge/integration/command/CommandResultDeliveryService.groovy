@@ -56,6 +56,12 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
      */
     def bootStrap = {
         log.info("Bootstrapping the command result delivery service")
+        // remove commands which did not finish, but will not be running now,
+        // so that they can be resent from TF.
+        def commands = CommandResult.findAllWhere(succeeded: null)
+        for (def cmd : commands) {
+            cmd.delete()
+        }
     }
 
     /**
