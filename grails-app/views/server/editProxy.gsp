@@ -72,14 +72,15 @@
   <table class="ItemDetailContainer">
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
-        <p><g:message code="server.page.editProxy.message"/></p>
+        <p><g:message code="server.page.editProxy.message.p1"/></p>
+        <p><g:message code="server.page.editProxy.message.p2"/></p>
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
               <label for="httpProxyHost"><g:message code="networkConfiguration.httpProxyHost.label"/></label>
             </td>
             <td valign="top" colspan="2"
-                class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyHost', 'errors')}">
+                class="${hasErrors(bean: networkConfig, field: 'httpProxyHost', 'errors')}">
               <input size="30" type="text" id="httpProxyHost" name="httpProxyHost"
                      value="${fieldValue(bean: networkConfig, field: 'httpProxyHost')}"/>
             </td>
@@ -100,7 +101,7 @@
               <label for="httpProxyPort"><g:message code="networkConfiguration.httpProxyPort.label"/></label>
             </td>
             <td valign="top" colspan="2"
-                class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyPort', 'errors')}">
+                class="${hasErrors(bean: networkConfig, field: 'httpProxyPort', 'errors')}">
               <input size="6" type="text" id="httpProxyPort" name="httpProxyPort"
                      value="${fieldValue(bean: networkConfig, field: 'httpProxyPort')}"/>
             </td>
@@ -120,10 +121,13 @@
             <td class="ItemDetailName">
               <label for="httpProxyUsername"><g:message code="networkConfiguration.httpProxyUsername.label"/></label>
             </td>
-            <td valign="top" colspan="2"
-                class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyUsername', 'errors')}">
+            <td valign="top"
+                class="${hasErrors(bean: networkConfig, field: 'httpProxyUsername', 'errors')}">
               <input size="30" type="text" id="httpProxyUsername" name="httpProxyUsername"
                      value="${fieldValue(bean: networkConfig, field: 'httpProxyUsername')}"/>
+            </td>
+            <td class="ItemDetailValue">
+              <i><g:message code="networkConfiguration.httpProxyUsername.label.tip" /></i>
             </td>
           </tr>
           <g:hasErrors bean="${networkConfig}" field="httpProxyUsername">
@@ -141,9 +145,12 @@
             <td class="ItemDetailName">
               <label for="httpProxyPassword"><g:message code="networkConfiguration.httpProxyPassword.label"/></label>
             </td>
-            <td valign="top" colspan="2"
-                class="ItemDetailValue ${hasErrors(bean: networkConfig, field: 'httpProxyPassword', 'errors')}">
+            <td valign="top"
+                class="${hasErrors(bean: networkConfig, field: 'httpProxyPassword', 'errors')}">
               <g:passwordFieldWithChangeNotification name="httpProxyPassword" value="${fieldValue(bean:networkConfig, field:'httpProxyPassword')}" size="30"/>
+            </td>
+            <td class="ItemDetailValue">
+              <i><g:message code="networkConfiguration.httpProxyPassword.label.tip" /></i>
             </td>
           </tr>
           <g:hasErrors bean="${networkConfig}" field="httpProxyPassword">
@@ -163,8 +170,10 @@
     <tr class="ContainerFooter">
       <td>
         <div class="AlignRight">
-          <g:actionSubmit action="removeProxy" value="${message(code:'server.page.editProxy.button.clear')}"
-                          class="Button"/>
+          <g:if test="${fieldValue(bean: networkConfig, field: 'httpProxyHost')}">
+            <g:actionSubmit action="removeProxy" value="${message(code:'server.page.editProxy.button.clear')}"
+                            class="Button"/>
+          </g:if>
           <g:actionSubmit action="updateProxy" value="${message(code:'server.page.editAuthentication.button.save')}"
                           class="Button"/>
         </div>
