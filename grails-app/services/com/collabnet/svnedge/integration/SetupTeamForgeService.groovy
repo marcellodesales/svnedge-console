@@ -636,9 +636,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         restartServer()
 
         // Noticing a tendency for the viewvc URL validation during 
-        // conversion to fail once and then work the second try.  This 
-        // seemed to help, so leaving it until more investigation is done.
-        Thread.sleep(1000)
+        // conversion to fail once and then work the second try.
+        // See artf6841 as a possible example.
+        Thread.sleep(3000)
 
         conversionData.exSystemId = registerIntegrationServer(conversionData)
         ctfServer.mySystemId = conversionData.exSystemId
