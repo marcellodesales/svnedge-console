@@ -320,6 +320,13 @@ class SetupReplicaController {
                 input.errors.rejectValue('ctfURL', 'ctfRemoteClientService.auth.error',
                         [input.ctfURL] as Object[], 'bad credentials')
             }
+            catch (IllegalStateException e) {
+                CtfServer ctfServer = CtfServer.getServer()
+                input.errors.rejectValue('ctfUsername', 
+                        'setupReplica.action.old.auth.error',
+                        [ctfServer.ctfUsername] as Object[], 
+                        'previous credentials are invalid')
+            }
             catch (InvalidSecurityKeyException e) {
                 input.errors.rejectValue('serverKey', 
                         'setupReplica.action.updateCredentials.invalidApiKey')

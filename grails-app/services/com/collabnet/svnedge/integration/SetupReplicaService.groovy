@@ -210,13 +210,35 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
 
         // confirm the new credentials work
         confirmCtfConnection(ctfConn);
-        // if no exception above, then creds are valid
-        ctfRemoteClientService.updateReplicaUser(
-                ctfConn.userSessionId, ctfConn.ctfUsername)
+
+        def ctfServer = CtfServer.getServer() 
+        if (ctfConn.ctfUsername != ctfServer.ctfUsername) {
+
+            CtfConnectionBean oldCtfConn = 
+                    new CtfConnectionBean(ctfURL: ctfServer.baseUrl,
+                    ctfUsername: ctfServer.ctfUsername, ctfPassword:
+                    securityService.decrypt(ctfServer.ctfPassword),
+                    userLocale: ctfConn.userLocale)
+        
+            try {        
+                // fill in the session id we will need. CTF does not allow replica
+                // user to be updated, if the old credentials are invalid.
+                // https://forge.collab.net/sf/go/artf108402
+                confirmCtfConnection(oldCtfConn)
+                
+                ctfRemoteClientService.updateReplicaUser(
+                        oldCtfConn.userSessionId, ctfConn.ctfUsername)
+        
+                ctfRemoteClientService.logoff(ctfServer.baseUrl, 
+                        oldCtfConn.ctfUsername, oldCtfConn.soapSessionId)
+            } catch (CtfAuthenticationException e) {
+                throw new IllegalStateException(
+                        "Previous credentials are invalid")
+            }
+        }
 
         // persist
         log.info("Updating the CTF credentials used for SVN Replication")
-        def ctfServer = CtfServer.getServer() 
         ctfServer.ctfUsername = ctfConn.ctfUsername
         ctfServer.ctfPassword = securityService.encrypt(ctfConn.ctfPassword)
         ctfServer.save()
