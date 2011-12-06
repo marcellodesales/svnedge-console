@@ -47,7 +47,7 @@ abstract class AbstractSvnEdgeService {
      * using the default locale from the JVM.
      */
     protected def getMessage(String key, List<String> params) {
-        return this.getMessage(key, params as String[], Locale.getDefault())
+        return this.getMessage(key, params, Locale.getDefault())
     }
 
     /**

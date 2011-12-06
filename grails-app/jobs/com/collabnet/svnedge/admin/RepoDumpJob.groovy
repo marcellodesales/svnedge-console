@@ -57,8 +57,7 @@ class RepoDumpJob {
                     log.info("Creating repo dump file: " + file)
                 }
             } catch (ConcurrentBackupException e) {
-                log.info("Backup for repository '" + repo.name + 
-                    "' skipped as an earlier dump/sync is still in progress")
+                log.warn("Backup skipped: " + e.message)
             }
         }
         else {

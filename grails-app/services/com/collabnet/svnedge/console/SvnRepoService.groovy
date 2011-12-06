@@ -1068,7 +1068,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
-            throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
+            String msg = getMessage("repository.action.backup.alreadyInProgress",
+                    [repo.name, progressLogFile.canonicalPath])
+            throw new ConcurrentBackupException(msg)
         }
 
         String filename = dumpFilename(bean, repo)
@@ -1282,7 +1284,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         File progressLogFile = prepareProgressLogFile(repo.name)
         if (progressLogFile.exists()) {
-            throw new ConcurrentBackupException("repository.action.createDumpfile.alreadyInProgress")
+            String msg = getMessage("repository.action.backup.alreadyInProgress",
+                    [repo.name, progressLogFile.canonicalPath])
+            throw new ConcurrentBackupException(msg)
         }
         Locale locale = bean.userLocale
 

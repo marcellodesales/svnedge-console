@@ -428,7 +428,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
         File progressFile = svnRepoService.prepareProgressLogFile(repo.name)
         if (progressFile.exists()) {
-            throw new ConcurrentBackupException("repository.action.cloudSync.alreadyInProgress")
+            String msg = getMessage("repository.action.backup.alreadyInProgress",
+                    [repo.name, progressFile.canonicalPath])
+            throw new ConcurrentBackupException(msg)
         }
         FileOutputStream fos
         try {

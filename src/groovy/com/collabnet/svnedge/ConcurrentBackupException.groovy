@@ -26,9 +26,9 @@ class ConcurrentBackupException extends SvnEdgeRuntimeException {
     
     /**
      * Creates a ConcurrentBackupException with the given errorKey.
-     * @param errorKey a message resource key
+     * @param message a String message
      */
-    public ConcurrentBackupException(String errorKey) {
-        super(errorKey)
+    public ConcurrentBackupException(String msg) {
+        super(msg)
     }
 }
