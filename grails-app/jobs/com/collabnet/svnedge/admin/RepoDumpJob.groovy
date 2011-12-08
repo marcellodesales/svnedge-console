@@ -17,8 +17,10 @@
  */
 package com.collabnet.svnedge.admin
 
-import com.collabnet.svnedge.ConcurrentBackupException;
+import com.collabnet.svnedge.ConcurrentBackupException
 import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.console.DumpBean
 
 /**
@@ -39,6 +41,12 @@ class RepoDumpJob {
 
     // the Job execute method
     def execute(context) {
+        if (Server.getServer().mode == ServerMode.STANDALONE) {
+            dumpOrBackup(context)
+        }
+    }
+    
+    private void dumpOrBackup(context) {
         log.info("Executing scheduled RepoDump ...")
         def dataMap = context.getMergedJobDataMap()
         Repository repo = Repository.get(dataMap.get("repoId"))
