@@ -26,9 +26,9 @@
       </div>
 
 
-      <div class="${controllerName == 'repo' && actionName == 'editAuthorization' || actionName == 'saveAuthorization' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
+      <div class="${controllerName == 'repo' && actionName.contains('Authorization') ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
           <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-          <g:link controller="repo" action="editAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>
+          <g:link controller="repo" action="showAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>
       </div>
 
       <div class="${controllerName == 'repo' && actionName == 'bkupScheduleMultiple' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">

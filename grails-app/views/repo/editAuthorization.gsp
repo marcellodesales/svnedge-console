@@ -24,19 +24,23 @@
     <td colspan="2"><g:message code="repository.page.editAuthorization.header" /></td>
 </tr>
 
+<tr>
+  <td colspan="2"><g:message code="repository.page.editAuthorization.lockMessage" /></td>
+</tr>
 
 <g:form action="saveAuthorization" method="post">
 
     <tr class="prop">
 
         <td width="100%" valign="top" class="value">
-            <textarea id="accessRules" name="accessRules" rows="25" cols="80">${fieldValue(bean:authRulesCommand,field:'accessRules')}</textarea>
+            <textarea id="accessRules" name="accessRules" rows="25" cols="80" style="width: 100%">${fieldValue(bean:authRulesCommand,field:'accessRules')}</textarea>
         </td>
     </tr>
 
     <tr class="ContainerFooter">
         <td colspan="2">
             <div class="AlignRight">
+                <g:actionSubmit action="cancelEditAuthorization" class="Button cancel" value="${message(code:'default.confirmation.cancel')}"/>
                 <input class="Button save" type="submit" value="${message(code:'repository.page.editAuthorization.button.save')}"/>
             </div>
 

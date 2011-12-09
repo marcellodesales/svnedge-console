@@ -25,6 +25,7 @@ import com.collabnet.svnedge.domain.RepoTemplate;
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode;
+import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
@@ -34,6 +35,8 @@ import com.collabnet.svnedge.integration.QuotaCloudServicesException;
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.util.ControllerUtil
+import com.collabnet.svnedge.util.ServletContextSessionLock
+
 import org.apache.commons.io.FileUtils
 
 
@@ -825,17 +828,69 @@ class RepoController {
                 args: [createLink(controller: 'job', action: 'list')])
     }
     
+    private static final String ACCESS_RULES_LOCK_KEY = "access_rules_lock"
+    
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def showAuthorization = {
+        User owner
+        ServletContextSessionLock lock = 
+                ServletContextSessionLock.obtain(session, ACCESS_RULES_LOCK_KEY)
+        if (lock) {
+            lock.release(session)
+            lock = null
+        } else {
+            lock = ServletContextSessionLock.peek(session, ACCESS_RULES_LOCK_KEY)
+            owner = User.get(lock.userId)
+        }
+        [accessRules: serverConfService.readSvnAccessFile(),
+                lock: lock, lockOwner: owner]
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def cancelEditAuthorization = {
+        ServletContextSessionLock lock = 
+                ServletContextSessionLock.obtain(session, ACCESS_RULES_LOCK_KEY)
+        if (lock) {
+            lock.release(session)
+        }
+        redirect(action: 'showAuthorization')
+    }
+
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def editAuthorization = {
         flash.clear()
-        String accessRules = serverConfService.readSvnAccessFile()
-        def command = new AuthzRulesCommand(accessRules: accessRules)
-        [authRulesCommand: command]
-
+        ServletContextSessionLock lock = 
+                ServletContextSessionLock.obtain(session, ACCESS_RULES_LOCK_KEY)
+        if (lock) {
+            lock.userId = loggedInUserInfo(field:'id') as int
+            String accessRules = serverConfService.readSvnAccessFile()
+            def command = new AuthzRulesCommand(accessRules: accessRules)
+            return [authRulesCommand: command]
+        } else {
+            redirect(action: 'showAuthorization')
+        }
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def saveAuthorization = { AuthzRulesCommand cmd ->
+        
+        ServletContextSessionLock existingLock =
+                ServletContextSessionLock.peek(session, ACCESS_RULES_LOCK_KEY)
+        if (!existingLock) {
+            log.warn "RepoController.saveAuthorization was called without an existing lock."
+            flash.warn = message(code: 'repository.action.saveAuthorization.not.locked')
+            redirect(action: 'showAuthorization')
+            return
+        }
+        ServletContextSessionLock lock =
+                ServletContextSessionLock.obtain(session, ACCESS_RULES_LOCK_KEY)
+        if (!lock) {
+            log.warn "RepoController.saveAuthorization was called without an owning the lock."
+            flash.warn = message(code: 'repository.action.saveAuthorization.not.locked')
+            redirect(action: 'showAuthorization')
+            return
+        }
+
         def result = serverConfService.validateSvnAccessFile(
                 cmd.accessRules)
         def exitStatus = Integer.parseInt(result[0])
@@ -857,9 +912,12 @@ class RepoController {
         } else {
             if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
                     cmd.accessRules)) {
+                lock.release(session)
                 flash.message = message(
                         code: 'repository.action.saveAuthorization.success')
                 flash.error = null
+                redirect(action: 'showAuthorization')
+                return
             } else {
                 flash.error = message(
                         code: 'repository.action.saveAuthorization.failure')
