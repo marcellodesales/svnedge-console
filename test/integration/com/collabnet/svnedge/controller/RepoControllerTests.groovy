@@ -93,6 +93,7 @@ class RepoControllerTests extends ControllerUnitTestCase {
     void testEditAuthorization() {
 
         controller.serverConfService = serverConfService
+        controller.metaClass.loggedInUserInfo = { return 1 }
 
         // should fetch an svn_access_file from services
         def model = controller.editAuthorization()
@@ -103,6 +104,10 @@ class RepoControllerTests extends ControllerUnitTestCase {
     void testSaveAuthorization() {
 
         controller.serverConfService = serverConfService
+        controller.metaClass.loggedInUserInfo = { return 1 }
+
+        // obtain lock
+        controller.editAuthorization()
 
         // save the original file to restore after test
         String original = serverConfService.readSvnAccessFile()
