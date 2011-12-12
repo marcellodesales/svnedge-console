@@ -21,18 +21,15 @@ package com.collabnet.svnedge.controller.api
 import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
-import org.codehaus.groovy.grails.web.converters.JSONParsingParameterCreationListener
-import org.codehaus.groovy.grails.web.converters.XMLParsingParameterCreationListener
 import grails.converters.deep.XML
+import org.json.JSONObject
+import groovy.util.slurpersupport.GPathResult
 
 /**
  * Default "not-implemented" endpoints for rest controllers
  */
 abstract class AbstractRestController {
 
-    JSONParsingParameterCreationListener jppcl = null
-    XMLParsingParameterCreationListener xppcl = null
-    
     def restRetrieve = {
         response.status = 405
         def result = [errorMessage: message(code: "api.error.405")]
@@ -70,22 +67,45 @@ abstract class AbstractRestController {
     }
 
     /**
-     * This helper provides the same service as "parseRequest: true" in UrlMappings 
-     * (disabled in UrlMappings to avoid stacktraces) 
-     * @param params the request params
+     * This helper will read the JSON or XML request body into a request parameter for use
+     * by the <code>getRestParam</code> method
      */
-    void parseRequest(GrailsParameterMap params) {
-        if (request.format == "json") {
-            if (!jppcl) {
-                jppcl = new JSONParsingParameterCreationListener()    
-            } 
-            jppcl.paramsCreated(params)
+    void parseRestRequest() {
+        // return immediately if request has already been parsed
+        if (params.requestParsed) {
+            return
         }
-        else if (request.format == "xml") {
-            if (!xppcl) {
-                xppcl = new XMLParsingParameterCreationListener()    
-            } 
-            xppcl.paramsCreated(params)
+        params.requestParsed = true
+        try {
+            if (request.format == "json") {
+                params.bodyJson = grails.converters.JSON.parse(request)
+            }
+            else if (request.format == "xml") {
+                params.bodyXml = grails.converters.deep.XML.parse(request)
+            }
+        } 
+        catch (Exception e) {
+            log.warn("Unable to parse JSON or XML body in request: ${e.message}")
         }
+    }
+
+    /**
+     * Convenience method to find an XML or JSON element in the request body. Ensures that
+     * <code>parseRestRequest</code> has been run.
+     * @param elementKey the key we seek
+     * @return the corresponding value, or null
+     */
+    String getRestParam(String elementKey) {
+        
+        parseRestRequest()
+        
+        def elementValue = null
+        if (params.bodyXml)  {
+            elementValue = params.bodyXml.entry.find({ it.@key == elementKey })?.text() 
+        }
+        else if (params.bodyJson) {
+            elementValue = params.bodyJson[elementKey] 
+        }
+        return elementValue
     }
 }
