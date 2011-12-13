@@ -27,6 +27,8 @@ import com.collabnet.svnedge.util.UntarCategory
 import com.sun.pkg.client.Image;
 
 import grails.test.*
+import javax.net.ssl.HttpsURLConnection
+import com.collabnet.svnedge.util.SSLUtil
 
 class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -79,10 +81,11 @@ class PackagesUpdateServiceIntegrationTests extends GrailsUnitTestCase {
             def imageFile = new File(this.validImageFileDir, fileName)
 
             if (!imageFile.exists()) {
-                def svnEdgeDir = config.svnedge.appHome
-                svnEdgeDir = new File(svnEdgeDir).getParentFile().canonicalPath
-                FileDownloaderCategory.setTruststore(svnEdgeDir + 
-                    "/scripts/cubit.keystore", "together")
+//                def svnEdgeDir = config.svnedge.appHome
+//                svnEdgeDir = new File(svnEdgeDir).getParentFile().canonicalPath
+//                FileDownloaderCategory.setTruststore(svnEdgeDir +
+//                    "/scripts/cubit.keystore", "together")
+                HttpsURLConnection.setDefaultSSLSocketFactory(SSLUtil.createTrustingSocketFactory());
                 FileDownloaderCategory.progressPrintStream = System.out
                 try {
                     use(FileDownloaderCategory) {
