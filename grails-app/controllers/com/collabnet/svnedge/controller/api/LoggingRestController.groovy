@@ -99,7 +99,7 @@ class LoggingRestController extends AbstractRestController {
         def daysToKeep = getRestParam("DaysToKeep")
         
         def result = [:]
-        if (consoleLogLevel && apacheLogLevel && daysToKeep) {
+        try {
             Server s = Server.getServer()
             s.consoleLogLevel = ConsoleLogLevel.valueOf(consoleLogLevel)
             s.apacheLogLevel = ApacheLogLevel.valueOf(apacheLogLevel)
@@ -108,9 +108,10 @@ class LoggingRestController extends AbstractRestController {
             response.status = 201
             result['message'] = message(code: "api.message.201")
         }
-        else {
+        catch (Exception e) {
             response.status = 400
             result['errorMessage'] = message(code: "api.error.400")
+            log.warn("Exception handling a REST PUT request", e)
         }
         
         withFormat {

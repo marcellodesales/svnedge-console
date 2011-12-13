@@ -78,20 +78,6 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
      */
     void testLoggingPut() {
         
-        // unauthorized calls receive 401
-        put(url) {
-            body { "" }
-        }
-        assertStatus 401
-
-        // authorized, but faulty, calls receive 400 (bad request)
-        put(url) {
-            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
-            body { "" }
-        }
-        assertStatus 400
-
-        
         // authorized with xml body should succeed
         def requestBody = 
 """<?xml version="1.0" encoding="UTF-8"?>
@@ -129,5 +115,88 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         assertEquals "the console level should be DEBUG", ConsoleLogLevel.DEBUG, s.consoleLogLevel
         assertEquals "the server level should be ERROR", ApacheLogLevel.ERROR, s.apacheLogLevel
         assertEquals "the days to keep should be 20", 20, s.pruneLogsOlderThan
+    }
+
+    /**
+     * Tests the PUT method for updating logging config
+     */
+    void testLoggingPutFaultyRequest() {
+
+        // unauthorized calls receive 401
+        put(url) {
+            body { "" }
+        }
+        assertStatus 401
+
+        // authorized, but faulty, calls receive 400 (bad request)
+        put(url) {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { "" }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+
+        // unsupported element value should receive 400 (bad request)
+        def requestBody =
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="ConsoleLogLevel">ERRROR</entry>
+  <entry key="ServerLogLevel">INFO</entry>
+  <entry key="DaysToKeep">5</entry>
+</map>
+"""
+        put("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+        // missing keyname (ConsoleLogLevel) should receive 400 (bad request)
+        requestBody =
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="ServerLogLevel">INFO</entry>
+  <entry key="DaysToKeep">5</entry>
+</map>
+"""
+        put("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+        // malformed XML should receive 400
+        requestBody =
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="ConsoleLogLevel">ERROR</entry>
+  <entry key="ServerLogLevel">INFO</entry>
+  <entry key="DaysToKeep">5</entry>
+<map>
+"""
+        put("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+        // JSON for XML content type should receive 400
+        requestBody =
+"""{
+    ConsoleLogLevel: "DEBUG",
+    ServerLogLevel: "ERROR",
+    DaysToKeep: 20
+}"""
+        put("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
     }
 }
