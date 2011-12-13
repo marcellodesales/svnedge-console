@@ -3,6 +3,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="repository.page.editAuthorization.title" /></title>
+      <g:javascript library="prototype" />
+    
 </head>
 
 
@@ -52,6 +54,19 @@
 
 </g:form>
 </table>
+<g:javascript>
+<!-- Safari wants a synchronous call for this to work, other browsers seem fine to send the request and move on -->
+window.onbeforeunload = function() {
+    new Ajax.Request('/csvn/repo/cancelEditAuthorization', {
+        asynchronous:false,
+        method:'get',
+        requestHeaders: {Accept: 'text/html'},
+        onSuccess: function(transport) {
+          // just send the request, don't need the result
+        }
+    })
+}
+</g:javascript>
 
 </body>
 </html>

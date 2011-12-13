@@ -113,13 +113,7 @@ class RepoControllerTests extends ControllerUnitTestCase {
         String original = serverConfService.readSvnAccessFile()
 
         // content we will submit to controller
-        String testFile = """
-[/]
-* =
-[/testrepo]
-* = rw
-"""
-
+        String testFile = NEW_ACCESS_RULES
         def cmd = new AuthzRulesCommand(accessRules: testFile)
         controller.saveAuthorization(cmd)
         assertNotNull "Controller should provide a success message", 
@@ -133,4 +127,23 @@ class RepoControllerTests extends ControllerUnitTestCase {
         // restore original
         serverConfService.writeSvnAccessFile(original)
     }
+    
+    private static final String NEW_ACCESS_RULES = """
+[/]
+* =
+[/testrepo]
+* = rw
+"""
+    
+    void testSaveAuthorizationWithoutLock() {
+        
+        controller.serverConfService = serverConfService
+        controller.metaClass.loggedInUserInfo = { return 1 }
+        
+        def cmd = new AuthzRulesCommand(accessRules: NEW_ACCESS_RULES)
+        controller.saveAuthorization(cmd)
+        assertNull "Controller should provide a success message",
+                controller.flash.message
+        assertNotNull "Controller should return an error", controller.flash.warn        
+    }    
 }
