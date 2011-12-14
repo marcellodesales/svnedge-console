@@ -260,22 +260,21 @@ public final class PackagesUpdateService implements InitializingBean {
 
         String proxyUrl = networkingService.httpProxy
         log.debug("Loading any proxy configuration... " + proxyUrl ?: "None")
-        if (proxyUrl && proxyUrl.trim().length() > 0) {
-            try {
-                this.proxyToOriginURL = proxyUrl.trim()
-                def prx = HttpProxyAuth.newInstance(new URL(
-                        this.proxyToOriginURL))
-                log.debug("Setting the Proxy server from the environment...")
-                this.csvnImage.setProxy(prx)
-                log.debug("Proxy Url: " + this.proxyToOriginURL)
-            } catch (IOException ioe) {
-                log.error("Can't connect to proxy: " + ioe.getMessage(), ioe)
-            } catch (IllegalArgumentException iae) {
-                log.error("The format of the proxy URL is incorrect: " + 
-                        this.proxyToOriginURL)
-            }
-        } else {
-            log.debug("No Proxy server set")
+        try {
+            this.proxyToOriginURL = proxyUrl?.trim()
+            def prx = (this.proxyToOriginURL) ? 
+                    HttpProxyAuth.newInstance(new URL(this.proxyToOriginURL)) :
+                    null
+            log.debug("Setting the Proxy server from the environment...")
+            this.csvnImage.setProxy(prx)
+            log.debug("Proxy Url: " + (this.proxyToOriginURL) ?: "None")
+        } catch (IOException ioe) {
+            log.error("Can't connect to proxy: " + ioe.getMessage(), ioe)
+        } catch (IllegalArgumentException iae) {
+            log.error("The format of the proxy URL is incorrect: " + 
+                    this.proxyToOriginURL)
+        } catch (Exception e) {
+            log.error ("Proxy configuration could not be set: ${e.message}")
         }
     }
 
