@@ -6,7 +6,7 @@
     <table class="Container">
       <tbody>
         <tr><td colspan="5"><strong><g:message code="packagesUpdate.page.table.repository" /></strong>
-            ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong> <g:message code="packagesUpdate.page.table.throughProxy" /> </strong>${proxyToOriginURL}
+            ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong><g:message code="packagesUpdate.page.table.throughProxy" args="${[createLink(controller: 'server', action: 'editProxy')]}" /></strong>
                </g:if></td></tr>
 
     <g:if test="${(!anyConnectionProblem && packagesInfo && packagesInfo.size() > 0) || 
