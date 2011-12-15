@@ -39,7 +39,7 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         get("${url}?format=xml") {
             headers["Authorization"] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
-        assertStatus 302 // security framework redirects to loginDenied...
+        assertStatus 401
 
         // but allow admins
         get("${url}?format=xml") {
@@ -53,7 +53,7 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
 
     void testLoggingUnsupportedMethods() {
        
-        // unauthorized calls receive 401
+        // unsupported methods send 401 to unauthorized client
         post(url) 
         assertStatus 401
 

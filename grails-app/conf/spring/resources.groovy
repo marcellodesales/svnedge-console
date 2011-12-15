@@ -40,8 +40,12 @@ beans = {
         
     basicExceptionTranslationFilter(org.springframework.security.ui.ExceptionTranslationFilter) {
         authenticationEntryPoint = ref('basicAuthenticationEntryPoint')
-        accessDeniedHandler = ref('accessDeniedHandler')
+        accessDeniedHandler = ref('restAccessDeniedHandler')
         portResolver = ref('portResolver')
+    }
+
+    restAccessDeniedHandler(com.collabnet.svnedge.security.RestAccessDeniedHandler) { bean ->
+        bean.autowire = 'byName'
     }
 
     // use the db-based statistics service
