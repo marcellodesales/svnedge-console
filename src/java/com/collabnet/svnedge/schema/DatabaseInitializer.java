@@ -89,7 +89,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS003Migrate200To210(),
             new MS004RepoTemplate(),
             new MS005ProxySupport(),
-            new MS006DisableCloudService()
+            new MS006DisableCloudService(),
+            new MS007AddEmailConfig()
         };
     }
 

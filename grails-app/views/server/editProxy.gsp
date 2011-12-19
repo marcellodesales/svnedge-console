@@ -55,16 +55,7 @@
 <g:render template="leftNav"/>
 
 <body>
-<g:set var="events" value="onclick='return warnForUnSavedData()'"/>
-<g:set var="tabArray"
-       value="${[[action: 'edit', events: events, label: message(code:'server.page.edit.tabs.general')]]}"/>
-<g:if test="${!isManagedMode}">
-  <g:set var="tabArray"
-         value="${tabArray << [action: 'editAuthentication', events: events, label: message(code:'server.page.edit.tabs.authentication')]}"/>
-</g:if>
-<g:set var="tabArray"
-       value="${tabArray << [action: 'editProxy', active: true, label: message(code:'server.page.edit.tabs.proxy')]}"/>
-<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+<g:render template="tabs" model="${[view: 'editProxy']}" />
 
 <g:form method="post" name="serverForm" action="updateProxy">
   <g:hiddenField name="view" value="editProxy"/>

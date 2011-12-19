@@ -23,6 +23,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.CantBindPortException;
+import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
@@ -314,6 +315,46 @@ class ServerController {
             isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
     }
+    
+    private static final String UNCHANGED = "_UnChAnGeD"
+    def editMail = {
+        def server = Server.getServer()
+        def config = MailConfiguration.getConfiguration()
+        config.discard()
+        if (config.authPassword) {
+            config.authPassword = UNCHANGED
+        }
+        return [config: config, server: server]
+     }
+     
+     def updateMail = {
+         def config = MailConfiguration.getConfiguration()
+         // bind data, excluding password
+         if (params.enabled) {
+            bindData(config, params, ['authPassword'])
+            // if a new password has been input, copy to the entity
+            def password = params['authPassword']
+            if (password != UNCHANGED) {
+                config.authPassword = password ? 
+                        securityService.encrypt(password) : ''
+            }
+            config.validate()
+            if (!config.hasErrors() && config.save()) {
+                flash.message = message(code:"server.action.updateMail.success")
+                redirect(action: 'editMail')
+            }
+            else {
+                config.discard()
+                request.error = message(code:"server.action.update.invalidSettings")
+                render(view: "editMail", model: [mailConfig: config])
+            }
+         } else {
+             config.enabled = false
+             config.save()
+             flash.message = message(code:"server.action.updateMail.disabled")
+             redirect(action: 'editMail')
+         }
+     } 
 }
 
 class CtfCredentialCommand {
