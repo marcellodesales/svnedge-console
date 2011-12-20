@@ -47,13 +47,13 @@ class LoggingRestController extends AbstractRestController {
      * </code>
      * 
      * Json return example:
-     * <code>
+     * <pre>
      * {
      *   "ConsoleLogLevel": "WARN",
      *   "ServerLogLevel": "WARN",
      *   "DaysToKeep": 3
      * }
-     * </code>
+     * </pre>
      */
     def restRetrieve = {
         def result = [:]
@@ -85,13 +85,13 @@ class LoggingRestController extends AbstractRestController {
      * </code>    
      * 
      * Request body example (JSON):
-     * <code>
+     * <pre>
      * {
      *   "ConsoleLogLevel": "WARN",
      *   "ServerLogLevel": "WARN",
      *   "DaysToKeep": 3
      * }
-     * </code>
+     * </pre>
      */
     def restUpdate = {
         def consoleLogLevel = getRestParam("ConsoleLogLevel")
