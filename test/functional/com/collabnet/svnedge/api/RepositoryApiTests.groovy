@@ -29,6 +29,7 @@ import com.collabnet.svnedge.domain.ServerMode
 class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
 
     def svnRepoService
+    def url = "/api/1/repository"
     
     void testRepositoryGet() {
         
@@ -42,11 +43,11 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         assertNotNull "Repo should be created", repo
 
         // without auth, GET is protected
-        get('/api/1/repository?format=xml')
+        get("${url}?format=xml")
         assertStatus 401
 
         // authorized request contains repo information
-        get('/api/1/repository?format=json') {
+        get("${url}?format=json") {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
         assertContentContains '{"repositories":['
@@ -60,41 +61,103 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         svnRepoService.deletePhysicalRepository(repo)
     }
 
+    /**
+     * Tests the POST method for creating a Repo
+     */
+    void testRepositoryPost() {
+
+        def server = Server.getServer()
+        def repoName = "api-test" + Math.random() * 10000
+        
+        // authorized with xml body should succeed
+        def requestBody =
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="name">${repoName}</entry>
+  <entry key="useTemplate">false</entry>
+</map>
+"""
+        post("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 201
+        assertContentContains "<entry key=\"message\">${getMessage("api.message.201")}</entry>"
+        assertContentContains "<entry key=\"repository\">"
+        assertContentContains "<entry key=\"viewvcUrl\">${server.viewvcURL(repoName)}</entry>"
+    }
+
+    void testRepositoryPostFaultyRequest() {
+
+        // unauthorized calls receive 401
+        post(url) {
+            body { "" }
+        }
+        assertStatus 401
+
+        // authorized, but faulty, calls receive 400 (bad request)
+        post(url) {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { "" }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+        // missing element value (name) should receive 400 (bad request)
+        def requestBody = 
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="naame">myName</entry>
+  <entry key="useTemplate">false</entry>
+</map>
+"""
+        post("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+
+        // malformed XML should receive 400
+        requestBody =
+"""<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="naame">myName</entry>
+  <entry key="useTemplate">false</entry>
+<map>
+"""
+        post("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 400
+        assertContentContains "<entry key=\"errorMessage\">"
+    }
+
     void testRepositoryUnsupportedMethods() {
         // unauthorized calls receive 401
-        put('/api/1/repository') {
+        put(url) {
             body { "" }
         }
         assertStatus 401
 
-        post('/api/1/repository') {
-            body { "" }
-        }
-        assertStatus 401
-
-        delete('/api/1/repository')
+        delete(url)
         assertStatus 401
 
         // authorized calls receive 405 (not implemented)
-        put('/api/1/repository') {
+        put(url) {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
             body { "" }
         }
         assertStatus 405
 
-        post('/api/1/repository') {
-            headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
-            body { "" }
-        }
-        assertStatus 405
-
-        delete('/api/1/repository') {
+        delete(url) {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
         assertStatus 405
 
         // a repo detail view is not yet supported
-        get('/api/1/repository/1') {
+        get("${url}/1") {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
         assertStatus 405
@@ -107,11 +170,11 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         server.save(flush: true)
         
         // without auth, GET is protected
-        get('/api/1/repository?format=xml')
+        get("${url}?format=xml")
         assertStatus 401
         
         // authorized request should respond 405
-        get('/api/1/repository?format=json') {
+        get("${url}?format=xml") {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
         assertStatus 405
@@ -120,7 +183,7 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         server.save(flush: true)
          
         // authorized request should respond 405
-        get('/api/1/repository?format=json') {
+        get("${url}?format=json") {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
         }
         assertStatus 405
