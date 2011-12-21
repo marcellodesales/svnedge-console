@@ -15,6 +15,9 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+
+
 package com.collabnet.svnedge.controller.api
 
 import com.collabnet.svnedge.domain.Server
@@ -26,27 +29,26 @@ import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 
 /**
- * Logging configuration REST API controller
+ * REST API controller for retrieving and updating the logging settings
+ * <p><bold>URL:</bold></p>
+ * <code>
+ *   /csvn/api/1/logging
+ * </code>
  */
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class LoggingRestController extends AbstractRestController {
 
     /**
-     * Rest method to view the logging configuration for the Subversion console and server. The log levels are
+     * <p>Rest method to view the logging configuration for the Subversion console and server. The log levels are
      * one of the following: DEBUG, INFO, WARN, ERROR. The DaysToKeep field indicates how many days of
-     * log to keep (0 means keep all).
+     * log to keep (0 means keep all).</p>
      * 
-     * URL:
-     * <code>
-     *   /csvn/api/1/logging
-     * </code>
-     * 
-     * HTTP Method:
+     * <p><bold>HTTP Method:</bold></p>
      * <code>
      *     GET
      * </code>
      * 
-     * Json return example:
+     * <p><bold>JSON-formatted request body example:</bold></p>
      * <pre>
      * {
      *   "ConsoleLogLevel": "WARN",
@@ -70,21 +72,16 @@ class LoggingRestController extends AbstractRestController {
     }
 
     /**
-     * Rest method to update the logging configuration for the Subversion server and console. The log levels can be
+     * <p>Rest method to update the logging configuration for the Subversion server and console. The log levels can be
      * one of the following: DEBUG, INFO, WARN, ERROR. The DaysToKeep field indicates how many days of
-     * log to keep (use 0 to keep all). Returns Status Code 201 on success.
+     * log to keep (use 0 to keep all). Returns Status Code 201 on success.</p>
      * 
-     * URL:
-     * <code>
-     *   /csvn/api/1/logging
-     * </code>
-     * 
-     * HTTP Method:
+     * <p><bold>HTTP Method:</bold></p>
      * <code>
      *   PUT
      * </code>    
      * 
-     * Request body example (JSON):
+     * <p><bold>JSON-formatted request body example:</bold></p>
      * <pre>
      * {
      *   "ConsoleLogLevel": "WARN",

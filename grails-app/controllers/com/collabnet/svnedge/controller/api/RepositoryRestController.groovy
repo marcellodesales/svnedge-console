@@ -29,7 +29,11 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 
 /**
- * Repository info
+ * REST API controller for creating and listing repositories
+ * <p><bold>URL:</bold></p>
+ * <code>
+ *   /csvn/api/1/repository
+ * </code>
  */
 @Secured(['ROLE_USER'])
 class RepositoryRestController extends AbstractRestController {
@@ -37,35 +41,28 @@ class RepositoryRestController extends AbstractRestController {
     def svnRepoService
 
     /**
-     * API to retrieve the list of repositories. For each repository, the name, status,
+     * <p>API to retrieve the list of repositories. For each repository, the name, status,
      * svnUrl, and viewvcUrl are returned. Status currently indicates whether the 
-     * Unix permissions are set correctly, so it will always be "OK" on Windows.
-     * 
-     * URL:
-     * <code>
-     *   /csvn/api/1/repository
-     * </code>
+     * Unix permissions are set correctly, so it will always be "OK" on Windows.</p>
      *
-     * HTTP Method:
+     * <p><bold>HTTP Method:</bold></p>
      * <code>
      *     GET
      * </code>
      * 
-     * XML-formatted return example:
+     * <p><bold>XML-formatted return example:</bold></p>
      * <pre>
-     * {@code
-     * <map>
-     *   <entry key="repositories">
-     *     <map>
-     *       <entry key="id">1</entry>
-     *       <entry key="name">api-test</entry>
-     *       <entry key="status">OK</entry>
-     *       <entry key="svnUrl">http://Homegrown/svn/api-test</entry>
-     *       <entry key="viewvcUrl">http://Homegrown/viewvc/api-test/</entry>
-     *     </map>
-     *   </entry>
-     * </map>  
-     * }
+     * &lt;map&gt;
+     *   &lt;entry key="repositories"&gt;
+     *     &lt;map&gt;
+     *       &lt;entry key="id"&gt;1&lt;/entry&gt;
+     *       &lt;entry key="name"&gt;api-test&lt;/entry&gt;
+     *       &lt;entry key="status"&gt;OK&lt;/entry&gt;
+     *       &lt;entry key="svnUrl"&gt;http://Homegrown/svn/api-test&lt;/entry&gt;
+     *       &lt;entry key="viewvcUrl"&gt;http://Homegrown/viewvc/api-test/&lt;/entry&gt;
+     *     &lt;/map&gt;
+     *   &lt;/entry&gt;
+     * &lt;/map&gt;  
      * </pre>    
      */
     def restRetrieve = {
@@ -100,44 +97,35 @@ class RepositoryRestController extends AbstractRestController {
     }
 
     /**
-     * API to create a repository. 
+     * <p>API to create a repository.</p> 
      *
-     * URL:
-     * <code>
-     *   /csvn/api/1/repository
-     * </code>
-     *
-     * HTTP Method:
+     * <p><bold>HTTP Method:</bold></p>
      * <code>
      *     POST
      * </code>
      *
-     * XML-formatted request body example
+     * <p><bold>XML-formatted request body example:</bold></p>
      * <pre>
-     * {@code
-     * <map>
-     *   <entry key="name">new-repo</entry>
-     *   <entry key="useTemplate">false</entry>
-     * </map>
-     * }
+     * &lt;map&gt;
+     *   &lt;entry key="name"&gt;new-repo&lt;/entry&gt;
+     *   &lt;entry key="useTemplate"&gt;false&lt;/entry&gt;
+     * &lt;/map&gt;
      * </pre>    
      * 
-     * XML-formatted return example:
+     * <p><bold>XML-formatted return example:</bold></p>
      * <pre>
-     * {@code
-     * <map>
-     *   <entry key="message">Successfully created</entry>
-     *   <entry key="repository">
-     *      <map>
-     *        <entry key="id">1</entry>
-     *        <entry key="name">new-repo</entry>
-     *        <entry key="status">OK</entry>
-     *        <entry key="svnUrl">http://Homegrown/svn/api-test</entry>
-     *        <entry key="viewvcUrl">http://Homegrown/viewvc/api-test/</entry>
-     *      </map>
-     *   </entry>
-     * </map>
-     * }
+     * &lt;map&gt;
+     *   &lt;entry key="message"&gt;Successfully created&lt;/entry&gt;
+     *   &lt;entry key="repository"&gt;
+     *      &lt;map&gt;
+     *        &lt;entry key="id"&gt;1&lt;/entry&gt;
+     *        &lt;entry key="name"&gt;new-repo&lt;/entry&gt;
+     *        &lt;entry key="status"&gt;OK&lt;/entry&gt;
+     *        &lt;entry key="svnUrl"&gt;http://Homegrown/svn/api-test&lt;/entry&gt;
+     *        &lt;entry key="viewvcUrl"&gt;http://Homegrown/viewvc/api-test/&lt;/entry&gt;
+     *      &lt;/map&gt;
+     *   &lt;/entry&gt;
+     * &lt;/map&gt;
      * </pre>    
      */
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])

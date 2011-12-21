@@ -26,12 +26,25 @@ import grails.converters.XML
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 
 /**
- * Secure Port access info for the API 
+ * REST API controller for retrieving the SSL settings
+ * <p><bold>URL:</bold></p>
+ * <code>
+ *   /csvn/api/1/logging
+ * </code>
  */
-
 @Secured(['ROLE_USER'])
 class SecurePortRestController extends AbstractRestController {
 
+    /**
+     * <p>REST method to view the SSL port for the console, and whether or not its use is required. No request body
+     * is expected</p>
+     * 
+     * <p><bold>HTTP Method:</bold></p>
+     * <code>
+     *     GET
+     * </code>
+     * 
+     */
     @Secured(['IS_AUTHENTICATED_ANONYMOUSLY'])
     def restRetrieve = {
         String port = System.getProperty("jetty.ssl.port", "4434")
