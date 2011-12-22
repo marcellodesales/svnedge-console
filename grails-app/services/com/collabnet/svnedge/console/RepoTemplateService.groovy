@@ -140,4 +140,16 @@ class RepoTemplateService extends AbstractSvnEdgeService {
         }
         return true
     }
+
+    /**
+     * Updates special templates with the localized name
+     * @param template the RepoTemplate whose name may need localization
+     * @param locale the locale
+     */
+    public void substituteL10nName(RepoTemplate template, Locale locale) {
+        if (template.name.startsWith('l10n_')) {
+            template.discard()
+            template.name = getMessage(template.name[5..-1], locale)
+        }
+    }
 }

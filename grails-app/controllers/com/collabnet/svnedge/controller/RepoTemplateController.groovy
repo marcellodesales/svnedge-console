@@ -17,7 +17,7 @@ class RepoTemplateController {
         params.sort = 'displayOrder'
         def templateList = RepoTemplate.list(params)
         for (RepoTemplate t : templateList) {
-            substituteL10nName(t)
+            repoTemplateService.substituteL10nName(t, request.locale)
         }
         [repoTemplateInstanceList: templateList, 
                 repoTemplateInstanceTotal: RepoTemplate.count()]
@@ -90,15 +90,8 @@ class RepoTemplateController {
             redirect(action: "list")
         }
         else {
-            substituteL10nName(repoTemplateInstance)
+            repoTemplateService.substituteL10nName(repoTemplateInstance, request.locale)
             return [repoTemplateInstance: repoTemplateInstance]
-        }
-    }
-
-    private void substituteL10nName(RepoTemplate template) {
-        if (template.name.startsWith('l10n_')) {
-            template.discard()
-            template.name = message(code: template.name[5..-1])
         }
     }
 
