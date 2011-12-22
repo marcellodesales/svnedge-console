@@ -49,7 +49,7 @@ class RepoTemplateControllerTests extends ControllerUnitTestCase {
         // mock the RepoTemplateService
         def svc = new Expando()
         svc.substituteL10nName = { p1, p2 ->
-            if (p1.name.startsWith("l10n_T2")) {
+            if (p1.name.startsWith("l10n_")) {
                 p1.name = p1.name.substring(5) 
             }    
         }
