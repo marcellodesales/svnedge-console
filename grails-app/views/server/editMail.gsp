@@ -17,12 +17,6 @@
 <body>
   <g:render template="tabs" model="${[view: 'editMail']}" />
   
-  <g:hasErrors bean="${config}">
-    <div class="errors">
-      <g:renderErrors bean="${config}" as="list" />
-    </div>
-  </g:hasErrors>
-            
 <p><g:message code="server.page.editMail.intro" args="${[server.adminEmail]}"/></p>
 
 <div class="dialog">            
@@ -77,7 +71,7 @@
               <label for="port"><g:message code="mailConfiguration.port.label" /></label>
             </td>
             <td valign="top" class="value ${hasErrors(bean: config, field: 'port', 'errors')}">
-              <g:textField name="port" value="${fieldValue(bean: config, field: 'port')}" class="requireEnabled"/>
+              <g:textField name="port" value="${fieldValue(bean: config, field: 'port').replace(',','')}" class="requireEnabled"/>
             </td>
              <td class="ItemDetailValue"><i><g:message code="mailConfiguration.port.label.tip" /></i></td>
           </tr>

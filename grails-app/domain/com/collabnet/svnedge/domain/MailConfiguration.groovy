@@ -1,6 +1,6 @@
 /*
  * CollabNet Subversion Edge
- * Copyright (C) 2010, CollabNet Inc. All rights reserved.
+ * Copyright (C) 2011, CollabNet Inc. All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -17,11 +17,6 @@
  */
 package com.collabnet.svnedge.domain
 
-import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
-import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.util.ConfigUtil
-
 /**
  * Data on how to send mail. 
  * We expect there to be only one config object defined.
@@ -37,12 +32,21 @@ class MailConfiguration {
     MailAuthMethod authMethod = MailAuthMethod.NONE
     
     static constraints = {
-        serverName(nullable: false, blank: false, unique: true)
-        port(min:1)
-        authUsername(nullable:true)
-        authPassword(nullable:true)
+        serverName(validator: isBlank, unique: true)
+        port(validator: isBlank)
+        authUsername(nullable:true, validator: isAuthRequired)
+        authPassword(nullable: true, validator: isAuthRequired)
         authMethod(nullable:false)
         securityMethod(nullable:false)
+    }
+    
+    private static def isBlank = { val, obj -> 
+            return (val || !obj.enabled) ? null : ['blank']
+    }
+    
+    private static def isAuthRequired = { val, obj -> 
+        return val || !obj.enabled || obj.authMethod == MailAuthMethod.NONE ?
+                null : ['blank']
     }
     
     static MailConfiguration getConfiguration() {
