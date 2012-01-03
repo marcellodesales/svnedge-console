@@ -31,12 +31,16 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.NetworkConfiguration;
+import java.net.ConnectException
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class ServerController {
 
     def operatingSystemService
     def lifecycleService
+    def mailNotificationService
     def networkingService
     def serverConfService
     def setupTeamForgeService
@@ -329,32 +333,82 @@ class ServerController {
      
      def updateMail = {
          def config = MailConfiguration.getConfiguration()
-         // bind data, excluding password
          if (params.enabled) {
-            bindData(config, params, ['authPassword'])
-            // if a new password has been input, copy to the entity
-            def password = params['authPassword']
-            if (password != UNCHANGED) {
-                config.authPassword = password ? 
-                        securityService.encrypt(password) : ''
-            }
-            config.validate()
-            if (!config.hasErrors() && config.save()) {
+            if (saveConfig(config)) {
                 flash.message = message(code:"server.action.updateMail.success")
                 redirect(action: 'editMail')
             }
             else {
-                config.discard()
                 request.error = message(code:"server.action.update.invalidSettings")
-                render(view: "editMail", model: [mailConfig: config])
+                render(view: "editMail", model: [config: config, server: Server.getServer()])
             }
          } else {
              config.enabled = false
-             config.save()
+             mailNotificationService.saveMailConfiguration(config)
              flash.message = message(code:"server.action.updateMail.disabled")
              redirect(action: 'editMail')
          }
      } 
+     
+     private boolean saveConfig(config) {
+         // bind data, excluding password
+         bindData(config, params, ['authPassword'])
+         // if a new password has been input, copy to the entity
+         def password = params['authPassword']
+         if (password != UNCHANGED) {
+             config.authPassword = password ?
+                     securityService.encrypt(password) : ''
+         }
+         return mailNotificationService.saveMailConfiguration(config)
+     }
+     
+     def testMail = {
+         MailConfiguration config = MailConfiguration.getConfiguration()
+         Server server = Server.getServer()
+         if (saveConfig(config)) {
+             try {
+                 sendMail {
+                     to server.adminEmail
+                     subject message(code: 'server.action.testMail.subject')
+                     body message(code: 'server.action.testMail.body')
+                 }
+                 flash.message = message(code: "server.action.testMail.success",
+                         args:[server.adminEmail])
+                 redirect(action: 'editMail')
+                 return
+
+             } catch (Exception e) {
+                log.debug "Caught Exception when testing mail server settings: " + e.getClass(), e
+                while (e.cause) {
+                    log.debug e.cause.message
+                    e = e.cause
+                }
+                
+                switch (e) {
+                    
+                    case ConnectException:
+                    request.error = message(code:"server.action.testMail.connectException")
+                    break
+                    
+                    case AuthenticationFailedException:
+                    request.error = message(code:"server.action.testMail.authenticationFailedException")
+                    break
+
+                    case MessagingException:
+                    request.error = message(code:"server.action.testMail.messagingException",
+                        args: [e.class, e.message])
+                    break
+                    
+                    default:
+                    request.error = message(code:"server.action.testMail.unknownException",
+                        args: [e.class, e.message])
+                }
+             }
+         } else {
+             request.error = message(code:"server.action.update.invalidSettings")
+         }
+         render(view: "editMail", model: [config: config, server: server])
+     }
 }
 
 class CtfCredentialCommand {

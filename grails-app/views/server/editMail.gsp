@@ -187,7 +187,7 @@
       <tr class="ContainerFooter">
         <td colspan="3">
           <div class="AlignRight">
-                <g:actionSubmit action="updateMail" value="${message(code:'server.page.editMail.button.testSettings')}" class="Button requireEnabled"/>
+                <g:actionSubmit action="testMail" value="${message(code:'server.page.editMail.button.testSettings')}" class="Button requireEnabled"/>
                 <g:actionSubmit action="updateMail" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
           </div>
         </td>

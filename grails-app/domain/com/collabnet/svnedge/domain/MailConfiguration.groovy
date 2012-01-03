@@ -51,10 +51,5 @@ class MailConfiguration {
 }
 
 enum MailAuthMethod { NONE, PLAINTEXT, ENCRYPTED, NTLM, KERBEROS }
-
-enum MailSecurityMethod { NONE, STARTTLS, SSL_TLS;
-    String toString() {
-        return super.toString().replace('_', '/')
-    }
-}
+enum MailSecurityMethod { NONE, STARTTLS, SSL }
 
