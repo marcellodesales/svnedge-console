@@ -21,8 +21,12 @@ import java.util.zip.ZipFile;
 
 import com.collabnet.svnedge.util.ConfigUtil;
 import com.collabnet.svnedge.domain.RepoTemplate
+import com.collabnet.svnedge.domain.Repository
+import org.apache.commons.io.FileUtils
 
 class RepoTemplateService extends AbstractSvnEdgeService {
+    
+    def svnRepoService
 
     File getTemplateDirectory() {
         File templateDir = new File(ConfigUtil.dataDirPath(), 'repoTemplates')
@@ -88,6 +92,20 @@ class RepoTemplateService extends AbstractSvnEdgeService {
             }            
         }
         return id
+    }
+
+    /**
+     * copies a given template file to the load location for a Repository
+     * @param template the RepoTemplate whose asset file should be copied
+     * @param targetRepo the target repo whihc will load the template
+     */
+    def copyTemplateForLoad(RepoTemplate template, Repository targetRepo) {
+        String templateDir = getTemplateDirectory()
+        String filename = template.location
+        File templateFile = new File(templateDir, filename)
+        File loadDir = svnRepoService.getLoadDirectory(targetRepo)
+        log.debug("Copying template file '${templateFile.absolutePath}' to load location '${loadDir.absolutePath}'")
+        FileUtils.copyFileToDirectory(templateFile, loadDir)
     }
         
     /**
