@@ -21,6 +21,12 @@
 package com.collabnet.svnedge.api
 
 import sun.misc.BASE64Encoder
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.console.DumpBean
+import com.collabnet.svnedge.console.SvnRepoService
+import com.collabnet.svnedge.domain.RepoTemplate
+import com.collabnet.svnedge.console.RepoTemplateService
 
 /**
  * Helper for API functional tests
@@ -46,4 +52,55 @@ class ApiTestHelper {
 
     }
 
+    /**
+     * creates a test repo and dumps it 
+     * @param svnRepoService the configured service
+     * @return File referencing the dump file
+     */
+    static File createDumpFile(SvnRepoService svnRepoService) {
+        
+        // create a repo with branches/tags/trunk nodes
+        def repoName = "test-repo-" + (Math.random() * 4000)
+        Repository repo = new Repository(name: repoName)
+        svnRepoService.createRepository(repo, true)
+        repo.save()
+
+        // create dump file of this
+        DumpBean params = new DumpBean()
+        params.compress = true
+        def filename = svnRepoService.createDump(params, repo)
+        File dumpFile = new File(new File(Server.getServer().dumpDir, repo.name), filename)
+        // create dump is async, so wait
+        def timeLimit = System.currentTimeMillis() + 60000
+        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        return dumpFile 
+    }
+
+    /**
+     * creates a template from a test dump file
+     * @param repoTemplateService the configured service
+     * @param svnRepoService the configured service
+     * @return RepoTemplate referencing the dump file
+     */
+    static RepoTemplate createTemplate(RepoTemplateService repoTemplateService, SvnRepoService svnRepoService) {
+
+        File dump = createDumpFile(svnRepoService)
+        
+        File templateDir = repoTemplateService.getUploadDirectory()
+        File templateFile = new File(templateDir, dump.name)
+        dump.renameTo(templateFile)
+        
+        RepoTemplate rt = new RepoTemplate()
+        rt.name = "test-template-" + (Math.random() * 4000)
+        rt.active = true
+        rt.displayOrder = 0
+        rt.dumpFile = true
+
+        repoTemplateService.saveTemplate(rt, templateFile, true)
+        return rt
+    }
+
 }
+

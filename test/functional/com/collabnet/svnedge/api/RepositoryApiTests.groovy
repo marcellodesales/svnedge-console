@@ -26,11 +26,14 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.domain.RepoTemplate
 
 class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
 
     def svnRepoService
     def commandLineService
+    def repoTemplateService
+    
     def url = "/api/1/repository"
     
     void testRepositoryGet() {
@@ -120,6 +123,43 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
                 commandLineService.createSvnFileURI(new File(repoParentDir, repoName)) + "trunk")
 
         assertTrue("The new repo should have a trunk directory", output.contains("Node Kind: directory"))
+        
+        // test new repo with template
+        RepoTemplate rt = ApiTestHelper.createTemplate(repoTemplateService, svnRepoService)
+        repoName = "api-test" + Math.random() * 10000
+        requestBody =
+            """<?xml version="1.0" encoding="UTF-8"?>
+<map>
+  <entry key="name">${repoName}</entry>
+  <entry key="applyStandardLayout">false</entry>
+  <entry key="applyTemplateId">${rt.id}</entry>
+</map>
+"""
+        post("${url}?format=xml") {
+            headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+            body { requestBody }
+        }
+        assertStatus 201
+        assertContentContains "<entry key=\"message\">${getMessage("api.message.201")}</entry>"
+        assertContentContains "<entry key=\"repository\">"
+        assertContentContains "<entry key=\"viewvcUrl\">${server.viewvcURL(repoName)}</entry>"
+
+        // wait for async job to load the template
+        // verify that repo load has run (trunk/tags/branches which should have been imported)
+        boolean loadSuccess = false
+        def timeLimit = System.currentTimeMillis() + 60000
+        while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(3000)
+            output = commandLineService.executeWithOutput(
+                    ConfigUtil.svnPath(), "info",
+                    "--no-auth-cache", "--non-interactive",
+                    commandLineService.createSvnFileURI(new File(repoParentDir, repoName)) + "trunk")
+
+            loadSuccess = output.contains("Node Kind: directory")
+        }      
+        
+        assertTrue("The new repo should have a trunk directory from template", output.contains("Node Kind: directory"))
+        
     }
 
     void testRepositoryPostFaultyRequest() {
