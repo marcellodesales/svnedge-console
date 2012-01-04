@@ -94,7 +94,7 @@
             <td valign="top" colspan="2"
                 class="${hasErrors(bean: networkConfig, field: 'httpProxyPort', 'errors')}">
               <input size="6" type="text" id="httpProxyPort" name="httpProxyPort"
-                     value="${fieldValue(bean: networkConfig, field: 'httpProxyPort')}"/>
+                     value="${fieldValue(bean: networkConfig, field: 'httpProxyPort').replace(',', '')}"/>
             </td>
           </tr>
           <g:hasErrors bean="${networkConfig}" field="httpProxyPort">
