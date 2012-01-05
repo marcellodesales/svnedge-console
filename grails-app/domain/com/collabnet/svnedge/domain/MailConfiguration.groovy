@@ -26,27 +26,38 @@ class MailConfiguration {
     boolean enabled = false
     String serverName = "localhost"
     int port = 25
-    String authUsername
-    String authPassword
+    String authUser
+    String authPass
     MailSecurityMethod securityMethod = MailSecurityMethod.NONE
     MailAuthMethod authMethod = MailAuthMethod.NONE
+    String fromAddress
+    
+    String createFromAddress() {
+        String addr = fromAddress
+        if (!addr) {
+            String host = serverName
+            if (host.startsWith('smtp.')) {
+                host = host.substring(5)
+            } else if (host.startsWith('exchange.')) {
+                host = host.substring(9)
+            }
+            addr = (authUsername ?: 'SubversionEdge') + '@' + host
+        }
+        return addr
+    }
     
     static constraints = {
         serverName(validator: isBlank, unique: true)
         port(validator: isBlank)
-        authUsername(nullable:true, validator: isAuthRequired)
-        authPassword(nullable: true, validator: isAuthRequired)
-        authMethod(nullable:false)
+        authUser(nullable:true)
+        authPass(nullable: true)
+        authMethod(nullable:true)
         securityMethod(nullable:false)
+        fromAddress(nullable:true, email: true)
     }
     
     private static def isBlank = { val, obj -> 
             return (val || !obj.enabled) ? null : ['blank']
-    }
-    
-    private static def isAuthRequired = { val, obj -> 
-        return val || !obj.enabled || obj.authMethod == MailAuthMethod.NONE ?
-                null : ['blank']
     }
     
     static MailConfiguration getConfiguration() {

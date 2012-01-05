@@ -324,12 +324,16 @@ class ServerController {
     def editMail = {
         def server = Server.getServer()
         def config = MailConfiguration.getConfiguration()
-        config.discard()
-        if (config.authPassword) {
-            config.authPassword = UNCHANGED
-        }
+        hidePassword(config)
         return [config: config, server: server]
-     }
+    }
+    
+    private void hidePassword(config) {
+        config.discard()
+        if (config.authPass) {
+            config.authPass = UNCHANGED
+        }
+    }
      
      def updateMail = {
          def config = MailConfiguration.getConfiguration()
@@ -340,6 +344,7 @@ class ServerController {
             }
             else {
                 request.error = message(code:"server.action.update.invalidSettings")
+                hidePassword(config)
                 render(view: "editMail", model: [config: config, server: Server.getServer()])
             }
          } else {
@@ -352,11 +357,11 @@ class ServerController {
      
      private boolean saveConfig(config) {
          // bind data, excluding password
-         bindData(config, params, ['authPassword'])
+         bindData(config, params, ['authPass'])
          // if a new password has been input, copy to the entity
-         def password = params['authPassword']
+         def password = params['authPass']
          if (password != UNCHANGED) {
-             config.authPassword = password ?
+             config.authPass = password ?
                      securityService.encrypt(password) : ''
          }
          return mailNotificationService.saveMailConfiguration(config)
@@ -369,6 +374,7 @@ class ServerController {
              try {
                  sendMail {
                      to server.adminEmail
+                     from config.createFromAddress()
                      subject message(code: 'server.action.testMail.subject')
                      body message(code: 'server.action.testMail.body')
                  }
@@ -400,14 +406,20 @@ class ServerController {
                     break
                     
                     default:
-                    request.error = message(code:"server.action.testMail.unknownException",
-                        args: [e.class, e.message])
+                    if (e.message.toLowerCase().contains("authentication")) {
+                        request.error = message(code:"server.action.testMail.maybeAuthenticationFailedException",
+                                args: [e.class, e.message])
+                    } else {
+                        request.error = message(code:"server.action.testMail.unknownException",
+                                args: [e.class, e.message])
+                    }
                 }
              }
          } else {
              request.error = message(code:"server.action.update.invalidSettings")
          }
-         render(view: "editMail", model: [config: config, server: server])
+         hidePassword(config)
+         render(view: "editMail", model: [config: config, server: Server.getServer()])
      }
 }
 

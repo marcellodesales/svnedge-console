@@ -63,9 +63,9 @@ class MailNotificationService extends AbstractSvnEdgeService
         log.debug "ConfigObject in updateConfig: " + config
         config['host'] = dynamicConfig.serverName
         config['port'] = dynamicConfig.port
-        config['username'] = dynamicConfig.authUsername
-        config['password'] = dynamicConfig.authPassword ?
-                securityService.decrypt(dynamicConfig.authPassword) : ''
+        config['username'] = dynamicConfig.authUser
+        config['password'] = dynamicConfig.authPass ?
+                securityService.decrypt(dynamicConfig.authPass) : ''
         config['disabled'] = !dynamicConfig.enabled
         def props = [:]
         switch (dynamicConfig.securityMethod) {
@@ -83,18 +83,16 @@ class MailNotificationService extends AbstractSvnEdgeService
             props["mail.smtp.starttls.enable"] = "true"
             props["mail.smtp.port"] = dynamicConfig.port as String
         }
-        if (dynamicConfig.authMethod != MailAuthMethod.NONE) {
+        if (dynamicConfig.authUser) {
             props["mail.smtp.auth"] = "true"
         }
-        if (dynamicConfig.authMethod != MailAuthMethod.PLAINTEXT) {
-            props["mail.smtp.auth.plain.disable"] = "true"
-        }
-        if (dynamicConfig.authMethod == MailAuthMethod.KERBEROS) {
-            props["mail.smtp.sasl.enable"] = "true"
-        }
+        // this might allow kerberos, but it is not tested
+        props["mail.smtp.sasl.enable"] = "true"
+        // if we are sending to a user and the server admin, the email should
+        // be sent to the admin, even if the user address is invalid.
+        props["mail.smtp.sendpartial"] = "true"
 
         config['props'] = props
-        
         configureMailSession(config)
     }
     
@@ -103,12 +101,9 @@ class MailNotificationService extends AbstractSvnEdgeService
         def ms = applicationContext.getBean('mailSender')
         ms.host = config.host ?: "localhost"
         ms.defaultEncoding = config.encoding ?: "utf-8"
-        if (config.port)
-            ms.port = config.port
-        if (config.username)
-            ms.username = config.username
-        if (config.password)
-            ms.password = config.password
+        ms.port = config.port
+        ms.username = config.username
+        ms.password = config.password
         if (config.protocol)
             ms.protocol = config.protocol
         if (config.props instanceof Map && config.props)

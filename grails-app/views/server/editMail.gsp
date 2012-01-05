@@ -36,7 +36,6 @@
             $$('.requireEnabled').each(function(item) {
                 item.disabled = !isEnabled;
             })
-            toggleAuthFields();
         }
       </g:javascript>
     </div>
@@ -51,7 +50,7 @@
               <label for="serverName"><g:message code="mailConfiguration.serverName.label" /></label>
             </td>
             <td valign="top" class="value ${hasErrors(bean: config, field: 'serverName', 'errors')}">
-              <g:textField name="serverName" value="${config?.serverName}" size="30" class="requireEnabled"/>
+              <g:textField name="serverName" value="${fieldValue(bean: config, field: 'serverName')}" size="30" class="requireEnabled"/>
             </td>
             <td class="ItemDetailValue"><i><g:message code="mailConfiguration.serverName.label.tip" /></i></td>
           </tr>
@@ -88,50 +87,18 @@
 
           <tr>
             <td class="ItemDetailName">
-              <label for="authMethod"><g:message code="mailConfiguration.authMethod.label" /></label>
+              <label for="authUser"><g:message code="mailConfiguration.authUser.label" /></label>
             </td>
-            <td valign="top" class="value ${hasErrors(bean: config, field: 'authMethod', 'errors')}">
-              <g:select name="authMethod" from="${com.collabnet.svnedge.domain.MailAuthMethod?.values()}" value="${config?.authMethod}" class="requireEnabled"/>
-              <g:javascript>
-                $('authMethod').onchange = toggleAuthFields; 
-        
-                function toggleAuthFields() {
-                    var isEnabled = $('enabled').checked;
-                    var selectedAuth = $$('#authMethod option').find(function(item) { return item.selected; });
-                    $$('.requireAuthMethod').each(function(item) {
-                        item.disabled = !isEnabled || selectedAuth.value == 'NONE';
-                    })
-                }
-              </g:javascript>
-              
+            <td valign="top" class="value ${hasErrors(bean: config, field: 'authUser', 'errors')}">
+              <g:textField name="authUser" value="${fieldValue(bean: config, field: 'authUser')}" class="requireEnabled requireAuthMethod"/>
             </td>
-            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.authMethod.label.tip" /></i></td>
+            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.authUser.label.tip" /></i></td>
           </tr>
-        <g:hasErrors bean="${config}" field="authMethod">
+        <g:hasErrors bean="${config}" field="authUser">
           <tr>
             <td>&nbsp;</td>
             <td colspan="2" width="100%" valign="top" class="errors">
-              <ul><g:eachError bean="${config}" field="authMethod">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-            </td>
-          </tr>
-        </g:hasErrors>
-                        
-          <tr>
-            <td class="ItemDetailName">
-              <label for="authUsername"><g:message code="mailConfiguration.authUsername.label" /></label>
-            </td>
-            <td valign="top" class="value ${hasErrors(bean: config, field: 'authUsername', 'errors')}">
-              <g:textField name="authUsername" value="${config?.authUsername}" class="requireEnabled requireAuthMethod"/>
-            </td>
-            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.authUsername.label.tip" /></i></td>
-          </tr>
-        <g:hasErrors bean="${config}" field="authUsername">
-          <tr>
-            <td>&nbsp;</td>
-            <td colspan="2" width="100%" valign="top" class="errors">
-              <ul><g:eachError bean="${config}" field="authUsername">
+              <ul><g:eachError bean="${config}" field="authUser">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
             </td>
@@ -140,18 +107,18 @@
 
           <tr>
             <td class="ItemDetailName">
-              <label for="authPassword"><g:message code="mailConfiguration.authPassword.label" /></label>
+              <label for="authPass"><g:message code="mailConfiguration.authPass.label" /></label>
             </td>
-            <td valign="top" class="value ${hasErrors(bean: config, field: 'authPassword', 'errors')}">
-              <g:passwordField name="authPassword" value="${config?.authPassword}" class="requireEnabled requireAuthMethod"/>
+            <td valign="top" class="value ${hasErrors(bean: config, field: 'authPass', 'errors')}">
+              <g:passwordField name="authPass" value="${fieldValue(bean: config, field: 'authPass')}" class="requireEnabled requireAuthMethod"/>
             </td>
-            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.authPassword.label.tip" /></i></td>
+            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.authPass.label.tip" /></i></td>
           </tr>
-        <g:hasErrors bean="${config}" field="authPassword">
+        <g:hasErrors bean="${config}" field="authPass">
           <tr>
             <td>&nbsp;</td>
             <td colspan="2" width="100%" valign="top" class="errors">
-              <ul><g:eachError bean="${config}" field="authPassword">
+              <ul><g:eachError bean="${config}" field="authPass">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
             </td>
@@ -172,6 +139,26 @@
             <td>&nbsp;</td>
             <td colspan="2" width="100%" valign="top" class="errors">
               <ul><g:eachError bean="${config}" field="securityMethod">
+                  <li><g:message error="${it}" encodeAs="HTML"/></li>
+              </g:eachError></ul>
+            </td>
+          </tr>
+        </g:hasErrors>
+
+          <tr>
+            <td class="ItemDetailName">
+              <label for="fromAddress"><g:message code="mailConfiguration.fromAddress.label" /></label>
+            </td>
+            <td valign="top" class="value ${hasErrors(bean: config, field: 'fromAddress', 'errors')}">
+              <g:textField name="fromAddress" value="${fieldValue(bean: config, field: 'fromAddress')}" class="requireEnabled requireAuthMethod"/>
+            </td>
+            <td class="ItemDetailValue"><i><g:message code="mailConfiguration.fromAddress.label.tip" /></i></td>
+          </tr>
+        <g:hasErrors bean="${config}" field="fromAddress">
+          <tr>
+            <td>&nbsp;</td>
+            <td colspan="2" width="100%" valign="top" class="errors">
+              <ul><g:eachError bean="${config}" field="fromAddress">
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError></ul>
             </td>
