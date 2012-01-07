@@ -24,6 +24,9 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsParameterMap
 import grails.converters.deep.XML
 import org.json.JSONObject
 import groovy.util.slurpersupport.GPathResult
+import org.springframework.validation.Errors
+import org.springframework.context.ApplicationContextAware
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 /**
  * Default "not-implemented" endpoints for rest controllers
@@ -107,5 +110,25 @@ abstract class AbstractRestController {
             elementValue = params.bodyJson[elementKey] 
         }
         return elementValue
+    }
+
+    /**
+     * Formatting helper to prepare validation errors for api usage
+     * @param errors the BindingResult/Validation errors
+     * @return String formatted result
+     */
+    String formatErrors(Errors errors) {
+        if (!errors) {
+            return null
+        }
+        StringBuilder sb = new StringBuilder()
+        for(it in errors.allErrors) {
+            def args = it.arguments ?: null
+            def code = it.code
+            def msg = ApplicationHolder.application.mainContext.getMessage(code, args, 
+                    it.defaultMessage, request.locale)
+            sb.append(msg + "\n")
+        }
+        return sb.toString()
     }
 }
