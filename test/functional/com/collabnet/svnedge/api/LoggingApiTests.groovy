@@ -46,9 +46,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
             headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         }
         assertStatus 200
-        assertContentContains "<entry key=\"ConsoleLogLevel\">WARN</entry>"
-        assertContentContains "<entry key=\"ServerLogLevel\">WARN</entry>"
-        assertContentContains "<entry key=\"DaysToKeep\">0</entry>"
+        assertContentContains "<entry key=\"consoleLogLevel\">WARN</entry>"
+        assertContentContains "<entry key=\"serverLogLevel\">WARN</entry>"
+        assertContentContains "<entry key=\"daysToKeep\">0</entry>"
     }
 
     void testLoggingUnsupportedMethods() {
@@ -82,9 +82,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         def requestBody = 
 """<?xml version="1.0" encoding="UTF-8"?>
 <map>
-  <entry key="ConsoleLogLevel">INFO</entry>
-  <entry key="ServerLogLevel">INFO</entry>
-  <entry key="DaysToKeep">5</entry>
+  <entry key="consoleLogLevel">INFO</entry>
+  <entry key="serverLogLevel">INFO</entry>
+  <entry key="daysToKeep">5</entry>
 </map>
 """
         put("${url}?format=xml") {
@@ -101,9 +101,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         // authorized with json body should succeed
         requestBody = 
 """{
-    ConsoleLogLevel: "DEBUG",
-    ServerLogLevel: "ERROR",
-    DaysToKeep: 20
+    consoleLogLevel: "DEBUG",
+    serverLogLevel: "ERROR",
+    daysToKeep: 20
 }"""
         put("${url}?format=json") {
             headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
@@ -141,9 +141,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         def requestBody =
 """<?xml version="1.0" encoding="UTF-8"?>
 <map>
-  <entry key="ConsoleLogLevel">ERRROR</entry>
-  <entry key="ServerLogLevel">INFO</entry>
-  <entry key="DaysToKeep">5</entry>
+  <entry key="consoleLogLevel">ERRROR</entry>
+  <entry key="serverLogLevel">INFO</entry>
+  <entry key="daysToKeep">5</entry>
 </map>
 """
         put("${url}?format=xml") {
@@ -153,12 +153,12 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         assertStatus 400
         assertContentContains "<entry key=\"errorMessage\">"
 
-        // missing keyname (ConsoleLogLevel) should receive 400 (bad request)
+        // missing keyname (consoleLogLevel) should receive 400 (bad request)
         requestBody =
 """<?xml version="1.0" encoding="UTF-8"?>
 <map>
-  <entry key="ServerLogLevel">INFO</entry>
-  <entry key="DaysToKeep">5</entry>
+  <entry key="serverLogLevel">INFO</entry>
+  <entry key="daysToKeep">5</entry>
 </map>
 """
         put("${url}?format=xml") {
@@ -172,9 +172,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         requestBody =
 """<?xml version="1.0" encoding="UTF-8"?>
 <map>
-  <entry key="ConsoleLogLevel">ERROR</entry>
-  <entry key="ServerLogLevel">INFO</entry>
-  <entry key="DaysToKeep">5</entry>
+  <entry key="consoleLogLevel">ERROR</entry>
+  <entry key="serverLogLevel">INFO</entry>
+  <entry key="daysToKeep">5</entry>
 <map>
 """
         put("${url}?format=xml") {
@@ -187,9 +187,9 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         // JSON for XML content type should receive 400
         requestBody =
 """{
-    ConsoleLogLevel: "DEBUG",
-    ServerLogLevel: "ERROR",
-    DaysToKeep: 20
+    consoleLogLevel: "DEBUG",
+    serverLogLevel: "ERROR",
+    daysToKeep: 20
 }"""
         put("${url}?format=xml") {
             headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"

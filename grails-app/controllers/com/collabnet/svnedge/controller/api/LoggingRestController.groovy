@@ -51,9 +51,9 @@ class LoggingRestController extends AbstractRestController {
      * <p><bold>JSON-formatted request body example:</bold></p>
      * <pre>
      * {
-     *   "ConsoleLogLevel": "WARN",
-     *   "ServerLogLevel": "WARN",
-     *   "DaysToKeep": 3
+     *   "consoleLogLevel": "WARN",
+     *   "serverLogLevel": "WARN",
+     *   "daysToKeep": 3
      * }
      * </pre>
      */
@@ -61,9 +61,9 @@ class LoggingRestController extends AbstractRestController {
         def result = [:]
         Server server = Server.getServer()
 
-        result.put "ConsoleLogLevel", server.consoleLogLevel.toString()
-        result.put "ServerLogLevel", server.apacheLogLevel.toString()
-        result.put "DaysToKeep", server.pruneLogsOlderThan 
+        result.put "consoleLogLevel", server.consoleLogLevel.toString()
+        result.put "serverLogLevel", server.apacheLogLevel.toString()
+        result.put "daysToKeep", server.pruneLogsOlderThan 
         
         withFormat {
             json { render result as JSON }
@@ -84,16 +84,16 @@ class LoggingRestController extends AbstractRestController {
      * <p><bold>JSON-formatted request body example:</bold></p>
      * <pre>
      * {
-     *   "ConsoleLogLevel": "WARN",
-     *   "ServerLogLevel": "WARN",
-     *   "DaysToKeep": 3
+     *   "consoleLogLevel": "WARN",
+     *   "serverLogLevel": "WARN",
+     *   "daysToKeep": 3
      * }
      * </pre>
      */
     def restUpdate = {
-        def consoleLogLevel = getRestParam("ConsoleLogLevel")
-        def apacheLogLevel = getRestParam("ServerLogLevel")
-        def daysToKeep = getRestParam("DaysToKeep")
+        def consoleLogLevel = getRestParam("consoleLogLevel")
+        def apacheLogLevel = getRestParam("serverLogLevel")
+        def daysToKeep = getRestParam("daysToKeep")
         
         def result = [:]
         try {
