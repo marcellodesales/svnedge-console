@@ -28,6 +28,12 @@ import org.springframework.context.ApplicationContextAware
 import org.springframework.context.ApplicationContext
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import java.net.ConnectException
+import java.net.SocketException
+import java.net.UnknownHostException
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
+
 /**
  * Business logic related to setup of a mail server and sending notifications
  * of important information related to asynchronous operations
@@ -108,5 +114,71 @@ class MailNotificationService extends AbstractSvnEdgeService
             ms.protocol = config.protocol
         if (config.props instanceof Map && config.props)
             ms.javaMailProperties = config.props
+    }
+    
+    /**
+     * Asynchronously sends an email to the given address with the given 
+     * subject and body. Mail is sent async since it is testing the 
+     * mail server configuration and could take a long time, if the server
+     * is misconfigured.
+     * 
+     * @return Future 
+     */
+    def sendTestMail(String toAddress, String mailSubject, String mailBody) {
+        MailConfiguration config = MailConfiguration.getConfiguration()    
+        return callAsync {
+            try {
+                sendMail {
+                    to toAddress
+                    from config.createFromAddress()
+                    subject mailSubject
+                    body mailBody
+                }
+                
+            } catch (Exception e) {
+                log.debug("Caught Exception when testing mail server settings: "
+                          + e.getClass(), e)
+                while (e.cause) {
+                    log.debug e.cause.message
+                    e = e.cause
+                }
+                
+                def error
+                switch (e) {
+                    case ConnectException:
+                    error = [code: "server.action.testMail.connectException"]
+                    break
+                    
+                    case UnknownHostException:
+                    error = [code: "server.action.testMail.unknownHostException"]
+                    break
+
+                    case SocketException:
+                    error = [code: "server.action.testMail.socketException",
+                             args: [e.class, e.message]]
+                    break
+
+                    case AuthenticationFailedException:
+                    error = [code:"server.action.testMail.authenticationFailedException"]
+                    break
+                    
+                    case MessagingException:
+                    error = [code: "server.action.testMail.messagingException",
+                             args: [e.class, e.message]]
+                    break
+                    
+                    default:
+                    if (e.message.toLowerCase().contains("authentication")) {
+                        error = [code: "server.action.testMail.maybeAuthenticationFailedException",
+                                 args: [e.class, e.message]]
+                    } else {
+                        error = [code: "server.action.testMail.unknownException",
+                                 args: [e.class, e.message]]
+                    }
+                }
+                return error
+            }
+            return null
+        }
     }
 }

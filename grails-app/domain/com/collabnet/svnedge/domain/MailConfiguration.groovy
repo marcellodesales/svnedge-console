@@ -41,7 +41,7 @@ class MailConfiguration {
             } else if (host.startsWith('exchange.')) {
                 host = host.substring(9)
             }
-            addr = (authUsername ?: 'SubversionEdge') + '@' + host
+            addr = (authUser ?: 'SubversionEdge') + '@' + host
         }
         return addr
     }

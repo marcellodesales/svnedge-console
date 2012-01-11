@@ -7,6 +7,70 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="layout" content="main" />
   <g:javascript library="prototype" />
+  <g:javascript>
+
+Event.observe(window, 'load', function() {
+    if ($('testButton')) {
+        $('testButton').observe('click', testMailHandler);
+    }
+});
+
+
+function testMailHandler() {
+    $('testButton').value = "Testing...";
+    $('saveButton').disabled = true;
+    window.setTimeout("$('testButton').disabled = true", 500);
+}
+
+function fetchResult() {
+    var repeatTestMailResult = true;
+    new Ajax.Request('/csvn/server/testMailResult?iefix=' + new Date(), {
+        method:'get',
+        asynchronous: false,
+        requestHeaders: {Accept: 'text/json'},
+        onSuccess: function(transport) {
+            repeatTestMailResult = false;
+            var responseData = transport.responseText.evalJSON(true);
+            var result = responseData.result;
+            var msg;
+            if (result == 'STILL_RUNNING') {
+                msg = '<g:message code="server.action.testMail.stillRunning"/>';
+                repeatTestMailResult = true;
+            } else if (result == 'NOT_RUNNING') {
+                resetPage();
+                msg = '<g:message code="server.action.testMail.notRunning"/>';
+            } else if (result == 'SUCCESS') {
+                resetPage();
+                $('requestmessages').innerHTML = '<div class="greenText">' +
+                        '<g:message code="server.action.testMail.success"
+                            args="${[server.adminEmail]}"/></div>';
+            } else if (result == 'FAILED') {
+                resetPage();
+                msg = responseData.errorMessage;
+            } else {
+                // shouldn't get here
+                alert("Result = " + result);
+            }
+            if (msg != null) {
+                $('requestmessages').innerHTML = '<div class="warningText">' +
+                        msg + '</div>';
+               
+            }
+        }
+    });
+    if (repeatTestMailResult) {
+        window.setTimeout(fetchResult, 20000);
+    }
+}
+
+function resetPage() {
+    $('cancelTestButton').id = 'testButton';
+    $('testButton').name = '_action_testMail';
+    $('testButton').value = '${message(code:'server.page.editMail.button.testSettings')}';
+    $('testButton').onclick = testMailHandler;
+    $('spinner').hide();
+}
+  </g:javascript>
 </head>
 <content tag="title">
   <g:message code="server.page.editMail.title" />
@@ -16,15 +80,27 @@
 
 <body>
   <g:render template="tabs" model="${[view: 'editMail']}" />
-  
-<p><g:message code="server.page.editMail.intro" args="${[server.adminEmail]}"/></p>
 
-<div class="dialog">            
-  <g:form method="post" onsubmit="javascript:check();" name="serverForm" action="updateMail">
+  <g:form method="post" name="serverForm" action="updateMail">
+    <div>
     <g:hiddenField name="view" value="editMail"/>
     <g:hiddenField name="id" value="${config?.id}" />
     <g:hiddenField name="version" value="${config?.version}" />
-    
+
+  <g:set var="testResult" value="${session['email.test.result']}"/>
+  <g:if test="${testResult}">
+      <g:if test="${testResult.done}">Test finished <!-- Should be handled by controller --></g:if>
+      <g:elseif test="${testResult.cancelled}"><!-- Will be handled by controller, should not happen -->${message(code: 'server.action.testMail.cancelled')}</g:elseif>
+      <g:else>
+        <g:javascript>
+            Event.observe(window, 'load', fetchResult);
+        </g:javascript>
+      </g:else>
+    </div>
+  </g:if>
+  
+<p><g:message code="server.page.editMail.intro" args="${[server.adminEmail]}"/></p>
+
     <div id="enabledContainer">
       <g:checkBox name="enabled" value="${config?.enabled}" />
       <label for="enabled"><g:message code="mailConfiguration.enabled.label" /></label>
@@ -43,7 +119,7 @@
     <br/>
     <div id="mailServerDialog">
       <p><g:message code="server.page.editMail.configureSMTP"/></p>
-      <table>
+      <table class="ItemDetailContainer">
         <tbody>
           <tr>
             <td class="ItemDetailName">
@@ -168,8 +244,22 @@
       <tr class="ContainerFooter">
         <td colspan="3">
           <div class="AlignRight">
-                <g:actionSubmit action="testMail" value="${message(code:'server.page.editMail.button.testSettings')}" class="Button requireEnabled"/>
-                <g:actionSubmit action="updateMail" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
+            <img id="spinner" class="spinner" src="/csvn/images/spinner-gray-bg.gif" alt="Testing connection..."/>
+            <g:set var="saveDisabled" value=""/>
+            <g:if test="${testResult}">
+               <g:actionSubmit action="cancelTestMail" value="${message(code:'server.page.editMail.button.cancelTest')}" 
+                       class="Button" id="cancelTestButton"/>
+               <g:set var="saveDisabled" value="disabled='disabled'"/>
+            </g:if>
+            <g:else>
+                <g:actionSubmit action="testMail" value="${message(code:'server.page.editMail.button.testSettings')}" 
+                        class="Button requireEnabled" id="testButton"/>
+                <g:javascript>
+                  $('spinner').hide();
+                </g:javascript>        
+            </g:else>
+                <g:actionSubmit action="updateMail" value="${message(code:'server.page.edit.button.save')}" 
+                        class="Button requireEnabled" id="saveButton" ${saveDisabled} />
           </div>
         </td>
       </tr>
@@ -177,8 +267,8 @@
     </tbody>
   </table>
 </div>
-</g:form>
 </div>
+</g:form>
 <g:javascript>
 toggleConfigFields();
 </g:javascript>

@@ -36,8 +36,8 @@ public class MS007AddEmailConfig implements MigrationScript {
                     "PORT INTEGER NOT NULL, " +
                     // AUTH_METHOD not being used, but not removing it yet.
                     "AUTH_METHOD VARCHAR(16), " +
-                    "AUTH_PASS VARCHAR(255), " +
-                    "AUTH_USER VARCHAR(255), " +
+                    "AUTH_PASSWORD VARCHAR(255), " +
+                    "AUTH_USERNAME VARCHAR(255), " +
                     "SECURITY_METHOD VARCHAR(16) NOT NULL, " +
                     "ENABLED BOOLEAN NOT NULL, " +
                     "CONSTRAINT MAIL_SERVER_NAME UNIQUE(SERVER_NAME))";        
@@ -49,9 +49,9 @@ public class MS007AddEmailConfig implements MigrationScript {
             db.executeUpdateSql("alter table MAIL_CONFIGURATION " +
             "add column FROM_ADDRESS VARCHAR(255)");
             db.executeUpdateSql("alter table MAIL_CONFIGURATION " +
-            "rename column AUTH_USERNAME AUTH_USER");
+            "alter column AUTH_USERNAME rename to AUTH_USER");
             db.executeUpdateSql("alter table MAIL_CONFIGURATION " +
-            "rename column AUTH_PASSWORD AUTH_PASS");
+            "alter column AUTH_PASSWORD rename to AUTH_PASS");
         }
         
         return false;

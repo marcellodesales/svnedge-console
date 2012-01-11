@@ -194,7 +194,7 @@
     
     <!-- TeamForge content-area begin -->
     <div class="contentArea">
-      <div class="sessionmessages"> 
+      <div class="sessionmessages" id="sessionmessages"> 
             <g:if test="${flash.message}">
                 <div class="greenText">${flash.message}</div>
             </g:if>
@@ -214,7 +214,7 @@
                 <div class="errorMessage"><%=flash.unfiltered_error%></div>
             </g:elseif>
       </div>
-      <div class="requestmessages"> 
+      <div class="requestmessages" id="requestmessages"> 
             <g:if test="${request['message']}">
                 <div class="greenText">${request['message']}</div>
             </g:if>

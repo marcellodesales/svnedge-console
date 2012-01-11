@@ -132,3 +132,42 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
     this.messageElement.innerHTML = promptString
 }
 
+/*
+ * Creates a modal dialog window over the current screen
+ * 
+ * i18n hash keys: _message, _confirmOkLabel, _confirmCancelLabel
+ * default props include 300px width, but dialogProps can be used to override
+ * add more
+ */
+function dialog(i18n, okHandler, cancelHandler, dialogProps) {
+    var defaultProps = {
+        className: "bluelighting", 
+        width: 300,
+        okLabel: i18n._confirmOkLabel,
+        cancelLabel: i18n._confirmCancelLabel,
+        onOk: function(win) {
+             if (okHandler) {
+                 if (okHandler()) {
+                     win.close();
+                 }
+             } else {
+                 win.close();
+             }
+        },
+        onCancel: function(win) {
+            if (cancelHandler) {
+                 if (cancelHandler()) {
+                     win.close();
+                 }
+            } else {
+                 win.close();                 
+            }
+        }
+    };
+    if (dialogProps) {
+        for (var prop in dialogProps) {
+            defaultProps[prop] = dialogProps[prop];
+        }
+    }
+    Dialog.confirm(i18n._message, defaultProps);
+}

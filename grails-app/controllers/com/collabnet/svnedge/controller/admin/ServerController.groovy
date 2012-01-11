@@ -31,12 +31,18 @@ import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.domain.NetworkConfiguration;
-import java.net.ConnectException
-import javax.mail.AuthenticationFailedException
-import javax.mail.MessagingException
+
+import grails.converters.JSON
+
+import java.util.concurrent.CancellationException
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_SYSTEM'])
 class ServerController {
+
+    private static final String TEST_MAIL_RESULT = "email.test.result"
+    private static final long TEST_MAIL_WAIT_SECONDS = 10
 
     def operatingSystemService
     def lifecycleService
@@ -371,56 +377,63 @@ class ServerController {
          MailConfiguration config = MailConfiguration.getConfiguration()
          Server server = Server.getServer()
          if (saveConfig(config)) {
-             try {
-                 sendMail {
-                     to server.adminEmail
-                     from config.createFromAddress()
-                     subject message(code: 'server.action.testMail.subject')
-                     body message(code: 'server.action.testMail.body')
-                 }
-                 flash.message = message(code: "server.action.testMail.success",
-                         args:[server.adminEmail])
-                 redirect(action: 'editMail')
-                 return
-
-             } catch (Exception e) {
-                log.debug "Caught Exception when testing mail server settings: " + e.getClass(), e
-                while (e.cause) {
-                    log.debug e.cause.message
-                    e = e.cause
+            def subject = message(code: 'server.action.testMail.subject')
+            def body = message(code: 'server.action.testMail.body')
+            def future = mailNotificationService
+                    .sendTestMail(server.adminEmail, subject, body)
+            try {
+                def result = future.get(TEST_MAIL_WAIT_SECONDS, TimeUnit.SECONDS)
+                if (result) {
+                    request.error = message(result)
+                } else {
+                    flash.message = message(code: "server.action.testMail.success",
+                                            args:[server.adminEmail])
+                    redirect(action: 'editMail')
+                    return
                 }
-                
-                switch (e) {
-                    
-                    case ConnectException:
-                    request.error = message(code:"server.action.testMail.connectException")
-                    break
-                    
-                    case AuthenticationFailedException:
-                    request.error = message(code:"server.action.testMail.authenticationFailedException")
-                    break
+            } catch (CancellationException e) {
+                 request.error = message(code: "server.action.testMail.cancelled")
+            } catch (TimeoutException e) {
+                session[TEST_MAIL_RESULT] = future                
+            }
+        } else {
+            request.error = message(code:"server.action.update.invalidSettings")
+        }
+        hidePassword(config)
+        render(view: "editMail", model: [config: config, server: Server.getServer()])
+    }
+    
+    def cancelTestMail = {
+        def future = session[TEST_MAIL_RESULT]
+        if (future && !future.isCancelled()) {
+            future.cancel(true)
+        }
+        session[TEST_MAIL_RESULT] = null
+        flash.message = message(code: "server.action.testMail.cancelled")
+        redirect(action: 'editMail')
+    }
 
-                    case MessagingException:
-                    request.error = message(code:"server.action.testMail.messagingException",
-                        args: [e.class, e.message])
-                    break
-                    
-                    default:
-                    if (e.message.toLowerCase().contains("authentication")) {
-                        request.error = message(code:"server.action.testMail.maybeAuthenticationFailedException",
-                                args: [e.class, e.message])
-                    } else {
-                        request.error = message(code:"server.action.testMail.unknownException",
-                                args: [e.class, e.message])
-                    }
-                }
-             }
-         } else {
-             request.error = message(code:"server.action.update.invalidSettings")
-         }
-         hidePassword(config)
-         render(view: "editMail", model: [config: config, server: Server.getServer()])
-     }
+    def testMailResult = {
+        def result = TestMailResult.NOT_RUNNING
+        def msg = null
+        def future = session[TEST_MAIL_RESULT]
+        if (future) {
+            if (future.cancelled) {
+                result = TestMailResult.CANCELLED
+            } else if (future.done) {
+                msg = future.get()
+                result = msg ? TestMailResult.FAILED : TestMailResult.SUCCESS
+                session[TEST_MAIL_RESULT] = null
+            } else {
+                result = TestMailResult.STILL_RUNNING
+            }
+        }
+        // Prevent IE caching
+        response.addHeader("Cache-Control", "max-age=0,no-cache,no-store")
+        return render([result: result.toString(), errorMessage: message(msg)] as JSON)
+    }
+
+    static enum TestMailResult { CANCELLED, STILL_RUNNING, NOT_RUNNING, SUCCESS, FAILED }
 }
 
 class CtfCredentialCommand {

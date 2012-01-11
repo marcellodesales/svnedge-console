@@ -106,23 +106,7 @@ function confirmAction(confirmMessage, okHandler, cancelHandler) {
 
     var guessHeight = (confirmMessage.length / 3)
     guessHeight += (confirmMessage.split("<p>").length * 50)
-
-    var s = Dialog.confirm(confirmMessage, {
-                className: "bluelighting",
-                width:300, height: guessHeight,
-                okLabel: listViewI18n._confirmOkLabel,
-                cancelLabel: listViewI18n._confirmCancelLabel,
-                onOk: function(win) {
-                    if (okHandler) {
-                        okHandler()
-                    }
-                },
-                onCancel: function(win) {
-                    if (cancelHandler) {
-                        cancelHandler()
-                    }
-                    win.close()
-                }
-    })
+    listViewI18n._message = confirmMessage;
+    dialog(listViewI18n, okHandler, cancelHandler, {height: guessHeight});
 }
 
