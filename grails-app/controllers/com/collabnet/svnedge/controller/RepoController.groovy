@@ -249,6 +249,7 @@ class RepoController {
 
         } else {
             try {
+                cmd.userId = loggedInUserInfo(field: 'id') as int
                 cmd.userLocale = request.locale
                 def filename = svnRepoService.scheduleDump(cmd, repo)
                 flash.message = message(code: 'repository.action.createDumpfile.success',

@@ -46,7 +46,7 @@ class ServerController {
 
     def operatingSystemService
     def lifecycleService
-    def mailNotificationService
+    def mailConfigurationService
     def networkingService
     def serverConfService
     def setupTeamForgeService
@@ -355,7 +355,7 @@ class ServerController {
             }
          } else {
              config.enabled = false
-             mailNotificationService.saveMailConfiguration(config)
+             mailConfigurationService.saveMailConfiguration(config)
              flash.message = message(code:"server.action.updateMail.disabled")
              redirect(action: 'editMail')
          }
@@ -370,7 +370,7 @@ class ServerController {
              config.authPass = password ?
                      securityService.encrypt(password) : ''
          }
-         return mailNotificationService.saveMailConfiguration(config)
+         return mailConfigurationService.saveMailConfiguration(config)
      }
      
      def testMail = {
@@ -379,7 +379,7 @@ class ServerController {
          if (saveConfig(config)) {
             def subject = message(code: 'server.action.testMail.subject')
             def body = message(code: 'server.action.testMail.body')
-            def future = mailNotificationService
+            def future = mailConfigurationService
                     .sendTestMail(server.adminEmail, subject, body)
             try {
                 def result = future.get(TEST_MAIL_WAIT_SECONDS, TimeUnit.SECONDS)

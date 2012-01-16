@@ -1200,7 +1200,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return (value < 10) ? "0" + value : String.valueOf(value)
     }
 
-    private String dumpFilename(DumpBean bean, repo) {
+    String dumpFilename(DumpBean bean, repo) {
         Calendar cal = Calendar.getInstance()
         SchedulerBean sched = bean.schedule
         String ts = ""

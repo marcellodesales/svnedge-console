@@ -38,7 +38,7 @@ import javax.mail.MessagingException
  * Business logic related to setup of a mail server and sending notifications
  * of important information related to asynchronous operations
  */
-class MailNotificationService extends AbstractSvnEdgeService 
+class MailConfigurationService extends AbstractSvnEdgeService 
         implements InitializingBean, ApplicationContextAware {
 
     ApplicationContext applicationContext

@@ -56,6 +56,11 @@ class BootStrap {
     def jobsAdminService
     def jobsInfoService
     def grailsApplication
+    
+    // Does not need bootstrapped, but have to be loaded to setup mail server
+    // and register listener
+    def mailConfigurationService
+    def mailListenerService
 
     def init = { servletContext ->
 

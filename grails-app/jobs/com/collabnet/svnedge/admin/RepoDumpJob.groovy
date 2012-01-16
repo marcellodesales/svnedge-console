@@ -21,6 +21,8 @@ import com.collabnet.svnedge.ConcurrentBackupException
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.event.DumpRepositoryEvent
 import com.collabnet.svnedge.console.DumpBean
 
 /**
@@ -52,6 +54,7 @@ class RepoDumpJob {
         Repository repo = Repository.get(dataMap.get("repoId"))
         DumpBean dumpBean = DumpBean.fromMap(dataMap)
         if (repo && dumpBean) {
+            User user = retrieveUserForEvent(dumpBean)
             try {
                 if (dumpBean.cloud) {
                     cloudServicesRemoteClientService
@@ -64,13 +67,31 @@ class RepoDumpJob {
                     String file = svnRepoService.createDump(dumpBean, repo)
                     log.info("Creating repo dump file: " + file)
                 }
+                svnRepoService.publishEvent(new DumpRepositoryEvent(this, 
+                        dumpBean, repo, true, user, null))
             } catch (ConcurrentBackupException e) {
                 log.warn("Backup skipped: " + e.message)
+            } catch (Exception e) {
+                log.warn("Repository dump failed", e)
+                svnRepoService.publishEvent(new DumpRepositoryEvent(this,
+                        dumpBean, repo, false, user, e))
             }
         }
         else {
             log.warn("Unable to execute the repo backup")
         }
+    }
+    
+    private User retrieveUserForEvent(dumpBean) {
+        User user = null
+        if (!dumpBean.isBackup()) {
+            try {
+                user = dumpBean.userId ? User.get(dumpBean.userId) : null
+            } catch (Exception e) {
+                log.warn("Error in user lookup", e)
+            }
+        }
+        return user
     }
 }
 

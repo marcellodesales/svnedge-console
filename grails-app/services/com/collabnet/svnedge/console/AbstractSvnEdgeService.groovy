@@ -46,7 +46,7 @@ abstract class AbstractSvnEdgeService {
      * @return the message related to the key in the messages.properties file
      * using the default locale from the JVM.
      */
-    protected def getMessage(String key, List<String> params) {
+    protected def getMessage(String key, List params) {
         return this.getMessage(key, params, Locale.getDefault())
     }
 
@@ -70,12 +70,12 @@ abstract class AbstractSvnEdgeService {
     * @return the message related to the key in the messages.properties file
     * using the default locale.
     */
-   protected def getMessage(String key, List<String> params, Locale locale) {
+   protected def getMessage(String key, List params, Locale locale) {
        if (!locale) {
            locale = Locale.getDefault()
        }
        def appCtx = grailsApplication.getMainContext()
-       return appCtx.getMessage(key, params as String[], locale)
+       return appCtx.getMessage(key, params as Object[], locale)
    }
    
    /**

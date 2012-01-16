@@ -210,6 +210,12 @@ class Server {
         }
         return portNumber
     }
+
+    String consoleUrlPrefix() {
+        def scheme = useSslConsole ? "https" : "http"
+        String port = ':' + getConsolePort(useSslConsole)
+        return scheme + "://" + hostname + port + '/csvn'
+    }
 }
 
 enum ServerMode { STANDALONE, CONVERTING_TO_MANAGED, MANAGED, REPLICA }
