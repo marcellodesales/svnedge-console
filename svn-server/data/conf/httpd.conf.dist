@@ -61,6 +61,7 @@ Include "__CSVN_CONF__/csvn_main_httpd.conf"
 LimitXMLRequestBody 0
 ServerSignature  Off
 ServerTokens  Prod
+TraceEnable Off
 
 TypesConfig "__CSVN_CONF__/mime.types"
 DefaultType text/plain
