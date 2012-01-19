@@ -47,8 +47,8 @@ class MailConfiguration {
     }
     
     static constraints = {
-        serverName(validator: isBlank, unique: true)
-        port(validator: isBlank)
+        serverName(validator: isBlank, unique: true, matches: "\\S+", nullable: true)
+        port(validator: isBlank, range: 1..65535, nullable: true)
         authUser(nullable:true)
         authPass(nullable: true)
         authMethod(nullable:true)
@@ -57,7 +57,7 @@ class MailConfiguration {
     }
     
     private static def isBlank = { val, obj -> 
-            return (val || !obj.enabled) ? null : ['blank']
+            return (val || val == 0 || !obj.enabled) ? null : ['blank']
     }
     
     static MailConfiguration getConfiguration() {

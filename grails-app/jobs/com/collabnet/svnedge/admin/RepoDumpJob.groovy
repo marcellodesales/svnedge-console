@@ -54,7 +54,6 @@ class RepoDumpJob {
         Repository repo = Repository.get(dataMap.get("repoId"))
         DumpBean dumpBean = DumpBean.fromMap(dataMap)
         if (repo && dumpBean) {
-            User user = retrieveUserForEvent(dumpBean)
             try {
                 if (dumpBean.cloud) {
                     cloudServicesRemoteClientService
@@ -68,30 +67,18 @@ class RepoDumpJob {
                     log.info("Creating repo dump file: " + file)
                 }
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this, 
-                        dumpBean, repo, true, user, null))
+                        dumpBean, repo, DumpRepositoryEvent.SUCCESS))
             } catch (ConcurrentBackupException e) {
                 log.warn("Backup skipped: " + e.message)
             } catch (Exception e) {
                 log.warn("Repository dump failed", e)
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,
-                        dumpBean, repo, false, user, e))
+                        dumpBean, repo, DumpRepositoryEvent.FAILED, e))
             }
         }
         else {
             log.warn("Unable to execute the repo backup")
         }
-    }
-    
-    private User retrieveUserForEvent(dumpBean) {
-        User user = null
-        if (!dumpBean.isBackup()) {
-            try {
-                user = dumpBean.userId ? User.get(dumpBean.userId) : null
-            } catch (Exception e) {
-                log.warn("Error in user lookup", e)
-            }
-        }
-        return user
     }
 }
 

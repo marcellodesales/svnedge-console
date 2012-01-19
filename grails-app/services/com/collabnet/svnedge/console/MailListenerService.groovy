@@ -22,6 +22,7 @@ import com.collabnet.svnedge.domain.MailConfiguration
 import com.collabnet.svnedge.domain.MailAuthMethod
 import com.collabnet.svnedge.domain.MailSecurityMethod
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.event.RepositoryEvent
 import com.collabnet.svnedge.event.DumpRepositoryEvent
 
@@ -66,8 +67,9 @@ class MailListenerService extends AbstractSvnEdgeService
         def toAddress = defaultAddress
         def ccAddress = null
         boolean sendOnSuccess = false
-        if (event.initiator?.email) {
-            toAddress = event.initiator.email
+        User user = retrieveUserForEvent(event)
+        if (user?.email) {
+            toAddress = user.email
             sendOnSuccess = true
             if (toAddress != defaultAddress && !event.isSuccess) {
                 ccAddress = defaultAddress
@@ -118,7 +120,7 @@ class MailListenerService extends AbstractSvnEdgeService
             } else {
                 mailBody = getMessage('mail.message.dump.body.error',
                         [dumpBean.hotcopy ? 1 : 0, dumpBean.backup ? 0 : 1, 
-                         repo.name, '', ''], locale)
+                         repo.name, '', '', ''], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)
@@ -138,5 +140,19 @@ class MailListenerService extends AbstractSvnEdgeService
                     "\nSubject: " + mailSubject + "\nBody:\n" + mailBody, e)
         }
     }
+
+    private User retrieveUserForEvent(DumpRepositoryEvent event) {
+        User user = null
+        DumpBean dumpBean = event.dumpBean
+        if (!dumpBean.isBackup()) {
+            try {
+                user = dumpBean.userId ? User.get(dumpBean.userId) : null
+            } catch (Exception e) {
+                log.warn("Error in user lookup", e)
+            }
+        }
+        return user
+    }
+
 }
 

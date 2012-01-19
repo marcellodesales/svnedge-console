@@ -21,24 +21,23 @@ package com.collabnet.svnedge.event
 import org.springframework.context.ApplicationEvent
 
 import com.collabnet.svnedge.domain.Repository
-import com.collabnet.svnedge.domain.User
 
 /**
  * Spring event meant to be published from repository operations
  */
 class RepositoryEvent extends ApplicationEvent {
+    public static final boolean SUCCESS = true
+    public static final boolean FAILED = false
 
     Repository repo
     boolean isSuccess
-    User initiator
     Exception exception
     
     def RepositoryEvent(source, Repository repo, boolean isSuccess, 
-            User initiator = null, Exception e = null) {
+            Exception e = null) {
         super(source)
         this.repo = repo
         this.isSuccess = isSuccess
-        this.initiator = initiator
         this.exception = e
     }
 }

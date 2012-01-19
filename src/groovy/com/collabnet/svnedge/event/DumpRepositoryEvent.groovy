@@ -22,7 +22,6 @@ import org.springframework.context.ApplicationEvent
 
 import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository
-import com.collabnet.svnedge.domain.User
 
 /**
  * Spring event related to background repo dump
@@ -31,9 +30,8 @@ class DumpRepositoryEvent extends RepositoryEvent {
     DumpBean dumpBean
     
     def DumpRepositoryEvent(source, DumpBean dumpBean,
-            Repository repo, boolean isSuccess, 
-            User initiator = null, Exception e = null) {
-        super(source, repo, isSuccess, initiator, e)
+            Repository repo, boolean isSuccess, Exception e = null) {
+        super(source, repo, isSuccess, e)
         this.dumpBean = dumpBean
     }
 }

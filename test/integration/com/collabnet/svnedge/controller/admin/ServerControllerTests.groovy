@@ -17,28 +17,29 @@
  */
 package com.collabnet.svnedge.controller.admin
 
+import javax.mail.Message;
+
+import com.collabnet.svnedge.controller.AbstractSvnEdgeControllerTests;
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import java.io.File
+import com.icegreen.greenmail.util.GreenMailUtil
+import com.icegreen.greenmail.util.ServerSetupTest
 
-class ServerControllerTests extends ControllerUnitTestCase {
+class ServerControllerTests extends AbstractSvnEdgeControllerTests {
 
     def operatingSystemService
     def lifecycleService
+    def mailConfigurationService
     def networkingService
     def serverConfService
     def grailsApplication
     def config
+    def greenMail
 
     protected void setUp() {
         super.setUp()
-
-        // mock the i18n "message" map available to controller
-        controller.metaClass.messageSource = [getMessage: { errors, locale ->
-            return "message" }]
-        controller.metaClass.message = { it -> return "message" }
 
         // mock the bindData method
         controller.metaClass.bindData = { obj, params, excludes ->
@@ -49,11 +50,13 @@ class ServerControllerTests extends ControllerUnitTestCase {
         controller.lifecycleService = lifecycleService
         controller.networkingService = networkingService
         controller.serverConfService = serverConfService
+        controller.mailConfigurationService = mailConfigurationService
         ConfigurationHolder.config = grailsApplication.config
     }
 
     protected void tearDown() {
         super.tearDown()
+        greenMail.deleteAllMessages()
     }
 
     void testIndex() {
@@ -102,5 +105,81 @@ class ServerControllerTests extends ControllerUnitTestCase {
             s.save(flush:true)
         }
         controller.editIntegration()
+    }
+    
+    void testEditMail() {
+        def model = controller.editMail()
+        assertFalse "Mail should start off disabled", model.config.enabled    
+    }
+    
+    void testUpdateMailSuccess() {
+        //controller.metaClass.loggedInUserInfo = { return 1 }
+        def params = controller.params
+        params['enabled'] = true
+        controller.updateMail()
+        assertEquals "Expected redirect to 'editMail' view on success", 
+                'editMail', controller.redirectArgs["action"]
+        assertNotNull "Controller should provide a success message",
+                controller.flash.message
+        assertNull "Controller should NOT provide an error message",
+                controller.flash.error
+    }
+    
+    void testUpdateMailFail() {        
+        def params = controller.params
+        params['enabled'] = true
+        // an invalid email address
+        params['fromAddress'] = "not.an.address"
+        controller.updateMail()
+        assertEquals "should not redirect on failure due to invalid address",
+                0, controller.redirectArgs.size()
+        assertNull "Controller should NOT provide a success message",
+                controller.flash.message
+        assertNotNull "Controller should provide an error message",
+                controller.request.error
+    }
+    
+    void testTestMailSuccess() {
+        def params = controller.params
+        params['enabled'] = true
+        params['port'] = ServerSetupTest.SMTP.port
+
+        controller.testMail()
+
+        assertEquals "Expected redirect to 'editMail' view on success",
+                'editMail', controller.redirectArgs["action"]
+        assertNotNull "Controller should provide a success message",
+                controller.flash.message
+        assertNull "Controller should NOT provide an error message",
+                controller.flash.error
+
+        assertEquals("Expected one mail message", 1,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        assertEquals("Message Subject did not match",
+                "Test email from Subversion Edge", message.subject)
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("Mail server settings are valid."))
+        assertEquals("Message From did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Message To did not match", Server.getServer().adminEmail,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertNull("Message not expected to have CC recipients",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
+    }
+
+    void testTestMailFail() {
+        def params = controller.params
+        params['enabled'] = true
+        params['port'] = 61332
+        controller.testMail()
+        assertEquals "should not redirect on failure due to invalid port",
+                0, controller.redirectArgs.size()
+        assertNull "Controller should NOT provide a success message",
+                controller.flash.message
+        assertNotNull "Controller should provide an error message",
+                controller.request.error
     }
 }
