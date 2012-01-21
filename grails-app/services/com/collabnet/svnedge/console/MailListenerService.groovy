@@ -23,6 +23,7 @@ import com.collabnet.svnedge.domain.MailAuthMethod
 import com.collabnet.svnedge.domain.MailSecurityMethod
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.event.LoadRepositoryEvent;
 import com.collabnet.svnedge.event.RepositoryEvent
 import com.collabnet.svnedge.event.DumpRepositoryEvent
 
@@ -76,16 +77,39 @@ class MailListenerService extends AbstractSvnEdgeService
             }
         }
         
-        switch (event) {
-            case DumpRepositoryEvent:
-                // don't send email to server admin unless an error occurs
-                if (sendOnSuccess || !event.isSuccess) {
+        // don't send email to server admin unless an error occurs
+        if (sendOnSuccess || !event.isSuccess) {
+            switch (event) {
+                case DumpRepositoryEvent:
                     sendDumpMail(toAddress, ccAddress, fromAddress, event)
-                }
                 break
+                case LoadRepositoryEvent:
+                    sendLoadMail(toAddress, ccAddress, fromAddress, event)
+                break
+            }
         }
     }
+
+    private static final long MAX_ATTACHMENT_SIZE = 104858
     
+    private byte[] getProcessOutput(RepositoryEvent event) {
+        File f = event.processOutput
+        byte[] s = null
+        if (f?.exists()) {
+            if (f.length() < MAX_ATTACHMENT_SIZE) {
+                s = f.bytes
+            } else {
+                long skipBytes = f.length() - MAX_ATTACHMENT_SIZE
+                s = new byte[MAX_ATTACHMENT_SIZE]
+                f.withInputStream {
+                    it.skip(skipBytes)
+                    it.read(s)
+                }
+            }
+        }
+        return s
+    }
+        
     private void sendDumpMail(toAddress, ccAddress, fromAddress, event) {
         def repo = event.repo
         def dumpBean = event.dumpBean
@@ -99,6 +123,7 @@ class MailListenerService extends AbstractSvnEdgeService
         mailSubject += getMessage('mail.message.repository', [repo.name], locale)
        
         def mailBody
+        byte[] processOutput
         if (event.isSuccess) {
             def filename = svnRepoService.dumpFilename(dumpBean, repo)
             Server server = Server.getServer()
@@ -110,23 +135,78 @@ class MailListenerService extends AbstractSvnEdgeService
                 [(dumpBean.hotcopy ? 1 : 0), repo.name, 
                  filename, repoLink, downloadLink], locale)
         } else {
+            processOutput = getProcessOutput(event)
             if (event.exception) {
                 def e = event.exception
                 GrailsUtil.deepSanitize(e)
                 mailBody = getMessage('mail.message.dump.body.error',
                         [dumpBean.hotcopy ? 1 : 0, dumpBean.backup ? 0 : 1, 
                          repo.name, e.message,
-                         e.class.name, e.getStackTrace().join('\n')], locale)
+                         e.class.name, e.getStackTrace().join('\n'),
+                         processOutput ? 1 : 0,
+                         isPartial(processOutput) ? 1 : 0,
+                         event.processOutput?.name], locale)
             } else {
                 mailBody = getMessage('mail.message.dump.body.error',
                         [dumpBean.hotcopy ? 1 : 0, dumpBean.backup ? 0 : 1, 
-                         repo.name, '', '', ''], locale)
+                         repo.name, '', '', '', processOutput ? 1 : 0,
+                         isPartial(processOutput) ? 1 : 0,
+                         event.processOutput?.name], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)
- 
+        sendMail(toAddress, ccAddress, fromAddress, 
+                 mailSubject, mailBody, processOutput)
+    }
+    
+    private boolean isPartial(byte[] progressContent) {
+        return progressContent && progressContent.length == MAX_ATTACHMENT_SIZE
+    }
+
+    private void sendLoadMail(toAddress, ccAddress, fromAddress, event) {
+        def repo = event.repo
+        Locale locale = event.locale ?: Locale.getDefault()
+        def mailSubject = getMessage(event.isSuccess ?
+                'mail.message.subject.success' : 'mail.message.subject.error',
+                null, locale)
+        mailSubject += getMessage('mail.message.load.subject', null, locale)
+        mailSubject += getMessage('mail.message.repository', [repo.name], locale)
+       
+        def mailBody
+        byte[] processOutput
+        if (event.isSuccess) {
+            mailBody = getMessage('mail.message.load.body.success',
+                    [repo.name], locale)
+        } else {
+            processOutput = getProcessOutput(event)
+            if (event.exception) {
+                def e = event.exception
+                GrailsUtil.deepSanitize(e)
+                mailBody = getMessage('mail.message.load.body.error',
+                        [repo.name, e.message,
+                         e.class.name, e.stackTrace.join('\n'),
+                         processOutput ? 1 : 0,
+                         isPartial(processOutput) ? 1 : 0,
+                         event.processOutput?.name], locale)
+            } else {
+                mailBody = getMessage('mail.message.load.body.error',
+                        [repo.name, '', '', '', processOutput ? 1 : 0,
+                         isPartial(processOutput) ? 1 : 0,
+                         event.processOutput?.name], locale)
+            }
+        }
+        mailBody += getMessage('mail.message.footer', null, locale)
+        sendMail(toAddress, ccAddress, fromAddress, 
+                 mailSubject, mailBody, processOutput)
+    }
+    
+    private void sendMail(toAddress, ccAddress, fromAddress, 
+                          mailSubject, mailBody, processOutput) {
         try {
             sendMail {
+                if (processOutput) {
+                    multipart true
+                }
                 to toAddress
                 if (ccAddress) {
                     cc ccAddress
@@ -134,6 +214,9 @@ class MailListenerService extends AbstractSvnEdgeService
                 from fromAddress
                 subject mailSubject
                 body mailBody
+                if (processOutput) {
+                    attachBytes "ProcessOutput.txt", "text/plain", processOutput
+                }
             }
         } catch (Exception e) {
             log.warn("Exception while sending mail. To: " + toAddress + 
@@ -141,15 +224,15 @@ class MailListenerService extends AbstractSvnEdgeService
         }
     }
 
-    private User retrieveUserForEvent(DumpRepositoryEvent event) {
+    private User retrieveUserForEvent(RepositoryEvent event) {
+        Integer userId = (event instanceof DumpRepositoryEvent && 
+                          event.dumpBean.isBackup()) ? 
+                null : event.userId
         User user = null
-        DumpBean dumpBean = event.dumpBean
-        if (!dumpBean.isBackup()) {
-            try {
-                user = dumpBean.userId ? User.get(dumpBean.userId) : null
-            } catch (Exception e) {
-                log.warn("Error in user lookup", e)
-            }
+        try {
+            user = userId ? User.get(event.userId) : null
+        } catch (Exception e) {
+            log.warn("Error in user lookup", e)
         }
         return user
     }

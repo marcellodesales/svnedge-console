@@ -742,7 +742,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @param repo the repo ni question
      * @return the filename the dumpfile is expected to have
      */
-    String scheduleDump(DumpBean bean, repo) {
+    String scheduleDump(DumpBean bean, repo, Integer userId = null) {
         def tName = "RepoDump-${repo.name}"
         def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
@@ -790,19 +790,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobGroup(RepoDumpJob.group)
 
         // data for reporting status to quartz job listeners
-        def progressLogFileName = getProgressLogFileName(repo.name)
+        File progressFile = prepareProgressLogFile(repo.name)
         def jobDataMap =
         [id: (bean.cloud ? "cloudSync-" : (bean.hotcopy ? "repoHotcopy-" : "repoDump-")) +
                 repo.name, repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description",
                         [repo.name], bean.userLocale),
-                urlProgress: "/csvn/log/show?fileName=/temp/${progressLogFileName}&view=tail",
+                progressLogFile: progressFile.absolutePath,
+                urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
                 urlResult: "/csvn/repo/dumpFileList/${repo.id}",
-                urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}"]
+                urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}",
+                locale: bean.userLocale]
         if (bean.cloud) {
             jobDataMap['urlResult'] = repo.cloudSvnUri
             jobDataMap['description'] = getMessage("repository.action.cloudSync.job.description",
                     [repo.name], bean.userLocale)
+        }
+        if (userId) {
+            jobDataMap['userId'] = userId
         }
         // data for generating the dump file
         jobDataMap.putAll(bean.toMap())
@@ -856,7 +861,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @param options any parameters needed by the
      * @return
      */
-    def scheduleLoad(Repository repo, Map options) {
+    def scheduleLoad(Repository repo, Map options, Integer userId = null) {
         long startTime = System.currentTimeMillis() + 5000L;
         def tName = "RepoLoad-${repo.name}"
         def tGroup = "AdhocLoad"
@@ -866,15 +871,20 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         trigger.setJobName(RepoLoadJob.name)
         trigger.setJobGroup(RepoLoadJob.group)
+        Locale locale = (options["locale"] ?: Locale.default) as Locale
         def jobDataMap =
         [id: "repoLoad-${repo.name}",
                 repoId: repo.id,
                 ignoreUuid: options["ignoreUuid"],
                 description: getMessage("repository.action.loadDumpFile.job.description",
-                        [repo.name], (options["locale"] ?: Locale.default) as Locale),
+                        [repo.name], locale),
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
-                progressLogFile: progressFile.absolutePath]
+                progressLogFile: progressFile.absolutePath, 
+                locale: locale]
 
+        if (userId) {
+            jobDataMap['userId'] = userId
+        }
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
 
         jobsAdminService.createOrReplaceTrigger(trigger)

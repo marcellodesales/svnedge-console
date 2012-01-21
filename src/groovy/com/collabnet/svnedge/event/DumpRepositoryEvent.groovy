@@ -30,8 +30,10 @@ class DumpRepositoryEvent extends RepositoryEvent {
     DumpBean dumpBean
     
     def DumpRepositoryEvent(source, DumpBean dumpBean,
-            Repository repo, boolean isSuccess, Exception e = null) {
-        super(source, repo, isSuccess, e)
+            Repository repo, boolean isSuccess, 
+            Integer userId = null, Locale locale = null, 
+            File processOutput = null, Exception e = null) {
+        super(source, repo, isSuccess, userId, locale, processOutput, e)
         this.dumpBean = dumpBean
     }
 }

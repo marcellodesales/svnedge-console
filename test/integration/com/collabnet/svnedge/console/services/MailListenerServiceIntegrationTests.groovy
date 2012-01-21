@@ -17,7 +17,10 @@
  */
 package com.collabnet.svnedge.console.services
 
+import java.io.File;
+
 import javax.mail.Message;
+import javax.mail.internet.MimeMultipart;
 
 import grails.test.GrailsUnitTestCase
 import com.collabnet.svnedge.console.CommandLineService
@@ -30,6 +33,7 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User;
 import com.collabnet.svnedge.event.DumpRepositoryEvent;
+import com.collabnet.svnedge.event.LoadRepositoryEvent;
 import com.collabnet.svnedge.util.ConfigUtil
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
@@ -79,9 +83,9 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     public void testDumpSuccess() {        
-        DumpBean params = new DumpBean(userId: 1)
+        DumpBean params = new DumpBean()
         DumpRepositoryEvent event = new DumpRepositoryEvent(
-                this, params, repo, DumpRepositoryEvent.SUCCESS)
+                this, params, repo, DumpRepositoryEvent.SUCCESS, ADMIN_USER_ID)
         
         mailListenerService.onApplicationEvent(event)
         
@@ -107,10 +111,10 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals("Expected 0 mail messages to start", 0, 
                 greenMail.getReceivedMessages().length)
         
-        DumpBean params = new DumpBean(userId: 1)
+        DumpBean params = new DumpBean()
         DumpRepositoryEvent event = new DumpRepositoryEvent(
-                this, params, repo, DumpRepositoryEvent.FAILED,
-                new Exception("testDumpFail"))
+                this, params, repo, DumpRepositoryEvent.FAILED, ADMIN_USER_ID,
+                null, null, new Exception("testDumpFail"))
         
         mailListenerService.onApplicationEvent(event)
 
@@ -154,10 +158,12 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
                 dupeMessage.getRecipients(Message.RecipientType.CC)))
     }
 
+    private static final int ADMIN_USER_ID = 1
+    
     public void testBackupSuccess() {
-        DumpBean params = new DumpBean(userId: 1, backup: true)
+        DumpBean params = new DumpBean(backup: true)
         DumpRepositoryEvent event = new DumpRepositoryEvent(
-                this, params, repo, DumpRepositoryEvent.SUCCESS)
+                this, params, repo, DumpRepositoryEvent.SUCCESS, ADMIN_USER_ID)
         
         mailListenerService.onApplicationEvent(event)
         
@@ -169,10 +175,10 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals("Expected 0 mail messages to start", 0, 
                 greenMail.getReceivedMessages().length)
         
-        DumpBean params = new DumpBean(userId: 1, backup: true)
+        DumpBean params = new DumpBean(backup: true)
         DumpRepositoryEvent event = new DumpRepositoryEvent(
-                this, params, repo, DumpRepositoryEvent.FAILED,
-                new Exception("testBackupFail"))
+                this, params, repo, DumpRepositoryEvent.FAILED, ADMIN_USER_ID, 
+                null, null, new Exception("testBackupFail"))
         
         mailListenerService.onApplicationEvent(event)
 
@@ -191,6 +197,133 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
                 GreenMailUtil.getAddressList(
                 message.getRecipients(Message.RecipientType.TO)))
         assertNull("Message should not have 'CC'",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
+    }
+
+    public void testLoadSuccess() {
+        LoadRepositoryEvent event = new LoadRepositoryEvent(
+                this, repo, LoadRepositoryEvent.SUCCESS, ADMIN_USER_ID)
+        
+        mailListenerService.onApplicationEvent(event)
+        
+        assertEquals("Expected one mail message", 1,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        assertEquals("Message Subject did not match",
+                "[Success][Load]Repository: test-repo", message.subject)
+        assertTrue("Message Body did not match", GreenMailUtil.getBody(message)
+                .startsWith("The loading of the dump file or archive into repository '" + 
+                repo.name + "' completed."))
+        assertEquals("Message From did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Message To did not match", User.get(ADMIN_USER_ID).email,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertNull("Message not expected to have CC recipients",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
+    }
+
+    public void testLoadFail() {
+        assertEquals("Expected 0 mail messages to start", 0,
+                greenMail.getReceivedMessages().length)
+        
+        LoadRepositoryEvent event = new LoadRepositoryEvent(
+                this, repo, DumpRepositoryEvent.FAILED, ADMIN_USER_ID,
+                null, null, new Exception("testLoadFail"))
+        
+        mailListenerService.onApplicationEvent(event)
+
+        // Two identical messages (as email is sent to two users)
+        assertEquals("Expected two mail message", 2,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        def dupeMessage = greenMail.getReceivedMessages()[1]
+        
+        assertEquals("Message Subject did not match",
+                "[Error][Load]Repository: test-repo", message.subject)
+        assertEquals("Duplicate message subject did not match original",
+                message.subject, dupeMessage.subject)
+        
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("The loading of the dump file or archive into repository '" + 
+                repo.name + "' failed."))
+        assertEquals("Duplicate message body did not match original",
+                GreenMailUtil.getBody(message),
+                GreenMailUtil.getBody(dupeMessage))
+        assertEquals("Message 'From' did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Duplicate message 'From' did not match original",
+            GreenMailUtil.getAddressList(message.from),
+            GreenMailUtil.getAddressList(dupeMessage.from))
+        assertEquals("Message 'To' did not match", User.get(1).email,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertEquals("Duplicate message 'To' did not match original",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)),
+                GreenMailUtil.getAddressList(
+                dupeMessage.getRecipients(Message.RecipientType.TO)))
+        assertEquals("Message 'CC' did not match", Server.getServer().adminEmail,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
+        assertEquals("Duplicate message 'CC' did not match original",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)),
+                GreenMailUtil.getAddressList(
+                dupeMessage.getRecipients(Message.RecipientType.CC)))
+    }
+
+    public void testLoadFailWithFile() {
+        assertEquals("Expected 0 mail messages to start", 0,
+                greenMail.getReceivedMessages().length)
+        
+        String testContent = 'qwerty foo bar baz '
+        while (testContent.length() < 200000) {
+            testContent += testContent
+        }
+        testContent = testContent.trim()
+        
+        File testFile = File.createTempFile("load-progress-test-file", ".txt")
+        testFile.text = testContent
+        
+        LoadRepositoryEvent event = new LoadRepositoryEvent(
+                this, repo, DumpRepositoryEvent.FAILED, ADMIN_USER_ID,
+                null, testFile, new Exception("testLoadFailWithFile"))
+        
+        mailListenerService.onApplicationEvent(event)
+
+        // Two identical messages (as email is sent to two users)
+        assertEquals("Expected two mail message", 2,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+
+        testFile.delete()
+        
+        assertTrue("Message Body did not contain attachment text ", 
+                GreenMailUtil.getBody(message)
+                .contains("Load process output is attached."))
+        assertTrue("Message Body did not contain file message ",
+            GreenMailUtil.getBody(message)
+            .contains("Full output is available in the server logs temp " +
+                      "directory with name " + testFile.name))
+
+        assertTrue(message.content instanceof MimeMultipart)
+        MimeMultipart mp = message.content
+        assertEquals("Expected an attachment", 2, mp.count)
+        assertEquals("Unexpected attachment content", 
+                testContent[-104858..-1], mp.getBodyPart(1).content)
+                
+        // Tested elsewhere, but might as well confirm it here too
+        assertEquals("Message Subject did not match",
+                "[Error][Load]Repository: test-repo", message.subject)        
+        assertEquals("Message 'From' did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Message 'To' did not match", User.get(1).email,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertEquals("Message 'CC' did not match", Server.getServer().adminEmail,
                 GreenMailUtil.getAddressList(
                 message.getRecipients(Message.RecipientType.CC)))
     }

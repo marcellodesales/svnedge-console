@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.admin
 
 import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.event.LoadRepositoryEvent
 
 /**
  * When triggered, the RepoLoadJob will invoke the {@link com.collabnet.svnedge.console.SvnRepoService#loadDumpFile}
@@ -44,9 +45,19 @@ class RepoLoadJob {
         try {
             log.info("Loading dump file for repo: ${repo.name}")
             svnRepoService.loadDumpFile(repo, dataMap)
+            svnRepoService.publishEvent(new LoadRepositoryEvent(this,
+                    repo, LoadRepositoryEvent.SUCCESS, 
+                    dataMap['userId'], dataMap['locale'], 
+                    dataMap['progressLogFile'] ? 
+                    new File(dataMap['progressLogFile']) : null))
         }
         catch (Exception e) {
             log.error("Unable to load the dump file", e)
+            svnRepoService.publishEvent(new LoadRepositoryEvent(this,
+                    repo, LoadRepositoryEvent.FAILED, 
+                    dataMap['userId'], dataMap['locale'], 
+                    dataMap['progressLogFile'] ? 
+                    new File(dataMap['progressLogFile']) : null, e))
         }
     }
 }

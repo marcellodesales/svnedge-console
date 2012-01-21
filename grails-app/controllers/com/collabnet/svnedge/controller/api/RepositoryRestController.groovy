@@ -198,7 +198,8 @@ class RepositoryRestController extends AbstractRestController {
                 def props = [:]
                 props.put("ignoreUuid", true)
                 props.put("locale", request.locale)
-                svnRepoService.scheduleLoad(repo, props)
+                def userId = loggedInUserInfo(field: 'id') as Integer
+                svnRepoService.scheduleLoad(repo, props, userId)
             }
 
             def repository = [id: repo.id,

@@ -20,31 +20,18 @@ package com.collabnet.svnedge.event
 
 import org.springframework.context.ApplicationEvent
 
+import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository
 
 /**
- * Spring event meant to be published from repository operations
+ * Spring event related to background repo dump
  */
-class RepositoryEvent extends ApplicationEvent {
-    public static final boolean SUCCESS = true
-    public static final boolean FAILED = false
-
-    Repository repo
-    boolean isSuccess
-    Integer userId
-    File processOutput
-    Exception exception
-    Locale locale
+class LoadRepositoryEvent extends RepositoryEvent {
     
-    def RepositoryEvent(source, Repository repo, boolean isSuccess, 
-            Integer userId = null, Locale locale, File processOutput = null, 
-            Exception e = null) {
-        super(source)
-        this.repo = repo
-        this.isSuccess = isSuccess
-        this.userId = userId
-        this.processOutput = processOutput
-        this.exception = e
-        this.locale = locale
+    def LoadRepositoryEvent(source,
+            Repository repo, boolean isSuccess, 
+            Integer userId = null, Locale locale = null, 
+            File processOutput = null, Exception e = null) {
+        super(source, repo, isSuccess, userId, locale, processOutput, e)
     }
 }

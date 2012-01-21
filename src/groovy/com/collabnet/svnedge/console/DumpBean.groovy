@@ -34,7 +34,6 @@ public class DumpBean {
     boolean renumberRevs
     boolean preserveRevprops
     boolean skipMissingMergeSources
-    int userId
     Locale userLocale
     int numberToKeep = 0
     SchedulerBean schedule = new SchedulerBean()
@@ -60,8 +59,7 @@ public class DumpBean {
         "backup",
         "cloud",
         "hotcopy",
-        "userLocale",
-        "userId"
+        "userLocale"
     ]
 
     Integer getLowerRevision() {

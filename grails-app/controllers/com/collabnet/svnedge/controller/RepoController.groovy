@@ -178,7 +178,8 @@ class RepoController {
                 def props = [:]
                 props.put("ignoreUuid", ignoreUUID)
                 props.put("locale", request.locale)
-                svnRepoService.scheduleLoad(repo, props)
+                def userId = loggedInUserInfo(field: 'id') as Integer
+                svnRepoService.scheduleLoad(repo, props, userId)
                 flash.unfiltered_message = message(
                         code: 'loadFileUpload.action.success',
                         args: [repo.name.encodeAsHTML(),
@@ -249,9 +250,9 @@ class RepoController {
 
         } else {
             try {
-                cmd.userId = loggedInUserInfo(field: 'id') as int
+                def userId = loggedInUserInfo(field: 'id') as Integer
                 cmd.userLocale = request.locale
-                def filename = svnRepoService.scheduleDump(cmd, repo)
+                def filename = svnRepoService.scheduleDump(cmd, repo, userId)
                 flash.message = message(code: 'repository.action.createDumpfile.success',
                         args: [filename])
                 redirect(action: 'dumpFileList', params: [id: params.id])
@@ -823,7 +824,8 @@ class RepoController {
         def props = [:]
         props.put("ignoreUuid", ignoreUUID)
         props.put("locale", request.locale)
-        svnRepoService.scheduleLoad(repo, props)
+        def userId = loggedInUserInfo(field: 'id') as Integer
+        svnRepoService.scheduleLoad(repo, props, userId)
         flash.unfiltered_message = message(
                 code: 'repository.action.save.success.loading',
                 args: [createLink(controller: 'job', action: 'list')])

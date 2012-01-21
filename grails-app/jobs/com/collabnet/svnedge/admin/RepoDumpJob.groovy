@@ -67,13 +67,19 @@ class RepoDumpJob {
                     log.info("Creating repo dump file: " + file)
                 }
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this, 
-                        dumpBean, repo, DumpRepositoryEvent.SUCCESS))
+                        dumpBean, repo, DumpRepositoryEvent.SUCCESS, 
+                        dataMap['userId'], dataMap['locale'],
+                        dataMap['progressLogFile'] ? 
+                        new File(dataMap['progressLogFile']) : null))
             } catch (ConcurrentBackupException e) {
                 log.warn("Backup skipped: " + e.message)
             } catch (Exception e) {
                 log.warn("Repository dump failed", e)
+                def path = dataMap['progressLogFile']
+                File progressFile = path ? new File(path) : null
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,
-                        dumpBean, repo, DumpRepositoryEvent.FAILED, e))
+                        dumpBean, repo, DumpRepositoryEvent.FAILED, 
+                        dataMap['userId'], dataMap['locale'], progressFile, e))
             }
         }
         else {
