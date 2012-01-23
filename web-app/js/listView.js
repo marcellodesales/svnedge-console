@@ -104,9 +104,7 @@ function updateActionButtons()  {
  */
 function confirmAction(confirmMessage, okHandler, cancelHandler) {
 
-    var guessHeight = (confirmMessage.length / 3)
-    guessHeight += (confirmMessage.split("<p>").length * 50)
     listViewI18n._message = confirmMessage;
-    dialog(listViewI18n, okHandler, cancelHandler, {height: guessHeight});
+    dialog(listViewI18n, okHandler, cancelHandler);
 }
 

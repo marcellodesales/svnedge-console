@@ -112,19 +112,20 @@ class SetupCloudServicesController {
     def credentials = {
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         def cmd = new CloudServicesAccountCommand()
-        if (cloudConfig && cloudConfig.domain) {
+        def existingCredentials = cloudConfig && cloudConfig.domain
+        if (existingCredentials) {
             cmd.password = securityService.decrypt(cloudConfig.password)
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
         }
-        render(view: "credentials", model: [cmd: cmd, existingCredentials: (cloudConfig != null)])
+        render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
     }
 
     def updateCredentials = { CloudServicesAccountCommand cmd ->
         // with existing config, only password can be updated
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         def existingCredentials = (cloudConfig && cloudConfig.domain)
-        if (cloudConfig) {
+        if (existingCredentials) {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
             if (params['password_changed'] != 'true') {
@@ -156,6 +157,21 @@ class SetupCloudServicesController {
             flash.error = message(code: "setupCloudServices.page.credentials.validation.error")
             render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
         }
+    }
+
+    def removeCredentials = {
+        def cloudConfig = CloudServicesConfiguration.currentConfig
+        if (cloudConfig) {
+            cloudConfig.domain = ''
+            cloudConfig.username = ''
+            cloudConfig.password = ''
+            cloudConfig.save()
+            request.message = message(code: "setupCloudServices.page.credentials.remove.success")
+        }
+        else {
+            request.warning = message(code: "setupCloudServices.page.credentials.remove.failure")
+        }
+        render(view: "index", model: [cmd: new CloudServicesAccountCommand()])
     }
 
     def selectUsers = {

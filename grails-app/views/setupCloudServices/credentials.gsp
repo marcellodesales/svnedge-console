@@ -20,6 +20,42 @@
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.credentials.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
+  <g:javascript library="window"/>
+  <g:javascript library="effects"/>
+  <g:javascript library="window_effects"/>
+  <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
+  <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
+  <g:javascript>
+  // javascript for confirmation dialog box to remove credentials
+  var i18n = {
+    _confirmOkLabel: "${message(code:'default.confirmation.ok')}",
+    _confirmCancelLabel: "${message(code:'default.confirmation.cancel')}",
+    _message: "${message(code:'setupCloudServices.page.credentials.button.remove.confirm')}"
+  }
+
+  Event.observe(window, 'load', function() {
+    $('btnCloudServicesRemove').observe('click', function(e) {
+      // stop this button click from submitting form
+      Event.stop(e)
+      // confirm dialog, with callback functions for "ok" and "cancel"
+      dialog(i18n,
+        function() {
+          // OkHandler. On "ok", submit the form
+          // Submits the form with the original button properties transferred to a hidden field,
+          // to simulate the button click and thereby activate Grails dispatcher
+          var s = Event.element(e)
+          var action = new Element('input', { type: 'hidden',  name: s.readAttribute('name'), value: s.readAttribute('value') });
+          var theForm = s.up('form');
+          theForm.appendChild(action);
+          theForm.submit();
+        },
+        function() {
+          // CancelHandler. On cancel, do nothing
+          return
+        })
+    })
+  })
+  </g:javascript>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.leftNav.header"/>
@@ -115,6 +151,11 @@
     <tr class="ContainerFooter">
       <td colspan="3">
         <div class="AlignRight">
+          <g:if test="${existingCredentials}">
+            <g:actionSubmit id="btnCloudServicesRemove"
+                            value="${message(code:'setupCloudServices.page.credentials.button.remove')}"
+                            controller="setupCloudServices" action="removeCredentials" class="Button"/>
+          </g:if>
           <g:actionSubmit id="btnCloudServicesValidate"
                           value="${message(code:'setupCloudServices.page.credentials.button.validate')}"
                           controller="setupCloudServices" action="updateCredentials" class="Button"/>
