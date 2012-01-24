@@ -17,19 +17,31 @@
  */
 package com.collabnet.svnedge.console.services
 
+import javax.mail.internet.MimeMultipart
+
 import grails.test.GrailsUnitTestCase
+
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.console.CommandLineService
 import com.collabnet.svnedge.console.LifecycleService
 import com.collabnet.svnedge.console.OperatingSystemService
 import com.collabnet.svnedge.console.SvnRepoService
 import com.collabnet.svnedge.console.DumpBean
+import com.collabnet.svnedge.domain.MailConfiguration
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.util.ConfigUtil
+import com.icegreen.greenmail.util.GreenMailUtil
+import com.icegreen.greenmail.util.ServerSetupTest
+
 import org.apache.commons.io.FileUtils;
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
+    def grailsApplication
+    def greenMail
+    def mailConfigurationService
     SvnRepoService svnRepoService
     CommandLineService commandLineService
     OperatingSystemService operatingSystemService
@@ -48,7 +60,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         // Setup a test repository parent
-        repoParentDir = createTestDir("repo")
+        repoParentDir = TestUtil.createTestDir("repo")
         Server server = lifecycleService.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.save()
@@ -59,6 +71,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
     protected void tearDown() {
         super.tearDown()
         repoParentDir.deleteDir()
+        greenMail.deleteAllMessages()
     }
 
 
@@ -81,7 +94,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
                 svnRepoService.createRepository(repo, true)
 
         // checkout the repo
-        def wcDir = createTestDir("wc")
+        def wcDir = TestUtil.createTestDir("wc")
         def testRepoFile = new File(wcDir, testRepoName)
         def status = commandLineService.executeWithStatus(
                 ConfigUtil.svnPath(), "checkout",
@@ -210,7 +223,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         if (!operatingSystemService.isWindows()) {
             // not sure how to test a native zip extraction on windows
 
-            File extractDir = createTestDir("hotcopy")
+            File extractDir = TestUtil.createTestDir("hotcopy")
             def exitStatus = commandLineService.executeWithStatus(
                     "unzip", dumpFile.canonicalPath, "-d", extractDir.canonicalPath)
             assertEquals "Unable to extract archive", 0, exitStatus
@@ -561,16 +574,72 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals "the target repo should still have its own UUID", targetUuid, svnRepoService.getReposUUID(repoTarget)
 
     }
+    
+    public void testLoadFailMail() {
+        
+        // upper limit on time to run async code
+        long timeLimit = System.currentTimeMillis() + 30000
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
+                
+        // create a target repo WITHOUT branches/tags/trunk nodes
+        def testRepoNameTarget = "load-test-target"
+        
+        Repository repoTarget = new Repository(name: testRepoNameTarget)
+        assertEquals "Failed to create target repository.", 0,
+                svnRepoService.createRepository(repoTarget, false)
+        repoTarget.save(flush: true)
+        
+        def resource = this.class.getResource("corrupted-dump-file.dump")
+        println resource
+        File dumpFile = new File(resource.toURI())
+        
+        // move src dump file to the expected load location for target
+        File loadDir = svnRepoService.getLoadDirectory(repoTarget)
+        // delete any residual load files
+        loadDir.eachFile {
+            it.delete()
+        }
+        File loadFile = new File(loadDir, dumpFile.name)
+        loadFile.text = dumpFile.text
+        //boolean loadFileCreated = dumpFile.renameTo(loadFile)
+        //assertTrue "should be able to move dumpfile to load directory", loadFile.exists()
+        assertTrue "loadFile should exist", loadFile.exists()
+        log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
 
-
-    private File createTestDir(String prefix) {
-        def testDir = File.createTempFile(prefix + "-test", null)
-        log.info("testDir = " + testDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        testDir.delete()
-        testDir.mkdir()
-        // TODO This doesn't seem to work, might need to delete in teardown
-        testDir.deleteOnExit()
-        return testDir
+        // almost all setup, but still need mail configured
+        ConfigurationHolder.config = grailsApplication.config
+        MailConfiguration mailConfig = MailConfiguration.configuration
+        mailConfig.port = ServerSetupTest.SMTP.port
+        mailConfig.enabled = true
+        mailConfigurationService.saveMailConfiguration(mailConfig)
+                
+        // load it
+        def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        def options = ["progressLogFile": progressFile.absolutePath]
+        options << ["ignoreUuid": false]
+        svnRepoService.scheduleLoad(repoTarget, options)
+        
+        long startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() < timeLimit &&
+                greenMail.receivedMessages.length == 0) {
+            Thread.sleep(1000)
+        }
+        assertEquals("Expected one mail message", 1,
+                greenMail.receivedMessages.length)
+        def message = greenMail.receivedMessages[0]
+        assertEquals("Message Subject did not match",
+                "[Error][Load]Repository: " + testRepoNameTarget,
+                message.subject)
+        assertTrue(message.content instanceof MimeMultipart)
+        MimeMultipart mp = message.content
+        assertEquals("Expected an attachment", 2, mp.count)
+        assertTrue("Message Body did not match", 
+                GreenMailUtil.getBody(mp.getBodyPart(0).content.getBodyPart(0))
+                .startsWith("The loading of the dump file or archive into repository '" + 
+                testRepoNameTarget + "' failed."))
     }
 }

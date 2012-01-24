@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.replication.command
 
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.domain.Server
 
 import com.collabnet.svnedge.integration.command.AbstractCommand
@@ -54,7 +55,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             this.rConf.save()
         }
         // Setup a test repository parent
-        repoParentDir = createTestDir("repo")
+        repoParentDir = TestUtil.createTestDir("repo")
     }
 
     protected void tearDown() {
@@ -123,7 +124,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
             fail("Should be able to add a repository for sync.")
         }
 
-        File wcMaster = createTestDir("wcMaster")
+        File wcMaster = TestUtil.createTestDir("wcMaster")
 
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
@@ -161,7 +162,7 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
         revNumberToAlter = matcher[0][1]
 
         def repoUri = commandLineService.createSvnFileURI(new File(repoParentDir, repoName))
-        File wcReplica = createTestDir("wcReplica")
+        File wcReplica = TestUtil.createTestDir("wcReplica")
         command = [ConfigUtil.svnPath(), "co", repoUri, wcReplica.canonicalPath,
             //"--username", username, "--password", password,
             "--non-interactive", "--no-auth-cache"] as String[]
@@ -312,17 +313,5 @@ class CopyRevpropsCommandIntegrationTests extends GrailsUnitTestCase {
 
         wcMaster.deleteDir()
         wcReplica.deleteDir()
-    }
-
-
-    private File createTestDir(String prefix) {
-        def testDir = File.createTempFile(prefix + "-test", null)
-        log.info("testDir = " + testDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        testDir.delete()
-        testDir.mkdir()
-        // TODO This doesn't seem to work, might need to delete in teardown
-        testDir.deleteOnExit()
-        return testDir
     }
 }

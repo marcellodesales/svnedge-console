@@ -17,12 +17,12 @@
  */
 package com.collabnet.svnedge.console.services
 
-import java.io.File;
-
-import javax.mail.Message;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.Message
+import javax.mail.internet.MimeMultipart
 
 import grails.test.GrailsUnitTestCase
+
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.console.CommandLineService
 import com.collabnet.svnedge.console.LifecycleService
 import com.collabnet.svnedge.console.OperatingSystemService
@@ -58,7 +58,7 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         super.setUp()
 
         // Setup a test repository parent
-        repoParentDir = createTestDir("repo")
+        repoParentDir = TestUtil.createTestDir("repo")
         Server server = Server.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.save()
@@ -326,16 +326,5 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals("Message 'CC' did not match", Server.getServer().adminEmail,
                 GreenMailUtil.getAddressList(
                 message.getRecipients(Message.RecipientType.CC)))
-    }
-
-    private File createTestDir(String prefix) {
-        def testDir = File.createTempFile(prefix + "-test", null)
-        log.info("testDir = " + testDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        testDir.delete()
-        testDir.mkdir()
-        // TODO This doesn't seem to work, might need to delete in teardown
-        testDir.deleteOnExit()
-        return testDir
     }
 }

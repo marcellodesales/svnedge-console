@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.replication.command
 
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.util.ConfigUtil 
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
@@ -63,7 +64,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
             this.rConf.save()
         }
         // Setup a test repository parent
-        repoParentDir = createTestDir("repo")
+        repoParentDir = TestUtil.createTestDir("repo")
     }
 
     protected void tearDown() {
@@ -457,7 +458,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         assertTrue("Repository directory should exist: " + 
             repoDir.getCanonicalPath(), repoDir.exists())
 
-        File wcDir = createTestDir("wc")
+        File wcDir = TestUtil.createTestDir("wc")
 
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
@@ -486,7 +487,7 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         commandLineService.execute(command.toArray(new String[0]))
 
         def repoUri = commandLineService.createSvnFileURI(repoDir)
-        File wcDir2 = createTestDir("wc2")
+        File wcDir2 = TestUtil.createTestDir("wc2")
         command = [ConfigUtil.svnPath(), "co", repoUri, wcDir2.canonicalPath,
             //"--username", username, "--password", password,
             "--non-interactive", "--no-auth-cache"]
@@ -544,16 +545,5 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         wcDir2.deleteDir()
         CommandTestsHelper
             .deleteTestProject(config, ctfRemoteClientService, projectName)
-    }
-
-    private File createTestDir(String prefix) {
-        def testDir = File.createTempFile(prefix + "-test", null)
-        log.info("testDir = " + testDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        testDir.delete()
-        testDir.mkdir()
-        // TODO This doesn't seem to work, might need to delete in teardown
-        testDir.deleteOnExit()
-        return testDir
     }
 }

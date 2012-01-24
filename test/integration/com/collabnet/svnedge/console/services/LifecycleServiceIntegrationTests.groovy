@@ -19,6 +19,7 @@ package com.collabnet.svnedge.console.services;
 
 import grails.test.GrailsUnitTestCase;
 
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.User 
 import com.collabnet.svnedge.util.ConfigUtil;
@@ -40,7 +41,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         // Setup a test repository parent
-        repoParentDir = createTestDir("repo")
+        repoParentDir = TestUtil.createTestDir("repo")
         Server server = lifecycleService.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.save()
@@ -121,7 +122,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     private void runSetSvnAuth(testusername, password) {
-        def confDir = createTestDir("conf")
+        def confDir = TestUtil.createTestDir("conf")
         def origConfDirPath = ConfigUtil.confDirPath()
         try {
             ConfigUtil.confDirPath = confDir.absolutePath
@@ -146,7 +147,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         Thread.sleep(100)
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
-        def confDir = createTestDir("conf")
+        def confDir = TestUtil.createTestDir("conf")
         def origConfDirPath = ConfigUtil.confDirPath()
         ConfigUtil.confDirPath = confDir.absolutePath
         copyConfFiles(origConfDirPath, confDir)
@@ -178,7 +179,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         Thread.sleep(100)
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
-        def confDir = createTestDir("conf")
+        def confDir = TestUtil.createTestDir("conf")
         def origConfDirPath = ConfigUtil.confDirPath()
         ConfigUtil.confDirPath = confDir.absolutePath
 
@@ -301,17 +302,5 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         File logDir = new File(ConfigUtil.dataDirPath(), "logs")
         def logNameSuffix = serverConfService.getLogFileSuffix()
         return new File(logDir, "error_${logNameSuffix}.log")
-    }
-
-
-    private File createTestDir(String prefix) {
-        def testDir = File.createTempFile(prefix + "-test", null)
-        log.info("testDir = " + testDir.getCanonicalPath())
-        // we want a dir, not a file, so delete and mkdir
-        testDir.delete()
-        testDir.mkdir()
-        // TODO This doesn't seem to work, might need to delete in teardown
-        testDir.deleteOnExit()
-        return testDir
     }
 }

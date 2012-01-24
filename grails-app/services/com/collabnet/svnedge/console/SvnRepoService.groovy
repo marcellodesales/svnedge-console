@@ -743,6 +743,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @return the filename the dumpfile is expected to have
      */
     String scheduleDump(DumpBean bean, repo, Integer userId = null) {
+        
         def tName = "RepoDump-${repo.name}"
         def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
@@ -1116,7 +1117,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 threads << dumpProcess.consumeProcessErrorStream(progress)
             }
             threads << dumpProcess.consumeProcessOutputStream(out)
-            runAsync {
+
                 try {
                     for (t in threads) {
                         try {
@@ -1131,11 +1132,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 finishDumpFile(finalDumpFile, tempDumpFile, progress,
                         progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
-            }
 
         } else {
             log.debug("Dump: No filter")
-            runAsync {
                 try {
                     dumpProcess.waitForProcessOutput(out, progress)
                 } finally {
@@ -1144,7 +1143,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 finishDumpFile(finalDumpFile, tempDumpFile, progress,
                         progressLogFile, bean.userLocale)
                 cleanupOldBackups(bean, repo)
-            }
         }
         return filename
     }

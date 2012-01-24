@@ -61,7 +61,8 @@ class MailConfiguration {
     }
     
     static MailConfiguration getConfiguration() {
-        return MailConfiguration.get(1) ?: new MailConfiguration()
+        def rows = MailConfiguration.list()
+        return rows ? rows.last() : new MailConfiguration()
     }
 }
 

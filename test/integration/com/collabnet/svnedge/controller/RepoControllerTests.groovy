@@ -17,15 +17,27 @@
  */
 package com.collabnet.svnedge.controller
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 import grails.test.*
 
+import com.collabnet.svnedge.TestUtil;
+import com.collabnet.svnedge.console.DumpBean;
 import com.collabnet.svnedge.controller.AuthzRulesCommand 
+import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.Repository 
+import com.collabnet.svnedge.domain.Server
+import com.icegreen.greenmail.util.GreenMailUtil
+import com.icegreen.greenmail.util.ServerSetupTest
 
 class RepoControllerTests extends ControllerUnitTestCase {
 
+    def mailConfigurationService
     def svnRepoService
     def serverConfService
+    def grailsApplication
+    def greenMail
+    def operatingSystemService
 
     def repoNameNew = "integration_test_new_repo"
     def repoNameExisting = "integration_test_existing_repo"
@@ -43,23 +55,22 @@ class RepoControllerTests extends ControllerUnitTestCase {
         
         repoNew = new Repository(name: repoNameNew)
         repoExisting = new Repository(name: repoNameExisting)
-        
+        repoExisting.save()
        
         // make sure the supposedly new repo is not in the way
         svnRepoService.archivePhysicalRepository(repoNew)
 
         // make sure the supposedly existing repo is in the way
-        svnRepoService.createRepository(repoExisting, false)
+        svnRepoService.createRepository(repoExisting, true)
 
     }
 
     protected void tearDown() {
         super.tearDown()
-
+        greenMail.deleteAllMessages()
         // cleanup repo
         svnRepoService.archivePhysicalRepository(repoNew)
         svnRepoService.archivePhysicalRepository(repoExisting)
-
     }
 
     void testIndex() {
@@ -145,5 +156,83 @@ class RepoControllerTests extends ControllerUnitTestCase {
         assertNull "Controller should provide a success message",
                 controller.flash.message
         assertNotNull "Controller should return an error", controller.flash.warn        
+    }    
+
+    void testCreateDumpFileSuccessMail() {
+        controller.metaClass.loggedInUserInfo = { return 1 }
+
+        ConfigurationHolder.config = grailsApplication.config
+        MailConfiguration mailConfig = MailConfiguration.configuration
+        mailConfig.port = ServerSetupTest.SMTP.port
+        mailConfig.enabled = true
+        mailConfigurationService.saveMailConfiguration(mailConfig)
+        
+        def dumpBean = new DumpBean()
+        controller.params.id = repoExisting.id
+        println "repoId=" + controller.params.id
+        controller.createDumpFile(dumpBean)
+        
+        long startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() < startTime + 10000 &&
+                greenMail.receivedMessages.length == 0) {
+            Thread.sleep(1000)
+            println "Waiting 1 s"
+        }
+        assertEquals("Expected one mail message ", 1,
+            greenMail.receivedMessages.length)
+        def message = greenMail.receivedMessages[0]
+        assertEquals("Message Subject did not match",
+                "[Success][Adhoc dump]Repository: " + repoExisting.name, 
+                message.subject)
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("The dump of repository '" + repoExisting.name + 
+                "' completed."))        
+    }    
+
+    void testCreateDumpFileFailMail() {
+        // this test relies on setting file system permissions
+        if (operatingSystemService.isWindows()) {
+            return
+        }
+        controller.metaClass.loggedInUserInfo = { return 1 }
+
+        ConfigurationHolder.config = grailsApplication.config
+        MailConfiguration mailConfig = MailConfiguration.configuration
+        mailConfig.port = ServerSetupTest.SMTP.port
+        mailConfig.enabled = true
+        boolean b = mailConfigurationService.saveMailConfiguration(mailConfig)
+        if (!b) {
+            fail "Should not be validation errors: " + mailConfig.errors.dump()
+        }
+        
+        // It would be good to use a test directory here, but svnRepoService is
+        // non-transactional, so that won't work
+        Server server = Server.getServer()
+        File dumpDir = new File(server.dumpDir, repoExisting.name)
+        if (!dumpDir.exists()) {
+            dumpDir.mkdirs()
+        }
+        dumpDir.setWritable(false)
+        
+        def dumpBean = new DumpBean()
+        controller.params.id = repoExisting.id
+        controller.createDumpFile(dumpBean)
+        
+        long startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() < startTime + 10000 &&
+                greenMail.receivedMessages.length == 0) {
+            Thread.sleep(1000)
+        }
+        dumpDir.setWritable(true)        
+        
+        assertEquals("Expected one mail message with two recipients", 2,
+            greenMail.receivedMessages.length)
+        def message = greenMail.receivedMessages[0]
+        assertEquals("Message Subject did not match",
+                "[Error][Adhoc dump]Repository: " + repoExisting.name, 
+                message.subject)
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("The dump of repository '" + repoExisting.name + 
+                "' failed."))        
     }    
 }

@@ -62,6 +62,14 @@ class MailListenerService extends AbstractSvnEdgeService
     
     void onApplicationEvent(RepositoryEvent event) {
         MailConfiguration config = MailConfiguration.getConfiguration()
+        if (config.enabled) {
+            onEnabledMail(event, config)
+        } else {
+            log.debug "Email notifications are disabled."
+        }
+    }
+        
+    private void onEnabledMail(RepositoryEvent event, MailConfiguration config) {
         def fromAddress = config.createFromAddress()
         Server server = Server.getServer()
         def defaultAddress = server.adminEmail
@@ -218,6 +226,7 @@ class MailListenerService extends AbstractSvnEdgeService
                     attachBytes "ProcessOutput.txt", "text/plain", processOutput
                 }
             }
+            
         } catch (Exception e) {
             log.warn("Exception while sending mail. To: " + toAddress + 
                     "\nSubject: " + mailSubject + "\nBody:\n" + mailBody, e)

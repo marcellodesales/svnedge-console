@@ -77,6 +77,15 @@ class RepoDumpJob {
                 log.warn("Repository dump failed", e)
                 def path = dataMap['progressLogFile']
                 File progressFile = path ? new File(path) : null
+                if (progressFile.exists()) {
+                    // rename the file, so future dumps can proceed
+                    int dot = path.lastIndexOf('.')
+                    String ts = new Date().format('yyyyMMddHHmmss')
+                    String newPath = path.substring(0, dot) + '-' + 
+                            ts + path.substring(dot)
+                    progressFile.renameTo(newPath)
+                }
+
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,
                         dumpBean, repo, DumpRepositoryEvent.FAILED, 
                         dataMap['userId'], dataMap['locale'], progressFile, e))
