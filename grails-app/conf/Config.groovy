@@ -202,6 +202,7 @@ environments {
     }
     production {
         grails.serverURL = "http://www.changeme.com"
+        grails.plugin.excludes = "greenmail"
 
         svnedge {
             defaultHighPort = 18080

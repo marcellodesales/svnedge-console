@@ -211,6 +211,21 @@ class ApplicationFilters {
                 }
             }
         }
+
+        /**
+         * This filter prevents access to the greenmail plug-in under the
+         * production environment.
+         */
+        greenmailPluginRestriction(controller: 'greenmail', action: '*') {
+            before = {
+                if (GrailsUtil.environment != "production") {
+                    return true
+                } else {
+                    redirect(controller: 'status', action: 'index')
+                    return false
+                }
+            }
+        }
     }
 
 }
