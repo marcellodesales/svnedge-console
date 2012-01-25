@@ -45,6 +45,10 @@ class UserAccountService extends AbstractSvnEdgeService {
             new Role(authority: "ROLE_ADMIN_REPO", 
                 description: getMessage("role.ROLE_ADMIN_REPO"))
 
+        Role roleAdminHooks = Role.findByAuthority("ROLE_ADMIN_HOOKS") ?:
+            new Role(authority: "ROLE_ADMIN_HOOKS", 
+                description: getMessage("role.ROLE_ADMIN_HOOKS"))
+
         Role roleAdminUsers = Role.findByAuthority("ROLE_ADMIN_USERS") ?:
             new Role(authority: "ROLE_ADMIN_USERS", 
                 description: getMessage("role.ROLE_ADMIN_USERS"))
@@ -135,6 +139,7 @@ class UserAccountService extends AbstractSvnEdgeService {
                     roleUser.save(flush: true)
                     roleAdminSystem.save(flush: true)
                     roleAdminRepo.save(flush: true)
+                    roleAdminHooks.save(flush: true)
                     roleAdminUsers.save(flush: true)
                 }
                 catch (Exception e) {
