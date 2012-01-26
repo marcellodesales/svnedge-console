@@ -79,6 +79,12 @@ class UserAccountService extends AbstractSvnEdgeService {
                             description: "repository admin user", enabled: true,
                             email: "adminRepo@example.com").save(flush: true)
 
+                User adminHooks = User.findByUsername("adminHooks") ?:
+                    new User(username: "adminHooks",
+                            realUserName: "Repo Hooks Administrator", passwd: password,
+                            description: "repository hooks admin user", enabled: true,
+                            email: "adminHooks@example.com").save(flush: true)
+
                 User adminUsers = User.findByUsername("adminUsers") ?:
                     new User(username: "adminUsers",
                             realUserName: "Users Administrator", passwd: password,
@@ -100,11 +106,13 @@ class UserAccountService extends AbstractSvnEdgeService {
 
                 roleAdminSystem.addToPeople(adminSystem)
                 roleAdminRepo.addToPeople(adminRepo)
+                roleAdminHooks.addToPeople(adminHooks)
                 roleAdminUsers.addToPeople(adminUsers)
 
 
                 roleUser.addToPeople(adminSystem)
                 roleUser.addToPeople(adminRepo)
+                roleUser.addToPeople(adminHooks)
                 roleUser.addToPeople(adminUsers)
                 roleUser.addToPeople(normalUser)
                 roleUser.addToPeople(normalDots)
@@ -113,6 +121,7 @@ class UserAccountService extends AbstractSvnEdgeService {
 
                 lifecycleService.setSvnAuth(adminSystem, "admin")
                 lifecycleService.setSvnAuth(adminRepo, "admin")
+                lifecycleService.setSvnAuth(adminHooks, "admin")
                 lifecycleService.setSvnAuth(adminUsers, "admin")
                 lifecycleService.setSvnAuth(normalUser, "admin")
                 lifecycleService.setSvnAuth(normalDots, "admin")
