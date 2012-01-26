@@ -931,6 +931,28 @@ class RepoController {
         render(view: 'editAuthorization', model: [authRulesCommand: cmd])
     }
 
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def hooksList = {
+        def model = reports()
+        def repo = Repository.get(params.id)
+        if (repo) {
+            // set default sort to be alphabetical, if neither sort
+            // parameter is present
+            if (!params.sort) {
+                params.sort = "name"
+                params.order = "asc"
+            }
+            if (!params.order) {
+                params.order = "asc"
+            }
+            def sortBy = params.sort
+            boolean isAscending = params.order == "asc"
+            model["hooksList"] =
+                svnRepoService.listHooks(repo, sortBy, isAscending)
+        }
+        return model
+    }
+
     /**
      * helper to format a SchedulerBean instance to a human-readable string
      * @param s

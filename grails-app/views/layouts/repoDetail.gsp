@@ -151,7 +151,9 @@
   <g:set var="tabArray" value="${[[action:'dumpFileList', href:createLink(action: 'dumpFileList', id: params.id), label: message(code:'repository.page.show.tabs.dumpFileList')]]}" />
   <g:set var="tabArray" value="${tabArray << [action:'bkupSchedule', href:createLink(action: 'bkupSchedule', id: params.id), label: message(code:'repository.page.show.tabs.bkupSchedule')]}" />
   <g:set var="tabArray" value="${tabArray << [action:'reports', href:createLink(action: 'reports', id: params.id), label: message(code:'repository.page.show.tabs.reports')]}" />
-
+  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_HOOKS">
+    <g:set var="tabArray" value="${tabArray << [action:'hooksList', href:createLink(action: 'hooksList', id: params.id), label: message(code:'repository.page.show.tabs.hooksList')]}" />
+  </g:ifAnyGranted>
   <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
   
   <g:pageProperty name="page.tabContent" />

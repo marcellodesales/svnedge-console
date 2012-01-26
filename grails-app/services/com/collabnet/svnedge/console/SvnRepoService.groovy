@@ -623,20 +623,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     files << f
                 }
             }
-        }
-        int sign = isAscending ? 1 : -1
-        switch (sortBy) {
-            case "name":
-                files = files.sort { a, b -> sign * (a.name <=> b.name) }
-                break
-            case "size":
-                files = files.sort { f -> sign * f.length() }
-                break
-            case "date":
-                files = files.sort { f -> sign * f.lastModified() }
-                break
-            default:
-                files = files.sort { f -> -1 * f.lastModified() }
+            files = sortFiles(files, sortBy, isAscending)
         }
         return files
     }
@@ -661,21 +648,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                         files << f
                     }
                 }
-                int sign = isAscending ? 1 : -1
-                switch (sortBy) {
-                    case "name":
-                        files = files.sort { a, b -> sign * (a.name <=> b.name) }
-                        break
-                    case "size":
-                        files = files.sort { f -> sign * f.length() }
-                        break
-                    case "date":
-                        files = files.sort { f -> sign * f.lastModified() }
-                        break
-                    default:
-                        files = files.sort { f -> -1 * f.lastModified() }
-                }
-
+                files = sortFiles(files, sortBy, isAscending)
                 fileMap.put(d.name, files)
             }
         }
@@ -1433,5 +1406,45 @@ class SvnRepoService extends AbstractSvnEdgeService {
             p.waitFor()
         }
         return isAccepted
+    }
+
+    /**
+     * Lists all the files within 'hooks' directory for the given repository.
+     * Subdirectories are not included.
+     * 
+     * @param repo A Repository object
+     * @return List of File objects
+     */
+    List<File> listHooks(repo, sortBy = "name", isAscending = true) {
+        def files = []
+        
+        Server server = Server.getServer()
+        File repoDir = new File(server.repoParentDir, repo.name)
+        File hooksDir = new File(repoDir, "hooks")
+        if (hooksDir.exists()) {
+            hooksDir.eachFile(FileType.FILES) { f ->
+                files << f
+            }
+            files = sortFiles(files, sortBy, isAscending)
+        }
+        return files
+    }
+    
+    private def sortFiles(files, sortBy, isAscending) {
+        int sign = isAscending ? 1 : -1
+        switch (sortBy) {
+            case "name":
+                files = files.sort { a, b -> sign * (a.name <=> b.name) }
+                break
+            case "size":
+                files = files.sort { f -> sign * f.length() }
+                break
+            case "date":
+                files = files.sort { f -> sign * f.lastModified() }
+                break
+            default:
+                files = files.sort { f -> -1 * f.lastModified() }
+        }
+        return files
     }
 }

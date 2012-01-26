@@ -235,4 +235,25 @@ class RepoControllerTests extends ControllerUnitTestCase {
                 .startsWith("The dump of repository '" + repoExisting.name + 
                 "' failed."))        
     }    
+
+    private static final def HOOKS_DIR_CONTENTS = [
+        'post-commit.tmpl', 'post-lock.tmpl', 'post-revprop-change.tmpl', 
+        'post-unlock.tmpl', 'pre-commit.tmpl', 'pre-lock.tmpl', 
+        'pre-revprop-change.tmpl', 'pre-unlock.tmpl', 'start-commit.tmpl']
+    
+    void testHooksList() {
+        def params = controller.params
+        params.id = repoExisting.id
+        // default order
+        def hooksList = controller.hooksList()['hooksList']
+        assertEquals "Hook scripts should be in alphabetical order", 
+                HOOKS_DIR_CONTENTS, hooksList.collect { it.name }
+                
+        // reverse it
+        params.sortBy= 'name'
+        params.order = 'desc'
+        hooksList = controller.hooksList()['hooksList']
+        assertEquals "Hook scripts should be in descending alphabetical order", 
+                HOOKS_DIR_CONTENTS.reverse(), hooksList.collect { it.name }
+    }
 }
