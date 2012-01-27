@@ -1429,6 +1429,38 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         return files
     }
+
+    /**
+     * Creates or replaces a hook script for the repo. 
+     * The <code>sourceFile</code> is presumed to be a temporary file which
+     * is moved into the repo <code>hooks</code> folder and made
+     * executable. If a name is provided, that will be used instead
+     * of the file's original name.
+     * @param repo The repository
+     * @param sourceFile a file to be installed as a hook script
+     * @param targetFilename the final name (optional)
+     */
+    boolean createOrReplaceHook(Repository repo, File sourceFile, String targetFilename) {
+
+        if (!repo || !sourceFile) {
+            throw new IllegalArgumentException("The repository and source file must be defined")
+        }
+        def repoHomeDir = getRepositoryHomePath(repo)
+        def hooksDir = new File(repoHomeDir, "hooks")
+        File destinationFile = new File(hooksDir, targetFilename ?: sourceFile.name)
+        log.info("Creating hook script: ${destinationFile.canonicalPath}")
+        
+        boolean existingFileDeleted = false
+        boolean renamed = false
+        // remove any existing file at the destination
+        if (destinationFile.exists()) {
+            existingFileDeleted = destinationFile.delete()
+        }
+        // move the input file to the destination
+        renamed = sourceFile.renameTo(destinationFile)
+        sourceFile.setExecutable(true)
+        return renamed
+    }
     
     private def sortFiles(files, sortBy, isAscending) {
         int sign = isAscending ? 1 : -1

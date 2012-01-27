@@ -56,12 +56,7 @@ class HookRestController extends AbstractRestController {
         def result = [:]
         try {
             def repo = Repository.get(params.id)
-            def repoHomeDir = svnRepoService.getRepositoryHomePath(repo)
-            def hooksDir = new File(repoHomeDir, "hooks")
-            // the filename is taken from the url path info (after Id token)
-            File destinationFile = new File(hooksDir, params.cgiPathInfo)
-            
-            log.info("Uploading hook script: ${destinationFile.canonicalPath}")
+            String destinationFileName = params.cgiPathInfo
             File uploadedFile = ControllerUtil.getFileFromRequest(request)
             
             if (!uploadedFile?.bytes.length) {
@@ -69,22 +64,14 @@ class HookRestController extends AbstractRestController {
                 throw new Exception(message(code: "api.error.400.missingFile"))
             }
             else {
-                boolean existingFileDeleted = false
-                boolean renamed = false
-                // remove any existing file at the name specified in the url
-                if (destinationFile.exists()) {
-                    existingFileDeleted = destinationFile.delete()
-                }
-                // move the uploaded file to this file
-                renamed = uploadedFile.renameTo(destinationFile)
-                if (!renamed) {
+                def success = svnRepoService.createOrReplaceHook(repo, uploadedFile, destinationFileName)
+                if (!success) {
                     response.status = 500
                     result.remove('message')
                     result['errorMessage'] = message(code: "api.error.500")
                     result['errorDetail'] = message(code: "api.error.500.filesystem")
                 }
                 else {
-                    uploadedFile.setExecutable(true)
                     response.status = 201
                     result['message'] = message(code: "api.message.201")
                 }
