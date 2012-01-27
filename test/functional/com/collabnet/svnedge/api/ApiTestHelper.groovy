@@ -53,17 +53,26 @@ class ApiTestHelper {
     }
 
     /**
+     * Creates a test repo
+     * @return new Repository instance
+     */
+    static Repository createRepo(SvnRepoService svnRepoService) {
+        // create a repo with branches/tags/trunk nodes
+        def repoName = "test-repo-" + (Math.random() * 4000)
+        Repository repo = new Repository(name: repoName)
+        svnRepoService.createRepository(repo, true)
+        repo.save()
+        return repo
+    }
+
+    /**
      * creates a test repo and dumps it 
      * @param svnRepoService the configured service
      * @return File referencing the dump file
      */
     static File createDumpFile(SvnRepoService svnRepoService) {
         
-        // create a repo with branches/tags/trunk nodes
-        def repoName = "test-repo-" + (Math.random() * 4000)
-        Repository repo = new Repository(name: repoName)
-        svnRepoService.createRepository(repo, true)
-        repo.save()
+        Repository repo = createRepo()
 
         // create dump file of this
         DumpBean params = new DumpBean()

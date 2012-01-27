@@ -26,7 +26,7 @@ class UrlMappings {
         }
 
 
-        "/api/$apiVersion/$entity/$id?"(parseRequest: false) {
+        "/api/$apiVersion/$entity/$id?/$cgiPathInfo**?"(parseRequest: false) {
             controller = { "${params.entity}Rest" }
             action = [GET: "restRetrieve", PUT: "restUpdate",
                     DELETE: "restDelete", POST: "restSave"]

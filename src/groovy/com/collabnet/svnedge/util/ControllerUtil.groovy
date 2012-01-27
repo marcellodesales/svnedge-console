@@ -17,10 +17,15 @@
  */
 package com.collabnet.svnedge.util
 
+import org.apache.commons.logging.LogFactory
+import org.apache.commons.logging.Log
+
 /**
  * Class for common utility methods shared by controllers
  */
 public class ControllerUtil {
+    
+    static Log log = LogFactory.getLog(ControllerUtil.class)
 
     /**
      * Helper to extract "list view selected ids" from a request parameter collection
@@ -39,6 +44,18 @@ public class ControllerUtil {
             }
         }
         return ids
+    }
+
+    /**
+     * Helper to stream a request body into a temporary file
+     * @param request the HttpServletRequest whose body will be written as a file
+     * @return File handle to the temporary file, or null
+     */
+    public static File getFileFromRequest(request) {
+        File f = File.createTempFile("requestBody", ".tmp")
+        log.debug("Writing request body to file: ${f.canonicalPath}")
+        f.withOutputStream { it << request.inputStream }
+        return f
     }
 
 
