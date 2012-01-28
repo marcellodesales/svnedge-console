@@ -592,36 +592,44 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def downloadDumpFile = {
+        fileAction('dumpFileList') { repo, filename ->
+            def contentType = filename.endsWith(".zip") ?
+                    "application/zip" : "application/octet-stream"
+            response.setContentType(contentType)
+            response.setHeader("Content-disposition",
+                    'attachment;filename="' + filename + '"')
+            if (!svnRepoService.copyDumpFile(filename, repo, response.outputStream)) {
+                throw new FileNotFoundException()
+            }
+        }
+        return null
+    }
+    
+    private def fileAction(String tabAction, Closure c) {
         def repo = Repository.get(params.id)
         if (repo) {
             def ids = ControllerUtil.getListViewSelectedIds(params)
             def filename = ids ? ids[0] : params.filename
             if (filename) {
                 try {
-                    def contentType = filename.endsWith(".zip") ?
-                        "application/zip" : "application/octet-stream"
-                    response.setContentType(contentType)
-                    response.setHeader("Content-disposition",
-                            'attachment;filename="' + filename + '"')
-                    if (!svnRepoService.copyDumpFile(filename, repo, response.outputStream)) {
-                        throw new FileNotFoundException()
-                    }
+                    c(repo, filename)
+                    
                 } catch (FileNotFoundException e) {
-                    flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
-                            args: [filename])
-                    redirect(action: 'dumpFileList', id: params.id)
+                    flash.error = message(code: 'repository.action.file.not.found',
+                                          args: [filename])
+                    redirect(action: tabAction, id: params.id)
                 }
             } else {
-                flash.error = message(code: 'repository.action.downloadDumpFile.not.found',
-                        args: [null])
-                redirect(action: 'dumpFileList', id: params.id)
+                flash.error = message(code: 'repository.action.file.not.found',
+                                      args: [null])
+                redirect(action: tabAction, id: params.id)
             }
+
         } else {
             flash.error = message(code: 'repository.action.not.found',
-                    args: [params.id])
-            redirect(action: 'dumpFileList', id: params.id)
+                                  args: [params.id])
+            redirect(action: 'list')
         }
-        return null
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -949,8 +957,38 @@ class RepoController {
             boolean isAscending = params.order == "asc"
             model["hooksList"] =
                 svnRepoService.listHooks(repo, sortBy, isAscending)
+
+        } else {
+            flash.error = message(code: 'repository.action.not.found',
+                                  args: [params.id])
+            redirect(action: 'list')
         }
         return model
+    }
+    
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def copyHook = {
+        fileAction('hooksList') { repo, filename ->
+            def copyName = params._confirmDialogText_copyHook
+            svnRepoService.copyHookFile(repo, filename, copyName)
+            flash.message = message(code: 'repository.action.copyHook.success',
+                args: [filename, copyName])
+            redirect(action: 'hooksList', id: params.id)
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def downloadHook = {
+        fileAction('hooksList') { repo, filename ->
+            def contentType = "application/octet-stream"
+            response.setContentType(contentType)
+            response.setHeader("Content-disposition",
+                    'attachment;filename="' + filename + '"')
+            if (!svnRepoService.streamHookFile(repo, filename, response.outputStream)) {
+                throw new FileNotFoundException()
+            }
+        }
+        return null
     }
 
     /**

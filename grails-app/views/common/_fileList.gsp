@@ -14,7 +14,7 @@
     <g:each in="${fileList}" status="i" var="file">
        <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
          <td><g:listViewSelectItem item="${file}" property="name"/></td>
-         <td><a href="${createLink(action: 'downloadHookFile', id: params.id, params: [filename: file.name])}">${file.name}</a></td>
+         <td><a href="${createLink(action: linkAction, id: params.id, params: [filename: file.name])}">${file.name}</a></td>
 
          <td><g:formatDate format="yyyy-MM-dd" date="${new java.util.Date(file.lastModified())}"/></td>
          <td><g:formatFileSize size="${file.length()}" /></td>

@@ -10,16 +10,18 @@
     <g:listViewActionButton action="editHook" minSelected="1" maxSelected="1">
       <g:message code="default.button.edit.label"/>
     </g:listViewActionButton>
-    <g:listViewActionButton action="copyHook" minSelected="1" maxSelected="1">
+    <g:listViewActionButton action="copyHook" minSelected="1" maxSelected="1"
+        textInput="true"
+        confirmMessage="${message(code:'repository.page.fileList.copy.confirmation')}">
       <g:message code="repository.page.fileList.button.copy.label"/>
     </g:listViewActionButton>
     <g:listViewActionButton action="renameHook" minSelected="1" maxSelected="1">
       <g:message code="repository.page.fileList.button.rename.label"/>
     </g:listViewActionButton>
-    <g:listViewActionButton action="downloadDumpFile" minSelected="1" maxSelected="1">
+    <g:listViewActionButton action="downloadHook" minSelected="1" maxSelected="1">
       <g:message code="repository.page.fileList.button.download.label"/>
     </g:listViewActionButton>
-    <g:listViewActionButton action="deleteDumpFiles" minSelected="1" maxSelected="1"
+    <g:listViewActionButton action="deleteHook" minSelected="1" maxSelected="1"
         confirmMessage="${message(code:'repository.page.fileList.delete.confirmation')}">
       <g:message code="default.button.delete.label"/>
     </g:listViewActionButton>
@@ -27,7 +29,7 @@
 
  <content tag="tabContent">
    <g:render template="/common/fileList" 
-     model="${[fileList: hooksList, buttons: listViewButtons, 
+     model="${[fileList: hooksList, buttons: listViewButtons, linkAction: 'downloadHook',
                noFilesMessage: message(code: 'repository.page.hooksFileList.noFiles')]}" />
  </content>
  

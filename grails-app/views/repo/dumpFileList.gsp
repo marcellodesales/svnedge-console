@@ -17,7 +17,7 @@
 
  <content tag="tabContent">
    <g:render template="/common/fileList" 
-     model="${[fileList: dumpFileList, buttons: listViewButtons, 
+     model="${[fileList: dumpFileList, buttons: listViewButtons, linkAction: 'downloadDumpFile',
                noFilesMessage: message(code: 'repository.page.dumpFileList.noFiles')]}" />
  </content>
 </g:applyLayout>

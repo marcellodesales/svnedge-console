@@ -149,25 +149,33 @@ class CsvnTagLib {
         out << "<input id='listViewAction_${attrs.action}' type='submit' class='Button ${attrs.action} listViewAction' "
         out << " name='_action_${attrs.action}' "
         out << " value='${body().trim()}'/>"
-        if (attrs.confirmMessage) {
-            out << "<div id='_confirm_${attrs.action}' style='display:none'>"
-            out << "<p>${attrs.confirmMessage}</p>"
-            if (attrs.confirmByTypingThis) {
-                out << "<p>${message(code: 'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>"
-                out << "<p><input id='_confirmTypeThis_${attrs.action}' type='text' size='20'/></p>"
-            }
-            out << "</div>"
-        }
         out << '\n<script type="text/javascript">\n'
         out << "  var button = \$('listViewAction_${attrs.action}');\n"
         out << "  button.minSelected = ${attrs.minSelected ?: 1};\n"
         out << "  button.maxSelected = ${attrs.maxSelected ?: 100};\n"
         if (attrs.confirmMessage) {
-            out << "button.confirmMessageElement = '_confirm_${attrs.action}';\n"
+            out << "button.confirmMessage = '<p>${attrs.confirmMessage}</p>"
+            if (attrs.confirmByTypingThis) {
+                out << "<p>" 
+                out << message(code: 'default.confirmation.typeThis.prompt')
+                out << " " + attrs.confirmByTypingThis + "</p>"
+                out << "<p><input id=\"_confirmTypeThis_${attrs.action}\" "
+                out << " type=\"text\" size=\"20\"/></p>"
+            } 
+            if (attrs.textInput) {
+                int size = 20
+                out << "<p><input id=\"_confirmDialogText_${attrs.action}\""
+                out << " name=\"_confirmDialogText_${attrs.action}\""
+                out << " type=\"text\" size=\"${size}\"/></p>"
+            }
+            out << "';\n"
         }
         if (attrs.confirmByTypingThis) {
             out << "button.confirmByTypingThisValue = '${attrs.confirmByTypingThis}';\n"
             out << "button.confirmByTypingInputElement = '_confirmTypeThis_${attrs.action}';\n"
+        }
+        if (attrs.textInput) {
+            out << "button.addTextParameter = true;\n"
         }
         out << "</script>"
     }

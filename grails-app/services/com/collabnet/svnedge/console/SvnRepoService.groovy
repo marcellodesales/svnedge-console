@@ -678,8 +678,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
     boolean copyDumpFile(filename, repo, outputStream)
     throws FileNotFoundException {
         File dumpFile = getDumpFile(filename, repo)
-        if (dumpFile.canRead()) {
-            dumpFile.withInputStream {
+        return copyFile(dumpFile, outputStream)
+    }
+    
+    private boolean copyFile(File f, outputStream) {
+        if (f.canRead()) {
+            f.withInputStream {
                 outputStream << it
             }
             return true
@@ -1478,5 +1482,45 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 files = files.sort { f -> -1 * f.lastModified() }
         }
         return files
+    }
+    
+    /**
+    * Copies a file within the hooks directory
+    *
+    * @param repo A Repository object
+    * @param originalName the current hook script
+    * @param copyName the name of the copy
+    * @return File pointing to the new file
+    */
+    File copyHookFile(repo, originalName, copyName) 
+           throws FileNotFoundException {       
+        File originalFile = getHookFile(repo, originalName)
+        Server server = Server.getServer()
+        File repoDir = new File(server.repoParentDir, repo.name)
+        File hooksDir = new File(repoDir, "hooks")
+        File newFile = new File(hooksDir, copyName)
+        newFile.withOutputStream { out ->
+            copyFile(originalFile, out)
+        }
+        return newFile
+    }
+
+    private File getHookFile(repo, filename) throws FileNotFoundException {
+        Server server = Server.getServer()
+        File repoDir = new File(server.repoParentDir, repo.name)
+        File hooksDir = new File(repoDir, "hooks")
+        File hookFile = new File(hooksDir, filename)
+        if (hookFile.exists()) {
+            return hookFile
+        }
+        throw new FileNotFoundException(filename)
+    }
+    
+    /**
+     * Passes the contents of the hook file to the outputStream
+     */
+    boolean streamHookFile(repo, filename, outputStream) {
+        File hookFile = getHookFile(repo, filename)
+        return copyFile(hookFile, outputStream)
     }
 }

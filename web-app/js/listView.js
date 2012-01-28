@@ -33,13 +33,13 @@ Event.observe(window, 'load', function() {
 
     // add observer to action buttons with confirmation messages
     $$('input.listViewAction').each (function(s) {
-        var confirmMessageElement = s.confirmMessageElement;
-        if (confirmMessageElement) {
+        if (s.confirmMessage) {
             Event.observe(s, 'click', function(e){
                 // stop this button click from submitting form
                 Event.stop(e)
                 // confirm dialog, with callback functions for "ok" and "cancel"
-                confirmAction($(confirmMessageElement).innerHTML,
+                listViewI18n._message = s.confirmMessage;
+                dialog(listViewI18n,
                         function() {
                             // on "ok", submit the form
                             // if "type this" confirmation present, verify user input matches first
@@ -50,6 +50,12 @@ Event.observe(window, 'load', function() {
                                     new Effect.Shake(Windows.focusedWindow.getId());
                                     return;
                                 }
+                            } else if (s.addTextParameter) {
+                            	var textName = "_confirmDialogText_" + s.readAttribute('name').substring("_action_".length);
+                            	var textValue = $(textName).value;
+                                var action = new Element('input', { type: 'hidden',  name: textName, value: textValue });
+                                var theForm = s.up('form');
+                                theForm.appendChild(action);                            	
                             }
                             // submit the form with the original button properties transferred to a hidden field,
                             // to simulate the button click and thereby activate Grails dispatcher
@@ -95,16 +101,3 @@ function updateActionButtons()  {
                 (parseInt(s.maxSelected) < numberItemsSelected)
     })
 }
-
-/**
- * creates a confirmation dialog based on the message. callback functions are invoked
- * @param confirmMessage the text to prompt (can be html)
- * @param okHandler the function that's called on "ok"
- * @param cancelHandler the function that's called on "cancel"
- */
-function confirmAction(confirmMessage, okHandler, cancelHandler) {
-
-    listViewI18n._message = confirmMessage;
-    dialog(listViewI18n, okHandler, cancelHandler);
-}
-
