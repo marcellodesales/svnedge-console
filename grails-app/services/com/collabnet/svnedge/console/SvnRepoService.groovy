@@ -1462,6 +1462,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         // move the input file to the destination
         renamed = sourceFile.renameTo(destinationFile)
+        // may need to copy from one FS to another
+        if (!renamed) {
+            destinationFile.withOutputStream { it << new FileInputStream(sourceFile) }
+            sourceFile.delete()
+        }
         sourceFile.setExecutable(true)
         return renamed
     }
