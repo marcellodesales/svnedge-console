@@ -39,8 +39,8 @@ class HookRestController extends AbstractRestController {
 
     /**
      * <p>Rest method to create or replace a given repo hook script with the file contents
-     * of the request. The request is presumed to be multipart, with the file content available
-     * at name "fileData".</p>
+     * of the request. The request body is streamed in its entirety to a temporary file
+     * and transferred to the repo hooks directory, and can be of any content type.</p>
      *
      * <p><bold>HTTP Method:</bold></p>
      * <code>
@@ -61,13 +61,12 @@ class HookRestController extends AbstractRestController {
             
             if (!uploadedFile?.bytes.length) {
                 log.warn("File upload request contained no file data")
-                throw new Exception(message(code: "api.error.400.missingFile"))
+                throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
             }
             else {
                 def success = svnRepoService.createOrReplaceHook(repo, uploadedFile, destinationFileName)
                 if (!success) {
                     response.status = 500
-                    result.remove('message')
                     result['errorMessage'] = message(code: "api.error.500")
                     result['errorDetail'] = message(code: "api.error.500.filesystem")
                 }
@@ -77,9 +76,15 @@ class HookRestController extends AbstractRestController {
                 }
             }
         }
-        catch (Exception e) {
+        catch (IllegalArgumentException e) {
             response.status = 400
             result['errorMessage'] = message(code: "api.error.400")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT request", e)
+        }
+        catch (Exception e) {
+            response.status = 500
+            result['errorMessage'] = message(code: "api.error.500")
             result['errorDetail'] = e.toString()
             log.warn("Exception handling a REST PUT request", e)
         }
