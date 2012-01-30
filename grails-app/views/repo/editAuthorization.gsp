@@ -21,6 +21,7 @@
     </div>
 </g:hasErrors>
 
+<g:form action="saveAuthorization" method="post">
 <table class="Container">
 <tr class="ContainerHeader">
     <td colspan="2"><g:message code="repository.page.editAuthorization.header" /></td>
@@ -30,7 +31,6 @@
   <td colspan="2"><g:message code="repository.page.editAuthorization.lockMessage" /></td>
 </tr>
 
-<g:form action="saveAuthorization" method="post">
 
     <tr class="prop">
 
@@ -42,21 +42,25 @@
     <tr class="ContainerFooter">
         <td colspan="2">
             <div class="AlignRight">
-                <g:actionSubmit action="cancelEditAuthorization" class="Button cancel" value="${message(code:'default.confirmation.cancel')}"/>
-                <input class="Button save" type="submit" value="${message(code:'repository.page.editAuthorization.button.save')}"/>
+                <g:actionSubmit id="cancel_button" action="cancelEditAuthorization" class="Button cancel" value="${message(code:'default.confirmation.cancel')}"/>
+                <input id="save_button" class="Button save" type="submit" value="${message(code:'repository.page.editAuthorization.button.save')}"/>
             </div>
 
         </td>
     </tr>
-
-    </tbody>
-    </table>
-
-</g:form>
 </table>
+</g:form>
 <g:javascript>
+var isAjaxCancel = true;
+function stopAjaxCancel() {
+    isAjaxCancel = false;
+}
+$('save_button').onclick = stopAjaxCancel;
+$('cancel_button').onclick = stopAjaxCancel;
+
 <!-- Safari wants a synchronous call for this to work, other browsers seem fine to send the request and move on -->
 window.onbeforeunload = function() {
+  if (isAjaxCancel) {
     new Ajax.Request('/csvn/repo/cancelEditAuthorization', {
         asynchronous:false,
         method:'get',
@@ -64,7 +68,8 @@ window.onbeforeunload = function() {
         onSuccess: function(transport) {
           // just send the request, don't need the result
         }
-    })
+    });
+  }
 }
 </g:javascript>
 
