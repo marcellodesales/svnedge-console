@@ -19,10 +19,12 @@
 package com.collabnet.svnedge.api
 
 import com.collabnet.svnedge.AbstractSvnEdgeFunctionalTests
- 
+import groovyx.net.http.RESTClient
+
 class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
     
     def url = "/api/1/template"
+    def svnRepoService
     
     void testTemplateGet() {
         
@@ -44,14 +46,30 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
         assertContentContains "\"id\": 1"        
         assertContentContains "\"name\": \"Empty repository\""        
     }
+
+    void testTemplatePut() {
+        def testDump = ApiTestHelper.createDumpFile(svnRepoService)
+        def testTemplateName = "functionalTestPut"
+
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [ 'format': 'json']
+        def resp = rest.put( path: "template/${testTemplateName}",
+                query: params,
+                body: testDump,
+                requestContentType: 'text/plain' )
+        assert resp.status == 201
+
+        // check that the file we just posted is in the list of templates
+        get("${url}?format=json") {
+            headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        }
+        assertContentContains '{"templates": ['
+        assertContentContains "\"name\": \"${testTemplateName}\""
+    }
     
      void testTemplateUnsupportedMethods() {
         // unauthorized calls receive 401
-        put(url) {
-            body { "" }
-        }
-        assertStatus 401
-
         post(url) {
             body { "" }
         }
@@ -61,12 +79,6 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
         assertStatus 401
 
         // authorized calls receive 405 (not implemented)
-        put(url) {
-            headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
-            body { "" }
-        }
-        assertStatus 405
-         
         post(url) {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
             body { "" }

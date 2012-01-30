@@ -72,7 +72,7 @@ class ApiTestHelper {
      */
     static File createDumpFile(SvnRepoService svnRepoService) {
         
-        Repository repo = createRepo()
+        Repository repo = createRepo(svnRepoService)
 
         // create dump file of this
         DumpBean params = new DumpBean()

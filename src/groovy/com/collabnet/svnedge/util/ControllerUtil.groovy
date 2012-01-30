@@ -49,13 +49,17 @@ public class ControllerUtil {
     /**
      * Helper to stream a request body into a temporary file
      * @param request the HttpServletRequest whose body will be written as a file
-     * @return File handle to the temporary file, or null
+     * @param targetFile empty file into which to write the file (optional -- temp file created
+     * otherwise)
+     * @return File handle to the temporary file
      */
-    public static File getFileFromRequest(request) {
-        File f = File.createTempFile("requestBody", ".tmp")
-        log.debug("Writing request body to file: ${f.canonicalPath}")
-        f.withOutputStream { it << request.inputStream }
-        return f
+    public static File getFileFromRequest(request, targetFile = null) {
+        if (!targetFile) {
+            targetFile = File.createTempFile("requestBody", ".tmp")
+        }
+        log.debug("Writing request body to file: ${targetFile.canonicalPath}")
+        targetFile.withOutputStream { it << request.inputStream }
+        return targetFile
     }
 
 

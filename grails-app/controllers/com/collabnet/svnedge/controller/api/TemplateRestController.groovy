@@ -24,6 +24,7 @@ import grails.converters.JSON
 import grails.converters.XML
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.util.ControllerUtil
 
 /**
  * REST API controller for creating and listing repository templates
@@ -93,6 +94,71 @@ class TemplateRestController extends AbstractRestController {
             result.put("templates", templateList)
         }
         
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+        }
+    }
+
+    /**
+     * <p>Rest method to create or replace a given repo template with the file contents
+     * of the request. The request body is streamed in its entirety to a temporary file
+     * and transferred to the templates location. Zip files ("application/zip") of a repo or
+     * plain text ("text/plain") dump files are accepted.</p>
+     *
+     * <p><bold>HTTP Method:</bold></p>
+     * <code>
+     *   PUT
+     * </code>
+     *
+     * <p><bold>URL:</bold></p>
+     * <code>
+     *   /csvn/api/1/template/{filename}
+     * </code>
+     */
+    def restUpdate = {
+        def result = [:]
+        try {
+            String destinationFileName = params.id
+            if (!destinationFileName) {
+                log.warn("Template name must be provided in url")
+                throw new IllegalArgumentException(message(code: "api.error.400"))
+            }
+            File templateDir = repoTemplateService.getUploadDirectory()
+            File templateFile = new File(templateDir, destinationFileName)
+            File uploadedFile = ControllerUtil.getFileFromRequest(request, templateFile)
+
+            if (!uploadedFile?.bytes.length) {
+                log.warn("File upload request contained no file data")
+                throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
+            }
+            else {
+                // move upload to the template staging area
+                def success = uploadedFile.renameTo(templateFile)
+                // may need to copy from one FS to another
+                if (!success) {
+                    templateFile.withOutputStream { it << new FileInputStream(uploadedFile) }
+                    uploadedFile.delete()
+                }
+                RepoTemplate t = new RepoTemplate(name: destinationFileName ?: uploadedFile.name)
+                repoTemplateService.saveTemplate(t, templateFile, false)
+                response.status = 201
+                result['message'] = message(code: "api.message.201")
+            }
+        }
+        catch (IllegalArgumentException e) {
+            response.status = 400
+            result['errorMessage'] = message(code: "api.error.400")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT request", e)
+        }
+        catch (Exception e) {
+            response.status = 500
+            result['errorMessage'] = message(code: "api.error.500")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT request", e)
+        }
+
         withFormat {
             json { render result as JSON }
             xml { render result as XML }
