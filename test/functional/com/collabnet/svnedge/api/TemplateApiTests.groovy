@@ -25,7 +25,8 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
     
     def url = "/api/1/template"
     def svnRepoService
-    
+    def repoTemplateService
+
     void testTemplateGet() {
         
         // without auth, GET is protected
@@ -48,43 +49,53 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
     }
 
     void testTemplatePut() {
+
+        // create a template to update
+        def testTemplate = ApiTestHelper.createTemplate(repoTemplateService, svnRepoService)
+
+        // the new dump file
         def testDump = ApiTestHelper.createDumpFile(svnRepoService)
-        def testTemplateName = "functionalTestPut"
+
 
         def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
-        def resp = rest.put( path: "template/${testTemplateName}",
+        def resp = rest.put( path: "template/${testTemplate.id}",
+                query: params,
+                body: testDump,
+                requestContentType: 'text/plain' )
+        assert resp.status == 201
+    }
+
+    void testTemplatePost() {
+
+        // the new dump file
+        def testDump = ApiTestHelper.createDumpFile(svnRepoService)
+        // the new repo template
+        def testTemplateName = "FunctionalTestingTemplate " + Math.floor(Math.random() * 10000).toInteger()
+
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [ 'format': 'json', 'name': testTemplateName, 'active': true]
+        def resp = rest.post( path: "template",
                 query: params,
                 body: testDump,
                 requestContentType: 'text/plain' )
         assert resp.status == 201
 
-        // check that the file we just posted is in the list of templates
+        // test that new repo template exists
         get("${url}?format=json") {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         }
-        assertContentContains '{"templates": ['
         assertContentContains "\"name\": \"${testTemplateName}\""
     }
     
      void testTemplateUnsupportedMethods() {
         // unauthorized calls receive 401
-        post(url) {
-            body { "" }
-        }
-        assertStatus 401
-         
         delete(url)
         assertStatus 401
 
         // authorized calls receive 405 (not implemented)
-        post(url) {
-            headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
-            body { "" }
-        }
-        assertStatus 405 
-
         delete(url) {
             headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         }

@@ -101,7 +101,7 @@ class TemplateRestController extends AbstractRestController {
     }
 
     /**
-     * <p>Rest method to create or replace a given repo template with the file contents
+     * <p>Rest method to replace a given repo template with the file contents
      * of the request. The request body is streamed in its entirety to a temporary file
      * and transferred to the templates location. Zip files ("application/zip") of a repo or
      * plain text ("text/plain") dump files are accepted.</p>
@@ -113,37 +113,118 @@ class TemplateRestController extends AbstractRestController {
      *
      * <p><bold>URL:</bold></p>
      * <code>
-     *   /csvn/api/1/template/{filename}
+     *   /csvn/api/1/template/{id}
      * </code>
+     *
+     * <p><bold>JSON-formatted return example:</bold></p>
+     * <pre>
+     * {
+     *   "message":"Entity created or updated successfully",
+     *   "template":{
+     *     "id": "2",
+     *     "name": "name"
+     *   }
+     * }
+     * </pre>
      */
     def restUpdate = {
         def result = [:]
         try {
-            String destinationFileName = params.id
-            if (!destinationFileName) {
-                log.warn("Template name must be provided in url")
+            String templateId = params.id
+            RepoTemplate t = RepoTemplate.get(templateId)
+            if (!templateId || !t) {
+                log.warn("Valid template id must be provided in url")
                 throw new IllegalArgumentException(message(code: "api.error.400"))
             }
-            File templateDir = repoTemplateService.getUploadDirectory()
-            File templateFile = new File(templateDir, destinationFileName)
-            File uploadedFile = ControllerUtil.getFileFromRequest(request, templateFile)
+            File uploadedFile = ControllerUtil.getFileFromRequest(request)
 
             if (!uploadedFile?.bytes.length) {
                 log.warn("File upload request contained no file data")
                 throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
             }
             else {
-                // move upload to the template staging area
-                def success = uploadedFile.renameTo(templateFile)
-                // may need to copy from one FS to another
-                if (!success) {
-                    templateFile.withOutputStream { it << new FileInputStream(uploadedFile) }
-                    uploadedFile.delete()
-                }
-                RepoTemplate t = new RepoTemplate(name: destinationFileName ?: uploadedFile.name)
-                repoTemplateService.saveTemplate(t, templateFile, false)
+                repoTemplateService.saveTemplate(t, uploadedFile, false)
                 response.status = 201
                 result['message'] = message(code: "api.message.201")
+                result['template'] = [id: t.id, name: t.name]
+            }
+        }
+        catch (IllegalArgumentException e) {
+            response.status = 400
+            result['errorMessage'] = message(code: "api.error.400")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT request", e)
+        }
+        catch (Exception e) {
+            response.status = 500
+            result['errorMessage'] = message(code: "api.error.500")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT request", e)
+        }
+
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+        }
+    }
+
+    /**
+     * <p>Rest method to create a repo template with the file contents
+     * of the request. The request body is streamed in its entirety to a temporary file
+     * and transferred to the templates location. Zip files ("application/zip") of a repo or
+     * plain text ("text/plain") dump files are accepted.</p>
+     * <p>The <code>name (string)</code> parameter conveys the display name of the template.</p>
+     * <p>The <code>active (boolean)</code> parameter indicates whether the template should
+     * be visible or not.</p>
+     *
+     * <p><bold>HTTP Method:</bold></p>
+     * <code>
+     *   PST
+     * </code>
+     *
+     * <p><bold>URL:</bold></p>
+     * <code>
+     *   /csvn/api/1/template?name=My%20New%20Template&active=true
+     * </code>
+     *
+     * <p><bold>JSON-formatted return example:</bold></p>
+     * <pre>
+     * {
+     *   "message":"Entity created or updated successfully",
+     *   "template":{
+     *     "id": "2",
+     *     "name": "My New Template"
+     *   }
+     * }
+     * </pre>
+     */
+    def restSave = {
+        def result = [:]
+        try {
+            String name = params.name
+            Boolean active = params.active ? Boolean.parseBoolean(params.active) : true
+            
+            if (!name) {
+                log.warn("Template name must be provided.")
+                throw new IllegalArgumentException(message(code: "api.error.400"))
+            }
+            File uploadedFile = ControllerUtil.getFileFromRequest(request)
+
+            if (!uploadedFile?.bytes.length) {
+                log.warn("File upload request contained no file data")
+                throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
+            }
+            else {
+                RepoTemplate t = new RepoTemplate(name: name, active: active)
+                if (t.hasErrors()) {
+                    t.discard()
+                    throw new IllegalArgumentException(formatErrors(t.errors))    
+                }
+                repoTemplateService.saveTemplate(t, uploadedFile, false)
+                t.refresh()
+                response.status = 201
+                result['message'] = message(code: "api.message.201")
+                result['template'] = [id: t.id, name: t.name]
             }
         }
         catch (IllegalArgumentException e) {
