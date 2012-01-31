@@ -1498,12 +1498,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
     * @return File pointing to the new file
     */
     File copyHookFile(repo, originalName, copyName) 
-           throws FileNotFoundException {       
+           throws FileNotFoundException, ValidationException {
+        
+        // Assuming subversion/apache should have similar capabilities with
+        // respect to hook filenames as with repository directory names       
+        if (!copyName.matches(Repository.RECOMMENDED_NAME_PATTERN)) {
+            throw new ValidationException("repository.name.matches.invalid")
+        }
+        
         File originalFile = getHookFile(repo, originalName)
         Server server = Server.getServer()
         File repoDir = new File(server.repoParentDir, repo.name)
         File hooksDir = new File(repoDir, "hooks")
         File newFile = new File(hooksDir, copyName)
+        def currentHooks = listHooks(repo)
+        if (currentHooks.contains(newFile)) {
+            throw new ValidationException("repository.file.already.exists")
+        }
+
         newFile.withOutputStream { out ->
             copyFile(originalFile, out)
         }

@@ -30,7 +30,7 @@ import com.collabnet.svnedge.domain.Server
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
 
-class RepoControllerTests extends ControllerUnitTestCase {
+class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
     def mailConfigurationService
     def svnRepoService
@@ -48,10 +48,6 @@ class RepoControllerTests extends ControllerUnitTestCase {
     protected void setUp() {
 
         super.setUp()
-        // mock the i18n "message" map available to controller
-        controller.metaClass.messageSource = [getMessage: { 
-            errors, locale -> return "message" }]
-        controller.metaClass.message = { it -> return "message" }
         
         repoNew = new Repository(name: repoNameNew)
         repoExisting = new Repository(name: repoNameExisting)
@@ -255,5 +251,41 @@ class RepoControllerTests extends ControllerUnitTestCase {
         hooksList = controller.hooksList()['hooksList']
         assertEquals "Hook scripts should be in descending alphabetical order", 
                 HOOKS_DIR_CONTENTS.reverse(), hooksList.collect { it.name }
+    }
+    
+    void testCopyHook() {
+        def params = controller.params
+        params.id = repoExisting.id
+        params['listViewItem_post-commit.tmpl'] = "on"
+
+        def invalidHookName = "invalid/hook/name"        
+        params['_confirmDialogText_copyHook'] = invalidHookName
+        controller.copyHook()
+        assertNull "Did not expect a success message", controller.flash.message
+        assertNotNull "There should be an error message", controller.flash.error
+        assertEquals "Validation failed on hook copy file name", 
+                controller.message(code: 'repository.name.matches.invalid'),
+                controller.flash.error.replace("'", "''")
+        controller.flash.error = null
+            
+        def validHookName = "valid_hook_name"
+        params['_confirmDialogText_copyHook'] = validHookName
+        controller.copyHook()
+        assertNotNull "Expected a success message", controller.flash.message
+        assertNull "There should not be an error message: " + 
+                controller.flash.error, controller.flash.error
+        def model = controller.hooksList()
+        def files = model["hooksList"]
+        boolean copyExists = false
+        files.each { copyExists |= (validHookName == it.name) }
+        assertTrue "Did not find copied file", copyExists
+        controller.flash.message = null
+        
+        // try again, now it should fail as the file already exists
+        controller.copyHook()
+        assertNull "Did not expect a success message", controller.flash.message
+        assertNotNull "There should be an error message", controller.flash.error
+        assertTrue "Error message should indicate file exists", 
+                controller.flash.error.contains("already exists")
     }
 }

@@ -970,9 +970,16 @@ class RepoController {
     def copyHook = {
         fileAction('hooksList') { repo, filename ->
             def copyName = params._confirmDialogText_copyHook
-            svnRepoService.copyHookFile(repo, filename, copyName)
-            flash.message = message(code: 'repository.action.copyHook.success',
-                args: [filename, copyName])
+            try {
+                svnRepoService.copyHookFile(repo, filename, copyName)
+                flash.message = message(
+                        code: 'repository.action.copyHook.success',
+                        args: [filename, copyName])
+            
+            } catch (ValidationException e) {
+                flash.error = message(code: e.message,
+                    args: [filename, copyName])
+            }
             redirect(action: 'hooksList', id: params.id)
         }
     }
