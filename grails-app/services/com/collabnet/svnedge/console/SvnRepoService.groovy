@@ -1502,29 +1502,53 @@ class SvnRepoService extends AbstractSvnEdgeService {
     File copyHookFile(repo, originalName, copyName) 
            throws FileNotFoundException, ValidationException {
         
+        return hookFileOperation(repo, originalName, copyName) { 
+            sourceFile, targetFile ->
+            targetFile.withOutputStream { out -> copyFile(sourceFile, out) }
+            targetFile.setExecutable(true)
+        }
+    }
+
+    private File hookFileOperation(repo, sourceName, targetName, Closure c) {
         // Assuming subversion/apache should have similar capabilities with
-        // respect to hook filenames as with repository directory names       
-        if (!copyName.matches(Repository.RECOMMENDED_NAME_PATTERN)) {
+        // respect to hook filenames as with repository directory names
+        if (!targetName.matches(Repository.RECOMMENDED_NAME_PATTERN)) {
             throw new ValidationException("repository.name.matches.invalid")
         }
         
-        File originalFile = getHookFile(repo, originalName)
+        File sourceFile = getHookFile(repo, sourceName)
         Server server = Server.getServer()
         File repoDir = new File(server.repoParentDir, repo.name)
         File hooksDir = new File(repoDir, "hooks")
-        File newFile = new File(hooksDir, copyName)
-        def currentHooks = listHooks(repo)
-        if (currentHooks.contains(newFile)) {
+        File targetFile = new File(hooksDir, targetName)
+        if (targetFile.exists()) {
             throw new ValidationException("repository.file.already.exists")
         }
-
-        newFile.withOutputStream { out ->
-            copyFile(originalFile, out)
-        }
-        newFile.setExecutable(true)
-        return newFile
+        c(sourceFile, targetFile)
+        return targetFile
     }
 
+    /**
+    * Renames a file within the hooks directory
+    *
+    * @param repo A Repository object
+    * @param sourceName the current hook script
+    * @param targetName the new name of the hook
+    * @return File pointing to the newly named file
+    */
+    File renameHookFile(repo, sourceName, targetName) 
+           throws FileNotFoundException, ValidationException {
+
+        return hookFileOperation(repo, sourceName, targetName) { 
+            sourceFile, targetFile ->
+            if (!sourceFile.renameTo(targetFile)) {
+                targetFile.withOutputStream { out -> copyFile(sourceFile, out) }
+                sourceFile.delete()
+            }
+            targetFile.setExecutable(true)
+        }
+    }    
+    
     private File getHookFile(repo, filename) throws FileNotFoundException {
         Server server = Server.getServer()
         File repoDir = new File(server.repoParentDir, repo.name)

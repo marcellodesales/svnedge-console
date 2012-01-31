@@ -295,4 +295,55 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         assertTrue "Error message should indicate file exists", 
                 controller.flash.error.contains("already exists")
     }
+
+    void testRenameHook() {
+        def params = controller.params
+        params.id = repoExisting.id
+        def existingFilename = 'post-commit.tmpl'
+        params['listViewItem_' + existingFilename] = "on"
+
+        def invalidHookName = "invalid/hook/name"        
+        params['_confirmDialogText_renameHook'] = invalidHookName
+        controller.renameHook()
+        assertNull "Did not expect a success message", controller.flash.message
+        assertNotNull "There should be an error message", controller.flash.error
+        assertEquals "Validation failed on new file name", 
+                controller.message(code: 'repository.name.matches.invalid'),
+                controller.flash.error.replace("'", "''")
+        controller.flash.error = null
+            
+        def validHookName = "valid_hook_name"
+        params['_confirmDialogText_renameHook'] = validHookName
+        controller.renameHook()
+        assertNotNull "Expected a success message", controller.flash.message
+        assertNull "There should not be an error message: " + 
+                controller.flash.error, controller.flash.error
+        def model = controller.hooksList()
+        def files = model["hooksList"]
+        File oldFile = null
+        File newFile = null
+        files.each { 
+            if (validHookName == it.name) {
+                newFile = it
+            }
+            if (existingFilename == it.name) {
+                oldFile = it
+            }
+        }
+        assertNull "Original file still exists", oldFile
+        assertNotNull "Did not find renamed file", newFile
+        assertTrue "File should be executable", newFile.canExecute()
+        controller.flash.message = null
+        
+        // try again, now it should fail as the file already exists
+        params['listViewItem_' + existingFilename] = "off"
+        existingFilename = 'pre-commit.tmpl'
+        params['listViewItem_' + existingFilename] = "on"
+        controller.renameHook()
+        assertNull "Did not expect a success message", controller.flash.message
+        assertNotNull "There should be an error message", controller.flash.error
+        assertTrue "Error message should indicate file exists: " + 
+                controller.flash.error, 
+                controller.flash.error.contains("already exists")
+    }
 }

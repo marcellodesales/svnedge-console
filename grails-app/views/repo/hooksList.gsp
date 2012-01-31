@@ -15,7 +15,9 @@
         confirmMessage="${message(code:'repository.page.fileList.copy.confirmation')}">
       <g:message code="repository.page.fileList.button.copy.label"/>
     </g:listViewActionButton>
-    <g:listViewActionButton action="renameHook" minSelected="1" maxSelected="1">
+    <g:listViewActionButton action="renameHook" minSelected="1" maxSelected="1"
+        textInput="true"
+        confirmMessage="${message(code:'repository.page.fileList.rename.confirmation')}">
       <g:message code="repository.page.fileList.button.rename.label"/>
     </g:listViewActionButton>
     <g:listViewActionButton action="downloadHook" minSelected="1" maxSelected="1">

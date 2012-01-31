@@ -985,6 +985,24 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def renameHook = {
+        fileAction('hooksList') { repo, filename ->
+            def targetName = params._confirmDialogText_renameHook
+            try {
+                svnRepoService.renameHookFile(repo, filename, targetName)
+                flash.message = message(
+                        code: 'repository.action.renameHook.success',
+                        args: [filename, targetName])
+            
+            } catch (ValidationException e) {
+                flash.error = message(code: e.message,
+                    args: [filename, targetName])
+            }
+            redirect(action: 'hooksList', id: params.id)
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
     def downloadHook = {
         fileAction('hooksList') { repo, filename ->
             def contentType = "application/octet-stream"
