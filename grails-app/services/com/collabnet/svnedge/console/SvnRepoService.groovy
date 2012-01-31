@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.console
 
+import java.io.File;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
@@ -1519,6 +1520,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         newFile.withOutputStream { out ->
             copyFile(originalFile, out)
         }
+        newFile.setExecutable(true)
         return newFile
     }
 

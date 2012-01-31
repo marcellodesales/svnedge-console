@@ -17,6 +17,8 @@
  */
 package com.collabnet.svnedge.controller
 
+import java.io.File;
+
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import grails.test.*
@@ -276,9 +278,14 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
                 controller.flash.error, controller.flash.error
         def model = controller.hooksList()
         def files = model["hooksList"]
-        boolean copyExists = false
-        files.each { copyExists |= (validHookName == it.name) }
-        assertTrue "Did not find copied file", copyExists
+        File copyFile = null
+        files.each { 
+            if (validHookName == it.name) {
+                copyFile = it
+            }
+        }
+        assertNotNull "Did not find copied file", copyFile
+        assertTrue "File should be executable", copyFile.canExecute()
         controller.flash.message = null
         
         // try again, now it should fail as the file already exists
