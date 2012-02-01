@@ -40,6 +40,8 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
     def grailsApplication
     def greenMail
     def operatingSystemService
+    def quartzScheduler
+    def jobsAdminService
 
     def repoNameNew = "integration_test_new_repo"
     def repoNameExisting = "integration_test_existing_repo"
@@ -158,6 +160,10 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
     void testCreateDumpFileSuccessMail() {
         controller.metaClass.loggedInUserInfo = { return 1 }
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
 
         ConfigurationHolder.config = grailsApplication.config
         MailConfiguration mailConfig = MailConfiguration.configuration
@@ -193,6 +199,10 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
             return
         }
         controller.metaClass.loggedInUserInfo = { return 1 }
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
 
         ConfigurationHolder.config = grailsApplication.config
         MailConfiguration mailConfig = MailConfiguration.configuration
