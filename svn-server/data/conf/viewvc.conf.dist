@@ -951,7 +951,7 @@ authzfile = __CSVN_CONF__/svn_access_file
 ## to comparison against the authorization rules files.  Leave the
 ## option unset to preserve the username case.
 ##
-#force_username_case = 
+force_username_case = __SERVER_FORCEUSERNAMECASE__
 
 ##---------------------------------------------------------------------------
 [query]

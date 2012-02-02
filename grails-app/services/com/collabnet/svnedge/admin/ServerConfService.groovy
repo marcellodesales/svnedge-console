@@ -430,6 +430,7 @@ Content-Length: 107
                       ConfigUtil.viewvcTemplateDir())
         s = s.replace("__CSVN_SVN_CLIENT__", ConfigUtil.svnPath())
         s = s.replace("__SERVER_ADMIN__", server.adminEmail)
+        s = s.replace("__SERVER_FORCEUSERNAMECASE__", server.forceUsernameCase)
         
         String serverMode = server.mode.toString()
         String appServerUrl, docroot, authorizer, isRootInUrl
@@ -662,6 +663,9 @@ RedirectMatch ^(${contextPath})\$ \$1/
 """
         if (server.useHttpV2 == false) {
             conf += "   SVNAdvertiseV2Protocol off\n"
+        }
+        if (server.forceUsernameCase == true) {
+            conf += "   AuthzForceUsernameCase Lower\n"
         }
         conf += ctfMode ? getCtfSvnHttpdConf(server, contextPath) : 
             getSVNHttpdConf(server)
