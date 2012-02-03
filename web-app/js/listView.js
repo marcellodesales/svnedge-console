@@ -67,8 +67,18 @@ Event.observe(window, 'load', function() {
                         function() {
                             // on cancel, do nothing
                             return
-                        })
-            })
+                        });
+
+                if (s.addTextParameter) {
+                	var textInputId = "_confirmDialogText_" + s.name.substring("_action_".length);
+            	    var selection = $$('input.listViewSelectItem:checked');
+            	    if (selection.length > 0) {
+                	    $(textInputId).value = 
+                	    	selection[0].name.substring('listViewItem_'.length);
+            	    }
+            	    setTimeout("focusWithCursorAtEnd('" + textInputId + "')", 500);
+                }
+            });
         }
     })
 
@@ -100,4 +110,15 @@ function updateActionButtons()  {
         s.disabled = (parseInt(s.minSelected) > numberItemsSelected) ||
                 (parseInt(s.maxSelected) < numberItemsSelected)
     })
+}
+
+/**
+ * Gives a text element focus with the cursor placed after the default value.
+ */
+function focusWithCursorAtEnd(textElementId) {
+    var el = $(textElementId);
+    el.focus();
+    var value = el.value;
+    el.value = '';
+    el.value = value;	
 }

@@ -970,16 +970,21 @@ class RepoController {
     def copyHook = {
         fileAction('hooksList') { repo, filename ->
             def copyName = params._confirmDialogText_copyHook
-            try {
-                svnRepoService.copyHookFile(repo, filename, copyName)
-                flash.message = message(
-                        code: 'repository.action.copyHook.success',
-                        args: [filename, copyName])
-            
-            } catch (ValidationException e) {
-                flash.error = message(code: e.message,
-                    args: [filename, copyName])
+            if (copyName) {
+                try {
+                    svnRepoService.copyHookFile(repo, filename, copyName)
+                    flash.message = message(
+                            code: 'repository.action.copyHook.success',
+                            args: [filename, copyName])
+                    
+                } catch (ValidationException e) {
+                    flash.error = message(code: e.message,
+                            args: [filename, copyName])
+                }            
+            } else {
+                flash.error = message(code: 'repository.action.filename.required')
             }
+
             redirect(action: 'hooksList', id: params.id)
         }
     }
@@ -988,15 +993,19 @@ class RepoController {
     def renameHook = {
         fileAction('hooksList') { repo, filename ->
             def targetName = params._confirmDialogText_renameHook
-            try {
-                svnRepoService.renameHookFile(repo, filename, targetName)
-                flash.message = message(
-                        code: 'repository.action.renameHook.success',
-                        args: [filename, targetName])
-            
-            } catch (ValidationException e) {
-                flash.error = message(code: e.message,
-                    args: [filename, targetName])
+            if (targetName) {
+                try {
+                    svnRepoService.renameHookFile(repo, filename, targetName)
+                    flash.message = message(
+                            code: 'repository.action.renameHook.success',
+                            args: [filename, targetName])
+                    
+                } catch (ValidationException e) {
+                    flash.error = message(code: e.message,
+                            args: [filename, targetName])
+                }
+            } else {
+                flash.error = message(code: 'repository.action.filename.required')
             }
             redirect(action: 'hooksList', id: params.id)
         }
