@@ -59,7 +59,7 @@ class HookRestController extends AbstractRestController {
             String destinationFileName = params.cgiPathInfo
             File uploadedFile = ControllerUtil.getFileFromRequest(request)
             
-            if (!uploadedFile?.bytes.length) {
+            if (!uploadedFile?.length()) {
                 log.warn("File upload request contained no file data")
                 throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
             }
