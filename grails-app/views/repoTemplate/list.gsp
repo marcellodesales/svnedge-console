@@ -60,7 +60,7 @@
                 rows[i].className = (i % 2) == 0 ? 'EvenRow' : 'OddRow';
             }
         }
-        Sortable.create('templates',{tag: 'tr', ghosting:true, onUpdate: sendUpdatedOrder})
+        Sortable.create('templates',{tag: 'tr', ghosting:false, onUpdate: sendUpdatedOrder})
       </g:javascript>
     </div>
     </g:if>

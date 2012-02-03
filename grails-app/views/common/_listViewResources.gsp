@@ -18,7 +18,7 @@
 
 <g:javascript library="prototype" />
 <g:javascript library="listView"/>
-<g:javascript library="effects"/>
+<g:javascript library="prototype/effects"/>
 <g:javascript library="window"/>
 <g:javascript library="window_effects"/>
 <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
