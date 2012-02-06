@@ -875,7 +875,7 @@ class RepoController {
         if (lock) {
             lock.userId = loggedInUserInfo(field:'id') as int
             String accessRules = serverConfService.readSvnAccessFile()
-            def command = new AuthzRulesCommand(accessRules: accessRules)
+            def command = new AuthzRulesCommand(fileContent: accessRules)
             return [authRulesCommand: command]
         } else {
             redirect(action: 'showAuthorization')
@@ -903,7 +903,7 @@ class RepoController {
         }
 
         def result = serverConfService.validateSvnAccessFile(
-                cmd.accessRules)
+                cmd.fileContent)
         def exitStatus = Integer.parseInt(result[0])
 
         if (exitStatus != 0) {
@@ -922,7 +922,7 @@ class RepoController {
             flash.message = null
         } else {
             if (!cmd.hasErrors() && serverConfService.writeSvnAccessFile(
-                    cmd.accessRules)) {
+                    cmd.fileContent)) {
                 lock.release(session)
                 flash.message = message(
                         code: 'repository.action.saveAuthorization.success')
@@ -1025,6 +1025,83 @@ class RepoController {
         return null
     }
 
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def editHook = {
+        fileAction('hooksList') { repo, filename ->
+
+            def model = reports() 
+            def identifier = "repo:${repo.id};hookName:${filename}"
+            User owner
+            ServletContextSessionLock lock =
+                ServletContextSessionLock.obtain(session, identifier)
+            if (lock) {
+                // if lock is obtained, present the editor
+                log.info("session lock obtained for file '${identifier}' granted to user '${lock.userId}'")
+                def file = svnRepoService.getHookFile(repo, filename)
+                model << [file: file, fileId: identifier, lockToken: identifier]
+                return model
+            }
+            else {
+                // else, redirect with warning to the list view
+                lock = ServletContextSessionLock.peek(session, identifier)
+                owner = User.get(lock.userId)
+                log.info("session lock denied for file '${identifier}'; already granted to user '${lock.userId}'")
+                flash.error = message (code: "default.fileEditor.isLocked", args: [owner.realUserName, lock.createdOn])
+                redirect(action: 'hooksList', id: repo.id)
+            }
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def saveHook  = {
+        // use the file id to extract current repo context and script name
+        def matcher = params.fileId =~ /repo:(\d+);hookName:(.*)/
+        def repoId = matcher[0][1]
+        def hookName = matcher[0][2]
+
+        // verify and release the file lock, and save the file
+        def lock = ServletContextSessionLock.obtain(session, params.fileId)
+        if (lock) {
+            log.info("saving edits to file '${hookName}' in repo '${repoId}'")
+            def file = svnRepoService.getHookFile(Repository.get(repoId), hookName)
+            file.text = params.fileContent
+            lock.release(session)
+            log.info("session lock released for file '${hookName}' from user '${lock.userId}'")
+            flash.message = message (code: "repository.page.hookEdit.saved", args: [hookName])
+        }
+        else {
+            // redirect with warning to the list view if lock not owned by current user for some reason
+            lock = ServletContextSessionLock.peek(session, params.fileId)
+            owner = User.get(lock.userId)
+            log.info("edit denied for file '${params.fileId}'; lock granted to user '${lock.userId}'")
+            flash.error = message (code: "default.fileEditor.isLocked", args: [owner.realUserName, lock.createdOn])
+            redirect(action: 'hooksList', id: repoId)
+        }
+        redirect(action: 'hooksList', id: repoId)
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def cancelHookEdit  = {
+        // release the file lock
+        def lock = ServletContextSessionLock.obtain(session, params.fileId)
+        if (lock) {
+            log.info("session lock released for file '${params.fileId}' from user '${lock.userId}'")
+            lock.release(session)
+        }
+        // use the file id to extract current repo context and hookm name
+        def matcher = params.fileId =~ /repo:(\d+);hookName:(.*)/
+        def repoId = matcher[0][1]
+        def hookName = matcher[0][2]
+        log.debug("File id indicates repo: '${matcher[0][1]}'")
+        if (repoId) {
+            flash.message = message(code: "repository.page.hookEdit.editCanceled", args: [hookName] )
+            redirect(action: 'hooksList', id: repoId)
+        }
+        else {
+            redirect(action: index)
+        }
+    }
+
     /**
      * helper to format a SchedulerBean instance to a human-readable string
      * @param s
@@ -1059,9 +1136,9 @@ class RepoController {
  * Command class for 'saveAuthorization' action provides validation
  */
 class AuthzRulesCommand {
-    String accessRules
+    String fileContent
     def errors
     static constraints = {
-        accessRules(blank: false)
+        fileContent(blank: false)
     }
 }

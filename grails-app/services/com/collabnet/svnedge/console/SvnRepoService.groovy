@@ -1549,7 +1549,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
     }    
     
-    private File getHookFile(repo, filename) throws FileNotFoundException {
+    def File getHookFile(repo, filename) throws FileNotFoundException {
         Server server = Server.getServer()
         File repoDir = new File(server.repoParentDir, repo.name)
         File hooksDir = new File(repoDir, "hooks")
