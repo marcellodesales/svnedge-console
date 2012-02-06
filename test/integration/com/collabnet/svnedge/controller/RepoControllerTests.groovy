@@ -125,7 +125,7 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
         // content we will submit to controller
         String testFile = NEW_ACCESS_RULES
-        def cmd = new AuthzRulesCommand(accessRules: testFile)
+        def cmd = new AuthzRulesCommand(fileContent: testFile)
         controller.saveAuthorization(cmd)
         assertNotNull "Controller should provide a success message", 
             controller.flash.message
@@ -151,7 +151,7 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         controller.serverConfService = serverConfService
         controller.metaClass.loggedInUserInfo = { return 1 }
         
-        def cmd = new AuthzRulesCommand(accessRules: NEW_ACCESS_RULES)
+        def cmd = new AuthzRulesCommand(fileContent: NEW_ACCESS_RULES)
         controller.saveAuthorization(cmd)
         assertNull "Controller should provide a success message",
                 controller.flash.message
