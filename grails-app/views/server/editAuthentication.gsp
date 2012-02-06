@@ -115,16 +115,6 @@
           <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label.tip" /></label>
         </td>
       </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="forceUsernameCase"><g:message code="server.forceUsernamecase.label" /></label>
-        </td>
-        <td valign="top" colspan="2"
-            class="ItemDetailValue ${hasErrors(bean:server,field:'forceUsernameCase','errors')}">
-          <g:checkBox name="forceUsernameCase" value="${server.forceUsernameCase}"/>
-          <label for="forceUsernameCase"><g:message code="server.forceUsernameCase.label.tip" /></label>
-        </td>
-      </tr>
    <g:hasErrors bean="${server}" field="ldapEnabled">
       <tr>
         <td></td>

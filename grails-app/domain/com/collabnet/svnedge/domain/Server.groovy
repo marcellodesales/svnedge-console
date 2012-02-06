@@ -45,7 +45,6 @@ class Server {
     String repoParentDir
     boolean defaultStart
     boolean allowAnonymousReadAccess
-    boolean forceUsernameCase
     boolean ldapEnabled
     Boolean ldapEnabledConsole
     boolean fileLoginEnabled 
