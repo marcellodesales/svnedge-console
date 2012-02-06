@@ -1012,6 +1012,18 @@ class RepoController {
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def deleteHook = {
+        fileAction('hooksList') { repo, filename ->
+            svnRepoService.deleteHookFile(repo, filename)
+            flash.message = message(
+                    code: 'repository.action.deleteHook.success',
+                    args: [filename])
+                    
+            redirect(action: 'hooksList', id: params.id)
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
     def downloadHook = {
         fileAction('hooksList') { repo, filename ->
             def contentType = "application/octet-stream"

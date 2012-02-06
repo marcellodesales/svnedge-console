@@ -25,6 +25,7 @@ import static groovyx.net.http.ContentType.JSON
 import com.collabnet.svnedge.console.SvnRepoService
 import com.collabnet.svnedge.util.ConfigUtil
 import groovyx.net.http.RESTClient
+import groovyx.net.http.HttpResponseException
 import org.apache.http.entity.FileEntity
 
 class HookApiTests extends AbstractSvnEdgeFunctionalTests {
@@ -66,4 +67,23 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         assert resp.status == 201
     }
    
+    void testHookDelete() {
+  
+        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+        def hookName = "post-commit.tmpl"
+        
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [ 'format': 'json']
+        def resp = rest.delete(path: "hook/${testRepo.id}/${hookName}",
+                               query: params)
+        assert resp.status == 200
+        
+        try {
+            resp = rest.delete(path: "hook/${testRepo.id}/${hookName}",
+                               query: params)
+        } catch (HttpResponseException e) {
+            assert e.response.status == 500
+        }
+    }
 }

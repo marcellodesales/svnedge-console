@@ -96,5 +96,52 @@ class HookRestController extends AbstractRestController {
     }
 
 
- 
+    /**
+    * <p>Rest method to delete a given repo hook script.</p>
+    *
+    * <p><bold>HTTP Method:</bold></p>
+    * <code>
+    *   DELETE
+    * </code>
+    *
+    * <p><bold>URL:</bold></p>
+    * <code>
+    *   /csvn/api/1/hook/{repoId}/{filename}
+    * </code>
+    */
+   def restDelete = {
+       def result = [:]
+       try {
+           def repo = Repository.get(params.id)
+           String filename = params.cgiPathInfo
+           
+           def success = svnRepoService.deleteHookFile(repo, filename)
+           if (success) {
+               response.status = 200
+               result['message'] = message(code: "api.message.200")
+           } else {
+               response.status = 500
+               result['errorMessage'] = message(code: "api.error.500")
+               result['errorDetail'] = message(code: "api.error.500.filesystem")
+           }
+       }
+       catch (FileNotFoundException e) {
+           response.status = 500
+           result['errorMessage'] = message(code: "api.error.500.filesystem")
+           result['errorDetail'] = e.toString()
+           log.warn("Exception handling a REST DELETE request", e)
+       }
+       catch (Exception e) {
+           response.status = 500
+           result['errorMessage'] = message(code: "api.error.500")
+           result['errorDetail'] = e.toString()
+           log.warn("Exception handling a REST DELETE request", e)
+       }
+
+       withFormat {
+           json { render result as JSON }
+           xml { render result as XML }
+       }
+   }
+
 }

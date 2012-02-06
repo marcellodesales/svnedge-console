@@ -356,4 +356,38 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
                 controller.flash.error, 
                 controller.flash.error.contains("already exists")
     }
+    
+    void testDeleteHook() {
+        def params = controller.params
+        params.id = repoExisting.id
+        def existingFilename = 'post-commit.tmpl'
+        params['listViewItem_' + existingFilename] = "on"
+
+        controller.deleteHook()
+        assertNull "There should not be an error message", controller.flash.error
+        assertNotNull "Expected a success message", controller.flash.message
+        assertEquals "Expected deleted success message",
+                controller.message(code: 'repository.action.deleteHook.success',
+                                   args: [existingFilename]),
+                controller.flash.message            
+        def model = controller.hooksList()
+        def files = model["hooksList"]
+        File oldFile = null
+        files.each {
+            if (existingFilename == it.name) {
+                oldFile = it
+            }
+        }
+        assertNull "File still exists", oldFile
+        controller.flash.message = null
+        
+        // try again, now it should fail as the file was already removed
+        params['listViewItem_' + existingFilename] = "on"
+        controller.deleteHook()
+        assertNull "Did not expect a success message", controller.flash.message
+        assertNotNull "There should be an error message", controller.flash.error
+        assertTrue "Error message should indicate file does not exist: " +
+                controller.flash.error,
+                controller.flash.error.contains("could not be found")
+    }
 }

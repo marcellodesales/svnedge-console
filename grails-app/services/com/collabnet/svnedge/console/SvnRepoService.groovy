@@ -1509,10 +1509,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
     }
 
-    private File hookFileOperation(repo, sourceName, targetName, Closure c) {
+    private File hookFileOperation(repo, sourceName, targetName, Closure c) 
+            throws FileNotFoundException, ValidationException {
         // Assuming subversion/apache should have similar capabilities with
         // respect to hook filenames as with repository directory names
-        if (!targetName.matches(Repository.RECOMMENDED_NAME_PATTERN)) {
+        if (targetName && 
+                !targetName.matches(Repository.RECOMMENDED_NAME_PATTERN)) {
             throw new ValidationException("repository.name.matches.invalid")
         }
         
@@ -1520,9 +1522,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
         Server server = Server.getServer()
         File repoDir = new File(server.repoParentDir, repo.name)
         File hooksDir = new File(repoDir, "hooks")
-        File targetFile = new File(hooksDir, targetName)
-        if (targetFile.exists()) {
-            throw new ValidationException("repository.file.already.exists")
+        File targetFile = null
+        if (targetName) {
+            targetFile = new File(hooksDir, targetName)
+            if (targetFile.exists()) {
+                throw new ValidationException("repository.file.already.exists")
+            }
         }
         c(sourceFile, targetFile)
         return targetFile
@@ -1566,5 +1571,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
     boolean streamHookFile(repo, filename, outputStream) {
         File hookFile = getHookFile(repo, filename)
         return copyFile(hookFile, outputStream)
+    }
+    
+    /**
+     * Removes the hook file/script from the filesystem
+     * @return true if the file existed and was deleted
+     */
+    boolean deleteHookFile(repo, hookName) throws FileNotFoundException {
+        boolean result = false
+        hookFileOperation(repo, hookName, null) {
+            sourceFile, targetFile ->
+            result = sourceFile.delete()
+        }
+        return result
     }
 }
