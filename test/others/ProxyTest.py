@@ -4,10 +4,10 @@ httpTarget = "http://www.collab.net"
 httpsTargetTrusted = "https://ctf.open.collab.net/sf/sfmain/do/home"
 httpsTargetUntrusted = "https://www.collab.net"
 
-proxyHost = "cu182.cloud.sp.collab.net"
+proxyHost = "192.168.1.11"
 proxyPort = "80"
-proxyUser = "proxyuser"
-proxyPwd = "proxypass"
+proxyUser = "administrator"
+proxyPwd = "C011a6net"
 
 def main():
     print "Testing proxy: %s\n" % (getProxyUrl(),)
@@ -16,7 +16,10 @@ def main():
     testProxy(httpsTargetUntrusted)
 
 def getProxyUrl():
-    proxyUrl = "http://%s:%s@%s:%s" % (proxyUser, proxyPwd, proxyHost, proxyPort)
+    if (proxyUser):
+        proxyUrl = "http://%s:%s@%s:%s" % (proxyUser, proxyPwd, proxyHost, proxyPort)
+    else:
+        proxyUrl = "http://%s:%s" % (proxyHost, proxyPort)
     return proxyUrl
 
 def getProxyProtocol(url):
