@@ -16,7 +16,7 @@
   - along with this program.  If not, see <http://www.gnu.org/licenses/>.
   --}%
 
-<g:applyLayout name="repoDetail">
+<g:applyLayout name="repoDetail" params="[suppressTabs: true]">
   <content tag="tabContent">
   <g:render template="/common/fileEditor"
       model="[fileContent: file.text,

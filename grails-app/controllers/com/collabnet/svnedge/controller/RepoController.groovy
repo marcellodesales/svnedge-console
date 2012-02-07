@@ -1026,6 +1026,7 @@ class RepoController {
                 ServletContextSessionLock.obtain(session, identifier)
             if (lock) {
                 // if lock is obtained, present the editor
+                lock.userId = loggedInUserInfo(field:'id') as int
                 log.info("session lock obtained for file '${identifier}' granted to user '${lock.userId}'")
                 def file = svnRepoService.getHookFile(repo, filename)
                 model << [file: file, fileId: identifier, lockToken: identifier]
@@ -1036,7 +1037,7 @@ class RepoController {
                 lock = ServletContextSessionLock.peek(session, identifier)
                 owner = User.get(lock.userId)
                 log.info("session lock denied for file '${identifier}'; already granted to user '${lock.userId}'")
-                flash.error = message (code: "default.fileEditor.isLocked", args: [owner.realUserName, lock.createdOn])
+                flash.error = message (code: "default.fileEditor.isLocked", args: [owner?.realUserName, lock.createdOn])
                 redirect(action: 'hooksList', id: repo.id)
             }
         }

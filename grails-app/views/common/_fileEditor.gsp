@@ -23,7 +23,7 @@
       <td>${heading}</td>
     </tr>
     <tr>
-      <td><g:message code="repository.page.editAuthorization.lockMessage" /></td>
+      <td><g:message code="default.fileEditor.lockMessage" /></td>
     </tr>
     <tr class="prop">
       <td width="100%" valign="top" class="value">
