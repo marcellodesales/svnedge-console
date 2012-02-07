@@ -40,21 +40,14 @@ class TemplateRestController extends AbstractRestController {
 
     /**
      * <p>API to retrieve the list of repository templates. For each template, the name and id are returned. The
-     * id may then be used to create new repositories ({@link RepositoryRestController#restSave}). The "showHidden" 
-     * parameter indicates whether to return all or just "active" repository templates.</p>
+     * id may then be used to create new repositories ({@link RepositoryRestController#restSave}). The optional
+     * "showInactive" parameter indicates whether to return all or just "active" repository templates.</p>
      *
      * <p><bold>HTTP Method:</bold></p>
      * <code>
      *     GET
      * </code>
-     * 
-     * <p><bold>XML-formatted request body example:</bold></p>
-     * <pre>
-     * &lt;map&gt;
-     *   &lt;entry key="showInactive"&gt;false&lt;/entry&gt;
-     * &lt;/map&gt;
-     * </pre> 
-     * 
+     *
      * <p><bold>XML-formatted return example:</bold></p>
      * <pre>
      * &lt;map&gt;

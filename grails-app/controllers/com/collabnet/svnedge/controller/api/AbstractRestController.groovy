@@ -93,13 +93,18 @@ abstract class AbstractRestController {
     }
 
     /**
-     * Convenience method to find an XML or JSON element in the request body. Ensures that
+     * Convenience method to find a Query param or XML/JSON element in the request body. Ensures that
      * <code>parseRestRequest</code> has been run.
      * @param elementKey the key we seek
      * @return the corresponding value, or null
      */
     String getRestParam(String elementKey) {
-        
+
+        // check for standard GET or POST param first, then look to request body
+        if (params.elementKey) {
+            return params.elementKey
+        }
+
         parseRestRequest()
         
         def elementValue = null
