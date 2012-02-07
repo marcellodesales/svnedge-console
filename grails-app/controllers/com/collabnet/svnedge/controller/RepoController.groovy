@@ -60,9 +60,7 @@ class RepoController {
     def list = {
         params.max = Math.min(params.max ? params.max.toInteger() : 10, 100)
         params.offset = params.offset ? params.offset.toInteger() : 0
-        if (!params.sort) {
-            params.sort = "name"
-        }
+        ControllerUtil.setDefaultSort(params, "name")
         def server = Server.getServer()
         def repoList
         if (server.mode == ServerMode.REPLICA) {
@@ -346,13 +344,7 @@ class RepoController {
         if (repo) {
             // set default sort to be date descending, if neither sort 
             // parameter is present
-            if (!params.sort) {
-                params.sort = "date"
-                params.order = "desc"
-            }
-            if (!params.order) {
-                params.order = "asc"
-            }
+            ControllerUtil.setDefaultSort(params, "date", "desc")
             def sortBy = params.sort
             boolean isAscending = params.order == "asc"
             model["dumpFileList"] =
@@ -366,15 +358,7 @@ class RepoController {
      */
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def dumpFileListAll = {
-        // set default sort to be date descending, if neither sort
-        // parameter is present
-        if (!params.sort) {
-            params.sort = "name"
-            params.order = "asc"
-        }
-        if (!params.order) {
-            params.order = "asc"
-        }
+        ControllerUtil.setDefaultSort(params, "name")
         def sortBy = params.sort
         boolean isAscending = params.order == "asc"
 
@@ -946,13 +930,7 @@ class RepoController {
         if (repo) {
             // set default sort to be alphabetical, if neither sort
             // parameter is present
-            if (!params.sort) {
-                params.sort = "name"
-                params.order = "asc"
-            }
-            if (!params.order) {
-                params.order = "asc"
-            }
+            ControllerUtil.setDefaultSort(params, "name")
             def sortBy = params.sort
             boolean isAscending = params.order == "asc"
             model["hooksList"] =

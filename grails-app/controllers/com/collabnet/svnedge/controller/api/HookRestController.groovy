@@ -38,6 +38,66 @@ class HookRestController extends AbstractRestController {
     def svnRepoService
 
     /**
+     * <p>API to retrieve the directory listing for hooks. Subdirectories are
+     * not included. File details include name, size, and last modified date.
+     * Optional sort and order query parameters are available.</p>
+     *
+     * <p><bold>HTTP Method:</bold></p>
+     * <code>
+     *     GET
+     * </code>
+     *
+     * <p><bold>XML-formatted response example:</bold></p>
+     * <pre>
+     * &lt;map&gt;
+     *   &lt;entry key="hooks"&gt;
+     *     &lt;map&gt;
+     *       &lt;entry key="name"&gt;pre-commit&lt;/entry&gt;
+     *       &lt;entry key="size"&gt;1024&lt;/entry&gt;
+     *       &lt;entry key="lastModified"&gt;14314314103483721&lt;/entry&gt;
+     *     &lt;/map&gt;
+     *   &lt;/entry&gt;
+     * &lt;/map&gt;
+     * </pre>
+     */
+    def restRetrieve = {
+        def result = [:]
+        String filename = params.cgiPathInfo
+        def repo = Repository.get(params.id)
+        if (repo) {
+            if (filename) {
+                // artf6983        
+                response.status = 405
+                result['errorMessage'] = message(code: "api.error.405")
+
+            } else {
+                result['hooks'] = listHooks(repo)
+            }
+        } else {
+            response.status = 400
+            result['errorMessage'] = message(code: "api.error.400.repository")
+            log.debug("Invalid repository parameter: " + params.id)
+        }
+        
+        withFormat {
+            json { render result as JSON }
+            xml { render result as XML }
+        }
+    }
+
+    private def listHooks(repo) {
+        def fileMapList = []
+        ControllerUtil.setDefaultSort(params, "name")
+        boolean isAscending = params.order == "asc"
+        def fileList = svnRepoService.listHooks(repo, params.sort, isAscending)
+        fileList.each { File f ->
+            fileMapList << [name: f.name, 
+                        size: f.length(), lastModifiedMillis: f.lastModified()]
+        }
+        return fileMapList
+    }
+
+    /**
      * <p>Rest method to create or replace a given repo hook script with the file contents
      * of the request. The request body is streamed in its entirety to a temporary file
      * and transferred to the repo hooks directory, and can be of any content type.</p>

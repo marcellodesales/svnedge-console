@@ -62,5 +62,20 @@ public class ControllerUtil {
         return targetFile
     }
 
-
+    /**
+     * Sets the 'sort' and 'order' properties for the request, only if they have
+     * not been sent by the client.
+     * 
+     * @param params query parameter map injected into the controller
+     * @param sortBy default column
+     */
+    public static void setDefaultSort(params, sortBy, order = "asc") {
+        if (!params.sort) {
+            params.sort = sortBy
+            params.order = order
+        }
+        if (!params.order) {
+            params.order = order
+        }
+    }
 }

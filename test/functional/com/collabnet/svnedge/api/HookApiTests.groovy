@@ -86,4 +86,45 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
             assert e.response.status == 500
         }
     }
+    
+    private static final def HOOKS_DIR_CONTENTS = [
+        'post-commit.tmpl', 'post-lock.tmpl', 'post-revprop-change.tmpl',
+        'post-unlock.tmpl', 'pre-commit.tmpl', 'pre-lock.tmpl',
+        'pre-revprop-change.tmpl', 'pre-unlock.tmpl', 'start-commit.tmpl']
+    
+    
+    void testHookList() {
+        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+        def url = "/api/1/hook/" + testRepo.id
+        
+        // without auth, GET is protected
+        get("${url}?format=xml")
+        assertStatus 401
+        
+        // without admin auth, GET is protected
+        get("${url}?format=json") {
+            headers['Authorization'] = "Basic ${ApiTestHelper.makeUserAuthorization()}"
+        }
+        assertStatus 401
+
+        // authorized request contains hooks directory contents
+        get("${url}?format=json") {
+            headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        }
+        assertContentContains '{"hooks": ['
+
+        // check contents with a non-default sort
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [format: 'json', sort: 'name', order: 'desc']
+        def resp = rest.get(path: "hook/${testRepo.id}", query: params)
+        assert resp.status == 200
+        assert resp.contentType == JSON.toString()
+        def fileList = resp.data['hooks']
+        assertNotNull "Expected a list of file data", fileList
+        assertEquals "Incorrect number of hook files", 
+                HOOKS_DIR_CONTENTS.size(), fileList.size()        
+        assertEquals "Hook scripts should be in descending alphabetical order",
+                HOOKS_DIR_CONTENTS.reverse(), fileList.collect { it.name }
+    }
 }
