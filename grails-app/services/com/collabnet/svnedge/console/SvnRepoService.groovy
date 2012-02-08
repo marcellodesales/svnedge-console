@@ -1436,6 +1436,25 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
+     * creates a hook script for the repo, but does not allow
+     * an existing file at the target name to be overwritten
+     * @param repo The repository
+     * @param sourceFile a file to be installed as a hook script
+     * @param targetFilename the final name (optional)
+     */
+    boolean createHook(Repository repo, File sourceFile, String targetFilename) {
+
+        if (!repo || !sourceFile) {
+            throw new IllegalArgumentException("The repository and source file must be defined")
+        }
+        def repoHomeDir = getRepositoryHomePath(repo)
+        def hooksDir = new File(repoHomeDir, "hooks")
+        File destinationFile = new File(hooksDir, targetFilename ?: sourceFile.name)
+
+        destinationFile.exists() ? false : createOrReplaceHook(repo, sourceFile, targetFilename)
+    }
+
+    /**
      * Creates or replaces a hook script for the repo. 
      * The <code>sourceFile</code> is presumed to be a temporary file which
      * is moved into the repo <code>hooks</code> folder and made

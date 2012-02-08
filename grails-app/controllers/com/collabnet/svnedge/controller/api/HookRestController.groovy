@@ -138,7 +138,10 @@ class HookRestController extends AbstractRestController {
                 throw new IllegalArgumentException(message(code: "api.error.400.missingFile"))
             }
             else {
-                def success = svnRepoService.createOrReplaceHook(repo, uploadedFile, destinationFileName)
+                // "overwrite" param set to false will block replacement of existing file
+                def success = (params["overwrite"] == "false") ? 
+                        svnRepoService.createHook(repo, uploadedFile, destinationFileName) :
+                        svnRepoService.createOrReplaceHook(repo, uploadedFile, destinationFileName)
                 if (!success) {
                     response.status = 500
                     result['errorMessage'] = message(code: "api.error.500")
@@ -169,6 +172,27 @@ class HookRestController extends AbstractRestController {
         }
     }
 
+    /**
+     * <p>Rest method to create a given repo hook script with the file contents
+     * of the request. The request body is streamed in its entirety to a temporary file
+     * and transferred to the repo hooks directory, and can be of any content type.</p>
+     * <p>If there is an existing file by the same name in the hooks directory, 
+     * the method will return an error.</p>
+     *
+     * <p><bold>HTTP Method:</bold></p>
+     * <code>
+     *   POST
+     * </code>
+     *
+     * <p><bold>URL:</bold></p>
+     * <code>
+     *   /csvn/api/1/hook/{repoId}/{filename}
+     * </code>
+     */
+    def restSave = {
+        params["overwrite"] = "false"
+        restUpdate()
+    }
 
     /**
     * <p>Rest method to delete a given repo hook script.</p>

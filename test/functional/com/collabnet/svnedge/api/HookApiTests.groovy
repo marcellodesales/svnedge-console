@@ -66,6 +66,33 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
                 requestContentType: 'application/octet-stream' )
         assert resp.status == 201
     }
+
+    void testHookPost() {
+
+        // post to a new file location should be successful
+        def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
+        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [ 'format': 'json']
+        def resp = rest.post( path: "hook/${testRepo.id}/testScript.py",
+                query: params,
+                body: testFile,
+                requestContentType: 'text/plain' )
+        assert resp.status == 201
+
+        // post to an existing file location should be blocked
+        try {
+            resp = rest.post( path: "hook/${testRepo.id}/post-commit.tmpl",
+                    query: params,
+                    body: testFile,
+                    requestContentType: 'text/plain' )
+        }
+        catch (HttpResponseException e) {
+            assert e.response.status == 500
+        }
+    }
    
     void testHookDelete() {
   
