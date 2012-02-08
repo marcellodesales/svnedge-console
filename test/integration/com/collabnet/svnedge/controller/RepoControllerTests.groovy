@@ -390,4 +390,29 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
                 controller.flash.error,
                 controller.flash.error.contains("could not be found")
     }
+
+    void testEditHook() {
+        controller.metaClass.loggedInUserInfo = { return 1 }
+        def params = controller.params
+        params.id = repoExisting.id
+        params['listViewItem_post-commit.tmpl'] = "on"
+
+        def model = controller.editHook()
+        def originalFileText = svnRepoService.getHookFile(repoExisting, "post-commit.tmpl").text
+        
+        assertNotNull "Model should contain a fileId", model.fileId
+        assertNotNull "Model should contain hook content", model.fileContent
+        assertEquals "File content in model should match disk", originalFileText, model.fileContent
+
+        def editedFileContent = "new content"
+        params.fileId = model.fileId
+        params.fileContent = editedFileContent
+        controller.saveHook()
+
+        def newFileText = svnRepoService.getHookFile(repoExisting, "post-commit.tmpl").text
+        assertEquals "File content on disk should be updated", editedFileContent, newFileText
+
+        // restore script file to original text
+        svnRepoService.getHookFile(repoExisting, "post-commit.tmpl").text = originalFileText
+    }
 }
