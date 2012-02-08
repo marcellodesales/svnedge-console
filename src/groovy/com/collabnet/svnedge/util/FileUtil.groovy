@@ -148,4 +148,21 @@ public class FileUtil {
             }
         }
     }
+
+    /**
+     * Checks the given file for non-ascii characters
+     */
+    boolean isAsciiText(File f) {
+        boolean b = true
+        f.withInputStream {
+            int i
+            while ((i = it.read()) != -1) {
+                if (i < 1 || i > 127) {
+                    b = false
+                    return
+                }
+            }
+        }
+        return b
+    }
 }

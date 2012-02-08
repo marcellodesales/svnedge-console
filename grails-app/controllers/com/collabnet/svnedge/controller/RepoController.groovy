@@ -49,6 +49,7 @@ class RepoController {
     def packagesUpdateService
     def repoTemplateService
     def statisticsService
+    def fileUtil
 
     @Secured(['ROLE_USER'])
     def index = { redirect(action: list, params: params) }
@@ -1004,7 +1005,11 @@ class RepoController {
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
     def downloadHook = {
         fileAction('hooksList') { repo, filename ->
-            def contentType = "application/octet-stream"
+            // Not sure how sophisticated we need to be here, so just
+            // treating any non-ascii file as binary
+            File hookFile = svnRepoService.getHookFile(repo, filename)
+            def contentType = fileUtil.isAsciiText(hookFile) ? "text/plain" : 
+                    "application/octet-stream"
             response.setContentType(contentType)
             response.setHeader("Content-disposition",
                     'attachment;filename="' + filename + '"')

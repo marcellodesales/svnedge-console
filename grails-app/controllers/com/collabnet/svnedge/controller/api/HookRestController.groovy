@@ -35,6 +35,7 @@ import com.collabnet.svnedge.util.ControllerUtil
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
 class HookRestController extends AbstractRestController {
     
+    def fileUtil
     def svnRepoService
 
     /**
@@ -66,10 +67,8 @@ class HookRestController extends AbstractRestController {
         def repo = Repository.get(params.id)
         if (repo) {
             if (filename) {
-                // artf6983        
-                response.status = 405
-                result['errorMessage'] = message(code: "api.error.405")
-
+                downloadHook(repo, filename)
+                return null
             } else {
                 result['hooks'] = listHooks(repo)
             }
@@ -96,6 +95,21 @@ class HookRestController extends AbstractRestController {
         }
         return fileMapList
     }
+
+    private void downloadHook(repo, filename) {
+        // Not sure how sophisticated we need to be here, so just
+        // treating any non-ascii file as binary
+        File hookFile = svnRepoService.getHookFile(repo, filename)
+        def contentType = fileUtil.isAsciiText(hookFile) ? "text/plain" :
+                "application/octet-stream"
+        response.setContentType(contentType)
+        response.setHeader("Content-disposition",
+                'attachment;filename="' + filename + '"')
+        if (!svnRepoService.streamHookFile(repo, filename, response.outputStream)) {
+            throw new FileNotFoundException()
+        }
+    }
+
 
     /**
      * <p>Rest method to create or replace a given repo hook script with the file contents

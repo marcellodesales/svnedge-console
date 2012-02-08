@@ -127,4 +127,16 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         assertEquals "Hook scripts should be in descending alphabetical order",
                 HOOKS_DIR_CONTENTS.reverse(), fileList.collect { it.name }
     }
+    
+    void testHookDownload() {
+        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+        def url = "/api/1/hook/" + testRepo.id + "/post-commit.tmpl"
+
+        // authorized request contains hooks directory contents
+        get(url) {
+            headers['Authorization'] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        }
+        assertContentType "text/plain"
+        assertContentStrict(svnRepoService.getHookFile(testRepo, "post-commit.tmpl").text)        
+    }
 }
