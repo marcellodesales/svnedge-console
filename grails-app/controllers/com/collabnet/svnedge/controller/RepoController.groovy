@@ -1029,7 +1029,7 @@ class RepoController {
                 lock.userId = loggedInUserInfo(field:'id') as int
                 log.info("session lock obtained for file '${identifier}' granted to user '${lock.userId}'")
                 def file = svnRepoService.getHookFile(repo, filename)
-                model << [file: file, fileId: identifier, lockToken: identifier]
+                model << [fileName: file.name, fileId: identifier, fileContent: file.text?.denormalize(), lockToken: identifier]
                 return model
             }
             else {
@@ -1055,7 +1055,7 @@ class RepoController {
         if (lock) {
             log.info("saving edits to file '${hookName}' in repo '${repoId}'")
             def file = svnRepoService.getHookFile(Repository.get(repoId), hookName)
-            file.text = params.fileContent
+            file.text = params.fileContent.toString().denormalize()
             lock.release(session)
             log.info("session lock released for file '${hookName}' from user '${lock.userId}'")
             flash.message = message (code: "repository.page.hookEdit.saved", args: [hookName])

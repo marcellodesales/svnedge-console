@@ -19,12 +19,13 @@
 <g:applyLayout name="repoDetail" params="[suppressTabs: true]">
   <content tag="tabContent">
   <g:render template="/common/fileEditor"
-      model="[fileContent: file.text,
+      model="[fileName: fileName,
           fileId: fileId,
+          fileContent: fileContent,
           saveAction: 'saveHook',
           cancelAction: 'cancelHookEdit',
           ajaxCancelUrl: '/csvn/repo/cancelHookEdit?fileId=' + fileId,
-          heading: message(code: 'repository.page.hookEdit.heading', args: [file.name])]" />
+          heading: message(code: 'repository.page.hookEdit.heading', args: [fileName])]" />
   </content>
 </g:applyLayout>
 
