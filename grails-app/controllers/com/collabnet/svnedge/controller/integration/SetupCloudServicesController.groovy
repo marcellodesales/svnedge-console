@@ -150,6 +150,7 @@ class SetupCloudServicesController {
             cloudConfig.username = cmd.username
             cloudConfig.password = securityService.encrypt(cmd.password)
             cloudConfig.domain = cmd.domain
+            cloudConfig.enabled = true
             cloudConfig.save()
             render(view: "confirm", model: [cmd: cmd])
         }
