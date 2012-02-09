@@ -21,9 +21,12 @@ package com.collabnet.svnedge.controller.api
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import grails.converters.JSON
 import grails.converters.XML
-import com.collabnet.svnedge.domain.Server
+
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.util.ControllerUtil
+import com.collabnet.svnedge.util.ServletContextSessionLock
+
+import com.collabnet.svnedge.ResourceLockedException
 
 /**
  * REST API controller for managing repository hook scripts
@@ -128,9 +131,18 @@ class HookRestController extends AbstractRestController {
      */
     def restUpdate = {
         def result = [:]
+        ServletContextSessionLock lock
         try {
             def repo = Repository.get(params.id)
             String destinationFileName = params.cgiPathInfo
+            
+            // validate that lock is available
+            def lockToken = "repo:${repo.id};hookName:${destinationFileName}"
+            lock = ServletContextSessionLock.obtain(session, lockToken)
+            if (!lock) {
+                throw new ResourceLockedException(message(code: "api.error.403.objectLocked"))
+            }
+            
             File uploadedFile = ControllerUtil.getFileFromRequest(request)
             
             if (!uploadedFile?.length()) {
@@ -153,19 +165,26 @@ class HookRestController extends AbstractRestController {
                 }
             }
         }
+        catch (ResourceLockedException e) {
+            response.status = 403
+            result['errorMessage'] = message(code: "api.error.403")
+            result['errorDetail'] = e.toString()
+            log.warn("Exception handling a REST PUT/POST request", e)
+        }
         catch (IllegalArgumentException e) {
             response.status = 400
             result['errorMessage'] = message(code: "api.error.400")
             result['errorDetail'] = e.toString()
-            log.warn("Exception handling a REST PUT request", e)
+            log.warn("Exception handling a REST PUT/POST request", e)
         }
         catch (Exception e) {
             response.status = 500
             result['errorMessage'] = message(code: "api.error.500")
             result['errorDetail'] = e.toString()
-            log.warn("Exception handling a REST PUT request", e)
+            log.warn("Exception handling a REST PUT/POST request", e)
         }
-
+        
+        lock?.release(session)
         withFormat {
             json { render result as JSON }
             xml { render result as XML }

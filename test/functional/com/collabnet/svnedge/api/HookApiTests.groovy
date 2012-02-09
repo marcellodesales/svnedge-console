@@ -27,6 +27,7 @@ import com.collabnet.svnedge.util.ConfigUtil
 import groovyx.net.http.RESTClient
 import groovyx.net.http.HttpResponseException
 import org.apache.http.entity.FileEntity
+import groovyx.net.http.ContentType
 
 class HookApiTests extends AbstractSvnEdgeFunctionalTests {
 
@@ -67,6 +68,40 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         assert resp.status == 201
     }
 
+    void testHookPutWhenLocked() {
+
+        // put to a locked location should result in 403 forbidden
+        def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
+        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+        
+        // lock the file for editing via web ui
+        def http = new RESTClient("http://localhost:8080/csvn/")
+        def httpResp = http.post (path: "j_spring_security_check",
+                requestContentType: ContentType.URLENC,
+                body: [j_username: 'admin', j_password: 'admin'])
+        
+        httpResp = http.post (path: "repo/index",
+                requestContentType: ContentType.URLENC,
+                body: ['_action_editHook': 'Edit', 'id': testRepo.id, 'listViewItem_post-commit.tmpl': 'on'])
+
+        
+        // now try REST PUT and expect 403 failure
+        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
+        def params = [ 'format': 'json']
+        try {
+            def restResp = rest.put( path: "hook/${testRepo.id}/post-commit.tmpl",
+                query: params,
+                body: testFile,
+                requestContentType: 'text/plain' )
+            
+            assert "This line should not be reached", false
+        }
+        catch (HttpResponseException e) {
+            assert e.response.status == 403
+        }
+     }
+    
     void testHookPost() {
 
         // post to a new file location should be successful
