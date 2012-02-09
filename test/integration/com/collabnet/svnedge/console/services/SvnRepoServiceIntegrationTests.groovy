@@ -63,6 +63,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         repoParentDir = TestUtil.createTestDir("repo")
         Server server = lifecycleService.getServer()
         server.repoParentDir = repoParentDir.getCanonicalPath()
+        server.adminEmail = "testAdminMail@example.com"
         server.save()
 
 

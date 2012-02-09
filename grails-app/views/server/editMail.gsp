@@ -102,8 +102,13 @@ function resetPage() {
 <p><g:message code="server.page.editMail.intro" args="${[server.adminEmail]}"/></p>
 
     <div id="enabledContainer">
-      <g:checkBox name="enabled" value="${config?.enabled}" />
+      <g:checkBox name="enabled" value="${config?.enabled}" disabled="${!config?.enabled && invalidAdminEmail}"/>
       <label for="enabled"><g:message code="mailConfiguration.enabled.label" /></label>
+      <g:if test="${invalidAdminEmail}">
+        <div class="warningText"><g:message code="mailConfiguration.enabled.invalidAdminEmail" 
+                                            args="${[createLink(action: 'edit')]}"/>
+      </div>
+      </g:if>
       <g:javascript>
         $('enabled').onclick = toggleConfigFields;
         

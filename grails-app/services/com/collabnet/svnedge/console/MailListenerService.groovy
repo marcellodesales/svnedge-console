@@ -54,6 +54,9 @@ import javax.mail.MessagingException
 class MailListenerService extends AbstractSvnEdgeService
     implements ApplicationListener<RepositoryEvent> {
 
+    // Default sample addresses shipped with the product
+    private def INVALID_ADDRESSES = ['admin@example.com', 'devnull@collab.net']
+        
     // this is needed so grails does not create a proxy resulting in 
     // registering the listener twice
     static transactional = false
@@ -73,20 +76,24 @@ class MailListenerService extends AbstractSvnEdgeService
         def fromAddress = config.createFromAddress()
         Server server = Server.getServer()
         def defaultAddress = server.adminEmail
-        def toAddress = defaultAddress
+        def toAddress = null 
+        if (!INVALID_ADDRESSES.contains(defaultAddress)) {
+            toAddress = defaultAddress
+        }
         def ccAddress = null
         boolean sendOnSuccess = false
         User user = retrieveUserForEvent(event)
-        if (user?.email) {
+        if (user?.email && !INVALID_ADDRESSES.contains(defaultAddress)) {
             toAddress = user.email
             sendOnSuccess = true
-            if (toAddress != defaultAddress && !event.isSuccess) {
+            if (toAddress != defaultAddress && !event.isSuccess &&
+                    !INVALID_ADDRESSES.contains(defaultAddress)) {
                 ccAddress = defaultAddress
             }
         }
         
         // don't send email to server admin unless an error occurs
-        if (sendOnSuccess || !event.isSuccess) {
+        if (toAddress && (sendOnSuccess || !event.isSuccess)) {
             switch (event) {
                 case DumpRepositoryEvent:
                     sendDumpMail(toAddress, ccAddress, fromAddress, event)

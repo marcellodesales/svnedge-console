@@ -331,7 +331,9 @@ class ServerController {
         def server = Server.getServer()
         def config = MailConfiguration.getConfiguration()
         hidePassword(config)
-        return [config: config, server: server]
+        boolean invalidAdminEmail = ("devnull@collab.net" == server.adminEmail)
+        return [config: config, server: server, 
+                invalidAdminEmail: invalidAdminEmail]
     }
     
     private void hidePassword(config) {

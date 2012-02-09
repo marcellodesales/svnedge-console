@@ -29,6 +29,7 @@ import com.collabnet.svnedge.controller.AuthzRulesCommand
 import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.User
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
 
@@ -158,8 +159,14 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         assertNotNull "Controller should return an error", controller.flash.warn        
     }    
 
+    private void changeEmailAddresses() {
+        User.metaClass.getEmail = { "test@example.com" }
+        Server.metaClass.getAdminEmail = { "testAdminMail@example.com" }
+    }
+
     void testCreateDumpFileSuccessMail() {
         controller.metaClass.loggedInUserInfo = { return 1 }
+        changeEmailAddresses()
         // make sure the quartz scheduler is running, is put in standby by other tests
         quartzScheduler.start()
         // but pause jobs likely to start running to ensure a thread is available
@@ -199,6 +206,7 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
             return
         }
         controller.metaClass.loggedInUserInfo = { return 1 }
+        changeEmailAddresses()
         // make sure the quartz scheduler is running, is put in standby by other tests
         quartzScheduler.start()
         // but pause jobs likely to start running to ensure a thread is available
