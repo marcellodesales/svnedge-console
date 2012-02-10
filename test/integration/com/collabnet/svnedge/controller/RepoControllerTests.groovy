@@ -32,6 +32,8 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
+import org.springframework.mock.web.MockMultipartHttpServletRequest
+import org.springframework.mock.web.MockMultipartFile
 
 class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
@@ -422,5 +424,25 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
         // restore script file to original text
         svnRepoService.getHookFile(repoExisting, "post-commit.tmpl").text = originalFileText
+    }
+
+    void testUploadHook() {
+        def fieldName = 'fileUpload'
+        def originalFileName = 'my-hook-script-file'
+        def contentType = 'text/plain'
+        def content = '!#/bin/sh etc etc'
+        controller.metaClass.request = new MockMultipartHttpServletRequest()
+        controller.request.addFile(new MockMultipartFile(
+                fieldName, originalFileName, contentType, content as byte[]))
+        controller.params.id = repoExisting.id
+        controller.svnRepoService = new Expando()
+        controller.svnRepoService.createHook = { p1, p2, p3 -> true }
+       
+        def model = controller.uploadHook()
+        assertEquals "Expected upload success message",
+                controller.message(code: 'repository.page.hookCreate.upload.success', args: [originalFileName, repoExisting.name]),
+                controller.flash.message
+        
+        controller.svnRepoService = svnRepoService
     }
 }
