@@ -1098,6 +1098,35 @@ class RepoController {
         }
     }
 
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def createHook = {
+        def model = reports()
+        model
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
+    def uploadHook = { 
+        def uploadedFile = request.getFile('fileUpload')
+        if (!uploadedFile || uploadedFile.empty) {
+            flash.error = message(code:'repository.page.hookCreate.upload.no.file')
+            redirect(action: 'createHook', id: params.id)
+        }   
+        else {
+            def repo = Repository.get(params.id)
+            def tempFile = File.createTempFile("hookUpload", "tmp")
+            uploadedFile.transferTo(tempFile)
+            if (svnRepoService.createHook(repo, tempFile, uploadedFile.originalFilename)) {
+                flash.message = message(code: "repository.page.hookCreate.upload.success",
+                        args: [uploadedFile.originalFilename, repo.name] )
+                redirect(action: 'hooksList', id: params.id)
+            }
+            else {
+                flash.error = message(code:'repository.page.hookCreate.upload.duplicate', args: [uploadedFile.originalFilename])
+                redirect(action: 'createHook', id: params.id)
+            }
+        }
+    }
+    
     /**
      * helper to format a SchedulerBean instance to a human-readable string
      * @param s
