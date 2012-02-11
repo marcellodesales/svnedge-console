@@ -20,6 +20,19 @@
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.index.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
+  <g:javascript>
+  <!--
+  // PRELOADING IMAGES
+    var freeBackupButton = new Image();
+    freeBackupButton.src="${resource(dir:'images/cloud',file:'freeBackupButton.png')}";
+    var freeTrialButton = new Image();
+    freeTrialButton.src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}";
+    var freeBackupButtonPressed = new Image();
+    freeBackupButtonPressed.src="${resource(dir:'images/cloud',file:'freeBackupButton-pressed.png')}";
+    var freeTrialButtonPressed = new Image();
+    freeTrialButtonPressed.src="${resource(dir:'images/cloud',file:'freeTrialButton-pressed.png')}";
+  //-->
+  </g:javascript>
   <style>
 
   td.CloudServicesHeading, td.CloudServicesSubHeading {
@@ -77,20 +90,23 @@
     </td>
   </tr>
   <tr>
-    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.index.p1"/>
-      <g:link controller="setupCloudServices" action="getStarted" >
-        <img align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
-      </g:link>
-    </td>
-  </tr>
-  <tr>
     <td class="CloudServicesBody">
 
       <table id="ServiceList">
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.backup.detail"/></p></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.backup.detail"/></p>
+            <g:link controller="setupCloudServices" action="getStarted"
+                      onmousedown="\$('freeBackup').src=freeBackupButtonPressed.src"
+                      onmouseup="\$('freeBackup').src=freeBackupButton.src">
+              <img id="freeBackup" align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeBackupButton.png')}" border="0"
+                      />
+<!-- 
+              foo<img align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/misc',file:'pixel.gif')}" width="252" height="52" border="0"/>
+             -->
+             </g:link>
+          </td>
         </tr>
         <tr>
           <td colspan="3"><hr/></td>
@@ -98,32 +114,16 @@
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p></td>
-        </tr>
-        <tr>
-          <td colspan="3"><hr/></td>
-        </tr>
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.extend.detail"/></p></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
+            <g:link url="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" 
+                      onmousedown="\$('freeTrial').src=freeTrialButtonPressed.src"
+                      onmouseup="\$('freeTrial').src=freeTrialButton.src">
+              <img id="freeTrial" align="right" alt="${message(code:'setupCloudServices.page.index.button.moveToCloud')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
+            </g:link>
+          </td>
         </tr>
       </table>
 
-    </td>
-  </tr>
-  <tr class="ContainerFooter">
-    <td>
-      <g:form method="post">
-        <div class="AlignLeft">
-          <p id="GetStartedPrompt"><g:message code="setupCloudServices.page.index.getStarted.prompt"/></p>
-        </div>
-        <div class="AlignRight">
-          <g:link controller="setupCloudServices" action="getStarted" >
-            <img alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
-          </g:link>
-        </div>
-      </g:form>
     </td>
   </tr>
 </table>
