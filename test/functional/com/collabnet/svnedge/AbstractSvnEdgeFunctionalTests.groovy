@@ -25,7 +25,9 @@ import com.collabnet.svnedge.util.UntarCategory
 import functionaltestplugin.FunctionalTestCase;
 import org.codehaus.groovy.grails.commons.ApplicationHolder 
 import org.codehaus.groovy.grails.commons.ConfigurationHolder 
-import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec 
+import org.codehaus.groovy.grails.plugins.codecs.HTMLCodec
+import javax.net.ssl.HttpsURLConnection
+import com.collabnet.svnedge.util.SSLUtil
 
 /**
  * This is the basic implementation of functional tests for the SvnEdge.
@@ -196,10 +198,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
             def imageFile = new File(validImageFileDir, fileName)
 
             if (!imageFile.exists()) {
-                def svnEdgeDir = config.svnedge.appHome
-                svnEdgeDir = new File(svnEdgeDir).getParentFile().canonicalPath
-                FileDownloaderCategory.setTruststore(svnEdgeDir +
-                    "/scripts/cubit.keystore", "together")
+                HttpsURLConnection.setDefaultSSLSocketFactory(SSLUtil.createTrustingSocketFactory());
                 FileDownloaderCategory.progressPrintStream = System.out
                 try {
                     use(FileDownloaderCategory) {

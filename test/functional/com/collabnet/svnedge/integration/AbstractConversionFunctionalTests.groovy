@@ -459,10 +459,13 @@ abstract class AbstractConversionFunctionalTests extends
      * if there are no repositories created.
      */
     protected boolean isItAFreshConversion() {
+       javaScriptEnabled = false
        get('/repo/list')
        assertStatus 200
-       return this.response.contentAsString.contains(
-           getMessage("repository.page.list.noRepos"))
+       def foundExpectedMessage = this.response.contentAsString.contains(
+               getMessage("repository.page.list.noRepos"))
+       javaScriptEnabled = true
+       return foundExpectedMessage
     }
 
     /**

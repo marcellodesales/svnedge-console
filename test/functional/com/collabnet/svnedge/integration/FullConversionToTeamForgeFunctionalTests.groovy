@@ -52,6 +52,7 @@ class FullConversionToTeamForgeFunctionalTests
      */
     private void createLocalRepository() {
         if (this.isItAFreshConversion()) {
+            javaScriptEnabled = false
             get('/repo/create')
             assertStatus 200
 
@@ -63,6 +64,7 @@ class FullConversionToTeamForgeFunctionalTests
             }
             assertStatus 200
             assertContentDoesNotContain(getMessage("default.errors.summary"))
+            javaScriptEnabled = true
         }
     }
 
