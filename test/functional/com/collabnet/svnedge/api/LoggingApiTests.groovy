@@ -94,6 +94,7 @@ class LoggingApiTests extends AbstractSvnEdgeFunctionalTests {
         assertStatus 201
         
         Server s = Server.getServer()
+        s.refresh()
         assertEquals "the console level should be INFO", ConsoleLogLevel.INFO, s.consoleLogLevel
         assertEquals "the server level should be INFO", ApacheLogLevel.INFO, s.apacheLogLevel
         assertEquals "the days to keep should be 5", 5, s.pruneLogsOlderThan

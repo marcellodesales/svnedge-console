@@ -32,6 +32,10 @@ import com.collabnet.svnedge.console.RepoTemplateService
  * Helper for API functional tests
  */
 class ApiTestHelper {
+    
+    static def getSchemeHostPort() {
+        "http://localhost:${Server.getConsolePort()}"
+    }
 
     static def encodeBase64(input) {
         BASE64Encoder encoder = new BASE64Encoder();

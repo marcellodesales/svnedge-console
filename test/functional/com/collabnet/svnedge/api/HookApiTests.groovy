@@ -38,7 +38,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
         def testRepo = ApiTestHelper.createRepo(svnRepoService)
 
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
         def resp = rest.put( path: "hook/${testRepo.id}/testScript.py",
@@ -53,7 +53,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         def testFile = new File(ConfigUtil.svnPath())
         def testRepo = ApiTestHelper.createRepo(svnRepoService)
     
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.encoder.'application/octet-stream' = {
             def entity = new FileEntity( (File) it, "application/octet-stream" );
             entity.setContentType( "application/octet-stream" );
@@ -75,7 +75,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         def testRepo = ApiTestHelper.createRepo(svnRepoService)
         
         // lock the file for editing via web ui
-        def http = new RESTClient("http://localhost:8080/csvn/")
+        def http = new RESTClient(ApiTestHelper.getSchemeHostPort() + "/csvn/")
         def httpResp = http.post (path: "j_spring_security_check",
                 requestContentType: ContentType.URLENC,
                 body: [j_username: 'admin', j_password: 'admin'])
@@ -86,7 +86,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
 
         
         // now try REST PUT and expect 403 failure
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
         try {
@@ -108,7 +108,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
         def testRepo = ApiTestHelper.createRepo(svnRepoService)
 
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
         def resp = rest.post( path: "hook/${testRepo.id}/testScript.py",
@@ -134,7 +134,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         def testRepo = ApiTestHelper.createRepo(svnRepoService)
         def hookName = "post-commit.tmpl"
         
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
         def resp = rest.delete(path: "hook/${testRepo.id}/${hookName}",
@@ -176,7 +176,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
         assertContentContains '{"hooks": ['
 
         // check contents with a non-default sort
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [format: 'json', sort: 'name', order: 'desc']
         def resp = rest.get(path: "hook/${testRepo.id}", query: params)

@@ -57,7 +57,7 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
         def testDump = ApiTestHelper.createDumpFile(svnRepoService)
 
 
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json']
         def resp = rest.put( path: "template/${testTemplate.id}",
@@ -74,7 +74,7 @@ class TemplateApiTests extends AbstractSvnEdgeFunctionalTests {
         // the new repo template
         def testTemplateName = "FunctionalTestingTemplate " + Math.floor(Math.random() * 10000).toInteger()
 
-        def rest = new RESTClient( "http://localhost:8080/csvn/api/1/" )
+        def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
         def params = [ 'format': 'json', 'name': testTemplateName, 'active': true]
         def resp = rest.post( path: "template",
