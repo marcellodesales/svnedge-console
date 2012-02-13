@@ -283,11 +283,8 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
+        assertContentContains(getMessage("status.page.header.title"))
         assertContentContains(getMessage("status.page.url.teamforge"))
-        // verify that the software version is still shown
-        assertContentContains(getMessage("status.page.status.version.software"))
-        assertContentContains(
-            getMessage("status.page.status.version.subversion"))
 
         get('/server/edit')
         assertStatus 200
@@ -312,11 +309,8 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
+        assertContentContains(getMessage("status.page.header.title"))
         assertContentDoesNotContain(getMessage("status.page.url.teamforge"))
-        // verify that the software version is still shown
-        assertContentContains(getMessage("status.page.status.version.software"))
-        assertContentContains(
-            getMessage("status.page.status.version.subversion"))
 
         // verify that the prohibited links work.
         assertProhibitedAccessToTeamForgeModeLinksWorks()
