@@ -85,41 +85,22 @@
     </td>
   </tr>
   <tr>
+    <td class="CloudServicesSubHeading">
+    <ol>
+      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step1"/></li>
+      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step2"/></li>
+      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step3"/></li>
+    </ol>
+    </td>
+  </tr>
+  <tr>
     <td class="CloudServicesBody">
 
-      <table id="ServiceList">
+      <table id="ServiceList" width="100%">
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
           <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.service.backup.detail"/></p></td>
-        </tr>
-        <tr>
-          <td colspan="3"><hr/></td>
-        </tr>
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
-          <td width="20%">
-            <ol class="ServiceDetail">
-              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step1"/></li>
-              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step2"/></li>
-              <li><g:message code="setupCloudServices.page.confirmation.service.migrate.step3"/></li>
-            </ol>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3"><hr/></td>
-        </tr>
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.extend"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudExtend.png')}" border="0"/></td>
-          <td width="20%">
-            <ol class="ServiceDetail">
-              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step1"/></li>
-              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step2"/></li>
-              <li><g:message code="setupCloudServices.page.confirmation.service.extend.step3"/></li>
-            </ol>
-          </td>
         </tr>
       </table>
 

@@ -100,7 +100,7 @@ class SetupCloudServicesController {
         else if (cloudServicesRemoteClientService.createAccount(cmd)) {
             // remove error message if it persists from previous submit (occasional grails bug)
             flash.error = null
-            flash.message = message(code: "setupCloudServices.page.signup.accountCreation.mustValidate")
+            request.unfiltered_message = message(code: "setupCloudServices.page.signup.accountCreation.mustValidate")
             render(view: "confirm", model: [cmd: cmd])
         }
         else {
