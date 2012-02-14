@@ -48,13 +48,6 @@
     margin-left: 1em;
   }
   
-  td#GoToCloud {
-    border-spacing: 0;
-    padding: 4px;
-    font-size: 1.5em;
-    vertical-align: top;
-    text-align: left;
-  }
   </style>
   <g:javascript>
   <!--
@@ -109,9 +102,6 @@
     </tr>
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
-        <table width="100%">
-        <tr>
-        <td width="80%">
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
@@ -188,15 +178,6 @@
             </td>
           </tr>
         </table>
-        
-        </td>
-        <td width="20%" id="GoToCloud">
-          <g:if test="${existingCredentials}">
-            <g:message code="setupCloudServices.page.confirmation.nextSteps.1"/>
-          </g:if>
-        </td>
-        </tr>
-        </table>
       </td>
     </tr>
     <tr class="ContainerFooter">
@@ -230,7 +211,10 @@
         <tr>
           <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.nextSteps.2"/></p></td>
+          <td width="20%">
+            <p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.nextSteps.1"/></p>
+            <p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.nextSteps.2"/></p>
+          </td>
         </tr>
         <tr>
           <td colspan="3"><hr/></td>
