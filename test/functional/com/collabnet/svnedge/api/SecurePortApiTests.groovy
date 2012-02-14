@@ -71,6 +71,7 @@ class SecurePortApiTests extends AbstractSvnEdgeFunctionalTests {
     void testSecurePortSslRedirect() {
 
         def server = Server.getServer()
+        server.refresh()
         server.useSslConsole = true
         server.save(flush: true)
 
