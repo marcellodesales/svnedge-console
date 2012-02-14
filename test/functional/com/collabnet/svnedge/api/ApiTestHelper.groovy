@@ -27,6 +27,8 @@ import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.console.SvnRepoService
 import com.collabnet.svnedge.domain.RepoTemplate
 import com.collabnet.svnedge.console.RepoTemplateService
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import groovy.sql.Sql
 
 /**
  * Helper for API functional tests
@@ -120,6 +122,18 @@ class ApiTestHelper {
         }
         return rt
     }
-
+    
+    static Sql getSqlInstance() {
+        def config = ConfigurationHolder.config
+        String url = config.dataSource.url
+        String driver = config.dataSource.driverClassName
+        String username = config.dataSource.username
+        String password = config.dataSource.password
+        Sql.newInstance(url, username, password, driver)
+    }
+    
+    static boolean executeSql(sql) {
+        return getSqlInstance().execute(sql)
+    }
 }
 
