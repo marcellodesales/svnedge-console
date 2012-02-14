@@ -70,10 +70,11 @@ class SecurePortApiTests extends AbstractSvnEdgeFunctionalTests {
      */
     void testSecurePortSslRedirect() {
 
-        def server = Server.getServer()
-        server.refresh()
-        server.useSslConsole = true
-        server.save(flush: true)
+        Server.withTransaction {
+            def server = Server.getServer()
+            server.useSslConsole = true
+            server.save()   
+        }
 
         // we should receive redirect to the 4434 url on other api methods 
         redirectEnabled = false
@@ -90,8 +91,11 @@ class SecurePortApiTests extends AbstractSvnEdgeFunctionalTests {
         assertContentContains '<entry key="SSLPort">4434</entry>'
         assertContentContains '<entry key="SSLRequired">true</entry>'
         
-        server.useSslConsole = false
-        server.save(flush: true)
+        Server.withTransaction {
+            def server = Server.getServer()
+            server.useSslConsole = false
+            server.save()   
+        }
     }
 
 
