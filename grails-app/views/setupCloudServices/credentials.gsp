@@ -25,7 +25,45 @@
   <g:javascript library="window_effects"/>
   <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
   <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
+  <style type="text/css">
+  
+  td.CloudServicesBody {
+    border-spacing: 0;
+    padding: 4px;
+  }
+
+  table#ServiceList tr td {
+    font-size: 1.50em;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  p.ServiceDetail, ol.ServiceDetail {
+    font-size: .96em;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  p.ServiceDetail {
+    margin-left: 1em;
+  }
+  
+  td#GoToCloud {
+    border-spacing: 0;
+    padding: 4px;
+    font-size: 1.5em;
+    vertical-align: top;
+    text-align: left;
+  }
+  </style>
   <g:javascript>
+  <!--
+  // PRELOADING IMAGES
+  var freeTrialButton = new Image();
+  freeTrialButton.src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}";
+  var freeTrialButtonPressed = new Image();
+  freeTrialButtonPressed.src="${resource(dir:'images/cloud',file:'freeTrialButton-pressed.png')}";
+
   // javascript for confirmation dialog box to remove credentials
   var i18n = {
     _confirmOkLabel: "${message(code:'default.confirmation.ok')}",
@@ -55,6 +93,7 @@
         })
     })
   })
+  //-->
   </g:javascript>
 </head>
 <content tag="title">
@@ -70,6 +109,9 @@
     </tr>
     <tr>
       <td class="ContainerBodyWithPaddedBorder">
+        <table width="100%">
+        <tr>
+        <td width="80%">
         <table class="ItemDetailContainer">
           <tr>
             <td class="ItemDetailName">
@@ -146,19 +188,28 @@
             </td>
           </tr>
         </table>
+        
+        </td>
+        <td width="20%" id="GoToCloud">
+          <g:if test="${existingCredentials}">
+            <g:message code="setupCloudServices.page.confirmation.nextSteps.1"/>
+          </g:if>
+        </td>
+        </tr>
+        </table>
       </td>
     </tr>
     <tr class="ContainerFooter">
-      <td colspan="3">
+      <td>
         <div class="AlignRight">
           <g:if test="${existingCredentials}">
             <g:actionSubmit id="btnCloudServicesRemove"
                             value="${message(code:'setupCloudServices.page.credentials.button.remove')}"
-                            controller="setupCloudServices" action="removeCredentials" class="Button"/>
+                            action="removeCredentials" class="Button"/>
           </g:if>
           <g:actionSubmit id="btnCloudServicesValidate"
                           value="${message(code:'setupCloudServices.page.credentials.button.validate')}"
-                          controller="setupCloudServices" action="updateCredentials" class="Button"/>
+                          action="updateCredentials" class="Button"/>
 
         </div>
       </td>
@@ -166,7 +217,41 @@
   </table>
 </g:form>
 
-<g:render template="nextSteps"/>
+<g:if test="${existingCredentials}">
+<table class="ItemDetailContainer">
+  <tr>
+    <td class="CloudServicesBody">
+
+      <table id="ServiceList" width="100%">
+
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.nextSteps.2"/></p></td>
+        </tr>
+        <tr>
+          <td colspan="3"><hr/></td>
+        </tr>
+        <tr>
+          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
+          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
+          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
+            <g:link url="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" 
+                      onmousedown="\$('freeTrial').src=freeTrialButtonPressed.src"
+                      onmouseup="\$('freeTrial').src=freeTrialButton.src">
+              <img id="freeTrial" align="right" alt="${message(code:'setupCloudServices.page.index.button.moveToCloud')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
+            </g:link>
+          </td>
+        </tr>
+        
+      </table>
+    </td>
+  </tr>
+</table>
+</g:if>
 
 </body>
 </html>
