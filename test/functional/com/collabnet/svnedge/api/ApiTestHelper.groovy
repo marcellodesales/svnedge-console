@@ -62,10 +62,13 @@ class ApiTestHelper {
      */
     static Repository createRepo(SvnRepoService svnRepoService) {
         // create a repo with branches/tags/trunk nodes
-        def repoName = "test-repo-" + (Math.random() * 4000)
-        Repository repo = new Repository(name: repoName)
-        svnRepoService.createRepository(repo, true)
-        repo.save()
+        def repo
+        Repository.withTransaction {
+            def repoName = "test-repo-" + (Math.random() * 4000)
+            repo = new Repository(name: repoName)
+            svnRepoService.createRepository(repo, true)
+            repo.save()  
+        }
         return repo
     }
 
@@ -105,13 +108,16 @@ class ApiTestHelper {
         File templateFile = new File(templateDir, dump.name)
         dump.renameTo(templateFile)
         
-        RepoTemplate rt = new RepoTemplate()
-        rt.name = "test-template-" + (Math.random() * 4000)
-        rt.active = true
-        rt.displayOrder = 0
-        rt.dumpFile = true
-
-        repoTemplateService.saveTemplate(rt, templateFile, true)
+        def rt
+        RepoTemplate.withTransaction {
+            rt = new RepoTemplate()
+            rt.name = "test-template-" + (Math.random() * 4000)
+            rt.active = true
+            rt.displayOrder = 0
+            rt.dumpFile = true
+    
+            repoTemplateService.saveTemplate(rt, templateFile, true)
+        }
         return rt
     }
 
