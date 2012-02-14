@@ -101,6 +101,7 @@ svnedge {
             developerOrganization = "svnEdge"
             developerKey = "0f75a56b3c5966afa4693314f631fcd03682b4f7"
         }
+        defaultProductSKU = "Base:CloudService-Free-1201"
     }
 
     ctfMaster {

@@ -22,7 +22,7 @@
   <g:javascript library="prototype"/>
   <g:javascript library="application"/>
 
-  <script type="text/javascript">
+  <g:javascript>
 
     var messages = {
       prompt: '<g:message code="setupCloudServices.login.available.prompt"/>',
@@ -43,9 +43,35 @@
       Event.observe(domainField, 'keydown', function(e) {
         domainChecker.keypressHandler()
       })
+      
+      Event.observe($('emailAddress'), 'keyup', emailConfirm);
+      Event.observe($('emailAddressConfirm'), 'keyup', emailConfirm);
+      Event.observe($('password'), 'keyup', passwordConfirm);
+      Event.observe($('passwordConfirm'), 'keyup', passwordConfirm);
+      Event.observe($('btnCloudServicesCreateAccout'), 'click', function(e) {
+        if (!emailConfirm(e)) {
+            Event.stop(e);
+            alert('<g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>');
+        }
+        if (!passwordConfirm(e)) {
+            Event.stop(e);
+            alert('<g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>');
+        }
+      });
     })
-
-  </script>
+    
+    function emailConfirm(e) {
+      var b = $('emailAddress').value == $('emailAddressConfirm').value;
+      $('confirmEmailMessage').style.display = b ? 'none' : '';
+      return b;
+    }
+    
+    function passwordConfirm(e) {
+      var b = $('password').value == $('passwordConfirm').value;
+      $('passwordConfirmMessage').style.display = b ? 'none' : '';
+      return b;
+    }
+    </g:javascript>       
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.leftNav.header"/>
@@ -53,7 +79,7 @@
 
 <g:render template="/server/leftNav"/>
 <body>
-<g:form>
+<g:form id="signupForm">
 <table class="ItemDetailContainer">
 <tr class="ContainerHeader">
   <td><g:message code="setupCloudServices.page.signup.title"/></td>
@@ -112,6 +138,22 @@
   </td>
   <td>
     <em><g:message code="setupCloudServices.page.signup.emailAddress.label.tip"/></em>
+  </td>
+</tr>
+<tr>
+  <td class="ItemDetailName">
+    <label for="emailAddressConfirm"><g:message code="setupCloudServices.page.signup.emailAddressConfirm.label"/></label>
+  </td>
+  <td valign="top">
+    <input size="40" type="text" id="emailAddressConfirm" name="emailAddressConfirm"
+           value=""/>
+  </td>
+  <td>
+    <span id="confirmEmailMessage" class="TextRequired" style="display: none;">
+      <img width="15" height="15" alt="Warning" align="bottom"
+                src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
+      <g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>
+    </span>
   </td>
 </tr>
 <tr>
@@ -195,7 +237,13 @@
     <input size="40" type="password" id="passwordConfirm" name="passwordConfirm"
            value="${fieldValue(bean: cmd, field: 'passwordConfirm')}"/>
   </td>
-  <td></td>
+  <td>
+    <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
+      <img width="15" height="15" alt="Warning" align="bottom"
+                src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
+      <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
+    </span>
+  </td>
 </tr>
 <tr>
   <td></td>

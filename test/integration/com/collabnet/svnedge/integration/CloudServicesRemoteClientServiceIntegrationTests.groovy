@@ -133,4 +133,13 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
         result = cloudServicesRemoteClientService.deleteUser(matchingUser.userId)
         assertTrue "the test user should have been successfully deleted", result
     }
+    
+    void testListChannelProducts() {
+        if (skipTests) {
+            return
+        }
+        def products = cloudServicesRemoteClientService.listChannelProducts().products
+        assertEquals "SvnEdge only has one associated product", 1, products.size()
+        assertEquals "Unexpected channel product", config.svnedge.cloudServices.defaultProductSKU, products[0].SKU
+    }
 }

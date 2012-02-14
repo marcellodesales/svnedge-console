@@ -149,6 +149,27 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
 
         body.put("affirmations[termsOfService]", cmd.acceptTerms)
         body.put("affirmations[privacyPolicy]", cmd.acceptTerms)
+        
+        def sku = ConfigUtil.configuration
+                .svnedge.cloudServices.defaultProductSKU
+        boolean foundSKU = false
+        def products = listChannelProducts(restClient).products
+        for (p in products) {
+            if (p.SKU == sku) {
+                foundSKU = true
+                body['subscription[SKU]'] = sku
+                body['subscription[cancellation]'] = p.cancellation
+                // currently only one plan, we will probably have to introduce
+                // a UI choice, if there ends up being more
+                for (plan in p.plans) {
+                    body['subscription[term]'] = plan.term
+                }
+            }
+        }
+        if (!foundSKU) {
+            throw new CloudServicesException("cloudServices.channel.product.not.found")
+        }
+        
         try {
             def resp = restClient.post(path: "organizations.json",
                     body: body,
@@ -192,6 +213,35 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return false
         }
     }
+
+    /**
+    * Lists available channel products.
+    */
+   def listChannelProducts(RESTClient restClient = null) throws CloudServicesException {
+       if (!restClient) {
+           log.debug("Creating new non-auth RESTClient")
+           restClient = createRestClient()
+       }
+       try {
+           def resp = restClient.get(path: "channel_products.json",
+                   query: createApiCredentialsMap(),
+                   requestContentType: URLENC)
+            
+           if (resp.status != 200) {
+               throw new CloudServicesException("channel.product.listing.failure")
+           }
+            
+           def data = resp.data
+           log.debug("REST data " + data)
+            
+           return data
+       }
+       catch (Exception e) {
+           log.warn("Unable to list Cloud projects", e)
+           throw e
+       }
+       return null
+   }
 
     /**
     * Lists projects within the configured domain.
@@ -328,7 +378,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 mAuthenticatedRestClient = null
             }
         }
-        
+
         log.debug("Creating new authenticated RESTClient")
         RESTClient restClient = createRestClient()
         def body = createFullCredentialsMap()
