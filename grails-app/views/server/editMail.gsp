@@ -264,7 +264,7 @@ function resetPage() {
                 </g:javascript>        
             </g:else>
                 <g:actionSubmit action="updateMail" value="${message(code:'server.page.edit.button.save')}" 
-                        class="Button requireEnabled" id="saveButton" ${saveDisabled} />
+                        class="Button" id="saveButton" ${saveDisabled} />
           </div>
         </td>
       </tr>
