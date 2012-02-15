@@ -491,7 +491,22 @@ class RepoController {
 
     private boolean createProject(repo) throws QuotaCloudServicesException {
         try {
+            // creating the project in request thread, so invalid name error
+            // can be handled.  Then in the async call, the project will be
+            // looked up and not created again.
             cloudServicesRemoteClientService.createProject(repo)
+            // creating the service can take quite a bit of time, so starting
+            // the process here, so it is less likely to time out when the 
+            // backup job runs
+            runAsync {
+                try {
+                    cloudServicesRemoteClientService.setupProjectAndService(repo)
+                } catch (Exception e) {
+                    log.warn(
+                        "Exception creating svn service for backup of repo: " + 
+                        repo.name, e)
+                }
+            }
             return true
         } catch (InvalidNameCloudServicesException invalidName) {
             flash.error = message(code: 'repository.action.bkupSchedule.cloud.name.invalid',

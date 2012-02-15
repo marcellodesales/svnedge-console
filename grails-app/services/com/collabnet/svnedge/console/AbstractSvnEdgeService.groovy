@@ -85,7 +85,9 @@ abstract class AbstractSvnEdgeService {
     * @param locale optional indicator to specify message language
     */
    protected void println(String key, OutputStream os, Locale locale = null) {
-       os << getMessage(key, locale) + "\n"
+       if (os) {
+           os << getMessage(key, locale) + "\n"
+       }
    }
 
    /**
@@ -97,7 +99,9 @@ abstract class AbstractSvnEdgeService {
     */
    protected void println(String key, List<String> params, OutputStream os, 
                           Locale locale = null) {
-       os << getMessage(key, params, locale) + "\n"
+       if (os) {
+           os << getMessage(key, params, locale) + "\n"
+       }
    }
 
 

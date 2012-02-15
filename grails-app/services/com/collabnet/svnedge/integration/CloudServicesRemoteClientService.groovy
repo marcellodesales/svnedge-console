@@ -579,9 +579,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return false
     }
 
-
-    private boolean synchronizeRepositoryWithProgress(repo, fos, locale) 
+    String setupProjectAndService(repo, fos = null, locale = null) 
             throws CloudServicesException {
+
         // confirm that the project exists
         String projectId = null
         def projectName = null
@@ -603,10 +603,6 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 throw new CloudServicesException('cloud.services.unable.to.create.project')
             }
         }
-
-        def credMap = createFullCredentialsMap()
-        def username = credMap.get('credentials[login]')
-        def password = credMap.get('credentials[password]')
 
         boolean serviceExists = false
         String serviceId = null
@@ -634,6 +630,13 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             }
         }
             
+        return cloudSvnURI
+    }
+
+    private boolean synchronizeRepositoryWithProgress(repo, fos, locale) 
+            throws CloudServicesException {
+
+        String cloudSvnURI = setupProjectAndService(repo, fos, locale)
         if (!cloudSvnURI) {
             cloudSvnURI = getCloudSvnURI(repo.name, serviceId, restClient)
             if (!cloudSvnURI) {
@@ -641,13 +644,17 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             }
         }
 
+        def credMap = createFullCredentialsMap()
+        def username = credMap.get('credentials[login]')
+        def password = credMap.get('credentials[password]')
+
         if (!repo.cloudSvnUri) {
             // prepare sync, the cloud service is not always completely ready
             // when it indicates that it is, so we'll retry this until success 
             // or timeout
             long waitTime = 100
-            long maxWaitTime = 300000
-            // gives about 6 min 45 seconds for service to initialize
+            long maxWaitTime = 600000
+            // gives about 14 min for service to initialize
             while (waitTime < maxWaitTime) {
                 Thread.sleep(waitTime)
                 try {
