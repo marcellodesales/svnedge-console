@@ -117,9 +117,8 @@ class ApiTestHelper {
             rt.active = true
             rt.displayOrder = 0
             rt.dumpFile = true
-    
-            repoTemplateService.saveTemplate(rt, templateFile, true)
         }
+        repoTemplateService.saveTemplate(rt, templateFile, true)
         return rt
     }
     

@@ -257,9 +257,7 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
     
     void testRepositoryIntegratedServer() {
         
-        def server = Server.getServer()
-        server.setMode(ServerMode.MANAGED)
-        server.save(flush: true)
+        ApiTestHelper.executeSql("UPDATE SERVER SET MODE = 'MANAGED'")
         
         // without auth, GET is protected
         get("${url}?format=xml")
@@ -280,7 +278,6 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         }
         assertStatus 405
          
-        server.setMode(ServerMode.STANDALONE)
-        server.save(flush: true)
+        ApiTestHelper.executeSql("UPDATE SERVER SET MODE = 'STANDALONE'")
     }
 }
