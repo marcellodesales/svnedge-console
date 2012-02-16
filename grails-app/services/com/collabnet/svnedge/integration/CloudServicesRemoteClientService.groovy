@@ -1,4 +1,8 @@
 /*
+
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
  * CollabNet Subversion Edge
  * Copyright (C) 2011, CollabNet Inc. All rights reserved.
  *
@@ -18,6 +22,7 @@
 
 package com.collabnet.svnedge.integration
 
+import java.util.concurrent.ConcurrentLinkedQueue
 import groovyx.net.http.HttpResponseException
 import groovyx.net.http.RESTClient
 import org.apache.http.conn.scheme.Scheme
@@ -46,11 +51,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     def networkingService
 
     private static final long CACHED_CLIENT_TIME_LIMIT = 300L
-    private static final long CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT = 60L
-    private long mLastAccessTimestamp = 0L
-    private long mCreatedTimestamp = 0L
-    private RESTClient mAuthenticatedRestClient
-    
+    private static final long CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT = 90L
+    private ConcurrentLinkedQueue cachedClients = new ConcurrentLinkedQueue()
+    private Map inUseClients = [:].asSynchronized()
+        
     /**
      * validates the provided credentials
      * @param username
@@ -247,9 +251,12 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     * Lists projects within the configured domain.
     */
    def listProjects(RESTClient restClient = null) throws CloudServicesException {
+       boolean isReturnClient = false
        if (!restClient) {
            restClient = getAuthenticatedRestClient()
+           isReturnClient = true
        }
+       def projectList = null
        try {
            def resp = restClient.get(path: "projects.json",
                requestContentType: URLENC)
@@ -261,13 +268,16 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
            def data = resp.data
            log.debug("REST data " + data)
 
-           return data
+           projectList = data
        }
        catch (Exception e) {
            log.warn("Unable to list Cloud projects", e)
            throw e
        }
-       return null
+       if (isReturnClient) {
+           returnClient(restClient)
+       } 
+       return projectList
    }
 
     /**
@@ -331,17 +341,24 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     }
 
     def retrieveProjectMap(repo, restClient = null) throws CloudServicesException {
+        boolean isReturnClient = false
         if (!restClient) {
             restClient = getAuthenticatedRestClient()
+            isReturnClient = true
         }
         def projectName = getProjectShortNameForRepository(repo)
+        def repoProject = null
         for (Map projectMap : listProjects(restClient)) {
             log.debug("ProjectMap: " + projectMap)
             if (projectMap['shortName'] == projectName) {
-                return projectMap
+                repoProject = projectMap
+                break
             }
         }
-        return null
+        if (isReturnClient) {
+            returnClient(restClient)
+        }
+        return repoProject
     }
 
     /**
@@ -353,6 +370,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         def restClient = getAuthenticatedRestClient()
         try {
             def resp = restClient.delete(path: "projects/" + projectId + ".json")
+            returnClient(restClient)
 
             // sc 200 = deleted
             if (resp.status == 200) {
@@ -368,14 +386,19 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     private synchronized RESTClient getAuthenticatedRestClient() 
             throws CloudServicesException {
         long now = System.currentTimeMillis()
-        if (mAuthenticatedRestClient) {
-            if (now - mLastAccessTimestamp < CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT * 1000 &&
-                now - mCreatedTimestamp < CACHED_CLIENT_TIME_LIMIT * 1000) {
-                 mLastAccessTimestamp = now
+        CachedClient cachedClient = cachedClients.poll() 
+        while (cachedClient) {
+            if ((now - cachedClient.mLastAccessTimestamp < 
+                    CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT * 1000) &&
+                    (now - cachedClient.mCreatedTimestamp < 
+                    CACHED_CLIENT_TIME_LIMIT * 1000)) {
+                 cachedClient.mLastAccessTimestamp = now
+                 inUseClients.put(cachedClient.mAuthenticatedRestClient, 
+                                  cachedClient)
                  log.debug("Using cached RESTClient")
-                 return mAuthenticatedRestClient    
+                 return cachedClient.mAuthenticatedRestClient    
             } else {
-                mAuthenticatedRestClient = null
+                cachedClient = cachedClients.poll()
             }
         }
 
@@ -399,9 +422,19 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 throw e
             }
         }
-        mAuthenticatedRestClient = restClient
-        mCreatedTimestamp = mLastAccessTimestamp = now
+        cachedClient = new CachedClient(
+            mAuthenticatedRestClient: restClient,
+            mCreatedTimestamp: now,
+            mLastAccessTimestamp: now)
+        inUseClients.put(restClient, cachedClient)
         return restClient
+    }
+            
+    void returnClient(restClient) {
+        def cachedClient = inUseClients.remove(restClient)
+        if (cachedClient) {
+            cachedClients.offer(cachedClient)
+        }
     }
 
     /**
@@ -503,6 +536,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         try {
             def resp = restClient.get(path: "users.json",
                                       requestContentType: URLENC)
+            returnClient(restClient)
 
             // return the user data as JSON object
             return resp.responseData
@@ -547,6 +581,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             def resp = restClient.post(path: "users.json",
                     body: body,
                     requestContentType: URLENC)
+            returnClient(restClient)
 
             // sc 201 = created
             return resp.status == 201
@@ -567,6 +602,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         def restClient = getAuthenticatedRestClient()
         try {
             def resp = restClient.delete(path: "users/" + userId + ".json")
+            returnClient(restClient)
 
             // sc 200 = deleted
             if (resp.status == 200) {
@@ -630,6 +666,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             }
         }
             
+        returnClient(restClient)
         return cloudSvnURI
     }
 
@@ -808,4 +845,10 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 "credentials[developerKey]": ConfigUtil.configuration.svnedge.cloudServices.credentials.developerKey
         ]
     }
+}
+
+class CachedClient {
+    long mLastAccessTimestamp = 0L
+    long mCreatedTimestamp = 0L
+    RESTClient mAuthenticatedRestClient
 }
