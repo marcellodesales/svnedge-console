@@ -261,7 +261,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
      * @return void
      */
     def setSelectedInterface(String interfaceName) {
-        if (interfaceName && (interfaceName != selectedInterface.name)) {
+        if (interfaceName && (interfaceName != selectedInterface?.name)) {
             selectedInterface = getNetworkInterfacesWithIPAddresses().find() { it.name == interfaceName }
         }
     }

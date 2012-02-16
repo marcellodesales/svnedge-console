@@ -90,7 +90,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS004RepoTemplate(),
             new MS005ProxySupport(),
             new MS006DisableCloudService(),
-            new MS007AddEmailConfig()
+            new MS007AddEmailConfig(),
+            new MS008ForceUsernameCase()
         };
     }
 

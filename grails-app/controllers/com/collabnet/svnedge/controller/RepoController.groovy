@@ -876,6 +876,10 @@ class RepoController {
             lock.userId = loggedInUserInfo(field:'id') as int
             String accessRules = serverConfService.readSvnAccessFile()
             def command = new AuthzRulesCommand(fileContent: accessRules)
+            if (Server.getServer().forceUsernameCase) {
+                request['unfiltered_warn'] = message(code: "repository.page.editAuthorization.caseNormalization",
+                        args: [createLink(controller: 'server', action: 'editAuthentication')])
+            }
             return [authRulesCommand: command]
         } else {
             redirect(action: 'showAuthorization')

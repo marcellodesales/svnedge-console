@@ -101,6 +101,7 @@ class LifecycleService {
                 adminName: "Nobody",
                 adminEmail: "devnull@collab.net",
                 allowAnonymousReadAccess: false,
+                forceUsernameCase: false,
                 ldapServerHost: "",
                 ldapServerPort: 389,
                 ldapAuthBasedn: "",

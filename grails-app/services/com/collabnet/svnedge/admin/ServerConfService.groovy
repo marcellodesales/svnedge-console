@@ -430,7 +430,10 @@ Content-Length: 107
                       ConfigUtil.viewvcTemplateDir())
         s = s.replace("__CSVN_SVN_CLIENT__", ConfigUtil.svnPath())
         s = s.replace("__SERVER_ADMIN__", server.adminEmail)
-        
+        if (server.forceUsernameCase) {
+            s = s.replace("#force_username_case = ", "force_username_case = lower")
+        }
+
         String serverMode = server.mode.toString()
         String appServerUrl, docroot, authorizer, isRootInUrl
 
@@ -889,6 +892,9 @@ ${extraconf}
         def conf = """  AuthzSVNAccessFile "${confDirPath()}/svn_access_file"
   SVNListParentPath On
 """
+        if (server.forceUsernameCase) {
+            conf += "  AuthzForceUsernameCase Lower\n"
+        }
         conf += getAuthBasic(server)
         if (server.allowAnonymousReadAccess) {
             conf += """
