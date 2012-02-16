@@ -269,8 +269,7 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         }
         assertStatus 405
          
-        server.setMode(ServerMode.REPLICA)
-        server.save(flush: true)
+        ApiTestHelper.executeSql("UPDATE SERVER SET MODE = 'REPLICA'")
          
         // authorized request should respond 405
         get("${url}?format=json") {

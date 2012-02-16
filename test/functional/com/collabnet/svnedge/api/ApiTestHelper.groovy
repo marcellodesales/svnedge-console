@@ -106,7 +106,7 @@ class ApiTestHelper {
 
         File dump = createDumpFile(svnRepoService)
         
-        File templateDir = repoTemplateService.getUploadDirectory()
+        File templateDir = repoTemplateService.getTemplateDirectory()
         File templateFile = new File(templateDir, dump.name)
         dump.renameTo(templateFile)
         
@@ -117,8 +117,9 @@ class ApiTestHelper {
             rt.active = true
             rt.displayOrder = 0
             rt.dumpFile = true
+            rt.location = dump.name
+            rt.save()
         }
-        repoTemplateService.saveTemplate(rt, templateFile, true)
         return rt
     }
     
