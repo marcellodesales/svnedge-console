@@ -57,7 +57,7 @@ grails.app.context="/csvn"
 
 grails.logging.jul.usebridge = true
 
-// See artf027 and chapter 7 of the grails user manual
+// See artf7027 and chapter 7 of the grails user manual
 grails.validateable.classes = [com.collabnet.svnedge.controller.integration.CtfConnectionCommand]
 
 svnedge {
