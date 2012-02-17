@@ -56,6 +56,13 @@
                 </span>
               </g:if>
             </td>
+            <td rowspan="3" style="vertical-align: top; text-align: center">
+              <div >
+                <a target="_blank" href="${helpBaseUrl}/index.jsp?topic=/csvn/action/movetocncloud.html"><img 
+                        width="200" height="75" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/><br/>
+                <g:message code="repository.page.bkupSchedule.help.link.label"/></a>
+              </div>
+            </td>
           </tr>
 
           <tr id="whenRow">

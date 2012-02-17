@@ -188,6 +188,7 @@ class ApplicationFilters {
                 if (!model) {
                     model = new HashMap()
                 }
+                model.put("helpBaseUrl", helpBase)
                 model.put("helpUrl", helpBase + helpPath)
             }
         }
