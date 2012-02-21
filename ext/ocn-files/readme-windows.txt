@@ -1,6 +1,5 @@
 CollabNet Subversion Edge - Windows 32/64-bit
 Version 2.4.0
-Release Date: unknown
 
 Contents
 

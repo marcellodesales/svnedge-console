@@ -1,6 +1,5 @@
 CollabNet Subversion Edge - Linux 32/64-bit
 Version 2.4.0
-Release Date: unknown
 
 Contents
 
@@ -35,8 +34,8 @@ Contents
 
    Product: CollabNet Subversion Edge
    License: GNU Affero General Public License 3.0 (AGPLv3)
-   Certified platforms: Red Hat Enterprise Linux 5.x 
-                        CentOS 5.x
+   Certified platforms: Red Hat Enterprise Linux 5.x - 6.x 
+                        CentOS 5.x - 6.x
                         SuSE Linux Enterprise 11.x
    
    NOTE: These are the platforms we formally certify when testing.  CollabNet
@@ -173,16 +172,16 @@ Contents
     on your LAN.  This usually means that you need to configure Firewall rules
     for you server to open the firewall for port 3343:
     
-	edit /etc/sysconfig/iptables
-	edit /etc/sysconfig/ip6tables
-		
-	Add the following line to the above files, it line be will the line before
-	the last 2 lines.
-		
-	-A RH-Firewall-1-INPUT -m state --state NEW -m tcp -p tcp --dport 3343 -j ACCEPT
+    edit /etc/sysconfig/iptables
+    edit /etc/sysconfig/ip6tables
+        
+    Add the following line to the above files, it line be will the line before
+    the last 2 lines.
+        
+    -A RH-Firewall-1-INPUT -m state --state NEW -m tcp -p tcp --dport 3343 -j ACCEPT
 
-	/etc/init.d/iptables restart
-	/etc/init.d/ip6tables restart
+    /etc/init.d/iptables restart
+    /etc/init.d/ip6tables restart
 
 8. Support for CollabNet Subversion Edge
 
