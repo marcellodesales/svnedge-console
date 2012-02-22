@@ -115,7 +115,7 @@
           <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
           <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
           <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
-            <g:link url="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" 
+            <g:link url="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" target="_blank"
                       onmousedown="\$('freeTrial').src=freeTrialButtonPressed.src"
                       onmouseup="\$('freeTrial').src=freeTrialButton.src">
               <img id="freeTrial" align="right" alt="${message(code:'setupCloudServices.page.index.button.moveToCloud')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
