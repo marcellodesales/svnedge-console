@@ -1487,8 +1487,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
             destinationFile.withOutputStream { out ->
                     sourceFile.withInputStream { input -> out << input } }
             sourceFile.delete()
+            renamed = true
         }
-        sourceFile.setExecutable(true)
+        destinationFile.setExecutable(true)
         return renamed
     }
     

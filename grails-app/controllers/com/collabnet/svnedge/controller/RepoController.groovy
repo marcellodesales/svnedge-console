@@ -1080,6 +1080,7 @@ class RepoController {
             log.info("saving edits to file '${hookName}' in repo '${repoId}'")
             def file = svnRepoService.getHookFile(Repository.get(repoId), hookName)
             file.text = params.fileContent.toString().denormalize()
+            file.setExecutable(true)
             lock.release(session)
             log.info("session lock released for file '${hookName}' from user '${lock.userId}'")
             flash.message = message (code: "repository.page.hookEdit.saved", args: [hookName])
