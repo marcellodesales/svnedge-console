@@ -1,16 +1,4 @@
 
-/* For svnedge wizard left description boxen. */
-.leftDescription {
-  padding-right: 5px;
-  margin-right: 0;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  white-space: normal;
-  width: 200px;
-  max-width: 200px;
-  min-width: 200px;
-}
-
 /* For toggles on job details page */
 .triggerRunning {
   color: green;
@@ -40,5 +28,63 @@
 
 tr.prop td.name {
   white-space: nowrap;
+}
+
+div.errorMessage, div.instructionText, div.greenText, div.warningText {
+  font-weight:  normal;
+  background: #f8fff4  url(/csvn/images/icons/icon_success_sml.gif) 0.4em 0.5em no-repeat;
+  padding: 6px 2em;
+  font-size: 110%;
+  margin: 3px 0 6px 0;
+  border-top: 2px solid #090;
+  border-left: 1px solid #090;
+} 
+
+div.errorText {
+  font-weight:  bold;
+  background: #ffefe7;
+  padding: 3px 1em 6px 5px;
+  font-size: 110%;
+  margin: 3px 0 6px 0;
+}
+  
+div.errorMessage {
+  font-weight: bold;
+  background: #fff5f1  url(/csvn/images/icons/icon_error_sml.gif)  0.4em 0.5em no-repeat;
+  border-color: #900;
+}
+.errors ul{
+  background: #fdf7f1 url(/csvn/images/icons/icon_error_sml.gif) 0.4em 0.5em no-repeat;
+  border: 1px solid #900; 
+  padding: 5px 5px 5px 25px;
+}
+.errors ul li {
+  list-style: none;
+}
+
+div.instructionText {
+  background: #e7f3fe  url(/csvn/images/icons/icon_info_sml.gif)  0.4em 0.5em no-repeat;
+  border-color: #369;
+}
+
+div.warningText {
+  background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;
+  border-color: #c60; 
+}
+
+/* Styles for messages that appear at the top of a page */
+FONT.MessagesTitle {
+  font-weight: bold;
+}
+
+/* Style for text headers */
+div.HeaderText {
+  font-size: 1.45em !important;
+  font-weight: bold !important;
+}
+
+/* Text colors for errors and success messages */
+font.errorMessage, FONT.TextRequired {
+  color:#D53808 !important;
 }
 

@@ -1,82 +1,99 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <g:sslRedirect/>
-    <title><g:layoutTitle default="CollabNet Subversion Edge management console" /></title>
-    <link rel="stylesheet" href="${resource(dir:'css',file:'styles_new.css')}"
-          type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir:'css',file:'svnedge.css')}"
-          type="text/css"/>
-    <link rel="shortcut icon"
-          href="${resource(dir:'images/icons',file:'favicon.ico')}" />
+    <title><g:layoutTitle default="CollabNet Subversion Edge Console" /></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Subversion Edge">
+    <meta name="author" content="CollabNet">
+
+    <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
     <g:layoutHead />
-    <g:javascript library="application" />                
+    <g:javascript library="application" />
+    
+       <style type="text/css">
+      body {
+        padding-top: 62px;
+        padding-bottom: 40px;
+      }
+      
+      .container {
+      width: 300px;
+      }
+      
+      /* Override some defaults */
+      html, body {
+        background-color: #eee;
+      }
+
+      /* The white background content wrapper */
+      .container > .content {
+        background-color: #fff;
+        padding: 20px;
+        margin: 0 -20px;
+        -webkit-border-radius: 10px 10px 10px 10px;
+           -moz-border-radius: 10px 10px 10px 10px;
+                border-radius: 10px 10px 10px 10px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+      }
+
+      .login-form {
+        margin-left: 65px;
+      }
+
+      legend {
+        margin-right: -50px;
+        font-weight: bold;
+        color: #404040;
+      }
+    </style>    
+    
   </head>
 
   <body ${pageProperty(name: 'body.onload', writeEntireProperty: true)}${pageProperty(name: 'body.onunload', writeEntireProperty: true)}>
-    <table width="100%" border="0" cellpadding="0" cellspacing="0"
-           class="mastHeadBackground">
-      <tr>
-        <td>
-          <table width="300" border="0" cellpadding="0" cellspacing="0"
-                 class="mastHeadLink">
-            <tr class="sitelogo">
-              <td><g:link controller="status"><img 
-                 src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
-                 border="0" alt="${message(code:'layout.page.home') }"/></g:link></td>
-            </tr>
-          </table>
-        </td>
-        <td align="right" valign="top">
-            <table border="0" cellspacing="0" cellpadding="0"
-                   class="mastHeadLink logonMenu">
-              <tr class="mastHeadLink" valign="top">
-                <td valign="middle">
-                <g:isNotLoggedIn>
-                    <g:link controller="login"><g:message code="layout.page.login" />
-                    </g:link>
-                </g:isNotLoggedIn>
-                <g:isLoggedIn>
-                    <g:message code="layout.page.loggedAs" />&nbsp;
-                    <g:link controller="user" action="showSelf">
-                    <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
-                    </g:link>
-                </td>
-                <td nowrap="nowrap">
-                    <img src="${resource(dir:'images/masthead',
-                              file:'vertical_line.gif')}" width="1" height="19"
-                         hspace="4" alt=""/>
-                </td>
-                <td valign="middle">
-                    <g:link controller="logout">
-                        <g:message code="layout.page.logout" />
-                    </g:link>
-                </g:isLoggedIn>
-                </td>
-                <td nowrap="nowrap"><img src="${resource(dir:'images/masthead',
-                file:'vertical_line.gif')}"
-                width="1" height="19" hspace="4" alt=""/></td>
 
-                <td nowrap="nowrap">&nbsp;&nbsp;&nbsp;<g:render template="/common/helpLink" model="['type' : 'img']"/></td>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> 
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <g:link controller="status" class="brand"><img
+               src="${resource(dir:'images/masthead',file:'logo.png')}"
+               border="0" alt="${message(code:'layout.page.home') }"/></g:link>
+          <div class="nav-collapse">
+            <ul class="nav">
+            <!-- buttons -->
+            </ul>
+            <ul class="nav pull-right">
+              <g:render template="/layouts/helpLink"/>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+    <g:render template="/layouts/aboutModal"/>              
 
-                <td nowrap="nowrap" valign="middle">&nbsp;<g:render template="/common/helpLink" model="['type' : 'text']"/>&nbsp;&nbsp;</td>
-
-              </tr>
-            </table>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" class="black"><img
-                 src="${resource(dir:'images/misc',file:'pixel.gif')}"
-                 border="0" height="1" width="1" alt=""/></td>
-      </tr>
-    </table>
-
-    <div class="sectiontitle">&nbsp;</div>
-    
-    <!-- TeamForge content-area begin -->
-    <div class="contentArea">
+    <!-- main content section begin -->
+    <div class="container-fluid">    
       <div class="sessionmessages"> 
             <g:if test="${flash.message}">
                 <div class="greenText">${flash.message}</div>
@@ -85,40 +102,11 @@
                 <div class="errorMessage">${flash.error}</div>
             </g:if>
       </div>
+    </div><!-- /container-fluid -->    
 
-      <div id="main">
-
-        <table class="Container" id="tracker_summary_table_id">
-          <!-- content header -->
-          <tr class="ContainerHeader">
-            <td>
-              <!-- *****************  PAGE TITLE GOES HERE ************** -->
-              <g:pageProperty name="page.title" />
-            </td>
-          </tr>
-          <tr>
-            <td class="ContainerBody">
-              <table class="CategoryListTable">
-                <tr>
-                  <td class="ContainerBodyWithPaddedBorder" width="80%" >
-                    <g:layoutBody />    
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
+      <div id="main" class="container-fluid">
+        <g:layoutBody />    
       </div>
       <!-- main content section end -->
-
-      <br/><br/>
-      <div id="footer">
-        <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
-        <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
-        width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
-        &#169; 2011 <g:message code="layout.page.trademark" />
-      </div>
-    </div>
-    <!-- TeamForge content-area end -->
   </body>
 </html>

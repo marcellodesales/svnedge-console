@@ -1,85 +1,55 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <g:sslRedirect/>
-    <title><g:layoutTitle default="CollabNet Subversion Edge" /></title>
+    <title><g:layoutTitle default="CollabNet Subversion Edge Console" /></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="${resource(dir:'css',file:'styles_new.css')}"
-          type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir:'css',file:'svnedge.css')}"
-          type="text/css"/>
-    <link rel="shortcut icon"
-          href="${resource(dir:'images/icons',file:'favicon.ico')}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Subversion Edge"/>
+    <meta name="author" content="CollabNet"/>
+
+    <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet"/>
+    <style type="text/css">
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-bottom: 40px;
+      }
+
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
+    <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+ 
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+      
+    <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
+          
     <g:layoutHead />
-    <g:javascript library="application" />                
+    <g:javascript library="application" />
   </head>
-
   <body ${pageProperty(name: 'body.onload', writeEntireProperty: true)}${pageProperty(name: 'body.onunload', writeEntireProperty: true)}>
-    <table width="100%" border="0" cellpadding="0" cellspacing="0"
-           class="mastHeadBackground">
-      <tr>
-        <td>
-          <table width="300" border="0" cellpadding="0" cellspacing="0"
-                 class="mastHeadLink">
-            <tr class="sitelogo">
-              <td><g:link controller="status"><img 
-                 src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
-                 border="0" alt="${message(code:'layout.page.home') }"/></g:link></td>
-            </tr>
-          </table>
-        </td>
-        <td align="right" valign="top">
-            <table border="0" cellspacing="0" cellpadding="0"
-                   class="mastHeadLink logonMenu">
-              <tr class="mastHeadLink" valign="top">
-                <td valign="middle">
-                <g:isNotLoggedIn>
-                    <g:link controller="login"><g:message code="layout.page.login" />
-                    </g:link>
-                </g:isNotLoggedIn>
-                <g:isLoggedIn>
-                    <g:message code="layout.page.loggedAs" />&nbsp;
-                    <g:link controller="user" action="showSelf">
-                    <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
-                    </g:link>
-                </td>
-                <td nowrap="nowrap">
-                    <img src="${resource(dir:'images/masthead',
-                              file:'vertical_line.gif')}" width="1" height="19"
-                         hspace="4" alt=""/>
-                </td>
-                <td valign="middle">
-                    <g:link controller="logout">
-                        <g:message code="layout.page.logout" />
-                    </g:link>
-                </g:isLoggedIn>
-                </td>
-                <td nowrap="nowrap"><img src="${resource(dir:'images/masthead',
-                file:'vertical_line.gif')}"
-                width="1" height="19" hspace="4" alt=""/></td>
-
-                <td nowrap="nowrap">&nbsp;&nbsp;&nbsp;<g:render template="/common/helpLink" model="['type' : 'img']"/></td>
-
-                <td nowrap="nowrap" valign="middle">&nbsp;<g:render template="/common/helpLink" model="['type' : 'text']"/>&nbsp;&nbsp;</td>
-
-              </tr>
-            </table>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" class="black"><img
-                 src="${resource(dir:'images/misc',file:'pixel.gif')}"
-                 border="0" height="1" width="1" alt=""/></td>
-      </tr>
-    </table>
-
-    <div class="sectiontitle">&nbsp;</div>
-
-    <!-- TeamForge buttonbar begin -->
-      <table class="TopMenu">
-      <tr class="ButtonRow">
-        <%--
+    
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> 
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <g:link controller="status" class="brand"><img
+               src="${resource(dir:'images/masthead',file:'logo.png')}"
+               alt="${message(code:'layout.page.home') }" style="border: 0;"/></g:link>
+          <div class="nav-collapse">
+            <!-- buttons -->
+            <ul class="nav">
+            
+                    <%--
             Algorithm:
             set buttonMap (controllerName: buttonName)
             set iconMap (controllerName: iconUrl)
@@ -133,18 +103,7 @@
                       ocn: message(code:'ocn.main.icon')
                       ]}" />
 
-        <g:set var="buttonIconMap"
-               value="${[status: 'project-homeicon.gif',
-                      repo: 'project-scmicon.gif',
-                      job: 'project-buildtesticon.gif',
-                      user: 'project-adminusers.gif',
-                      userCache: 'project-tasksicon.gif',
-                      statistics: 'project-reportsicon.gif',
-                      admin: 'project-projectadminicon.gif',
-                      ocn: 'project-extensionicon.gif']}"/>
-
-        <td class="VerticalSeparatorNoBorder"></td>
- <%-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status) --%>
+        <%-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status) --%>
         <g:set var="selectedButton">status</g:set>
         <g:if test="${controllerButtonMap[activeButton]}">
             <g:set var="selectedButton"
@@ -154,47 +113,54 @@
             <g:set var="selectedButton" 
                 value="${controllerButtonMap[controllerName]}" />
         </g:elseif>
+        
         <g:each in="${featureList}">
-          <g:set var="buttonClass">Button</g:set>
+          <g:set var="buttonClass" value=""/>
           <g:set var="isButtonSelected" 
               value="${(controllerButtonMap[controllerName] == controllerButtonMap[it]) || 
               (it == 'status' && selectedButton == 'status')}" />
           <g:if test="${isButtonSelected}">
-            <g:set var="buttonClass">Button Selected</g:set>
-            <td class="SelectedLeft"><img
-                 src="${resource(dir:'images/misc',file:'pixel.gif')}"
-                 border="0" height="1" width="4" alt=""/></td>
+            <g:set var="buttonClass"> class="active"</g:set>
           </g:if>
 
-          <td class="${buttonClass}"
-              onclick="window.location='${createLink(controller: it)}'; return false;"><a
-              href="${createLink(controller: it )}" target="_top"><img
-              src="${resource(dir:'images/project',file: buttonIconMap[controllerButtonMap[it]])}"
-              width="25" height="20"
-              border="0" alt=""/><br/>${buttonNameMap[controllerButtonMap[it]]}</a></td>
-          <g:if test="${isButtonSelected}">
-            <td class="SelectedRight"><img
-                 src="${resource(dir:'images/misc',file:'pixel.gif')}"
-                 border="0" height="1" width="4" alt=""/></td>
-          </g:if>
-          <td class="VerticalSeparator"></td>
-
+          <li${buttonClass}><a href="${createLink(controller: it )}" 
+              target="_top">${buttonNameMap[controllerButtonMap[it]]}</a></li>
         </g:each>
-        <td class="ButtonEnd"></td>
-      </tr>
-      <tr class="ShadowRow">
-        <td colspan="2"></td>
-        <td class="SelectedLeft"></td>
-        <td class="Selected"></td>
-        <td class="SelectedRight"></td>
-        <td colspan="20"></td>
-      </tr>
-    </table>
-    <!-- TeamForge buttonbar end -->
+        
+            </ul>
+            <!-- buttons end -->
+            <ul class="nav pull-right">
+                <g:isNotLoggedIn>
+                  <li><g:link controller="login"><g:message code="layout.page.login" /></g:link>
+                </g:isNotLoggedIn>
+                <g:isLoggedIn>
+                    <li><g:message code="layout.page.loggedAs" />&nbsp;
+                    <g:link controller="user" action="showSelf">
+                    <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
+                    </g:link>
+                </li>
+                <li class="divider-vertical"></li>
+                <li><g:link controller="logout"><g:message code="layout.page.logout"/></g:link>
+                </g:isLoggedIn>
+              </li>
+              <li class="divider-vertical"></li>
+              <g:render template="/layouts/helpLink"/>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+    <g:render template="/layouts/aboutModal"/>
     
-    <!-- TeamForge content-area begin -->
-    <div class="contentArea">
-      <div class="sessionmessages" id="sessionmessages"> 
+    <!-- main content section begin -->
+    <div class="container-fluid">    
+      <div class="sessionmessages" id="sessionmessages">
+        <!-- 
+          <div class="alert alert-block">
+          <h4 class="alert-heading">Updates Available</h4>
+          There are new updates available for <a href="updates.html">download</a>.
+          </div>
+        -->
             <g:if test="${flash.message}">
                 <div class="greenText">${flash.message}</div>
             </g:if>
@@ -234,48 +200,52 @@
                 <div class="errorMessage"><%=request['unfiltered_error']%></div>
             </g:elseif>
       </div>
+    </div> <!-- /container-fluid -->
+ 
+    <div id="main" class="container-fluid">
+      <div class="row-fluid">
 
-      <div id="main">
+        <g:set var="blocks" value="12"/>
+        <g:if test="${pageProperty(name:'page.leftMenu')}">
+          <g:set var="blocks" value="9"/>
+          <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
+          <div class="span3">
+            <div class="well sidebar-nav">
+              <ul class="nav nav-list">
+                <g:pageProperty name="page.leftMenu" />
+              </ul>
+            </div> <!--/.well -->
 
-        <table class="Container" id="tracker_summary_table_id">
-          <!-- content header -->
-          <tr class="ContainerHeader">
-            <td>
-              <!-- *****************  PAGE TITLE GOES HERE ************** -->
-              <g:pageProperty name="page.title" />
-            </td>
-          </tr>
-          <tr>
-            <td class="ContainerBody">
-              <table class="CategoryListTable">
-                <tr>
-                  
-                  <g:if test="${pageProperty(name:'page.leftMenu')}">
-                    <td class="CategoryListBody" width="10%">                         
-                      <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
-                      <g:pageProperty name="page.leftMenu" />
-                    </td>
-                  </g:if>
-      
-                  <td class="ContainerBodyWithPaddedBorder" width="90%" >
-                    <g:layoutBody />    
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <!-- main content section end -->
+            <div class="well">
+              <span class="label label-info">Tip:</span> Want to add
+              additional Subversion features like Code Search, Code Review,
+              Analytics or enhanced permissions management? <br /> <br />
+              <a href="teamforge.html">Connect</a> Subversion Edge to
+              TeamForge. <a target="_blank"
+              href="http://www.open.collab.net/products/ctf/"> More
+              information ...</a>
+            </div> <!--/.well -->
 
-      <br/><br/>
-      <div id="footer">
-        <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
-        <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
-        width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
-        &#169; 2011 <g:message code="layout.page.trademark" />
-      </div>
-    </div>
-    <!-- TeamForge content-area end -->
+          </div> <!--/span3-->
+        </g:if>
+        <div class="span${blocks}">
+          <div class="row-fluid">
+            <div class="span2">
+              <h2><g:pageProperty name="page.title" /></h2>
+            </div>
+          </div>
+
+          <div class="row-fluid">
+            <g:layoutBody />
+          </div>
+        </div><!-- /spanX -->
+      </div><!-- /row-fluid -->
+    </div><!-- /container-fluid #main-->
+    <!-- main content section end -->
+    <!-- ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <g:javascript library="jquery-1.7.1.min"/>
+    <g:javascript library="jquery-tablesorter"/>
+    <g:javascript library="bootstrap"/>    
   </body>
 </html>

@@ -1,10 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main" />
-    <title>CollabNet Subversion Edge</title>
-    <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
     <style>
       p.dialogTitle {
         padding-top: 0px;
@@ -14,8 +10,6 @@
         margin-top: 10px;
       }
     </style>
-    <g:javascript library="prototype" />
-    <g:javascript library="window" />
     <script type="text/javascript">
 
       // add restart support for unapplied updates

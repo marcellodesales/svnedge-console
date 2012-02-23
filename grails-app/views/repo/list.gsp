@@ -14,11 +14,9 @@
 </content>
     
     <body>
-
-    <g:set var="colCount">
-      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">5</g:ifAnyGranted>
-      <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">3</g:ifNotGranted>
-    </g:set>
+    
+    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO"><g:set var="colCount" value="5"/></g:ifAnyGranted>
+    <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO"><g:set var="colCount" value="3"/></g:ifNotGranted>
 
     <g:form>
     <g:if test="${repositoryInstanceList.size() > 0}">
