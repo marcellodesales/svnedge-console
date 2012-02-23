@@ -4,17 +4,17 @@
     <g:sslRedirect/>
     <title><g:layoutTitle default="CollabNet Subversion Edge Console" /></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Subversion Edge">
-    <meta name="author" content="CollabNet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Subversion Edge"/>
+    <meta name="author" content="CollabNet"/>
 
-    <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet">
+    <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet"/>
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
       }
     </style>
-    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet">
+    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -78,7 +78,7 @@
           </a>
           <g:link controller="status" class="brand"><img
                src="${resource(dir:'images/masthead',file:'logo.png')}"
-               border="0" alt="${message(code:'layout.page.home') }"/></g:link>
+               alt="${message(code:'layout.page.home') }"/></g:link>
           <div class="nav-collapse">
             <ul class="nav">
             <!-- buttons -->
@@ -104,7 +104,7 @@
       </div>
     </div><!-- /container-fluid -->    
 
-      <div id="main" class="container-fluid">
+      <div id="main" class="container">
         <g:layoutBody />    
       </div>
       <!-- main content section end -->

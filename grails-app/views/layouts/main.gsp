@@ -44,7 +44,7 @@
           </a>
           <g:link controller="status" class="brand"><img
                src="${resource(dir:'images/masthead',file:'logo.png')}"
-               alt="${message(code:'layout.page.home') }" style="border: 0;"/></g:link>
+               alt="${message(code:'layout.page.home') }"/></g:link>
           <div class="nav-collapse">
             <!-- buttons -->
             <ul class="nav">
@@ -115,15 +115,10 @@
         </g:elseif>
         
         <g:each in="${featureList}">
-          <g:set var="buttonClass" value=""/>
           <g:set var="isButtonSelected" 
               value="${(controllerButtonMap[controllerName] == controllerButtonMap[it]) || 
               (it == 'status' && selectedButton == 'status')}" />
-          <g:if test="${isButtonSelected}">
-            <g:set var="buttonClass"> class="active"</g:set>
-          </g:if>
-
-          <li${buttonClass}><a href="${createLink(controller: it )}" 
+          <li<g:if test="${isButtonSelected}"> class="active"</g:if>><a href="${createLink(controller: it )}" 
               target="_top">${buttonNameMap[controllerButtonMap[it]]}</a></li>
         </g:each>
         

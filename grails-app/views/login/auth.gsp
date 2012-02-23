@@ -6,40 +6,23 @@
     <g:message code="login.page.auth.title" />
   </content>
 <body>
-  <%--<g:if test='${flash.message}'>
-    <div class='login_message'>${flash.message}</div>
-  </g:if>--%>
-  <form action='${postUrl}' method='POST' id='loginForm' class='cssform'>
-  <table cellpadding="4" width="100%">
-    <tbody>
-      <tr>
-        <td width="10%"><label for='j_username'><g:message code="login.page.auth.username.label" /></label></td>
-        <td>
-          <input type='text' class='text_' name='j_username' id='j_username' size="35" value='${request.remoteUser}' />
-        </td>
-      </tr>
-      <tr>
-        <td width="10%"><label for='j_password'><g:message code="login.page.auth.password.label" /></label></td>
-        <td>
-          <input type='password' class='text_' name='j_password' id='j_password' size="35"/>
-        </td>
-      </tr>
-      
-    </tbody></table>
-    <tr class="ContainerFooter">
-   <td colspan="2">
-    <div class="AlignRight">
-      <input type='submit' value='${message(code:"login.page.auth.button.submit")}' class="Button"/>
-    </div>
-   </td>
-   </tr>
-</form>
 
-   <script type='text/javascript'>
-     <!--
-         (function(){
-         document.forms['loginForm'].elements['j_username'].focus();
-         })();
-     // -->
-   </script>
+  <div class="content">
+    <div class="row">
+      <div class="login-form">
+        <h2><g:message code="login.page.auth.title" /></h2>
+        <form action='${postUrl}' method='post' id='loginForm'>
+          <fieldset>
+            <div class="clearfix">
+              <input type="text" name="j_username" id="j_username" placeholder="<g:message code="login.page.auth.username.label" />" />
+            </div>
+            <div class="clearfix">
+              <input type="password" name="j_password" id="j_password" placeholder="<g:message code="login.page.auth.password.label" />" />
+            </div>
+            <button class="btn btn-primary" type="submit"><g:message code="login.page.auth.button.submit" /></button>
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </div>
  </body>

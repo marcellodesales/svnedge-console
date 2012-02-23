@@ -26,10 +26,6 @@
   padding-left: 10px;
 }
 
-tr.prop td.name {
-  white-space: nowrap;
-}
-
 div.errorMessage, div.instructionText, div.greenText, div.warningText {
   font-weight:  normal;
   background: #f8fff4  url(/csvn/images/icons/icon_success_sml.gif) 0.4em 0.5em no-repeat;
@@ -70,17 +66,6 @@ div.instructionText {
 div.warningText {
   background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;
   border-color: #c60; 
-}
-
-/* Styles for messages that appear at the top of a page */
-FONT.MessagesTitle {
-  font-weight: bold;
-}
-
-/* Style for text headers */
-div.HeaderText {
-  font-size: 1.45em !important;
-  font-weight: bold !important;
 }
 
 /* Text colors for errors and success messages */
