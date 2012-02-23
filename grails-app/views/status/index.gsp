@@ -188,37 +188,29 @@
 
     </content>
 
-      <table align="center" width="99%">
+      <h2><g:message code="status.page.header.information"/></h2>
+      <table class="table table-striped table-bordered table-condensed">
         <tbody>
-          <tr><td>
-            <table class="ItemDetailContainer">
-              <tbody>
-                <tr class="ContainerHeader">
-                  <td colspan="2"><g:message code="status.page.header.server" /></td>
-                </tr>
-            <g:if test="${softwareVersion}">
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="status.page.status.version.software" /></strong></td>
-                  <td class="ItemDetailValue">${softwareVersion}</td>
-                </tr>
-            </g:if>
-            <g:if test="${svnVersion}">
-                <tr class="prop, OddRow">
-                  <td class="ItemDetailName"><strong><g:message code="status.page.status.version.subversion" /></strong></td>
-                  <td class="ItemDetailValue">${svnVersion}</td>
-                </tr>
-            </g:if>
-            <g:each status="i" var="stat" in="${perfStats}">
-              <tr class="prop, ${i % 2 == 0 ? 'EvenRow' : 'OddRow'}">
-                <td class="ItemDetailName"><strong>${stat.label}</strong></td>
-                <td class="ItemDetailValue">${stat.value ?: message(code:'status.page.status.noData')}</td>
-              </tr>
-            </g:each>
-
-              </tbody>
-            </table>
-          </td></tr>
+        <g:if test="${softwareVersion}">
+          <tr>
+            <td><strong><g:message code="status.page.status.version.software"/></strong></td>
+            <td>${softwareVersion}</td>
+          </tr>
+        </g:if>
+        <g:if test="${svnVersion}">
+          <tr>
+            <td><strong><g:message code="status.page.status.version.subversion"/></strong></td>
+            <td>${svnVersion}</td>
+          </tr>
+        </g:if>
+        <g:each status="i" var="stat" in="${perfStats}">
+          <tr>
+            <td><strong>${stat.label}</strong></td>
+            <td>${stat.value ?: message(code: 'status.page.status.noData')}</td>
+          </tr>
+        </g:each>
         </tbody>
       </table>
+  
   </body>
 </html>
