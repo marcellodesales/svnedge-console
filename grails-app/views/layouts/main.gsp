@@ -134,7 +134,7 @@
                   <li><g:link controller="login"><g:message code="layout.page.login" /></g:link>
                 </g:isNotLoggedIn>
                 <g:isLoggedIn>
-                    <li><g:message code="layout.page.loggedAs" />&nbsp;
+                    <li>
                     <g:link controller="user" action="showSelf">
                     <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
                     </g:link>
