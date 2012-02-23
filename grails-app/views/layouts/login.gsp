@@ -80,9 +80,6 @@
                src="${resource(dir:'images/masthead',file:'logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
           <div class="nav-collapse">
-            <ul class="nav">
-            <!-- buttons -->
-            </ul>
             <ul class="nav pull-right">
               <g:render template="/layouts/helpLink"/>
             </ul>
@@ -108,5 +105,8 @@
         <g:layoutBody />    
       </div>
       <!-- main content section end -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <g:javascript library="jquery-1.7.1.min"/>
+    <g:javascript library="bootstrap"/>    
   </body>
 </html>
