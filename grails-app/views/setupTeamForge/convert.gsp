@@ -11,7 +11,7 @@
   <g:render template="/server/leftNav" />
 
   <body>
-  <div class="instructionText">
+  <div class="alert alert-block alert-info">
     <g:if test="${ctfProjectLink}">
       <p><g:message code="setupTeamForge.page.convert.p1" /></p>
       <p><g:message code="setupTeamForge.page.convert.project" /> '${wizardBean.ctfProject}' <g:message code="setupTeamForge.page.convert.sourceCode" /> <a href="${ctfProjectLink}">${ctfProjectLink}</a></p>
@@ -28,7 +28,7 @@
 <g:message code="setupTeamForge.page.convert.p3" />
 
 <g:if test="${warnings}">
-  <div class="warningText">
+  <div class="alert">
       <g:message code="setupTeamForge.page.convert.warning" />
     <ul>
     <g:each in="${warnings}">

@@ -110,7 +110,7 @@ function fetchUploadProgress() {
                 <g:if test="${headRev > 0}">
                   <tr>
                     <td colspan="4">
-                      <div class="instructionText"><g:message code="repository.page.load.not.empty.message"/></div>
+                      <div class="alert alert-info"><g:message code="repository.page.load.not.empty.message"/></div>
                     </td>
                   <tr>
                 </g:if>

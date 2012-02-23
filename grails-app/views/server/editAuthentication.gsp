@@ -83,7 +83,7 @@
 
     <div class="message">${result}</div>
     <g:if test="${!isConfigurable}">
-    <div class="instructionText">
+    <div class="alert alert-block alert-info">
     <p><g:message code="server.page.edit.missingDirectives" />
     <blockquote>
     <code>

@@ -39,7 +39,7 @@
             <g:render template="errorList"/>
           </g:if> 
           <g:if test="${connectionErrors && errorCause}">
-            <div class="errorMessage">
+            <div class="alert alert-block alert-error">
                 <%=generalError%>
                 <ul>
                     <li><g:message code="ctfConversion.form.ctfInfo.noconnection"/> <%=errorCause%></li>
@@ -124,7 +124,7 @@
           <input size="40" type="text" id="serverKey" name="serverKey" 
               value="${fieldValue(bean: cmd, field: 'serverKey')}"/>
           <g:if test="${con && con.requiresServerKey}">
-            <div class="errorMessage">
+            <div class="alert alert-error">
               <g:message code="setupReplica.action.updateCredentials.invalidApiKey" />
             </div>
           </g:if>

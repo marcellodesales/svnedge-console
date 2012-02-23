@@ -25,7 +25,7 @@
         <td class="ItemDetailContainerCell">
 
           <g:if test="${con.errors.hasGlobalErrors()}">
-            <div class="errorMessage">
+            <div class="alert alert-block alert-error">
               <ul>
               <g:each in="${con.errors.globalErrors}">
                   <li><g:message error="${it}" /></li>

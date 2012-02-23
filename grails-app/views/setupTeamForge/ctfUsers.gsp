@@ -35,7 +35,7 @@
  <tr>
    <td class="ContainerBodyWithPaddedBorder">
  <g:if test="${server.ldapEnabled}">
-      <div class="warningText">
+      <div class="alert">
       <g:message code="setupTeamForge.page.ctfUsers.p1" />
       </div>
  </g:if>

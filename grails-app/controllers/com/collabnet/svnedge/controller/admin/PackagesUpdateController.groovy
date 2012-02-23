@@ -282,6 +282,7 @@ class PackagesUpdateController {
         if (session["install"] == null) {
             redirect(action:"installed")
         }
+        return [hideButtons: true]
     }
 
     def confirmStart = {

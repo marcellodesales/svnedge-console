@@ -1,3 +1,63 @@
+/* *************************************************************************
+ *                     Bootstrap CSS Overrides                             *
+ *************************************************************************** */
+ 
+.navbar .brand {
+  padding: 0px 8px;
+}
+
+.alert {
+  padding-left: 2em;
+  background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;
+  border-color: #c60; 
+}
+
+.alert-error {
+  font-weight: bold;
+  background: #fff5f1  url(/csvn/images/icons/icon_error_sml.gif)  0.4em 0.5em no-repeat;
+  border-color: #900;
+}
+
+.alert-info {
+  background: #e7f3fe  url(/csvn/images/icons/icon_info_sml.gif)  0.4em 0.5em no-repeat;
+  border-color: #369;
+}
+
+.alert-success {
+  background: #f8fff4  url(/csvn/images/icons/icon_success_sml.gif) 0.4em 0.5em no-repeat;
+  border-color: #090;
+}
+
+.sessionmessages .alert, .requestmessages .alert {
+  border-top: 2px solid #c60;
+  color: black;
+}
+
+.sessionmessages .alert-error, .requestmessages .alert-error {
+  border-top: 2px solid #900;
+  color: black;
+}
+
+.sessionmessages .alert-info, .requestmessages .alert-info {
+  border-top: 2px solid #369;
+  color: black;
+}
+
+.sessionmessages .alert-success, .requestmessages .alert-success {
+  border-top: 2px solid #090;
+  color: black;
+}
+
+
+/* *************************************************************************
+ *                     Subversion Edge Specific CSS                        *
+ *************************************************************************** */
+
+.sessionmessages, .requestmessages {
+  font-size: 110%;
+  color: black;
+}
+
 
 /* For toggles on job details page */
 .triggerRunning {
@@ -26,29 +86,6 @@
   padding-left: 10px;
 }
 
-div.errorMessage, div.instructionText, div.greenText, div.warningText {
-  font-weight:  normal;
-  background: #f8fff4  url(/csvn/images/icons/icon_success_sml.gif) 0.4em 0.5em no-repeat;
-  padding: 6px 2em;
-  font-size: 110%;
-  margin: 3px 0 6px 0;
-  border-top: 2px solid #090;
-  border-left: 1px solid #090;
-} 
-
-div.errorText {
-  font-weight:  bold;
-  background: #ffefe7;
-  padding: 3px 1em 6px 5px;
-  font-size: 110%;
-  margin: 3px 0 6px 0;
-}
-  
-div.errorMessage {
-  font-weight: bold;
-  background: #fff5f1  url(/csvn/images/icons/icon_error_sml.gif)  0.4em 0.5em no-repeat;
-  border-color: #900;
-}
 .errors ul{
   background: #fdf7f1 url(/csvn/images/icons/icon_error_sml.gif) 0.4em 0.5em no-repeat;
   border: 1px solid #900; 
@@ -56,20 +93,5 @@ div.errorMessage {
 }
 .errors ul li {
   list-style: none;
-}
-
-div.instructionText {
-  background: #e7f3fe  url(/csvn/images/icons/icon_info_sml.gif)  0.4em 0.5em no-repeat;
-  border-color: #369;
-}
-
-div.warningText {
-  background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;
-  border-color: #c60; 
-}
-
-/* Text colors for errors and success messages */
-font.errorMessage, FONT.TextRequired {
-  color:#D53808 !important;
 }
 

@@ -57,7 +57,7 @@
         <td class="ItemDetailContainerCell">
 
           <g:if test="${formError}">
-            <div class="errorMessage">
+            <div class="alert alert-block alert-error">
                 ${formError}
                 <g:if test="${errorCause}">
                     <ul>

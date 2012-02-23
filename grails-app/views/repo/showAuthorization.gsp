@@ -19,7 +19,7 @@
 </g:hasErrors>
 
   <g:if test="${lock}">
-    <div class="warningText"><g:message code="repository.page.showAuthorization.isLocked" args="${[lockOwner.realUserName, lock.createdOn]}"/></div>
+    <div class="alert"><g:message code="repository.page.showAuthorization.isLocked" args="${[lockOwner.realUserName, lock.createdOn]}"/></div>
   </g:if>
 
 <table class="Container">

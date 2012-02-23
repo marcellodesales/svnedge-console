@@ -1,18 +1,35 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <g:sslRedirect/>
-    <title>CollabNet Subversion Edge: Error</title>
+    <title>CollabNet Subversion Edge Error"</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="${resource(dir:'css',file:'styles_new.css')}"
-          type="text/css"/>
-    <link rel="stylesheet" href="${resource(dir:'css',file:'svnedge.css')}"
-          type="text/css"/>
-    <link rel="shortcut icon"
-          href="${resource(dir:'images/icons',file:'favicon.ico')}" />
-    <g:javascript library="application" />                
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="Subversion Edge"/>
+    <meta name="author" content="CollabNet"/>
 
+    <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet"/>
+    <style type="text/css">
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-bottom: 40px;
+      }
+
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
+    <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+ 
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+      
+    <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />          
+    <g:javascript library="application" />
+    
     <style type="text/css">
       .message {
         border: 1px solid black;
@@ -34,78 +51,67 @@
       }
     </style>
   </head>
-
   <body ${pageProperty(name: 'body.onload', writeEntireProperty: true)}${pageProperty(name: 'body.onunload', writeEntireProperty: true)}>
-    <table width="100%" border="0" cellpadding="0" cellspacing="0"
-           class="mastHeadBackground">
-      <tr>
-        <td>
-          <table width="300" border="0" cellpadding="0" cellspacing="0"
-                 class="mastHeadLink">
-            <tr class="sitelogo">
-              <td><g:link controller="status"><img 
-                 src="${resource(dir:'images/masthead',file:'CSVN-Logo.png')}"
-                 border="0" alt="${message(code:'layout.page.home') }"/></g:link></td>
-            </tr>
-          </table>
-        </td>
-        <td align="right" valign="top">
-        </td>
-      </tr>
-      <tr>
-        <td colspan="2" class="black"><img
-                 src="${resource(dir:'images/misc',file:'pixel.gif')}"
-                 border="0" height="1" width="1" alt=""/></td>
-      </tr>
-    </table>
-
-    <div class="sectiontitle">&nbsp;</div>
     
-      <!-- TeamForge buttonbar begin -->
-      <table class="TopMenu">
-      <tr class="ButtonRow">
-          <td class="VerticalSeparatorNoBorder"></td>
-          <td class="Button"
-              onclick="window.location='${createLink(controller: 'status')}'; return false;"><a
-              href="${createLink(controller: 'status')}" target="_top"><img
-              src="${resource(dir:'images/project', file: 'project-homeicon.gif')}"
-              width="25" height="20"
-              border="0" alt=""/><br/><g:message code="status.main.icon"/></a></td>
-          <td class="VerticalSeparator"></td>
-                  <td class="ButtonEnd"></td>
-          
-      </tr>
-      <tr class="ShadowRow">
-        <td colspan="2"></td>
-        <td class="SelectedLeft"></td>
-        <td class="Selected"></td>
-        <td class="SelectedRight"></td>
-        <td colspan="20"></td>
-      </tr>
-    </table>
-    <!-- TeamForge buttonbar end -->
-    
-    <!-- TeamForge content-area begin -->
-    <div class="contentArea">
-      <div class="sessionmessages"> 
-         <div class="errorMessage"><g:message code="error.alertMessage"/></div>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> 
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <g:link controller="status" class="brand"><img
+               src="${resource(dir:'images/masthead',file:'logo.png')}"
+               alt="${message(code:'layout.page.home') }"/></g:link>
+          <div class="nav-collapse">
+            <!-- buttons -->
+            <ul class="nav">
+              <li><a href="${createLink(controller: 'status')}" 
+                  target="_top"><g:message code="status.main.icon"/></a></li>
+            </ul>
+            <!-- buttons end -->
+            <ul class="nav pull-right">
+                <g:isNotLoggedIn>
+                  <li><g:link controller="login"><g:message code="layout.page.login" /></g:link>
+                </g:isNotLoggedIn>
+                <g:isLoggedIn>
+                    <li>
+                    <g:link controller="user" action="showSelf">
+                    <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
+                    </g:link>
+                </li>
+                <li class="divider-vertical"></li>
+                <li><g:link controller="logout"><g:message code="layout.page.logout"/></g:link>
+                </g:isLoggedIn>
+              </li>
+              <li class="divider-vertical"></li>
+              <g:render template="/layouts/helpLink"/>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
+    </div>
+    <g:render template="/layouts/aboutModal"/>
+    
+    <!-- main content section begin -->
+    <div class="container-fluid">    
+      <div class="sessionmessages" id="sessionmessages">
+         <div class="alert alert-block alert-error"><g:message code="error.alertMessage"/></div>
+      </div>
+    </div> <!-- /container-fluid -->
+ 
+    <div id="main" class="container-fluid">
+      <div class="row-fluid">
 
-      <div id="main">
-        <table class="Container" id="tracker_summary_table_id">
-          <!-- content header -->
-          <tr class="ContainerHeader">
-            <td>
-              <!-- *****************  PAGE TITLE GOES HERE ************** -->
-              Error
-            </td>
-          </tr>
-          <tr>
-            <td class="ContainerBody">
-              <table class="CategoryListTable">
-                <tr>
-                  <td class="ContainerBodyWithPaddedBorder" width="80%" >
-                    <!-- More content -->
+        <div class="span12">
+          <div class="row-fluid">
+            <div class="span2">
+              <h2>Error</h2>
+            </div>
+          </div>
+
+          <div class="row-fluid">
                     <p><g:message code="error.contactAdmin"/></p> 
                     <p><g:message code="error.submitErrorReport" args="${['https://ctf.open.collab.net/sf/discussion/do/listTopics/projects.svnedge/discussion.user_questions', 
                         (exception && exception.message ? exception?.message?.replace('?', 'QMark').replace('&', 'AND').encodeAsHTML().replace('&', '_') : 'null')]}"/>
@@ -150,30 +156,20 @@
       </div>
     </g:if>
                     </div>
-                    <!-- More content end -->
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      </div>
-      <!-- main content section end -->
-
-      <br/><br/>
-      <div id="footer">
-        <div id="poweredbylogo"><a href="http://www.collab.net/?cid=csvnedgeL" target="collabnet">
-        <img src="${resource(dir:'images/about',file:'poweredbylogo.gif')}"
-        width="102" height="31" alt="${message(code:'layout.page.poweredBy') }" border="0"/></a></div>
-        &#169; 2011 <g:message code="layout.page.trademark" />
-      </div>
-    </div>
-    <!-- TeamForge content-area end -->
-<script type="text/javascript">
-function setDisplayMode(id, mode) {
-  document.getElementById(id).style.display = mode; 
-  return false;
-}
-</script>
+          </div>
+        </div><!-- /spanX -->
+      </div><!-- /row-fluid -->
+    </div><!-- /container-fluid #main-->
+    <!-- main content section end -->
+    <!-- ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <g:javascript library="jquery-1.7.1.min"/>
+    <g:javascript library="bootstrap"/>    
+    <script type="text/javascript">
+      function setDisplayMode(id, mode) {
+        document.getElementById(id).style.display = mode; 
+        return false;
+      }
+    </script>
   </body>
 </html>

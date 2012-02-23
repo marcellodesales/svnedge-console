@@ -10,7 +10,7 @@
                   <li><g:message error="${it}" encodeAs="HTML"/></li>
               </g:eachError>
           </g:hasErrors>
-          <div class="errorMessage"><g:message code="setupTeamForge.page.error.additional" /></div>
+          <div class="alert alert-error"><g:message code="setupTeamForge.page.error.additional" /></div>
         </td>
         <td class="ItemDetailValue"><em><g:message code="ctfConversionBean.serverKey.error.missing" /></em></td>
       </tr> 

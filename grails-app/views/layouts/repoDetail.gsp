@@ -15,7 +15,7 @@
     <body>
 
 <g:if test="${!repositoryInstance.permissionsOk}">
-<div class="instructionText">
+<div class="alert alert-block alert-info">
     <i><g:message code="repository.page.show.filePermissionInfo" /></i>
     <p>
        <g:message code="repository.page.show.permission.p1" args="${['CollabNet Subversion Edge']}" />

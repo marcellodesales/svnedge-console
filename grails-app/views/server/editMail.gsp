@@ -41,7 +41,7 @@ function fetchResult() {
                 msg = '<g:message code="server.action.testMail.notRunning"/>';
             } else if (result == 'SUCCESS') {
                 resetPage();
-                $('requestmessages').innerHTML = '<div class="greenText">' +
+                $('requestmessages').innerHTML = '<div class="alert alert-success">' +
                         '<g:message code="server.action.testMail.success"
                             args="${[server.adminEmail]}"/></div>';
             } else if (result == 'FAILED') {
@@ -52,7 +52,7 @@ function fetchResult() {
                 alert("Result = " + result);
             }
             if (msg != null) {
-                $('requestmessages').innerHTML = '<div class="warningText">' +
+                $('requestmessages').innerHTML = '<div class="alert">' +
                         msg + '</div>';
                
             }
@@ -105,7 +105,7 @@ function resetPage() {
       <g:checkBox name="enabled" value="${config?.enabled}" disabled="${!config?.enabled && invalidAdminEmail}"/>
       <label for="enabled"><g:message code="mailConfiguration.enabled.label" /></label>
       <g:if test="${invalidAdminEmail}">
-        <div class="warningText"><g:message code="mailConfiguration.enabled.invalidAdminEmail" 
+        <div class="alert"><g:message code="mailConfiguration.enabled.invalidAdminEmail" 
                                             args="${[createLink(action: 'edit')]}"/>
       </div>
       </g:if>

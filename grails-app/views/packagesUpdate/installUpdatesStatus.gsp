@@ -2,7 +2,7 @@
   <head>
     <title>CollabNet Subversion Edge <g:message code="packagesUpdate.page.installUpdatesStatus.title" /></title>
 
-      <meta name="layout" content="pkgupdates" />
+      <meta name="layout" content="main" />
       <g:javascript library="prototype" />
       <g:javascript src="jsProgressBarHandler.js" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"

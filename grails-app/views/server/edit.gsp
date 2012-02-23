@@ -123,7 +123,7 @@
   <body>
     <div class="message">${result}</div>
 <g:if test="${!isConfigurable}">
-<div class="instructionText">
+<div class="alert alert-block alert-info">
     <p><g:message code="server.page.edit.missingDirectives" />
     <blockquote>
     <code>
@@ -135,7 +135,7 @@
 </div>
 </g:if>
 <g:if test="${privatePortInstructions}">
-<div class="instructionText">
+<div class="alert alert-block alert-info">
     <g:if test ="${isStandardPort}">
       <i><g:message code="server.page.edit.standardPorts.header" /></i>
     </g:if>
