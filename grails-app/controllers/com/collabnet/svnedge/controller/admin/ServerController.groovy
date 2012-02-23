@@ -56,7 +56,7 @@ class ServerController {
     def ctfRemoteClientService
     def packagesUpdateService
 
-    def index = { redirect(action:edit, params:params) }
+    def index = { redirect(controller: 'status', action: 'index', params:params) }
 
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [update:'POST', revert: 'POST']

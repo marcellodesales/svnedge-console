@@ -109,7 +109,8 @@
     </content>
     
     <!-- Following content goes in the left nav area -->
-    <content tag="leftMenu">
+    <g:render template="/server/leftNav" />
+    
   <g:form method="post">
   <div>
     <g:if test="${isReplicaMode}">
@@ -186,7 +187,6 @@
     </div>
     </g:form>
 
-    </content>
 
       <h2><g:message code="status.page.header.information"/></h2>
       <table class="table table-striped table-bordered table-condensed">

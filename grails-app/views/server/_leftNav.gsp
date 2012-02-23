@@ -1,37 +1,55 @@
 <content tag="leftMenu">
-  <div class="<g:if test="${['edit','editAuthentication', 'editProxy', 'updateProxy', 'editMail', 'updateMail'].contains(actionName)}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="server" action="edit"><g:message code="server.page.leftNav.settings" /></g:link>
-  </div>
+  <li class="nav-header"><g:message code="admin.page.leftNav.maintenance"/></li>
+  
+  <li<g:if test="${controllerName == 'status'}"> class="active"</g:if>>
+    <g:link controller="status" action="index"><g:message code="admin.page.leftNav.status" /></g:link>
+  </li>
+            
+  <li<g:if test="${controllerName == 'log' && actionName != 'configure'}"> class="active"</g:if>>
+    <g:link controller="log" action="list" params="[sort : 'date', order: 'desc']"><g:message code="admin.page.leftNav.logs" /></g:link>
+  </li>
+            
+  <li<g:if test="${controllerName == 'packagesUpdate'}"> class="active"</g:if>>
+    <g:link controller="packagesUpdate" action="available"><g:message code="admin.page.leftNav.updates" /></g:link>
+  </li>
 
-  <div class="<g:if test="${controllerName == 'log'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="log" action="list" params="[sort : 'date', order: 'desc']"><g:message code="server.page.leftNav.logs" /></g:link>
-  </div>
+  <li class="nav-header"><g:message code="admin.page.leftNav.configuration"/></li>
 
-  <div class="<g:if test="${controllerName == 'packagesUpdate'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="packagesUpdate" action="available"><g:message code="server.page.leftNav.updates" /></g:link>
-  </div>
+  <li<g:if test="${controllerName == 'server' && (actionName == 'edit' || (actionName == 'update' && params.view == 'edit'))}"> class="active"</g:if>>
+    <g:link controller="server" action="edit"><g:message code="admin.page.leftNav.settings" /></g:link>
+  </li>
+  <li<g:if test="${controllerName == 'server' && (actionName == 'editAuthentication' || (actionName == 'update' && params.view == 'editAuthentication'))}"> class="active"</g:if>>
+    <g:link controller="server" action="editAuthentication"><g:message code="admin.page.leftNav.auth" /></g:link>
+  </li>
+  <li<g:if test="${controllerName == 'server' && ['editProxy', 'updateProxy'].contains(actionName)}"> class="active"</g:if>>
+    <g:link controller="server" action="editProxy"><g:message code="admin.page.leftNav.proxy" /></g:link>
+  </li>
+  <li<g:if test="${controllerName == 'server' && ['editMail', 'updateMail'].contains(actionName)}"> class="active"</g:if>>
+    <g:link controller="server" action="editMail"><g:message code="admin.page.leftNav.mail" /></g:link>
+  </li>
+
+  <li<g:if test="${controllerName == 'log' && actionName == 'configure'}"> class="active"</g:if>>
+    <g:link controller="log" action="configure"><g:message code="admin.page.leftNav.logConfigure" /></g:link>
+  </li>
+
+  <li class="nav-header"><g:message code="admin.page.leftNav.extensions"/></li>
+
 
 <g:if test="${!isManagedMode}">
-  <div class="<g:if test="${controllerName == 'setupTeamForge' || controllerName == 'setupReplica'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+  <li<g:if test="${controllerName == 'setupTeamForge' || controllerName == 'setupReplica'}"> class="active"</g:if>>
     <g:link controller="setupTeamForge" action="index">CollabNet TeamForge</g:link>
-  </div>
+  </li>
 </g:if>
 <g:else>
-  <div class="<g:if test="${['editIntegration','revert','editCredentials','updateCredentials'].contains(actionName) }">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="server" action="editIntegration"><g:message code="server.page.leftNav.toStandalone" /></g:link>
-  </div>
+  <li<g:if test="${['editIntegration','revert','editCredentials','updateCredentials'].contains(actionName) }"> class="active"</g:if>>
+    <g:link controller="server" action="editIntegration"><g:message code="admin.page.leftNav.toStandalone" /></g:link>
+  </li>
 </g:else>
 
 <%@ page import="com.collabnet.svnedge.domain.integration.CloudServicesConfiguration" %>
 <g:if test="${CloudServicesConfiguration.currentConfig?.enabled}">
-  <div class="<g:if test="${controllerName == 'setupCloudServices'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="setupCloudServices" action="index"><g:message code="server.page.leftNav.cloudServices" /></g:link>
-  </div>
+  <li<g:if test="${controllerName == 'setupCloudServices'}"> class="active"</g:if>>
+    <g:link controller="setupCloudServices" action="index"><g:message code="admin.page.leftNav.cloudServices" /></g:link>
+  </li>
 </g:if>
 </content>

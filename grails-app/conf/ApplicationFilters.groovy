@@ -118,7 +118,7 @@ class ApplicationFilters {
                         || ServerMode.REPLICA == Server.getServer().mode)
 
                 // default list of features for all users
-                def featureList = ["status"]
+                def featureList = []
                 if (!isManagedMode) {
                     featureList << "repo"
                 }
@@ -193,6 +193,15 @@ class ApplicationFilters {
             }
         }
 
+        redirectStatusToRepositoryList(controller: 'status', action: '*') {
+            before = {
+                if (!authenticateService
+                        .ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
+                    redirect(controller: 'repo', action: 'list')
+                }
+            }
+        }
+        
         /**
          * This filter restricts the access to the plug-in dbUtil under the
          * production environment for users with the roles "ROLE_ADMIN".

@@ -13,10 +13,6 @@
 
 <body>
 
-  <g:set var="tabArray" value="${[[action:'list', label: message(code:'logs.page.tabs.available')]]}" />
-  <g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'logs.page.tabs.settings')]}" />
-  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-
   <g:form>
 
       <table class="ItemDetailContainer">

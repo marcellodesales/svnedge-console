@@ -16,10 +16,6 @@
 
 <body>
 
-  <g:set var="tabArray" value="${[[active: true, label: message(code:'logs.page.tabs.available')]]}" />
-  <g:set var="tabArray" value="${tabArray << [action:'configure', label: message(code:'logs.page.tabs.settings')]}" />
-  <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
-
   <table class="Container">
     <tbody>
     <tr class="ItemListHeader">

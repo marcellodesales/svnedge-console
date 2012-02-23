@@ -74,7 +74,7 @@
         --%>
 
         <g:set var="controllerButtonMap"
-               value="${[status: 'status',
+               value="${[status: 'admin',
                       repo: 'repo',
                       repoTemplate: 'repo',
                       user: 'user',
