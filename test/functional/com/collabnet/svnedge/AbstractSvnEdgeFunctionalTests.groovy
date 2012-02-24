@@ -81,7 +81,7 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         form('loginForm') {
             j_username = username
             j_password = password
-            click login
+            click "Sign In"
         }
         assertStatus(200)
         javaScriptEnabled = true
