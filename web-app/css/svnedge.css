@@ -58,6 +58,10 @@
   color: black;
 }
 
+.well h2 {
+    margin-left: 12px;
+    font-size: 18px;    
+}
 
 /* For toggles on job details page */
 .triggerRunning {

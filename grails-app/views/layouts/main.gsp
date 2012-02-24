@@ -104,7 +104,7 @@
                       ]}" />
 
         <%-- activate buttons in this order: 'activeButton' property in model, controllerName, or default (status) --%>
-        <g:set var="selectedButton">status</g:set>
+        <g:set var="selectedButton">admin</g:set>
         <g:if test="${controllerButtonMap[activeButton]}">
             <g:set var="selectedButton"
                 value="${controllerButtonMap[activeButton]}" />
@@ -208,6 +208,7 @@
           <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
           <div class="span3">
             <div class="well sidebar-nav">
+              <h2>${buttonNameMap[selectedButton]}</h2>
               <ul class="nav nav-list">
                 <g:pageProperty name="page.leftMenu" />
               </ul>
@@ -226,11 +227,13 @@
           </div> <!--/span3-->
         </g:if>
         <div class="span${blocks}">
+        <g:if test="${pageProperty(name:'page.title') && pageProperty(name:'page.title').trim() != buttonNameMap[selectedButton]}">
           <div class="row-fluid">
-            <div class="span2">
+            <div class="span6">
               <h2><g:pageProperty name="page.title" /></h2>
             </div>
           </div>
+        </g:if>
 
           <div class="row-fluid">
             <g:layoutBody />

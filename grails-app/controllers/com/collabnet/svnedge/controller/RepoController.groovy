@@ -80,7 +80,6 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def discover = {
-
         try {
             svnRepoService.syncRepositories();
             flash.message = message(code: 'repository.action.discover.success')
@@ -90,7 +89,7 @@ class RepoController {
             log.error("Unable to discover repositories", e)
             flash.error = message(code: 'repository.action.discover.failure')
         }
-        redirect(action: list, params: params)
+        redirect(action: list)
     }
 
     private Repository selectRepository() {
@@ -945,6 +944,12 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
     def hooksList = {
+        def id = params.id
+        if (!id) {
+            id = ControllerUtil.getListViewSelectedIds(params)[0]
+            params.id = id
+        }
+
         def model = reports()
         def repo = Repository.get(params.id)
         if (repo) {

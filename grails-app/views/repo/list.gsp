@@ -64,6 +64,11 @@
 
     <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
     <p class="pull-right">
+    
+     <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+     <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
+     <g:listViewActionButton action="hooksList" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
+         
       <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
                               confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
                               confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">

@@ -50,6 +50,13 @@
         </g:each>
       </tbody>
       </table>
+      
+      <g:form>
+      <p class="pull-right">
+        <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+      </p>
+      </g:form>
+      
       <g:javascript>
         function sendUpdatedOrder(container) {
             new Ajax.Request("/csvn/repoTemplate/updateListOrder", {
