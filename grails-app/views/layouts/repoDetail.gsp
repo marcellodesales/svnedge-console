@@ -6,7 +6,6 @@
         <g:pageProperty name="page.headSnippet" />
     </head>
 
-<g:render template="leftNav" />
 
 <content tag="title">
      <g:message code="repository.page.leftnav.title" />
@@ -30,123 +29,124 @@
  </div>
 </g:if>
 
+    <ul class="breadcrumb">
+      <li><g:link action="list"><g:message code="repository.main.icon"/></g:link><span
+        class="divider">/</span></li>
+      <li class="active"><a href="#">${fieldValue(bean:repositoryInstance, field:'name')}</a></li>
+    </ul>
 
-        <table class="Container">
-    <thead>
-    <tr class="ContainerHeader">
-      <td colspan="5"><g:message code="repository.page.show.header" /></td>    
-    </tr>
-    </thead>
-                    <tbody>
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.name" /></td>
-                            <td valign="top" class="value">${fieldValue(bean:repositoryInstance, field:'name')}</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                            <td>&nbsp;</td>
-                         </tr>
- 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.status" /></td>
-                            <td valign="top" class="value">
-                              <g:if test="${repositoryInstance.permissionsOk}">
-                                <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
-                              </g:if>
-                              <g:else>
-                                <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
-                              </g:else>
-                             </td>
-
-                            <td>&nbsp;</td>
-
-                            <td valign="top" class="name"><g:message code="repository.page.show.fsformat" /></td>
-                            <td valign="top" class="value" nowrap="nowrap">
-                                <g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/>
-                            </td>
-                        </tr>
- 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.revision" /></td>
-                            <td valign="top" class="value">${headRev}</td>
-
-                            <td>&nbsp;</td>
-
-                            <td valign="top" class="name"><g:message code="repository.page.show.repoformat" /></td>
-                            <td valign="top" class="value">${repoFormat}</td>
-                        </tr>
- 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.uuid" /></td>
-                            <td valign="top" class="value" nowrap="nowrap">${repoUUID}</td>
-
-                            <td>&nbsp;</td>
-
-                            <td valign="top" class="name"><g:message code="repository.page.show.supports" /></td>
-                            <td valign="top" class="value" nowrap="nowrap">${repoSupport}</td>
-                        </tr>
- 
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.size" /></td>
-                            <td valign="top" class="value">
-                               <g:if test="${diskUsage}">
-                                  <g:formatFileSize size="${diskUsage}"/>
-                               </g:if>
-                               <g:else>
-                                  <g:message code="status.page.status.noData"/>
-                               </g:else>
-                            </td>
-
-                            <td>&nbsp;</td>
-
-                            <td valign="top" class="name"><g:message code="repository.page.show.sharding" /></td>
-                            <td valign="top" class="value">
-                              <g:if test="${sharded >= 0}">
-                                <g:message code="repository.page.show.sharding.enabled" args="${[sharded]}"/>
-                              </g:if>
-                              <g:else>
-                                <g:message code="repository.page.show.sharding.disabled"/>
-                              </g:else>
-                             </td>
-                        </tr>
-
-                        <tr class="prop">
-                            <td valign="top" class="name"><g:message code="repository.page.show.packed" /></td>
-                            <td valign="top" class="value">
-                              <g:if test="${minPackedRev > 0}">
-                                <g:message code="default.boolean.true" />
-                              </g:if>
-                              <g:else>
-                                <g:message code="default.boolean.false" />
-                              </g:else>
-                             </td> 
-
-                            <td>&nbsp;</td>
-
-                            <td valign="top" class="name"><g:message code="repository.page.show.repshare" /></td>
-                            <td valign="top" class="value">
-                              <g:if test="${repSharing}">
-                                <g:message code="default.boolean.true" />
-                              </g:if>
-                              <g:else>
-                                <g:message code="default.boolean.false" />
-                              </g:else>
-                             </td>
-                         </tr>
-
-                    </tbody>
-                </table>
-
-            <div class="buttons">
-                <g:form>
-                    <input type="hidden" name="id" value="${repositoryInstance?.id}" />
-                    <g:if test="${!repositoryInstance.permissionsOk}">
-                    <span class="button"><g:actionSubmit class="updatePermissions" value="${message(code:'repository.page.show.button.validate') }" action="updatePermissions"/></span>
-                    </g:if>
-                    <%--
-                    <span class="button"><g:actionSubmit class="delete" onclick="return confirm('Are you sure?');" value="Delete" /></span>
-                    --%>
-                </g:form>
+    <div class="row-fluid">
+      <div class="span12">
+        <h2>${fieldValue(bean:repositoryInstance, field:'name')}</h2>
+        <div class="row-fluid">
+          <div class="span10 well">
+            
+            <div class="row-fluid">
+              <div class="span1">
+                <strong><g:message code="repository.page.show.status" /></strong>
+              </div>
+              <div class="span3">
+                <g:if test="${repositoryInstance.permissionsOk}">
+                  <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
+                </g:if>
+                <g:else>
+                  <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
+                </g:else>
+              </div>
+              <div class="span2">
+                <strong><g:message code="repository.page.show.fsformat" /></strong>
+              </div>
+              <div class="span4"><g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/></div>
             </div>
+
+            <div class="row-fluid">
+              <div class="span1">
+                <strong><g:message code="repository.page.show.revision" /></strong>
+              </div>
+              <div class="span3">${headRev}</div>
+              <div class="span2">
+                <strong><g:message code="repository.page.show.repoformat" /></strong>
+              </div>
+              <div class="span4">${repoFormat}</div>
+            </div>
+            
+            <div class="row-fluid">
+              <div class="span1">
+                <strong><g:message code="repository.page.show.uuid" /></strong>
+              </div>
+              <div class="span3">${repoUUID}</div>
+              <div class="span2">
+                <strong><g:message code="repository.page.show.supports" /></strong>
+              </div>
+              <div class="span4">${repoSupport}</div>
+            </div>
+           
+            <div class="row-fluid">
+              <div class="span1">
+                <strong><g:message code="repository.page.show.size" /></strong>
+              </div>
+              <div class="span3">
+                <g:if test="${diskUsage}">
+                  <g:formatFileSize size="${diskUsage}"/>
+                </g:if>
+                <g:else>
+                  <g:message code="status.page.status.noData"/>
+                </g:else>
+              </div>
+              <div class="span2">
+                <strong><g:message code="repository.page.show.sharding" /></strong>
+              </div>
+              <div class="span4">
+                <g:if test="${sharded >= 0}">
+                  <g:message code="repository.page.show.sharding.enabled" args="${[sharded]}"/>
+                </g:if>
+                <g:else>
+                  <g:message code="repository.page.show.sharding.disabled"/>
+                </g:else>
+              </div>
+            </div>
+
+            <div class="row-fluid">
+              <div class="span1">
+                <strong><g:message code="repository.page.show.packed" /></strong>
+              </div>
+              <div class="span3">
+                <g:if test="${minPackedRev > 0}">
+                  <g:message code="default.boolean.true" />
+                </g:if>
+                <g:else>
+                  <g:message code="default.boolean.false" />
+                </g:else>
+              </div>
+              <div class="span2">
+                <strong><g:message code="repository.page.show.repshare" /></strong>
+              </div>
+              <div class="span4">
+                <g:if test="${repSharing}">
+                  <g:message code="default.boolean.true" />
+                </g:if>
+                <g:else>
+                  <g:message code="default.boolean.false" />
+                </g:else>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+        <div class="buttons">
+          <g:form>
+            <input type="hidden" name="id" value="${repositoryInstance?.id}"/>
+            <g:if test="${!repositoryInstance.permissionsOk}">
+              <span class="button"><g:actionSubmit class="updatePermissions"
+                                                   value="${message(code:'repository.page.show.button.validate') }"
+                                                   action="updatePermissions"/></span>
+            </g:if>
+          <%--
+          <span class="button"><g:actionSubmit class="delete" onclick="return confirm('Are you sure?');" value="Delete" /></span>
+          --%>
+          </g:form>
+        </div>
 
   <g:if test="${!params.suppressTabs}">
   <g:set var="tabArray" value="${[[action:'dumpFileList', href:createLink(action: 'dumpFileList', id: params.id), label: message(code:'repository.page.show.tabs.dumpFileList')]]}" />
