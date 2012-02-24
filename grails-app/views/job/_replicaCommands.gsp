@@ -20,29 +20,22 @@
 <%@page import="com.collabnet.svnedge.integration.command.AbstractCommand"%>
 <%@page import="com.collabnet.svnedge.integration.command.CommandState"%>
 
-<table class="Container">
+<h3>
+  <g:if test="${shortRun}">
+    <g:message code="job.page.list.short_running.header"/>
+  </g:if>
+  <g:else>
+    <g:message code="job.page.list.long_running.header"/>
+  </g:else>
+</h3>
+<table class="table table-striped table-bordered table-condensed">
   <thead>
-    <tr class="ContainerHeader">
-      <td colspan="3">
-       <g:if test="${shortRun}">
-        <g:message code="job.page.list.short_running.header"/>
-       </g:if>
-       <g:else>
-        <g:message code="job.page.list.long_running.header"/>
-       </g:else>
-      </td>
-      <td>
-        <g:set var="imageRunning" value="none" />
-        <g:if test="${runningCommands.size() > 0}">
-           <g:set var="imageRunning" value="" />
-        </g:if>
-      </td>
-    </tr>
-     <tr class="ItemListHeader">
-       <td width="18">#</td>
-       <td width="15%">${message(code: 'job.page.list.column.id')}</td>
-       <td>${message(code: 'job.page.list.column.code')}</td>
-       <td width="20%">${message(code: 'job.page.list.column.started_at')}</td>
+  <tr>
+    <tr>
+       <th width="18">#</th>
+       <th width="15%">${message(code: 'job.page.list.column.id')}</th>
+       <th>${message(code: 'job.page.list.column.code')}</th>
+       <th width="20%">${message(code: 'job.page.list.column.started_at')}</th>
     </tr>
   </thead>
   <tbody id="${tableName}">
@@ -51,13 +44,13 @@
      <g:set var="command" value="${runningCommands.get(i)}" />
 
     <g:if test="${command.state == CommandState.RUNNING}">
-      <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
+      <tr id="run_${command.id}">
     </g:if>
     <g:elseif test="${(command.state == CommandState.TERMINATED || command.state == CommandState.REPORTED) && command.succeeded}">
-      <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}" style="background-color : #99D6AD;">
+      <tr id="run_${command.id}" style="background-color : #99D6AD;">
     </g:elseif>
     <g:elseif test="${(command.state == CommandState.TERMINATED || command.state == CommandState.REPORTED) && !command.succeeded}">
-      <tr id="run_${command.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}" style="background-color : #FFB2B2;">
+      <tr id="run_${command.id}" style="background-color : #FFB2B2;">
     </g:elseif>
 
        <td>${i+1}</td>
@@ -95,12 +88,11 @@
       </tr> 
     </g:if>
     <g:else>
-      <tr class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
+      <tr>
        <td>${i+1}</td>
-       <td colspan="3" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
+       <td colspan="3" align="center"><strong>${message(code: 'job.page.list.row.job_idle')}</strong></td>
       </tr>
     </g:else>
-     </tr>
    </g:each>
   </tbody>
  </table>

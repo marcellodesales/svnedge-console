@@ -31,17 +31,20 @@
      </div>
    </div>
 <br/>
+<br/>
 
-<div class="ImageListParent">
-   <table class="Container" id="scheduledCommandsTable">
-     <tbody>
-     <tr class="ContainerHeader">
-       <td colspan="2">
+<div>
+  <table class="table table-striped table-bordered table-condensed" id="scheduledCommandsTable">
+    <thead>
+     <tr>
+       <th>
          <g:message code="job.page.list.scheduled.header"/>
-       </td>
+       </th>
      </tr>
+    </thead>
+    <tbody>
   <g:each in="${scheduledCommands}" status="i" var="schCommand">
-    <tr id="sch_${schCommand.id}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
+    <tr id="sch_${schCommand.id}">
      <td>
       &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(schCommand)}" />
       <img border="0" src="/csvn/images/replica/${commandCode}.png">
@@ -53,23 +56,23 @@
    </table>
 <g:if test="${unprocessedCommands}">
 <br />
-   <table class="Container" id="blockedCommandsTable">
-     <tbody>
-     <tr class="ContainerHeader">
-       <td colspan="2">
+   <table class="table table-striped table-bordered table-condensed" id="blockedCommandsTable">
+     <thead>
+     <tr>
+       <th>
          <g:message code="job.page.list.blocked.header"/>
-       </td>
+       </th>
      </tr>
-  <g:set var="rowClass" value="OddRow"/>
+     </thead>
+     <tbody>
   <g:each in="${unprocessedCommands}" status="i" var="cmd">
-    <tr id="sch_${cmd.id}" class="${rowClass}}">
+    <tr id="sch_${cmd.id}">
      <td>
       &nbsp; <g:set var="commandCode" value="${AbstractCommand.makeCodeName(cmd)}" />
-      <img border="0" src="/csvn/images/replica/${commandCode}.png" alt"" />
+      <img border="0" src="/csvn/images/replica/${commandCode}.png" alt="" />
       ${cmd.id} ${cmd.params.repoName ? "(" + cmd.params.repoName.substring(cmd.params.repoName.lastIndexOf("/") + 1, cmd.params.repoName.length()) + ")" : ""}
      </td>
     </tr>
-    <g:set var="rowClass" value="${rowClass ==  'OddRow' ? 'EvenRow' : 'OddRow'}"/>
   </g:each>
     </tbody>
    </table>
@@ -81,9 +84,6 @@
 
 <g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
-
-<br/><br/>
-
 
 <g:render template="/job/replicaCommands" model="['tableName': 'shortRunningCommandsTable',
  'runningCommands': shortRunningCommands, 'maxNumber': maxShortRunning, 'shortRun': true]" />
