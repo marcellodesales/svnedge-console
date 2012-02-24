@@ -13,12 +13,7 @@
   <g:message code="job.page.header"/>
 </content>
 
-<content tag="leftMenu">
-  <div class="<g:if test="${actionName == 'list' || actionName == 'listReplica'}">ImageListParentSelectedNoTop</g:if><g:else>ImageListParent</g:else>">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="job" action="index"><g:message code="job.page.leftNav.list" /></g:link>
-  </div>
-</content>
+<g:render template="/server/leftNav"/>
 
 <body>
 

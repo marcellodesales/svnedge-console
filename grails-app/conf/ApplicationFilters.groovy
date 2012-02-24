@@ -130,14 +130,8 @@ class ApplicationFilters {
                     featureList << "user"
                 }
 
-                featureList << "statistics"
-
                 // role-based additions
                 if (authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
-                    if (!isIntegrationServer) {
-                        featureList << "job"
-                    }
-
                     if (lifecycleService.getServer().replica) {
                         featureList << "admin"
                     }
@@ -155,6 +149,7 @@ class ApplicationFilters {
                 }
                 model.put("featureList", featureList)
                 model.put("isManagedMode", isManagedMode)
+                model.put("isIntegrationServer", isIntegrationServer)
             }
         }
 

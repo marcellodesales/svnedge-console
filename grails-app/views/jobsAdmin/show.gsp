@@ -9,9 +9,9 @@
       Scheduled Jobs Administration
     </content>
     
-    <!-- Following content goes in the left nav area -->
-    <content tag="leftMenu">
-      <div class="leftDescription">
+    <g:render template="/server/leftNav"/>
+
+      <div class="well">
         The list of schedule jobs can be seen in the form.
         Here's the list of operations that can be done.
         <ul>
@@ -23,7 +23,7 @@
           ${summary}
         </p>
       </div>
-    </content>
+    </div>
     <div class="body">
       <div class="dialog">
         <table class="ItemDetailContainer" align="center" width="99%">

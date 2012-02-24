@@ -2,20 +2,13 @@
 
 <content tag="leftMenu">
 
-  <div class="${controllerName == 'user' && actionName == 'list' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+  <li<g:if test="${controllerName == 'user' && actionName == 'list'}"> class="active"</g:if>>
     <g:link controller="user" action="list"><g:message code="user.page.leftnav.list"/></g:link>
-  </div>
+  </li>
 
-  <div class="${controllerName == 'user' && actionName == 'create' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <g:link controller="user" action="create"><g:message code="user.page.leftnav.create"/></g:link>
-  </div>
-
-  <div class="${controllerName == 'role' && actionName == 'list' ? 'ImageListParentSelectedNoTop' : 'ImageListParent' }">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
+  <li<g:if test="${controllerName == 'role' && actionName == 'list'}"> class="active"</g:if>>
     <g:link controller="role" action="list"><g:message code="role.page.leftnav.list"/></g:link>
-  </div>
+  </li>
 
 </content>
 

@@ -74,22 +74,6 @@
   font-weight: bold;
 }
 
-/* For svnedge statistics menu */
-.category {
-  margin-left: 20px;
-  padding-left: 20px;
-
-}
-.group {
-  margin-left: 10px;
-  padding-left: 10px;
-}
-
-.graph {
-  margin-left: 10px;
-  padding-left: 10px;
-}
-
 .errors ul{
   background: #fdf7f1 url(/csvn/images/icons/icon_error_sml.gif) 0.4em 0.5em no-repeat;
   border: 1px solid #900; 

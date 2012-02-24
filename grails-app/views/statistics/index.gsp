@@ -11,16 +11,18 @@
       </content>
     
       <!-- Following content goes in the left nav area -->
-      <content tag="leftMenu">
-        <div class="leftDescription">
+        <g:render template="/server/leftNav"/>
+
+      <g:render template="chart" />
+
         <ul class="category">
         <g:each status="i" var="data" in="${statData}">
           <%-- hide empty stat group categories (eg, replica-only categories in standalone mode --%>
           <g:if test="${data.statgroups}">
-          <li>${data.category}</li>
-            <ul class="group">
+          <div class="span3"><h3>${data.category}</h3>
             <g:each status="j" var="group" in="${data.statgroups}">
-              <li>${group.statgroup}</li>
+              <div class="group">
+                ${group.statgroup}
                 <ul class="graph">
                 <g:each status="k" var="graph" in="${group.graphs}">
                   <li><a href="#" 
@@ -29,17 +31,12 @@
                          ${graph.graphName}
                   </a></li>
                 </g:each>
-                </ul>
+              </div>
             </g:each>
-            </ul>
+          </div> <!-- /span3 -->
           </g:if>
         </g:each>
         </ul>
-        </div>
-
-      </content>
-
-      <g:render template="chart" />
   
 </body>
 </html>

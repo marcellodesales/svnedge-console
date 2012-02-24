@@ -14,7 +14,9 @@
   <g:message code="job.page.header"/> - ${replicaName}
 </content>
 
-<content tag="leftMenu">
+<g:render template="/server/leftNav"/>
+
+<div class="well">
 <br/>
    <div class="ImageListParent">
     <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
@@ -80,7 +82,7 @@
 </g:if>
 </div>
 
-</content>
+</div>
 
 <g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />
