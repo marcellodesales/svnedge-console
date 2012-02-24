@@ -224,6 +224,11 @@ class CsvnTagLib {
         int currentstep = (offset / max) + 1
         int firststep = 1
         int laststep = Math.round(Math.ceil(total / max))
+        
+        // no pager is needed if these conditions are true, return now
+        if (total == 0 || laststep == firststep) {
+            return
+        }
 
         // write the html
         out << '<div class="pagination">'
