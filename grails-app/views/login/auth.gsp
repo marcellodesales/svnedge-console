@@ -19,7 +19,7 @@
             <div class="clearfix">
               <input type="password" name="j_password" id="j_password" placeholder="<g:message code="login.page.auth.password.label" />" />
             </div>
-            <button class="btn btn-primary" value="Login" type="submit"><g:message code="login.page.auth.button.submit" /></button>
+            <input class="btn btn-primary" value="<g:message code="login.page.auth.button.submit" />" type="submit"></input>
           </fieldset>
         </form>
       </div>
