@@ -137,7 +137,8 @@ class CsvnTagLib {
     /**
      * This tag will create a "multi-select" action button for use
      * in list views
-     * @attr action REQUIRED the controller action to execut
+     * @attr action REQUIRED the controller action to execute
+     * @attr primary boolean indicating whether this should be styled as the primary button
      * @attr minSelected the min number of items selected to enable the button
      * @attr maxSelected the max number of items selected to enable the button
      * @attr confirmMessage the confirmation message to display before allowing the action
@@ -146,7 +147,9 @@ class CsvnTagLib {
      * @return the button html
      */
     def listViewActionButton = { attrs, body ->
-        out << "<input id='listViewAction_${attrs.action}' type='submit' class='btn ${attrs.action} listViewAction' "
+        
+        def styleClasses = (attrs.primary) ? "btn btn-primary" : "btn"
+        out << "<input id='listViewAction_${attrs.action}' type='submit' class='${styleClasses} ${attrs.action} listViewAction' "
         out << " name='_action_${attrs.action}' "
         out << " value='${body().trim()}'/>"
         out << '\n<script type="text/javascript">\n'

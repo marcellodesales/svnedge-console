@@ -16,21 +16,22 @@
 
 <body>
 
-  <table class="Container">
-    <tbody>
-    <tr class="ItemListHeader">
+<table class="table table-striped table-bordered table-condensed tablesorter">
+  <thead>
+    <tr>
       
       <g:sortableColumn property="name" title="${message(code:'logs.page.list.column.name')}"/>
       <g:sortableColumn property="date" title="${message(code:'logs.page.list.column.date')}"/>
       <g:sortableColumn property="size" title="${message(code:'logs.page.list.column.size')}"/>
     </tr>
-
+  </thead>
+  <tbody>
     <g:if test="${files.size() > 0}">
 
       <g:each in="${files}" status="i" var="file">
         <g:def var="fileName" value="${file.name}"/>
 
-        <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+        <tr>
           <td><g:link action="show" params="[fileName : fileName]">${file.name}</g:link></td>
           <td><g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/></td>
           <td><g:formatFileSize size="${file.size}"/></td>
@@ -40,16 +41,11 @@
 
     </g:if>
     <g:else>
-      <tr class="ItemListNoData">
+      <tr>
         <td colspan="3"><g:message code="logs.page.list.noFilesFound" /></td>
       </tr>
     </g:else>
-
-    <tr class="ContainerFooter">
-      <td colspan="5">
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  </tbody>
+</table>
 </body>
 </html>

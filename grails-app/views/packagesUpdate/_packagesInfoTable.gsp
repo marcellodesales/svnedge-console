@@ -3,21 +3,28 @@
    <g:set var="tabArray" value="${tabArray << [action:'installed', label: message(code:'packagesUpdate.page.tabs.installed')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
-    <table class="Container">
-      <tbody>
-        <tr><td colspan="5"><strong><g:message code="packagesUpdate.page.table.repository" /></strong>
-            ${imageOriginUrl} <g:if test="${proxyToOriginURL}"><strong><g:message code="packagesUpdate.page.table.throughProxy" args="${[createLink(controller: 'server', action: 'editProxy')]}" /></strong>
-               </g:if></td></tr>
+   <div class="well">
+   <strong><g:message code="packagesUpdate.page.table.repository" /></strong>
+   ${imageOriginUrl} 
+   <g:if test="${proxyToOriginURL}">
+     <strong><g:message code="packagesUpdate.page.table.throughProxy" args="${[createLink(controller: 'server', action: 'editProxy')]}" /></strong>
+   </g:if>
+   </div>
+   
+   <table class="table table-striped table-bordered table-condensed tablesorter">
+     <thead>
+       <tr>
+         <g:sortableColumn property="summary" title="${message(code:'packagesUpdate.page.table.column.summary')}"/>
+         <g:sortableColumn property="publishedDate" title="${message(code:'packagesUpdate.page.table.column.publishedDate')}"/>
+         <g:sortableColumn property="release" title="${message(code:'packagesUpdate.page.table.column.release')}"/>
+         <g:sortableColumn property="branch" title="${message(code:'packagesUpdate.page.table.column.branch')}"/>
+         <g:sortableColumn property="size" title="${message(code:'packagesUpdate.page.table.column.size')}"/>
+       </tr>
+     </thead>
+     <tbody>
 
     <g:if test="${(!anyConnectionProblem && packagesInfo && packagesInfo.size() > 0) || 
                   (actionName == 'installed' && packagesInfo && packagesInfo.size() > 0)}">
-        <tr class="ItemListHeader">
-          <g:sortableColumn property="summary" title="${message(code:'packagesUpdate.page.table.column.summary')}"/>
-          <g:sortableColumn property="publishedDate" title="${message(code:'packagesUpdate.page.table.column.publishedDate')}"/>
-          <g:sortableColumn property="release" title="${message(code:'packagesUpdate.page.table.column.release')}"/>
-          <g:sortableColumn property="branch" title="${message(code:'packagesUpdate.page.table.column.branch')}"/>
-          <g:sortableColumn property="size" title="${message(code:'packagesUpdate.page.table.column.size')}"/>
-        </tr>
       <g:each var="packageInfo" in="${packagesInfo}" status="rowNumber">
 
         <tr class="${(rowNumber % 2) == 0 ? 'OddRow' : 'EvenRow'}">
@@ -35,8 +42,8 @@
       </g:each>
     </g:if>
     <g:else>
-      <tr class="ItemListNoData">
-        <td colspan="3">
+      <tr>
+        <td colspan="5">
             <g:if test="${actionName == 'available'}"> 
                 <g:message code="packagesUpdate.page.table.noUpdatesAvilable" />
             </g:if>

@@ -35,26 +35,18 @@
 
     <g:form method="post">
 
-      <table class="Container">
-        <tbody>
-          <tr class="ContainerFooter">
-            <td>
-              <div class="AlignRight">
+              <div class="pull-right">
                   <g:actionSubmit id="reloadButton" action="reloadAddOns" 
                                   value="${message(code:'packagesUpdate.page.addOns.button.reload')}" 
-                                  class="Button"/>
+                                  class="btn"/>
                   <g:set var="confirmMsg" value="${message(code:'packagesUpdate.addons.install.confirmation')}" />
                   <g:actionSubmit id="installButton" action="installAddOns" 
                                   value="${message(code:'packagesUpdate.page.addOns.button.install')}" 
-                                  class="Button"
+                                  class="btn btn-primary"
                                   onclick="return confirm('${confirmMsg}')"
                                />
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
+      
     </g:form>
 
   </body>

@@ -173,11 +173,12 @@
           </g:if>
 
         </table>
+  </table>
         <g:if test="${!repositoryInstance}">
           <br/>
-          <table class="Container">
-            <tbody>
-            <tr class="ItemListHeader">
+          <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
+          <thead>
+            <tr>
               <th><g:listViewSelectAll/></th>
               <g:sortableColumn property="repoName" titleKey="repository.page.bkupSchedule.job.repoName"
                                 defaultOrder="asc"/>
@@ -185,8 +186,10 @@
               <g:sortableColumn property="scheduledFor" titleKey="repository.page.bkupSchedule.job.scheduledFor"/>
               <g:sortableColumn property="keepNumber" titleKey="repository.page.bkupSchedule.job.keepNumber"/>
             </tr>
+          </thead>
+          <tbody>
             <g:each in="${repoBackupJobList}" status="i" var="job">
-              <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+              <tr>
                 <td>
                   <g:listViewSelectItem item="${job}" property="repoId"
                                         onClick="setFormState({'type': '${job.typeCode}', 'numberToKeep': '${job.keepNumber}', 'scheduleFrequency': '${job.schedule?.frequency}', 'scheduleHour': '${job.schedule?.hour}', 'scheduleMinute': '${job.schedule?.minute}', 'scheduleDayOfWeek': '${job.schedule?.dayOfWeek}'})"/>
@@ -216,29 +219,25 @@
             </g:each>
             <g:if test="${!repoBackupJobList}">
               <tr>
-                <td colspan="5"><p><g:message code="repository.page.list.noRepos"/></p></td>
+                <td><p><g:message code="repository.page.list.noRepos"/></p></td>
               </tr>
             </g:if>
+            </tbody>
           </table>
         </g:if>
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td>
-        <div class="AlignRight">
+
+        <div class="pull-right">
           <g:if test="${!repositoryInstance}">
-            <g:listViewActionButton action="updateBkupSchedule" minSelected="1">
+            <g:listViewActionButton action="updateBkupSchedule" minSelected="1" primary="true">
               <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
             </g:listViewActionButton>
           </g:if>
           <g:else>
             <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}"
-                            class="Button"/>
+                            class="btn btn-primary"/>
           </g:else>
         </div>
-      </td>
-    </tr>
-  </table>
+  
 </g:form>
 <g:javascript>
   function typeHandler() {

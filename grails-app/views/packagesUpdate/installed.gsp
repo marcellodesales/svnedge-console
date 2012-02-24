@@ -30,22 +30,14 @@
 
     <g:form method="post">
 
-      <table class="Container">
-        <tbody>
-          <tr class="ContainerFooter">
-            <td >
-              <div class="AlignRight">
+              <div class="pull-right">
                   <g:actionSubmit id="reloadUpdates" action="reloadUpdates" 
                                   value="${message(code:'packagesUpdate.page.installed.button.reloadUpdates')}" 
-                                  class="Button"/>
+                                  class="btn btn-primary"/>
                   <g:actionSubmit id="reloadAddOns" action="reloadAddOns" 
                                   value="${message(code:'packagesUpdate.page.installed.button.reloadAddOns')}" 
-                                  class="Button"/>
+                                  class="btn"/>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
 
     </g:form>
 

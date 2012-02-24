@@ -21,18 +21,17 @@
     <span class="menuButton"><g:link class="create" action="create"><g:message code="repoTemplate.page.create.header.title" /></g:link></span>
   </div>
 -->
-  <div class="body">
+  <p>
+    <g:message code="repoTemplate.page.list.header.title" />
+  </p>
+  <p>
+    <g:message code="repoTemplate.page.list.sort.instructions"/>
+  </p>
+
     <g:if test="${repoTemplateInstanceList.size() > 0}">
-    <div class="list">
-      <table class="Container">
-      <thead>
-        <tr class="ContainerHeader">
-          <td colspan="3"><g:message code="repoTemplate.page.list.header.title" /></td>
-        </tr>
-        <tr class="InstructionHeader">
-          <td colspan="3"><g:message code="repoTemplate.page.list.sort.instructions"/></td>
-        </tr>
-        <tr class="ItemListHeader">
+      <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
+        <thead>
+        <tr>
           <!-- <th><g:listViewSelectAll/></th>
           <g:sortableColumn property="name" title="${message(code: 'repoTemplate.name.label', default: 'Name')}" />
           <g:sortableColumn property="active" title="${message(code: 'repoTemplate.active.label', default: 'Active')}" />  -->
@@ -53,7 +52,7 @@
       
       <g:form>
       <p class="pull-right">
-        <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+        <g:listViewActionButton action="create" minSelected="0" maxSelected="0" primary="true"><g:message code="default.button.create.label" /></g:listViewActionButton>
       </p>
       </g:form>
       
@@ -69,11 +68,9 @@
         }
         Sortable.create('templates',{tag: 'tr', ghosting:false, onUpdate: sendUpdatedOrder})
       </g:javascript>
-    </div>
     </g:if>
     <g:else>
-      <div><p><g:message code="repoTemplate.page.list.empty"/></p></div>
+      <p><g:message code="repoTemplate.page.list.empty"/></p>
     </g:else>
-  </div>
 </body>
 </html>

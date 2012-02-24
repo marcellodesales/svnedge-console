@@ -18,20 +18,10 @@
 
 <%@ page import="org.springframework.scheduling.quartz.QuartzJobBean" %>
 
-<table class="Container">
+<h3>${heading}</h3>
+<table class="table table-striped table-bordered table-condensed tablesorter">
   <thead>
-  <tr class="ContainerHeader">
-    <td colspan="5">
-      ${heading}
-    </td>
-    <td>
-      <g:set var="imageRunning" value="none"/>
-      <g:if test="${itemList?.size() > 0}">
-        <g:set var="imageRunning" value=""/>
-      </g:if>
-    </td>
-  </tr>
-  <tr class="ItemListHeader">
+  <tr>
     <td width="5%">#</td>
     <td width="15%">${message(code: 'job.page.list.column.id')}</td>
     <td width="50%">${message(code: 'job.page.list.column.description')}</td>
@@ -43,7 +33,7 @@
   <tbody id="${tableName}">
   <g:each in="${itemList}" var="jobCtx" status="i">
 
-    <tr id="run_${jobCtx.jobDetail}" class="${(i % 2) == 0 ? 'OddRow' : 'EvenRow'}">
+    <tr id="run_${jobCtx.jobDetail}">
 
       <td>${i + 1}</td>
       <td>
@@ -91,7 +81,7 @@
     </tr>
   </g:each>
   <g:if test="${!itemList}">
-    <tr class="EvenRow}">
+    <tr>
       <td>1</td>
       <td colspan="6" align="center"><b>${message(code: 'job.page.list.row.job_idle')}</b></td>
     </tr>

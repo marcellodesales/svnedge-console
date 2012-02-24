@@ -33,14 +33,6 @@
 
     <body>
 
-    <table class="Container">
-      <thead>
-        <tr class="ContainerHeader">
-          <td><g:message code="repository.page.backup.header" /></td>
-        </tr>
-      </thead>
-    </table>
-
     <g:render template="backupScheduleForm"/>
 
     </body>
