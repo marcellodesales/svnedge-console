@@ -101,17 +101,17 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
 
     protected void loginAdmin() {
         this.login ("admin", "admin")
-        assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
+        assertContentContains("loggedInUser")
     }
 
     protected void loginUser() {
         this.login ("user", "admin")
-        assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
+        assertContentContains("loggedInUser")
     }
 
     protected void loginUserDot() {
         this.login ("user.new", "admin")
-        assertContentContains(getMessage("layout.page.loggedAs") + "&nbsp;")
+        assertContentContains("loggedInUser")
     }
 
     /**
