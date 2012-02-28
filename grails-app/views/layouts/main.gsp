@@ -29,8 +29,11 @@
       
     <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
           
-    <g:layoutHead />
+    <!-- jquery lib is often needed before page html is rendered -->
+    <g:javascript library="jquery-1.7.1.min"/>
     <g:javascript library="application" />
+    <g:layoutHead />
+
   </head>
   <body ${pageProperty(name: 'body.onload', writeEntireProperty: true)}${pageProperty(name: 'body.onunload', writeEntireProperty: true)}>
     
@@ -244,7 +247,6 @@
     <!-- main content section end -->
     <!-- ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <g:javascript library="jquery-1.7.1.min"/>
     <g:javascript library="jquery-tablesorter"/>
     <g:javascript library="bootstrap"/>    
   </body>

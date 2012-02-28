@@ -22,7 +22,7 @@
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.selectUsers.title"/></title>
   <meta name="layout" content="main"/>
   <g:javascript library="prototype"/>
-  <g:render template="/common/listViewResources"/>
+  <g:javascript library="listView"/>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.selectUsers.title"/>

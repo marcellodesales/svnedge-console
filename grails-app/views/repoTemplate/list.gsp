@@ -3,7 +3,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repoTemplate.page.list.header.title /></title>
-        <g:render template="/common/listViewResources"/>
+        <g:javascript library="listView"/>
         <g:javascript library="prototype"/>
         <g:javascript library="prototype/dragdrop"/>
     </head>

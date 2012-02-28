@@ -3,7 +3,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
-        <g:render template="/common/listViewResources"/>
+        <g:javascript library="listView"/>
 
     </head>
 
@@ -16,7 +16,6 @@
 <body>
 
 <g:form>
-  <g:if test="${repositoryInstanceList.size() > 0}">
     <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
       <thead>
       <tr>
@@ -31,6 +30,7 @@
       </tr>
       </thead>
       <tbody>
+      <g:if test="${repositoryInstanceList.size() > 0}">
       <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
         <g:set var="repoName" value="${repositoryInstance.name}"/>
         <tr>
@@ -59,16 +59,36 @@
           </g:ifAnyGranted>
         </tr>
       </g:each>
+      </g:if>
+      <g:else>
+        <g:set var="numCols" value="2"/>
+        <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+          <g:set var="numCols" value="4"/>
+        </g:ifAnyGranted>
+        <tr>
+          <td colspan="${numCols}">
+            <g:if test="${isReplica}">
+              <p><g:message code="repository.page.list.replica.noRepos"/></p>
+            </g:if>
+            <g:else>
+              <p><g:message code="repository.page.list.noRepos"/></p>
+            </g:else>
+          </td>
+        </tr>
+      </g:else>
       </tbody>
     </table>
 
-    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+
+  <g:pagination total="${repositoryInstanceTotal}"/>
+
+  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
     <p class="pull-right">
-    
-     <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
-     <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
-     <g:listViewActionButton action="hooksList" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
-         
+
+      <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+      <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
+      <g:listViewActionButton action="hooksList" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
+
       <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
                               confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
                               confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
@@ -81,21 +101,7 @@
         <g:message code="repository.page.list.button.load.label"/>
       </g:listViewActionButton>
     </p>
-    </g:ifAnyGranted>
-
-    <g:pagination total="${repositoryInstanceTotal}"/>
-    
-
-  </g:if>
-
-  <g:else>
-    <g:if test="${isReplica}">
-      <p><g:message code="repository.page.list.replica.noRepos"/></p>
-    </g:if>
-    <g:else>
-      <p><g:message code="repository.page.list.noRepos"/></p>
-    </g:else>
-  </g:else>
+  </g:ifAnyGranted>
 
 </g:form>
 

@@ -21,7 +21,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code="repository.page.backup.header" /></title>
-        <g:render template="/common/listViewResources"/>
+        <g:javascript library="listView"/>
 
     </head>
 

@@ -1,6 +1,6 @@
 <g:applyLayout name="repoDetail">
  <content tag="headSnippet">
-    <g:render template="/common/listViewResources"/>
+    <g:javascript library="listView"/>
  </content>
 
  <g:set var="listViewButtons">

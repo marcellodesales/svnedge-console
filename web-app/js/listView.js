@@ -24,72 +24,22 @@ String.prototype.trim = function () {
     return this.replace(/^\s*/, "").replace(/\s*$/, "");
 }
 
-Event.observe(window, 'load', function() {
+$(function() {
     // add observer to checkboxes for enabling / disabling command buttons
-    var allItemSelectCheckboxes = $$('input.listViewSelectItem');
-    allItemSelectCheckboxes.each(function(item) {
-        Event.observe(item, 'click', updateActionButtons);
+    var allItemSelectCheckboxes = $('input.listViewSelectItem');
+    allItemSelectCheckboxes.each(function() {
+        $(this).on('click', updateActionButtons);
     })
 
-    // add observer to action buttons with confirmation messages
-    $$('input.listViewAction').each (function(s) {
-        if (s.confirmMessage) {
-            Event.observe(s, 'click', function(e){
-                // stop this button click from submitting form
-                Event.stop(e)
-                // confirm dialog, with callback functions for "ok" and "cancel"
-                listViewI18n._message = s.confirmMessage;
-                dialog(listViewI18n,
-                        function() {
-                            // on "ok", submit the form
-                            // if "type this" confirmation present, verify user input matches first
-                            if (s.confirmByTypingThisValue) {
-                                var typeThis = s.confirmByTypingThisValue;
-                                var userInput = $(s.confirmByTypingInputElement).value;
-                                if (typeThis != userInput) {
-                                    new Effect.Shake(Windows.focusedWindow.getId());
-                                    return;
-                                }
-                            } else if (s.addTextParameter) {
-                            	var textName = "_confirmDialogText_" + s.readAttribute('name').substring("_action_".length);
-                            	var textValue = $(textName).value;
-                                var action = new Element('input', { type: 'hidden',  name: textName, value: textValue });
-                                var theForm = s.up('form');
-                                theForm.appendChild(action);                            	
-                            }
-                            // submit the form with the original button properties transferred to a hidden field,
-                            // to simulate the button click and thereby activate Grails dispatcher
-                            var action = new Element('input', { type: 'hidden',  name: s.readAttribute('name'), value: s.readAttribute('value') });
-                            var theForm = s.up('form');
-                            theForm.appendChild(action);
-                            theForm.submit();
-                        },
-                        function() {
-                            // on cancel, do nothing
-                            return
-                        });
-
-                if (s.addTextParameter) {
-                	var textInputId = "_confirmDialogText_" + s.name.substring("_action_".length);
-            	    var selection = $$('input.listViewSelectItem:checked');
-            	    if (selection.length > 0) {
-                	    $(textInputId).value = 
-                	    	selection[0].name.substring('listViewItem_'.length);
-            	    }
-            	    setTimeout("focusWithCursorAtEnd('" + textInputId + "')", 500);
-                }
-            });
-        }
-    })
 
     // "select all" handler
-    if ($('listViewSelectAll')) {
-        $('listViewSelectAll').observe('click', function(event) {
+    if ($('#listViewSelectAll')) {
+        $('#listViewSelectAll').on('click', function(event) {
             // set all the item checkboxes to state of the "select all" checkbox
-            var checkedState = $('listViewSelectAll').checked
-            allItemSelectCheckboxes.each(function(s) {
-                if (!s.disabled) {
-                    s.checked = checkedState
+            var checkedState = $('#listViewSelectAll').is(':checked');
+            $('input.listViewSelectItem').each(function() {
+                if (!$(this).attr('disabled')) {
+                    $(this).attr('checked', checkedState)
                 }
             })
             updateActionButtons()
@@ -97,7 +47,7 @@ Event.observe(window, 'load', function() {
     }
 
     // enable/disable action buttons based on initial page state
-    updateActionButtons()
+    updateActionButtons();
 });
 
 /**
@@ -105,10 +55,15 @@ Event.observe(window, 'load', function() {
  * according to their minSelected and maxSelected attributes
  */
 function updateActionButtons()  {
-    numberItemsSelected = $$('input:checked.listViewSelectItem').length
-    $$('input.listViewAction').each(function(s) {
-        s.disabled = (parseInt(s.minSelected) > numberItemsSelected) ||
-                (parseInt(s.maxSelected) < numberItemsSelected)
+    numberItemsSelected = $('input.listViewSelectItem:checked').size()
+    $('input.listViewAction').each(function() {
+        if ((parseInt($(this).data('minSelected')) > numberItemsSelected) ||
+                (parseInt($(this).data('maxSelected')) < numberItemsSelected)) {
+            $(this).attr('disabled', true)
+        }                
+        else {
+            $(this).removeAttr('disabled')
+        }
     })
 }
 

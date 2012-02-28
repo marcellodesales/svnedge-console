@@ -149,36 +149,98 @@ class CsvnTagLib {
     def listViewActionButton = { attrs, body ->
         
         def styleClasses = (attrs.primary) ? "btn btn-primary" : "btn"
-        out << "<input id='listViewAction_${attrs.action}' type='submit' class='${styleClasses} ${attrs.action} listViewAction' "
+        def buttonId = "listViewAction_${attrs.action}"
+        def modalId = "listViewAction_${attrs.action}_confirm"
+        def confirmDialogTextId = "_confirmDialogText_${attrs.action}"
+        
+        // html button and modal dialog (if needed) 
+        out << "<input id='${buttonId}' type='submit' class='${styleClasses} ${attrs.action} listViewAction' "
         out << " name='_action_${attrs.action}' "
-        out << " value='${body().trim()}'/>"
-        out << '\n<script type="text/javascript">\n'
-        out << "  var button = \$('listViewAction_${attrs.action}');\n"
-        out << "  button.minSelected = ${attrs.minSelected ?: 1};\n"
-        out << "  button.maxSelected = ${attrs.maxSelected ?: 100};\n"
+        out << " value='${body().trim()}'"
         if (attrs.confirmMessage) {
-            out << "button.confirmMessage = '<p>${attrs.confirmMessage}</p>"
+            out << " data-toggle='modal' data-target='#${modalId}'"
+        }
+        out << "/>"
+        if (attrs.confirmMessage) {
+            out << """
+            <div id="${modalId}" class="modal hide fade" style="display: none">
+            <div class="modal-header">
+              <a class="close" data-dismiss="modal">×</a>
+              <h3>${message(code: 'default.confirmation.title')}</h3>
+            </div>
+            <div class="modal-body">
+              <p>${attrs.confirmMessage}</p>
+            """
+
             if (attrs.confirmByTypingThis) {
-                out << "<p>" 
-                out << message(code: 'default.confirmation.typeThis.prompt')
-                out << " " + attrs.confirmByTypingThis + "</p>"
-                out << "<p><input id=\"_confirmTypeThis_${attrs.action}\" "
-                out << " type=\"text\" size=\"20\"/></p>"
-            } 
-            if (attrs.textInput) {
-                int size = 20
-                out << "<p><input id=\"_confirmDialogText_${attrs.action}\""
-                out << " name=\"_confirmDialogText_${attrs.action}\""
-                out << " type=\"text\" size=\"${size}\"/></p>"
+                out << """
+                <p>${message(code: 'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>
+                """
             }
-            out << "';\n"
+
+            if (attrs.confirmByTypingThis || attrs.textInput) {
+                out << """
+                <p><input id="${confirmDialogTextId}" name="${confirmDialogTextId}"
+                type="text" size="20"/></p>
+                """
+            }
+
+            out << """
+            </div>
+            <div class="modal-footer">
+              <a href="#" class="btn btn-primary ok">${message(code: 'default.confirmation.ok')}</a>
+              <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+            </div>
+            </div>
+            """
         }
-        if (attrs.confirmByTypingThis) {
-            out << "button.confirmByTypingThisValue = '${attrs.confirmByTypingThis}';\n"
-            out << "button.confirmByTypingInputElement = '_confirmTypeThis_${attrs.action}';\n"
-        }
-        if (attrs.textInput) {
-            out << "button.addTextParameter = true;\n"
+
+        // script element for button activations (min/max selection)
+        out << '\n<script type="text/javascript">\n'
+        out << "  var button = \$('#${buttonId}');\n"
+        out << "  button.data('minSelected', ${attrs.minSelected ?: 1});\n"
+        out << "  button.data('maxSelected', ${attrs.maxSelected ?: 100});\n"
+        
+        // script for displaying a confirmation dialog 
+        if (attrs.confirmMessage) {
+            out << """
+            var submitAction = function() { 
+                var button = \$("#${buttonId}");
+                var form = button.closest("form");
+                form.attr("action", "/csvn/${controllerName}/${attrs.action}");
+                form.submit();
+            }
+            var confirmOk = submitAction;
+            """
+            
+            if (attrs.confirmByTypingThis) {
+                out << """
+                confirmOk = function() {
+                    if (\$("#${modalId}").find("#${confirmDialogTextId}").attr('value') ==
+                           "${attrs.confirmByTypingThis}") {
+                        submitAction();
+                    }   
+                    else {
+                        // no action
+                    } 
+                }
+                """
+            }
+            
+            if (attrs.textInput) {
+                out << """
+                prefillSelection = function() {
+                    var selection = \$('input.listViewSelectItem:checked');
+                    if (selection.size() > 0) {
+                        \$("#${confirmDialogTextId}").attr('value',  
+                            selection.attr('name').substring('listViewItem_'.length));
+                    }
+                }
+                \$("#${buttonId}").on('click', prefillSelection);
+            	"""
+            }
+            
+            out << """\$("#${modalId}").find("a.ok").on("click", confirmOk);"""
         }
         out << "</script>"
     }
