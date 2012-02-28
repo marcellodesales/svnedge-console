@@ -94,214 +94,51 @@
     </p>
     </div>
     </g:if>
-    <g:render template="tabs" model="${[view: 'editAuthentication']}" />
     
-  <g:form method="post" name="serverForm">
+  <g:form class="form-horizontal" method="post" name="serverForm">
       <g:hiddenField name="view" value="editAuthentication"/>
+      <g:hiddenField name="id" value="${server.id}" />
+      
+      <fieldset>
+        <legend><g:message code="admin.page.leftNav.auth" /></legend>
+        <g:propCheckBox bean="${server}" field="allowAnonymousReadAccess" prefix="server"/>
+        <g:propCheckBox bean="${server}" field="forceUsernameCase" prefix="server"/>
 
-      <input type="hidden" name="id" value="${server.id}" />
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ContainerBodyWithPaddedBorder">
+        <g:propControlsBody bean="${server}" field="ldapEnabled" prefix="server" labelCode="server.authenticationMethods.label">
+            <g:checkBox name="fileLoginEnabled" value="${server.fileLoginEnabled}"/>
+            <label class="checkbox inline withFor" for="fileLoginEnabled"><g:message code="server.fileLoginEnabled.label" /></label><br />
+            <g:checkBox name="ldapEnabled" value="${server.ldapEnabled}" onClick="javascript:showHideLdapOptions();"/>
+            <label class="checkbox inline withFor" for="ldapEnabled"><g:message code="server.ldapEnabled.label" /></label>
+        </g:propControlsBody>
 
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ItemDetailName">
-          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label" /></label>
-        </td>
-        <td valign="top" colspan="2"
-            class="ItemDetailValue ${hasErrors(bean:server,field:'allowAnonymousReadAccess','errors')}">
-          <g:checkBox name="allowAnonymousReadAccess" value="${server.allowAnonymousReadAccess}"/>
-          <label for="allowAnonymousReadAccess"><g:message code="server.allowAnonymousReadAccess.label.tip" /></label>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="forceUsernameCase"><g:message code="server.forceUsernameCase.label" /></label>
-        </td>
-        <td valign="top" colspan="2"
-            class="ItemDetailValue ${hasErrors(bean:server,field:'forceUsernameCase','errors')}">
-          <g:checkBox name="forceUsernameCase" value="${server.forceUsernameCase}"/>
-          <label for="forceUsernameCase"><g:message code="server.forceUsernameCase.label.tip" /></label>
-        </td>
-      </tr>
-   <g:hasErrors bean="${server}" field="ldapEnabled">
-      <tr>
-        <td></td>
-        <td colspan="2" class="errors">
-           <ul><g:eachError bean="${server}" field="ldapEnabled">
-             <li><g:message error="${it}" encodeAs="HTML"/></li>
-           </g:eachError></ul>
-        </td>
-      </tr>
-   </g:hasErrors>
-      <tr>
-        <td class="ItemDetailName">
-          <label><g:message code="server.authenticationMethods.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'fileLoginEnabled','errors')}">
-          <g:checkBox name="fileLoginEnabled" value="${server.fileLoginEnabled}"/>
-          <label for="fileLoginEnabled"><g:message code="server.fileLoginEnabled.label" /></label>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapEnabled','errors')}">
-          <g:checkBox name="ldapEnabled" value="${server.ldapEnabled}" onClick="javascript:showHideLdapOptions();"/>
-         <label for="ldapEnabled"><g:message code="server.ldapEnabled.label" /></label>
-        </td>
-      </tr>
-      </table>
       <div id="ldapDialog">
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapSecurityLevel.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapSecurityLevel','errors')}">
+      
+        <g:propControlsBody bean="${server}" field="ldapSecurityLevel" prefix="server" required="true">
           <g:select from="${['NONE', 'SSL', 'TLS', 'STARTTLS']}" value="${fieldValue(bean:server,field:'ldapSecurityLevel')}" name="ldapSecurityLevel"></g:select>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerHost.label" /></label>
-        </td>
-        <td class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerHost','errors')}">
-          <input size="30" type="text" id="ldapServerHost" name="ldapServerHost" value="${fieldValue(bean:server,field:'ldapServerHost')}"/>
-          <g:hasErrors bean="${server}" field="ldapServerHost">
-              <ul><g:eachError bean="${server}" field="ldapServerHost">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-          </g:hasErrors>
-        </td>
-        <td class="ItemDetailValue">
-          <i><strong><g:message code="server.page.editAuthentication.ldapServerHost.example" /></strong></i>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerPort.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerPort','errors')}">
-          <input size="6" type="text" id="ldapServerPort" name="ldapServerPort" 
-                  value="${params.ldapServerPort ?: server.ldapServerPort}"/>
-          <g:hasErrors bean="${server}" field="ldapServerPort">
-              <ul><g:eachError bean="${server}" field="ldapServerPort">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-          </g:hasErrors>
+        </g:propControlsBody>
+      
+        <g:propTextField bean="${server}" field="ldapServerHost" prefix="server" required="true"/>
+        <g:propTextField bean="${server}" field="ldapServerPort" prefix="server" required="true" sizeClass="small" integer="true"/>
+        <g:propTextField bean="${server}" field="ldapAuthBasedn" prefix="server" sizeClass="xxlarge"/>
+        <g:propTextField bean="${server}" field="ldapAuthBinddn" prefix="server" sizeClass="xxlarge"/>
+        <g:propTextField bean="${server}" field="ldapAuthBindPassword" prefix="server"/>
+        <g:propTextField bean="${server}" field="ldapLoginAttribute" prefix="server"/>
+        
+        <g:propControlsBody bean="${server}" field="ldapSearchScope" prefix="server">
+            <g:select from="${['sub', 'one']}" value="${fieldValue(bean:server,field:'ldapSearchScope')}" name="ldapSearchScope"></g:select>
+        </g:propControlsBody>
+        
+        <g:propTextField bean="${server}" field="ldapFilter" prefix="server" sizeClass="xxlarge" maxlength="8000"/>
 
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBasedn.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapAuthBasedn','errors')}">
-          <input size="30" type="text" id="ldapAuthBasedn" name="ldapAuthBasedn" value="${fieldValue(bean:server,field:'ldapAuthBasedn')}"/>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBinddn.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'ldapAuthBinddn','errors')}">
-          <input size="30" type="text" id="ldapAuthBinddn" name="ldapAuthBinddn" value="${fieldValue(bean:server,field:'ldapAuthBinddn')}"/>
-        </td>
-        <td class="ItemDetailValue">
-          <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
-          <i><strong><g:message code="server.page.editAuthentication.anonymBindsNotAllowed.example" /></strong></i>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapAuthBindPassword.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'ldapAuthBindPassword','errors')}">
-          <g:passwordFieldWithChangeNotification name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}" size="30"/>
-        </td>
-        <td class="ItemDetailValue">
-          <i><strong><g:message code="general.warning" /></strong> <g:message code="server.page.editAuthentication.anonymBindsNotAllowed" /></i>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapLoginAttribute.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'ldapLoginAttribute','errors')}">
-          <input size="30" type="text" id="ldapLoginAttribute" name="ldapLoginAttribute" value="${fieldValue(bean:server,field:'ldapLoginAttribute')}"/>
-        </td>
-        <td class="ItemDetailValue">
-          <i><g:message code="server.ldapLoginAttribute.label.tip" /></i>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapSearchScope.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue">
-          <g:select from="${['sub', 'one']}" value="${fieldValue(bean:server,field:'ldapSearchScope')}" name="ldapSearchScope"></g:select>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapFilter.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'ldapFilter','errors')}">
-          <input size="30" maxlength=8000 type="text" id="ldapFilter" name="ldapFilter" value="${fieldValue(bean:server,field:'ldapFilter')}"/>
-        </td>
-        <td class="ItemDetailValue">
-          <i><g:message code="server.ldapFilter.label.tip" /></i>
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="name"><g:message code="server.ldapServerCertVerificationNeeded.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapServerCertVerificationNeeded','errors')}">
-          <g:checkBox name="ldapServerCertVerificationNeeded" value="${server.ldapServerCertVerificationNeeded}"/>
-          <g:message code="server.ldapServerCertVerificationNeeded.label.tip" />
-        </td>
-      </tr> 
-      <tr>
-        <td class="ItemDetailName">
-          <label for="ldapEnabledConsole"><g:message code="server.ldapEnabledConsole.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'ldapEnabledConsole','errors')}">
-          <g:checkBox name="ldapEnabledConsole" value="${server.ldapEnabledConsole}"/>
-          <g:message code="server.ldapEnabledConsole.label.tip" />
-        </td>
-      </tr>      
-     <tr>
-        <td class="ItemDetailName">
-          <label for="authHelperPort"><g:message code="server.authHelperPort.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'authHelperPort','errors')}">
-          <input size="6" type="text" id="authHelperPort" name="authHelperPort" 
-              value="${params.authHelperPort ?: server.authHelperPort}"/>
-          <g:hasErrors bean="${server}" field="authHelperPort">
-              <ul><g:eachError bean="${server}" field="authHelperPort">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-          </g:hasErrors>
-        </td>
-        <td class="ItemDetailValue">
-          <i><g:message code="server.authHelperPort.label.tip" /></i>
-        </td>
-      </tr>  
-      </table>
+        <g:propCheckBox bean="${server}" field="ldapServerCertVerificationNeeded" prefix="server"/>
+        <g:propCheckBox bean="${server}" field="ldapEnabledConsole" prefix="server"/>
+        <g:propTextField bean="${server}" field="authHelperPort" prefix="server" sizeClass="small" integer="true"/>
+
+      </fieldset>
+      <div class="form-actions">
+        <g:actionSubmit action="update" value="${message(code:'server.page.editAuthentication.button.save')}" class="btn btn-primary"/>
+        <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
       </div>
-      </td>
-      </tr>
-      <tr class="ContainerFooter">
-        <td >
-          <div class="AlignRight">
-                <g:actionSubmit action="update" value="${message(code:'server.page.editAuthentication.button.save')}" class="Button"/>
-            </div>
-        </td>
-      </tr>
-      </table>
-      </g:form>             
+    </g:form>             
   </body>
 </html>

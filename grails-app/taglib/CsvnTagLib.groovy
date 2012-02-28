@@ -315,4 +315,160 @@ class CsvnTagLib {
         out <<  '</div>'
     }
 
+    /**
+     * Prints the html for a bootstrap control-group holding a text field.
+     * Attributes include: bean, field
+     *   sizeClass: mini, small, medium, large, xlarge (default), and xxlarge 
+     *   required: true or false (default)
+     *   integer:  true or false (default)
+     *   prefix: Used to find message resources in the event the more specific
+     *           attribute is not used. name = <prefix>.<field>.label(.tip) 
+     *   label or labelCode: an already l10n value or the resource name
+     *   tip or tipCode: an already l10n value or the resource name
+     *   maxlength
+     */
+    def propTextField = { attrs ->
+        out << propControlsBody(attrs) {
+            def obj = attrs['bean']
+            def fieldName = attrs['field']
+            attrs.id = attrs.id ?: fieldName
+            def sizeClass = 'input-' + (attrs['sizeClass'] ?: 'xlarge')
+            out << '    <input name="'
+            out << fieldName << '" value="'
+            def isInt = attrs['integer'] && attrs['integer'] != 'false'
+            def value = fieldValue(bean: obj, field: fieldName)
+            if (isInt) {
+                value = value.replace(',', '')
+            }
+            out << value << '" type="text" class="' << sizeClass
+            if (attrs['maxlength']) {
+                out << '" maxlength="' << attrs['maxlength']
+            }
+            out << '" id="' << attrs.id << '"/>\n'
+        }
+    }
+
+    /**
+     * Prints the html for a bootstrap control-group with the contents of the
+     * body inserted into the controls div.
+     * Attributes include: bean, field
+     *   required: true or false (default)
+     *   prefix: Used to find message resources in the event the more specific
+     *           attribute is not used. name = <prefix>.<field>.label(.tip) 
+     *   label or labelCode: an already l10n value or the resource name
+     *   tip or tipCode: an already l10n value or the resource name
+     */
+    def propControlsBody = { attrs, body ->
+        def obj = attrs['bean']
+        def fieldName = attrs['field']
+        attrs.id = attrs.id ?: fieldName
+        
+        out << '\n<div class="control-group'
+        def isRequired = attrs['required']
+        if (isRequired && isRequired != 'false') {
+            out << ' required-field'
+        }
+        
+        out << hasErrors(bean: obj, field: fieldName, ' error')
+        out << '">\n'
+
+        out << '  <label class="control-label" for="' << fieldName << '">'
+        def labelText = label(attrs, fieldName, 'label', 'label', fieldName)
+        out << labelText << '</label>\n'
+        out << '  <div class="controls">\n'
+        out << body()
+        
+        def tip = label(attrs, fieldName, 'tip', 'label.tip', '')
+        if (tip) {
+            out << '    <div class="help-block">' << tip
+        }
+        out << hasErrors(bean: obj, field: fieldName) {
+            if (!tip) {
+                out << '    <div class="help-block">'
+            }
+            out << '\n      <ul>\n'
+            out << eachError(bean: obj, field: fieldName) {
+                out << '        <li>'
+                out << message(error: it, encodeAs: "HTML")
+                out << '</li>\n'
+            }
+            out << '      </ul>\n'
+            if (!tip) {
+                out << '    </div>\n'
+            }
+        }
+        if (tip) {
+            out << '    </div>\n'
+        }
+        out << '  </div>\n</div>\n'
+    }
+
+    
+    private def label(attrs, fieldName, attrName = 'label',  
+            suffix = 'label', defaultValue = null) {
+        def codePrefix = attrs['prefix']
+        def label = attrs[attrName]
+        if (!label) {
+            def labelCode = attrs[attrName + 'Code']
+            if (labelCode) {
+                label = message(code: labelCode)
+            } else if (codePrefix) {
+                label = message(code: 
+                        codePrefix + '.' + fieldName + '.' + suffix,
+                        'default': defaultValue ?: '')
+            } else {
+                label = defaultValue
+            }
+        }
+        return label
+    }
+
+    /**
+     * Prints the html for a bootstrap control-group containing a checkbox
+     * Attributes include: bean, field
+     *   required: true or false (default)
+     *   prefix: Used to find message resources in the event the more specific
+     *           attribute is not used. name = <prefix>.<field>.label(.tip) 
+     *   label or labelCode: an already l10n value or the resource name
+     *   tip or tipCode: an already l10n value or the resource name
+     */
+    def propCheckBox = { attrs ->
+        def obj = attrs['bean']
+        def fieldName = attrs['field']
+        attrs.id = attrs.id ?: fieldName
+        
+        out << '\n<div class="control-group'
+        def isRequired = attrs['required']
+        if (isRequired && isRequired != 'false') {
+            out << ' required-field'
+        }
+        
+        out << hasErrors(bean: obj, field: fieldName, ' error')
+        out << '">\n'
+
+        out << '  <label class="control-label" for="' << fieldName << '">'
+        def codePrefix = attrs['prefix']
+        def labelText = label(attrs, fieldName, 'label', 'label', fieldName)
+        out << labelText << '</label>\n'
+        out << '  <div class="controls">\n'
+        
+        out << checkBox(name: fieldName, value: obj[fieldName])
+        def tip = label(attrs, fieldName, 'tip', 'label.tip') 
+        if (tip) {
+            out << '    <label class="checkbox inline withFor" for="' 
+            out << fieldName << '">' << tip << '</label>\n'
+        }
+        out << hasErrors(bean: obj, field: fieldName) {
+            out << '    <div class="help-block">\n'
+            out << '      <ul>\n'
+            out << eachError(bean: obj, field: fieldName) {
+                out << '        <li>'
+                out << message(error: it, encodeAs: "HTML")
+                out << '</li>\n'
+            }
+            out << '      </ul>\n'
+            out << '    </div>\n'
+        }
+        out << '  </div>\n</div>\n'
+    }
 }

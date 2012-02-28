@@ -200,241 +200,80 @@ $('bindInstructions').hide();
     </div>
 </g:if>
 
-  <g:render template="tabs" model="${[view: 'edit']}" />
-
-  <g:form method="post" onsubmit="javascript:check();" name="serverForm">
+  <g:form class="form-horizontal" method="post" onsubmit="javascript:check();" name="serverForm">
       <g:hiddenField name="view" value="edit"/>
-  
-      <input type="hidden" name="id" value="${server.id}" />
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ContainerBodyWithPaddedBorder">
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ItemDetailName">
-          <label for="hostname"><g:message code="server.hostname.label" /></label>
-        </td>
-        <td valign="top" class="value ${hasErrors(bean:server,field:'hostname','errors')}">
-          <input size="30" type="text" id="hostname" name="hostname" 
-              value="${fieldValue(bean:server,field:'hostname')}"/>
-        </td>
-        <td class="ItemDetailValue"><i><g:message code="server.hostname.label.tip" /></i></td>
-      </tr>
-    <g:hasErrors bean="${server}" field="hostname">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" valign="top" class="errors">
-          <ul><g:eachError bean="${server}" field="hostname">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
+      <g:hiddenField name="id" value="${server.id}" />
 
-      <tr>
-        <td class="ItemDetailName">
-          <label for="port"><g:message code="server.port.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'port','errors')}">
-          <input size="6" type="text" id="port" name="port" 
-              value="${params.port ?: server.port}"/>
-        </td>
-        <td class="ItemDetailValue">
-            <g:if test="${privatePortInstructions}">
-                <i><g:message code="server.port.label.tip" /></i>
-            </g:if>
-            <g:else>
-            <g:if test="${(server.useSsl && server.port != 443) || server.port != 80}">
-                <i><g:message code="server.port.label.tip.standardPorts" /></i>
-            </g:if>
-            </g:else>
-         </td>
-      </tr> 
-    <g:hasErrors bean="${server}" field="port">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" valign="top" class="errors">
-          <ul><g:eachError bean="${server}" field="port">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-    
-      <tr>
-        <td class="ItemDetailName">
-          <label for="repoParentDir"><g:message code="server.repoParentDir.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'repoParentDir','errors')}">
-          <input size="30" type="text" id="repoParentDir" name="repoParentDir" 
-              value="${fieldValue(bean:server,field:'repoParentDir')}"/>
-        </td>
-        <td class="ItemDetailValue"><i><g:message code="server.repoParentDir.label.tip" /></i></td>
-      </tr> 
-    <g:hasErrors bean="${server}" field="repoParentDir">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" valign="top" class="errors">
-          <ul><g:eachError bean="${server}" field="repoParentDir">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
+      <fieldset>
+        <legend><g:message code="admin.page.leftNav.settings" /></legend>
+            
+        <g:propTextField bean="${server}" field="hostname" required="true" prefix="server"/>
 
-      <tr>
-        <td class="ItemDetailName">
-          <label for="dumpDir"><g:message code="server.dumpDir.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:server,field:'dumpDir','errors')}">
-          <input size="30" type="text" id="dumpDir" name="dumpDir" 
-              value="${fieldValue(bean:server,field:'dumpDir')}"/>
-        </td>
-        <td class="ItemDetailValue"><i><g:message code="server.dumpDir.label.tip" /></i></td>
-      </tr> 
-    <g:hasErrors bean="${server}" field="dumpDir">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" valign="top" class="errors">
-          <ul><g:eachError bean="${server}" field="dumpDir">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-     
+        <g:set var='portTip' value=""/>
+        <g:if test="${privatePortInstructions}">
+          <g:set var='portTip' value="server.port.label.tip"/>
+        </g:if>
+        <g:else>
+          <g:if test="${(server.useSsl && server.port != 443) || server.port != 80}">
+            <g:set var='portTip' value="server.port.label.tip.standardPorts"/>
+          </g:if>
+        </g:else>
+        <g:propTextField bean="${server}" field="port" required="true" 
+            integer="true" sizeClass="small" prefix="server" tipCode="${portTip}"/>
+
+        <g:propTextField bean="${server}" field="repoParentDir" required="true" 
+            sizeClass="xxlarge" prefix="server"/>
+
+        <g:propTextField bean="${server}" field="dumpDir" required="true" 
+            sizeClass="xxlarge" prefix="server"/>
+
+        <g:propControlsBody bean="${server}" field="ipAddress" prefix="server">
+            <select class="select-medium" name="ipAddress" id="ipAddress" onchange="updateInterface(this)">
+              <optgroup label="IPv4">
+                <g:each var="addr" in="${ipv4Addresses.collect{ it.getHostAddress() }}">
+                  <g:set var="isSelected" value=""/>
+                  <g:if test="${server.ipAddress == addr}">
+                    <g:set var="isSelected"> selected="selected"</g:set>
+                  </g:if>
+                  <option value="${addr}"${isSelected}>${addr}</option>
+                </g:each>
+              </optgroup>
+              <optgroup label="IPv6">
+                <g:each var="addr" in="${ipv6Addresses.collect{ it.getHostAddress() }}">
+                  <g:set var="isSelected" value=""/>
+                  <g:if test="${server.ipAddress == addr}">
+                    <g:set var="isSelected"> selected="selected"</g:set>
+                  </g:if>
+                  <option value="${addr}"${isSelected}>${addr}</option>
+                </g:each>
+              </optgroup>
+            </select>
+        </g:propControlsBody>
+
+        <g:propControlsBody bean="${server}" field="netInterface" prefix="server">
+            <g:select name="netInterface" id="netInterface" from="${networkInterfaces}" 
+                  value="${server.netInterface}"/>
+            <script type="text/javascript">updateInterface(document.getElementById('ipAddress'))</script>
+        </g:propControlsBody>
       
-      <tr>
-      	  <td class="ItemDetailName">
-              <label for="ipAddress"><g:message code="server.ipAddress.label" /></label>
-          </td>
-          <td valign="top" class="value">
-              <select name="ipAddress" id="ipAddress" onchange="updateInterface(this)">
-                  <optgroup label="IPv4">
-                  <g:each var="addr" in="${ipv4Addresses.collect{ it.getHostAddress() }}">
-                    <g:set var="isSelected" value=""/>
-                    <g:if test="${server.ipAddress == addr}">
-                      <g:set var="isSelected"> selected="selected"</g:set>
-                    </g:if>
-					<option value="${addr}"${isSelected}>${addr}</option>
-				  </g:each>
-				  </optgroup>
-                  <optgroup label="IPv6">
-                  <g:each var="addr" in="${ipv6Addresses.collect{ it.getHostAddress() }}">
-                    <g:set var="isSelected" value=""/>
-                    <g:if test="${server.ipAddress == addr}">
-                      <g:set var="isSelected"> selected="selected"</g:set>
-                    </g:if>
-					<option value="${addr}"${isSelected}>${addr}</option>
-				  </g:each>
-				  </optgroup>
-			  </select>
-          </td>
-      </tr>
-      <tr>
-          <td class="ItemDetailName">
-              <label for="netInterface"><g:message code="server.netInterface.label" /></label>
-          </td>
-          <td class="value">
-             <g:select name="netInterface" id="netInterface" from="${networkInterfaces}" 
-                 value="${server.netInterface}"/>
-             <script type="text/javascript">updateInterface(document.getElementById('ipAddress'))</script>
-          </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-              <label for="adminName"><g:message code="server.adminName.label" /></label>
-          </td>
-          <td colspan="2" class="ItemDetailValue">
-              <!-- Widget should eventually change to person picker (See TeamForge) -->
-              <input name="adminName" id="adminName" type="text" 
-                  value="${server.adminName}"/>
-              <g:hasErrors bean="${server}" field="adminName">
-                 <ul><g:eachError bean="${server}" field="adminName">
-                      <li><g:message error="${it}" encodeAs="HTML"/></li>
-                  </g:eachError></ul>
-              </g:hasErrors>
-          </td>
-      </tr>
-      <!-- The following 2 table rows should be removed after updating UI to person picker -->
-      <tr>
-          <td class="ItemDetailName">
-              <label for="adminEmail"><g:message code="server.adminEmail.label" /></label>
-          </td>
-          <td class="value errors" colspan="2">
-              <input name="adminEmail" id="adminEmail" type="text" 
-                  value="${server.adminEmail}"/>
-              <g:hasErrors bean="${server}" field="adminEmail">
-                  <ul><g:eachError bean="${server}" field="adminEmail">
-                      <li><g:message error="${it}" encodeAs="HTML"/></li>
-                  </g:eachError></ul>
-              </g:hasErrors>
-          </td>
-      </tr>
-      <tr>
-          <td class="ItemDetailName">
-              <label for="adminAltContact"><g:message code="server.adminAltContact.label" /></label>
-          </td>
-          <td valign="top" class="ItemDetailValue" colspan="2">
-              <input name="adminAltContact" id="adminAltContact" type="text" 
-                  value="${server.adminAltContact}"/>
-              <g:hasErrors bean="${server}" field="adminAltContact">
-                  <ul><g:eachError bean="${server}" field="adminAltContact">
-                      <li><g:message error="${it}" encodeAs="HTML"/></li>
-                  </g:eachError></ul>
-              </g:hasErrors>
-          </td>
-      </tr>
-      <g:if test="${server.mode == ServerMode.REPLICA}">
-      <tr>
-         <td class="ItemDetailName">
-          <label for="useSsl"><g:message code="server.useHttpV2.label" /></label>
-         </td>
-        <td class="ItemDetailValue ${hasErrors(bean:server,field:'useHttpV2','errors')}" colspan="2">
-          <g:checkBox name="useHttpV2" value="${server.useHttpV2}"/>
-          <g:message code="server.useHttpV2.label.tip" />
-        </td>
-      </tr>
-      </g:if>
-      <tr>
-         <td class="ItemDetailName">
-          <label for="useSsl"><g:message code="server.useSsl.label" /></label>
-         </td>
-        <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSsl','errors')}" colspan="2">
-          <g:checkBox name="useSsl" value="${server.useSsl}"/>
-          <g:message code="server.useSsl.label.tip" />
-        </td>
-      </tr>
-      <tr>
-         <td class="ItemDetailName">
-          <label for="useSslConsole"><g:message code="server.useSslConsole.label" /></label>
-         </td>
-        <td class="ItemDetailValue ${hasErrors(bean:server,field:'useSslConsole','errors')}" colspan="2">
-          <g:checkBox name="useSslConsole" value="${server.useSslConsole}"/>
-          <g:message code="server.useSslConsole.label.tip" />
-        </td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="defaultStart"><g:message code="server.defaultStart.label" /></label>
-        </td>
-        <td colspan="2" class="ItemDetailValue ${hasErrors(bean:server,field:'defaultStart','errors')}">
-          <g:checkBox name="defaultStart" value="${server.defaultStart}"/>
-          <g:message code="server.defaultStart.label.tip" />
-        </td>
-      </tr>
 
-      </table>
-      </td>
-      </tr>
-      <tr class="ContainerFooter">
-        <td >
-          <div class="AlignRight">
-                <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="Button"/>
-          </div>
-        </td>
-      </tr>
-      </table>
-      </g:form>             
+        <g:propTextField bean="${server}" field="adminName" prefix="server"/>
+        <g:propTextField bean="${server}" field="adminEmail" required="true" prefix="server"/>
+        <g:propTextField bean="${server}" field="adminAltContact" prefix="server"/>
+
+        <g:if test="${server.mode == ServerMode.REPLICA}">
+          <g:propCheckBox bean="${server}" field="useHttpV2" prefix="server"/>
+        </g:if>
+      
+        <g:propCheckBox bean="${server}" field="useSsl" prefix="server"/>
+        <g:propCheckBox bean="${server}" field="useSslConsole" prefix="server"/>
+        <g:propCheckBox bean="${server}" field="defaultStart" prefix="server"/>
+
+      </fieldset>
+      <div class="form-actions">
+        <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
+        <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+      </div>
+    </g:form>             
   </body>
 </html>
