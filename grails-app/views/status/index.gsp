@@ -112,7 +112,8 @@
     <g:render template="/server/leftNav" />
     
   <g:form method="post">
-  <div>
+  <div class="row-fluid">
+    <div class="span7 well">
     <g:if test="${isReplicaMode}">
       <div class="ImageListParent">
         <strong><g:message code="status.page.replica.name" /></strong> ${currentReplica.name}
@@ -130,17 +131,12 @@
     </g:if>
     <g:if test="${isStarted}">
       <div class="ImageListParent">
-        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
-      </div>
-      <div class="ImageListParent">
-        <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
-          <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit class="stop" value="${message(code:'status.page.subversion.stop')}" action="stop"/></span>
-          </div>
-        </g:ifAnyGranted>
         <strong><g:message code="status.page.subversion" /> </strong>
         <img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
                          hspace="4" alt="<g:message code='status.page.subversion.on' />"/><g:message code="status.page.subversion.on" />
+      </div>
+      <div class="ImageListParent">
+        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
       </div>
      <g:if test="${!ctfUrl && server.viewvcURL()}">
       <div class="ImageListParent">
@@ -170,20 +166,29 @@
    </g:if>
    <g:else>
       <div class="ImageListParent">
-        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
-      </div>
-      <div class="ImageListParent">
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
-          <div class="buttons" style="float: right">
-            <span class="button"><g:actionSubmit value="${message(code:'status.page.subversion.start')}" action="start"/></span>
-          </div>
         </g:ifAnyGranted>
         <strong><g:message code="status.page.subversion" /> </strong>
         <img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
                          hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" />
       </div>
+      <div class="ImageListParent">
+        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
+      </div>
     </g:else>
-  <img src="${resource(dir:'images/misc', file:'pixel.gif')}" width="280" height="1" alt=""/>
+    </div>
+    <div class="span1">
+        <g:if test="${isStarted}">
+          <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
+            <g:actionSubmit class="btn btn-danger" value="${message(code:'status.page.subversion.stop')}" action="stop"/>
+          </g:ifAnyGranted>
+        </g:if>
+        <g:else>
+          <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
+            <g:actionSubmit class="btn btn-success" value="${message(code:'status.page.subversion.start')}" action="start"/>
+          </g:ifAnyGranted>
+        </g:else>       
+    </div>
     </div>
     </g:form>
 
