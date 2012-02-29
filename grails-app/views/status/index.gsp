@@ -115,39 +115,42 @@
   <div class="row-fluid">
     <div class="span7 well">
     <g:if test="${isReplicaMode}">
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.replica.name" /></strong> ${currentReplica.name}
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.replica.name" /></strong></div><div class="span3"> ${currentReplica.name}</div>
       </div>
       <g:if test="${currentReplica.svnMasterUrl}">
-         <div class="ImageListParent">
-           <strong><g:message code="status.page.replica.location" /></strong> ${currentReplica.svnMasterUrl}
+         <div class="row-fluid">
+           <div class="span4"><strong><g:message code="status.page.replica.location" /></strong></div><div class="span3"> ${currentReplica.svnMasterUrl}</div>
          </div>
       </g:if>
     </g:if>
     <g:if test="${ctfUrl}">
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.url.teamforge" /></strong> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a>
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.url.teamforge" /></strong></div><div class="span3"> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a></div>
       </div>
     </g:if>
     <g:if test="${isStarted}">
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.subversion" /> </strong>
-        <img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
-                         hspace="4" alt="<g:message code='status.page.subversion.on' />"/><g:message code="status.page.subversion.on" />
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.subversion" /> </strong></div>
+        <div class="span3"><img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
+                         hspace="4" alt="<g:message code='status.page.subversion.on' />"/><g:message code="status.page.subversion.on" /></div>
       </div>
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span3"> ${server.hostname}</div>
       </div>
      <g:if test="${!ctfUrl && server.viewvcURL()}">
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.url.repository" /></strong> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a>
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.url.repository" /></strong></div><div class="span3"> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a></div>
       </div>
-      <div class="ImageListParent"><strong><g:message code="status.page.url.repository.browse" /></strong>
-        <a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a>
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.url.repository.browse" /></strong></div>
+        <div class="span3"><a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a></div>
       </div>
      </g:if>
       <g:if test="${isReplicaMode}">
-        <div class="ImageListParent"><strong><g:message code="status.page.status.replication.activity" /></strong>
+        <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.status.replication.activity" /></strong></div>
+        <div class="span3">
         <g:set var="replicationStatusIcon" value="fping_up.gif" />
         <g:if test="${replicaCommandsSize > 0}">
             <g:set var="replicationStatusIcon" value="replica/commands_updating_spinner.gif" />
@@ -161,19 +164,18 @@
                  <g:message code="status.page.status.replication.commands_running"/> ${replicaCommandsSize}
                </g:else>
              </div>
+         </div>
         </div>
       </g:if>
    </g:if>
    <g:else>
-      <div class="ImageListParent">
-        <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
-        </g:ifAnyGranted>
-        <strong><g:message code="status.page.subversion" /> </strong>
-        <img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
-                         hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" />
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.subversion" /> </strong></div>
+        <div class="span3"><img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
+                         hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" /></div>
       </div>
-      <div class="ImageListParent">
-        <strong><g:message code="status.page.hostname" /> </strong> ${server.hostname}
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span3"> ${server.hostname}</div>
       </div>
     </g:else>
     </div>
