@@ -52,8 +52,7 @@
     </div>
     </g:if>
     
-  <g:form class="form-horizontal form-vertical-allowed" method="post" name="serverForm">
-      <g:javascript>conditionalConvertToVerticalForm();</g:javascript>
+  <g:form class="form-horizontal" method="post" name="serverForm">
       <g:hiddenField name="view" value="editAuthentication"/>
       <g:hiddenField name="id" value="${server.id}" />
       

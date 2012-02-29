@@ -173,8 +173,7 @@ $('#bindInstructions').hide();
     </div>
 </g:if>
 
-  <g:form class="form-horizontal form-vertical-allowed" method="post" name="serverForm" id="serverForm">
-      <g:javascript>conditionalConvertToVerticalForm();</g:javascript>
+  <g:form class="form-horizontal" method="post" name="serverForm" id="serverForm">
       <g:hiddenField name="view" value="edit"/>
       <g:hiddenField name="id" value="${server.id}" />
 

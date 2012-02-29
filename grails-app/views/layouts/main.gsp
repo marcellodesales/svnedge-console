@@ -19,8 +19,8 @@
         padding: 9px 0;
       }
     </style>
-    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
     <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+    <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
  
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>

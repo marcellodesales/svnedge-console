@@ -182,15 +182,3 @@ function calculateDialogHeight(msg) {
     guessHeight += (msg.split("<p>").length * 50)
     return guessHeight
 }
-
-/**
- * Changes forms marked with the form-vertical-allowed class to vertical
- * format when the screen resolution is discovered to be less than 800px.
- */
-function conditionalConvertToVerticalForm() {
-    if ($(window).width() < 800) {
-    	var forms = $('.form-vertical-allowed');
-        forms.addClass("form-vertical");
-        forms.removeClass("form-horizontal");
-    }
-}
