@@ -165,7 +165,7 @@ class CsvnTagLib {
             out << """
             <div id="${modalId}" class="modal hide fade" style="display: none">
             <div class="modal-header">
-              <a class="close" data-dismiss="modal">×</a>
+              <a class="close" data-dismiss="modal">x</a>
               <h3>${message(code: 'default.confirmation.title')}</h3>
             </div>
             <div class="modal-body">
