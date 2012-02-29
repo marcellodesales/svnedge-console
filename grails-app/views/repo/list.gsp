@@ -20,7 +20,7 @@
       <thead>
       <tr>
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-          <th><g:listViewSelectAll/></th>
+          <th></th>
         </g:ifAnyGranted>
         <g:sortableColumn property="name" title="${message(code:'repository.page.list.name')}"/>
           <th><g:message code="repository.page.list.checkout_command"/></th>
@@ -35,7 +35,7 @@
         <g:set var="repoName" value="${repositoryInstance.name}"/>
         <tr>
           <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-            <td><g:listViewSelectItem item="${repositoryInstance}"/></td>
+            <td><g:listViewSelectItem item="${repositoryInstance}" radioStyle="true"/></td>
           </g:ifAnyGranted>
           <g:set var="viewvcURL" value="${server.viewvcURL(repoName)}"/>
           <g:if test="${viewvcURL}">
@@ -83,24 +83,23 @@
   <g:pagination total="${repositoryInstanceTotal}"/>
 
   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-    <p class="pull-right">
+    <div class="pull-right">
 
       <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
       <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
       <g:listViewActionButton action="hooksList" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
-
-      <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
-                              confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
-                              confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
-        <g:message code="default.button.delete.label"/>
-      </g:listViewActionButton>
       <g:listViewActionButton action="dumpOptions" minSelected="1" maxSelected="1">
         <g:message code="repository.page.list.button.dump.label"/>
       </g:listViewActionButton>
       <g:listViewActionButton action="loadOptions" minSelected="1" maxSelected="1">
         <g:message code="repository.page.list.button.load.label"/>
       </g:listViewActionButton>
-    </p>
+      <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
+                              confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
+                              confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
+        <g:message code="default.button.delete.label"/>
+      </g:listViewActionButton>
+    </div>
   </g:ifAnyGranted>
 
 </g:form>

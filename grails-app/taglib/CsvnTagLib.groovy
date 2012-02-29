@@ -111,16 +111,19 @@ class CsvnTagLib {
      * @attr hidden OPTIONAL if true, this will be a hidden field instead of checkbox
      * @attr disabled OPTIONAL if true and not hidden, this checkbox will be disabled
      * @attr selected OPTIONAL if true and not hidden, this checkbox will be preselected
+     * @attr radioStyle OPTIONAL if true, selecting this checkbox will clear others. Unlike radio
+     * it can also be unselected
      * @return the item row checkbox
      */
     def listViewSelectItem = { attrs ->
         def prop = attrs.property ?: "id"
         def name = "listViewItem_${attrs.item[prop]}"
+        def styleClasses = (attrs.radioStyle) ? "listViewSelectItem radio" : "listViewSelectItem"
         if (attrs.hidden) {
-            out << "<input type=\"hidden\" class=\"listViewSelectItem\" id=\"${name}\" name=\"${name}\" value=\"on\""
+            out << "<input type=\"hidden\" class=\"${styleClasses}\" id=\"${name}\" name=\"${name}\" value=\"on\""
         }
         else {
-            out << "<input type=\"checkbox\" class=\"listViewSelectItem\" id=\"${name}\" name=\"${name}\""
+            out << "<input type=\"checkbox\" class=\"${styleClasses}\" id=\"${name}\" name=\"${name}\""
             if (attrs.disabled) {
                 out << " disabled"
             }
@@ -165,7 +168,7 @@ class CsvnTagLib {
             out << """
             <div id="${modalId}" class="modal hide fade" style="display: none">
             <div class="modal-header">
-              <a class="close" data-dismiss="modal">x</a>
+              <a class="close" data-dismiss="modal">&times;</a>
               <h3>${message(code: 'default.confirmation.title')}</h3>
             </div>
             <div class="modal-body">

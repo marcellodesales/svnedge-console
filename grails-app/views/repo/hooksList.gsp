@@ -32,7 +32,8 @@
  <content tag="tabContent">
    <g:render template="/common/fileList" 
      model="${[fileList: hooksList, buttons: listViewButtons, linkAction: 'downloadHook',
-               noFilesMessage: message(code: 'repository.page.hooksFileList.noFiles')]}" />
+               noFilesMessage: message(code: 'repository.page.hooksFileList.noFiles'),
+               radioStyle: true]}" />
  </content>
  
 </g:applyLayout>

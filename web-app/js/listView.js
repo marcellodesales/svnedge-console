@@ -28,7 +28,13 @@ $(function() {
     // add observer to checkboxes for enabling / disabling command buttons
     var allItemSelectCheckboxes = $('input.listViewSelectItem');
     allItemSelectCheckboxes.each(function() {
-        $(this).on('click', updateActionButtons);
+        $(this).on('click', function() {
+            if ($(this).hasClass("radio")) {
+                currentId = $(this).attr("id");
+                $('input.listViewSelectItem:checked[id!="' + currentId + '"]').removeAttr("checked");
+            }
+            updateActionButtons();
+        });
     })
 
 
