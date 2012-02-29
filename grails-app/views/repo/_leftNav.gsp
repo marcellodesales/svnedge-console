@@ -3,11 +3,15 @@
     <li class="active"><g:message code="repository.page.replica.hosted" /></li>
   </g:if>
   <g:else>
-    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+      <li class="nav-header">
+          <g:message code="repository.main.icon" />
+      </li>
 
       <li<g:if test="${(controllerName == 'repo' && actionName == 'list')}"> class="active"</g:if>>
-            <g:link controller="repo" action="list"><g:message code="repository.page.leftnav.list" /></g:link>
+          <g:link controller="repo" action="list"><g:message code="repository.page.leftnav.list" /></g:link>
       </li>
+
+    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
 
       <li<g:if test="${controllerName == 'repo' && actionName.contains('Authorization')}"> class="active"</g:if>>
           <g:link controller="repo" action="showAuthorization"><g:message code="repository.page.leftnav.accessRules" /></g:link>

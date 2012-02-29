@@ -211,7 +211,6 @@
           <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
           <div class="span3">
             <div class="well sidebar-nav">
-              <h2>${buttonNameMap[selectedButton]}</h2>
               <ul class="nav nav-list">
                 <g:pageProperty name="page.leftMenu" />
               </ul>
