@@ -3,7 +3,6 @@
   <head>
     <title>CollabNet Subversion Edge <g:message code="server.page.edit.title" /></title>
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
 
     <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
 
@@ -17,39 +16,20 @@
 	    </g:each>
 	    ]
     </g:each>
-
-        var fieldsChanged = false;
-        Event.observe(window, 'load', function() {
-            // track field changes for "unsaved changes" alert
-            var allInputs = Form.getElements("serverForm")
-            allInputs.each(function(item){
-                Event.observe(item, 'change', function(event) {
-                    fieldsChanged = true;
-                });
-            })
-
+        
+        $(document).ready(function() {
             // toggle standard server ports with useSsl field
-            $("useSsl").observe('click', updatePort.bind(this) )
-
+            $("#useSsl").click(function(event) {
+                var sslChkbox = $("#useSsl");
+                var port = $("#port");
+                if (sslChkbox.attr('checked') && port.val() == '80') {
+                    port.val('443');
+                }
+                else if (!sslChkbox.attr('checked') && port.val() == '443') {
+                    port.val('80');
+                }
+           });
         });
-
-        // update standard server ports based on useSsl change event
-        function updatePort(event) {
-            var sslChkbox = Event.element(event)
-
-            // hack for IE event problems
-            if (Prototype.Browser.IE) {
-               sslChkbox.blur()
-               sslChkbox.focus()
-            }
-
-            if (sslChkbox.checked && $("port").value == '80') {
-                $("port").value = '443'
-            }
-            else if (!sslChkbox.checked && $("port").value == '443') {
-                $("port").value = '80'
-            }
-        }
 
         function updateInterface(addrSelect) {
             var val = addrSelect.value
@@ -103,13 +83,6 @@
             }
         }
 
-        function warnForUnSavedData() {
-          if (!fieldsChanged) {
-            return true
-          }
-          return confirm("${editAuthConfirmMessage}");
-        }
-        
       /* ]]> */
     </g:javascript>
     
@@ -164,9 +137,9 @@
       <p><g:message code="server.page.edit.privatePorts.instructions" /></p>
     </g:else>
 <ul>
-<g:if test ="${isStandardPort}">
+<g:if test ="${isStandardPort}"> 
     <li><g:message code="server.page.edit.httpdBind" /> <a id="toggleBind" href="#"
-      onclick="var el = $('bindInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+      onclick="var el = $('#bindInstructions'); el.toggle(); if (!el.is(':hidden')) { $(this).text('<g:message code="general.hide" />'); } else { $(this).text('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
     <div id="bindInstructions" style="border: 1px;">
     <p><g:message code="server.page.edit.httpdBind.instructions" /> <em><g:message code="server.page.edit.httpdBind.asRoot" /></em>
     </p>
@@ -179,7 +152,7 @@
     </li>
 </g:if>
 <li><g:message code="server.page.edit.httpd.asSudo" /> <a id="toggleSudo" href="#" 
-  onclick="var el = $('sudoInstructions'); el.toggle(); if (el.visible()) { this.update('<g:message code="general.hide" />'); } else { this.update('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
+  onclick="var el = $('#sudoInstructions'); el.toggle(); if (!el.is(':hidden')) { $(this).text('<g:message code="general.hide" />'); } else { $(this).text('<g:message code="server.page.edit.showCommands" />'); } return false;"> <g:message code="server.page.edit.showCommands" /></a>
 <div id="sudoInstructions" style="border: 1px;">
 <p>
 <g:message code="server.page.edit.httpd.asSudo.instruction" />
@@ -194,13 +167,14 @@ ${console_user}    ALL=(ALL) NOPASSWD: ${csvnHome}/bin/httpd</code>
 </li>
 </ul>
 <script type="text/javascript">
-$('sudoInstructions').hide();
-$('bindInstructions').hide();
+$('#sudoInstructions').hide();
+$('#bindInstructions').hide();
 </script>
     </div>
 </g:if>
 
-  <g:form class="form-horizontal" method="post" onsubmit="javascript:check();" name="serverForm">
+  <g:form class="form-horizontal form-vertical-allowed" method="post" name="serverForm" id="serverForm">
+      <g:javascript>conditionalConvertToVerticalForm();</g:javascript>
       <g:hiddenField name="view" value="edit"/>
       <g:hiddenField name="id" value="${server.id}" />
 
@@ -222,10 +196,10 @@ $('bindInstructions').hide();
             integer="true" sizeClass="small" prefix="server" tipCode="${portTip}"/>
 
         <g:propTextField bean="${server}" field="repoParentDir" required="true" 
-            sizeClass="xxlarge" prefix="server"/>
+            sizeClass="span6" prefix="server"/>
 
         <g:propTextField bean="${server}" field="dumpDir" required="true" 
-            sizeClass="xxlarge" prefix="server"/>
+            sizeClass="span6" prefix="server"/>
 
         <g:propControlsBody bean="${server}" field="ipAddress" prefix="server">
             <select class="select-medium" name="ipAddress" id="ipAddress" onchange="updateInterface(this)">

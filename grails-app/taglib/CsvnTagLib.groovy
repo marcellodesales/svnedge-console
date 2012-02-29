@@ -394,7 +394,10 @@ class CsvnTagLib {
             def obj = attrs['bean']
             def fieldName = attrs['field']
             attrs.id = attrs.id ?: fieldName
-            def sizeClass = 'input-' + (attrs['sizeClass'] ?: 'xlarge')
+            def sizeClass = attrs['sizeClass'] ?: 'xlarge'
+            if (!sizeClass.startsWith('span')) {
+                sizeClass = 'input-' + sizeClass
+            }
             out << '    <input name="'
             out << fieldName << '" value="'
             def isInt = attrs['integer'] && attrs['integer'] != 'false'

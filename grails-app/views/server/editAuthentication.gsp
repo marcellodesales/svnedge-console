@@ -2,73 +2,30 @@
   <head>
     <title>CollabNet Subversion Edge <g:message code="server.page.editAuthentication.title" /></title>
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
 
     <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
 
     <g:javascript>
-
-        var fieldsChanged = false;
-        Event.observe(window, 'load', function() {
-            // track field changes for "unsaved changes" alert
-            var allInputs = Form.getElements("serverForm")
-            allInputs.each(function(item){
-                Event.observe(item, 'change', function(event) {
-                    fieldsChanged = true;
-                });
-            })
-            
+      /* <![CDATA[ */
+        $(document).ready(function() {            
             // toggle the console ldap auth with the general ldapenabled setting
-            $('ldapEnabled').observe('change', function(event){
-                $('ldapEnabledConsole').checked = $('ldapEnabled').checked
-                
-            })
+            var ldapChkBox = $('#ldapEnabled');
+            ldapChkBox.change(function(event) {
+            alert("Meeeee");
+                $('#ldapEnabledConsole').attr('checked', ldapChkBox.attr('checked'));
+            });
+            
+            showHideLdapOptions();
         });
 
-        // updates a select for the given values.  Assumes that the options
-        // should have both text and value set the same.
-        function updateSelect(selectElem, values) {
-            removeAllOptions(selectElem)
-            for (var i = 0; i < values.length; i++) {
-                addOption(selectElem, values[i], values[i])
+        function showHideLdapOptions() {
+            if ($('#ldapEnabled').attr('checked')) {
+                $('#ldapDialog').show();
+            } else { 
+                $('#ldapDialog').hide();
             }
         }
-
-        // add an option with the given text/value to the select element.
-        function addOption(selectElem, text, value) {
-            var opt = document.createElement('option');
-	        opt.text = text
-	        opt.value = value
-            try {
-                selectElem.add(opt, null) // standards compliant
-            }
-            catch(ex) {
-                selectElem.add(opt) // IE only
-            }
-        }
-
-        // remove all current options from the select element.
-        function removeAllOptions(selectElem) {
-            for (var i = selectElem.length - 1; i >= 0; i--) {
-                selectElem.remove(i)
-            }
-        }
-    
-    function showHideLdapOptions() {
-      if (document.forms[0].ldapEnabled.checked)
-        document.getElementById('ldapDialog').style.display = 'block';
-      else 
-        document.getElementById('ldapDialog').style.display = 'none';
-    }
-    Event.observe(window, 'load', showHideLdapOptions, false);
-
-    function warnForUnSavedData() {
-      if (!fieldsChanged) {
-        return true
-      }
-      return confirm("${editAuthConfirmMessage}");
-    }
-
+      /* ]]> */
     </g:javascript>
     
   </head>
@@ -78,7 +35,7 @@
   
   <g:render template="leftNav" />
   
-  <body onLoad="javascript:showHideLdapOptions();">
+  <body>
 
 
     <div class="message">${result}</div>
@@ -95,7 +52,8 @@
     </div>
     </g:if>
     
-  <g:form class="form-horizontal" method="post" name="serverForm">
+  <g:form class="form-horizontal form-vertical-allowed" method="post" name="serverForm">
+      <g:javascript>conditionalConvertToVerticalForm();</g:javascript>
       <g:hiddenField name="view" value="editAuthentication"/>
       <g:hiddenField name="id" value="${server.id}" />
       
@@ -119,8 +77,8 @@
       
         <g:propTextField bean="${server}" field="ldapServerHost" prefix="server" required="true"/>
         <g:propTextField bean="${server}" field="ldapServerPort" prefix="server" required="true" sizeClass="small" integer="true"/>
-        <g:propTextField bean="${server}" field="ldapAuthBasedn" prefix="server" sizeClass="xxlarge"/>
-        <g:propTextField bean="${server}" field="ldapAuthBinddn" prefix="server" sizeClass="xxlarge"/>
+        <g:propTextField bean="${server}" field="ldapAuthBasedn" prefix="server" sizeClass="span6"/>
+        <g:propTextField bean="${server}" field="ldapAuthBinddn" prefix="server" sizeClass="span6"/>
         <g:propTextField bean="${server}" field="ldapAuthBindPassword" prefix="server"/>
         <g:propTextField bean="${server}" field="ldapLoginAttribute" prefix="server"/>
         
@@ -128,7 +86,7 @@
             <g:select from="${['sub', 'one']}" value="${fieldValue(bean:server,field:'ldapSearchScope')}" name="ldapSearchScope"></g:select>
         </g:propControlsBody>
         
-        <g:propTextField bean="${server}" field="ldapFilter" prefix="server" sizeClass="xxlarge" maxlength="8000"/>
+        <g:propTextField bean="${server}" field="ldapFilter" prefix="server" sizeClass="span6" maxlength="8000"/>
 
         <g:propCheckBox bean="${server}" field="ldapServerCertVerificationNeeded" prefix="server"/>
         <g:propCheckBox bean="${server}" field="ldapEnabledConsole" prefix="server"/>
