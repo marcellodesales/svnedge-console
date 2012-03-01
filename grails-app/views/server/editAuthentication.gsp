@@ -78,7 +78,9 @@
         <g:propTextField bean="${server}" field="ldapServerPort" prefix="server" required="true" sizeClass="small" integer="true"/>
         <g:propTextField bean="${server}" field="ldapAuthBasedn" prefix="server" sizeClass="span6"/>
         <g:propTextField bean="${server}" field="ldapAuthBinddn" prefix="server" sizeClass="span6"/>
-        <g:propTextField bean="${server}" field="ldapAuthBindPassword" prefix="server"/>
+        <g:propControlsBody bean="${server}" field="ldapAuthBindPassword" prefix="server">
+          <g:passwordFieldWithChangeNotification name="ldapAuthBindPassword" value="${fieldValue(bean:server,field:'ldapAuthBindPassword')}" size="30"/>
+        </g:propControlsBody>
         <g:propTextField bean="${server}" field="ldapLoginAttribute" prefix="server"/>
         
         <g:propControlsBody bean="${server}" field="ldapSearchScope" prefix="server">
