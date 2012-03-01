@@ -11,7 +11,6 @@
             // toggle the console ldap auth with the general ldapenabled setting
             var ldapChkBox = $('#ldapEnabled');
             ldapChkBox.change(function(event) {
-            alert("Meeeee");
                 $('#ldapEnabledConsole').attr('checked', ldapChkBox.attr('checked'));
             });
             
