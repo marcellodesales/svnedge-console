@@ -4,7 +4,6 @@
     CollabNet Subversion Edge <g:message code="packagesUpdate.page.available.title" />
   </title>
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
 
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
         djconfig="parseOnLoad: true, isDebug: false"></script>
@@ -20,6 +19,12 @@
            document.getElementById("reloadButton").disabled = true;
            </g:if>
         });
+        
+        function startInstall() {
+          form = $('#installButton').closest("form");
+          form.attr("action", "/csvn/packagesUpdate/installUpdates");
+          form.submit()
+        }
       </script>
 
   </head>
@@ -31,9 +36,10 @@
 
   <body>
 
+    <g:render template="/common/restartSupport"/>
     <g:render template="/packagesUpdate/packagesInfoTable" />
 
-    <g:form method="post">
+    <g:form method="post" id="updatesForm">
 
               <div class="pull-right">
                   <g:actionSubmit id="reloadButton" action="reloadUpdates" 
@@ -43,9 +49,23 @@
                   <g:actionSubmit id="installButton" action="installUpdates" 
                                   value="${message(code:'packagesUpdate.page.available.button.install')}" 
                                   class="btn btn-primary"
-                                  onclick="return confirm('${confirmMsg}')"
+                                  data-toggle='modal' data-target='#confirmInstall'
                                />
               </div>
+
+      <div id="confirmInstall" class="modal hide fade" style="display: none">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h3>${message(code: 'default.confirmation.title')}</h3>
+        </div>
+        <div class="modal-body">
+          <p>${confirmMsg}</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary ok" onclick="startInstall()">${message(code: 'default.confirmation.ok')}</a>
+          <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+        </div>
+      </div>
 
     </g:form>
 

@@ -12,78 +12,26 @@
     </style>
     <script type="text/javascript">
 
-      // add restart support for unapplied updates
-      Event.observe(window, 'load', function() {
-          var restartLinkElement = $('restartLink')
-          if (restartLinkElement == null) {
-              return
-          }
-          restartLinkElement.observe('click', function(event){
-            // show modal info dialog
-            var title = "<p class='dialogTitle'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting')}</p>"
-            var msg = "<p class='dialogBody'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip')}"
-            msg += " ${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.tip2')}</p>"
-            msg += "<img src=\"${resource(dir:'images',file:'spinner-gray-bg.gif')}\" align=\"baseline\"/>"
-            Dialog.info(msg, {title: title, width:250, height: 90, showProgress: false, className: "bluelighting"});
-
-            // execute restart
-            new Ajax.Request('/csvn/status/restartConsole', {
-                method:'post',
-                requestHeaders: {Accept: 'text/json'},
-                onSuccess: function(transport) {
-                   responseData = transport.responseText.evalJSON(true);
-                   status = responseData.result.restart
-                   timeoutId = window.setTimeout('waitForRestart()', 5000);
-                },
-                onFailure: function(transport) {
-                   Dialog.setInfoMessage("<p class='dialogBody'>${message(code: 'packagesUpdate.page.installUpdatesStatus.serverIsRestarting.failed')}</p>");
-                }
-            })
-          });
-      })
-
-      var pingUrl = "/csvn/images/project/project-homeicon.gif";
-      var timeoutId
-
-      function waitForRestart() {
-        var image = new Image();
-        var uniqueUrl = pingUrl + "?s=" + Math.random();
-        image.onload = function() {
-          if (this.height > 0)  {
-            window.location = "/csvn"
-          }
-          else {
-            timeoutId = window.setTimeout('waitForRestart()', 5000);
-          }
-        }
-        image.onerror = function() {
-          timeoutId = window.setTimeout('waitForRestart()', 5000);
-        }
-        image.src = uniqueUrl
-      }
-
     <g:if test="${isReplicaMode}">
 
         /** Handle for the polling function */
         var periodicUpdater
 
         // instantiate the polling task on load
-        Event.observe(window, 'load', function() {
+        $(function() {
             periodicUpdater = new PeriodicalExecuter(fetchReplicationData, 1)
         })
 
         /** function to fetch replication info and update ui */
         function fetchReplicationData() {
-
-          new Ajax.Request('/csvn/status/replicationInfo', {
-                  method:'get',
-                  requestHeaders: {Accept: 'text/json'},
-                  onSuccess: function(transport) {
-                     responseData = transport.responseText.evalJSON(true);
-                     numberOfCommands = responseData.relicaServerInfo.runningCmdsSize
-                     updateUiCommandsRunning(numberOfCommands)
-                  }
-          })
+          $.ajax({
+            url: '/csvn/status/replicationInfo',
+            type: "GET",
+            success: function(data, textStatus, jqXHR) {
+              numberOfCommands = data.relicaServerInfo.runningCmdsSize
+              updateUiCommandsRunning(numberOfCommands)
+            }
+          });                    
         }
 
         /**
@@ -91,11 +39,11 @@
          */
         function updateUiCommandsRunning(numberOfCommands) {
             if (numberOfCommands > 0) {
-                $('spinner').src = '/csvn/images/replica/commands_updating_spinner.gif';
-                $('commandsCount').innerHTML = '<g:message code="status.page.status.replication.commands_running"/> ' + numberOfCommands;
+                $('#spinner').attr('src', '/csvn/images/replica/commands_updating_spinner.gif');
+                $('#commandsCount').html('<g:message code="status.page.status.replication.commands_running"/> ' + numberOfCommands);
             } else {
-                $('spinner').src = '/csvn/images/fping_up.gif';
-                $('commandsCount').innerHTML = '<g:message code="status.page.status.replication.no_commands"/>'; 
+                $('#spinner').attr('src','/csvn/images/fping_up.gif');
+                $('#commandsCount').html('<g:message code="status.page.status.replication.no_commands"/>'); 
             }
         }
     </g:if>
@@ -107,6 +55,8 @@
     <content tag="title">
       <g:message code="status.page.header.title" />
     </content>
+
+    <g:render template="/common/restartSupport"/>
     
     <!-- Following content goes in the left nav area -->
     <g:render template="/server/leftNav" />

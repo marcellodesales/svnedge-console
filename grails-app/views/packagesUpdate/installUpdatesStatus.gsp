@@ -3,8 +3,6 @@
     <title>CollabNet Subversion Edge <g:message code="packagesUpdate.page.installUpdatesStatus.title" /></title>
 
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
-      <g:javascript src="jsProgressBarHandler.js" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
                 djconfig="parseOnLoad: true, isDebug: false"></script>
 
@@ -59,7 +57,6 @@
             dojox.cometd.subscribe('/csvn-updates/status', onMessage);
 
             dojo.byId('restartButton').disabled = true;
-            dijit.byId('updateProcessDialog').show();
             startUpgrade();
         };
         dojo.addOnLoad(init);
@@ -87,15 +84,14 @@
                 var c = m.channel;
                 var o = eval('('+m.data+')')
                 if (c == "/csvn-updates/percentages") {
-                    myJsProgressBarHandler.setPercentage('progressStatus_overallPercentage', o.overallPercentage)
-
+                    dojo.byId("progressBar").style.width = "" + o.overallPercentage + "%";
                     if (o.overallPercentage == 100) {
                         hasFinished = true
                         dojo.byId('restartButton').disabled = false;
                         dojo.byId('roller').style.display = 'none';
-                        dojo.byId('restartServer').innerHTML = "${restartServer}";
                         dojo.byId('progressStatus_phase').innerHTML = "${installFinished}"
                         dojo.byId('progressStatus_statusMessage').innerHTML = "";
+                        dojo.removeClass("progressBar", "active");
                         destroy()
                     }
 
@@ -170,10 +166,8 @@
         function startBackgroundListener() {
             dojo.byId('roller').style.display = '';
             dojo.byId('progressStatus_phase').innerHTML = "${serverRestarting}&#133;";
-            dojo.byId('progressStatus_statusMessage').value = '';
-            dojo.byId('progressStatus_statusMessage').style.display = 'none';
-            dojo.byId('progressStatus_overallPercentage').style.display = 'none';
-            dojo.byId('restartServer').innerHTML = "${serverRestartingTip} <BR> ${serverRestartingTip2}";
+            dojo.byId('progressStatus_statusMessage').innerHTML = "${serverRestartingTip} ${serverRestartingTip2}";
+            dojo.byId('progressBar').style.display = 'none';
             dojo.byId('restartButton').disabled = true;
             requestServerRestart();
             if (!timerIsOn) {
@@ -185,11 +179,8 @@
     </script>
 
     <style type="text/css">
-        @import "/csvn/plugins/cometd-0.1.5/dojo/resources/dojo.css";
-        .dijitDialogCloseIcon { display:none }
-
+ 
         div#progressStatus_statusMessage {
-          width:350px;
           height: 35px;
           background-color: #dddddd;
           margin-top: 10px;
@@ -198,8 +189,6 @@
         }
 
     </style>
-    <link rel="stylesheet"
-        href="/csvn/plugins/cometd-0.1.5/dijit/themes/tundra/tundra.css" />
 
   </head>
 
@@ -216,58 +205,28 @@
 
   <body>
 
-    <div style="position: absolute; top: -9999px; opacity: 0; left: 478px; visibility: hidden;" 
-         dojoType="dijit.Dialog" id="updateProcessDialog" widgetid="updateProcessDialog" 
-         title="CollabNet Subversion Edge ${message(code:'packagesUpdate.page.installUpdatesStatus.header')}" role="dialog" tabindex="-1"
-         class="dijitDialog dijitContentPane" wairole="dialog"
-         waistate="labelledby-updateProcessDialog_title">
-      <table>
-        <tr>
-          <td valign="middle">
-            <img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle">
-            <font size="3"><strong><span id="progressStatus_phase">
-               <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />&#133;</span></strong>
-            </font>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div id="progressStatus_statusMessage" name="progressStatus_statusMessage">
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-               &nbsp;
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-               <span id="progressStatus_overallPercentage" class="progressBar">0%</span>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-               <font size="3"><strong><span id="restartServer"></span></strong></font>
-          </td>
-        </tr>
-        <tr>
-          <td align="center">
-               &nbsp;
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <div class="AlignRight">
-              <input id="restartButton" type="button" value="${message(code:'packagesUpdate.page.installUpdatesStatus.button.restart')}"
-                 class="Button" onClick="javascript:startBackgroundListener();" />
-            </div>
-          </td>
-        </tr>
-      </table>
+  <div id="progressModal" class="modal">
+      <div class="modal-header">
+        <h3>CollabNet Subversion Edge ${message(code:'packagesUpdate.page.installUpdatesStatus.header')}</h3>
+      </div>
+      <div class="modal-body">
+        <p><img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle"/>
+          <strong><span id="progressStatus_phase">
+            <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />&#133;</span>
+          </strong>
+        </p>
+        <p>
+          <div id="progressStatus_statusMessage" name="progressStatus_statusMessage"></div>
+        </p>
+        <div class="progress progress-info progress-striped active">
+          <div id="progressBar" class="bar" style="width: 0%;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <input id="restartButton" type="button" value="${message(code:'packagesUpdate.page.installUpdatesStatus.button.restart')}"
+               class="btn btn-primary" onClick="startBackgroundListener();" />
+      </div>
     </div>
-
-    <BR><BR><BR><BR>
-
+    <div class="modal-backdrop fade in"></div>
   </body>
 </html>
