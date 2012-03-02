@@ -178,18 +178,6 @@
 
     </script>
 
-    <style type="text/css">
- 
-        div#progressStatus_statusMessage {
-          height: 35px;
-          background-color: #dddddd;
-          margin-top: 10px;
-          padding: 5px 2px 0px 5px;
-          overflow: hidden;
-        }
-
-    </style>
-
   </head>
 
     <g:if test="${session.install.equals('addOns')}">
@@ -215,9 +203,7 @@
             <g:message code="packagesUpdate.page.installUpdatesStatus.initialPhase" />&#133;</span>
           </strong>
         </p>
-        <p>
-          <div id="progressStatus_statusMessage" name="progressStatus_statusMessage"></div>
-        </p>
+        <div class="well" id="progressStatus_statusMessage" name="progressStatus_statusMessage"></div>
         <div class="progress progress-info progress-striped active">
           <div id="progressBar" class="bar" style="width: 0%;"></div>
         </div>
