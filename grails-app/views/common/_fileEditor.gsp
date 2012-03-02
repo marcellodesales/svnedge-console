@@ -16,29 +16,15 @@
   - along with this program.  If not, see <http://www.gnu.org/licenses/>.
   --}%
 
+<g:if test="${heading}"><h3>${heading}</h3></g:if>
+<p><g:message code="default.fileEditor.lockMessage" /></p>
 <g:form method="post">
   <g:hiddenField name="fileId" value="${fileId}"/>
-  <table class="Container">
-    <tr class="ContainerHeader">
-      <td>${heading}</td>
-    </tr>
-    <tr>
-      <td><g:message code="default.fileEditor.lockMessage" /></td>
-    </tr>
-    <tr class="prop">
-      <td width="100%" valign="top" class="value">
-        <textarea id="fileContent" name="fileContent" rows="25" cols="80" style="width: 99%">${fileContent}</textarea>
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td>
-        <div class="AlignRight">
-          <g:actionSubmit id="cancel_button" action="${cancelAction}" class="Button cancel" value="${message(code:'default.confirmation.cancel')}"/>
-          <g:actionSubmit id="save_button" action="${saveAction}" class="Button save" value="${message(code:'default.button.save.label')}"/>
-        </div>
-      </td>
-    </tr>
-  </table>
+  <div style="width: 100%">
+    <textarea id="fileContent" name="fileContent" rows="25" cols="80" style="width: 99%">${fileContent}</textarea>
+  </div>
+    <g:actionSubmit id="save_button" action="${saveAction}" class="btn btn-primary" value="${message(code:'default.button.save.label')}"/>
+    <g:actionSubmit id="cancel_button" action="${cancelAction}" class="btn" value="${message(code:'default.confirmation.cancel')}"/>
 </g:form>
 <g:if test="${ajaxCancelUrl}">
 <g:javascript>
@@ -46,20 +32,18 @@
   function stopAjaxCancel() {
     isAjaxCancel = false;
   }
-  $('save_button').onclick = stopAjaxCancel;
-  $('cancel_button').onclick = stopAjaxCancel;
+  $('#save_button').click(stopAjaxCancel);
+  $('#cancel_button').click(stopAjaxCancel);
 
   <!-- Safari wants a synchronous call for this to work, other browsers seem fine to send the request and move on -->
   window.onbeforeunload = function() {
     if (isAjaxCancel) {
-      new Ajax.Request('${ajaxCancelUrl}', {
-        asynchronous:false,
-        method:'get',
-        requestHeaders: {Accept: 'text/html'},
-        onSuccess: function(transport) {
-          // just send the request, don't need the result
-        }
-      });
+      $.ajax({
+        url: '${ajaxCancelUrl}',
+        type: "GET",
+        dataType: 'html',
+        async: false
+      });      
     }
   }
 </g:javascript>
