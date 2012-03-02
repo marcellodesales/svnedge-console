@@ -1,85 +1,35 @@
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>CollabNet Subversion Edge <g:message code="logs.page.configure.title" /></title>
 </head>
 
-<content tag="title">
-   <g:message code="server.page.edit.header" />
-</content>
+<content tag="title"><g:message code="logs.page.configure.title" /></content>
 
 <g:render template="/server/leftNav" />
 
 <body>
-
-  <g:form>
-
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ContainerBodyWithPaddedBorder">
-          <table class="ItemDetailContainer">
-          <tr>
-            <td class="ItemDetailName">
-              <label for="consoleLevel"><g:message code="logConfigurationCommand.consoleLevel.label" /></label>
-            </td>
-            <td valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'consoleLevel','errors')}">
-                 <select class="inputfield" name="consoleLevel" id="consoleLevel">
-                    <g:each in="${consoleLevels}" var="level">
-                        <option value="${level}" <g:if test="${level == logConfigurationCommand.consoleLevel}">SELECTED</g:if>>${level}</option>
-                    </g:each>
-                 </select>
-            </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.consoleLevel.label.tip" /></i></td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="apacheLevel"><g:message code="logConfigurationCommand.apacheLevel.label" /></label>
-            </td>
-            <td valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'apacheLevel','errors')}">
-                 <select class="inputfield" name="apacheLevel" id="apacheLevel">
-                    <g:each in="${apacheLevels}" var="level">
-                        <option value="${level}" <g:if test="${level == logConfigurationCommand.apacheLevel}">SELECTED</g:if>>${level}</option>
-                    </g:each>
-                 </select>
-            </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.apacheLevel.label.tip" /></i></td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="pruneLogFileOlderThan"><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label" /></label>
-            </td>
-            <td nowrap valign="top" class="value ${hasErrors(bean:logConfigurationCommand,field:'pruneLogsOlderThan','errors')}">
-              <input name="pruneLogsOlderThan" id="pruneLogFileOlderThan" type="text" size="3"
-                value="${logConfigurationCommand.pruneLogsOlderThan}"/> <g:message code="logConfigurationCommand.pruneLogFileOlderThan.days" />
-            </td>
-            <td class="ItemDetailValue"><i><g:message code="logConfigurationCommand.pruneLogFileOlderThan.label.tip" /></i></td>
-          </tr>
-          <g:hasErrors bean="${logConfigurationCommand}" field="pruneLogsOlderThan">
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <ul>
-                <li><g:message code="logConfigurationCommand.pruneLogFileOlderThan.error"/></li>
-              </ul>
-            </td>
-          </tr>
-          </g:hasErrors>
-
-          </table>
-        </td>
-      </tr>
-        <tr class="ContainerFooter">
-        <td >
-          <div class="AlignRight">
-                <g:actionSubmit action="saveConfiguration" value="${message(code:'logs.page.configure.button.save')}" class="Button"/>
-            </div>
-        </td>
-      </tr>
-     </table>
+  <g:form class="form-horizontal">
+    <g:propControlsBody bean="${logConfigurationCommand}" field="consoleLevel" prefix="logConfigurationCommand">
+      <select class="inputfield" name="consoleLevel" id="consoleLevel">
+        <g:each in="${consoleLevels}" var="level">
+          <option value="${level}" <g:if test="${level == logConfigurationCommand.consoleLevel}">selected="selected"</g:if>>${level}</option>
+        </g:each>
+      </select>
+    </g:propControlsBody>
+    
+    <g:propControlsBody bean="${logConfigurationCommand}" field="apacheLevel" prefix="logConfigurationCommand">
+      <select class="inputfield" name="apacheLevel" id="apacheLevel">
+        <g:each in="${apacheLevels}" var="level">
+          <option value="${level}" <g:if test="${level == logConfigurationCommand.apacheLevel}">selected="selected"</g:if>>${level}</option>
+        </g:each>
+      </select>
+    </g:propControlsBody>
+    
+    <g:propTextField bean="${logConfigurationCommand}" field="pruneLogsOlderThan" prefix="logConfigurationCommand" sizeClass="mini"/>
+    <div class="form-actions">
+      <g:actionSubmit action="saveConfiguration" value="${message(code:'logs.page.configure.button.save')}" class="btn btn-primary"/>
+      <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+    </div>
   </g:form>
-
-
-
 </body>
 </html>

@@ -2,7 +2,11 @@
 <html lang="en">
   <head>
     <g:sslRedirect/>
-    <title><g:layoutTitle default="CollabNet Subversion Edge Console" /></title>
+
+    <g:if test="${pageProperty(name:'page.title')}">
+        <g:set var="pageHeader"><g:pageProperty name="page.title" /></g:set>
+    </g:if>    
+    <title><g:layoutTitle default="CollabNet Subversion Edge ${pageHeader ?: 'Console'}" /></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="description" content="Subversion Edge"/>
@@ -229,15 +233,11 @@
           </div> <!--/span3-->
         </g:if>
         <div class="span${blocks}">
-        <g:if test="${pageProperty(name:'page.title') && pageProperty(name:'page.title').trim() != buttonNameMap[selectedButton]}">
-          <div class="row-fluid">
-            <div class="span6">
-              <h2><g:pageProperty name="page.title" /></h2>
-            </div>
-          </div>
-        </g:if>
+          <g:if test="${pageHeader}">
+            <div class="page-header"><h1>${pageHeader}</h1></div>
+          </g:if>
 
-          <div class="row-fluid">
+          <div id="pageContent">
             <g:layoutBody />
           </div>
         </div><!-- /spanX -->

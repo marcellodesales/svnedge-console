@@ -20,107 +20,39 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
 </head>
-<content tag="title">
-  <g:message code="setupTeamForge.page.leftNav.header"/>
-</content>
+<content tag="title"><g:message code="server.page.editIntegration.leftNav.header" /></content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
+  <p>
+    <g:message code="server.page.editIntegration.p1" args="${['<strong><i>' + cmd.ctfURL + '</i></strong>']}" />
+  </p>
 
-   <g:set var="tabArray" value="${[[controller: 'server', action: 'editIntegration', label: message(code:'server.page.editIntegration.tab.convert')]]}" />
-   <g:set var="tabArray" value="${ tabArray << [active: true, controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]}" />
+   <g:set var="tabArray" value="${[[active: true, controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]]}" />
+   <g:set var="tabArray" value="${ tabArray << [controller: 'server', action: 'editIntegration', label: message(code:'server.page.editIntegration.tab.convert')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
-<g:form method="post">
+  <g:if test="${isReplica}">
+    <p><g:message code="setupReplica.page.editCredentials.p1"/></p>
+  </g:if>
 
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
+  <g:form class="form-horizontal" method="post">
+    <fieldset>
+    <g:if test="${isReplica}">
 
-        <p>
-          <g:if test="${isReplica}">
-            <g:message code="setupReplica.page.editCredentials.p1"/>
-          </g:if>
-        </p>
+      <g:propControlsBody bean="${cmd}" field="ctfURL" prefix="setupReplica.page.ctfInfo">
+        ${cmd.ctfURL}
+        <g:hiddenField name="ctfURL" value="${cmd.ctfURL}"/>
+      </g:propControlsBody>
+      <g:propTextField bean="${cmd}" field="ctfUsername" prefix="setupReplica.page.ctfInfo"/>
+      <g:propControlsBody bean="${cmd}" field="ctfPassword" prefix="setupReplica.page.ctfInfo">
+        <g:passwordField name="ctfPassword" value="${cmd.ctfPassword}" size="20"/>
+      </g:propControlsBody>
+    </g:if>
 
-        <table class="ItemDetailContainer">
-         <g:if test="${isReplica}">
-          <tr>
-            <td class="ItemDetailName">
-              <label for="ctfURL"><g:message code="setupReplica.page.ctfInfo.ctfURL.label"/></label>
-            </td>
-            <td valign="top" class="value">
-              ${cmd.ctfURL}
-              <g:hiddenField name="ctfURL" value="${cmd.ctfURL}"/>
-            </td>
-            <td>
-              <em><g:message code="setupReplica.page.ctfInfo.ctfURL.label.tip"/></em>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="ctfURL">
-                <ul><g:eachError bean="${cmd}" field="ctfURL">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="ctfUsername"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></label>
-            </td>
-            <td class="value ${hasErrors(bean: cmd, field: 'ctfUsername', 'errors')}">
-              <g:textField name="ctfUsername" value="${cmd.ctfUsername}" size="20"/> 
-            </td>
-            <td>
-              <em><g:message code="setupReplica.page.ctfInfo.ctfUsername.label.tip"/></em>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="ctfUsername">
-                <ul><g:eachError bean="${cmd}" field="ctfUsername">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="ctfPassword"><g:message code="setupReplica.page.ctfInfo.ctfPassword.label"/></label>
-            </td>
-            <td class="value ${hasErrors(bean: cmd, field: 'ctfPassword', 'errors')}">
-              <g:passwordField name="ctfPassword" value="${cmd.ctfPassword}" size="20"/>
-            </td>
-            <td>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="ctfPassword">
-                <ul><g:eachError bean="${cmd}" field="ctfPassword">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-     </g:if>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="serverKey"><g:message code="ctfConversionBean.serverKey.label" /></label>
-        </td>
-        <td valign="top" class="value ${hasErrors(bean: cmd, field: 'serverKey', 'errors')}">
-          <input size="40" type="text" id="serverKey" name="serverKey" 
-              value="${fieldValue(bean: cmd, field: 'serverKey')}"/>
-        </td>
-        <td class="ItemDetailValue"><em><g:message code="ctfConversionBean.serverKey.error.missing" /></em>
+    <g:set var="tip"><em><g:message code="ctfConversionBean.serverKey.error.missing" /></em>
           <div>
             <g:message code="setupReplica.page.apiKey.description" />
             <ul>
@@ -128,34 +60,13 @@
               <li><g:message code="setupReplica.page.apiKey.property" /></li>
             </ul>
           </div>
-        </td>
-      </tr> 
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="serverKey">
-                <ul><g:eachError bean="${cmd}" field="serverKey">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-
-    <tr class="ContainerFooter">
-      <td colspan="3">
-        <div class="AlignRight">
-        
-          <g:actionSubmit action="updateCredentials" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="Button"/>
-        </div>
-      </td>
-    </tr>
-
-  </table>
-</g:form>
+    </g:set>
+    <g:propTextField bean="${cmd}" field="serverKey" prefix="ctfConversionBean" tip="${tip}"/>    
+    </fieldset>
+    <div class="form-actions">
+      <g:actionSubmit action="updateCredentials" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="btn btn-primary"/>
+    </div>
+  </g:form>
 
 </body>
 </html>

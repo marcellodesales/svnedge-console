@@ -1,6 +1,5 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge <g:message code="server.page.editAuthentication.title" /></title>
       <meta name="layout" content="main" />
 
     <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
@@ -29,7 +28,7 @@
     
   </head>
   <content tag="title">
-    <g:message code="server.page.edit.header" />
+    <g:message code="server.page.editAuthentication.title" />
   </content>
   
   <g:render template="leftNav" />
@@ -56,7 +55,6 @@
       <g:hiddenField name="id" value="${server.id}" />
       
       <fieldset>
-        <legend><g:message code="admin.page.leftNav.auth" /></legend>
         <g:propCheckBox bean="${server}" field="allowAnonymousReadAccess" prefix="server"/>
         <g:propCheckBox bean="${server}" field="forceUsernameCase" prefix="server"/>
 

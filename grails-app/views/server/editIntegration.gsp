@@ -21,27 +21,23 @@
   <head>
     <title>CollabNet Subversion Edge <g:message code="server.page.editIntegration.title" /></title>
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
-
   </head>
-  <content tag="title">
-    <g:message code="server.page.editIntegration.leftNav.header" />
-  </content>
+  <content tag="title"><g:message code="server.page.editIntegration.leftNav.header" /></content>
 
   <g:render template="leftNav" />
 
   <body>
 
-   <g:set var="tabArray" value="${[[active:true, label: message(code:'server.page.editIntegration.tab.convert')]]}" />
-   <g:set var="tabArray" value="${ tabArray << [controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]}" />
+    <p>
+     <g:message code="server.page.editIntegration.p1" args="${['<strong><i>' + ctfServerBaseUrl + '</i></strong>']}" />
+    </p>
+
+   <g:set var="tabArray" value="${[[controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]]}" />
+   <g:set var="tabArray" value="${ tabArray << [active:true, label: message(code:'server.page.editIntegration.tab.convert')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
-      <table class="ItemDetailContainer">
-      <tr>
-        <td class="ContainerBodyWithPaddedBorder">
-
            <p>
-            <g:message code="server.page.editIntegration.p1" args="${['<strong><i>' + ctfServerBaseUrl + '</i></strong>']}" />
+            <g:message code="server.page.editIntegration.p2"/>
            </p>
             <ul>
                 <li><g:message code="server.page.editIntegration.bullet1" /></li>
@@ -52,9 +48,6 @@
             <ul>
                <li><g:message code="server.page.editIntegration.bullet3" /></li>
             </ul>
-      </td></tr>
-      <tr>
-        <td class="ItemDetailContainerCell">
 
           <g:if test="${formError}">
             <div class="alert alert-block alert-error">
@@ -67,69 +60,21 @@
             </div>
           </g:if>
 
-    <g:form method="post" action="revert">
-
-      <table class="ItemDetailContainer">
-      <tr><td colspan="3">&nbsp;</td></tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="ctfURL"><g:message code="server.page.editIntegration.ctfUrl.label" /></label>
-        </td>
-        <td valign="top" class="value" colspan="2">${ctfServerBaseUrl}</td>
-      </tr>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="ctfUsername"><g:message code="server.page.editIntegration.ctfUsername.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfUsername','errors')}">
-          <input size="20" type="text" id="ctfUsername" name="ctfUsername" 
-              value="${fieldValue(bean:ctfCredentials,field:'ctfUsername').replace(',','')}"/>
-        </td>
-        <td class="ItemDetailValue">
-          <em><g:message code="server.page.editIntegration.ctfUsername.label.tip" /></em>
-         </td>
-      </tr>
-   <g:hasErrors bean="${ctfCredentials}" field="ctfUsername">
-      <tr>
-         <td></td>
-         <td class="errors" colspan="2">
-              <ul><g:eachError bean="${ctfCredentials}" field="ctfUsername">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-         </td>
-      </tr>
-   </g:hasErrors>
-      <tr>
-        <td class="ItemDetailName">
-          <label for="ctfPassword"><g:message code="server.page.editIntegration.ctfPassword.label" /></label>
-        </td>
-        <td class="value ${hasErrors(bean:ctfCredentials,field:'ctfPassword','errors')}">
-          <input size="20" type="password" id="ctfPassword" name="ctfPassword" 
-              value="${fieldValue(bean:ctfCredentials,field:'ctfPassword')}"/>
-        </td>
-        <td></td>
-      </tr>
-   <g:hasErrors bean="${ctfCredentials}" field="ctfPassword">
-      <tr>
-         <td></td>
-         <td class="errors" colspan="2">
-              <ul><g:eachError bean="${ctfCredentials}" field="ctfPassword">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-              </g:eachError></ul>
-         </td>
-      </tr>
-   </g:hasErrors>
-      <tr><td colspan="3">&nbsp;</td></tr>
-      <tr class="ContainerFooter">
-        <td colspan="3">
-          <div class="AlignRight">
-                <g:actionSubmit action="revert" value="${message(code:'server.page.editIntegration.button.convert')}" class="Button"/>
-          </div>
-        </td>
-      </tr>
-     </table>
-  </g:form>
-
- </td></tr></table>
+    <g:form class="form-horizontal" method="post" action="revert">
+      <fieldset>
+      <g:propControlsBody bean="${ctfCredentials}" field="ctfUrl" prefix="server.page.editIntegration">
+        ${ctfServerBaseUrl}
+      </g:propControlsBody>
+      <g:propTextField bean="${ctfCredentials}" field="ctfUsername" prefix="server.page.editIntegration"/>
+      <g:propControlsBody bean="${ctfCredentials}" field="ctfPassword" prefix="server.page.editIntegration">
+        <input type="password" id="ctfPassword" name="ctfPassword" 
+            value="${fieldValue(bean:ctfCredentials,field:'ctfPassword')}"/>
+      </g:propControlsBody>
+      </fieldset>
+      <div class="form-actions">
+        <g:actionSubmit action="revert" value="${message(code:'server.page.editIntegration.button.convert')}" class="btn btn-primary"/>
+        <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+      </div>
+    </g:form>
   </body>
 </html>

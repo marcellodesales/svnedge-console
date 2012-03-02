@@ -1,7 +1,6 @@
 <%@ page import="com.collabnet.svnedge.domain.ServerMode" %>
 <html>
   <head>
-    <title>CollabNet Subversion Edge <g:message code="server.page.edit.title" /></title>
       <meta name="layout" content="main" />
 
     <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}" />
@@ -87,9 +86,7 @@
     </g:javascript>
     
   </head>
-  <content tag="title">
-    <g:message code="server.page.edit.header" />
-  </content>
+  <content tag="title"><g:message code="admin.page.leftNav.settings" /></content>
 
   <g:render template="leftNav" />
 
@@ -177,9 +174,7 @@ $('#bindInstructions').hide();
       <g:hiddenField name="view" value="edit"/>
       <g:hiddenField name="id" value="${server.id}" />
 
-      <fieldset>
-        <legend><g:message code="admin.page.leftNav.settings" /></legend>
-            
+      <fieldset>            
         <g:propTextField bean="${server}" field="hostname" required="true" prefix="server"/>
 
         <g:set var='portTip' value=""/>

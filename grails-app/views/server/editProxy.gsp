@@ -1,6 +1,4 @@
-<html>
-<head>
-  <title>CollabNet Subversion Edge %{--
+%{--
   - CollabNet Subversion Edge
   - Copyright (C) 2011, CollabNet Inc. All rights reserved.
   -
@@ -17,160 +15,37 @@
   - You should have received a copy of the GNU Affero General Public License
   - along with this program.  If not, see <http://www.gnu.org/licenses/>.
   --}%
-
-    <g:message code="server.page.editProxy.title"/></title>
+<html>
+<head>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
-
-  <g:set var="editAuthConfirmMessage" value="${message(code:'server.page.edit.authentication.confirm')}"/>
-
-  <g:javascript>
-
-    var fieldsChanged = false;
-    Event.observe(window, 'load', function() {
-        // track field changes for "unsaved changes" alert
-        var allInputs = Form.getElements("serverForm")
-        allInputs.each(function(item){
-            Event.observe(item, 'change', function(event) {
-                fieldsChanged = true;
-            });
-        })
-    });
-  
-
-    function warnForUnSavedData() {
-      if (!fieldsChanged) {
-        return true
-      }
-      return confirm("${editAuthConfirmMessage}");
-    }
-
-  </g:javascript>
-
 </head>
-<content tag="title">
-  <g:message code="server.page.edit.header"/>
-</content>
+<content tag="title"><g:message code="server.page.editProxy.title"/></content>
 
 <g:render template="leftNav"/>
 
 <body>
-<g:render template="tabs" model="${[view: 'editProxy']}" />
+<p><g:message code="server.page.editProxy.message.p1"/></p>
+<p><g:message code="server.page.editProxy.message.p2"/></p>
 
-<g:form method="post" name="serverForm" action="updateProxy">
+<g:form class="form-horizontal" method="post" name="serverForm" action="updateProxy">
   <g:hiddenField name="view" value="editProxy"/>
-
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-        <p><g:message code="server.page.editProxy.message.p1"/></p>
-        <p><g:message code="server.page.editProxy.message.p2"/></p>
-        <table class="ItemDetailContainer">
-          <tr>
-            <td class="ItemDetailName">
-              <label for="httpProxyHost"><g:message code="networkConfiguration.httpProxyHost.label"/></label>
-            </td>
-            <td valign="top" colspan="2"
-                class="${hasErrors(bean: networkConfig, field: 'httpProxyHost', 'errors')}">
-              <input size="30" type="text" id="httpProxyHost" name="httpProxyHost"
-                     value="${fieldValue(bean: networkConfig, field: 'httpProxyHost')}"/>
-            </td>
-          </tr>
-          <g:hasErrors bean="${networkConfig}" field="httpProxyHost">
-            <tr>
-              <td></td>
-              <td colspan="2" class="errors">
-                <ul><g:eachError bean="${networkConfig}" field="httpProxyHost">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </td>
-            </tr>
-          </g:hasErrors>
-
-          <tr>
-            <td class="ItemDetailName">
-              <label for="httpProxyPort"><g:message code="networkConfiguration.httpProxyPort.label"/></label>
-            </td>
-            <td valign="top" colspan="2"
-                class="${hasErrors(bean: networkConfig, field: 'httpProxyPort', 'errors')}">
-              <input size="6" type="text" id="httpProxyPort" name="httpProxyPort"
-                     value="${fieldValue(bean: networkConfig, field: 'httpProxyPort').replace(',', '')}"/>
-            </td>
-          </tr>
-          <g:hasErrors bean="${networkConfig}" field="httpProxyPort">
-            <tr>
-              <td></td>
-              <td colspan="2" class="errors">
-                <ul><g:eachError bean="${networkConfig}" field="httpProxyPort">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </td>
-            </tr>
-          </g:hasErrors>
-
-          <tr>
-            <td class="ItemDetailName">
-              <label for="httpProxyUsername"><g:message code="networkConfiguration.httpProxyUsername.label"/></label>
-            </td>
-            <td valign="top"
-                class="${hasErrors(bean: networkConfig, field: 'httpProxyUsername', 'errors')}">
-              <input size="30" type="text" id="httpProxyUsername" name="httpProxyUsername"
-                     value="${fieldValue(bean: networkConfig, field: 'httpProxyUsername')}"/>
-            </td>
-            <td class="ItemDetailValue">
-              <i><g:message code="networkConfiguration.httpProxyUsername.label.tip" /></i>
-            </td>
-          </tr>
-          <g:hasErrors bean="${networkConfig}" field="httpProxyUsername">
-            <tr>
-              <td></td>
-              <td colspan="2" class="errors">
-                <ul><g:eachError bean="${networkConfig}" field="httpProxyUsername">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </td>
-            </tr>
-          </g:hasErrors>
-
-          <tr>
-            <td class="ItemDetailName">
-              <label for="httpProxyPassword"><g:message code="networkConfiguration.httpProxyPassword.label"/></label>
-            </td>
-            <td valign="top"
-                class="${hasErrors(bean: networkConfig, field: 'httpProxyPassword', 'errors')}">
-              <g:passwordFieldWithChangeNotification name="httpProxyPassword" value="${fieldValue(bean:networkConfig, field:'httpProxyPassword')}" size="30"/>
-            </td>
-            <td class="ItemDetailValue">
-              <i><g:message code="networkConfiguration.httpProxyPassword.label.tip" /></i>
-            </td>
-          </tr>
-          <g:hasErrors bean="${networkConfig}" field="httpProxyPassword">
-            <tr>
-              <td></td>
-              <td colspan="2" class="errors">
-                <ul><g:eachError bean="${networkConfig}" field="httpProxyPassword">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </td>
-            </tr>
-          </g:hasErrors>
-        </table>
-        
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td>
-        <div class="AlignRight">
-          <g:if test="${fieldValue(bean: networkConfig, field: 'httpProxyHost')}">
-            <g:actionSubmit action="removeProxy" value="${message(code:'server.page.editProxy.button.clear')}"
-                            class="Button"/>
-          </g:if>
-          <g:actionSubmit action="updateProxy" value="${message(code:'server.page.editAuthentication.button.save')}"
-                          class="Button"/>
-        </div>
-      </td>
-    </tr>
-  </table>
+  <fieldset>
+    <g:propTextField bean="${networkConfig}" field="httpProxyHost" prefix="networkConfiguration"/>
+    <g:propTextField bean="${networkConfig}" field="httpProxyPort" prefix="networkConfiguration" sizeClass="small" integer="true"/>
+    <g:propTextField bean="${networkConfig}" field="httpProxyUsername" prefix="networkConfiguration"/>
+    <g:propControlsBody bean="${networkConfig}" field="httpProxyPassword" prefix="networkConfiguration">
+      <g:passwordFieldWithChangeNotification name="httpProxyPassword" value="${fieldValue(bean:networkConfig, field:'httpProxyPassword')}" size="30"/>
+    </g:propControlsBody>
+  </fieldset>
+  <div class="form-actions">
+    <g:actionSubmit action="updateProxy" value="${message(code:'server.page.editAuthentication.button.save')}"
+                    class="btn btn-primary"/>
+    <g:if test="${fieldValue(bean: networkConfig, field: 'httpProxyHost')}">
+      <g:actionSubmit action="removeProxy" value="${message(code:'server.page.editProxy.button.clear')}"
+                      class="btn"/>
+    </g:if>
+    <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+  </div>
 </g:form>
 </body>
 </html>

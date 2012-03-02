@@ -182,3 +182,7 @@ function calculateDialogHeight(msg) {
     guessHeight += (msg.split("<p>").length * 50)
     return guessHeight
 }
+
+function elementExists(jQueryObject) {
+	return jQueryObject.length > 0;
+}

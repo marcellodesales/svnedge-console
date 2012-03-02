@@ -408,7 +408,10 @@ class CsvnTagLib {
             if (isInt) {
                 value = value.replace(',', '')
             }
-            out << value << '" type="text" class="' << sizeClass
+            out << value << '" type="text"'
+            def className = attrs['class'] ? 
+                    attrs['class'] + ' ' + sizeClass : sizeClass
+            out << ' class="' << className
             if (attrs['maxlength']) {
                 out << '" maxlength="' << attrs['maxlength']
             }

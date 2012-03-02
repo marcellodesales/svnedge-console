@@ -52,7 +52,7 @@
 </g:if>
 <g:else>
   <li<g:if test="${['editIntegration','revert','editCredentials','updateCredentials'].contains(actionName) }"> class="active"</g:if>>
-    <g:link controller="server" action="editIntegration"><g:message code="admin.page.leftNav.toStandalone" /></g:link>
+    <g:link controller="setupReplica" action="editCredentials"><g:message code="admin.page.leftNav.toStandalone" /></g:link>
   </li>
 </g:else>
 
