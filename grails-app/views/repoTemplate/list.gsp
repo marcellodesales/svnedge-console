@@ -64,6 +64,17 @@
       
       <g:javascript>
         $('#templates').sortable({
+            helper: function(event, elem)
+            {
+              var originals = elem.children();
+              var helper = elem.clone();
+              helper.children().each(function(index)
+              {
+                // Set helper cell sizes to match the original sizes
+                $(this).width(originals.eq(index).width())
+              });
+              return helper;
+            },
             stop: function(event, ui) {
               itemList = new Array();
               $('#templates tr').each ( function() {
