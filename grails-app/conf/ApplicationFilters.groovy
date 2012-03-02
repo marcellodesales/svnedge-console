@@ -116,6 +116,7 @@ class ApplicationFilters {
                 boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
                 boolean isManagedMode = (isIntegrationServer
                         || ServerMode.REPLICA == Server.getServer().mode)
+                boolean isUserAdmin = authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_USERS")
 
                 // default list of features for all users
                 def featureList = []
@@ -126,7 +127,7 @@ class ApplicationFilters {
                 if (lifecycleService.getServer().replica) {
                     featureList << "userCache"
                 }
-                else if (!isManagedMode) {
+                else if (!isManagedMode && isUserAdmin) {
                     featureList << "user"
                 }
 
