@@ -1,15 +1,11 @@
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title><g:message code="repository.page.show.title" /></title>
         <g:pageProperty name="page.headSnippet" />
     </head>
 
 
-<content tag="title">
-     <g:message code="repository.page.leftnav.title" />
-</content>
+<content tag="title"><g:message code="repository.page.show.title" args="${[repositoryInstance.name]}"/></content>
 
     <body>
 
@@ -29,15 +25,8 @@
  </div>
 </g:if>
 
-    <ul class="breadcrumb">
-      <li><g:link action="list"><g:message code="repository.main.icon"/></g:link><span
-        class="divider">/</span></li>
-      <li class="active"><a href="#">${fieldValue(bean:repositoryInstance, field:'name')}</a></li>
-    </ul>
-
     <div class="row-fluid">
       <div class="span12">
-        <h2>${fieldValue(bean:repositoryInstance, field:'name')}</h2>
         <div class="row-fluid">
           <div class="span10 well">
             
