@@ -43,9 +43,24 @@
                   <g:actionSubmit id="installButton" action="installAddOns" 
                                   value="${message(code:'packagesUpdate.page.addOns.button.install')}" 
                                   class="btn btn-primary"
-                                  onclick="return confirm('${confirmMsg}')"
-                               />
+                                  data-toggle='modal' data-target='#confirmInstall'
+                  />
               </div>
+
+      <div id="confirmInstall" class="modal hide fade" style="display: none">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h3>${message(code: 'default.confirmation.title')}</h3>
+        </div>
+        <div class="modal-body">
+          <p>${confirmMsg}</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary ok" 
+             onclick="formSubmit($('#installButton').closest('form'), '/csvn/packagesUpdate/installAddOns')">${message(code: 'default.confirmation.ok')}</a>
+          <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+        </div>
+      </div>
       
     </g:form>
 

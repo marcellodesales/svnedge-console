@@ -131,9 +131,6 @@
                                                    value="${message(code:'repository.page.show.button.validate') }"
                                                    action="updatePermissions"/></span>
             </g:if>
-          <%--
-          <span class="button"><g:actionSubmit class="delete" onclick="return confirm('Are you sure?');" value="Delete" /></span>
-          --%>
           </g:form>
         </div>
 

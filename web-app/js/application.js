@@ -132,56 +132,17 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
     this.messageElement.innerHTML = promptString
 }
 
-/*
- * Creates a modal dialog window over the current screen
- * 
- * @param i18n object having keys: _message, _confirmOkLabel, _confirmCancelLabel
- * @param okHandler callback function for OK click, if needed
- * @param cancelHandler callback function for Cancel click, if needed
- * @param dialogProps default props include 300px width, but dialogProps can be used to override
- * add more
+/**
+ * helper to submit a form, optionally updating the action first
+ * @param form
+ * @param actionAttr OPTIONAL set the action before submitting
  */
-function dialog(i18n, okHandler, cancelHandler, dialogProps) {
-    var defaultProps = {
-        className: "bluelighting", 
-        width: 300,
-        okLabel: i18n._confirmOkLabel,
-        cancelLabel: i18n._confirmCancelLabel,
-        onOk: function(win) {
-             if (okHandler) {
-                 if (okHandler()) {
-                     win.close();
-                 }
-             } else {
-                 win.close();
-             }
-        },
-        onCancel: function(win) {
-            if (cancelHandler) {
-                 if (cancelHandler()) {
-                     win.close();
-                 }
-            } else {
-                 win.close();                 
-            }
-        },
-        showEffect: Element.show,
-        hideEffect: Element.hide,
-        height: calculateDialogHeight(i18n._message)
-    };
-    if (dialogProps) {
-        for (var prop in dialogProps) {
-            defaultProps[prop] = dialogProps[prop];
-        }
+function formSubmit(form, action) {
+    if (action) {
+        form.attr("action", action)
     }
-    Dialog.confirm(i18n._message, defaultProps);
-}
-
-function calculateDialogHeight(msg) {
-    guessHeight = (msg.length / 3)
-    guessHeight += (msg.split("<p>").length * 50)
-    return guessHeight
-}
+    form.submit()
+} 
 
 function elementExists(jQueryObject) {
 	return jQueryObject.length > 0;

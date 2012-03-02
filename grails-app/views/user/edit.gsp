@@ -142,18 +142,34 @@
     </g:hasErrors>
                    <tr class="ContainerFooter">
                      <td colspan="3">
-                        <div class="AlignRight">
-                           <g:actionSubmit action="update" class="Button save" value="${message(code:'user.page.edit.button.save')}" />
-                           <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-                              <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
-                              <g:actionSubmit action="delete" class="Button delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" />
-                           </g:ifAnyGranted>
-                        </div>
+                        
                      </td>
                   </tr>
 
                 </tbody>
                 </table>
+          
+          <div class="form-actions">
+            <g:actionSubmit action="update" class="btn btn-primary save" value="${message(code:'user.page.edit.button.save')}" />
+            <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
+              <g:actionSubmit action="delete" class="btn delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"
+                              data-toggle="modal" data-target="#confirmDelete" />
+            </g:ifAnyGranted>
+          </div>
+
+          <div id="confirmDelete" class="modal hide fade" style="display: none">
+            <div class="modal-header">
+              <a class="close" data-dismiss="modal">&times;</a>
+              <h3>${message(code: 'default.confirmation.title')}</h3>
+            </div>
+            <div class="modal-body">
+              <p>${message(code:'user.page.edit.button.delete.confirm')}</p>
+            </div>
+            <div class="modal-footer">
+              <a href="#" class="btn btn-primary ok" onclick="formSubmit($('#deleteButton').closest('form'), '/csvn/user/delete')">${message(code: 'default.confirmation.ok')}</a>
+              <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+            </div>
+          </div>
 
         </g:form>
 

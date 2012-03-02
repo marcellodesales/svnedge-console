@@ -60,18 +60,32 @@
             </table>
         </div>
 
-        <div class="buttons">
-            <g:form>
-                <input type="hidden" name="id" value="${userInstance.id}" />
-                <g:if test="${editable}">
-                  <span class="button"><g:actionSubmit action="edit" class="edit" value="${message(code:'user.page.edit.button.edit')}" /></span>
-                </g:if> 
-                  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-                    <g:set var="question" value="${message(code:'user.page.edit.button.delete.confirm')}" />
-                    <span class="button"><g:actionSubmit action="delete" class="delete" onclick="return confirm('${question}');" value="${message(code:'user.page.edit.button.delete')}" /></span>
-                  </g:ifAnyGranted>
-            </g:form>
+      <div class="form-actions">
+        <g:form>
+          <input type="hidden" name="id" value="${userInstance.id}" />
+          <g:if test="${editable}">
+            <g:actionSubmit action="edit" class="btn edit" value="${message(code:'user.page.edit.button.edit')}" />
+          </g:if> 
+            <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
+              <g:actionSubmit action="btn delete" class="delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"
+                              data-toggle="modal" data-target="#confirmDelete" />
+            </g:ifAnyGranted>
+        </g:form>
+      </div>
+
+      <div id="confirmDelete" class="modal hide fade" style="display: none">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h3>${message(code: 'default.confirmation.title')}</h3>
         </div>
+        <div class="modal-body">
+          <p>${message(code:'user.page.edit.button.delete.confirm')}</p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary ok" onclick="formSubmit($('#deleteButton').closest('form'), '/csvn/user/delete')">${message(code: 'default.confirmation.ok')}</a>
+          <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+        </div>
+      </div>
 
     </div>
 </body>

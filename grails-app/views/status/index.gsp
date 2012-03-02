@@ -1,15 +1,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta name="layout" content="main" />
-    <style>
-      p.dialogTitle {
-        padding-top: 0px;
-        margin-top: 5px;
-      }
-      p.dialogBody {
-        margin-top: 10px;
-      }
-    </style>
     <script type="text/javascript">
 
     <g:if test="${isReplicaMode}">

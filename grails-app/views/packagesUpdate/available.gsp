@@ -19,12 +19,6 @@
            document.getElementById("reloadButton").disabled = true;
            </g:if>
         });
-        
-        function startInstall() {
-          form = $('#installButton').closest("form");
-          form.attr("action", "/csvn/packagesUpdate/installUpdates");
-          form.submit()
-        }
       </script>
 
   </head>
@@ -62,7 +56,8 @@
           <p>${confirmMsg}</p>
         </div>
         <div class="modal-footer">
-          <a href="#" class="btn btn-primary ok" onclick="startInstall()">${message(code: 'default.confirmation.ok')}</a>
+          <a href="#" class="btn btn-primary ok" 
+             onclick="formSubmit($('#installButton').closest('form'), '/csvn/packagesUpdate/installUpdates')">${message(code: 'default.confirmation.ok')}</a>
           <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
         </div>
       </div>
