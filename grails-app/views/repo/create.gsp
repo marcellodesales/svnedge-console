@@ -100,7 +100,6 @@
             // store the selection in a hidden field for submit
             var selectedItem = this.innerHTML;
             var repo = this.parentNode.parentNode.firstChild.textContent;
-            alert(repo + " / " + selectedItem);
             $('#initOptionSelected').val(repo + "/" + selectedItem);
         });
       }
