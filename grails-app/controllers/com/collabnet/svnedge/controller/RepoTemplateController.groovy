@@ -125,9 +125,11 @@ class RepoTemplateController {
     
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def updateListOrder = {
+        def idList = params['templates[]']
         log.debug("Updating repository template list order: " + 
-            params['templates[]'])
-        repoTemplateService.reorderTemplates(params['templates[]'])
+                idList)
+        repoTemplateService.reorderTemplates(idList.split(","))
+        render "ok"
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])

@@ -4,8 +4,7 @@
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repoTemplate.page.list.header.title /></title>
         <g:javascript library="listView"/>
-        <g:javascript library="prototype"/>
-        <g:javascript library="prototype/dragdrop"/>
+        <g:javascript library="jquery-ui-1.8.18.custom.min"/>
     </head>
 
 <g:render template="/repo/leftNav" />
@@ -28,7 +27,7 @@
     <g:message code="repoTemplate.page.list.sort.instructions"/>
   </p>
 
-    <g:if test="${repoTemplateInstanceList.size() > 0}">
+    
       <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
         <thead>
         <tr>
@@ -41,12 +40,19 @@
       </thead>
       <tbody id="templates">
         <g:each in="${repoTemplateInstanceList}" status="i" var="repoTemplateInstance">
-          <tr id="repoTemplate_${repoTemplateInstance.id}" class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}" style="cursor: move">
+          <tr id="repoTemplate_${repoTemplateInstance.id}" style="cursor: move">
             <!-- <td><g:listViewSelectItem item="${repoTemplateInstance}"/></td> -->
             <td><g:link action="edit" id="${repoTemplateInstance.id}">${repoTemplateInstance.name}</g:link></td>
             <td><g:formatBoolean boolean="${repoTemplateInstance.active}" /></td>
           </tr>
         </g:each>
+        <g:if test="${repoTemplateInstanceList.size() == 0}">
+          <tr>
+            <td colspan="2">
+              <p><g:message code="repoTemplate.page.list.empty"/></p>
+            </td>
+          </tr>
+        </g:if>
       </tbody>
       </table>
       
@@ -57,20 +63,18 @@
       </g:form>
       
       <g:javascript>
-        function sendUpdatedOrder(container) {
-            new Ajax.Request("/csvn/repoTemplate/updateListOrder", {
-                method: "post", parameters: Sortable.serialize(container.id)
-                });
-            var rows = $('templates').childElements();
-            for (var i = 0; i < rows.length; i++) {
-                rows[i].className = (i % 2) == 0 ? 'EvenRow' : 'OddRow';
-            }
-        }
-        Sortable.create('templates',{tag: 'tr', ghosting:false, onUpdate: sendUpdatedOrder})
+        $('#templates').sortable({
+            stop: function(event, ui) {
+              itemList = new Array();
+              $('#templates tr').each ( function() {
+                var id = $(this).attr('id').replace(/[^\d]+/g, '');
+                itemList[itemList.length] = id;
+              })
+              $.post('/csvn/repoTemplate/updateListOrder', {
+                'templates[]': itemList.join(",")
+              });
+          }
+        });
       </g:javascript>
-    </g:if>
-    <g:else>
-      <p><g:message code="repoTemplate.page.list.empty"/></p>
-    </g:else>
 </body>
 </html>
