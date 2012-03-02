@@ -1,9 +1,6 @@
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title><g:message code="repository.page.create.title"/></title>
-  <g:javascript library="prototype"/>
   <script type="text/javascript" src="/csvn/js/simpletreemenu.js">
     /***********************************************
      * Simple Tree Menu- © Dynamic Drive DHTML code library (www.dynamicdrive.com)
@@ -13,28 +10,16 @@
   </script>
   <link rel="stylesheet" type="text/css" href="/csvn/css/simpletree.css"/>
   <script type="text/javascript">
-
-    Event.observe(window, 'load', function() {
-      $('name').focus();
-
-      $$('input.repoInitOptions').each(function(item) {
-        item.observe('click', function(e) {
-          showSelectedOptionDetail();
-        })
-      })
+  /* <![CDATA[ */
+    $(document).ready(function() {
+      $('#name').focus();
+      $('input.repoInitOptions').click(showSelectedOptionDetail);
 
       setInitialOptionState()
       showSelectedOptionDetail()
 
       // load all repo dump files into the backup chooser div
-      new Ajax.Request('/csvn/repo/dumpFileListAll', {
-        method:'get',
-        requestHeaders: {Accept: 'text/json'},
-        onSuccess: function(transport) {
-          prepareBackupsTree(transport)
-        }
-      })
-
+      $.get('/csvn/repo/dumpFileListAll', prepareBackupsTree)
     });
 
     var initOptionParam = "${params.initOption ?: ''}";
@@ -42,23 +27,21 @@
 
     function showSelectedOptionDetail() {
       hideAllOptionDetails()
-      $$('input.repoInitOptions').each(function(item) {
-        if (item.checked == true) {
-          var detailsClass = ".initOptionDetail." + item.id
-          $$(detailsClass)[0].show()
+      $('input.repoInitOptions').each(function(index, item) {
+        if (item.checked) {
+          var detailsClass = ".initOptionDetail." + item.id;
+          $(detailsClass).show();
         }
       })
     }
 
     function hideAllOptionDetails() {
-      $$('.initOptionDetail').each(function(item) {
-        item.hide()
-      });
+      $('.initOptionDetail').hide();
     }
 
     function setInitialOptionState() {
       if (initOptionParam.length > 0) {
-        $$('input.repoInitOptions').each(function(item) {
+        $('input.repoInitOptions').each(function(index, item) {
           if (item.value == initOptionParam) {
             item.checked = true;
           }
@@ -66,8 +49,7 @@
       }
     }
 
-    function prepareBackupsTree(transport) {
-      var responseJson = transport.responseText.evalJSON(true);
+    function prepareBackupsTree(responseJson, textStatus, jqXHR) {
       if (responseJson.result != null) {
         backupsHtml = "<p><g:message code='repository.page.create.useBackup.instructions'/></p>";
         backupsHtml += '<ul id="backupsTree" class="treeview">';
@@ -103,30 +85,27 @@
         }
         backupsHtml += "</ul>"
 
-        $('backupChooser').update(backupsHtml);
+        $('#backupChooser').html(backupsHtml);
 
         // use simple tree menu to style list as tree
         ddtreemenu.createTree("backupsTree", false)
 
         // add "clickability" to the backup file names
-        $$('ul.backupList li').each(function(item) {
-          item.observe('click', function() {
+        $('ul.backupList li').click(function() {
             // unselect all items
-            $$('ul.backupList li').each(function(it) {
-              it.removeClassName('selected');
-            });
+            $('ul.backupList li').removeClass('selected');
             // select this item
-            item.addClassName('selected');
+            $(this).addClass('selected');
 
             // store the selection in a hidden field for submit
-            var selectedItem = item.innerHTML
-            var repo = item.up('li.submenu').firstChild.data
-            $('initOptionSelected').value = repo + "/" + selectedItem
-          });
+            var selectedItem = this.innerHTML;
+            var repo = this.parentNode.parentNode.firstChild.textContent;
+            alert(repo + " / " + selectedItem);
+            $('#initOptionSelected').val(repo + "/" + selectedItem);
         });
       }
     }
-
+  /* ]]> */
   </script>
   <style>
   div.initOptionDetail {
@@ -147,62 +126,37 @@
   </style>
 </head>
 
-<content tag="title">
-  <g:message code="repository.page.leftnav.title"/>
-</content>
+<content tag="title"><g:message code="repository.page.create.title"/></content>
 
 <g:render template="leftNav"/>
 
 <body>
-<table class="Container">
-<tr class="ContainerHeader">
-  <td colspan="2"><g:message code="repository.page.leftnav.title"/></td>
-</tr>
-
-<g:form action="save" method="post">
-  <tr class="prop">
-    <td valign="top" class="name">
-      <label for="name"><g:message code="repository.page.create.name"/></label>
-    </td>
-    <td width="100%" valign="top" class="value errors">
-      <input type="text" id="name" name="name" value="${fieldValue(bean: repo, field: 'name')}"/>
-      <g:hasErrors bean="${repo}" field="name">
-        <ul><g:eachError bean="${repo}" field="name">
-          <li><g:message error="${it}" encodeAs="HTML"/></li>
-        </g:eachError></ul>
-      </g:hasErrors>
-    </td>
-  </tr>
-  <tr class="prop">
-    <td valign="top" class="name" style="white-space: nowrap;"><label for="useBackup"><g:message
-            code="repository.page.create.initOptions"/></label></td>
-    <td valign="top" class="value ${hasErrors(bean: repo, field: 'useBackup', 'errors')}">
-      <g:radio name="initOption" value="useTemplate" id="useTemplate" class="repoInitOptions" checked="checked"/><label
-            for="useTemplate"><g:message code="repository.page.create.useTemplate"/></label>
-      <g:radio name="initOption" value="useBackup" id="useBackup" class="repoInitOptions"/><label
-            for="useBackup"><g:message code="repository.page.create.useBackup"/></label>
+<g:form class="form-horizontal" action="save" method="post">
+  <g:propTextField bean="${repo}" field="name" required="true" prefix="repository.page.create"/>
+    
+  <div class="control-group ${hasErrors(bean: repo, field: 'useBackup', 'error')}">
+    <div class="control-label"><g:message code="repository.page.create.initOptions"/></div>
+    <div class="controls">
+      <label class="radio"><g:radio name="initOption" value="useTemplate" id="useTemplate" class="repoInitOptions" checked="checked"/>
+            <g:message code="repository.page.create.useTemplate"/></label>
+      <div id="templateChooser" class="initOptionDetail useTemplate" style="display:none">
+        <g:each in="${templateList}" status="i" var="template">
+            <label class="radio"><g:radio name="templateId" value="${template.id}" 
+              checked="${(params.templateId == template.id as String) || (i == 0 && !params.templateId)}"/><span class="help-inline">${template.name}</span></label>
+        </g:each>
+      </div>    
+      <label class="radio"><g:radio name="initOption" value="useBackup" id="useBackup" class="repoInitOptions"/>
+        <span class="help-inline"><g:message code="repository.page.create.useBackup"/></label>
       <g:hiddenField name="initOptionSelected" value="${params.initOptionSelected}"/>
       <div id="backupChooser" class="initOptionDetail useBackup" style="display:none">
         Loading backup files...
       </div>
 
-      <div id="templateChooser" class="initOptionDetail useTemplate" style="display:none">
-        <g:each in="${templateList}" status="i" var="template">
-            <div><label><g:radio name="templateId" value="${template.id}" 
-              checked="${(params.templateId == template.id as String) || (i == 0 && !params.templateId)}"/>${template.name}</label></div>
-        </g:each>
-      </div>
-    </td>
-  </tr>
-  <tr class="ContainerFooter">
-    <td colspan="2">
-      <div class="AlignRight">
-        <input class="Button save" type="submit" value="<g:message code='repository.page.create.button.create'/>"/>
-      </div>
-    </td>
-  </tr>
-  </tbody>
-  </table>
+    </div>
+  </div>
+  <div class="form-actions">    
+    <input class="btn btn-primary" type="submit" value="${message(code: 'repository.page.create.button.create')}"/>
+   </div>
 </g:form>
 </table>
 </body>
