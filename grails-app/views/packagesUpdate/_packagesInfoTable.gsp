@@ -3,7 +3,7 @@
    <g:set var="tabArray" value="${tabArray << [action:'installed', label: message(code:'packagesUpdate.page.tabs.installed')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
-   <div class="well">
+   <div>
    <strong><g:message code="packagesUpdate.page.table.repository" /></strong>
    ${imageOriginUrl} 
    <g:if test="${proxyToOriginURL}">
