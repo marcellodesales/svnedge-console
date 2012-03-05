@@ -16,19 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-var Ajax;
-if (Ajax && (Ajax != null)) {
-    Ajax.Responders.register({
-                onCreate: function() {
-                    if ($('spinner') && Ajax.activeRequestCount > 0)
-                        Effect.Appear('spinner', {duration:0.5,queue:'end'});
-                },
-                onComplete: function() {
-                    if ($('spinner') && Ajax.activeRequestCount == 0)
-                        Effect.Fade('spinner', {duration:0.5,queue:'end'});
-                }
-            });
-}
+// global ajax event listener
+$('#spinner').bind("ajaxSend", function(){
+    $(this).show();
+}).bind("ajaxComplete", function(){
+    $(this).hide();
+});
 
 /**
  * A class for streaming a log file into a div or other element
@@ -40,19 +33,18 @@ if (Ajax && (Ajax != null)) {
  */
 function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToScroll, errorMsg) {
 
-    this.logData = { "log" : {"fileName": logFileName, "startIndex": 0, "endIndex": initialOffset}}
-    this.contentElement = elementToUpdate
-    this.scrollingElement = divElementToScroll
-    this.errorMsg = errorMsg
-    this.fetchUpdates = function(logStreamer) {
-
-        new Ajax.Request('/csvn/log/tail', {
-                    logStreamer: logStreamer,
-                    method:'get',
-                    requestHeaders: {Accept: 'text/json'},
-                    parameters: {fileName: logStreamer.logData.log.fileName, startIndex: logStreamer.logData.log.endIndex },
-                    onSuccess: function(transport) {
-                        logStreamer.logData = transport.responseText.evalJSON(true);
+    this.logData = { "log" : {"fileName": logFileName, "startIndex": 0, "endIndex": initialOffset}};
+    this.contentElement = elementToUpdate;
+    this.scrollingElement = divElementToScroll;
+    this.errorMsg = errorMsg;
+    this.fetchUpdates = function() {
+        var self = this
+        $.ajax({url: '/csvn/log/tail', 
+                data: {fileName: self.logData.log.fileName, startIndex: self.logData.log.endIndex },
+                context: self,
+                success: function(data, status, xhr) {
+                        logStreamer = this
+                        logStreamer.logData = data    
                         appendText = ""
                         if (logStreamer.logData.log.error) {
                             appendText = (logStreamer.errorMsg) ? logStreamer.errorMsg : "\n\n** " + logStreamer.logData.log.error + " **"
@@ -61,25 +53,29 @@ function LogStreamer(logFileName, initialOffset, elementToUpdate, divElementToSc
                         else {
                             appendText = logStreamer.logData.log.content
                         }
-                        if (Prototype.Browser.IE) {
-                            var newContent = "<PRE>" + logStreamer.contentElement.innerText + "\n" + appendText + "</PRE>"
-                            logStreamer.contentElement.update(newContent);
+                        if (appendText) {
+                            if ( $.browser.msie ) {
+                                var newContent = logStreamer.contentElement.text() + appendText
+                                logStreamer.contentElement.html(newContent);
+                            }
+                            else {
+                                var newContent = logStreamer.contentElement.text() + appendText
+                                logStreamer.contentElement.text(newContent);
+                            }
                         }
-                        else {
-                            var newContent = logStreamer.contentElement.innerHTML + appendText
-                            logStreamer.contentElement.update(newContent);
-                        }
-                        logStreamer.scrollingElement.scrollTop = logStreamer.scrollingElement.scrollHeight;
+                        logStreamer.scrollingElement.prop({ scrollTop: logStreamer.scrollingElement.prop("scrollHeight") });
                     }
                 })
     }
-    this.periodicUpdater = null
+    this.periodicUpdater = null;
     this.start = function() {
-        var fetchUpdates = this.fetchUpdates.curry(this)
-        this.periodicUpdater = new PeriodicalExecuter(fetchUpdates, 1)
+        var self = this
+        this.periodicUpdater = setInterval(function() { self.fetchUpdates() }, 1000);
     }
     this.stop = function() {
-        if (this.periodicUpdater) this.periodicUpdater.stop()
+        if (this.periodicUpdater) {
+            clearInterval(this.periodicUpdater);
+        }
     }
 }
 
@@ -98,23 +94,28 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
     this.onSuccess = null
     this.onFailure = null
     this.tokenAvailable = false
-    this.doAjaxRequest = function(checker) {
-        checker.messageElement.innerHTML = '<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> ' + checkingString
-        checker.ajaxInstance = new Ajax.Request(ajaxUrl, {
-                    method:'get',
-                    requestHeaders: {Accept: 'text/json'},
-                    parameters: {token: checker.inputElement.value },
-                    onSuccess: function(transport) {
-                        var responseJson = transport.responseText.evalJSON(true);
+    this.ajaxUrl = ajaxUrl
+    this.checkingString = checkingString
+    this.messageElement.html(promptString)
+    this.doAjaxRequest = function() {
+        var checker = this
+        checker.messageElement.html('<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> ' + checker.checkingString)
+        checker.ajaxInstance = $.ajax({
+                    url: checker.ajaxUrl, 
+                    data: {token: checker.inputElement.attr("value") },
+                    context: checker,
+                    success: function(data, status, xhr) {
+                        var checker = this
+                        var responseJson = data
                         if (responseJson.result.tokenStatus == 'ok') {
-                            checker.messageElement.innerHTML = '<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> ' + responseJson.result.message
+                            checker.messageElement.html('<img src="/csvn/images/ok.png" alt="ok icon" align="top"/> ' + responseJson.result.message)
                             checker.tokenAvailable = true
                             if (checker.onSuccess != null) {
                                 checker.onSuccess()
                             }
                         }
                         else {
-                            checker.messageElement.innerHTML = '<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> ' + responseJson.result.message
+                            checker.messageElement.html('<img src="/csvn/images/attention.png" alt="problem icon" align="top"/> ' + responseJson.result.message)
                             checker.tokenAvailable = false
                             if (checker.onFailure != null) {
                                 checker.onFailure()
@@ -125,11 +126,12 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
     }
     this.keypressHandler = function() {
         clearTimeout(this.delayCheckTimer)
-        var checkAvailability = this.doAjaxRequest.curry(this)
+        var self = this
+        var checkAvailability = function() { self.doAjaxRequest() }
         this.delayCheckTimer = setTimeout(checkAvailability, 1000)
     }
 
-    this.messageElement.innerHTML = promptString
+    
 }
 
 /**

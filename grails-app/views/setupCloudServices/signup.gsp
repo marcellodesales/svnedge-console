@@ -19,7 +19,6 @@
 <head>
   <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.signup.title"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
   <g:javascript library="application"/>
 
   <g:javascript>
@@ -29,26 +28,26 @@
       checking: '<g:message code="setupCloudServices.login.available.checking"/>'
     }
 
-    Event.observe(window, 'load', function() {
-      var usernameField = $('username')
-      var usernameMsgElement = $('usernameUniquenessMessage')
+    $(function() {
+      var usernameField = $('#username')
+      var usernameMsgElement = $('#usernameUniquenessMessage')
       var loginChecker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.checking, messages.prompt)
-      Event.observe(usernameField, 'keydown', function(e) {
+      usernameField.on('keydown', function(e) {
         loginChecker.keypressHandler()
       })
 
-      var domainField = $('domain')
-      var domainMsgElement = $('domainUniquenessMessage')
+      var domainField = $('#domain')
+      var domainMsgElement = $('#domainUniquenessMessage')
       var domainChecker = new CloudTokenAvailabilityChecker(domainField, domainMsgElement, '/csvn/setupCloudServices/checkDomainAvailability', messages.checking, messages.prompt)
-      Event.observe(domainField, 'keydown', function(e) {
+      domainField.on('keydown', function(e) {
         domainChecker.keypressHandler()
       })
       
-      Event.observe($('emailAddress'), 'keyup', emailConfirm);
-      Event.observe($('emailAddressConfirm'), 'keyup', emailConfirm);
-      Event.observe($('password'), 'keyup', passwordConfirm);
-      Event.observe($('passwordConfirm'), 'keyup', passwordConfirm);
-      Event.observe($('btnCloudServicesCreateAccout'), 'click', function(e) {
+      $('#emailAddress').on('keyup', emailConfirm);
+      $('#emailAddressConfirm').on('keyup', emailConfirm);
+      $('#password').on('keyup', passwordConfirm);
+      $('#passwordConfirm').on('keyup', passwordConfirm);
+      $('#btnCloudServicesCreateAccout').on('click', function(e) {
         if (!emailConfirm(e)) {
             Event.stop(e);
             alert('<g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>');
@@ -61,14 +60,14 @@
     })
     
     function emailConfirm(e) {
-      var b = $('emailAddress').value == $('emailAddressConfirm').value;
-      $('confirmEmailMessage').style.display = b ? 'none' : '';
+      var b = $('#emailAddress').attr("value") == $('#emailAddressConfirm').attr("value");
+      $('#confirmEmailMessage').css("display", b ? 'none' : 'inline');
       return b;
     }
     
     function passwordConfirm(e) {
-      var b = $('password').value == $('passwordConfirm').value;
-      $('passwordConfirmMessage').style.display = b ? 'none' : '';
+      var b = $('#password').attr("value") == $('#passwordConfirm').attr("value");
+      $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
       return b;
     }
     </g:javascript>       
