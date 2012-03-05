@@ -18,34 +18,20 @@
 
 <g:applyLayout name="repoDetail" params="[suppressTabs: true]">
   <content tag="tabContent">
-    <g:uploadForm action="uploadHook">
-      <g:hiddenField name="id" value="${params.id}"/>
-      <div class="dialog">
-        <table class="Container">
-          <thead>
-          <tr class="ContainerHeader">
-            <td colspan="2"><g:message code="repository.page.hookCreate.heading"/></td>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="prop">
-            <td valign="top" class="name">
-              <label for="fileUpload"><g:message code="repository.page.hookCreate.upload.label" /></label>
-            </td>
-            <td valign="top" class="value">
-              <input type="file" name="fileUpload" id="fileUpload"/>
-              <i><g:message code="repository.page.hookCreate.upload.description" /></i>
-            </td>
-          </tr>
-          <tr class="ContainerFooter">
-            <td colspan="2">
-              <div class="AlignRight">
-                <g:actionSubmit action="uploadHook" class="Button save" value="${message(code: 'default.button.create.label')}" />
-              </div>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+    <h3><g:message code="repository.page.hookCreate.heading"/></h3>
+    <g:uploadForm class="form-horizontal" action="uploadHook">
+      <fieldset>
+      <g:hiddenField name="id" value="${params.id}"/>      
+      <div class="control-group">
+      <div class="control-label"><label 
+          for="fileUpload"><g:message code="repository.page.hookCreate.upload.label"/></label></div>
+      <div class="controls">
+        <input type="file" name="fileUpload" id="fileUpload"/>
+        <div class="help-block"><g:message code="repository.page.hookCreate.upload.label.tip" /></div>
+      </div>
+      </fieldset>
+      <div class="form-actions">    
+        <g:actionSubmit action="uploadHook" class="btn btn-primary" value="${message(code: 'default.button.create.label')}" />
       </div>
     </g:uploadForm>
   </content>
