@@ -1,8 +1,6 @@
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title>CollabNet Subversion Edge <g:message code=repoTemplate.page.list.header.title /></title>
         <g:javascript library="listView"/>
         <g:javascript library="jquery-ui-1.8.18.custom.min"/>
     </head>
@@ -10,7 +8,7 @@
 <g:render template="/repo/leftNav" />
 
 <content tag="title">
-   <g:message code="repository.page.leftnav.title" />
+   <g:message code="repoTemplate.page.list.header.title" />
 </content>
 
 
@@ -20,9 +18,6 @@
     <span class="menuButton"><g:link class="create" action="create"><g:message code="repoTemplate.page.create.header.title" /></g:link></span>
   </div>
 -->
-  <p>
-    <g:message code="repoTemplate.page.list.header.title" />
-  </p>
   <p>
     <g:message code="repoTemplate.page.list.sort.instructions"/>
   </p>
