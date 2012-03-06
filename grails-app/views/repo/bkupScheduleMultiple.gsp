@@ -18,17 +18,14 @@
 
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main" />
-        <title>CollabNet Subversion Edge <g:message code="repository.page.backup.header" /></title>
         <g:javascript library="listView"/>
-
     </head>
 
 <g:render template="leftNav" />
 
 <content tag="title">
-   <g:message code="repository.page.leftnav.title" />
+   <g:message code="repository.page.backup.header" />
 </content>
 
     <body>

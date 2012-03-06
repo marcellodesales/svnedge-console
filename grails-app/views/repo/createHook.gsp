@@ -22,9 +22,9 @@
     <g:uploadForm class="form-horizontal" action="uploadHook">
       <fieldset>
       <g:hiddenField name="id" value="${params.id}"/>      
-      <div class="control-group">
-      <div class="control-label"><label 
-          for="fileUpload"><g:message code="repository.page.hookCreate.upload.label"/></label></div>
+      <div class="control-group required-field">
+      <label class="control-label"
+          for="fileUpload"><g:message code="repository.page.hookCreate.upload.label"/></label>
       <div class="controls">
         <input type="file" name="fileUpload" id="fileUpload"/>
         <div class="help-block"><g:message code="repository.page.hookCreate.upload.label.tip" /></div>

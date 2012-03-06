@@ -116,8 +116,8 @@ function resetPage() {
     <div id="mailServerDialog">
       <p><g:message code="server.page.editMail.configureSMTP"/></p>
       
-      <g:propTextField bean="${config}" field="serverName" prefix="mailConfiguration" class="requireEnabled"/>
-      <g:propTextField bean="${config}" field="port" prefix="mailConfiguration" class="requireEnabled" integer="true"/>
+      <g:propTextField bean="${config}" field="serverName" prefix="mailConfiguration" class="requireEnabled" required="true"/>
+      <g:propTextField bean="${config}" field="port" prefix="mailConfiguration" class="requireEnabled" integer="true" required="true"/>
       <g:propTextField bean="${config}" field="authUser" prefix="mailConfiguration" class="requireEnabled requireAuthMethod"/>
       <g:propControlsBody bean="${config}" field="authPass" prefix="mailConfiguration" class="requireEnabled">
         <g:passwordField name="authPass" value="${fieldValue(bean: config, field: 'authPass')}" class="requireEnabled"/>

@@ -10,7 +10,6 @@
 </content>
 
 <body>
-  <div>
   <table>
               <tbody>
                 <tr>
@@ -33,9 +32,8 @@
                 </tr>
               </tbody>
             </table>
-  </div>
-
-    <h3><g:message code="repository.page.dump.subtitle" /></h3>
+    <br/>
+    <h2><small><g:message code="repository.page.dump.subtitle" /></small></h3>
     <g:form class="form-horizontal" action="createDumpFile">
       <input type="hidden" name="id" value="${repositoryInstance?.id}" />
       <g:propTextField bean="${dump}" field="revisionRange" prefix="repository.page.dump"/>

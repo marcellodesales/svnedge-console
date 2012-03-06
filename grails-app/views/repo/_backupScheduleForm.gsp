@@ -17,17 +17,15 @@
   --}%
 
 <%@ page import="com.collabnet.svnedge.console.SchedulerBean" %>
-<g:form method="post" name="bkupForm">
+<g:form class="form-horizontal" method="post" name="bkupForm">
   <input type="hidden" name="id" value="${repositoryInstance?.id}"/>
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-        <table class="ItemDetailContainer">
-          <tr>
-            <td class="ItemDetailName">
-              <label for="type"><g:message code="repository.page.bkupSchedule.type"/></label>
-            </td>
-            <td valign="top" class="value ItemDetailValue">
+
+<div class="row-fluid">
+  <div  class="span9" id="scheduler">
+    <div class="control-group required-field">
+      <label class="control-label"
+          for="type"><g:message code="repository.page.bkupSchedule.type"/></label>
+      <div class="controls">
               <g:set var="isCloud" value="${params.type == 'cloud' || dump.cloud}"/>
               <g:set var="isDumpDelta" value="${params.type == 'dump_delta' || dump.deltas}"/>
               <g:set var="isHotcopy" value="${params.type == 'hotcopy' || dump.hotcopy}"/>
@@ -48,69 +46,46 @@
                         code="repository.page.bkupSchedule.type.none"/></option>
               </select>
               <g:if test="${cloudRegistrationRequired}">
-                <span id="cloudRegister" class="TextRequired" style="display: none;">
+                <span id="cloudRegister" class="help-inline" style="display: none;">
                   <img width="15" height="15" alt="Warning" align="bottom"
                        src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
                   <g:message code="repository.page.bkupSchedule.cloud.not.configured"
                              args="${[createLink(controller: 'setupCloudServices', action: 'index')]}"/>
                 </span>
               </g:if>
-            </td>
-            <g:if test="${cloudEnabled}">
-            <td rowspan="3" style="vertical-align: top; text-align: center">
-              <div >
-                <a target="_blank" href="${helpBaseUrl}/index.jsp?topic=/csvn/action/movetocncloud.html"><img 
-                        width="200" height="75" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/><br/>
-                <g:message code="repository.page.bkupSchedule.help.link.label"/></a>
-              </div>
-            </td>
-            </g:if>
-          </tr>
+      </div>
+    </div>
 
-          <tr id="whenRow">
-            <td class="ItemDetailName">
-              <label for="frequency"><g:message code="repository.page.bkupSchedule.period"/></label>
-            </td>
-            <td valign="top" class="value ItemDetailValue">
-              <table>
-                <tr>
-                  <td>
-                    <div>
-                      <label>
+    <div class="control-group required-field" id="whenRow">
+      <label class="control-label"
+          for="frequency"><g:message code="repository.page.bkupSchedule.period"/></label>
+      <div class="controls">
+                    <div style="display: inline-block;">
+                      <label class="radio">
                         <g:radio id="frequency_h" name="schedule.frequency" value="HOURLY"
                                  checked="${dump.schedule.frequency == SchedulerBean.Frequency.HOURLY}"
                                  class="scheduleElement"/>
                         <g:message code="repository.page.bkupSchedule.period.hourly"/>
                       </label>
-                    </div>
-
-                    <div>
-                      <label>
+                      <label class="radio">
                         <g:radio id="frequency_d" name="schedule.frequency" value="DAILY"
                                  checked="${dump.schedule.frequency == SchedulerBean.Frequency.DAILY}"
                                  class="scheduleElement"/>
                         <g:message code="repository.page.bkupSchedule.period.daily"/>
                       </label>
-                    </div>
-
-                    <div>
-                      <label>
+                      <label class="radio">
                         <g:radio id="frequency_w" name="schedule.frequency" value="WEEKLY"
                                  checked="${dump.schedule.frequency != SchedulerBean.Frequency.HOURLY && dump.schedule.frequency != SchedulerBean.Frequency.DAILY}"
                                  class="scheduleElement"/>
                         <g:message code="repository.page.bkupSchedule.period.weekly"/>
                       </label>
                     </div>
-                  </td>
-                  <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                  <td>
-
-                    <table class="ItemDetailContainer">
+                    <table style="display: inline-block; margin-left: 20px; vertical-align: top;">
                       <tr>
-                        <td class="ItemDetailName">
+                        <td>
                           <g:message code="repository.page.bkupSchedule.startTime"/>&nbsp;&nbsp;
                         </td>
-                        <td valign="top" class="value ItemDetailValue">
+                        <td>
                           <g:set var="hours"
                                  value="${(0..23).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
                           <g:set var="minutes"
@@ -118,20 +93,20 @@
                           <span id="time">
                             <g:select id="startHour" name="schedule.hour" from="${hours}"
                                       value="${formatNumber(number: dump.schedule.hour, minIntegerDigits: 2)}"
-                                      class="scheduleElement"/>&nbsp;:&nbsp;<g:select id="startMinute"
+                                      class="scheduleElement autoWidth"/>&nbsp;:&nbsp;<g:select id="startMinute"
                                                                                       name="schedule.minute"
                                                                                       from="${minutes}"
                                                                                       value="${formatNumber(number: dump.schedule.minute, minIntegerDigits: 2)}"
-                                                                                      class="scheduleElement"/>&nbsp;:&nbsp;00
+                                                                                      class="scheduleElement autoWidth"/>&nbsp;:&nbsp;00
                           </span>
                         </td>
                       </tr>
                       <tr id="dayOfWeekRow">
                         <g:set var="daysOfWeek"
                                value="${[message(code: 'default.dayOfWeek.sunday'), message(code: 'default.dayOfWeek.monday'), message(code: 'default.dayOfWeek.tuesday'), message(code: 'default.dayOfWeek.wednesday'), message(code: 'default.dayOfWeek.thursday'), message(code: 'default.dayOfWeek.friday'), message(code: 'default.dayOfWeek.saturday')]}"/>
-                        <td class="ItemDetailName"><g:message code="repository.page.bkupSchedule.dayOfWeek"/></td>
-                        <td valign="top" class="value ItemDetailValue">
-                          <select id="dayOfWeek" name="schedule.dayOfWeek" class="scheduleElement">
+                        <td><g:message code="repository.page.bkupSchedule.dayOfWeek"/></td>
+                        <td>
+                          <select id="dayOfWeek" name="schedule.dayOfWeek" class="scheduleElement autoWidth">
                             <g:each status="i" var="day" in="${daysOfWeek}">
                               <option value="${i + 1}" <g:if
                                       test="${dump.schedule.dayOfWeek == i + 1}">selected="selected"</g:if>>${day}</option>
@@ -140,42 +115,44 @@
                         </td>
                       </tr>
                     </table>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
+      </div>
+    </div>
+              
+    <div class="control-group required-field" id="keepRow">
+      <label class="control-label"
+          for="keep"><g:message code="repository.page.bkupSchedule.numberToKeep"/></label>
+      <div class="controls">
+        <input type="text" name="numberToKeep" id="numberToKeep" value="${dump.numberToKeep}"
+             class="scheduleFormElement input-mini"/>
+        <div class="help-block"><g:message code="repository.page.bkupSchedule.numberToKeep.all"/></div>
+      </div>
+    </div>
 
-          <tr id="keepRow">
-            <td class="ItemDetailName">
-              <label for="keep"><g:message code="repository.page.bkupSchedule.numberToKeep"/></label>
-            </td>
-            <td valign="top" class="value ItemDetailValue">
-              <input type="text" size="3" name="numberToKeep" id="numberToKeep" value="${dump.numberToKeep}"
-                     class="scheduleFormElement"/>
-              &nbsp;&nbsp;<g:message code="repository.page.bkupSchedule.numberToKeep.all"/>
-            </td>
-          </tr>
-          <g:if test="${repositoryInstance && (flash['nameAdjustmentRequired' + repositoryInstance.id] || repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name)}">
-            <tr id="cloudNameRow">
-              <td class="ItemDetailName">
-                <label for="${'cloudName' + repositoryInstance.id}"><g:message
-                        code="repository.page.bkupSchedule.cloudName"/></label>
-              </td>
-              <td valign="top" class="value ItemDetailValue">
+    <g:if test="${repositoryInstance && (flash['nameAdjustmentRequired' + repositoryInstance.id] || repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name)}">
+    <div class="control-group required-field" id="cloudNameRow">
+      <label class="control-label"
+          for="${'cloudName' + repositoryInstance.id}"><g:message code="repository.page.bkupSchedule.cloudName"/></label>
+      <div class="controls">
                 <g:if test="${flash['nameAdjustmentRequired' + repositoryInstance.id]}">
                   <input type="text" name="${'cloudName' + repositoryInstance.id}"
-                         value="${params['cloudName' + repositoryInstance.id] ?: repositoryInstance.cloudName ?: repositoryInstance.name}"
-                         size="30"/>
+                         value="${params['cloudName' + repositoryInstance.id] ?: repositoryInstance.cloudName ?: repositoryInstance.name}"/>
                 </g:if>
                 <g:elseif
                         test="${repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name}">${repositoryInstance.cloudName}</g:elseif>
-              </td>
-            </tr>
-          </g:if>
+      </div>
+    </div>
+    </g:if>
+  </div>
+            <g:if test="${cloudEnabled}">
+              <div class="span3" style="vertical-align: top; text-align: center" id="cloudInfo">
+                <a target="_blank" href="${helpBaseUrl}/index.jsp?topic=/csvn/action/movetocncloud.html"><img 
+                        width="200" height="75" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/><br/>
+                <g:message code="repository.page.bkupSchedule.help.link.label"/></a>
+              </div>
+            </g:if>
+</div>
 
-        </table>
-  </table>
+          
         <g:if test="${!repositoryInstance}">
           <br/>
           <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
@@ -243,65 +220,59 @@
 </g:form>
 <g:javascript>
   function typeHandler() {
-    var typeSelect = $('type');
-    if (typeSelect.value == 'dump' || typeSelect.value == 'dump_delta' ||
-        typeSelect.value == 'hotcopy') {
-      $('whenRow').style.display = '';
-      $('keepRow').style.display = '';
-      if ($('cloudRegister')) {
-        $('cloudRegister').style.display = 'none';
-      }
-      if ($('cloudNameRow')) {
-        $('cloudNameRow').style.display = 'none';
-      }
-    } else if (typeSelect.value == 'cloud') {
-      $('whenRow').style.display = '';
-      $('keepRow').style.display = 'none';
-      if ($('cloudRegister')) {
-        $('cloudRegister').style.display = '';
-      }
-      if ($('cloudNameRow')) {
-        $('cloudNameRow').style.display = '';
-      }
+    var typeSelect = $('#type');
+    var typeSelectValue = typeSelect.val();
+    if (typeSelectValue == 'dump' || typeSelectValue == 'dump_delta' ||
+        typeSelectValue == 'hotcopy') {
+      $('#whenRow').show();
+      $('#keepRow').show();
+      $('#cloudRegister').hide();
+      $('#cloudNameRow').hide;
+    } else if (typeSelectValue == 'cloud') {
+      $('#whenRow').show();
+      $('#keepRow').hide();
+      $('#cloudRegister').show();
+      $('#cloudNameRow').show();
     } else {
-      $('whenRow').style.display = 'none';
-      $('keepRow').style.display = 'none';
-      if ($('cloudRegister')) {
-        $('cloudRegister').style.display = 'none';
-      }
-      if ($('cloudNameRow')) {
-        $('cloudNameRow').style.display = 'none';
-      }
+      $('#whenRow').hide();
+      $('#keepRow').hide();
+      $('#cloudRegister').hide();
+      $('#cloudNameRow').hide();
     }
   }
   typeHandler();
-  $('type').onchange = typeHandler;
+  $('#type').change(typeHandler);
 
-  var hourSelect = $('startHour');
+  var hourSelect = $('#startHour');
   var hourOptions = [];
-  for (var i = 0; i < hourSelect.options.length; i++) {
-    hourOptions[i] = hourSelect.options[i];
+  var hourSelectOptions = $('#startHour option');
+  for (var i = 0; i < hourSelectOptions.length; i++) {
+    hourOptions[i] = hourSelectOptions[i];
   }
   function displayTimeWidget() {
-    if ($('frequency_h').checked) {
-      for (var i = hourSelect.options.length - 1; i > 0; i--) {
-        hourSelect.remove(i);
-      }
-      hourSelect.disabled = true;
+    if ($('#frequency_h').attr('checked')) {
+      hourSelect.empty();
+      //hourSelect.append('<option value="' + hourOptions[0] + '"/>')
+      hourSelect.append(hourOptions[0]);
+      hourSelect.attr('disabled', true);
     } else {
-      if (hourSelect.options.length == 1) {
+      var hours = $('#startHour option');
+      if (hours.length == 1) {
+        hours.attr('selected', true);
+        hourSelect.empty()
         for (var i = 1; i < hourOptions.length; i++) {
-          hourSelect.add(hourOptions[i], null);
+          hourSelect.append(hourOptions[i]);
         }
+        hourSelect.prepend(hourOptions[0]);
       }
-      hourSelect.disabled = false;
+      hourSelect.attr('disabled', false);
     }
   }
   function displayDayOfWeekWidget() {
-    if ($('frequency_w').checked) {
-      $('dayOfWeekRow').style.display = '';
+    if ($('#frequency_w').attr('checked')) {
+      $('#dayOfWeekRow').show();
     } else {
-      $('dayOfWeekRow').style.display = 'none';
+      $('#dayOfWeekRow').hide();
     }
   }
   function frequencyHandler() {
@@ -309,9 +280,9 @@
     displayDayOfWeekWidget();
   }
   frequencyHandler();
-  $('frequency_h').onchange = frequencyHandler;
-  $('frequency_d').onchange = frequencyHandler;
-  $('frequency_w').onchange = frequencyHandler;
+  $('#frequency_h').change(frequencyHandler);
+  $('#frequency_d').change(frequencyHandler);
+  $('#frequency_w').change(frequencyHandler);
 
   var allowScheduleFormStateClobber = true;
   function setFormState(state) {
@@ -324,36 +295,33 @@
     // after this, disallow picking up changes from the existing jobs
     allowScheduleFormStateClobber = false
 
-    $("type").value = state.type
+    $("#type").val(state.type);
 
     var hour = state.scheduleHour.length == 1 ? '0' + state.scheduleHour : '' + state.scheduleHour;
-    $('startHour').value = hour;
+    $('#startHour').val(hour);
 
     var minute = state.scheduleMinute.length == 1 ? '0' + state.scheduleMinute : '' + state.scheduleMinute;
-    $('startMinute').value = minute;
+    $('#startMinute').val(minute);
 
-    $('dayOfWeek').value = state.scheduleDayOfWeek
-    $('numberToKeep').value = state.numberToKeep
+    $('#dayOfWeek').val(state.scheduleDayOfWeek);
+    $('#numberToKeep').val(state.numberToKeep);
     if (state.scheduleFrequency == "HOURLY") {
-      $('frequency_h').checked = "true"
+      $('#frequency_h').attr('checked', true);
     }
     else if (state.scheduleFrequency == "DAILY") {
-      $('frequency_d').checked = "true"
+      $('#frequency_d').attr('checked', true);
     }
     else if (state.scheduleFrequency == "WEEKLY") {
-        $('frequency_w').checked = "true"
+        $('#frequency_w').attr('checked', true);
       }
     typeHandler()
     frequencyHandler()
   }
 
   // add observer to disable state changes after the form is manipulated
-  Event.observe(window, 'load', function() {
-    var allScheduleFormElements = $$("input.scheduleElement").concat($$("select.scheduleElement"));
-    allScheduleFormElements.each(function(item) {
-      Event.observe(item, 'click', function() {
-        allowScheduleFormStateClobber = false
-      });
-    })
-  })
+  $(document).ready(function() {
+    $(".scheduleElement").click(function() {
+        allowScheduleFormStateClobber = false;
+    });
+  });
 </g:javascript>
