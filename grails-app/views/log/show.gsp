@@ -54,7 +54,7 @@
 </div>
 
 <g:if test="${file}">
-  <div style="height: 300px; overflow: auto;" id="fileContentDiv">
+  <div style="overflow: auto;" id="fileContentDiv">
     <!-- Leave this left-justified so that spaces are not padded in the first line of the log -->
     <pre id="fileContent">
       <%
@@ -96,6 +96,16 @@
   <g:link action="list" class="btn"><g:message code="logs.page.show.button.return" /></g:link>
 </div>
 
+<g:javascript>
+  function resizeFileViewer() {
+    $("#fileContentDiv").css('height', '' + Math.round(.8 * $(window).height()));
+  }
+
+  $(document).ready(function() {
+    resizeFileViewer();
+    $(window).bind('resize', resizeFileViewer);
+  });
+</g:javascript>
 
 
 </body>
