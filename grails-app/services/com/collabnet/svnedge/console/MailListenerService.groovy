@@ -83,7 +83,7 @@ class MailListenerService extends AbstractSvnEdgeService
         def ccAddress = null
         boolean sendOnSuccess = false
         User user = retrieveUserForEvent(event)
-        if (user?.email && !INVALID_ADDRESSES.contains(defaultAddress)) {
+        if (user?.email && !INVALID_ADDRESSES.contains(user.email)) {
             toAddress = user.email
             sendOnSuccess = true
             if (toAddress != defaultAddress && !event.isSuccess &&
