@@ -13,6 +13,6 @@
     </g:set>  
     %{-- is this tab currently active? --}%
     <g:set var="active" value="${tab.action == actionName || tab.active}"/>
-    <li class="${active ? 'active' : ''}"><a href="${(active || !tabLink) ? '#' : tabLink}">${tab.label}</a></li>
+    <li class="${active ? 'active' : ''}"><a href="${(active || !tabLink) ? '#' : tabLink}"><%= tab.label.replaceAll(" ", "&nbsp;") %></a></li>
   </g:each>
 </ul>

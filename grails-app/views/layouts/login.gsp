@@ -23,9 +23,10 @@
     <![endif]-->
 
     <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
-    <g:layoutHead />
+    <g:javascript library="jquery-1.7.1.min"/>
     <g:javascript library="application" />
-    
+    <g:layoutHead />
+
        <style type="text/css">
       body {
         padding-top: 62px;
@@ -104,7 +105,6 @@
       </div>
       <!-- main content section end -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <g:javascript library="jquery-1.7.1.min"/>
-    <g:javascript library="bootstrap"/>    
+    <g:javascript library="bootstrap"/>
   </body>
 </html>

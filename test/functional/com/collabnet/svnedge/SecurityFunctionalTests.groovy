@@ -62,7 +62,7 @@ class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
         get('/server/edit')
         assertStatus 200
-        assertContentContains getMessage('server.page.leftNav.settings')
+        assertContentContains getMessage('admin.page.leftNav.settings')
     }
 
     void testAdminReposAuthority() {
