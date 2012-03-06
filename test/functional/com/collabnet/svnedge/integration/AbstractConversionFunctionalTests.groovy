@@ -288,7 +288,7 @@ abstract class AbstractConversionFunctionalTests extends
 
         get('/server/edit')
         assertStatus 200
-        assertContentContains(getMessage("server.page.leftNav.toStandalone"))
+        assertContentContains(getMessage("admin.page.leftNav.toStandalone"))
 
         // verify that prohibited links work
         assertProhibitedAccessToStandaloneModeLinksWorks()
