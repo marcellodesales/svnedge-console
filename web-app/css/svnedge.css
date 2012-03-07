@@ -38,6 +38,11 @@
   padding-left: 200px;
 }
 
+.form-actions {
+  background-color: #fff;
+}
+
+
 .sessionmessages .alert, .requestmessages .alert {
   border-top: 2px solid #c60;
   color: black;

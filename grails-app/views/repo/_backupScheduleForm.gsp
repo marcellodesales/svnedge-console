@@ -142,6 +142,13 @@
       </div>
     </div>
     </g:if>
+    
+    <g:if test="${repositoryInstance}">
+      <div class="form-actions">
+        <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}"
+                            class="btn btn-primary"/>
+      </div>
+    </g:if>
   </div>
             <g:if test="${cloudEnabled}">
               <div class="span3" style="vertical-align: top; text-align: center" id="cloudInfo">
@@ -203,19 +210,14 @@
             </g:if>
             </tbody>
           </table>
-        </g:if>
 
-        <div class="pull-right">
-          <g:if test="${!repositoryInstance}">
+          <div class="pull-right">
             <g:listViewActionButton action="updateBkupSchedule" minSelected="1" primary="true">
               <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
             </g:listViewActionButton>
-          </g:if>
-          <g:else>
-            <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}"
-                            class="btn btn-primary"/>
-          </g:else>
-        </div>
+          </div>
+        </g:if>
+
   
 </g:form>
 <g:javascript>

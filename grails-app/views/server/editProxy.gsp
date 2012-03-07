@@ -30,8 +30,8 @@
 <g:form class="form-horizontal" method="post" name="serverForm" action="updateProxy">
   <g:hiddenField name="view" value="editProxy"/>
   <fieldset>
-    <g:propTextField bean="${networkConfig}" field="httpProxyHost" prefix="networkConfiguration"/>
-    <g:propTextField bean="${networkConfig}" field="httpProxyPort" prefix="networkConfiguration" sizeClass="small" integer="true"/>
+    <g:propTextField bean="${networkConfig}" field="httpProxyHost" prefix="networkConfiguration" required="true"/>
+    <g:propTextField bean="${networkConfig}" field="httpProxyPort" prefix="networkConfiguration" required="true" sizeClass="small" integer="true"/>
     <g:propTextField bean="${networkConfig}" field="httpProxyUsername" prefix="networkConfiguration"/>
     <g:propControlsBody bean="${networkConfig}" field="httpProxyPassword" prefix="networkConfiguration">
       <g:passwordFieldWithChangeNotification name="httpProxyPassword" value="${fieldValue(bean:networkConfig, field:'httpProxyPassword')}" size="30"/>

@@ -47,7 +47,7 @@
 
 <g:if test="${!isManagedMode}">
   <li<g:if test="${controllerName == 'setupTeamForge' || controllerName == 'setupReplica'}"> class="active"</g:if>>
-    <g:link controller="setupTeamForge" action="index">CollabNet TeamForge</g:link>
+    <g:link controller="setupTeamForge" action="index"><g:message code="admin.page.leftNav.teamforge" /></g:link>
   </li>
 </g:if>
 <g:else>

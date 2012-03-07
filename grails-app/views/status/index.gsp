@@ -136,7 +136,7 @@
     </g:form>
 
 
-      <h2><g:message code="status.page.header.information"/></h2>
+      <h2><small style="color: #333;"><g:message code="status.page.header.information"/></small></h2>
       <table class="table table-striped table-bordered table-condensed">
         <tbody>
         <g:if test="${softwareVersion}">

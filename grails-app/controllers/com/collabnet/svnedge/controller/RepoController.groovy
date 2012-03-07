@@ -275,8 +275,12 @@ class RepoController {
 
     @Secured(['ROLE_USER'])
     def reports = {
+        def id = params.id
+        if (!id) {
+            id = ControllerUtil.getListViewSelectedIds(params)[0]
+            params.id = id
+        }
         def repo = Repository.get(params.id)
-
         if (!repo) {
             flash.error = message(code: 'repository.action.not.found',
                     args: [params.id])
@@ -944,12 +948,6 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_HOOKS'])
     def hooksList = {
-        def id = params.id
-        if (!id) {
-            id = ControllerUtil.getListViewSelectedIds(params)[0]
-            params.id = id
-        }
-
         def model = reports()
         def repo = Repository.get(params.id)
         if (repo) {
