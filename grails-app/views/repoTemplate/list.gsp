@@ -26,10 +26,7 @@
       <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
         <thead>
         <tr>
-          <!-- <th><g:listViewSelectAll/></th>
-          <g:sortableColumn property="name" title="${message(code: 'repoTemplate.name.label', default: 'Name')}" />
-          <g:sortableColumn property="active" title="${message(code: 'repoTemplate.active.label', default: 'Active')}" />  -->
-          <th><g:message code="repoTemplate.name.label"/></th>
+          <th><g:message code="repoTemplate.page.list.name.label"/></th>
           <th><g:message code="repoTemplate.active.label"/></th>
         </tr>
       </thead>

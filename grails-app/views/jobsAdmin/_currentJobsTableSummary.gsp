@@ -1,7 +1,6 @@
-<div class="dialog">
-        <table class="ItemDetailContainer"  align="center" width="99%">
+        <table class="table table-striped table-bordered">
           <thead>
-            <tr class="ContainerHeader">
+            <tr>
               <td>Group/Job name</td>
               <td>Trigger name</td>
               <td>Last trigger</td>
@@ -11,9 +10,7 @@
             <tbody>
 
       <g:each status="i" var="groupName" in="${groupTriggers.keySet()}">
-        
-              <tr><td colspan="4">&nbsp;</td></tr>
-              <tr class="ContainerHeader">
+              <tr>
                 <th colspan="4">
                     <div style="float: right">
                       <g:if test="${groupTriggers[groupName]['triggerState'] == 'Paused'}">
@@ -36,7 +33,7 @@
                     <g:form method="post" style="display: inline">
                         <input type="hidden" name="operation" value="${operation}"/>
                         <input type="hidden" name="chosenJob" value="${groupName}"/>
-                      <g:actionSubmit class="save" value="${jobAction}"
+                      <g:actionSubmit class="btn save" value="${jobAction}"
                                       action="updateJobs" />
                     </g:form>
                     </div>
@@ -46,12 +43,12 @@
 
               <g:each status="j" var="jobName" in="${groupTriggers[groupName].keySet()}">
                 <g:if test="${jobName != 'triggerState'}">
-                <tr class="prop, ${j % 2 == 0 ? 'EvenRow' : 'OddRow'}">
-                  <td valign="top" rowspan="${groupTriggers[groupName][jobName].size()}">${jobName}</td>
+                <tr>
+                  <td rowspan="${groupTriggers[groupName][jobName].size()}">${jobName}</td>
               <g:each status="k" var="trigger" in="${groupTriggers[groupName][jobName]}">
                   <g:if test="${k != 0}">
                     </tr>
-                    <tr class="prop, ${j % 2 == 0 ? 'EvenRow' : 'OddRow'}">
+                    <tr>
                   </g:if>
                     <td>${trigger.name}</td>
 <!--
