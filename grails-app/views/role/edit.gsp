@@ -1,12 +1,10 @@
 <%@ page import="com.collabnet.svnedge.domain.Role" %>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title><g:message code="role.page.edit.title"/></title>
 </head>
 <content tag="title">
-  <g:message code="role.page.header"/>
+  <g:message code="role.page.edit.title" args="${[roleInstance.authority]}"/>
 </content>
 
 <g:render template="../user/leftNav" />
@@ -17,49 +15,29 @@
       <g:renderErrors bean="${roleInstance}" as="list"/>
     </div>
   </g:hasErrors>
-    <table class="Container"> 
-        <tr class="ContainerHeader">
-            <td colspan="2"><g:message code="role.page.edit.title"/></td>
-        </tr> 
-  <g:form method="post">
+  <g:form class="form-horizontal" method="post">
     <g:hiddenField name="id" value="${roleInstance?.id}"/>
     <g:hiddenField name="version" value="${roleInstance?.version}"/>
-        <tr class="prop">
-          <td valign="top" class="name">
-            <label><g:message code="role.authority.label"/></label>
-          </td>
-          <td width="100%" valign="top" class="value ${hasErrors(bean: roleInstance, field: 'authority', 'errors')}">
-            ${fieldValue(bean: roleInstance, field: "authority")}
-          </td>
-        </tr>
-
-        <tr class="prop">
-          <td valign="top" class="name">
-            <label for="description"><g:message code="role.description.label"/></label>
-          </td>
-          <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'description', 'errors')}">
-            <g:textArea name="description" value="${roleInstance?.description}" />
-          </td>
-        </tr>
-
-        <tr class="prop">
-          <td valign="top" class="name" style="white-space: nowrap;">
-            <label for="people"><g:message code="role.people.label"/></label>
-          </td>
-          <td valign="top" class="value ${hasErrors(bean: roleInstance, field: 'people', 'errors')}">
-            <g:select name="people" from="${userList}" multiple="yes" optionKey="id" optionValue="username" size="5" value="${roleInstance?.people}"/>
-            <i><g:message code="role.page.edit.warning.selfedit"/></i> 
-          </td>
-        </tr>
-        <tr class="ContainerFooter">
-          <td colspan="2">
-             <div class="AlignRight">
-               <g:actionSubmit class="Button save" action="update" value="${message(code: 'default.button.update.label')}"/>
-             </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+    <g:propControlsBody bean="${roleInstance}" field="description" prefix="role">
+      <g:textArea id="description" name="description" value="${roleInstance?.description}" class="span6"/>
+    </g:propControlsBody>        
+            
+    <div class="control-group">
+      <span class="control-label"><g:message code="role.people.label"/></span>
+      <div class="controls">
+        <g:if test="${userList.size() > 12}"><div style="width: 300px; height: 300px; overflow: auto; border: 1px solid #eee; padding: 5px;"></g:if>
+        <g:set var="selectedUsers" value="${roleInstance?.people.collect { it.id }}"/>
+        <g:each var="user" in="${userList}">
+            <label class="checkbox"><input type="checkbox" name="people" value="${user.id}" <g:if test="${selectedUsers.contains(user.id)}"> checked="checked"</g:if>/>${user.username}</label>
+        </g:each>
+        <g:if test="${userList.size() > 12}"></div></g:if>
+        <div class="help-block"><g:message code="role.page.edit.warning.selfedit"/></div> 
+      </div>
+    </div>        
+            
+    <div class="form-actions">
+      <g:actionSubmit class="btn btn-primary save" action="update" value="${message(code: 'default.button.update.label')}"/>
+    </div>
   </g:form>
 </body>
 </html>

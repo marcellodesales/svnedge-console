@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <title><g:message code="role.page.list.title"/></title>
 </head>
 
 <content tag="title">

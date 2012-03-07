@@ -433,8 +433,13 @@ class CsvnTagLib {
         def obj = attrs['bean']
         def fieldName = attrs['field']
         attrs.id = attrs.id ?: fieldName
+        def groupId = attrs['groupId']
         
-        out << '\n<div class="control-group'
+        out << '\n<div'
+        if (groupId) {
+            out << ' id="' << groupId << '"'
+        }
+        out << ' class="control-group'
         def isRequired = attrs['required']
         if (isRequired && isRequired != 'false') {
             out << ' required-field'

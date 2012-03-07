@@ -1,6 +1,5 @@
 <head>
     <meta name="layout" content="main" />
-    <title><g:message code="user.page.list.title"/></title>
 </head>
 
 

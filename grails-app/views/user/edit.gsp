@@ -1,154 +1,63 @@
 <head>
     <meta name="layout" content="main" />
-    <title>CollabNet Subversion Edge <g:message code="user.page.edit.title"/></title>
 </head>
 
 
 <content tag="title">
-  <g:message code="user.page.header"/>
+  <g:message code="user.page.edit.title"/>
 </content>
 
 <g:render template="leftNav" />
 
 <body>
         <g:hasErrors bean="${userInstance}" field="version">
-        <div class="errors">
+        <div class="alert alert-error">
             <g:renderErrors bean="${userInstance}" field="version" as="list" />
         </div>
         </g:hasErrors>
-        <g:form>
+        <g:form class="form-horizontal">
             <input type="hidden" name="id" value="${userInstance.id}" />
             <input type="hidden" name="version" value="${userInstance.version}" />
-    <table class="Container"> 
-        <tr class="ContainerHeader">
-            <td colspan="3"><g:message code="user.page.edit.title"/></td>        
-        </tr> 
-                    <tr class="prop">
-                        <td valign="top" class="name"><g:message code="user.username.label"/></td>
-                        <td class="value">
-                            ${userInstance.username}
-            </td>
-            <td width="100%" >
-                           <div id="passwd_change_link"><a href="#" onclick="showPasswdFields()"><g:message code="user.page.edit.passwdchange"/></a></div>
-                        </td>
-                    </tr>
+            <input type="hidden" id="passwd_change_active" name="passwd_change_active" value="false" />
+            
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.username.label"/></span>
+      <div class="controls readonly">
+        ${userInstance.username}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="passwd_change_link"><a href="#" onclick="showPasswdFields()"><g:message code="user.page.edit.passwdchange"/></a></span>
+      </div>
+    </div>        
 
-                    <tr class="prop" id="passwd_row">
-                        <td class="name"><label for="passwd"><g:message code="user.page.edit.passwd"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'passwd','errors')}">
-                            <input type="password" id="passwd" name="passwd" value=""/>
-                        </td>
-            <td width="100%" >
-                           <div id="cancel_passwd_link"><a href="#" onclick="cancelPasswordChange()"><g:message code="user.page.edit.passwdchange.cancel"/></a></div>
-                        </td>
-                    </tr>
-    <g:hasErrors bean="${userInstance}" field="passwd">
-      <tr id="passwd_errors_row">
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="passwd">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
+    <div id="passwd_row">
+      <g:propControlsBody bean="${userInstance}" field="passwd" required="true" prefix="user" groupId="passwd_control">
+        <input type="password" id="passwd" name="passwd" value="${userInstance.passwd}"/>&nbsp;&nbsp;<span id="cancel_passwd_link"><a href="#" onclick="cancelPasswordChange()"><g:message code="user.page.edit.passwdchange.cancel"/></a></span>
+      </g:propControlsBody>
+    </div>
 
-                    <tr class="prop" id="passwd_confirm_row">
-                        <td class="name"><label for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'passwd','errors')}">
-                            <input type="password" id="confirmPasswd" name="confirmPasswd" value=""/>
-                        </td>
-                    </tr>
+    <div id="passwd_confirm_row">
+      <div class="control-group${hasErrors(bean:userInstance,field:'passwd',' error')}">
+        <label class="control-label" for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/></label>
+        <div class="controls">
+          <input type="password" id="confirmPasswd" name="confirmPasswd" value=""/>
+        </div>
+      </div>
+    </div>
+    <g:propTextField bean="${userInstance}" field="realUserName" required="true" prefix="user"/>
+    <g:propTextField bean="${userInstance}" field="email" required="true" prefix="user"/>
+    <g:propTextField bean="${userInstance}" field="description" prefix="user"/>
 
-                    <tr class="prop">
-                        <td valign="top" class="name"><label for="realUserName"><g:message code="user.realUserName.label"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'realUserName','errors')}">
-                            <input type="text" id="realUserName" name="realUserName" value="${userInstance.realUserName}"/>
-                        </td>
-                    </tr>
-    <g:hasErrors bean="${userInstance}" field="realUserName">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="realUserName">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-
-                    <tr class="prop">
-                        <td valign="top" class="name"><label for="email"><g:message code="user.email.label"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'email','errors')}">
-                            <input type="text" id="email" name="email" value="${userInstance?.email}"/>
-                        </td>
-                    </tr>
-    <g:hasErrors bean="${userInstance}" field="email">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="email">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-
-                    <tr class="prop">
-                        <td valign="top" class="name"><label for="description"><g:message code="user.description.label"/></label></td>
-                        <td class="value ${hasErrors(bean:userInstance,field:'description','errors')}">
-                            <input type="text" id="description" name="description" value="${userInstance.description}"/>
-                        </td>
-                    </tr>
-    <g:hasErrors bean="${userInstance}" field="description">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="description">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-
-
-                  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-                   <g:if test="${allowEditingRoles}">
-              
-                    <tr class="prop">
-                        <td valign="top" class="name" style="white-space: nowrap;">
-                          <label for="authorities"><g:message code="user.authorities.label" /></label>
-                        </td>
-                        <td  colspan="2" class="value ${hasErrors(bean: userInstance, field: 'authorities', 'errors')}">
+    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
+      <g:if test="${allowEditingRoles}">
+        <g:propControlsBody bean="${userInstance}" field="authorities" prefix="user">
                           <g:each in="${roleList}" var="role">
                             <g:checkBox id="authority_${role.id}" name="authorities" value="${role.id}"
                             checked="${userInstance.authorities.contains(role)}"
                             disabled="${!authorizedRoleList.contains(role)}"/>
-                            <label for="authority_${role.id}">${role.authority} - ${role.description}</label><br/>
+                            <label class="checkbox inline withFor" for="authority_${role.id}">${role.authority} - ${role.description}</label><br/>
                           </g:each>
-                        </td>
-                    </tr>
-                     </g:if>
-                   </g:ifAnyGranted>
-    <g:hasErrors bean="${userInstance}" field="authorities">
-      <tr>
-        <td>&nbsp;</td>
-        <td colspan="2" width="100%" class="errors">
-          <ul><g:eachError bean="${userInstance}" field="authorities">
-              <li><g:message error="${it}" encodeAs="HTML"/></li>
-          </g:eachError></ul>
-        </td>
-      </tr>
-    </g:hasErrors>
-                   <tr class="ContainerFooter">
-                     <td colspan="3">
-                        
-                     </td>
-                  </tr>
-
-                </tbody>
-                </table>
-          
+        </g:propControlsBody>
+      </g:if>
+    </g:ifAnyGranted>
+  
           <div class="form-actions">
             <g:actionSubmit action="update" class="btn btn-primary save" value="${message(code:'user.page.edit.button.save')}" />
             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
@@ -175,40 +84,31 @@
 
 <g:javascript>
 <!--
-function el(id) {
-    return document.getElementById(id);
-}
-
 function showPasswdFields() {
-    parentOfRows.insertBefore(passwdRow, whereToInsert);
-    if (passwdErrorsRow) {
-        parentOfRows.insertBefore(passwdErrorsRow, whereToInsert);
-    }
-    parentOfRows.insertBefore(passwdConfirmRow, whereToInsert);
-    el("passwd_change_link").style.display="none";
+    passwdRow.attr('disabled', false);
+    passwdRow.show();
+    passwdConfirmRow.attr('disabled', false);
+    passwdConfirmRow.show();
+    $("#passwd_change_link").hide();
+    $("#passwd_change_active").val(true);
 }
 
 function cancelPasswordChange() {
-    parentOfRows.removeChild(passwdRow);
-    if (passwdErrorsRow) {
-        parentOfRows.removeChild(passwdErrorsRow);
-    }
-    parentOfRows.removeChild(passwdConfirmRow);
-    el("passwd_change_link").style.display="block";
+    passwdRow.hide();
+    passwdRow.attr('disabled', true);    
+    passwdConfirmRow.hide();
+    passwdConfirmRow.attr('disabled', true);
+    $("#passwd_change_link").show();
+    $("#passwd_change_active").val(false);
 }
 
-var passwdRow = el("passwd_row");
-var passwdConfirmRow = el("passwd_confirm_row");
-var passwdErrorsRow = el("passwd_errors_row");
-var parentOfRows = passwdRow.parentNode;
-var whereToInsert = passwdConfirmRow.nextSibling;
-if (passwdErrorsRow) {
-    el("passwd_change_link").style.display="none";
+var passwdRow = $("#passwd_row");
+var passwdConfirmRow = $("#passwd_confirm_row");
+var passwdErrors = $("#passwd_control.error");
+if (passwdErrors.length > 0) {
+    $("#passwd_change_link").hide();
 } else {
-    //passwdRow.style.display="none";
-    //passwdConfirmRow.style.display="none";
-    parentOfRows.removeChild(passwdRow);
-    parentOfRows.removeChild(passwdConfirmRow);
+    cancelPasswordChange();
 }
 //-->
 </g:javascript>

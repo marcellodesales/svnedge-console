@@ -1,6 +1,5 @@
 <head>
     <meta name="layout" content="main" />
-    <title>CollabNet Subversion Edge <g:message code="user.page.show.title"/></title>
 </head>
 
 <content tag="title">
@@ -11,67 +10,56 @@
 
 <body>
 
-    <div class="body">
-        <h1><g:message code="user.page.show.details.header"/></h1>
-        <div class="dialog">
-            <table>
-            <tbody>
-
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="user.username.label"/></td>
-                    <td valign="top" class="value">${userInstance.username}</td>
-                </tr>
+  <g:form class="form-horizontal">
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.username.label"/></span>
+      <div class="controls readonly">${userInstance.username}</div>
+    </div>        
 
                 <%-- only showing fullname and email for editable (local db) users --%>
                 <g:if test="${editable}">
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="user.realUserName.label"/></td>
-                    <td valign="top" class="value">${userInstance.realUserName}</td>
-                </tr>
-
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="user.email.label"/></td>
-                    <td valign="top" class="value">${userInstance.email}</td>
-                </tr>
+                
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.realUserName.label"/></span>
+      <div class="controls readonly">${userInstance.realUserName}</div>
+    </div>        
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.email.label"/></span>
+      <div class="controls readonly">${userInstance.email}</div>
+    </div>        
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.description.label"/></span>
+      <div class="controls readonly">${userInstance.description}</div>
+    </div>        
                 </g:if>
 
-                <tr class="prop">
-                    <td valign="top" class="name"><g:message code="user.description.label"/></td>
-                    <td valign="top" class="value">${userInstance.description}</td>
-                </tr>
 
                 <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
 
-
-                  <tr class="prop">
-                      <td valign="top" class="name"><g:message code="user.authorities.label" /></td>
-
-                      <td valign="top" class="value">
+    <div class="control-group">
+      <span class="control-label"><g:message code="user.authorities.label"/></span>
+      <div class="controls readonly">
                           <ul>
                           <g:each in="${userInstance.authorities}" var="r">
                               <li><g:link controller="role" action="show" id="${r.id}">${r.authority}</g:link> (${r.description})</li>
                           </g:each>
                           </ul>
-                      </td>
-                   </tr>
+      </div>
+    </div>        
+
                  </g:ifAnyGranted>
 
-            </tbody>
-            </table>
-        </div>
-
       <div class="form-actions">
-        <g:form>
           <input type="hidden" name="id" value="${userInstance.id}" />
           <g:if test="${editable}">
-            <g:actionSubmit action="edit" class="btn edit" value="${message(code:'user.page.edit.button.edit')}" />
+            <g:actionSubmit action="edit" class="btn btn-primary edit" value="${message(code:'user.page.edit.button.edit')}" />
           </g:if> 
             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
-              <g:actionSubmit action="btn delete" class="delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"
+              <g:actionSubmit action="delete" class="btn delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"
                               data-toggle="modal" data-target="#confirmDelete" />
             </g:ifAnyGranted>
-        </g:form>
       </div>
+  </g:form>
 
       <div id="confirmDelete" class="modal hide fade" style="display: none">
         <div class="modal-header">

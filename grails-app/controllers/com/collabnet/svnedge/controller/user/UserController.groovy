@@ -213,24 +213,27 @@ class UserController {
             // validate for field settings
             userInstance.validate()
 
-            if (params.containsKey('passwd') && !params.passwd) {
-                userInstance.errors.rejectValue('passwd', 
-                    'user.passwd.blank')
-            }
-
-            def newpassword = params.passwd
             def passwordsMatch = true
-            if (newpassword) {
-                passwordsMatch = newpassword == params.confirmPasswd
-                if (passwordsMatch) {
-                    userInstance.passwd = newpassword
-                    userInstance.validate()
-                    if (!userInstance.hasErrors()) {
-                        invalidateSecurityCache = true
-                    }
-                } else {
+            def newpassword = null
+            if (params.passwd_change_active && params.passwd_change_active == 'true') {
+                if (params.containsKey('passwd') && !params.passwd) {
                     userInstance.errors.rejectValue('passwd', 
-                        'user.passwd.mismatch')
+                            'user.passwd.blank')
+                }
+                
+                newpassword = params.passwd
+                if (newpassword) {
+                    passwordsMatch = newpassword == params.confirmPasswd
+                    if (passwordsMatch) {
+                        userInstance.passwd = newpassword
+                        userInstance.validate()
+                        if (!userInstance.hasErrors()) {
+                            invalidateSecurityCache = true
+                        }
+                    } else {
+                        userInstance.errors.rejectValue('passwd', 
+                                'user.passwd.mismatch')
+                    }
                 }
             }
 
@@ -334,7 +337,10 @@ class UserController {
                 GrailsHibernateUtil.setObjectToReadyOnly(userInstance,
                     sessionFactory)
                 // undo changes
-                userInstance.discard()
+                // this suddenly started throwing away the password errors when
+                // rewriting the template, commenting out until further
+                // investigation
+                //userInstance.discard()
                 request['error'] = message(code: 'default.errors.summary')
                 render(view: "edit", model: [userInstance: userInstance,
                        roleList: getRoleList(), 
