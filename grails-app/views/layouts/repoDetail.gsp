@@ -7,6 +7,8 @@
 
 <content tag="title"><g:message code="repository.page.show.title" args="${[repositoryInstance.name]}"/></content>
 
+<g:render template="/repo/leftNav" />
+
     <body>
 
 <g:if test="${!repositoryInstance.permissionsOk}">
