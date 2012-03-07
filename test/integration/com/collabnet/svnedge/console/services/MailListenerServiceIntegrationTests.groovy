@@ -63,6 +63,9 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         server.repoParentDir = repoParentDir.getCanonicalPath()
         server.adminEmail = 'testAdminMail@example.com'
         server.save()
+        User user = User.get(ADMIN_USER_ID)
+        user.email = "testUserMail@example.com"
+        user.save()
         
         def testRepoName = "test-repo"
         repo = new Repository(name: testRepoName)
