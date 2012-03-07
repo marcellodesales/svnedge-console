@@ -260,7 +260,7 @@ abstract class AbstractConversionFunctionalTests extends
         get('/server/edit')
         assertStatus 200
         assertContentDoesNotContain(
-            getMessage("server.page.leftNav.toStandalone"))
+            getMessage("admin.page.leftNav.toStandalone"))
 
         // verify that prohibited links are working
         assertProhibitedAccessToTeamForgeModeLinksWorks()

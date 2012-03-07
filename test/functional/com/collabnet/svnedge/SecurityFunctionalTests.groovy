@@ -58,7 +58,7 @@ class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
         get('/user/index')
         assertStatus 200
-        assertContentContains getMessage("user.page.show.details.header")
+        assertContentContains getMessage("user.username.label")
 
         get('/server/edit')
         assertStatus 200
