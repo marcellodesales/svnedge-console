@@ -21,6 +21,7 @@ import com.collabnet.svnedge.domain.Role
 import com.collabnet.svnedge.domain.User 
 import org.codehaus.groovy.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import com.collabnet.svnedge.util.ControllerUtil
 
 /**
  * User controller.
@@ -55,7 +56,7 @@ class UserController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
     def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
+        ControllerUtil.setDefaultSort(params, "username")
         [userInstanceList: User.list(params), userInstanceTotal: User.count()]
     }
 

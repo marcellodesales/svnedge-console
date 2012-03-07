@@ -1,5 +1,7 @@
 <head>
     <meta name="layout" content="main" />
+  <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
+
 </head>
 
 
@@ -10,7 +12,7 @@
 <g:render template="leftNav" />
 
 <body>
-            <table class="table table-striped table-bordered table-condensed tablesorter">
+            <table class="table table-striped table-bordered table-condensed tablesorter" id="datatable">
               <thead>
                <tr>
                     <g:sortableColumn property="username" title="${message(code: 'user.page.list.column.username')}" />
@@ -34,5 +36,31 @@
   </p>
 </g:form>
 
-<g:pagination total="${userInstanceTotal}" />
+<g:javascript library="jquery.dataTables.min"/>
+<g:javascript library="DT_bootstrap"/>
+<g:javascript>
+  /* Table initialisation */
+  $(document).ready(function() {
+    $('#datatable').dataTable( {
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrev": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.search.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${message(code:'default.search.noResults.message')}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+        },
+      "aaSorting": [[ 0, "asc" ]]
+      
+    } );
+  } );
+</g:javascript>
+
 </body>

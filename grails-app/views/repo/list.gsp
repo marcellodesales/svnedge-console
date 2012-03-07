@@ -4,6 +4,7 @@
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
         <g:javascript library="listView"/>
+        <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
 
     </head>
 
@@ -16,7 +17,7 @@
 <body>
 
 <g:form>
-    <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
+    <table id="datatable" class="table table-striped table-bordered table-condensed tablesorter">
       <thead>
       <tr>
         <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
@@ -84,7 +85,6 @@
     </table>
 
 
-  <g:pagination total="${repositoryInstanceTotal}"/>
 
   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
     <div class="pull-right">
@@ -111,6 +111,38 @@
   </g:ifAnyGranted>
 
 </g:form>
+
+<g:javascript library="jquery.dataTables.min"/>
+<g:javascript library="DT_bootstrap"/>
+<g:javascript>
+  /* Table initialisation */
+  $(document).ready(function() {
+    $('#datatable').dataTable( {
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrev": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.search.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${message(code:'repository.page.list.noRepos')}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+        },
+      "aaSorting": [[ 1, "asc" ]],
+      "aoColumns": [
+        { "bSortable": false }, // disable sorting on selection buttons
+        null,
+        null,
+        { "bSortable": false } // disable sorting on status (?)
+      ]
+    } );
+  } );
+</g:javascript>
 
 </body>
 </html>
