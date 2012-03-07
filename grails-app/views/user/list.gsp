@@ -51,7 +51,7 @@
             "sNext": "${message(code:'default.paginate.next')}",
             "sPrev": "${message(code:'default.paginate.prev')}"
         },
-        "sSearch": "${message(code:'default.search.label')}",
+        "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
         "sEmptyTable": "${message(code:'default.search.noResults.message')}",
         "sInfo": "${message(code:'datatable.showing')}",

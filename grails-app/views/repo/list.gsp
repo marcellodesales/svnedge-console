@@ -117,7 +117,7 @@
 <g:javascript>
   /* Table initialisation */
   $(document).ready(function() {
-    $('#datatable').dataTable( {
+    var dt = $('#datatable').dataTable( {
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
@@ -127,7 +127,7 @@
             "sNext": "${message(code:'default.paginate.next')}",
             "sPrev": "${message(code:'default.paginate.prev')}"
         },
-        "sSearch": "${message(code:'default.search.label')}",
+        "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
         "sEmptyTable": "${message(code:'repository.page.list.noRepos')}",
         "sInfo": "${message(code:'datatable.showing')}",
@@ -140,6 +140,12 @@
         null,
         { "bSortable": false } // disable sorting on status (?)
       ]
+    } );
+    
+    // limit filter to column 1 only (the repo name)
+    filterElement= $('#datatable_filter').find("input")
+  	filterElement.keyup( function () {
+        dt.fnFilter(filterElement.attr("value"), 1)
     } );
   } );
 </g:javascript>
