@@ -27,16 +27,14 @@
  </div>
 </g:if>
 
-    <div class="row-fluid">
-      <div class="span12">
         <div class="row-fluid">
-          <div class="span10 well">
+          <div class="span11 well">
             
             <div class="row-fluid">
-              <div class="span1">
+              <div class="span2">
                 <strong><g:message code="repository.page.show.status" /></strong>
               </div>
-              <div class="span3">
+              <div class="span2">
                 <g:if test="${repositoryInstance.permissionsOk}">
                   <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
                 </g:if>
@@ -44,39 +42,28 @@
                   <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
                 </g:else>
               </div>
-              <div class="span2">
+              <div class="span4">
                 <strong><g:message code="repository.page.show.fsformat" /></strong>
               </div>
               <div class="span4"><g:message code="repository.page.show.fsformat.value" args="${[fsType, fsFormat]}"/></div>
             </div>
 
             <div class="row-fluid">
-              <div class="span1">
+              <div class="span2">
                 <strong><g:message code="repository.page.show.revision" /></strong>
               </div>
-              <div class="span3">${headRev}</div>
-              <div class="span2">
+              <div class="span2">${headRev}</div>
+              <div class="span4">
                 <strong><g:message code="repository.page.show.repoformat" /></strong>
               </div>
               <div class="span4">${repoFormat}</div>
             </div>
-            
-            <div class="row-fluid">
-              <div class="span1">
-                <strong><g:message code="repository.page.show.uuid" /></strong>
-              </div>
-              <div class="span3">${repoUUID}</div>
-              <div class="span2">
-                <strong><g:message code="repository.page.show.supports" /></strong>
-              </div>
-              <div class="span4">${repoSupport}</div>
-            </div>
            
             <div class="row-fluid">
-              <div class="span1">
+              <div class="span2">
                 <strong><g:message code="repository.page.show.size" /></strong>
               </div>
-              <div class="span3">
+              <div class="span2">
                 <g:if test="${diskUsage}">
                   <g:formatFileSize size="${diskUsage}"/>
                 </g:if>
@@ -84,7 +71,7 @@
                   <g:message code="status.page.status.noData"/>
                 </g:else>
               </div>
-              <div class="span2">
+              <div class="span4">
                 <strong><g:message code="repository.page.show.sharding" /></strong>
               </div>
               <div class="span4">
@@ -98,10 +85,10 @@
             </div>
 
             <div class="row-fluid">
-              <div class="span1">
+              <div class="span2">
                 <strong><g:message code="repository.page.show.packed" /></strong>
               </div>
-              <div class="span3">
+              <div class="span2">
                 <g:if test="${minPackedRev > 0}">
                   <g:message code="default.boolean.true" />
                 </g:if>
@@ -109,7 +96,7 @@
                   <g:message code="default.boolean.false" />
                 </g:else>
               </div>
-              <div class="span2">
+              <div class="span4">
                 <strong><g:message code="repository.page.show.repshare" /></strong>
               </div>
               <div class="span4">
@@ -122,8 +109,21 @@
               </div>
             </div>
             
+            <div class="row-fluid" style="margin-top: 5px;">
+              <div class="span2">
+                <strong><g:message code="repository.page.show.supports" /></strong>
+              </div>
+              <div class="span10">${repoSupport}</div>
+            </div>
+            <div class="row-fluid">
+              <div class="span2">
+                <strong><g:message code="repository.page.show.uuid" /></strong>
+              </div>
+              <div class="span10">${repoUUID}</div>
+            </div>
+
           </div>
-        </div>
+        </div>    
 
         <div class="buttons">
           <g:form>
