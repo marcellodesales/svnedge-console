@@ -70,7 +70,7 @@ class CsvnTagLib {
         <input type="hidden" name="${fieldName}_changed" id="${fieldName}_changed" value="false"/>
         <input type="password" name="${fieldName}" id="${fieldName}" value="${pwdToken}" size="${size}"/>
         <script type="text/javascript">
-        \$('${fieldName}').observe('change', function(event){
+        \$('#${fieldName}').change(function(event){
             \$('${fieldName}_changed').value = 'true'
         })
        </script>

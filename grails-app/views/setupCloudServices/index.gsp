@@ -17,9 +17,8 @@
   --}%
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.index.title"/></title>
+  <title>CollabNet Subversion Edge <g:message code="admin.page.leftNav.cloudServices"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
   <g:javascript>
   <!--
   // PRELOADING IMAGES
@@ -76,14 +75,11 @@
 
   </style>
 </head>
-<content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
-</content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
-<table class="ItemDetailContainer">
+<table>
   <tr>
     <td class="CloudServicesHeading">
       <g:message code="setupCloudServices.page.index.title"/>

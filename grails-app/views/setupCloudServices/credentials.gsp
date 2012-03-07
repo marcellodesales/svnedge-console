@@ -17,14 +17,8 @@
   --}%
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.credentials.title"/></title>
+  <title>CollabNet Subversion Edge </title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
-  <g:javascript library="window"/>
-  <g:javascript library="prototype/effects"/>
-  <g:javascript library="window_effects"/>
-  <link rel="stylesheet" href="${resource(dir:'js/themes',file:'default.css')}" type="text/css"/>
-  <link rel="stylesheet" href="${resource(dir:'js/themes',file:'lighting.css')}" type="text/css"/>
   <style type="text/css">
   
   td.CloudServicesBody {
@@ -56,150 +50,63 @@
   freeTrialButton.src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}";
   var freeTrialButtonPressed = new Image();
   freeTrialButtonPressed.src="${resource(dir:'images/cloud',file:'freeTrialButton-pressed.png')}";
-
-  // javascript for confirmation dialog box to remove credentials
-  var i18n = {
-    _confirmOkLabel: "${message(code:'default.confirmation.ok')}",
-    _confirmCancelLabel: "${message(code:'default.confirmation.cancel')}",
-    _message: "${message(code:'setupCloudServices.page.credentials.button.remove.confirm')}"
-  }
-
-  Event.observe(window, 'load', function() {
-    $('btnCloudServicesRemove').observe('click', function(e) {
-      // stop this button click from submitting form
-      Event.stop(e)
-      // confirm dialog, with callback functions for "ok" and "cancel"
-      dialog(i18n,
-        function() {
-          // OkHandler. On "ok", submit the form
-          // Submits the form with the original button properties transferred to a hidden field,
-          // to simulate the button click and thereby activate Grails dispatcher
-          var s = Event.element(e)
-          var action = new Element('input', { type: 'hidden',  name: s.readAttribute('name'), value: s.readAttribute('value') });
-          var theForm = s.up('form');
-          theForm.appendChild(action);
-          theForm.submit();
-        },
-        function() {
-          // CancelHandler. On cancel, do nothing
-          return
-        })
-    })
-  })
   //-->
   </g:javascript>
 </head>
-<content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
-</content>
+<content tag="title"><g:message code="setupCloudServices.page.credentials.title"/></content>
 
 <g:render template="/server/leftNav"/>
 <body>
-<g:form>
-  <table class="ItemDetailContainer">
-    <tr class="ContainerHeader">
-      <td><g:message code="setupCloudServices.page.credentials.title"/></td>
-    </tr>
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-        <table class="ItemDetailContainer">
-          <tr>
-            <td class="ItemDetailName">
-              <label for="domain"><g:message code="setupCloudServices.page.signup.domain.label"/></label>
-            </td>
-            <td valign="top">
-              <g:if test="${!existingCredentials}">
-                <input size="40" type="text" id="domain" name="domain"
-                       value="${fieldValue(bean: cmd, field: 'domain')}"/>
-              </g:if>
-              <g:else>
-                <b>${fieldValue(bean: cmd, field: 'domain')}</b>
-              </g:else>
+<g:form class="form-horizontal">
 
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="domain">
-                <ul><g:eachError bean="${cmd}" field="domain">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="username"><g:message
-                      code="setupCloudServices.page.signup.username.label"/></label>
-            </td>
-            <td valign="top">
-              <g:if test="${!existingCredentials}">
-                <input size="40" type="text" id="username" name="username"
-                       value="${fieldValue(bean: cmd, field: 'username')}"/>
-              </g:if>
-              <g:else>
-                <b>${fieldValue(bean: cmd, field: 'username')}</b>
-              </g:else>
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="username">
-                <ul><g:eachError bean="${cmd}" field="username">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-          <tr>
-            <td class="ItemDetailName">
-              <label for="password"><g:message
-                      code="setupCloudServices.page.signup.password.label"/></label>
-            </td>
-            <td valign="top">
-              <g:passwordFieldWithChangeNotification name="password"
-                                                     value="${fieldValue(bean:cmd,field:'password')}"
-                                                     size="40"/>
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="errors" colspan="2">
-              <g:hasErrors bean="${cmd}" field="password">
-                <ul><g:eachError bean="${cmd}" field="password">
-                  <li><g:message error="${it}" encodeAs="HTML"/></li>
-                </g:eachError></ul>
-              </g:hasErrors>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td>
-        <div class="AlignRight">
+  <g:if test="${existingCredentials}">
+    <div class="control-group required-field">
+      <span class="control-label"><g:message code="setupCloudServices.page.signup.domain.label"/></span>
+      <div class="controls readonly">${cmd.domain}</div>
+    </div>
+    <div class="control-group required-field">
+      <span class="control-label"><g:message code="setupCloudServices.page.signup.username.label"/></span>
+      <div class="controls readonly">${cmd.username}</div>
+    </div>    
+  </g:if>
+  <g:else>
+    <g:propTextField bean="${cmd}" field="domain" required="true" prefix="setupCloudServices.page.signup"/>
+    <g:propTextField bean="${cmd}" field="username" required="true" prefix="setupCloudServices.page.signup"/>
+  </g:else>
+
+  <g:propControlsBody bean="${cmd}" field="password" required="true" prefix="setupCloudServices.page.signup">
+    <g:passwordFieldWithChangeNotification name="password"
+      value="${fieldValue(bean:cmd,field:'password')}"/>
+  </g:propControlsBody>
+  <div class="form-actions">  
+          <g:actionSubmit id="btnCloudServicesValidate"
+                          value="${message(code:'setupCloudServices.page.credentials.button.validate')}"
+                          action="updateCredentials" class="btn btn-primary"/>
           <g:if test="${existingCredentials}">
             <g:actionSubmit id="btnCloudServicesRemove"
                             value="${message(code:'setupCloudServices.page.credentials.button.remove')}"
-                            action="removeCredentials" class="Button"/>
+                            action="removeCredentials" class="btn" data-toggle="modal" data-target="#confirmDelete"/>
           </g:if>
-          <g:actionSubmit id="btnCloudServicesValidate"
-                          value="${message(code:'setupCloudServices.page.credentials.button.validate')}"
-                          action="updateCredentials" class="Button"/>
-
+  </div>
+  
+      <div id="confirmDelete" class="modal hide fade" style="display: none">
+        <div class="modal-header">
+          <a class="close" data-dismiss="modal">&times;</a>
+          <h3><g:message code="default.confirmation.title"/></h3>
         </div>
-      </td>
-    </tr>
-  </table>
+        <div class="modal-body">
+          <p><g:message code="setupCloudServices.page.credentials.button.remove.confirm"/></p>
+        </div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary ok" 
+             onclick="formSubmit($('#btnCloudServicesRemove').closest('form'), '/csvn/setupCloudServices/removeCredentials')">${message(code: 'default.confirmation.ok')}</a>
+          <a href="#" class="btn cancel" data-dismiss="modal">${message(code: 'default.confirmation.cancel')}</a>
+        </div>
+      </div>  
 </g:form>
 
 <g:if test="${existingCredentials}">
-<table class="ItemDetailContainer">
+<table>
   <tr>
     <td class="CloudServicesBody">
 

@@ -19,11 +19,7 @@
 
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.selectUsers.title"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
-  <g:javascript library="application"/>
-
   <script type="text/javascript">
 
     var messages = {
@@ -32,21 +28,20 @@
     }
 
     var usernameAvailabilityCheckers = []
-    Event.observe(window, 'load', function() {
-      $$('input.CheckForLoginUniqueness').each(function(s) {
-        var usernameField = s
-        var usernameMsgElement = s.next()
-        var checker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.checking, messages.prompt)
-        usernameAvailabilityCheckers.push(checker)
-        checker.onSuccess = updateActionButtons
-        checker.onFailure = updateActionButtons
+    $(document).ready(function() {
+      $('input.CheckForLoginUniqueness').each(function(s) {
+        var usernameField = s;
+        // FIXME! Still needs to convert completely to jquery.
+        var usernameMsgElement = s.next();
+        var checker = new CloudTokenAvailabilityChecker(usernameField, usernameMsgElement, '/csvn/setupCloudServices/checkLoginAvailability', messages.checking, messages.prompt);
+        usernameAvailabilityCheckers.push(checker);
+        checker.onSuccess = updateActionButtons;
+        checker.onFailure = updateActionButtons;
 
-        checker.doAjaxRequest(checker)
-        Event.observe(usernameField, 'keydown', function(e) {
-          checker.keypressHandler()
-        })
-      })
-      updateActionButtons()
+        checker.doAjaxRequest(checker);
+        usernameField.keydown(checker.keypressHandler);
+      });
+      updateActionButtons();
     })
 
     function updateActionButtons() {
@@ -57,16 +52,12 @@
           break
         }
       }
-      $$('input.listViewAction').each(function(s) {
-        s.disabled = !enableActions
-      })
+      $('input.listViewAction').attr('disabled', !enableActions);
     }
 
   </script>
 </head>
-<content tag="title">
-  <g:message code="setupCloudServices.page.selectUsers.title"/>
-</content>
+<content tag="title"><g:message code="setupCloudServices.page.selectUsers.title"/></content>
 
 <g:render template="/server/leftNav"/>
 <body>
@@ -77,29 +68,26 @@
        value="${tabArray << [active: true, label: message(code:'setupCloudServices.page.tabs.createLogins', args:[2])]}"/>
 <g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
 
+<g:message code="setupCloudServices.page.createUserLogins.p1"/>
 <g:form>
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-        <p>
-          <g:message code="setupCloudServices.page.createUserLogins.p1"/>
-        </p>
-        <table class="Container">
-          <tbody>
+  <table class="table table-striped table-bordered table-condensed">
+          <thead>
           <tr class="ItemListHeader">
             <th><g:message code="setupCloudServices.page.selectUsers.username"/></th>
             <th><g:message code="setupCloudServices.page.selectUsers.realUsername"/></th>
             <th><g:message code="setupCloudServices.page.selectUsers.emailAddress"/></th>
             <th><g:message code="setupCloudServices.page.selectUsers.proposedLogin"/></th>
           </tr>
+          </thead>
+          <tbody>
           <g:each in="${userList}" status="i" var="user">
-            <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+            <tr>
               <td>${user.username}</td>
               <td>${user.realUserName}</td>
               <td>${user.email}</td>
               <td>
                 <g:listViewSelectItem item="${user}" hidden="true"/>
-                <input size="40" type="text" id="username_${user.id}" name="username_${user.id}"
+                <input type="text" id="username_${user.id}" name="username_${user.id}"
                        value="${fieldValue(bean: user, field: 'username')}"
                        class="CheckForLoginUniqueness"/>
                 <span class="usernameUniqueneMessage" id="usernameUniqueMessage_${user.id}"></span>
@@ -111,21 +99,15 @@
               <td colspan="5"><p><g:message code="setupCloudServices.page.selectUsers.noUsers"/></p></td>
             </tr>
           </g:if>
+          </tbody>
         </table>
 
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td colspan="3">
-        <div class="AlignRight">
+        <div class="pull-right">
           <g:actionSubmit id="btnMigrateUsers"
                           value="${message(code:'setupCloudServices.page.selectUsers.migrate')}"
-                          controller="setupCloudServices" action="migrateUsers" class="Button listViewAction"
+                          controller="setupCloudServices" action="migrateUsers" class="btn btn-primary listViewAction"
                           disabled="disabled"/>
         </div>
-      </td>
-    </tr>
-  </table>
 </g:form>
 
 </body>

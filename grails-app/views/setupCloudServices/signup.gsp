@@ -17,10 +17,7 @@
   --}%
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.signup.title"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="application"/>
-
   <g:javascript>
 
     var messages = {
@@ -72,269 +69,64 @@
     }
     </g:javascript>       
 </head>
-<content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
-</content>
+<content tag="title"><g:message code="setupCloudServices.page.signup.title"/></content>
 
 <g:render template="/server/leftNav"/>
 <body>
-<g:form id="signupForm">
-<table class="ItemDetailContainer">
-<tr class="ContainerHeader">
-  <td><g:message code="setupCloudServices.page.signup.title"/></td>
-</tr>
-<tr>
-<td class="ContainerBodyWithPaddedBorder">
 <p><g:message code="setupCloudServices.page.signup.p1"/></p>
-<table class="ItemDetailContainer">
-<tr>
-  <td class="ItemDetailName">
-    <label for="firstName"><g:message code="setupCloudServices.page.signup.firstName.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="firstName" name="firstName"
-           value="${fieldValue(bean: cmd, field: 'firstName')}"/>
-  </td>
-  <td></td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="firstName">
-      <ul><g:eachError bean="${cmd}" field="firstName">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="lastName"><g:message code="setupCloudServices.page.signup.lastName.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="lastName" name="lastName"
-           value="${fieldValue(bean: cmd, field: 'lastName')}"/>
-  </td>
-  <td></td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="lastName">
-      <ul><g:eachError bean="${cmd}" field="lastName">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="emailAddress"><g:message code="setupCloudServices.page.signup.emailAddress.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="emailAddress" name="emailAddress"
-           value="${fieldValue(bean: cmd, field: 'emailAddress')}"/>
-  </td>
-  <td>
-    <em><g:message code="setupCloudServices.page.signup.emailAddress.label.tip"/></em>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="emailAddressConfirm"><g:message code="setupCloudServices.page.signup.emailAddressConfirm.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="emailAddressConfirm" name="emailAddressConfirm"
-           value=""/>
-  </td>
-  <td>
-    <span id="confirmEmailMessage" class="TextRequired" style="display: none;">
-      <img width="15" height="15" alt="Warning" align="bottom"
+<g:form class="form-horizontal">
+  <g:propTextField bean="${cmd}" field="firstName" required="true" prefix="setupCloudServices.page.signup"/>
+  <g:propTextField bean="${cmd}" field="lastName" required="true" prefix="setupCloudServices.page.signup"/>
+  <g:propTextField bean="${cmd}" field="emailAddress" required="true" prefix="setupCloudServices.page.signup"/>
+  
+  <div class="control-group required-field">
+    <label class="control-label"
+        for="emailAddressConfirm"><g:message code="setupCloudServices.page.signup.emailAddressConfirm.label"/></label>
+    <div class="controls">
+      <input type="text" class="input-xlarge" id="emailAddressConfirm" name="emailAddressConfirm" value=""/>
+      <span id="confirmEmailMessage" class="TextRequired" style="display: none;">
+        <img width="15" height="15" alt="Warning" align="bottom"
                 src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
-      <g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>
-    </span>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="emailAddress">
-      <ul><g:eachError bean="${cmd}" field="emailAddress">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="phoneNumber"><g:message code="setupCloudServices.page.signup.phone.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="phoneNumber" name="phoneNumber"
-           value="${fieldValue(bean: cmd, field: 'phoneNumber')}"/>
-  </td>
-  <td></td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="phoneNumber">
-      <ul><g:eachError bean="${cmd}" field="phoneNumber">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="username"><g:message code="setupCloudServices.page.signup.username.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="username" name="username"
-           value="${fieldValue(bean: cmd, field: 'username')}"/>
-  </td>
-  <td>
+        <g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>
+      </span>
+    </div>
+  </div>
+
+  <g:propTextField bean="${cmd}" field="phoneNumber" prefix="setupCloudServices.page.signup"/>
+  <g:propControlsBody bean="${cmd}" field="username" required="true" prefix="setupCloudServices.page.signup">
+    <input type="text" class="input-xlarge" id="username" name="username"
+        value="${fieldValue(bean: cmd, field: 'username')}"/>
     <span id="usernameUniquenessMessage"></span>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="username">
-      <ul><g:eachError bean="${cmd}" field="username">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="password"><g:message code="setupCloudServices.page.signup.password.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="password" id="password" name="password"
-           value="${fieldValue(bean: cmd, field: 'password')}"/>
-  </td>
-  <td></td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="password">
-      <ul><g:eachError bean="${cmd}" field="password">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="passwordConfirm"><g:message
-            code="setupCloudServices.page.signup.passwordConfirm.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="password" id="passwordConfirm" name="passwordConfirm"
-           value="${fieldValue(bean: cmd, field: 'passwordConfirm')}"/>
-  </td>
-  <td>
+  </g:propControlsBody>
+  <g:propControlsBody bean="${cmd}" field="password" required="true" prefix="setupCloudServices.page.signup">
+      <input type="password" class="input-xlarge" id="password" name="password"
+          value="${fieldValue(bean: cmd, field: 'password')}"/>
+  </g:propControlsBody>
+  <g:propControlsBody bean="${cmd}" field="passwordConfirm" required="true" prefix="setupCloudServices.page.signup">
+      <input type="password" class="input-xlarge" id="passwordConfirm" name="passwordConfirm"
+          value="${fieldValue(bean: cmd, field: 'passwordConfirm')}"/>
     <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
       <img width="15" height="15" alt="Warning" align="bottom"
                 src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
       <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
     </span>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="passwordConfirm">
-      <ul><g:eachError bean="${cmd}" field="passwordConfirm">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="organization"><g:message code="setupCloudServices.page.signup.organization.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="organization" name="organization"
-           value="${fieldValue(bean: cmd, field: 'organization')}"/>
-  </td>
-  <td>
-    <em><g:message code="setupCloudServices.page.signup.organization.label.tip"/></em>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="organization">
-      <ul><g:eachError bean="${cmd}" field="organization">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-    <label for="domain"><g:message code="setupCloudServices.page.signup.domain.label"/></label>
-  </td>
-  <td valign="top">
-    <input size="40" type="text" id="domain" name="domain"
-           value="${fieldValue(bean: cmd, field: 'domain')}"/>
-  </td>
-  <td>
-    <em><g:message code="setupCloudServices.page.signup.domain.label.tip"/></em> <br/>
+  </g:propControlsBody>
+  <g:propTextField bean="${cmd}" field="organization" required="true" prefix="setupCloudServices.page.signup"/>
+  <g:propControlsBody bean="${cmd}" field="domain" required="true" prefix="setupCloudServices.page.signup">
+    <input type="text" class="input-xlarge" id="domain" name="domain"
+        value="${fieldValue(bean: cmd, field: 'domain')}"/>
     <span id="domainUniquenessMessage"></span>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="domain">
-      <ul><g:eachError bean="${cmd}" field="domain">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-  <td class="ItemDetailName">
-  </td>
-  <td valign="top" colspan="2">
-    <g:checkBox name="acceptTerms" checked="${cmd.acceptTerms}"/>
-    <label for="acceptTerms"><g:message code="setupCloudServices.page.signup.terms.label"/></label>
-  </td>
-</tr>
-<tr>
-  <td></td>
-  <td class="errors" colspan="2">
-    <g:hasErrors bean="${cmd}" field="acceptTerms">
-      <ul><g:eachError bean="${cmd}" field="acceptTerms">
-        <li><g:message error="${it}" encodeAs="HTML"/></li>
-      </g:eachError></ul>
-    </g:hasErrors>
-  </td>
-</tr>
-<tr>
-</table>
-</td>
-</tr>
-<tr class="ContainerFooter">
-  <td>
-    <div class="AlignRight">
-      <g:actionSubmit id="btnCloudServicesExistingLogin"
-                      value="${message(code:'setupCloudServices.page.signup.button.existingLogin')}"
-                      controller="setupCloudServices" action="credentials" class="Button"/>
-
+  </g:propControlsBody>
+  <g:propCheckBox bean="${cmd}" field="acceptTerms" required="true" prefix="setupCloudServices.page.signup"/>
+  <div class="form-actions">
       <g:actionSubmit id="btnCloudServicesCreateAccout"
                       value="${message(code:'setupCloudServices.page.signup.button.continue')}"
-                      controller="setupCloudServices" action="createAccount" class="Button"/>
-    </div>
-  </td>
-</tr>
-</table>
+                      controller="setupCloudServices" action="createAccount" class="btn btn-primary"/>
+      <g:actionSubmit id="btnCloudServicesExistingLogin"
+                      value="${message(code:'setupCloudServices.page.signup.button.existingLogin')}"
+                      controller="setupCloudServices" action="credentials" class="btn"/>
+
+  </div>
 </g:form>
 
 </body>

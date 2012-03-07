@@ -19,9 +19,7 @@
 
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.selectUsers.title"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
   <g:javascript library="listView"/>
 </head>
 <content tag="title">
@@ -37,16 +35,12 @@
        value="${tabArray << [label: message(code:'setupCloudServices.page.tabs.createLogins', args:[2])]}"/>
 <g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
 
-<g:form>
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-        <p>
-          <g:message code="setupCloudServices.page.selectUsers.p1"/>
-        </p>
-        <table class="Container">
-          <tbody>
-          <tr class="ItemListHeader">
+<g:message code="setupCloudServices.page.selectUsers.p1"/>
+<g:form class="form-horizontal">
+
+        <table class="table table-striped table-bordered table-condensed">
+          <thead>
+          <tr>
             <th><g:listViewSelectAll/></th>
             <g:sortableColumn property="username" titleKey="setupCloudServices.page.selectUsers.username"
                               defaultOrder="asc"/>
@@ -55,8 +49,10 @@
             <g:sortableColumn property="matchingRemoteUser"
                               titleKey="setupCloudServices.page.selectUsers.matchingRemoteUser"/>
           </tr>
+          </thead>
+          <tbody>
           <g:each in="${userList}" status="i" var="user">
-            <tr class="${(i % 2) == 0 ? 'EvenRow' : 'OddRow'}">
+            <tr>
               <td><g:listViewSelectItem item="${user}" property="userId" selected="${user.selectForMigration}"/></td>
               <td>${user.username}</td>
               <td>${user.realUserName}</td>
@@ -70,19 +66,11 @@
             </tr>
           </g:if>
         </table>
-
-      </td>
-    </tr>
-    <tr class="ContainerFooter">
-      <td>
-        <div class="AlignRight">
+        <div class="pull-right">
           <g:listViewActionButton action="createUserLogins" minSelected="1">
             <g:message code="setupCloudServices.page.selectUsers.createLogins"/>
           </g:listViewActionButton>
         </div>
-      </td>
-    </tr>
-  </table>
 </g:form>
 
 </body>

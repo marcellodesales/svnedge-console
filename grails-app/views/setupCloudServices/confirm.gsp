@@ -17,9 +17,8 @@
   --}%
 <html>
 <head>
-  <title>CollabNet Subversion Edge <g:message code="setupCloudServices.page.index.title"/></title>
+  <title><g:message code="setupCloudServices.page.confirmation.title"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
   <style>
 
   td.CloudServicesHeading, td.CloudServicesSubHeading {
@@ -67,21 +66,18 @@
 
   </style>
 </head>
-<content tag="title">
-  <g:message code="setupCloudServices.page.leftNav.header"/>
-</content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
-<table class="ItemDetailContainer">
+<table>
   <tr>
     <td class="CloudServicesHeading">
       <g:message code="setupCloudServices.page.confirmation.title"/>
     </td>
   </tr>
   <tr>
-    <td class="CloudServicesSubHeading"><g:message code="setupCloudServices.page.confirmation.p1"/>
+    <td class="CloudServicesSubHeading"><br/><g:message code="setupCloudServices.page.confirmation.p1"/>
     </td>
   </tr>
   <tr>
@@ -106,9 +102,9 @@
 
     </td>
   </tr>
-  <tr class="ContainerFooter">
+  <tr>
     <td>
-        <div class="AlignLeft">
+        <div>
           <p id="GetStartedPrompt"><g:message code="setupCloudServices.page.confirmation.getStarted.prompt"/></p>
         </div>
     </td>
