@@ -1,3 +1,4 @@
+<%@ page import=" org.springframework.web.util.JavaScriptUtils" %>
 <head>
     <meta name="layout" content="main" />
   <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
@@ -12,24 +13,15 @@
 <g:render template="leftNav" />
 
 <body>
-            <table class="table table-striped table-bordered table-condensed tablesorter" id="datatable">
-              <thead>
-               <tr>
-                    <g:sortableColumn property="username" title="${message(code: 'user.page.list.column.username')}" />
-                    <g:sortableColumn property="realUserName" title="${message(code: 'user.page.list.column.realUserName')}" />
-                    <g:sortableColumn property="description" title="${message(code: 'user.page.list.column.description')}" />
-              </tr>
-            </thead>
-            <tbody>
-            <g:each in="${userInstanceList}" status="i" var="person">
-                <tr>
-                    <td><g:link action="edit" id="${person.id}">${person.username}</g:link></td>
-                    <td>${person.realUserName}</td>
-                    <td>${person.description}</td>
-                </tr>
-            </g:each>
-            </tbody>
-            </table>
+  <table class="table table-striped table-bordered table-condensed tablesorter" id="datatable"></table>
+  <script type="text/javascript">
+  /* Data set */
+  var aDataSet = [
+  <g:each in="${userInstanceList}" status="i" var="person">
+      ['<g:link action="edit" id="${person.id}">${person.username}</g:link>','<%= JavaScriptUtils.javaScriptEscape(person.realUserName) %>','<%= JavaScriptUtils.javaScriptEscape(person.description) %>'],
+  </g:each>
+  ];
+  </script>
 <g:form>
   <p class="pull-right">
     <g:listViewActionButton action="create" minSelected="0" maxSelected="0" primary="true"><g:message code="default.button.create.label" /></g:listViewActionButton>
@@ -42,6 +34,12 @@
   /* Table initialisation */
   $(document).ready(function() {
     $('#datatable').dataTable( {
+      "aaData": aDataSet,
+	  "aoColumns": [
+	    { "sTitle": "${message(code: 'user.page.list.column.username')}" },
+		{ "sTitle": "${message(code: 'user.page.list.column.realUserName')}" },
+		{ "sTitle": "${message(code: 'user.page.list.column.description')}" }
+	  ],
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,

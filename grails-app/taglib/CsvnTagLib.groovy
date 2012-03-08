@@ -157,7 +157,7 @@ class CsvnTagLib {
         def confirmDialogTextId = "_confirmDialogText_${attrs.action}"
         
         // html button and modal dialog (if needed) 
-        out << "<input id='${buttonId}' type='submit' class='${styleClasses} ${attrs.action} listViewAction' "
+        out << "<input id='${buttonId}' type='submit' class='${styleClasses} listViewAction' "
         out << " name='_action_${attrs.action}' "
         out << " value='${body().trim()}'"
         if (attrs.confirmMessage) {

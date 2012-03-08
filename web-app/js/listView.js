@@ -26,17 +26,7 @@ String.prototype.trim = function () {
 
 $(function() {
     // add observer to checkboxes for enabling / disabling command buttons
-    var allItemSelectCheckboxes = $('input.listViewSelectItem');
-    allItemSelectCheckboxes.each(function() {
-        $(this).on('click', function() {
-            if ($(this).hasClass("radio")) {
-                currentId = $(this).attr("id");
-                $('input.listViewSelectItem:checked[id!="' + currentId + '"]').removeAttr("checked");
-            }
-            updateActionButtons();
-        });
-    })
-
+    applyCheckboxObserver();
 
     // "select all" handler
     if ($('#listViewSelectAll')) {
@@ -70,6 +60,24 @@ function updateActionButtons()  {
         else {
             $(this).removeAttr('disabled')
         }
+    })
+}
+
+/**
+ * adds click handler to all of the list view select checkboxes on the page
+ */
+function applyCheckboxObserver() {
+    var allItemSelectCheckboxes = $('input.listViewSelectItem');
+    allItemSelectCheckboxes.removeAttr("checked");
+    allItemSelectCheckboxes.removeAttr("checked");
+    allItemSelectCheckboxes.each(function() {
+        $(this).on('click', function() {
+            if ($(this).hasClass("radio")) {
+                currentId = $(this).attr("id");
+                $('input.listViewSelectItem:checked[id!="' + currentId + '"]').removeAttr("checked");
+            }
+            updateActionButtons();
+        });
     })
 }
 

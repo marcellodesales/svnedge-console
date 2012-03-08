@@ -50,6 +50,7 @@ class RepoController {
     def repoTemplateService
     def statisticsService
     def fileUtil
+    def authenticateService
 
     @Secured(['ROLE_USER'])
     def index = { redirect(action: list, params: params) }
@@ -268,7 +269,13 @@ class RepoController {
 
     @Secured(['ROLE_USER'])
     def show = {
-        redirect(action: 'dumpFileList', id: params.id)
+        def repoId = (params.id) ?: ControllerUtil.getListViewSelectedIds(params)[0]
+        if (authenticateService.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_HOOKS')) {
+            redirect(action: 'hooksList', id: repoId)
+        }
+        else {
+            redirect(action: 'dumpFileList', id: repoId)
+        }
     }
 
     @Secured(['ROLE_USER'])
