@@ -7,7 +7,7 @@
 </head>
 
 <content tag="title">
-    <g:message code="server.page.edit.header" />
+    <g:message code="logs.page.list.title" />
 </content>
 
 %{--
