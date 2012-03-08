@@ -4,7 +4,10 @@
         <meta name="layout" content="main" />
         <title>CollabNet Subversion Edge <g:message code=repository.page.list.header.title /></title>
         <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
-
+        <g:set var="adminView" value="${false}"/>
+        <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
+          <g:set var="adminView" value="${true}"/>
+        </g:ifAnyGranted>  
     </head>
 
 <g:render template="leftNav" />
@@ -21,23 +24,23 @@
     /* Data set */
     var aDataSet = [
     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
-      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
+      <g:if test="${adminView}">
         ['<g:listViewSelectItem item="${repositoryInstance}" radioStyle="true"/>',
          '<a href="${server.viewvcURL(repositoryInstance.name)}" target="_blank">${repositoryInstance.name}</a>',
          'svn co ${server.svnURL()}${repositoryInstance.name} ${repositoryInstance.name} --username=<g:loggedInUsername/>',
          '<g:link action="show" id="${repositoryInstance.id}">${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }</g:link>'
         ],
-      </g:ifAnyGranted> 
-      <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
+      </g:if> 
+      <g:else>
         ['<a href="${server.viewvcURL(repositoryInstance.name)}" target="_blank">${repositoryInstance.name}</a>',
          'svn co ${server.svnURL()}${repositoryInstance.name} ${repositoryInstance.name} --username=<g:loggedInUsername/>',
         ],
-       </g:ifNotGranted> 
+       </g:else> 
     </g:each>
     ];
     </script>
 
-<g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
+<g:if test="${adminView}">
   <div class="pull-right">
   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
    <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
@@ -58,7 +61,7 @@
    </g:listViewActionButton>
    </g:ifAnyGranted>
   </div>
-</g:ifAnyGranted>
+</g:if>
 </g:form>
 
 <g:javascript library="jquery.dataTables.min"/>
@@ -83,7 +86,7 @@
         "sInfo": "${message(code:'datatable.showing')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
         },
-      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">  
+      <g:if test="${adminView}">  
       "aaSorting": [[ 1, "asc" ]],
       "aoColumns": [
         {"sTitle": "", "bSortable": false}, 
@@ -93,14 +96,14 @@
           "bSortable": false
         }
       ]
-      </g:ifAnyGranted>
-      <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">  
+      </g:if>
+      <g:else>  
       "aaSorting": [[ 0, "asc" ]],
       "aoColumns": [
         {"sTitle": "${message(code:'repository.page.list.name')}"},
         {"sTitle": "${message(code:'repository.page.list.checkout_command')}"},
       ]
-      </g:ifNotGranted>
+      </g:else>
     } );
     
     // limit filter to column 1 only (the repo name)
