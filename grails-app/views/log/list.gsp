@@ -3,6 +3,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
   <title>CollabNet Subversion Edge <g:message code="logs.page.list.title" /></title>
+  <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
 </head>
 
 <content tag="title">
@@ -16,7 +17,7 @@
 
 <body>
 
-<table class="table table-striped table-bordered table-condensed tablesorter">
+<table class="table table-striped table-bordered table-condensed tablesorter" id="datatable">
   <thead>
     <tr>
       
@@ -34,7 +35,7 @@
         <tr>
           <td><g:link action="show" params="[fileName : fileName]">${file.name}</g:link></td>
           <td><g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/></td>
-          <td><g:formatFileSize size="${file.size}"/></td>
+          <td><span title="${file.size}"><g:formatFileSize size="${file.size}"/></span></td>
         </tr>
 
       </g:each>
@@ -47,5 +48,36 @@
     </g:else>
   </tbody>
 </table>
+
+<g:javascript library="jquery.dataTables.min"/>
+<g:javascript library="DT_bootstrap"/>
+<g:javascript>
+  /* Table initialisation */
+  $(document).ready(function() {
+    $('#datatable').dataTable( {
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrev": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.filter.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${message(code:'default.search.noResults.message')}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+        },
+      "aaSorting": [[ 0, "asc" ]],
+      "aoColumns": [
+                null,
+                null,
+                { "sType": "title-numeric" }  // sorts on title attribute, rather than text of the file size element
+            ]
+    } );
+  } );
+</g:javascript>
 </body>
 </html>
