@@ -19,7 +19,7 @@
 <html>
     <head>
         <meta name="layout" content="main" />
-        <g:javascript library="listView"/>
+        <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
     </head>
 
 <g:render template="leftNav" />
@@ -32,5 +32,8 @@
 
     <g:render template="backupScheduleForm"/>
 
+    <g:javascript library="listView"/>
+    <g:javascript library="jquery.dataTables.min"/>
+    <g:javascript library="DT_bootstrap"/>
     </body>
 </html>

@@ -162,55 +162,28 @@
           
         <g:if test="${!repositoryInstance}">
           <br/>
-          <table id="reposTable" class="table table-striped table-bordered table-condensed tablesorter">
-          <thead>
-            <tr>
-              <th><g:listViewSelectAll/></th>
-              <g:sortableColumn property="repoName" titleKey="repository.page.bkupSchedule.job.repoName"
-                                defaultOrder="asc"/>
-              <g:sortableColumn property="type" titleKey="repository.page.bkupSchedule.job.type"/>
-              <g:sortableColumn property="scheduledFor" titleKey="repository.page.bkupSchedule.job.scheduledFor"/>
-              <g:sortableColumn property="keepNumber" titleKey="repository.page.bkupSchedule.job.keepNumber"/>
-            </tr>
-          </thead>
-          <tbody>
-            <g:each in="${repoBackupJobList}" status="i" var="job">
-              <tr>
-                <td>
-                  <g:listViewSelectItem item="${job}" property="repoId"
-                                        onClick="setFormState({'type': '${job.typeCode}', 'numberToKeep': '${job.keepNumber}', 'scheduleFrequency': '${job.schedule?.frequency}', 'scheduleHour': '${job.schedule?.hour}', 'scheduleMinute': '${job.schedule?.minute}', 'scheduleDayOfWeek': '${job.schedule?.dayOfWeek}'})"/>
-                </td>
+          <table id="datatable" class="table table-striped table-bordered table-condensed"></table>
+          <script type="text/javascript">
+            /* Data set */
+            var aDataSet = [
+              <g:each in="${repoBackupJobList}" status="i" var="job">
+                <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
+                  <g:set var="cloudActivationRequired" value="${true}"/>
+                </g:if>
+                <g:if test="${flash['nameAdjustmentRequired' + job.repoId]}">
+                  <g:set var="cloudNameChangeRequired" value="${true}"/>
+                </g:if>  
+                ['${job.repoId}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
+                  '${job.repoId}|${job.repoName}|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
+                  '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
+                  '${job.scheduleFormatted}',
+                  '${job.keepNumber == 0 ? "ALL" : job.keepNumber}'
+                ]<g:if test="${i < (repoBackupJobList.size() - 1)}">,</g:if>
 
-                <td>${job.repoName}
-                  <g:if test="${flash['nameAdjustmentRequired' + job.repoId]}">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <label><g:message code="repository.page.bkupSchedule.cloudName"/>
-                      <input type="text" name="${'cloudName' + job.repoId}"
-                             value="${params['cloudName' + job.repoId] ?: job.cloudName ?: job.repoName}" size="30"/>
-                    </label>
-                  </g:if>
-                  <g:elseif test="${job.cloudName && job.cloudName != job.repoName}">(${job.cloudName})</g:elseif>
-                </td>
-                <td>${job.type}
-                  <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
-                    <span class="TextRequired">
-                      <g:message code="repository.page.bkupSchedule.cloud.activation.required"
-                                 args="${[createLink(controller: 'setupCloudServices', action: 'index')]}"/>
-                    </span>
-                  </g:if>
-                </td>
-                <td>${job.scheduleFormatted}</td>
-                <td>${job.keepNumber == 0 ? "ALL" : job.keepNumber}</td>
-              </tr>
-            </g:each>
-            <g:if test="${!repoBackupJobList}">
-              <tr>
-                <td><p><g:message code="repository.page.list.noRepos"/></p></td>
-              </tr>
-            </g:if>
-            </tbody>
-          </table>
-
+              </g:each>
+            ];
+          </script>
+         
           <div class="pull-right">
             <g:listViewActionButton action="updateBkupSchedule" minSelected="1" primary="true">
               <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
@@ -290,7 +263,7 @@
   function setFormState(state) {
 
     // only change form if we are allowing changes and values are provided
-    if (!allowScheduleFormStateClobber || state.type == 'null') {
+    if (!allowScheduleFormStateClobber || state.type == '') {
       return;
     }
 
@@ -325,5 +298,95 @@
     $(".scheduleElement").click(function() {
         allowScheduleFormStateClobber = false;
     });
+  });
+  
+  // data table configuration for repo listing
+ $(document).ready(function() {
+    var dt = $('#datatable').dataTable( {
+      "aaData": aDataSet,
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrevious": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.filter.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${(isReplica) ? message(code:'repository.page.list.replica.noRepos') : message(code:'repository.page.list.noRepos')}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+      },
+    "aaSorting": [[ 1, "asc" ]],
+    "aoColumns": [
+      {"sTitle": "<g:listViewSelectAll/>", 
+       "bSortable": false,
+       "fnRender": function (oObj, sVal) {
+           var template = '<input type="checkbox" class="listViewSelectItem" id="listViewItem_{0}" name="listViewItem_{0}" onClick="setFormState({\'type\': \'{1}\', \'numberToKeep\': \'{2}\', \'scheduleFrequency\': \'{3}\', \'scheduleHour\': \'{4}\', \'scheduleMinute\': \'{5}\', \'scheduleDayOfWeek\': \'{6}\'})"/>'
+           var expanded = new String(template);
+           var vals = sVal.split("|");
+           for (i = 0; i < vals.length; i++) {
+              var token = "\\{" + i + "\\}"
+              expanded = expanded.replace(new RegExp(token,'g'), vals[i]);
+           }
+           return expanded;
+        }
+      },
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.repoName')}",
+       "fnRender": function(oObj, sVal) {
+          repoId = sVal.split("|")[0]
+          repoName = sVal.split("|")[1]
+          cloudName = sVal.split("|")[2] 
+          cloudNameRequired = sVal.split("|")[3] == 'nc'
+          cloudNameParam = sVal.split("|")[4]
+           
+          out = repoName
+          // if "cloud name change required", indicated in third token, show form element
+          if (cloudNameRequired) {
+            // if no param from previous form submit, prefill form element with cloud or repo name
+            if (cloudNameParam.length == 0 ) {
+                cloudNameParam = (cloudName.length > 0) ? cloudName : repoName;
+            }
+            out += 
+            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+            '<label><g:message code="repository.page.bkupSchedule.cloudName"/>' +
+              '<input type="text" name="cloudName' + repoId + '"' +
+                     ' value="' + cloudNameParam + '" size="30"/>' +
+            '</label>'
+          }
+          else if (cloudName.length > 0 && cloudName != repoName) {
+            out += " (" + cloudName + ")"
+          }
+          return out
+       }
+      },
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.type')}",
+       "fnRender": function(oObj, sVal) {
+          out = sVal.split("|")[0]
+          // if "cloud activation required", indicated in second token, show message
+          if (sVal.split("|")[1] == 'ca') {
+            out += 
+            ' <span class="TextRequired">' +
+                '<g:message code="repository.page.bkupSchedule.cloud.activation.required" args="${[createLink(controller: 'setupCloudServices', action: 'index')]}"/>' +
+            '</span>'
+          }
+          return out
+       }
+      },
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.scheduledFor')}"},
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.keepNumber')}"}
+    ] 
+   })
+   
+    // limit filter to column 1 only (the repo name)
+    filterElement= $('#datatable_filter').find("input")
+    filterElement.keyup( function () {
+        dt.fnFilter(filterElement.attr("value"), 1);
+        applyCheckboxObserver();
+        updateActionButtons();
+    } );
   });
 </g:javascript>
