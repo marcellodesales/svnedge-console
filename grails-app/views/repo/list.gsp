@@ -29,10 +29,10 @@
           '${repositoryInstance.name}',
           '',
           '${repositoryInstance.id}|${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }'
-        ],
+        ]<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
       </g:if> 
       <g:else>
-        ['${repositoryInstance.name}', ''],
+        ['${repositoryInstance.name}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
        </g:else> 
     </g:each>
     ];

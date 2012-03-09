@@ -23,7 +23,7 @@
   <g:each in="${files}" status="i" var="file">
       ['${file.name}',
         '<g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/>',
-        '${file.size}|<g:formatFileSize size="${file.size}"/>'],
+        '${file.size}|<g:formatFileSize size="${file.size}"/>']<g:if test="${i < (files.size() - 1)}">,</g:if>
   </g:each>
   ];
   </script>
