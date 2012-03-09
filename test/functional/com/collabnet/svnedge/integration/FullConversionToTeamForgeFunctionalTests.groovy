@@ -64,6 +64,8 @@ class FullConversionToTeamForgeFunctionalTests
             }
             assertStatus 200
             assertContentDoesNotContain(getMessage("default.errors.summary"))
+            def title = getMessage("repository.page.show.title", [repoName])
+            assertContentContains(title)
             javaScriptEnabled = true
         }
     }
@@ -126,9 +128,9 @@ class FullConversionToTeamForgeFunctionalTests
         assertContentDoesNotContain(
             getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error"))
         assertContentContains(
-            getMessage("setupTeamForge.page.ctfProject.name.label"))
+            getMessage("setupTeamForge.page.ctfProject.ctfProject.label"))
         assertContentContains(
-            getMessage("setupTeamForge.page.ctfProject.name.label.tip"))
+            getMessage("setupTeamForge.page.ctfProject.ctfProject.label.tip"))
 
         this.createdProjectName = "csvnproj" + new Random().nextInt(10000)
         def projButton = 

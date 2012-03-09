@@ -1,4 +1,4 @@
-<ul class="nav nav-tabs">
+<ul class="nav nav-${pills ? 'pills' : 'tabs' }">
   <g:each var="tab" in="${tabs}">
     <g:set var="tabLink">
       <g:if test="${tab.href}">

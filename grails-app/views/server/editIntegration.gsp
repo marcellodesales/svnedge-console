@@ -59,14 +59,15 @@
                 </g:if>
             </div>
           </g:if>
-
+    <br/>
     <g:form class="form-horizontal" method="post" action="revert">
       <fieldset>
-      <g:propControlsBody bean="${ctfCredentials}" field="ctfUrl" prefix="server.page.editIntegration">
-        ${ctfServerBaseUrl}
-      </g:propControlsBody>
-      <g:propTextField bean="${ctfCredentials}" field="ctfUsername" prefix="server.page.editIntegration"/>
-      <g:propControlsBody bean="${ctfCredentials}" field="ctfPassword" prefix="server.page.editIntegration">
+      <div class="control-group">
+        <span class="control-label"><g:message code="server.page.editIntegration.ctfUrl.label"/></span>
+        <div class="controls readonly">${ctfServerBaseUrl}</div>
+      </div>      
+      <g:propTextField bean="${ctfCredentials}" field="ctfUsername" required="true" prefix="server.page.editIntegration"/>
+      <g:propControlsBody bean="${ctfCredentials}" field="ctfPassword" required="true" prefix="server.page.editIntegration">
         <input type="password" id="ctfPassword" name="ctfPassword" 
             value="${fieldValue(bean:ctfCredentials,field:'ctfPassword')}"/>
       </g:propControlsBody>

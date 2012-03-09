@@ -1,17 +1,13 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge <g:message code="setupTeamForge.page.convert.title" /></title>
       <meta name="layout" content="main" />
-      <g:javascript library="prototype" />
   </head>
-  <content tag="title">
-    <g:message code="setupTeamForge.page.leftNav.header" />
-  </content>
+  <content tag="title"><g:message code="setupTeamForge.page.convert.title" /></content>
 
   <g:render template="/server/leftNav" />
 
   <body>
-  <div class="alert alert-block alert-info">
+  <div class="well">
     <g:if test="${ctfProjectLink}">
       <p><g:message code="setupTeamForge.page.convert.p1" /></p>
       <p><g:message code="setupTeamForge.page.convert.project" /> '${wizardBean.ctfProject}' <g:message code="setupTeamForge.page.convert.sourceCode" /> <a href="${ctfProjectLink}">${ctfProjectLink}</a></p>

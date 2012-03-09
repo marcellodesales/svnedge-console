@@ -453,25 +453,29 @@ abstract class AbstractConversionFunctionalTests extends
      * if there are no repositories created.
      */
     protected boolean isItAFreshConversion() {
-       javaScriptEnabled = false
-       get('/repo/list')
-       assertStatus 200
-       def foundExpectedMessage = this.response.contentAsString.contains(
-               getMessage("repository.page.list.noRepos"))
-       javaScriptEnabled = true
-       return foundExpectedMessage
+// datatables conversion is dependent on js, so working around until js issues
+// can be fixed.
+//       javaScriptEnabled = false
+//       get('/repo/list')
+//       assertStatus 200
+//       def foundExpectedMessage = this.response.contentAsString.contains(
+//               getMessage("repository.page.list.noRepos"))
+//       javaScriptEnabled = true
+
+        get('/dbUtil/sql?sqlText=select+*+from+REPOSITORY&run=Execute')
+        assertStatus 200
+        def foundExpectedMessage = this.response.contentAsString
+                .contains("NO ROWS FOUND")
+        return foundExpectedMessage
     }
 
     /**
      * Verifies the tabs for the fresh conversion.
      */
     private void assertTabsOnFreshConversionAreCorrect() {
-        //TODO: Add parameter of the current tab
-        //TODO: Verify if the correct tab is highlighted
-        def introTab = getMessage("setupTeamForge.page.tabs.index", [1])
-        assertContentContains(introTab.replaceAll(" ", "&nbsp;"))
+        assertContentDoesNotContain('nav-pills')
         def convertTab = getMessage("setupTeamForge.page.tabs.confirm", [2])
-        assertContentContains(convertTab.replaceAll(" ", "&nbsp;"))
+        assertContentDoesNotContain(convertTab.replaceAll(" ", "&nbsp;"))
     }
 
     /**
@@ -480,19 +484,16 @@ abstract class AbstractConversionFunctionalTests extends
     private void assertTabsOnCompleteConversionAreCorrect() {
         //TODO: Add parameter of the current tab
         //TODO: Verify if the correct tab is highlighted.
-        def introTab = getMessage("setupTeamForge.page.tabs.index", [1])
-        assertContentContains(introTab.replaceAll(" ", "&nbsp;"))
-
-        def credTab = getMessage("setupTeamForge.page.tabs.ctfInfo", [2])
+        def credTab = getMessage("setupTeamForge.page.tabs.ctfInfo", [1])
         assertContentContains(credTab.replaceAll(" ", "&nbsp;"))
 
-        def projTab = getMessage("setupTeamForge.page.tabs.ctfProject", [3])
+        def projTab = getMessage("setupTeamForge.page.tabs.ctfProject", [2])
         assertContentContains(projTab.replaceAll(" ", "&nbsp;"))
 
-        def usersTab = getMessage("setupTeamForge.page.tabs.ctfUsers", [4])
+        def usersTab = getMessage("setupTeamForge.page.tabs.ctfUsers", [3])
         assertContentContains(usersTab.replaceAll(" ", "&nbsp;"))
 
-        def convertTab = getMessage("setupTeamForge.page.tabs.confirm", [5])
+        def convertTab = getMessage("setupTeamForge.page.tabs.confirm", [4])
         assertContentContains(convertTab.replaceAll(" ", "&nbsp;"))
     }
 
