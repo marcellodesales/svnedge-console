@@ -78,14 +78,15 @@
         "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
         "oPaginate": {
             "sNext": "${message(code:'default.paginate.next')}",
-            "sPrev": "${message(code:'default.paginate.prev')}"
+            "sPrevious": "${message(code:'default.paginate.prev')}"
         },
         "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
         "sEmptyTable": "${(isReplica) ? message(code:'repository.page.list.replica.noRepos') : message(code:'repository.page.list.noRepos')}",
         "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
-        },
+      },
       <g:if test="${adminView}">  
       "aaSorting": [[ 1, "asc" ]],
       "aoColumns": [
@@ -93,7 +94,7 @@
         {"sTitle": "${message(code:'repository.page.list.name')}"},
         {"sTitle": "${message(code:'repository.page.list.checkout_command')}"},
         {"sTitle": "${message(code:'repository.page.list.status')}",
-          "bSortable": false
+         "bSortable": false
         }
       ]
       </g:if>
@@ -110,7 +111,7 @@
     filterElement= $('#datatable_filter').find("input")
   	filterElement.keyup( function () {
         dt.fnFilter(filterElement.attr("value"), 1);
-        applyCheckboxObserver()
+        applyCheckboxObserver();
         updateActionButtons();
     } );
   } );

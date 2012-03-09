@@ -47,12 +47,13 @@
         "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
         "oPaginate": {
             "sNext": "${message(code:'default.paginate.next')}",
-            "sPrev": "${message(code:'default.paginate.prev')}"
+            "sPrevious": "${message(code:'default.paginate.prev')}"
         },
         "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
         "sEmptyTable": "${message(code:'default.search.noResults.message')}",
         "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
         },
       "aaSorting": [[ 0, "asc" ]]
