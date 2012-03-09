@@ -21,9 +21,9 @@
   /* Data set */
   var aDataSet = [
   <g:each in="${files}" status="i" var="file">
-      ['<g:link action="show" params="[fileName : fileName]">${file.name}</g:link>',
+      ['${file.name}',
         '<g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/>',
-        '<span title="${file.size}"><g:formatFileSize size="${file.size}"/></span>'],
+        '${file.size}|<g:formatFileSize size="${file.size}"/>'],
   </g:each>
   ];
   </script>
@@ -37,9 +37,18 @@
     $('#datatable').dataTable( {
       "aaData": aDataSet,
       "aoColumns": [
-	    { "sTitle": "${message(code: 'logs.page.list.column.name')}" },
+	    {"sTitle": "${message(code: 'logs.page.list.column.name')}",
+	     "fnRender": function (oObj, sVal) {
+          var template = '<g:link action="show" params="[fileName : 'FILENAME']">FILENAME</g:link>';
+          return template.replace(/FILENAME/g, sVal);
+       }
+	    },
 		{ "sTitle": "${message(code: 'logs.page.list.column.date')}" },
 		{ "sTitle": "${message(code: 'logs.page.list.column.size')}",
+		  "fnRender": function (oObj, sVal) {
+          var template = '<span title="SIZE">FORMATTED</span>';
+          return template.replace("SIZE", sVal.split("|")[0]).replace("FORMATTED", sVal.split("|")[1]);
+       },
 		  "sType": "title-numeric" // sorts on title attribute, rather than text of the file size element
 		}
 	  ],

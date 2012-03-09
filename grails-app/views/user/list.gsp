@@ -18,7 +18,7 @@
   /* Data set */
   var aDataSet = [
   <g:each in="${userInstanceList}" status="i" var="person">
-      ['<g:link action="edit" id="${person.id}">${person.username}</g:link>','<%= JavaScriptUtils.javaScriptEscape(person.realUserName) %>','<%= JavaScriptUtils.javaScriptEscape(person.description) %>'],
+      ['${person.id}|${person.username}','<%= JavaScriptUtils.javaScriptEscape(person.realUserName) %>','<%= JavaScriptUtils.javaScriptEscape(person.description) %>'],
   </g:each>
   ];
   </script>
@@ -36,9 +36,14 @@
     $('#datatable').dataTable( {
       "aaData": aDataSet,
 	  "aoColumns": [
-	    { "sTitle": "${message(code: 'user.page.list.column.username')}" },
-		{ "sTitle": "${message(code: 'user.page.list.column.realUserName')}" },
-		{ "sTitle": "${message(code: 'user.page.list.column.description')}" }
+	    {"sTitle": "${message(code: 'user.page.list.column.username')}",
+	     "fnRender": function (oObj, sVal) {
+          var template = '<g:link action="edit" id="ID">USERNAME</g:link>'
+          return template.replace("ID", sVal.split("|")[0]).replace("USERNAME", sVal.split("|")[1]);;
+       }
+	    },
+		  {"sTitle": "${message(code: 'user.page.list.column.realUserName')}" },
+		  {"sTitle": "${message(code: 'user.page.list.column.description')}" }
 	  ],
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
@@ -57,7 +62,6 @@
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
         },
       "aaSorting": [[ 0, "asc" ]]
-      
     } );
   } );
 </g:javascript>
