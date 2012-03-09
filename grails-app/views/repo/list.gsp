@@ -25,16 +25,14 @@
     var aDataSet = [
     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
       <g:if test="${adminView}">
-        ['<g:listViewSelectItem item="${repositoryInstance}" radioStyle="true"/>',
-         '<a href="${server.viewvcURL(repositoryInstance.name)}" target="_blank">${repositoryInstance.name}</a>',
-         'svn co ${server.svnURL()}${repositoryInstance.name} ${repositoryInstance.name} --username=<g:loggedInUsername/>',
-         '<g:link action="show" id="${repositoryInstance.id}">${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }</g:link>'
+        ['${repositoryInstance.id}',
+          '${repositoryInstance.name}',
+          '',
+          '${repositoryInstance.id}|${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }'
         ],
       </g:if> 
       <g:else>
-        ['<a href="${server.viewvcURL(repositoryInstance.name)}" target="_blank">${repositoryInstance.name}</a>',
-         'svn co ${server.svnURL()}${repositoryInstance.name} ${repositoryInstance.name} --username=<g:loggedInUsername/>',
-        ],
+        ['${repositoryInstance.name}', ''],
        </g:else> 
     </g:each>
     ];
@@ -90,19 +88,49 @@
       <g:if test="${adminView}">  
       "aaSorting": [[ 1, "asc" ]],
       "aoColumns": [
-        {"sTitle": "", "bSortable": false}, 
-        {"sTitle": "${message(code:'repository.page.list.name')}"},
-        {"sTitle": "${message(code:'repository.page.list.checkout_command')}"},
+        {"sTitle": "", 
+         "bSortable": false,
+         "fnRender": function (oObj, sVal) {
+           var template = '<input type="checkbox" class="listViewSelectItem radio" id="listViewItem_ID" name="listViewItem_ID"/>'
+           return template.replace(/ID/g, sVal);
+         }
+        },
+        {"sTitle": "${message(code:'repository.page.list.name')}",
+         "fnRender": function ( oObj, sVal ) {
+           var template = '<a href="${server.viewvcURL("REPO")}" target="_blank">REPO</a>';
+           return template.replace(/REPO/g, sVal);
+         }
+        },
+        {"sTitle": "${message(code:'repository.page.list.checkout_command')}",
+         "fnRender": function (oObj, sVal) {
+           var template = 'svn co ${server.svnURL()}REPO REPO --username=<g:loggedInUsername/>';
+           return template.replace(/REPO/g, $(oObj.aData[1]).text());
+         }
+        },
         {"sTitle": "${message(code:'repository.page.list.status')}",
-         "bSortable": false
+         "bSortable": false ,
+         "fnRender": function(oObj, sVal) {
+           var template = '<g:link action="show" id="REPOID">MSG</g:link>';
+           return template.replace("REPOID", sVal.split("|")[0]).replace("MSG", sVal.split("|")[1]);
+         }
         }
       ]
       </g:if>
       <g:else>  
       "aaSorting": [[ 0, "asc" ]],
       "aoColumns": [
-        {"sTitle": "${message(code:'repository.page.list.name')}"},
-        {"sTitle": "${message(code:'repository.page.list.checkout_command')}"},
+        {"sTitle": "${message(code:'repository.page.list.name')}",
+         "fnRender": function ( oObj, sVal ) {
+           var template = '<a href="${server.viewvcURL("REPO")}" target="_blank">REPO</a>';
+           return template.replace(/REPO/g, sVal);
+         }
+        },
+        {"sTitle": "${message(code:'repository.page.list.checkout_command')}",
+         "fnRender": function (oObj, sVal) {
+           var template = 'svn co ${server.svnURL()}REPO REPO --username=<g:loggedInUsername/>';
+           return template.replace(/REPO/g, $(oObj.aData[0]).text());
+         }
+        }
       ]
       </g:else>
     } );
