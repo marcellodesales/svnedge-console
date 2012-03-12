@@ -19,62 +19,34 @@
   --}%
 
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
 </head>
 <content tag="title">
-  <g:message code="setupTeamForge.page.leftNav.header"/>
+  <g:message code="setupReplica.page.title"/>
 </content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
-
+<p><g:message code="setupReplica.page.convert.p1"/></p>
 
 <g:form method="post">
+<div class="well">
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></div>
+    <div class="span8">${ctfURL}</div>
+  </div>
 
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></div>
+    <div class="span8">${ctfUsername}</div>
+  </div>
 
-        <p>
-          <g:message code="setupReplica.page.convert.p1"/>
-        </p>
-
-        <div class="dialog">
-          <table align="center" width="99%">
-            <tbody>
-            <tr><td>
-              <table class="ItemDetailContainer">
-                <tbody>
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.ctfURL.label"/></td>
-                  <td class="ItemDetailValue">${ctfURL}</td>
-                </tr>
-                
-                <tr>
-                   <td class="ItemDetailName"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></td>
-                   <td class="ItemDetailValue">${ctfUsername}</td>
-                 </tr>
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></td>
-                  <td class="ItemDetailValue">${svnReplicaCheckout}</td>
-                </tr>
-                
-                </tbody>
-              </table>
-            </td></tr>
-            </tbody>
-          </table>
-        </div>
-
-
-    
-  </table>
-  </td>
-  </tr>
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.confirm.svnReplicaCheckout.label"/></strong></div>
+    <div class="span8">${svnReplicaCheckout}</div>
+  </div>
+</div>
 </g:form>
-
 </body>
 </html>
   

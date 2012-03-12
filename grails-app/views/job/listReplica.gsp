@@ -5,7 +5,6 @@
 <head>
     <meta name="layout" content="main" />
     <meta http-equiv="refresh" content="5">
-    <title><g:message code="job.page.list.title"/></title>
 </head>
 
 <body>
@@ -17,34 +16,29 @@
 <g:render template="/server/leftNav"/>
 
 <div class="well">
-<br/>
-   <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${message(code:'status.page.replica.master_hostname')}</b> ${svnMasterUrl}
-   </div>
-   <div class="ImageListParent">
-    <img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-    <b>${message(code:'status.page.url.teamforge')}</b> ${ctfUrl}
-   </div>
-   <div class="ImageListParent">
-     <div style="float: left;"><img width="9" hspace="5" height="9" src="${resource(dir:'/images/icons',file:'big_bullet.gif')}" alt="&bull;"/>
-     </div> <div id="pollingIntervalString" style="float: left;">
+  <div class="row-fluid">
+    <div class="span2"><strong>${message(code:'status.page.replica.master_hostname')}</strong></div>
+    <div class="span9">${svnMasterUrl}</div>
+  </div>
+  <div class="row-fluid">
+    <div class="span2"><strong>${message(code:'status.page.url.teamforge')}</strong></div>
+    <div class="span9">${ctfUrl}</div>
+  </div>
+  <div class="row-fluid">
+    <div class="span11">
+      <div id="pollingIntervalString" style="float: left;">
         ${message(code:'job.page.list.polling_interval', args:[commandPollRate])}
-     </div>
-   </div>
-<br/>
+      </div>
+    </div>
+  </div>
+</div>
 <br/>
 
 <div>
+  <h3><small><g:message code="job.page.list.scheduled.header"/></small></h3>
   <table class="table table-striped table-bordered table-condensed" id="scheduledCommandsTable">
-    <thead>
-     <tr>
-       <th>
-         <g:message code="job.page.list.scheduled.header"/>
-       </th>
-     </tr>
-    </thead>
     <tbody>
+ <g:if test="${scheduledCommands}">
   <g:each in="${scheduledCommands}" status="i" var="schCommand">
     <tr id="sch_${schCommand.id}">
      <td>
@@ -54,18 +48,16 @@
      </td>
     </tr>
   </g:each>
+ </g:if>
+ <tr><td><g:message code="job.page.list.none"/></td></tr>
     </tbody>
    </table>
+</div>
 <g:if test="${unprocessedCommands}">
-<br />
+ <br />
+ <div>
+ <h3><small><g:message code="job.page.list.blocked.header"/></small></h3>
    <table class="table table-striped table-bordered table-condensed" id="blockedCommandsTable">
-     <thead>
-     <tr>
-       <th>
-         <g:message code="job.page.list.blocked.header"/>
-       </th>
-     </tr>
-     </thead>
      <tbody>
   <g:each in="${unprocessedCommands}" status="i" var="cmd">
     <tr id="sch_${cmd.id}">
@@ -79,10 +71,8 @@
     </tbody>
    </table>
    <small><g:message code="job.page.list.blocked.note"/></small>
+ </div>
 </g:if>
-</div>
-
-</div>
 
 <g:render template="/job/replicaCommands" model="['tableName': 'longRunningCommandsTable',
  'runningCommands': longRunningCommands, 'maxNumber': maxLongRunning, 'shortRun': false]" />

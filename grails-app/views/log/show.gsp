@@ -1,13 +1,8 @@
 <%@ page import="org.apache.commons.lang.StringEscapeUtils" %>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
   <meta name="layout" content="main"/>
-  <title>CollabNet Subversion Edge <g:message code="logs.page.show.title" args="${[params.fileName]}" encodeAs="HTML"/></title>
-  <g:javascript library="application" />
   <g:javascript>
-
-
     $(function() {
         $('#tailButton').on('click', toggleLogStreaming)
         $('#tailSpinner').hide()
@@ -39,7 +34,7 @@
 </head>
 
 <content tag="title">
-  <g:message code="server.page.edit.header" />
+  <g:message code="logs.page.show.title" args="${[params.fileName]}" encodeAs="HTML"/>
 </content>
 
 <g:render template="/server/leftNav" />
@@ -49,12 +44,17 @@
   <div class="message">${flash.message}</div>
 </g:if>
 
-<div id="fileName">
-  <g:message code="logs.page.show.header.fileName" /> ${params.fileName} &nbsp;<g:message code="logs.page.show.header.size" /> ${fileSize} &nbsp;<g:message code="logs.page.show.header.lastModification" /> ${fileModification}</td>
+<div id="fileName" class="row-fluid" style="margin-bottom: 5px;">
+  <div class="span1"><strong><g:message code="logs.page.show.header.fileName" /></strong></div>
+  <div class="span3">${params.fileName}</div>
+  <div class="span1"><strong><g:message code="logs.page.show.header.size" /></strong></div>
+  <div class="span2">${fileSize} &nbsp;</div>
+  <div class="span2"><strong><g:message code="logs.page.show.header.lastModification" /></strong></div>
+  <div class="span3">${fileModification}</div>
 </div>
 
 <g:if test="${file}">
-  <div style="overflow: auto;" id="fileContentDiv">
+  <div style="overflow: auto; height='300px'" id="fileContentDiv">
     <!-- Leave this left-justified so that spaces are not padded in the first line of the log -->
     <pre id="fileContent">
       <%
@@ -98,7 +98,7 @@
 
 <g:javascript>
   function resizeFileViewer() {
-    $("#fileContentDiv").css('height', '' + Math.round(.8 * $(window).height()));
+    $("#fileContentDiv").css('height', (Math.round($(window).height()) - 220) + 'px');
   }
 
   $(document).ready(function() {

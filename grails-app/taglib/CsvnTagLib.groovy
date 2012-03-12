@@ -458,6 +458,7 @@ class CsvnTagLib {
         if (tip) {
             out << '    <div class="help-block">' << tip
         }
+        def skipHtmlEncoding = attrs['skipHtmlEncoding']
         out << hasErrors(bean: obj, field: fieldName) {
             if (!tip) {
                 out << '    <div class="help-block">'
@@ -465,7 +466,11 @@ class CsvnTagLib {
             out << '\n      <ul>\n'
             out << eachError(bean: obj, field: fieldName) {
                 out << '        <li>'
-                out << message(error: it, encodeAs: "HTML")
+                if (skipHtmlEncoding) {
+                    out << message(error: it)
+                } else {
+                    out << message(error: it, encodeAs: "HTML")
+                }
                 out << '</li>\n'
             }
             out << '      </ul>\n'

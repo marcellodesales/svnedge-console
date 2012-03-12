@@ -20,14 +20,14 @@
 <%@page import="com.collabnet.svnedge.integration.command.AbstractCommand"%>
 <%@page import="com.collabnet.svnedge.integration.command.CommandState"%>
 
-<h3>
+<h3><small>
   <g:if test="${shortRun}">
     <g:message code="job.page.list.short_running.header"/>
   </g:if>
   <g:else>
     <g:message code="job.page.list.long_running.header"/>
   </g:else>
-</h3>
+</small></h3>
 <table class="table table-striped table-bordered table-condensed">
   <thead>
   <tr>

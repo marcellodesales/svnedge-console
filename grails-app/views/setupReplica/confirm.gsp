@@ -19,86 +19,64 @@
   --}%
 
   <meta name="layout" content="main"/>
-  <g:javascript library="prototype"/>
 </head>
 <content tag="title">
-  <g:message code="setupTeamForge.page.leftNav.header"/>
+  <g:message code="setupReplica.page.title"/>
 </content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
 
-<g:set var="tabArray" value="${[[action:'index', label: message(code:'setupTeamForge.page.tabs.index', args:[1])]]}"/>
-<g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[2])]}"/>
-<g:set var="tabArray" value="${tabArray << [action:'replicaSetup', label: message(code:'setupReplica.page.tabs.replicaInfo', args:[3])]}"/>
-<g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.confirm', args:[4])]}"/>
+<g:set var="tabArray" value="${[]}"/>
+<g:set var="tabArray" value="${tabArray << [action:'ctfInfo', label: message(code:'setupReplica.page.tabs.ctfInfo', args:[1])]}"/>
+<g:set var="tabArray" value="${tabArray << [action:'replicaSetup', label: message(code:'setupReplica.page.tabs.replicaInfo', args:[2])]}"/>
+<g:set var="tabArray" value="${tabArray << [active: true, label: message(code:'setupReplica.page.tabs.confirm', args:[3])]}"/>
+<g:render template="/common/tabs" model="${[tabs: tabArray, pills: true]}"/>
 
+<p><strong><g:message code="setupTeamForge.page.confirm.ready" /></strong> <g:message code="setupReplica.page.confirm.p1" /></p>
 
-<g:render template="/common/tabs" model="${[tabs: tabArray]}"/>
+<div class="well">
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.confirm.ctfURL.label"/></strong></div>
+    <div class="span8">${ctfURL}</div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></strong></div>
+    <div class="span8">${ctfUsername}</div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></strong></div>
+    <div class="span8">
+      <g:if test="${selectedScmServer.description}">
+        <g:message code="setupReplica.page.confirm.nameDescription" args="${[selectedScmServer.title, selectedScmServer.description]}"/>
+      </g:if>
+      <g:else>${selectedScmServer.title}</g:else>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.replicaSetup.description.label"/></strong></div>
+    <div class="span8">
+      <g:if test="${replicaDescription}">
+        <g:message code="setupReplica.page.confirm.nameDescription" args="${[replicaTitle, replicaDescription]}"/>
+      </g:if>
+      <g:else>${replicaTitle}</g:else>
+    </div>
+  </div>
+
+  <div class="row-fluid">
+    <div class="span3"><strong><g:message code="setupReplica.page.replicaSetup.message.label"/></strong></div>
+    <div class="span8">${replicaMessageForAdmin}</div>
+  </div>
+</div>
 
 <g:form method="post">
-
-  <table class="ItemDetailContainer">
-    <tr>
-      <td class="ContainerBodyWithPaddedBorder">
-
-        <p>
-          <p><strong><g:message code="setupTeamForge.page.confirm.ready" /></strong> <g:message code="setupReplica.page.confirm.p1" /></p>
-        </p>
-
-        <div class="dialog">
-          <table align="center" width="99%">
-            <tbody>
-            <tr><td>
-              <table class="ItemDetailTable">
-                <tbody>
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.ctfURL.label"/></td>
-                  <td class="ItemDetailValue">${ctfURL}</td>
-                </tr>
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.ctfInfo.ctfUsername.label"/></td>
-                  <td class="ItemDetailValue">${ctfUsername}</td>
-                </tr>
-
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.confirm.svnMasterURL.label"/></td>
-                  <td class="ItemDetailValue">${selectedScmServer.title}: <i>${selectedScmServer.description}</i></td>
-                </tr>
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.replicaSetup.description.label"/></td>
-                  <td class="ItemDetailValue">${replicaTitle}: <i>${replicaDescription}</i></td>
-                </tr>
-
-                <tr>
-                  <td class="ItemDetailName"><g:message code="setupReplica.page.replicaSetup.message.label"/></td>
-                  <td class="ItemDetailValue">${replicaMessageForAdmin}</td>
-                </tr>
-
-                </tbody>
-              </table>
-            </td></tr>
-            </tbody>
-          </table>
-        </div>
-
-
-    <tr class="ContainerFooter">
-      <td colspan="3">
-        <div class="AlignRight">
-          <g:actionSubmit action="convert" value="${message(code:'setupTeamForge.page.confirm.button.confirm')}" class="Button"/>
-        </div>
-      </td>
-    </tr>
-
-  </table>
-  </td>
-  </tr>
+  <div class="pull-right">
+    <g:actionSubmit action="convert" value="${message(code:'setupTeamForge.page.confirm.button.confirm')}" class="btn btn-primary"/>
+  </div>
 </g:form>
 
 </body>
