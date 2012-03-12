@@ -22,12 +22,12 @@
 <table class="table table-striped table-bordered table-condensed tablesorter">
   <thead>
   <tr>
-    <td width="5%">#</td>
-    <td width="15%">${message(code: 'job.page.list.column.id')}</td>
-    <td width="50%">${message(code: 'job.page.list.column.description')}</td>
-    <td width="10%">${message(code: 'job.page.list.column.scheduled')}</td>
-    <td width="10%">${message(code: 'job.page.list.column.started_at')}</td>
-    <td width="10%">${message(code: 'job.page.list.column.finished_at')}</td>
+    <th width="5%">#</th>
+    <th width="15%" nowrap="nowrap">${message(code: 'job.page.list.column.id')}</th>
+    <th width="50%" nowrap="nowrap">${message(code: 'job.page.list.column.description')}</th>
+    <th width="10%" nowrap="nowrap">${message(code: 'job.page.list.column.scheduled')}</th>
+    <th width="10%" nowrap="nowrap">${message(code: 'job.page.list.column.started_at')}</th>
+    <th width="10%" nowrap="nowrap">${message(code: 'job.page.list.column.finished_at')}</th>
   </tr>
   </thead>
   <tbody id="${tableName}">
