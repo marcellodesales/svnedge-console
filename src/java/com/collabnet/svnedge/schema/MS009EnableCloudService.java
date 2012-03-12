@@ -25,13 +25,20 @@ public class MS009EnableCloudService implements MigrationScript {
     private Logger log = Logger.getLogger(getClass());
 
     public boolean migrate(SqlUtil db) throws SQLException {
-        
+        // insert row, if it does not exist
+        db.executeUpdateSql("insert into CLOUD_SERVICES_CONFIGURATION " +
+                "(select 1 as ID, 0 as VERSION, '' as DOMAIN, '' as USERNAME," +
+                " '' as PASSWORD, true as ENABLED from " +
+                "(select 1 as ID, count(*) from CLOUD_SERVICES_CONFIGURATION)" +
+                " where ID not in " +
+                "(select ID from CLOUD_SERVICES_CONFIGURATION))");
+        // for installations where a row already existed
         db.executeUpdateSql("update CLOUD_SERVICES_CONFIGURATION " +
                 "set ENABLED = true");
         return false;
     }
     
     public int[] getVersion() {
-        return new int[] {2,4,1};
+        return new int[] {3,0,0};
     }
 }
