@@ -270,12 +270,12 @@ class RepoController {
     @Secured(['ROLE_USER'])
     def show = {
         def repoId = (params.id) ?: ControllerUtil.getListViewSelectedIds(params)[0]
-        if (authenticateService.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_HOOKS')) {
-            redirect(action: 'hooksList', id: repoId)
-        }
-        else {
-            redirect(action: 'dumpFileList', id: repoId)
-        }
+        redirect(action: firstTabView(), id: repoId)
+    }
+    
+    private String firstTabView() {
+        return authenticateService.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_HOOKS') ?
+                'hooksList' : 'dumpFileList'
     }
 
     @Secured(['ROLE_USER'])
@@ -688,7 +688,7 @@ class RepoController {
             catch (org.springframework.dao.DataIntegrityViolationException e) {
                 flash.error = message(code: 'repository.action.cant.delete',
                         [params.id] as String[])
-                redirect(action: show, id: params.id)
+                redirect(action: firstTabView(), id: params.id)
             }
         }
         else {
@@ -740,11 +740,11 @@ class RepoController {
             repo.setPermissionsOk(true)
             repo.save(validate: false, flush: true)
             flash.message = message(code: 'repository.action.permissions.set.ok')
-            redirect(action: show, id: params.id)
+            redirect(action: firstTabView(), id: params.id)
         }
         else {
             flash.error = message(code: 'repository.action.permissions.set.notOk')
-            redirect(action: show, id: params.id)
+            redirect(action: firstTabView(), id: params.id)
         }
     }
 
@@ -820,7 +820,7 @@ class RepoController {
                     flash.message = message(code: 'repository.action.save.success')
                 }
 
-                redirect(action: 'dumpFileList', id: repo.id)
+                redirect(action: firstTabView(), id: repo.id)
                 success = true
             } else {
                 repo.errors.reject('repository.action.save.failure')
