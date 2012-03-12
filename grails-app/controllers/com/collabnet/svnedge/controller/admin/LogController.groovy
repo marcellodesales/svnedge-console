@@ -27,6 +27,7 @@ import com.collabnet.svnedge.domain.Server;
 import com.collabnet.svnedge.domain.ServerMode
 
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
+import com.collabnet.svnedge.util.ControllerUtil
 
 /**
  * This Controller manages views and actions related to application logging.
@@ -47,10 +48,7 @@ class LogController {
         // fetch the log file list
         def files = logManagementService.getLogFiles()
 
-        // add virtual bean-style properties to File for "date" and "size" --
-        // allows easy sorting below
-        File.metaClass.getDate = {-> delegate.lastModified() }
-        File.metaClass.getSize = {-> delegate.length() }
+        ControllerUtil.decorateFileClass()
 
         // sort log files based File property matching the sort param
         if (params.sort) {

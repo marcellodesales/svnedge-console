@@ -354,6 +354,7 @@ class RepoController {
             // set default sort to be date descending, if neither sort 
             // parameter is present
             ControllerUtil.setDefaultSort(params, "date", "desc")
+            ControllerUtil.decorateFileClass()
             def sortBy = params.sort
             boolean isAscending = params.order == "asc"
             model["dumpFileList"] =
@@ -959,11 +960,11 @@ class RepoController {
             // set default sort to be alphabetical, if neither sort
             // parameter is present
             ControllerUtil.setDefaultSort(params, "name")
+            ControllerUtil.decorateFileClass()
             def sortBy = params.sort
             boolean isAscending = params.order == "asc"
             model["hooksList"] =
                 svnRepoService.listHooks(repo, sortBy, isAscending)
-
         } else {
             flash.error = message(code: 'repository.action.not.found',
                                   args: [params.id])

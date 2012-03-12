@@ -1,35 +1,77 @@
 
 
-<g:if test="${fileList?.size() > 0}">
-  <g:form>
+
+<g:form>
   <input type="hidden" name="id" value="${params.id}" />
-  <table class="table table-striped table-bordered table-condensed">
-  <thead>
-    <tr class="ItemListHeader">
-      <th><g:if test="${!radioStyle}"><g:listViewSelectAll/></g:if></th>
-      <g:sortableColumn property="name" titleKey="repository.page.fileList.filename" />
-      <g:sortableColumn property="date" titleKey="repository.page.fileList.timestamp" />
-      <g:sortableColumn property="size" titleKey="repository.page.fileList.fileSize" />
-    </tr>
-  </thead>
-  <tbody>  
-    <g:each in="${fileList}" status="i" var="file">
-       <tr>
-         <td><g:listViewSelectItem item="${file}" property="name" radioStyle="${radioStyle}"/></td>
-         <td><a href="${createLink(action: linkAction, id: params.id, params: [filename: file.name])}">${file.name}</a></td>
-
-         <td><g:formatDate format="yyyy-MM-dd" date="${new java.util.Date(file.lastModified())}"/></td>
-         <td><g:formatFileSize size="${file.length()}" /></td>
-       </tr>
-    </g:each>
-  </tbody>
-  </table>
-
+  <table class="table table-striped table-bordered table-condensed" id="datatable"></table>
+  <script type="text/javascript">
+    /* Data set */
+    var aDataSet = [
+      <g:each in="${fileList}" status="i" var="file">
+      <g:set var="fileSize"><%=file.size()%></g:set>
+      ['${file.name}', '${file.name}',
+        '<g:formatDate format="${message(code: "default.dateTime.format.withZone")}" date="${file.date}"/>',
+        '${file.size}|<g:formatFileSize size="${file.size}"/>']<g:if test="${i < (fileList.size() - 1)}">,</g:if>
+      </g:each>
+    ];
+  </script>
+  
   <div class="pull-right">
     <%=buttons%>
   </div>
-  </g:form>
-</g:if>
-<g:else>
-    <p>${noFilesMessage}</p>
-</g:else>
+
+  
+  <g:javascript library="jquery.dataTables.min"/>
+  <g:javascript library="DT_bootstrap"/>
+  <g:javascript>
+  /* Table initialisation */
+  $(document).ready(function() {
+    $('#datatable').dataTable( {
+      "aaData": aDataSet,
+      "aoColumns": [
+	    {"sTitle": "",
+	     "bSortable": false,
+	     "fnRender": function (oObj, sVal) {
+	        <g:set var="itemSelectStyles" value="${radio ? 'listViewSelectItem radio' : 'listViewSelectItem'}"/>
+          var template = '<input type="checkbox" name="listViewItem_FILENAME" id="listViewItem_FILENAME" class="${itemSelectStyles}">';
+          return template.replace(/FILENAME/g, sVal);
+       }
+	    },
+	    {"sTitle": "${message(code: 'logs.page.list.column.name')}",
+	     "fnRender": function (oObj, sVal) {
+          var template = '<g:link action="${linkAction}" params="[fileName : 'FILENAME']">FILENAME</g:link>';
+          return template.replace(/FILENAME/g, sVal);
+       }
+	    },
+		{ "sTitle": "${message(code: 'repository.page.fileList.timestamp')}" },
+		{ "sTitle": "${message(code: 'repository.page.fileList.fileSize')}",
+		  "fnRender": function (oObj, sVal) {
+          var template = '<span title="SIZE">FORMATTED</span>';
+          return template.replace("SIZE", sVal.split("|")[0]).replace("FORMATTED", sVal.split("|")[1]);
+       },
+		  "sType": "title-numeric" // sorts on title attribute, rather than text of the file size element
+		}
+	  ],
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrevious": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.filter.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${noFilesMessage}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+        },
+      "aaSorting": [[ 1, "asc" ]]
+    } );
+  } );
+  </g:javascript>
+  <g:javascript library="listView"/>
+  
+</g:form>

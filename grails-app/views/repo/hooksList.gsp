@@ -1,6 +1,6 @@
 <g:applyLayout name="repoDetail">
  <content tag="headSnippet">
-    <g:javascript library="listView"/>
+   <link href="${resource(dir:'css',file:'DT_bootstrap.css')}" rel="stylesheet"/>
  </content>
 
  <g:set var="listViewButtons">

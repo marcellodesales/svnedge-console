@@ -78,4 +78,14 @@ public class ControllerUtil {
             params.order = order
         }
     }
+
+    /**
+     * Helper to create "size" and "date" bean-style properties on the File class
+     * for use by jstl 
+     */
+    public static void decorateFileClass() {
+        // add virtual bean-style properties to File for "date" and "size" 
+        File.metaClass.getDate = {-> delegate.lastModified() }
+        File.metaClass.getSize = {-> delegate.length() }
+    }
 }
