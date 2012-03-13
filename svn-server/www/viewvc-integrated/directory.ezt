@@ -34,6 +34,11 @@
 <!-- ************************************************************** -->
 
 [is roottype "svn"]
+  [if-any rev]
+  <div id="vc_togglables">
+    <a href="[revision_href]"><img src="[docroot]/images/branding/revision-icon.gif" alt="Changeset"/> r[rev]</a>
+  </div>
+  [end]
 [else]
 [is num_dead "0"]
 [else]
@@ -51,11 +56,12 @@
 [is skip "true"]
   <h2>Not displayed because the number of entries in this directory ([sfee_display]) is greater than the maximum supported ([sfee_display_max])</h2>
 [else]
-<table class="table table-striped table-bordered table-condensed" id="dirlist">
-<thead>
+<table class="vc_table" id="dirlist">
+<tbody>
+<tr class="table_header"><td colspan=[is cfg.options.show_logs "1"]5[else]4[end]>/[where]</td></tr>
 <tr class="column_header">
 
-  <th class="vc_header[is sortby "file"]_sort[end]">
+  <td class="vc_header[is sortby "file"]_sort[end]">
     <a href="[sortby_file_href]#dirlist">
      [is sortby "file"]
       <img class="vc_sortarrow" alt="[is sortdir "down"](rev)[else](asc)[end]"
@@ -67,8 +73,8 @@
         src="[docroot]/images/branding/sort_up_down.gif"/>
      [end]
     </a>File
-  </th>
-  <th class="vc_header[is sortby "rev"]_sort[end]">
+  </td>
+  <td class="vc_header[is sortby "rev"]_sort[end]">
     [if-any sortby_rev_href]<a href="[sortby_rev_href]#dirlist">
     [is sortby "rev"]
       <img class="vc_sortarrow" alt="[is sortdir "down"](rev)[else](asc)[end]"
@@ -79,8 +85,8 @@
         src="[docroot]/images/branding/sort_up_down.gif"/>
     [end]
     </a>[end]Rev.
-  </th>
-  <th class="vc_header[is sortby "date"]_sort[end]">
+  </td>
+  <td class="vc_header[is sortby "date"]_sort[end]">
     [if-any sortby_date_href]<a href="[sortby_date_href]#dirlist">
     [is sortby "date"]
       <img class="vc_sortarrow" alt="[is sortdir "down"](rev)[else](asc)[end]"
@@ -92,8 +98,8 @@
         src="[docroot]/images/branding/sort_up_down.gif"/>
     [end]
     </a>[end]Age
-  </th>
-  <th class="vc_header[is sortby "author"]_sort[end]">
+  </td>
+  <td class="vc_header[is sortby "author"]_sort[end]">
     [if-any sortby_author_href]<a href="[sortby_author_href]#dirlist">
     [is sortby "author"]
       <img class="vc_sortarrow" alt="[is sortdir "down"](rev)[else](asc)[end]"
@@ -105,9 +111,9 @@
         src="[docroot]/images/branding/sort_up_down.gif"/>
     [end]
     </a>[end]Author
-  </th>
+  </td>
 [is cfg.options.show_logs "1"]
-  <th class="vc_header[is sortby "log"]_sort[end]">
+  <td class="vc_header[is sortby "log"]_sort[end]">
     [if-any sortby_log_href]<a href="[sortby_log_href]#dirlist">
     [is sortby "log"]
       <img class="vc_sortarrow" alt="[is sortdir "down"](rev)[else](asc)[end]"
@@ -119,13 +125,12 @@
         src="[docroot]/images/branding/sort_up_down.gif"/>
     [end]
     </a>[end]Last log entry
-  </th>
+  </td>
 [end]
 </tr>
-</thead>
-<tbody>
+
 [if-any up_href]
-  <tr>
+  <tr class="vc_row_odd">
     <td>
       <a href="[up_href]">
       <img src="[docroot]/images/back_small.png" alt="" class="vc_icon"
@@ -168,7 +173,7 @@
       [end]
     [end]
   [end]
-  <tr>
+  <tr class="vc_row_[if-index entries even]even[else]odd[end]">
     <td [if-any name_href]onclick="jumpTo('[name_href]')"[end]>
     [if-any name_href]<a name="[entries.anchor]" href="[name_href]" title="[name_href_title]">[end]
        <img src="[docroot]/images/[is entries.pathtype "dir"]dir[else][is entries.state "dead"]broken[else]text[end][end].png" alt="" class="vc_icon" width="16px" height="16px"/>

@@ -427,7 +427,7 @@ Content-Length: 107
         s = s.replace("__CSVN_REPO_ROOT__", server.repoParentDir)
         s = s.replace("__CSVN_CONF__", confDirPath)
         s = s.replace("__CSVN_VIEWVC_TEMPLATES__", 
-                      ConfigUtil.viewvcTemplateDir())
+                      getViewvcTemplateDir(server))
         s = s.replace("__CSVN_SVN_CLIENT__", ConfigUtil.svnPath())
         s = s.replace("__SERVER_ADMIN__", server.adminEmail)
         if (server.forceUsernameCase) {
@@ -670,7 +670,7 @@ RedirectMatch ^(${contextPath})\$ \$1/
             getSVNHttpdConf(server)
         conf += "</Location>\n\n"
 
-        def viewvcTemplateDirPath = ConfigUtil.viewvcTemplateDir()
+        def viewvcTemplateDirPath = getViewvcTemplateDir(server)
         conf += """
 <Directory "${viewvcTemplateDirPath}/docroot">
   AllowOverride None
@@ -713,7 +713,19 @@ ${getAuthBasic(server)}
         }
         new File(confDirPath, "svn_viewvc_httpd.conf").write(conf)
     }
-    
+
+    /**
+     * returns the path to the appropriate viewvc template dir based
+     * on server mode
+     * @param server the Server instance
+     * @return absolute path to the appropriate template dir
+     */
+    private def getViewvcTemplateDir(server) {
+        return (server?.mode == ServerMode.STANDALONE) ?
+            ConfigUtil.viewvcTemplateDir() :
+            ConfigUtil.viewvcTemplateDirIntegrated()
+    }
+
     private def getAuthHelperListen(server) {
         def conf = ""
         if (isLdapLoginEnabled(server)) {

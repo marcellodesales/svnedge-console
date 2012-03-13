@@ -122,6 +122,12 @@ public final class ConfigUtil {
             new File(appHome(), "www/viewvc").absolutePath
     }
 
+    def static viewvcTemplateDirIntegrated() {
+        return getConfig().svnedge.svn.viewvcTemplatesPath ?
+            getConfig().svnedge.svn.viewvcTemplatesPath :
+            new File(appHome(), "www/viewvc-integrated").absolutePath
+    }
+
     def static viewvcTemplatesDirPath() {
         return getConfig().svnedge.svn.viewvcTemplatesPath ?
             getConfig().svnedge.svn.viewvcTemplatesPath : 
