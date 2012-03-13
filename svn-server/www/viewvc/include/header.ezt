@@ -38,7 +38,7 @@
     <span class="icon-bar"></span>
   </a>
   <a class="brand" href="/viewvc">
-    <img src="[docroot]/images/masthead/logo.png" alt="CollabNet Subversion Edge"/>
+    <img src="[docroot]/images/branding/logo.png" alt="CollabNet Subversion Edge"/>
   </a>
   <div class="nav-collapse">
     <!-- buttons -->
