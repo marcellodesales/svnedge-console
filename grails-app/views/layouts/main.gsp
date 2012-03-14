@@ -221,13 +221,8 @@
             </div> <!--/.well -->
 
             <div class="well">
-              <span class="label label-info">Tip:</span> Want to add
-              additional Subversion features like Code Search, Code Review,
-              Analytics or enhanced permissions management? <br /> <br />
-              <a href="teamforge.html">Connect</a> Subversion Edge to
-              TeamForge. <a target="_blank"
-              href="http://www.open.collab.net/products/ctf/"> More
-              information ...</a>
+              <span class="label label-info">Tip:</span>
+              <g:tipSelector/> 
             </div> <!--/.well -->
 
           </div> <!--/span3-->

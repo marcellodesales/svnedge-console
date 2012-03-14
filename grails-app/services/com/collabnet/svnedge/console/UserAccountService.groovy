@@ -19,6 +19,7 @@ package com.collabnet.svnedge.console
 
 import com.collabnet.svnedge.domain.Role 
 import com.collabnet.svnedge.domain.User;
+import com.collabnet.svnedge.domain.UserProperty
 
 /**
  * This class provides User and Role management services and bootstraps the security context
@@ -28,6 +29,9 @@ class UserAccountService extends AbstractSvnEdgeService {
     def lifecycleService
     def authenticateService
     def csvnAuthenticationProvider
+
+    private def tipMessageCounts = [:]
+    private def tipMessageAliases = [:]
 
     // ensures the existence of essential Roles and Users
     def bootStrap = {env->
@@ -158,8 +162,49 @@ class UserAccountService extends AbstractSvnEdgeService {
                 break
 
         }
+        
+        initializeTipMessages()
     }
 
+    private void initializeTipMessages() {
+        Properties p = new Properties()
+        InputStream stream = getTipsResourceAsStream()
+        try {
+            p.load(stream)
+        } finally {
+            stream.close()
+        }
+        for (name in p.stringPropertyNames()) {
+            int dot = name.lastIndexOf('.')
+            int index = name.substring(dot + 1) as int
+            String key = name.substring(0, dot + 1)
+            Integer prevCount = tipMessageCounts[key]
+            if (!prevCount || prevCount < index) {
+                tipMessageCounts[key] = index
+            }
+            
+            def value = p[name]
+            int start = value.indexOf('<alias>')
+            if (start >= 0) {
+                int end = value.indexOf('</alias>')
+                tipMessageAliases[name] = value.substring(start + 7, end)
+            }
+        }
+        
+        log.info("tip message counts: " + tipMessageCounts)
+        log.debug("tip message aliases: " + tipMessageAliases)
+    }
+
+    private InputStream getTipsResourceAsStream() {
+        def stream
+        try {
+            stream = grailsApplication.mainContext.getResource("/WEB-INF/grails-app/i18n/tips.properties").file.newInputStream()
+        } catch (IOException e) {
+            stream = this.class.getResourceAsStream("/grails-app/i18n/tips.properties")
+        }
+        return stream
+    }
+        
     /**
      * Test if the User object derives from LDAP authentication
      * @param u
@@ -173,5 +218,74 @@ class UserAccountService extends AbstractSvnEdgeService {
         new User(username: userid, realUserName: "Super Administrator", enabled: true,
                  passwd: password, description: "admin user", email: "admin@example.com")
             .save(flush: true)
+    }
+
+    String tipMessageCode(User user, String controller, String action) {
+        def prefix = authenticateService
+                .ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM") ?
+                'tip.admin.' : 'tip.enduser.'
+        if (controller == 'repo' && authenticateService.ifAnyGranted(
+                "ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS")) {
+            prefix = 'tip.adminRepo.'
+        } else if (controller == 'user' && authenticateService.ifAnyGranted(
+                "ROLE_ADMIN,ROLE_ADMIN_USERS")) {
+            prefix = 'tip.adminUser.'
+        }
+
+        String controllerKey = prefix + controller + '.'
+        String actionKey = prefix + controller + '.' + action + '.'
+        if (tipMessageCounts[controllerKey] || tipMessageCounts[actionKey]) {
+            
+            int controllerCount = tipMessageCounts[controllerKey] ?: 0
+            int actionCount = tipMessageCounts[actionKey] ?: 0
+            int generalCount = tipMessageCounts[prefix] ?: 1
+            double threshold = weightSpecificToGeneral(
+                    controllerCount + actionCount, generalCount)
+            double dice = Math.random()
+            log.debug("tipMessageCode for c=" + controller + ", a=" + action +
+                 " threshold=" + threshold + ", dice=" + dice)
+            
+            if (dice <= threshold) {
+                if (actionCount > 0) {
+                    if (controllerCount > 0) {
+                        threshold = weightSpecificToGeneral(
+                                actionCount, controllerCount)
+                        dice = Math.random()
+                        prefix = (dice < threshold) ? actionKey : controllerKey
+                    } else {
+                        prefix = actionKey
+                    }
+                } else {
+                    prefix = controllerKey
+                }
+            }
+        }
+
+        def props = user.propertiesMap
+        UserProperty tipCount = props[prefix]
+        if (tipCount) {
+            int newCount = (tipCount.value as int) + 1
+            int maxIndex = tipMessageCounts[prefix]
+            if (maxIndex < newCount) {
+                newCount = 1
+            }
+            tipCount.value = newCount as String
+            
+        } else {
+            tipCount = new UserProperty(name: prefix, value: "1")
+            user.addToProps(tipCount)
+        }
+        tipCount.save()
+        
+        String key = prefix + tipCount.value
+        return tipMessageAliases[key] ?: key
+    }
+
+    private float weightSpecificToGeneral(int specific, int general) {
+        // 0.25  + 0.25 * min( (2 * specific/general, 1 ) + min( specific/general, 1 ) * 0.4
+        // At 1/15 ratio weights specific message at 0.34
+        // At 1/1 ratio or higher, weights specific message at 0.9
+        return 0.25f + 0.25f * Math.min(1.0f, 2.0f * specific / general) +
+                0.4f * Math.min(1.0f, 1.0f * specific / general)
     }
 }

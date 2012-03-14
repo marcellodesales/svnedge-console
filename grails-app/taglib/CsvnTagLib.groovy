@@ -17,11 +17,14 @@
  */
 
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.integration.command.AbstractCommand
 
 class CsvnTagLib {
 
     def securityService
+    def authenticateService
+    def userAccountService
 
     /**
      * this custom tag will format the "size" input (bytes from file.length) into
@@ -551,5 +554,19 @@ class CsvnTagLib {
             out << '    </div>\n'
         }
         out << '  </div>\n</div>\n'
+    }
+    
+    
+    /**
+    * This tag determines the help tip to display
+    */
+   def tipSelector = { attrs ->
+        if (authenticateService.isLoggedIn()) {
+            User user = User.get(loggedInUserInfo(field:'id') as int)
+            String code = userAccountService
+                    .tipMessageCode(user, params.controller, params.action)
+                        
+            out << message(code: code)
+        }
     }
 }

@@ -22,7 +22,7 @@ package com.collabnet.svnedge.domain
  */
 class User {
     static transients = ['pass']
-    static hasMany = [authorities: Role]
+    static hasMany = [authorities: Role, props: UserProperty]
     static belongsTo = Role
 
     /** Username */
@@ -58,5 +58,13 @@ class User {
         passwd(blank: false, minSize: 5, maxSize: 255,
             matches: "[^\"]*")
         enabled()
+    }
+    
+    def getPropertiesMap() {
+        def m = [:]
+        for (UserProperty p in props) {
+            m[p.name] = p
+        }
+        return m
     }
 }
