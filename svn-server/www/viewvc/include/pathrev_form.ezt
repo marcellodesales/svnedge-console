@@ -32,21 +32,22 @@
   [end]
   </select>
 [else]
-  <input type="text" name="pathrev" value="[pathrev]" size="6"/>
+  <input type="text" name="pathrev" value="[pathrev]" class="input-small"/>
 [end]
 <input type="submit" value="Set Sticky [is roottype "cvs"]Tag[else]Revision[end]" />
 </div>
 </form>
 
 [if-any pathrev]
+<br/>
 <form method="get" action="[pathrev_clear_action]" style="display: inline">
 <div style="display: inline">
 [for pathrev_clear_hidden_values]<input type="hidden" name="[pathrev_clear_hidden_values.name]" value="[pathrev_clear_hidden_values.value]"/>[end]
 [if-any lastrev]
-  [is pathrev lastrev][else]<input type="submit" value="Set to [lastrev]" />[end]
+  [is pathrev lastrev][else]<input type="submit" class="input-small" value="Set to [lastrev]" />[end]
   (<i>Current path doesn't exist after revision <strong>[lastrev]</strong></i>)
 [else]
-  <input type="submit" value="Clear" />
+  <input type="submit" class="btn btn-small" value="Clear" />
 [end]
 </div>
 </form>

@@ -1,6 +1,6 @@
-<hr />
 
-<table class="auto">
+<div class="well">
+<table class="table-condensed">
 <tr><td>Files shown:</td><td><strong>[files_shown]</strong>
 [is num_dead "0"]
 [else]
@@ -69,6 +69,7 @@
     </form>
   [end]
 [end]
+</div>
 
 [# if you want to disable tarball generation remove the following: ]
 [if-any tarball_href]

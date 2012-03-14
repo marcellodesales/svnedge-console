@@ -1,14 +1,10 @@
 [# setup page definitions]
-[is servermode "STANDALONE"]
   [define page_title]Log of:[end]
-[else]
-  [define page_title]Log of /[where][end]
-[end]
   [define help_href][docroot]/help_log.html[end]
 [# end]
 [include "include/header.ezt" "log"]
 
-<table class="auto">
+<table class="table-condensed well">
 
 [if-any default_branch]
 <tr>

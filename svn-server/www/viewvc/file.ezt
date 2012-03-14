@@ -1,9 +1,5 @@
 [# setup page definitions]
-[is servermode "STANDALONE"]
   [define page_title]Annotation of:[end]
-[else]
-  [define page_title]Contents of /[where][end]
-[end]
   [define help_href][docroot]/help_rootview.html[end]
 [# end]
 [include "include/header.ezt" "annotate"]
@@ -17,7 +13,8 @@
 
 [if-any lines]
 <div id="vc_file">
-<table cellspacing="0" cellpadding="0" class="vc_table">
+<table cellspacing="0" cellpadding="0" class="table-condensed table-bordered">
+<thead>
 <tr>
 <th class="vc_header">Line</th>
 [is annotation "annotated"]
@@ -26,6 +23,8 @@
 [end]
 <th class="vc_header">File contents</th>
 </tr>
+</thead>
+<tbody>
 [for lines]
   [is lines.rev last_rev]
   [else]
@@ -46,6 +45,7 @@
   </tr>
   [define last_rev][lines.rev][end]
 [end]
+</tbody>
 </table>
 </div>
 
