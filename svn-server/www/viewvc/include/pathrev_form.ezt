@@ -34,7 +34,7 @@
 [else]
   <input type="text" name="pathrev" value="[pathrev]" class="input-small"/>
 [end]
-<input type="submit" value="Set Sticky [is roottype "cvs"]Tag[else]Revision[end]" />
+<input type="submit" class="btn btn-small" value="Set Sticky [is roottype "cvs"]Tag[else]Revision[end]" />
 </div>
 </form>
 
