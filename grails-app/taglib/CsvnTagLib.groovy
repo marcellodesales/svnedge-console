@@ -17,6 +17,7 @@
  */
 
 import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.integration.command.AbstractCommand
 
@@ -558,15 +559,23 @@ class CsvnTagLib {
     
     
     /**
-    * This tag determines the help tip to display
-    */
-   def tipSelector = { attrs ->
-        if (authenticateService.isLoggedIn()) {
-            User user = User.get(loggedInUserInfo(field:'id') as int)
-            String code = userAccountService
-                    .tipMessageCode(user, params.controller, params.action)
-                        
-            out << message(code: code)
+     * This tag determines the help tip to display
+     */
+    def tipSelector = { attrs, body ->
+        try {
+            Server server = Server.getServer()
+            if (authenticateService.isLoggedIn() &&
+                    server.mode == ServerMode.STANDALONE) {
+                def idString = loggedInUserInfo(field:'id')
+                if (idString) {
+                    User user = User.get(idString as int)
+                    String code = userAccountService.tipMessageCode(
+                            user, params.controller, params.action)
+                    out << body(tip: message(code: code))
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Exception prevented showing tip content: " + e.message)
         }
     }
 }

@@ -220,10 +220,12 @@
               </ul>
             </div> <!--/.well -->
 
-            <div class="well">
+            <g:tipSelector>
+            <div class="well hidden-phone">
               <span class="label label-info">Tip:</span>
-              <g:tipSelector/> 
+              <%=tip%>
             </div> <!--/.well -->
+            </g:tipSelector>
 
           </div> <!--/span3-->
         </g:if>
