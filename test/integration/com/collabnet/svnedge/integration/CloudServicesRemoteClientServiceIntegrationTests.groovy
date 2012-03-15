@@ -47,7 +47,7 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
         this.config = grailsApplication.config
         
         csConf = CloudServicesConfiguration.getCurrentConfig()
-        if (!csConf) {
+        if (!csConf || !csConf.domain) {
             File f = new File(ConfigUtil.appHome(), "testCred.properties")
             if (f.exists()) {
                 Properties up = new Properties()
@@ -68,7 +68,7 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
         if (skipTests) {
             return
         }
-        def repo = new Repository(name: "testRepo1")
+        def repo = new Repository(name: "testRepo")
         String projectId = cloudServicesRemoteClientService.createProject(repo)
         assertNotNull "Could not create test project", projectId
         
