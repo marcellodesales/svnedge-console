@@ -15,7 +15,7 @@
       <option value="c" [is diff_format "c"]selected="selected"[end]>Context Diff</option>
       <option value="s" [is diff_format "s"]selected="selected"[end]>Side by Side</option>
     </select>
-    <input type="submit" value="Show" />
+    <input type="submit" class="btn btn-small" value="Show" />
     (<a href="[patch_href]">Generate patch</a>)
   </div>
 </form>
@@ -24,7 +24,7 @@
 <!-- ************************************************************** -->
 
 [if-any raw_diff]
-<pre>[raw_diff]</pre>
+<pre class="vc_raw">[raw_diff]</pre>
 [else]
 
 [define change_right][end]
@@ -100,8 +100,8 @@
 [if-any change_right][change_right][end]
 </table>
 
-<h3>Diff Legend</h3>
-<table class="auto" cellspacing="0">
+<h4>Diff Legend</h4>
+<table class="table-condensed well" cellspacing="0">
 <tr>
  <td class="vc_diff_plusminus"><strong style="color: red;">&ndash;</strong></td>
  <td class="vc_diff_remove">Removed lines</td>

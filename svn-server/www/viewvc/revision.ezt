@@ -15,7 +15,7 @@
     <td>
       [for jump_rev_hidden_values]<input type="hidden" name="[jump_rev_hidden_values.name]" value="[jump_rev_hidden_values.value]"/>[end]
       <input type="text" name="revision" value="[rev]" />
-      <input type="submit" value="Go" />
+      <input type="submit" class="btn btn-small" value="Go" />
       [if-any prev_href]
         <a href="[prev_href]" title="Previous Revision"><img src="[docroot]/images/back.png" alt="Previous" width="20" height="22" /></a>[end]
       [if-any next_href] <a href="[next_href]" title="Next Revision"><img src="[docroot]/images/forward.png" width="20" height="22" alt="Next" /></a>[end]
@@ -53,7 +53,7 @@
   <div><a href="[first_changes_href]">Show only first [first_changes] changes...</div>
 [end]
 
-<table cellspacing="1" cellpadding="2" table="vc_table">
+<table class="table able-condensed well">
   <thead>
   <tr align="left">
     <th class="vc_header_sort">Path</th>

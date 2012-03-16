@@ -1,9 +1,5 @@
 [# setup page definitions]
-[is servermode "STANDALONE"]
   [define page_title]View of:[end]
-[else]
-  [define page_title]View of /[where][end]
-[end[
   [define help_href][docroot]/help_rootview.html[end]
 [# end]
 [include "include/header.ezt" "markup"]

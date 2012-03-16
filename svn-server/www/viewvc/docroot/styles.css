@@ -10,33 +10,6 @@
   padding: 0 1px;
 }
 
-#vc_logo {
-  padding: 8px 10px;
-}
-
-#vc_masthead {
-  background: #6d92b5 url('images/branding/banner_bgSlice.gif') repeat-y;
-  height: 60px;
-  border-bottom: 12px solid #ccc;
-}
-
-#vc_topmatter {
-  color: white;
-  float: right;
-  padding: 8px 10px;
-  text-align: right;
-}
-
-#vc_admin {
-  padding: 0 0 10px 0;
-  text-align: right;
-}
-
-#vc_footer {
-  border-top: 2px solid #efefef;
-  padding-top: 10px;
-}
-
 #vc_subview_selection_group {
   border-color: white;
   border-style: solid;
@@ -313,6 +286,11 @@ pre, .vc_diff_remove, .vc_diff_add, .vc_diff_changes1, .vc_diff_changes2, .vc_di
   font-family: sans-serif;
 }
 
+.vc_raw {
+    overflow: auto;
+    padding: 1em;;
+}
+
 /*** Intraline Diff Styles ***/
 .vc_idiff_add {
   background-color: #aaffaa;
@@ -397,5 +375,9 @@ table.fixed td {
 #poweredbylogo {
   float: left;
   padding: 0 22px 15px 0;
+}
+
+.btn {
+   vertical-align: top;
 }
 

@@ -147,7 +147,7 @@
    </table>
   </td>
   <td>
-   <input type="submit" value="Search" />
+   <input type="submit" class="btn btn-small" value="Search" />
   </td>
  </tr>
 </table>

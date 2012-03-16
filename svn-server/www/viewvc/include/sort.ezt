@@ -11,7 +11,7 @@
         <option value="date" [is logsort "date"]selected="selected"[end]>Commit date</option>
         <option value="rev" [is logsort "rev"]selected="selected"[end]>Revision</option>
       </select>
-      <input type="submit" value="  Sort  " />
+      <input type="submit" value="  Sort  " class="btn btn-small" />
   </div>
 </form>
 [end]

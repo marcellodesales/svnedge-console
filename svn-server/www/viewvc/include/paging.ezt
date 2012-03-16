@@ -26,7 +26,7 @@
            [define last_count][picklist.count][end]
           [end]
         </select>
-        <input type="submit" value="Go">
+        <input type="submit" class="btn btn-small" value="Go">
         
         [if-any prev_count]<a href="[prev_next_base]log_pagestart=[prev_count]"/><img src="[docroot]/images/back.png" alt="Previous" width="20" height="22" /></a>[end]
         [if-any next_count]<a href="[prev_next_base]log_pagestart=[next_count]"/><img src="[docroot]/images/forward.png" alt="Next" width="20" height="22" /></a>[end]

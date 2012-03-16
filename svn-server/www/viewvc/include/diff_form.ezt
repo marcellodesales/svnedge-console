@@ -13,7 +13,7 @@
 
 <form method="get" action="[diff_select_action]" id="diff_select">
 
-  <table cellpadding="2" cellspacing="0" class="auto">
+  <table cellpadding="2" cellspacing="0" class="table-condensed well">
   <tr>
   <td>&nbsp;</td>
   <td>
@@ -62,7 +62,7 @@
     <option value="c" [is diff_format "c"]selected="selected"[end]>Context Diff</option>
     <option value="s" [is diff_format "s"]selected="selected"[end]>Side by Side</option>
   </select>
-  <input type="submit" value="  Get Diffs  " />
+  <input type="submit" value="  Get Diffs  " class="btn btn-small" />
   </td>
   </tr>
   </table>

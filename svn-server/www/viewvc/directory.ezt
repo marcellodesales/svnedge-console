@@ -19,7 +19,7 @@
             <option [is picklist.count dir_pagestart]selected[end] value="[picklist.count]">Page [picklist.page]: [picklist.start] to [picklist.end]</option>
           [end]
         </select>
-        <input type="submit" value="Go" />
+        <input type="submit" class="btn btn-small" value="Go" />
       </form>
   </td>
 </tr>
