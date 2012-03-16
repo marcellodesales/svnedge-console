@@ -49,14 +49,14 @@
  [is changes.type "add"]
   <tr>
     <td id="l[changes.line_number]">[if-any right.annotate_href]<a href="[right.annotate_href]#l[changes.line_number]">[changes.line_number]</a>[else][changes.line_number][end]</td>
-    <td class="vc_diff_plusminus"><strong style="color: green;">+</strong></td>
+    <td class="vc_diff_plusminus"><strong class="vc_diff_plus">+</strong></td>
     <td class="vc_diff_add">[changes.right]</td>
   </tr>
  [else]
  [is changes.type "remove"]
   <tr>
     <td style="text-decoration: line-through">[changes.line_number]</td>
-    <td class="vc_diff_plusminus"><strong style="color: red;">&ndash;</strong></td>
+    <td class="vc_diff_plusminus"><strong class="vc_diff_minus">&ndash;</strong></td>
     <td class="vc_diff_remove">[changes.left]</td>
   </tr>
  [else]
@@ -64,7 +64,7 @@
   [if-any changes.have_left]
   <tr>
     <td style="text-decoration: line-through">[changes.line_number]</td>
-    <td class="vc_diff_plusminus"><strong style="color: yellow;">&lt;</strong></td>
+    <td class="vc_diff_plusminus"><strong class="vc_diff_right">&lt;</strong></td>
     <td class="vc_diff_changes1">[changes.left]</td>
   </tr>
   [end]
@@ -72,7 +72,7 @@
   [if-any changes.have_right]
   <tr>
     <td id="l[changes.line_number]">[if-any right.annotate_href]<a href="[right.annotate_href]#l[changes.line_number]">[changes.line_number]</a>[else][changes.line_number][end]</td>
-    <td class="vc_diff_plusminus"><strong style="color: yellow;">&gt;</strong></td>
+    <td class="vc_diff_plusminus"><strong class="vc_diff_left">&gt;</strong></td>
     <td class="vc_diff_changes2">[changes.right]</td>
   </tr>[end]
   [end]
@@ -100,22 +100,23 @@
 [if-any change_right][change_right][end]
 </table>
 
+<br/>
 <h4>Diff Legend</h4>
 <table class="table-condensed well" cellspacing="0">
 <tr>
- <td class="vc_diff_plusminus"><strong style="color: red;">&ndash;</strong></td>
+ <td class="vc_diff_plusminus"><strong class="vc_diff_minus">&ndash;</strong></td>
  <td class="vc_diff_remove">Removed lines</td>
 </tr>
 <tr>
- <td class="vc_diff_plusminus"><strong style="color: green;">+</strong></td>
+ <td class="vc_diff_plusminus"><strong class="vc_diff_plus">+</strong></td>
  <td class="vc_diff_add">Added lines</td>
 </tr>
 <tr>
- <td class="vc_diff_plusminus"><strong style="color: yellow;">&lt;</strong></td>
+ <td class="vc_diff_plusminus"><strong class="vc_diff_right">&lt;</strong></td>
  <td class="vc_diff_changes1">Changed lines</td>
 </tr>
 <tr>
- <td class="vc_diff_plusminus"><strong style="color: yellow;">&gt;</strong></td>
+ <td class="vc_diff_plusminus"><strong class="vc_diff_left">&gt;</strong></td>
  <td class="vc_diff_changes2">Changed lines</td>
 </tr>
 </table>

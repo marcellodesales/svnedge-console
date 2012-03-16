@@ -278,13 +278,18 @@ pre, .vc_diff_remove, .vc_diff_add, .vc_diff_changes1, .vc_diff_changes2, .vc_di
   font-family: monospace; 
   white-space: pre;
 }
-.vc_diff_remove { background: rgb(100%,60%,60%); }
-.vc_diff_add { background: rgb(60%,100%,60%); }
-.vc_diff_changes1 { background: rgb(100%,100%,70%); color: rgb(50%,50%,50%); text-decoration: line-through; }
-.vc_diff_changes2 { background: rgb(100%,100%,0%); }
+.vc_diff_remove { background: rgb(219, 132, 132); }
+.vc_diff_add { background: rgb(134, 222, 134); }
+.vc_diff_changes1 { background: rgb(230, 227, 86); color: rgb(50%,50%,50%); text-decoration: line-through; }
+.vc_diff_changes2 { background: rgb(217, 217, 0); }
 .vc_diff_nochange, .vc_diff_binary, .vc_diff_error {
   font-family: sans-serif;
 }
+
+.vc_diff_minus {color: rgb(219, 132, 132)}
+.vc_diff_plus {color: rgb(134, 222, 134) }
+.vc_diff_right {color: rgb(230, 227, 86) }
+.vc_diff_left {color: rgb(217, 217, 0)}
 
 .vc_raw {
     overflow: auto;
