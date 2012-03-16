@@ -244,6 +244,9 @@
     <!-- ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <g:javascript library="jquery-tablesorter"/>
-    <g:javascript library="bootstrap"/>    
+    <g:javascript library="bootstrap"/>
+    <g:javascript library="load-image.min"/>
+    <g:javascript library="bootstrap-image-gallery.min"/>
+
   </body>
 </html>
