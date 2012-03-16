@@ -310,6 +310,10 @@ pre, .vc_diff_remove, .vc_diff_add, .vc_diff_changes1, .vc_diff_changes2, .vc_di
   background-color:#e0e0e0;
 }
 
+td {
+    vertical-align: top;
+}
+
 table.vc_idiff col.content { 
   width: 50%;
 }
