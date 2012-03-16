@@ -19,110 +19,60 @@
 <head>
   <title>CollabNet Subversion Edge <g:message code="admin.page.leftNav.cloudServices"/></title>
   <meta name="layout" content="main"/>
-  <g:javascript>
-  <!--
-  // PRELOADING IMAGES
-    var freeBackupButton = new Image();
-    freeBackupButton.src="${resource(dir:'images/cloud',file:'freeBackupButton.png')}";
-    var freeTrialButton = new Image();
-    freeTrialButton.src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}";
-    var freeBackupButtonPressed = new Image();
-    freeBackupButtonPressed.src="${resource(dir:'images/cloud',file:'freeBackupButton-pressed.png')}";
-    var freeTrialButtonPressed = new Image();
-    freeTrialButtonPressed.src="${resource(dir:'images/cloud',file:'freeTrialButton-pressed.png')}";
-  //-->
-  </g:javascript>
-  <style>
-
-  td.CloudServicesHeading, td.CloudServicesSubHeading {
-    border-collapse: collapse;
-    padding: 3px 20px;
-    font-size: 1.75em;
-    font-weight: bold;
-    color: #69c;
-  }
-
-  td.CloudServicesSubHeading  {
-    font-size: 1.27em;
-    font-weight: normal;
-    color: black;
-    padding: 3px 20px;
-  }
-
-  td.CloudServicesBody {
-    border-spacing: 0;
-    padding: 4px;
-  }
-
-  p#GetStartedPrompt {
-    font-size: 1.50em;
-    vertical-align: top;
-    text-align: left;
-    padding: 4px;
-  }
-
-  table#ServiceList tr td {
-    font-size: 1.50em;
-    vertical-align: middle;
-    text-align: center;
-  }
-
-  p.ServiceDetail {
-    font-size: .96em;
-    vertical-align: top;
-    text-align: center;
-  }
-
-  </style>
 </head>
 
 <g:render template="/server/leftNav"/>
 
 <body>
-<table>
-  <tr>
-    <td class="CloudServicesHeading">
-      <g:message code="setupCloudServices.page.index.title"/>
-    </td>
-  </tr>
-  <tr>
-    <td class="CloudServicesBody">
+  <div class="marketing">
+    <div class="row-fluid">
+    <span class="pull-right"><a target="_blank" href="http://www.open.collab.net/cloud/"><img src="${resource(dir:'images/cloud',file:'ecd-banner.png')}"/></a></span>
+    <h1 style="text-align:left"><g:message code="setupCloudServices.page.index.title"/></h1>
+    <p class="marketing-byline" style="text-align:left"><g:message code="setupCloudServices.page.index.byline"/></p>
+    </div>
 
-      <table id="ServiceList">
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.backup.detail"/></p>
-            <g:link controller="setupCloudServices" action="getStarted"
-                      onmousedown="\$('freeBackup').src=freeBackupButtonPressed.src"
-                      onmouseup="\$('freeBackup').src=freeBackupButton.src">
-              <img id="freeBackup" align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/cloud',file:'freeBackupButton.png')}" border="0"
-                      />
-<!-- 
-              foo<img align="right" alt="${message(code:'setupCloudServices.page.index.button.continue')}" src="${resource(dir:'images/misc',file:'pixel.gif')}" width="252" height="52" border="0"/>
-             -->
-             </g:link>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3"><hr/></td>
-        </tr>
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.migrate"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudMigrate.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
-            <g:link url="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" target="_blank"
-                      onmousedown="\$('freeTrial').src=freeTrialButtonPressed.src"
-                      onmouseup="\$('freeTrial').src=freeTrialButton.src">
-              <img id="freeTrial" align="right" alt="${message(code:'setupCloudServices.page.index.button.moveToCloud')}" src="${resource(dir:'images/cloud',file:'freeTrialButton.png')}" border="0"/>
-            </g:link>
-          </td>
-        </tr>
-      </table>
+    <div class="row-fluid">&nbsp;</div>
 
-    </td>
-  </tr>
-</table>
+    <div class="row-fluid">
+      <div class="span4">
+        <img class="bs-icon" src="${resource(dir:'images/glyphicons',file:'glyphicons_079_podium.png')}">
+        <h2><g:message code="setupCloudServices.page.index.point.1"/></h2>
+        <p><g:message code="setupCloudServices.page.index.body.1"/></p>
+      </div>
+      <div class="span4">
+        <img class="bs-icon" src="${resource(dir:'images/glyphicons',file:'glyphicons_203_lock.png')}">
+        <h2><g:message code="setupCloudServices.page.index.point.2"/></h2>
+        <p><g:message code="setupCloudServices.page.index.body.2"/></p>
+      </div>
+      <div class="span4">
+        <img class="bs-icon" src="${resource(dir:'images/glyphicons',file:'glyphicons_082_roundabout.png')}">
+        <h2><g:message code="setupCloudServices.page.index.point.3"/></h2>
+        <p><g:message code="setupCloudServices.page.index.body.3"/></p>
+      </div>
+    </div>
+
+    <hr/>
+
+    <div class="row-fluid">
+    
+      <div class="span6">
+        <p><img src="${resource(dir:'images/cloud',file:'cloud-backup-logo.png')}" /></p>
+        <p><g:message code="setupCloudServices.page.index.service.backup.detail"/></p>
+        <p><span class="pull-right"><g:link controller="setupCloudServices" action="getStarted"
+           class="btn btn-primary"><g:message code="setupCloudServices.page.index.button.continue"/></g:link></span></p>
+      </div>
+    
+      <div class="span6">
+        <p><img src="${resource(dir:'images/cloud',file:'cloudforge-logo.png')}" /></p>
+        <p><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
+        <p><span class="pull-right"><a target="_blank"
+            href="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" class="btn btn-primary"><g:message code="setupCloudServices.page.index.button.moveToCloud"/></a></span>
+        </p>
+      </div>
+    
+    </div>
+
+  </div>
 
 </body>
 </html>
