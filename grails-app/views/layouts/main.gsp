@@ -50,7 +50,11 @@
             <span class="icon-bar"></span>
           </a>
           <g:link controller="status" class="brand"><img
+               class="hidden-phone"
                src="${resource(dir:'images/masthead',file:'logo.png')}"
+               alt="${message(code:'layout.page.home') }"/><img
+               class="visible-phone"
+               src="${resource(dir:'images/masthead',file:'small-logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
           <div class="nav-collapse">
             <!-- buttons -->

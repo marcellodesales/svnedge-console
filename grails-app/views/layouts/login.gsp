@@ -9,30 +9,17 @@
     <meta name="author" content="CollabNet"/>
 
     <link href="${resource(dir:'css',file:'bootstrap.css')}" rel="stylesheet"/>
-    <style>
+    <style type="text/css">
       body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        padding-top: 60px;
+        padding-bottom: 40px;
       }
     </style>
+
     <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
     <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
 
-    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
-    <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
-    <g:javascript library="jquery-1.7.1.min"/>
-    <g:javascript library="application" />
-    <g:layoutHead />
-
-       <style type="text/css">
-      body {
-        padding-top: 62px;
-        padding-bottom: 40px;
-      }
-      
+    <style type="text/css">
       .container {
       width: 300px;
       }
@@ -65,6 +52,17 @@
         color: #404040;
       }
     </style>    
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
+    <g:javascript library="jquery-1.7.1.min"/>
+    <g:javascript library="application" />
+    <g:layoutHead />
+
     
   </head>
 
@@ -79,7 +77,11 @@
             <span class="icon-bar"></span>
           </a>
           <g:link controller="status" class="brand"><img
+               class="hidden-phone"
                src="${resource(dir:'images/masthead',file:'logo.png')}"
+               alt="${message(code:'layout.page.home') }"/><img
+               class="visible-phone"
+               src="${resource(dir:'images/masthead',file:'small-logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
           <div class="nav-collapse">
             <ul class="nav pull-right">
