@@ -26,7 +26,7 @@
 <body>
   <div class="marketing">
     <div class="row-fluid">
-    <span class="pull-right"><a target="_blank" href="http://www.open.collab.net/cloud/"><img src="${resource(dir:'images/cloud',file:'ecd-banner.png')}"/></a></span>
+    <span class="pull-right"><a target="_blank" href="http://www.open.collab.net/cloud/"><img src="${resource(dir:'images/cloud',file:'subversion-edge-to-the-cloud.png')}"/></a></span>
     <h1 style="text-align:left"><g:message code="setupCloudServices.page.index.title"/></h1>
     <p class="marketing-byline" style="text-align:left"><g:message code="setupCloudServices.page.index.byline"/></p>
     </div>
