@@ -82,7 +82,10 @@
 
     </ul>
     <ul class="nav pull-right">
-    <li id="loggedInUser">[if-any username]Logged in as: [username][end]</li>
+    [if-any username]
+    <li id="loggedInUser"><a href="#">Logged in as: [username]</a></li>
+    <li class="divider-vertical"/>
+    [end]
     <li class="dropdown">
     <a href="#" class="dropdown-toggle" data-toggle="dropdown">Help <b class="caret"></b></a>
         <ul class="dropdown-menu">
