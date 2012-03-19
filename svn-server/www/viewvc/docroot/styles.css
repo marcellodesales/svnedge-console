@@ -331,6 +331,19 @@ table.vc_idiff tbody th {
   text-align:right;
 }
 
+.vc_row_even {
+    background-color: #fefefe;
+}
+
+.vc_row_odd {
+    background-color: #f2f2f2;
+}
+
+tr.vc_row_odd:hover, tr.vc_row_even:hover, tr.vc_row_odd:hover td, tr.vc_row_even:hover td {
+    background-color: #d8eeff;
+}
+
+
 
 /*** Query Form ***/
 .vc_query_form {
