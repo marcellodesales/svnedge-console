@@ -20,7 +20,7 @@
       <g:form method="post">
         <h3><img src="${resource(dir:'images/teamforge',file:'one.png')}" /> <g:message code="setupTeamForge.page.index.action.head.1" /></h3>
         <span class="pull-right"><a class="btn" target="_blank"
-                href="http://www.open.collab.net/products/ctf/"><g:message code="setupTeamForge.page.index.button.discover" /> &raquo;</a>
+                href="http://www.collab.net/SVNE2TeamForge"><g:message code="setupTeamForge.page.index.button.discover" /> &raquo;</a>
         </span>
         <p style="margin-left:35px"><g:message code="setupTeamForge.page.index.action.body.1" /></p>
         <h3><img src="${resource(dir:'images/teamforge',file:'two.png')}" /> <g:message code="setupTeamForge.page.index.action.head.2" /></h3>
