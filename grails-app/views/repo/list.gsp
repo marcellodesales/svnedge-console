@@ -52,11 +52,13 @@
    <g:listViewActionButton action="loadOptions" minSelected="1" maxSelected="1">
      <g:message code="repository.page.list.button.load.label"/>
    </g:listViewActionButton>
-   <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
-                           confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
-                           confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
-     <g:message code="default.button.delete.label"/>
-   </g:listViewActionButton>
+   <g:if test="${!isManaged}">
+     <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
+                             confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
+                             confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
+       <g:message code="default.button.delete.label"/>
+     </g:listViewActionButton>
+   </g:if>
    </g:ifAnyGranted>
   </div>
 </g:if>

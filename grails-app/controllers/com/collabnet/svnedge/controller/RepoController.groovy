@@ -63,6 +63,14 @@ class RepoController {
         ControllerUtil.setDefaultSort(params, "name")
         def server = Server.getServer()
         def repoList
+        // in Managed Mode, only super user can access the repo listing
+        if (server.mode == ServerMode.MANAGED &&
+                !authenticateService.ifAnyGranted("ROLE_ADMIN")) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(controller: "status")
+            return
+        }
+
         if (server.mode == ServerMode.REPLICA) {
             if (params.sort == "name") {
                 repoList = ReplicatedRepository.listSortedByName(params)
@@ -74,7 +82,9 @@ class RepoController {
         }
         [repositoryInstanceList: repoList,
                 repositoryInstanceTotal: Repository.count(),
-                server: server, isReplica: server.mode == ServerMode.REPLICA]
+                server: server, isReplica: server.mode == ServerMode.REPLICA,
+                isManaged: server.mode == ServerMode.MANAGED
+        ]
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -700,6 +710,13 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def deleteMultiple = {
+        // in Managed Mode, local delete is prohibited
+        if (Server.server.mode == ServerMode.MANAGED) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(action: "list")
+            return
+        }
+
         ControllerUtil.getListViewSelectedIds(params).each {
             def repo = Repository.get(it)
             if (repo) {

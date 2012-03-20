@@ -99,7 +99,7 @@ class ApplicationFilters {
                     return false
                 }
                 if (isManagedMode &&
-                        (["repo", "user", "role", "setupTeamForge"].contains(controllerName) ||
+                        (["user", "role", "setupTeamForge"].contains(controllerName) ||
                          ("server" == controllerName && "editAuthentication" == actionName)) ||
                         (isIntegrationServer && "job" == controllerName)) {
                     flash.error = app.getMainContext().getMessage(
@@ -116,11 +116,12 @@ class ApplicationFilters {
                 boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
                 boolean isManagedMode = (isIntegrationServer
                         || ServerMode.REPLICA == Server.getServer().mode)
+                boolean isSuperUser = authenticateService.ifAnyGranted("ROLE_ADMIN")
                 boolean isUserAdmin = authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_USERS")
 
                 // default list of features for all users
                 def featureList = []
-                if (!isManagedMode) {
+                if (!isManagedMode || isSuperUser) {
                     featureList << "repo"
                 }
 
