@@ -6,6 +6,14 @@
   padding: 0px 8px;
 }
 
+.navbar {
+  color: #CCCCCC;
+  font-weight: bold;
+}
+.navbar .nav > li > a {
+  color: #CCCCCC;
+}
+
 .alert {
   padding-left: 2em;
   background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;

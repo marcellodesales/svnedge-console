@@ -153,7 +153,7 @@
             <g:if test="${cloudEnabled}">
               <div class="span3" style="vertical-align: top; text-align: center" id="cloudInfo">
                 <a target="_blank" href="${helpBaseUrl}/index.jsp?topic=/csvn/action/movetocncloud.html"><img 
-                        width="200" height="179" alt="" src="${resource(dir:'images/cloud',file:'cloud-vault.png')}" border="0"/><br/>
+                        width="200" height="152" alt="" src="${resource(dir:'images/cloud',file:'subversion-edge-to-the-cloud.png')}" border="0"/><br/>
                 <g:message code="repository.page.bkupSchedule.help.link.label"/></a>
               </div>
             </g:if>
