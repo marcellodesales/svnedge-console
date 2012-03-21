@@ -41,7 +41,9 @@
 <g:if test="${adminView}">
   <div class="pull-right">
   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-   <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+    <g:if test="${!isManaged}">
+      <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
+    </g:if>
    <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
   </g:ifAnyGranted>
    <g:listViewActionButton action="show" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
@@ -99,7 +101,12 @@
         },
         {"sTitle": "${message(code:'repository.page.list.name')}",
          "fnRender": function ( oObj, sVal ) {
+           <g:if test="${isManaged}">
+           var template = 'REPO';
+           </g:if>
+           <g:else>
            var template = '<a href="${server.viewvcURL("REPO")}" target="_blank">REPO</a>';
+           </g:else>
            return template.replace(/REPO/g, sVal);
          }
         },

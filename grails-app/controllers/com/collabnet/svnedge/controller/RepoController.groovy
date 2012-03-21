@@ -767,6 +767,12 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def create = {
+        // in Managed Mode, local create is prohibited
+        if (Server.server.mode == ServerMode.MANAGED) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(action: "list")
+            return
+        }
         def repo = request.repo
         if (!repo) {
             repo = new Repository()
@@ -798,6 +804,12 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def save = {
+        // in Managed Mode, local create is prohibited
+        if (Server.server.mode == ServerMode.MANAGED) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(action: "list")
+            return
+        }
         def repo = new Repository(params)
         def success = false
         repo.validate()
