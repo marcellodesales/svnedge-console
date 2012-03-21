@@ -405,36 +405,94 @@ class RepoController {
         } else {
             DumpBean cmd = flash.dumpBean
             if (!cmd) {
-                def backups = svnRepoService.retrieveScheduledBackups(repo)
-                if (backups) {
-                    cmd = backups[0]
-                } else {
-                    params.type = 'none'
-                    cmd = new DumpBean()
-                    bindData(cmd, params)
-                }
+                params.type = 'none'
+                cmd = new DumpBean()
+                bindData(cmd, params)
             }
             model["dump"] = cmd
+            
+            def backups = svnRepoService.retrieveScheduledBackups(repo)
+            if (backups) {
+                def repoBackupJobList = []
+                for (b in backups) {
+                    def job = populateJobMap(b)
+                    job.repoId = repo.id
+                    job.repoName = repo.name
+                    job.cloudName = repo.cloudName
+                    repoBackupJobList << job
+                }
+                model['repoBackupJobList'] = repoBackupJobList
+            }
         }
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         model['cloudRegistrationRequired'] = !cloudConfig || !cloudConfig.domain
         model['cloudEnabled'] = cloudConfig?.enabled
         return model
     }
+    
+    
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def addBkupSchedule = { DumpBean cmd ->
+        params.remove('_action_addBkupSchedule')
+        updateBkupSchedule(cmd)
+    }
+
+    private def parseCombinedIds() {
+        def idList = []
+        def combinedIdList = ControllerUtil.getListViewSelectedIds(params)
+        if (combinedIdList) {
+            for (id in combinedIdList) {
+                int delim = id.indexOf('__')
+                if (delim > 0) {
+                    idList << [id.substring(0, delim), id.substring(delim + 2)]
+                } else {
+                    idList << [id, null]
+                }
+            }
+        }
+        return idList
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def deleteBkupSchedule = {
+        params.remove('_action_deleteBkupSchedule')
+        def idList = parseCombinedIds()
+        if (idList) {
+            idList.each {
+                def repoId = it[0]
+                def jobId = it[1]
+                if (!jobId) {
+                    flash.error = message(code: 'repository.action.job.notFound')
+                    return
+                }
+                svnRepoService.deleteScheduledJob(jobId)
+            }
+        }
+        flash.message = message(code: 'repository.action.job.deleted')
+        bkupRedirect()
+    }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def updateBkupSchedule = { DumpBean cmd ->
         params.remove('_action_updateBkupSchedule')
         // handle single or multiple repo backups with same action
-        def repoIdList = (params.id) ? [params.id] : ControllerUtil.getListViewSelectedIds(params)
+        def repoIdList = parseCombinedIds()
+        if (!repoIdList) {
+            repoIdList = [[params.id, null]]
+        }
         def type = params.type
+        if (type == 'dump'  && cmd.deltas) {
+            type = 'dump_delta'
+        }
         try {
             def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
             def projects = (type == "cloud" && 
                             cloudConfig && cloudConfig.domain) ?
                 cloudServicesRemoteClientService.listProjects() : null
             repoIdList.each {
-                Repository repo = Repository.get(it)
+                def repoId = it[0]
+                def jobId = it[1]
+                Repository repo = Repository.get(repoId)
                 if (!repo) {
                     flash.error = message(code: 'repository.action.not.found',
                             args: [params.id])
@@ -451,13 +509,12 @@ class RepoController {
 
                     if (confirmCloudProject(repo, projects)) {
                         cmd.cloud = true
-                        scheduleBackup(cmd, repo, type)
+                        scheduleBackup(cmd, repo, type, jobId)
                     }
                 } else if (type == "none") {
-                    svnRepoService.clearScheduledDumps(repo)
-                    flash.message = message(code: 'repository.action.updateBkupSchedule.none')
+                    flash.error = message(code: 'repository.action.updateBkupSchedule.none')
                 } else {
-                    scheduleBackup(cmd, repo, type)
+                    scheduleBackup(cmd, repo, type, jobId)
                 }
             }
         } catch (QuotaCloudServicesException quota) {
@@ -466,17 +523,13 @@ class RepoController {
             flash.unfiltered_error = message(code: auth.message,
                     args: [1, createLink(controller: 'setupCloudServices', action: 'index')])
         }
-
-        // redirect based on origin (single repo or multiple-repo backup)
+        bkupRedirect()
+    }
+    
+    /**  redirect based on origin (single repo or multiple-repo backup) */
+    private void bkupRedirect() {
         if (params.id) {
-            if (flash.error || cmd.errors) {
-                redirect(action: 'bkupSchedule', params: params)
-                return
-            }
-            else {
-                redirect(action: 'dumpFileList', id: params.id)
-                return
-            }
+            redirect(action: 'bkupSchedule', params: params)
         }
         else {
             redirect(action: 'bkupScheduleMultiple', params: params)
@@ -535,7 +588,7 @@ class RepoController {
         return false
     }
 
-    private void scheduleBackup(DumpBean cmd, Repository repo, def type) {
+    private void scheduleBackup(DumpBean cmd, Repository repo, def type, def jobId) {
         try {
             cmd.userLocale = request.locale
             cmd.hotcopy = (type == 'hotcopy')
@@ -546,7 +599,7 @@ class RepoController {
                 flash.error = "There were errors"
             }
             else {
-                svnRepoService.scheduleDump(cmd, repo)
+                svnRepoService.scheduleDump(cmd, repo, null, jobId)
                 flash.message = message(code: 'repository.action.updateBkupSchedule.success')
             }
         }
@@ -572,24 +625,36 @@ class RepoController {
         def listParams = [:]
         listParams.sort = "name"
         listParams.order = (params.sort == "repoName") ? params.order : null
+        def backups = svnRepoService.retrieveScheduledBackups()
+        def jobMap = [:]
+        if (backups) {
+            for (b in backups) {
+                def repoId = b.repoId
+                def repoJobs = jobMap[repoId]
+                if (!repoJobs) {
+                    repoJobs = []
+                    jobMap[repoId] = repoJobs
+                }
+                repoJobs << b
+            }
+        }
         Repository.list(listParams).each {
             def job = [:]
             job.repoId = it.id
             job.repoName = it.name
             job.cloudName = it.cloudName
-            def backups = svnRepoService.retrieveScheduledBackups(it)
-            if (backups) {
-                DumpBean b = (DumpBean) backups[0]
-                job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
-                job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
-                    message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
-                        message(code: "repository.page.bkupSchedule.type.hotcopy") :
-                        message(code: "repository.page.bkupSchedule.type.fullDump")
-                job.keepNumber = b.numberToKeep
-                job.schedule = b.schedule
-                job.scheduleFormatted = formatSchedule(b.schedule)
-            }
             repoBackupJobList << job
+            
+            def currentJobs = jobMap[it.id]
+            if (currentJobs) {
+                for (b in currentJobs) {
+                    job = populateJobMap(b)
+                    job.repoId = it.id
+                    job.repoName = it.name
+                    job.cloudName = it.cloudName
+                    repoBackupJobList << job
+                }
+            }
         }
 
         // sort the resulting job Collection according to params if needed
@@ -607,6 +672,21 @@ class RepoController {
         model['cloudRegistrationRequired'] =  !cloudConfig || !cloudConfig.domain
         model['cloudEnabled'] = cloudConfig?.enabled
         return model
+    }
+    
+    private def populateJobMap(Map b) {
+        def job = [:]
+        job.putAll(b)
+        job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
+        job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
+            message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
+                message(code: "repository.page.bkupSchedule.type.hotcopy") :
+                message(code: "repository.page.bkupSchedule.type.fullDump")
+        job.keepNumber = b.numberToKeep
+        DumpBean db = DumpBean.fromMap(b)
+        job.schedule = db.schedule
+        job.scheduleFormatted = formatSchedule(db.schedule)
+        return job
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])

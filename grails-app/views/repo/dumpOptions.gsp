@@ -38,6 +38,7 @@
       <input type="hidden" name="id" value="${repositoryInstance?.id}" />
       <g:propTextField bean="${dump}" field="revisionRange" prefix="repository.page.dump"/>
       <g:propCheckBox bean="${dump}" field="incremental" prefix="repository.page.dump"/>
+      <g:propCheckBox bean="${dump}" field="deltas" prefix="repository.page.dump"/>
       <g:propCheckBox bean="${dump}" field="compress" prefix="repository.page.dump"/>
       <g:propCheckBox bean="${dump}" field="filter" prefix="repository.page.dump"/>
       <div id="filterOptions">

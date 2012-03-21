@@ -27,23 +27,17 @@
           for="type"><g:message code="repository.page.bkupSchedule.type"/></label>
       <div class="controls">
               <g:set var="isCloud" value="${params.type == 'cloud' || dump.cloud}"/>
-              <g:set var="isDumpDelta" value="${params.type == 'dump_delta' || dump.deltas}"/>
               <g:set var="isHotcopy" value="${params.type == 'hotcopy' || dump.hotcopy}"/>
-              <g:set var="isNone" value="${params.type == 'none'}"/>
               <select id="type" name="type" class="scheduleElement">
                 <g:if test="${cloudEnabled}">
                   <option value="cloud" <g:if test="${isCloud}">selected="selected"</g:if>><g:message
                           code="repository.page.bkupSchedule.type.cloud"/></option>
                 </g:if>
                 <option value="dump" <g:if
-                        test="${!isCloud && !isDumpDelta && !isHotcopy && !isNone}">selected="selected"</g:if>><g:message
+                        test="${!isCloud && !isHotcopy}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.fullDump"/></option>
-                <option value="dump_delta" <g:if test="${isDumpDelta}">selected="selected"</g:if>><g:message
-                        code="repository.page.bkupSchedule.type.fullDumpDelta"/></option>
                 <option value="hotcopy" <g:if test="${isHotcopy}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.hotcopy"/></option>
-                <option value="none" <g:if test="${isNone}">selected="selected"</g:if>><g:message
-                        code="repository.page.bkupSchedule.type.none"/></option>
               </select>
               <g:if test="${cloudRegistrationRequired}">
                 <span id="cloudRegister" class="help-inline" style="display: none;">
@@ -127,6 +121,7 @@
         <div class="help-block"><g:message code="repository.page.bkupSchedule.numberToKeep.all"/></div>
       </div>
     </div>
+    <g:propCheckBox bean="${dump}" field="deltas" prefix="repository.page.bkupSchedule" groupId="deltasRow"/>
 
     <g:if test="${repositoryInstance && (flash['nameAdjustmentRequired' + repositoryInstance.id] || repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name)}">
     <div class="control-group required-field" id="cloudNameRow">
@@ -143,12 +138,6 @@
     </div>
     </g:if>
     
-    <g:if test="${repositoryInstance}">
-      <div class="form-actions">
-        <g:actionSubmit action="updateBkupSchedule" value="${message(code:'default.button.save.label')}"
-                            class="btn btn-primary"/>
-      </div>
-    </g:if>
   </div>
             <g:if test="${cloudEnabled}">
               <div class="span3" style="vertical-align: top; text-align: center" id="cloudInfo">
@@ -160,7 +149,6 @@
 </div>
 
           
-        <g:if test="${!repositoryInstance}">
           <br/>
           <table id="datatable" class="table table-striped table-bordered table-condensed"></table>
           <script type="text/javascript">
@@ -170,11 +158,13 @@
                 <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
                   <g:set var="cloudActivationRequired" value="${true}"/>
                 </g:if>
-                <g:if test="${flash['nameAdjustmentRequired' + job.repoId]}">
+                <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + job.repoId]}">
                   <g:set var="cloudNameChangeRequired" value="${true}"/>
-                </g:if>  
-                ['${job.repoId}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
+                </g:if>
+                ['${job.repoId}__${job.id}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
+                <g:if test="${!repositoryInstance}">
                   '${job.repoId}|${job.repoName}|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
+                </g:if>
                   '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
                   '${job.scheduleFormatted}',
                   '${job.keepNumber == 0 ? "ALL" : job.keepNumber}'
@@ -183,34 +173,55 @@
               </g:each>
             ];
           </script>
-         
+
           <div class="pull-right">
-            <g:listViewActionButton action="updateBkupSchedule" minSelected="1" primary="true">
-              <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
+          <g:if test="${repositoryInstance}">
+            <g:listViewActionButton action="addBkupSchedule" minSelected="0" maxSelected="0">
+              <g:message code="repository.page.bkupSchedule.job.new"/>
+            </g:listViewActionButton>
+            <g:listViewActionButton action="updateBkupSchedule" minSelected="1" maxSelected="1">
+              <g:message code="repository.page.bkupSchedule.job.replace"/>
+            </g:listViewActionButton>
+          </g:if>
+          <g:else>
+            <g:listViewActionButton action="addBkupSchedule" minSelected="1">
+              <g:message code="repository.page.bkupSchedule.job.new"/>
+            </g:listViewActionButton>
+            <g:listViewActionButton action="updateBkupSchedule" minSelected="1">
+              <g:message code="repository.page.bkupSchedule.job.replace"/>
+            </g:listViewActionButton>
+          </g:else>
+            <g:listViewActionButton action="deleteBkupSchedule" minSelected="1">
+              <g:message code="repository.page.bkupSchedule.job.delete"/>
             </g:listViewActionButton>
           </div>
-        </g:if>
-
   
 </g:form>
 <g:javascript>
   function typeHandler() {
     var typeSelect = $('#type');
     var typeSelectValue = typeSelect.val();
-    if (typeSelectValue == 'dump' || typeSelectValue == 'dump_delta' ||
+    if (typeSelectValue == 'dump' ||
         typeSelectValue == 'hotcopy') {
       $('#whenRow').show();
       $('#keepRow').show();
       $('#cloudRegister').hide();
       $('#cloudNameRow').hide;
+      if (typeSelectValue == 'dump') {
+        $('#deltasRow').show();
+      } else {
+        $('#deltasRow').hide();
+      }
     } else if (typeSelectValue == 'cloud') {
       $('#whenRow').show();
       $('#keepRow').hide();
+      $('#deltasRow').hide();
       $('#cloudRegister').show();
       $('#cloudNameRow').show();
     } else {
       $('#whenRow').hide();
       $('#keepRow').hide();
+      $('#deltasRow').hide();
       $('#cloudRegister').hide();
       $('#cloudNameRow').hide();
     }
@@ -270,7 +281,14 @@
     // after this, disallow picking up changes from the existing jobs
     allowScheduleFormStateClobber = false
 
-    $("#type").val(state.type);
+    var type = state.type;
+    if (type == 'dump_delta') {
+        type = 'dump';
+        $('#deltas').attr('checked', true);
+    } else {
+        $('#deltas').attr('checked', false);
+    }
+    $("#type").val(type);
 
     var hour = state.scheduleHour.length == 1 ? '0' + state.scheduleHour : '' + state.scheduleHour;
     $('#startHour').val(hour);
@@ -315,7 +333,7 @@
         },
         "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
-        "sEmptyTable": "${(isReplica) ? message(code:'repository.page.list.replica.noRepos') : message(code:'repository.page.list.noRepos')}",
+        "sEmptyTable": "${message(code:'repository.page.bkupSchedule.noJobs')}",
         "sInfo": "${message(code:'datatable.showing')}",
         "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
@@ -335,6 +353,7 @@
            return expanded;
         }
       },
+    <g:if test="${!repositoryInstance}">
       {"sTitle": "${message(code:'repository.page.bkupSchedule.job.repoName')}",
        "fnRender": function(oObj, sVal) {
           repoId = sVal.split("|")[0]
@@ -363,6 +382,7 @@
           return out
        }
       },
+    </g:if>
       {"sTitle": "${message(code:'repository.page.bkupSchedule.job.type')}",
        "fnRender": function(oObj, sVal) {
           out = sVal.split("|")[0]

@@ -251,6 +251,6 @@
     <g:javascript library="bootstrap"/>
     <g:javascript library="load-image.min"/>
     <g:javascript library="bootstrap-image-gallery.min"/>
-
+    <g:pageProperty name="page.bottomOfBody" />
   </body>
 </html>

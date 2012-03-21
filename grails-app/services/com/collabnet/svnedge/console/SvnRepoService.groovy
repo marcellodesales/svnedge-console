@@ -702,27 +702,38 @@ class SvnRepoService extends AbstractSvnEdgeService {
         throw new FileNotFoundException(filename)
     }
 
-    List retrieveScheduledBackups(repo) {
+    List retrieveScheduledBackups(repo = null) {
         List backups = []
-        def tName = "RepoDump-${repo.name}"
-        def tGroup = "Backup"
-        def trigger = jobsAdminService.getTrigger(tName, tGroup)
-        if (trigger) {
-            DumpBean bean = DumpBean.fromMap(trigger.jobDataMap)
-            backups << bean
+        def tNamePrefix = "RepoDump-${repo?.name}-"
+        def triggers = jobsAdminService
+                .getTriggers(RepoDumpJob.jobName, RepoDumpJob.group)
+        for (trigger in triggers) {
+            if ((!repo && trigger.group == BACKUP_TRIGGER_GROUP) || 
+                    trigger.name.startsWith(tNamePrefix)) {
+                backups << trigger.jobDataMap
+            }
         }
         return backups
     }
 
+    public static final def BACKUP_TYPES = ['hotcopy', 'fullDump', 'cloud']
+    
     /**
      * method to schedule a RepoDump quartz job
      * @param bean the parameters for the dump job
      * @param repo the repo ni question
      * @return the filename the dumpfile is expected to have
      */
-    String scheduleDump(DumpBean bean, repo, Integer userId = null) {
-        
-        def tName = "RepoDump-${repo.name}"
+    String scheduleDump(DumpBean bean, repo, Integer userId = null, 
+            String tName = null) {
+
+        if (!tName) {
+            long jobId = generateJobId(repo)
+            tName = "RepoDump-${repo.name}-" + 
+                (bean.cloud ? BACKUP_TYPES[2] : 
+                (bean.hotcopy ? BACKUP_TYPES[0] : BACKUP_TYPES[1])) + 
+                '-' + jobId
+        }
         def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
         def trigger
@@ -771,8 +782,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         // data for reporting status to quartz job listeners
         File progressFile = prepareProgressLogFile(repo.name)
         def jobDataMap =
-        [id: (bean.cloud ? "cloudSync-" : (bean.hotcopy ? "repoHotcopy-" : "repoDump-")) +
-                repo.name, repoId: repo.id,
+        [id: tName, repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description",
                         [repo.name], bean.userLocale),
                 progressLogFile: progressFile.absolutePath,
@@ -796,6 +806,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return bean.cloud ? null : dumpFilename(bean, repo)
     }
 
+    private long generateJobId(repo) {
+        return System.currentTimeMillis()
+    }
+    
     File prepareProgressLogFile(repoName) {
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
         return new File(tempLogDir, getProgressLogFileName(repoName))
@@ -1248,6 +1262,13 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
 
     }
+    
+    /**
+     * Removes the given trigger
+     */
+    def deleteScheduledJob(jobId) {
+        jobsAdminService.removeTrigger(jobId, BACKUP_TRIGGER_GROUP)
+    }    
 
     /**
      * Method to invoke "svnadmin hotcopy", verify the result, and create

@@ -32,8 +32,10 @@
 
     <g:render template="backupScheduleForm"/>
 
+    </body>
+<content tag="bottomOfBody">
     <g:javascript library="listView"/>
     <g:javascript library="jquery.dataTables.min"/>
     <g:javascript library="DT_bootstrap"/>
-    </body>
+</content>
 </html>
