@@ -19,7 +19,8 @@ package com.collabnet.svnedge.integration.security
 
 import java.net.ConnectException;
 
-import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.CtfServer;
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConnectionException;
@@ -33,10 +34,13 @@ import org.springframework.security.Authentication
 import org.springframework.security.AuthenticationException
 import org.springframework.security.BadCredentialsException
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
+import com.collabnet.svnedge.admin.RepoDiscoveryJob
+import org.apache.commons.logging.LogFactory
 
 class CtfAuthenticationProvider implements AuthenticationProvider {
 
     boolean transactional = true
+    def log = LogFactory.getLog(CtfAuthenticationProvider.class)
 
     // Because of the way we're defining this as a bean in resources.groovy,
     // any injected beans need to be set explicitly there
@@ -50,15 +54,31 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
             gUser = ctfRemoteClientService.authenticateUser(
                 authentication.getPrincipal(), authentication.getCredentials())
 
+            // if ROLE_ADMIN is granted and mode is MANAGED, kick off async repo discovery
+            // if ROLE_ADMIN is not granted, throw auth exception
+            if (Server.server.mode == ServerMode.MANAGED) {
+                if (gUser.authorities.find { it.authority == "ROLE_ADMIN" }) {
+                    RepoDiscoveryJob.triggerNow([:])
+                }
+                else {
+                    def msg = "The TeamForge account '" +
+                            authentication.getPrincipal() + "' does not have access to this system."
+                    throw new CtfAuthenticationException(msg)
+                }
+            }
+
         } catch (CtfServiceUnavailableException connectivityError) {
+            log.warn(connectivityError.message)
             throw new ProviderNotFoundException(connectivityError.getMessage())
 
         } catch (CtfAuthenticationException connectivityError) {
+            log.warn(connectivityError.message)
             throw new BadCredentialsException(connectivityError.getMessage())
         
         } catch (Exception otherError) {
             def otherMsg = "Othe problem occurred while contacting the " +
                 "teamforge manager: " + otherError.getMessage()
+            log.warn(otherMsg)
             throw new BadCredentialsException(otherMsg)
         }
         if (!gUser) {

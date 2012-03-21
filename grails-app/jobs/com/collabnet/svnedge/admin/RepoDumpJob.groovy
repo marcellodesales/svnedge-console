@@ -43,9 +43,7 @@ class RepoDumpJob {
 
     // the Job execute method
     def execute(context) {
-        if (Server.getServer().mode == ServerMode.STANDALONE) {
-            dumpOrBackup(context)
-        }
+        dumpOrBackup(context)
     }
     
     private void dumpOrBackup(context) {
