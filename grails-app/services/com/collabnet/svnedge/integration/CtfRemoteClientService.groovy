@@ -17,32 +17,24 @@
  */
 package com.collabnet.svnedge.integration
 
-import java.text.SimpleDateFormat
-import java.util.Map;
-import org.springframework.security.GrantedAuthority
-import org.springframework.security.GrantedAuthorityImpl
-import org.codehaus.groovy.grails.commons.ConfigurationHolder;
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
-import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
-import grails.util.GrailsUtil
-import org.apache.axis.AxisFault
-import com.collabnet.svnedge.console.AbstractSvnEdgeService;
+import com.collabnet.svnedge.console.AbstractSvnEdgeService
+import com.collabnet.svnedge.domain.NetworkConfiguration
 import com.collabnet.svnedge.domain.User
-import com.collabnet.svnedge.domain.integration.ApprovalState 
-import com.collabnet.svnedge.domain.integration.CtfServer 
-import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.domain.integration.ApprovalState
+import com.collabnet.svnedge.domain.integration.CtfServer
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+import com.collabnet.svnedge.net.HttpProxyAuth
 import com.collabnet.svnedge.util.SoapClient
 import com.collabnet.svnedge.util.SvnEdgeCertHostnameVerifier
-import com.collabnet.svnedge.console.AbstractSvnEdgeService;
-
-import java.net.NoRouteToHostException
-import java.net.UnknownHostException
-import java.net.MalformedURLException
+import grails.util.GrailsUtil
 import java.security.cert.CertificateException
-import javax.net.ssl.SSLHandshakeException
 import javax.net.ssl.HttpsURLConnection
-import com.collabnet.svnedge.domain.NetworkConfiguration
-import com.collabnet.svnedge.net.HttpProxyAuth
+import javax.net.ssl.SSLHandshakeException
+import org.apache.axis.AxisFault
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUser
+import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
+import org.springframework.security.GrantedAuthority
+import org.springframework.security.GrantedAuthorityImpl
 
 /**
  * CTFWsClientService defines the service used by SVNEdge to communicate with 
@@ -388,6 +380,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         User u = new User(username: username, 
             realUserName: ctfUser.fullName,
             email: ctfUser.email)
+        // create a pseudo integer id for the local pseudo user
+        // which is needed for file edit locks
+        u.id = (Math.random() * 1000).toInteger()
         // not sure if this is needed on a new object, but we don't want
         // the data saved to the db, so adding it for safety
         u.discard()

@@ -39,7 +39,7 @@
 	    },
 	    {"sTitle": "${message(code: 'logs.page.list.column.name')}",
 	     "fnRender": function (oObj, sVal) {
-          var template = '<g:link action="${linkAction}" params="[fileName : 'FILENAME']">FILENAME</g:link>';
+          var template = '<g:link action="${linkAction}" id="${params.id}" params="[filename : 'FILENAME']">FILENAME</g:link>';
           return template.replace(/FILENAME/g, sVal);
        }
 	    },

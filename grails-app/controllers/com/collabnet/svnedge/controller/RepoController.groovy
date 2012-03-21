@@ -17,28 +17,19 @@
  */
 package com.collabnet.svnedge.controller
 
-import java.text.SimpleDateFormat
-
-import com.collabnet.svnedge.ValidationException;
+import com.collabnet.svnedge.ValidationException
 import com.collabnet.svnedge.console.DumpBean
-import com.collabnet.svnedge.domain.RepoTemplate;
-import com.collabnet.svnedge.domain.Repository
-import com.collabnet.svnedge.domain.Server
-import com.collabnet.svnedge.domain.ServerMode;
-import com.collabnet.svnedge.domain.User
-import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
-import com.collabnet.svnedge.domain.integration.ReplicatedRepository
-import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
-import com.collabnet.svnedge.integration.InvalidNameCloudServicesException;
-import com.collabnet.svnedge.integration.QuotaCloudServicesException;
-
-import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.console.SchedulerBean
+import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
+import com.collabnet.svnedge.integration.AuthenticationCloudServicesException
+import com.collabnet.svnedge.integration.InvalidNameCloudServicesException
+import com.collabnet.svnedge.integration.QuotaCloudServicesException
 import com.collabnet.svnedge.util.ControllerUtil
 import com.collabnet.svnedge.util.ServletContextSessionLock
-
 import org.apache.commons.io.FileUtils
-
+import org.codehaus.groovy.grails.plugins.springsecurity.Secured
+import com.collabnet.svnedge.domain.*
 
 @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
 class RepoController {
@@ -987,6 +978,12 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def editAuthorization = {
+        // in Managed Mode, local edit of access rules is prohibited
+        if (Server.server.mode == ServerMode.MANAGED) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(action: "list")
+            return
+        }
         flash.clear()
         ServletContextSessionLock lock = 
                 ServletContextSessionLock.obtain(session, ACCESS_RULES_LOCK_KEY)
@@ -1006,7 +1003,12 @@ class RepoController {
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def saveAuthorization = { AuthzRulesCommand cmd ->
-        
+        // in Managed Mode, local edit of access rules is prohibited
+        if (Server.server.mode == ServerMode.MANAGED) {
+            flash.error = message(code: "filter.probihited.mode.managed")
+            redirect(action: "list")
+            return
+        }
         ServletContextSessionLock existingLock =
                 ServletContextSessionLock.peek(session, ACCESS_RULES_LOCK_KEY)
         if (!existingLock) {

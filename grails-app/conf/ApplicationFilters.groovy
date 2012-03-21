@@ -19,7 +19,6 @@
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
 import grails.util.GrailsUtil
-
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
@@ -99,7 +98,7 @@ class ApplicationFilters {
                     return false
                 }
                 if (isManagedMode &&
-                        (["user", "role", "setupTeamForge"].contains(controllerName) ||
+                        (["user", "role", "setupTeamForge", "repoTemplate"].contains(controllerName) ||
                          ("server" == controllerName && "editAuthentication" == actionName)) ||
                         (isIntegrationServer && "job" == controllerName)) {
                     flash.error = app.getMainContext().getMessage(
