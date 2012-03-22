@@ -17,12 +17,10 @@
     <g:link controller="statistics" action="index"><g:message code="statistics.main.icon" /></g:link>
   </li>
 
-  <g:if test="${!isIntegrationServer}">
-    <li<g:if test="${controllerName == 'job'}"> class="active"</g:if>>
-      <g:link controller="job" action="index"><g:message code="job.main.icon" /></g:link>
-    </li>  
-  </g:if>
-  
+  <li<g:if test="${controllerName == 'job'}"> class="active"</g:if>>
+    <g:link controller="job" action="index"><g:message code="job.main.icon" /></g:link>
+  </li>
+
   <li class="nav-header"><g:message code="admin.page.leftNav.configuration"/></li>
 
   <li<g:if test="${controllerName == 'server' && (actionName == 'edit' || (actionName == 'update' && params.view == 'edit'))}"> class="active"</g:if>>

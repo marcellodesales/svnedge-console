@@ -99,8 +99,7 @@ class ApplicationFilters {
                 }
                 if (isManagedMode &&
                         (["user", "role", "setupTeamForge", "repoTemplate"].contains(controllerName) ||
-                         ("server" == controllerName && "editAuthentication" == actionName)) ||
-                        (isIntegrationServer && "job" == controllerName)) {
+                         ("server" == controllerName && "editAuthentication" == actionName))) {
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.managed", null,
                             Locale.getDefault())
