@@ -408,7 +408,7 @@ class RepoController {
                 for (b in backups) {
                     def job = populateJobMap(b)
                     job.repoId = repo.id
-                    job.repoName = repo.name
+                    job.repoName = repo.name.encodeAsHTML()
                     job.cloudName = repo.cloudName
                     repoBackupJobList << job
                 }
@@ -632,7 +632,8 @@ class RepoController {
         Repository.list(listParams).each {
             def job = [:]
             job.repoId = it.id
-            job.repoName = it.name
+            job.repoName = it.name.encodeAsHTML() + ' ' +
+                    message(code: 'repository.page.bkupSchedule.type.new')
             job.cloudName = it.cloudName
             repoBackupJobList << job
             
@@ -640,7 +641,6 @@ class RepoController {
             if (currentJobs) {
                 for (b in currentJobs) {
                     job = populateJobMap(b)
-                    job.repoId = it.id
                     job.repoName = it.name
                     job.cloudName = it.cloudName
                     repoBackupJobList << job

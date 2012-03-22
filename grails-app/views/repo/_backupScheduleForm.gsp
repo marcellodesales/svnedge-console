@@ -150,6 +150,9 @@
 
           
           <br/>
+          <g:if test="${!repositoryInstance}">
+          <div class="alert alert-info"><g:message code="repository.page.bkupSchedule.multipleIntructions"/></div>
+          </g:if>
           <table id="datatable" class="table table-striped table-bordered table-condensed"></table>
           <script type="text/javascript">
             /* Data set */
@@ -163,7 +166,7 @@
                 </g:if>
                 ['${job.repoId}__${job.id}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
                 <g:if test="${!repositoryInstance}">
-                  '${job.repoId}|${job.repoName}|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
+                  '${job.repoId}|<%=job.repoName%>|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
                 </g:if>
                   '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
                   '${job.scheduleFormatted}',
@@ -184,11 +187,8 @@
             </g:listViewActionButton>
           </g:if>
           <g:else>
-            <g:listViewActionButton action="addBkupSchedule" minSelected="1">
-              <g:message code="repository.page.bkupSchedule.job.new"/>
-            </g:listViewActionButton>
             <g:listViewActionButton action="updateBkupSchedule" minSelected="1">
-              <g:message code="repository.page.bkupSchedule.job.replace"/>
+              <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
             </g:listViewActionButton>
           </g:else>
             <g:listViewActionButton action="deleteBkupSchedule" minSelected="1">
@@ -404,7 +404,7 @@
     // limit filter to column 1 only (the repo name)
     filterElement= $('#datatable_filter').find("input")
     filterElement.keyup( function () {
-        dt.fnFilter(filterElement.attr("value"), 1);
+        dt.fnFilter(filterElement.attr("value"));
         applyCheckboxObserver();
         updateActionButtons();
     } );
