@@ -17,19 +17,11 @@
  */
 package com.collabnet.svnedge.console
 
-import java.io.File;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
-import org.hyperic.sigar.FileInfo
-
-import groovy.io.FileType;
-
-import com.collabnet.svnedge.ConcurrentBackupException;
-import com.collabnet.svnedge.ValidationException;
-
-
+import com.collabnet.svnedge.ConcurrentBackupException
+import com.collabnet.svnedge.RepoLoadException
+import com.collabnet.svnedge.ValidationException
+import com.collabnet.svnedge.admin.RepoDumpJob
+import com.collabnet.svnedge.admin.RepoLoadJob
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
@@ -37,17 +29,14 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.statistics.StatValue
 import com.collabnet.svnedge.domain.statistics.Statistic
-import com.collabnet.svnedge.util.ConfigUtil;
-
-import org.quartz.CronTrigger;
-import org.quartz.SimpleTrigger
-import com.collabnet.svnedge.admin.RepoDumpJob
-import org.quartz.JobDataMap
-import com.collabnet.svnedge.admin.RepoLoadJob
-
-import com.collabnet.svnedge.RepoLoadException
+import com.collabnet.svnedge.util.ConfigUtil
+import groovy.io.FileType
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import org.apache.commons.io.FileUtils
+import java.util.zip.ZipOutputStream
+import org.quartz.CronTrigger
+import org.quartz.JobDataMap
+import org.quartz.SimpleTrigger
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
@@ -1229,6 +1218,41 @@ class SvnRepoService extends AbstractSvnEdgeService {
             prefix += "-hotcopy"
         }
         return prefix + range + options + "-" + ts + ".dump" + zip
+    }
+
+    /**
+     * Will find most-recent up-to-date backup matching the DumpBean criteria for the given repo,
+     * or null if there is no existing backup of the criteria
+     * @param bean the DumpBean
+     * @param repo the repo
+     * @return File or null
+     */
+    File findUpToDateBackup(DumpBean bean, Repository repo) {
+        // find the dumpfile name we would generate now
+        if (!bean.revisionRange) {
+            bean.revisionRange = "0:" + findHeadRev(repo)
+        }
+        String name = dumpFilename(bean, repo)
+
+        // see if any file already exists, ignoring date
+        int dateBegin = name.lastIndexOf("-") + 1
+        int dateEnd = name.indexOf(".", dateBegin)
+        String namePrefix = name.substring(0, dateBegin)
+        String nameSuffix = name.substring(dateEnd)
+        File dumpDir = new File(Server.server.dumpDir, repo.name)
+
+        // return last match or null
+        def existingBackups = []
+        dumpDir?.eachFileMatch(~"${namePrefix}\\d{14}${nameSuffix}") {
+            log.debug("found existing backup file which is up to date: ${it.name}")
+            existingBackups << it
+        }
+        if (existingBackups.size()) {
+            return existingBackups.sort{ file -> file.lastModified() }.reverse()[0]
+        }
+        else {
+            return null
+        }
     }
 
     private addFilterOptions(DumpBean bean, filterCmd) {

@@ -18,12 +18,9 @@
 package com.collabnet.svnedge.admin
 
 import com.collabnet.svnedge.ConcurrentBackupException
-import com.collabnet.svnedge.domain.Repository
-import com.collabnet.svnedge.domain.Server
-import com.collabnet.svnedge.domain.ServerMode
-import com.collabnet.svnedge.domain.User
-import com.collabnet.svnedge.event.DumpRepositoryEvent
 import com.collabnet.svnedge.console.DumpBean
+import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.event.DumpRepositoryEvent
 
 /**
  * When triggered, the RepoDumpJob will invoke the {@link com.collabnet.svnedge.console.SvnRepoService#createDump}
@@ -57,12 +54,21 @@ class RepoDumpJob {
                     cloudServicesRemoteClientService
                         .synchronizeRepository(repo, dumpBean.userLocale)
                     log.info("Synchronized cloud backup for " + repo.name)
-                } else if (dumpBean.hotcopy) {
-                    String file = svnRepoService.createHotcopy(dumpBean, repo)
-                    log.info("Creating repo hotcopy file: " + file)
-                } else {
-                    String file = svnRepoService.createDump(dumpBean, repo)
-                    log.info("Creating repo dump file: " + file)
+                }
+                else {
+                    // if this is a backup job, we should skip when there are no changes since last run
+                    String existingFile = (dumpBean.backup) ?
+                            svnRepoService.findUpToDateBackup(dumpBean, repo)?.name :
+                            null
+                    if (existingFile && dumpBean.backup) {
+                        log.info("Backup skipped, previous file '${existingFile}' is up to date")
+                    } else if (dumpBean.hotcopy) {
+                        String file = svnRepoService.createHotcopy(dumpBean, repo)
+                        log.info("Creating repo hotcopy file: " + file)
+                    } else {
+                        String file = svnRepoService.createDump(dumpBean, repo)
+                        log.info("Creating repo dump file: " + file)
+                    }
                 }
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this, 
                         dumpBean, repo, DumpRepositoryEvent.SUCCESS, 
