@@ -84,25 +84,35 @@ class ApplicationFilters {
             before = {
 
                 boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
-                boolean isManagedMode = (isIntegrationServer
-                        || ServerMode.REPLICA == Server.getServer().mode)
+                boolean isReplicaServer = ServerMode.REPLICA == Server.getServer().mode
+                boolean isManagedMode = (isIntegrationServer || isReplicaServer)
 
+                // prohibited actions in Standalone mode
                 if (!isManagedMode &&
                         "server" == controllerName && (
                 "editIntegration" == actionName || "revert" == actionName)) {
 
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.standalone", null,
-                            Locale.getDefault())
+                            request.locale)
                     redirect(controller: "status")
                     return false
                 }
+                // prohibited actions in TF or Replica mode
                 if (isManagedMode &&
                         (["user", "role", "setupTeamForge", "repoTemplate"].contains(controllerName) ||
                          ("server" == controllerName && "editAuthentication" == actionName))) {
                     flash.error = app.getMainContext().getMessage(
                             "filter.probihited.mode.managed", null,
-                            Locale.getDefault())
+                            request.locale)
+                    redirect(controller: "status")
+                    return false
+                }
+                // prohibited actions in Replica mode only
+                if (isReplicaServer && ["repo"].contains(controllerName)) {
+                    flash.error = app.getMainContext().getMessage(
+                            "filter.probihited.mode.managed", null,
+                            request.locale)
                     redirect(controller: "status")
                     return false
                 }
@@ -112,21 +122,19 @@ class ApplicationFilters {
             after = {model ->
 
                 boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
-                boolean isManagedMode = (isIntegrationServer
-                        || ServerMode.REPLICA == Server.getServer().mode)
+                boolean isReplicaServer = ServerMode.REPLICA == Server.getServer().mode
+                boolean isManagedMode = (isIntegrationServer || isReplicaServer)
+
                 boolean isSuperUser = authenticateService.ifAnyGranted("ROLE_ADMIN")
                 boolean isUserAdmin = authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_USERS")
 
                 // default list of features for all users
                 def featureList = []
-                if (!isManagedMode || isSuperUser) {
+                if (!isManagedMode || (isIntegrationServer && isSuperUser)) {
                     featureList << "repo"
                 }
 
-                if (lifecycleService.getServer().replica) {
-                    featureList << "userCache"
-                }
-                else if (!isManagedMode && isUserAdmin) {
+                if (!isManagedMode && isUserAdmin) {
                     featureList << "user"
                 }
 
@@ -150,6 +158,7 @@ class ApplicationFilters {
                 model.put("featureList", featureList)
                 model.put("isManagedMode", isManagedMode)
                 model.put("isIntegrationServer", isIntegrationServer)
+                model.put("isReplicaServer", isReplicaServer)
             }
         }
 
