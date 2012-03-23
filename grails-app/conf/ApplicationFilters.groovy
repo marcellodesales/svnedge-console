@@ -199,8 +199,15 @@ class ApplicationFilters {
 
         redirectStatusToRepositoryList(controller: 'status', action: '*') {
             before = {
-                if (!authenticateService
-                        .ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
+                boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
+                boolean isReplicaServer = ServerMode.REPLICA == Server.getServer().mode
+                boolean isManagedMode = (isIntegrationServer || isReplicaServer)
+                boolean isAdmin = authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")
+
+                if (isManagedMode && !isAdmin) {
+                    redirect(controller: 'ocn', action: 'index')
+                }
+                else if (!isAdmin) {
                     redirect(controller: 'repo', action: 'list')
                 }
             }

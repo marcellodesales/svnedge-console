@@ -55,6 +55,7 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
     private static String ROLE_USER = "ROLE_USER"
     private static String ROLE_ADMIN = "ROLE_ADMIN"
+    private static String ROLE_ADMIN_SYSTEM = "ROLE_ADMIN_SYSTEM"
     /**
      * The prefix of the command ids.
      */
@@ -390,22 +391,22 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         // trues =>  enabled, accountNonExpired, credentialsNonExpired,
         //           accountNonLocked,
         new GrailsUserImpl(username, "password", true, true, true, true, 
-                           getGrantedAuthorities(ctfUser, (isLocalAdmin || hasScmEditPermission)), u)
+                           getGrantedAuthorities(ctfUser, isLocalAdmin, hasScmEditPermission), u)
     }
 
-    private GrantedAuthority[] getGrantedAuthorities(ctfUser, boolean isLocalAdmin = false) {
-        GrantedAuthority[] auth
-        if (ctfUser.superUser || isLocalAdmin) {
-            auth = new GrantedAuthority[2]
-            auth[0] = new GrantedAuthorityImpl(ROLE_USER)
-            auth[1] = new GrantedAuthorityImpl(ROLE_ADMIN)
-        } else if (ctfUser.restrictedUser) {
-            auth = new GrantedAuthority[0]
-        } else {
-            auth = new GrantedAuthority[1]
-            auth[0] = new GrantedAuthorityImpl(ROLE_USER)
+    private GrantedAuthority[] getGrantedAuthorities(ctfUser, boolean isLocalAdmin = false, boolean isScmAdmin = false) {
+        
+        def auth = []
+        if (!ctfUser.restrictedUser) {
+            auth << new GrantedAuthorityImpl(ROLE_USER)
+            if (ctfUser.superUser || isLocalAdmin) {
+                auth << new GrantedAuthorityImpl(ROLE_ADMIN)
+            }
+            else if (isScmAdmin)  {
+                auth << new GrantedAuthorityImpl(ROLE_ADMIN_SYSTEM)
+            }
         }
-        auth
+        auth as GrantedAuthority[]
     }
 
     private static String PERM_USER = "view"

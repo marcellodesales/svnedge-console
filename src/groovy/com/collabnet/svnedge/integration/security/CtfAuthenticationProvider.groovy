@@ -60,11 +60,6 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
                 if (gUser.authorities.find { it.authority == "ROLE_ADMIN" }) {
                     RepoDiscoveryJob.triggerNow([:])
                 }
-                else {
-                    def msg = "The TeamForge account '" +
-                            authentication.getPrincipal() + "' does not have access to this system."
-                    throw new CtfAuthenticationException(msg)
-                }
             }
 
         } catch (CtfServiceUnavailableException connectivityError) {
