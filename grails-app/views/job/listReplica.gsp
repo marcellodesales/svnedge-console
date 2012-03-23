@@ -4,7 +4,6 @@
 <%@page import="com.collabnet.svnedge.integration.command.AbstractCommand"%>
 <head>
     <meta name="layout" content="main" />
-    <meta http-equiv="refresh" content="5">
 </head>
 
 <body>
