@@ -150,31 +150,48 @@
 
           
           <br/>
-          <g:if test="${!repositoryInstance}">
-          <div class="alert alert-info"><g:message code="repository.page.bkupSchedule.multipleIntructions"/></div>
-          </g:if>
-          <table id="datatable" class="table table-striped table-bordered table-condensed"></table>
-          <script type="text/javascript">
-            /* Data set */
-            var aDataSet = [
-              <g:each in="${repoBackupJobList}" status="i" var="job">
-                <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
-                  <g:set var="cloudActivationRequired" value="${true}"/>
-                </g:if>
-                <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + job.repoId]}">
-                  <g:set var="cloudNameChangeRequired" value="${true}"/>
-                </g:if>
-                ['${job.repoId}__${job.id}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
-                <g:if test="${!repositoryInstance}">
-                  '${job.repoId}|<%=job.repoName%>|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
-                </g:if>
-                  '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
-                  '${job.scheduleFormatted}',
-                  '${job.keepNumber == 0 ? "ALL" : job.keepNumber}'
-                ]<g:if test="${i < (repoBackupJobList.size() - 1)}">,</g:if>
+        <g:if test="${!repositoryInstance}">
+          <div class="tabbable">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#existingJobs" data-toggle="tab" id="existingJobsLink"><g:message code="repository.page.bkupSchedule.job.existingJobs"/></a></li>
+              <li><a href="#newJobs" data-toggle="tab" id="newJobsLink"><g:message code="repository.page.bkupSchedule.job.newJobs"/></a></li>
+           </ul>
+           <div class="tab-content">
+             <div class="tab-pane active" id="existingJobs">
+        </g:if>
 
-              </g:each>
-            ];
+          <table id="jobDataTable" class="table table-striped table-bordered table-condensed"></table>
+          <script type="text/javascript">
+            var repoJobMap = {};
+            <g:each in="${repoList}" status="j" var="repoMap">
+              jobList = [];
+              repoJobMap['id${repoMap.repoId}'] = jobList;
+              <g:each in="${repoBackupJobMap[repoMap.repoId]}" status="i" var="job">
+               <g:if test="${cloudRegistrationRequired && job.typeCode == 'cloud'}">
+                 <g:set var="cloudActivationRequired" value="${true}"/>
+               </g:if>
+               <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + job.repoId]}">
+                 <g:set var="cloudNameChangeRequired" value="${true}"/>
+               </g:if>
+               jobList.push(['${job.repoId}__${job.id}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
+               <g:if test="${!repositoryInstance}">
+                 '${job.repoId}|<%=job.repoName%>|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
+               </g:if>
+               '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
+               '${job.scheduleFormatted}',
+               '${job.keepNumber == 0 ? "ALL" : job.keepNumber}'
+             ]);
+           </g:each>
+          </g:each>
+          
+            /* Data set */
+            var jobDataSet = [];
+            for (repoId in repoJobMap) {
+              var jobList = repoJobMap[repoId];
+              for (var i = 0; i < jobList.length; i++) {
+                jobDataSet.push(jobList[i]);
+              }
+            }
           </script>
 
           <div class="pull-right">
@@ -188,13 +205,43 @@
           </g:if>
           <g:else>
             <g:listViewActionButton action="updateBkupSchedule" minSelected="1">
-              <g:message code="repository.page.bkupSchedule.job.setSchedule"/>
+              <g:message code="repository.page.bkupSchedule.job.replace"/>
             </g:listViewActionButton>
           </g:else>
             <g:listViewActionButton action="deleteBkupSchedule" minSelected="1">
               <g:message code="repository.page.bkupSchedule.job.delete"/>
             </g:listViewActionButton>
           </div>
+
+        <g:if test="${!repositoryInstance}">
+          </div>
+          <div class="tab-pane" id="newJobs">
+          
+          <table id="newJobDataTable" class="table table-striped table-bordered table-condensed"></table>
+          <script type="text/javascript">
+            /* Data set */
+            var newJobDataSet = [
+              <g:each in="${repoList}" status="i" var="repoMap">
+                <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + repoMap.repoId]}">
+                  <g:set var="cloudNameChangeRequired" value="${true}"/>
+                </g:if>
+                <g:if test="${i > 0}">,</g:if>
+                ['${repoMap.repoId}',
+                 '${repoMap.repoId}|<%=repoMap.repoName%>|${repoMap.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + repoMap.repoId]}',
+                 '${repoMap.jobCount ? repoMap.repoId : 0}']
+              </g:each>
+            ];
+          </script>
+          <div class="pull-right">
+            <g:listViewActionButton action="addBkupSchedule" minSelected="1">
+              <g:message code="repository.page.bkupSchedule.job.new"/>
+            </g:listViewActionButton>
+          </div>
+          
+          </div>
+        </div>
+       </div>
+        </g:if>
   
 </g:form>
 <g:javascript>
@@ -318,44 +365,7 @@
     });
   });
   
-  // data table configuration for repo listing
- $(document).ready(function() {
-    var dt = $('#datatable').dataTable( {
-      "aaData": aDataSet,
-      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
-      "sPaginationType": "bootstrap",
-      "bStateSave": true,
-      "oLanguage": {
-        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
-        "oPaginate": {
-            "sNext": "${message(code:'default.paginate.next')}",
-            "sPrevious": "${message(code:'default.paginate.prev')}"
-        },
-        "sSearch": "${message(code:'default.filter.label')}",
-        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
-        "sEmptyTable": "${message(code:'repository.page.bkupSchedule.noJobs')}",
-        "sInfo": "${message(code:'datatable.showing')}",
-        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
-        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
-      },
-    "aaSorting": [[ 1, "asc" ]],
-    "aoColumns": [
-      {"sTitle": "<g:listViewSelectAll/>", 
-       "bSortable": false,
-       "fnRender": function (oObj, sVal) {
-           var template = '<input type="checkbox" class="listViewSelectItem" id="listViewItem_{0}" name="listViewItem_{0}" onClick="setFormState({\'type\': \'{1}\', \'numberToKeep\': \'{2}\', \'scheduleFrequency\': \'{3}\', \'scheduleHour\': \'{4}\', \'scheduleMinute\': \'{5}\', \'scheduleDayOfWeek\': \'{6}\'})"/>'
-           var expanded = new String(template);
-           var vals = sVal.split("|");
-           for (i = 0; i < vals.length; i++) {
-              var token = "\\{" + i + "\\}"
-              expanded = expanded.replace(new RegExp(token,'g'), vals[i]);
-           }
-           return expanded;
-        }
-      },
-    <g:if test="${!repositoryInstance}">
-      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.repoName')}",
-       "fnRender": function(oObj, sVal) {
+  function renderRepoName(oObj, sVal) {
           repoId = sVal.split("|")[0]
           repoName = sVal.split("|")[1]
           cloudName = sVal.split("|")[2] 
@@ -380,7 +390,48 @@
             out += " (" + cloudName + ")"
           }
           return out
-       }
+  }
+  
+  var i18nMessages = {
+        "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
+        "oPaginate": {
+            "sNext": "${message(code:'default.paginate.next')}",
+            "sPrevious": "${message(code:'default.paginate.prev')}"
+        },
+        "sSearch": "${message(code:'default.filter.label')}",
+        "sZeroRecords": "${message(code:'default.search.noResults.message')}",
+        "sEmptyTable": "${message(code:'repository.page.bkupSchedule.noJobs')}",
+        "sInfo": "${message(code:'datatable.showing')}",
+        "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
+        "sInfoFiltered": " ${message(code:'datatable.filtered')}"
+  };
+      
+  // data table configuration for repo listing
+ $(document).ready(function() {
+    var jobdt = $('#jobDataTable').dataTable( {
+      "aaData": jobDataSet,
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": i18nMessages,
+    "aaSorting": [[ 1, "asc" ]],
+    "aoColumns": [
+      {"sTitle": "<g:listViewSelectAll/>", 
+       "bSortable": false,
+       "fnRender": function (oObj, sVal) {
+           var template = '<input type="checkbox" class="listViewSelectItem" id="listViewItem_{0}" name="listViewItem_{0}" onClick="setFormState({\'type\': \'{1}\', \'numberToKeep\': \'{2}\', \'scheduleFrequency\': \'{3}\', \'scheduleHour\': \'{4}\', \'scheduleMinute\': \'{5}\', \'scheduleDayOfWeek\': \'{6}\'})"/>'
+           var expanded = new String(template);
+           var vals = sVal.split("|");
+           for (i = 0; i < vals.length; i++) {
+              var token = "\\{" + i + "\\}"
+              expanded = expanded.replace(new RegExp(token,'g'), vals[i]);
+           }
+           return expanded;
+        }
+      },
+    <g:if test="${!repositoryInstance}">
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.repoName')}",
+       "fnRender": renderRepoName
       },
     </g:if>
       {"sTitle": "${message(code:'repository.page.bkupSchedule.job.type')}",
@@ -401,12 +452,74 @@
     ] 
    })
    
-    // limit filter to column 1 only (the repo name)
-    filterElement= $('#datatable_filter').find("input")
+    filterElement= $('#jobDataTable_filter').find("input")
     filterElement.keyup( function () {
-        dt.fnFilter(filterElement.attr("value"));
         applyCheckboxObserver();
         updateActionButtons();
     } );
+    
+ <g:if test="${!repositoryInstance}">
+  var newJobdt = $('#newJobDataTable').dataTable( {
+      "aaData": newJobDataSet,
+      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sPaginationType": "bootstrap",
+      "bStateSave": true,
+      "oLanguage": i18nMessages,
+    "aaSorting": [[ 1, "asc" ]],
+    "aoColumns": [
+      {"sTitle": "<g:listViewSelectAll/>", 
+       "bSortable": false,
+       "fnRender": function (oObj, sVal) {
+           return '<input type="checkbox" class="listViewSelectItem" id="listViewItem_' + 
+                sVal + '" name="listViewItem_' + sVal + '"/>';
+        }
+      },
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.repoName')}",
+       "fnRender": renderRepoName
+      },
+      {"sTitle": "${message(code:'repository.page.bkupSchedule.job.existingJobs')}",
+       "fnRender": function (oObj, sVal) {
+         if (sVal == '0') {
+           return '<g:message code="repository.page.bkupSchedule.job.none"/>';
+         } else {
+           var jobList = repoJobMap['id' + sVal];
+           var jobMap = {};
+           for (var i = 0; i < jobList.length; i++) {
+             var type = jobList[i][2].split("|")[0];
+             var count = jobMap[type];
+             if (!count) {
+               jobMap[type] = 1;
+             } else {
+               jobMap[type] = count + 1;
+             }
+           }
+           var typeList = [];
+           for (type in jobMap) {
+             typeList.push((jobMap[type] > 1) ? type + ': ' + jobMap[type] : type); 
+           }
+           typeList.sort();
+           return typeList.join(', ');
+         }
+       }
+      }
+    ]
+  });
+   
+  filterElement= $('#newJobDataTable_filter').find("input")
+  filterElement.keyup( function () {
+      applyCheckboxObserver();
+      updateActionButtons();
+  });
+  
+  $(document).ready(function() {
+    var tabs = ['#existingJobsLink', '#newJobsLink'];
+    for (var i = 0; i < tabs.length; i++) {
+      $(tabs[i]).click(function() {
+        $('input.listViewSelectItem').removeAttr("checked");
+      });
+    }
+  });
+ </g:if>
+    
   });
 </g:javascript>

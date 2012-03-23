@@ -402,8 +402,11 @@ class RepoController {
             }
             model["dump"] = cmd
             
+            def repoMap = [repoId: repo.id, repoName: repo.name, cloudName: repo.cloudName, jobCount: 0]
+            model['repoList'] = [repoMap]
             def backups = svnRepoService.retrieveScheduledBackups(repo)
             if (backups) {
+                repoMap.jobCount = backups.size()
                 def repoBackupJobList = []
                 for (b in backups) {
                     def job = populateJobMap(b)
@@ -412,7 +415,7 @@ class RepoController {
                     job.cloudName = repo.cloudName
                     repoBackupJobList << job
                 }
-                model['repoBackupJobList'] = repoBackupJobList
+                model['repoBackupJobMap'] = [(repo.id): repoBackupJobList]
             }
         }
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
@@ -610,8 +613,9 @@ class RepoController {
     def bkupScheduleMultiple = { DumpBean cmd ->
 
         def model = [:]
-        def repoBackupJobList = []
-
+        def repoBackupJobMap = [:]
+        def repoList = []
+        
         // fetch list of repositories using request params to sort if possible, then add backup trigger info
         def listParams = [:]
         listParams.sort = "name"
@@ -630,21 +634,25 @@ class RepoController {
             }
         }
         Repository.list(listParams).each {
-            def job = [:]
-            job.repoId = it.id
-            job.repoName = it.name.encodeAsHTML() + ' ' +
-                    message(code: 'repository.page.bkupSchedule.type.new')
-            job.cloudName = it.cloudName
-            repoBackupJobList << job
+            def repoMap = [:]
+            repoMap.repoId = it.id
+            repoMap.repoName = it.name.encodeAsHTML()
+            repoMap.cloudName = it.cloudName
+            repoList << repoMap
             
             def currentJobs = jobMap[it.id]
             if (currentJobs) {
+                def jobList = []
+                repoBackupJobMap[it.id] = jobList
                 for (b in currentJobs) {
-                    job = populateJobMap(b)
+                    def job = populateJobMap(b)
                     job.repoName = it.name
                     job.cloudName = it.cloudName
-                    repoBackupJobList << job
+                    jobList << job
                 }
+                repoMap.jobCount = currentJobs.size()
+            } else {
+                repoMap.jobCount = 0
             }
         }
 
@@ -658,7 +666,8 @@ class RepoController {
 
         // add to model
         model["dump"] = cmd
-        model["repoBackupJobList"] = repoBackupJobList
+        model["repoList"] = repoList
+        model["repoBackupJobMap"] = repoBackupJobMap
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         model['cloudRegistrationRequired'] =  !cloudConfig || !cloudConfig.domain
         model['cloudEnabled'] = cloudConfig?.enabled
