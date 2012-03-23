@@ -99,7 +99,8 @@
 
             // store the selection in a hidden field for submit
             var selectedItem = this.innerHTML;
-            var repo = this.parentNode.parentNode.firstChild.textContent;
+            var repo = $(this.parentNode.parentNode).clone()
+                .children().remove().end().text();
             $('#initOptionSelected').val(repo + "/" + selectedItem);
         });
       }
