@@ -19,97 +19,32 @@
 <head>
   <title><g:message code="setupCloudServices.page.confirmation.title"/></title>
   <meta name="layout" content="main"/>
-  <style>
-
-  td.CloudServicesHeading, td.CloudServicesSubHeading {
-    border-collapse: collapse;
-    padding: 3px 20px;
-    font-size: 1.75em;
-    font-weight: bold;
-    color: #69c;
-  }
-
-  td.CloudServicesSubHeading  {
-    font-size: 1.27em;
-    font-weight: normal;
-    color: black;
-    padding: 3px 20px;
-  }
-
-  td.CloudServicesBody {
-    border-spacing: 0;
-    padding: 4px;
-  }
-
-  p#GetStartedPrompt {
-    font-size: 1.50em;
-    vertical-align: top;
-    text-align: left;
-    padding: 4px;
-  }
-
-  table#ServiceList tr td {
-    font-size: 1.50em;
-    vertical-align: middle;
-    text-align: center;
-  }
-
-  p.ServiceDetail, ol.ServiceDetail {
-    font-size: .96em;
-    vertical-align: top;
-    text-align: left;
-  }
-
-  p.ServiceDetail {
-    margin-left: 1em;
-  }
-
-  </style>
 </head>
+
+<content tag="title">
+  <g:message code="setupCloudServices.page.confirmation.title"/>
+</content>
 
 <g:render template="/server/leftNav"/>
 
 <body>
-<table>
-  <tr>
-    <td class="CloudServicesHeading">
-      <g:message code="setupCloudServices.page.confirmation.title"/>
-    </td>
-  </tr>
-  <tr>
-    <td class="CloudServicesSubHeading"><br/><g:message code="setupCloudServices.page.confirmation.p1"/>
-    </td>
-  </tr>
-  <tr>
-    <td class="CloudServicesSubHeading">
+
+<div class="row-fluid">
+  <div class="span6">
+    <p><g:message code="setupCloudServices.page.confirmation.p1"/></p>
     <ol>
-      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step1"/></li>
-      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step2"/></li>
-      <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step3"/></li>
-    </ol>
-    </td>
-  </tr>
-  <tr>
-    <td class="CloudServicesBody">
+       <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step1"/></li>
+       <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step2"/></li>
+       <li><g:message code="setupCloudServices.page.confirmation.service.backup.detail.step3"/></li>
+     </ol>
+    <p><g:message code="setupCloudServices.page.confirmation.getStarted.prompt"/></p>
+    <p><a class="btn" target="_blank" href="http://visit.collab.net/SVNsupport.html"><g:message code="setupCloudServices.page.confirmation.support"/> &raquo;</a></p>
+  </div>
+  <div class="span6">
+     <img alt="" src="${resource(dir:'images/cloud',file:'subversion-edge-to-the-cloud.png')}" border="0"/>
+  </div>
+</div>
 
-      <table id="ServiceList" width="100%">
-        <tr>
-          <td width="20%"><g:message code="setupCloudServices.page.index.service.backup"/></td>
-          <td width="60%"><img width="400" height="150" alt="" src="${resource(dir:'images/cloud',file:'cloudBackup.png')}" border="0"/></td>
-          <td width="20%"><p class="ServiceDetail"><g:message code="setupCloudServices.page.confirmation.service.backup.detail"/></p></td>
-        </tr>
-      </table>
-
-    </td>
-  </tr>
-  <tr>
-    <td>
-        <div>
-          <p id="GetStartedPrompt"><g:message code="setupCloudServices.page.confirmation.getStarted.prompt"/></p>
-        </div>
-    </td>
-  </tr>
-</table>
 
 </body>
 </html>
