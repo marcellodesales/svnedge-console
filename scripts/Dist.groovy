@@ -264,7 +264,9 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             fileset(dir: "${basedir}/svn-server",
             includes:"**/*")
         }
-        Ant.move(file: warName, 
+        // copy the version string to a file for use in the View VC "About" dialog
+        Ant.echo(message: "Release: ${metadata.getApplicationVersion()}", file: updatesDir + "/www/viewvc/app_version.txt")
+        Ant.move(file: warName,
                  tofile: "${updatesWebAppsDir}/csvn.war")
             //move the data directory as temp-data (artf62798) for packaging
             //The bootstrap process must move this directory back to data
@@ -283,6 +285,8 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
             fileset(dir: "${basedir}/svn-server",
                     includes:"**/*")
         }
+        // copy the version string to a file for use in the View VC "About" dialog
+        Ant.echo(message: "Release: ${metadata.getApplicationVersion()}", file: distDir + "/www/viewvc/app_version.txt")
         Ant.move(file: warName, tofile: "${webAppsDir}/" +
                 "csvn.war")
         Ant.chmod(dir: distDir + "/bin/cgi-bin",
