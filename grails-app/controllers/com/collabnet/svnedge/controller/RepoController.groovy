@@ -404,10 +404,10 @@ class RepoController {
             
             def repoMap = [repoId: repo.id, repoName: repo.name, cloudName: repo.cloudName, jobCount: 0]
             model['repoList'] = [repoMap]
+            def repoBackupJobList = []
             def backups = svnRepoService.retrieveScheduledBackups(repo)
             if (backups) {
                 repoMap.jobCount = backups.size()
-                def repoBackupJobList = []
                 for (b in backups) {
                     def job = populateJobMap(b)
                     job.repoId = repo.id
@@ -415,8 +415,8 @@ class RepoController {
                     job.cloudName = repo.cloudName
                     repoBackupJobList << job
                 }
-                model['repoBackupJobMap'] = [(repo.id): repoBackupJobList]
             }
+            model['repoBackupJobMap'] = [(repo.id): repoBackupJobList]
         }
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         model['cloudRegistrationRequired'] = !cloudConfig || !cloudConfig.domain
