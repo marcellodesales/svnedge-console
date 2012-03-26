@@ -4,7 +4,7 @@
 
       <meta name="layout" content="main" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
-                djconfig="parseOnLoad: true, isDebug: false"></script>
+                djconfig="parseOnLoad: false, isDebug: false"></script>
 
     <g:set var="restartServer" value="${message(code:'packagesUpdate.page.installUpdatesStatus.restartServer')}" />
     <g:set var="installFinished" value="${message(code:'packagesUpdate.page.installUpdatesStatus.finished')}" />
