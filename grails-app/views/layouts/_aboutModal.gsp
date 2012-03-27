@@ -10,6 +10,7 @@
               args="${[version]}"/></strong>
         </p>
         <p>&copy; 2012 <g:message code="layout.page.trademark" /></p>
+        <p><g:message code="layout.page.help.about.glyphicons" /></p>
         <p><g:link url="https://ctf.open.collab.net/sf/wiki/do/viewPage/projects.svnedge/wiki/OpenSourceComponents"
               target="_blank"><g:message code="layout.page.help.about.componentList" /></g:link>
         </p>
