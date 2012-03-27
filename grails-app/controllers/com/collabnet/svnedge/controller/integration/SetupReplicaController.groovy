@@ -333,6 +333,10 @@ class SetupReplicaController {
             }
         }
 
+        // provide ctf url to the CtfConnectionBean, needed for information message
+        def ctfServer = CtfServer.getServer()
+        input.ctfURL = ctfServer.baseUrl
+
         // return to input view with success or errors
         render([view: "editCredentials", 
                 model: [cmd: input, isReplica: isReplica]])
