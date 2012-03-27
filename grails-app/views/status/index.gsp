@@ -55,43 +55,54 @@
   <g:form method="post">
   <div class="row-fluid">
     <div class="span7 well">
-    <g:if test="${isReplicaMode}">
-      <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.replica.name" /></strong></div><div class="span3"> ${currentReplica.name}</div>
-      </div>
-      <g:if test="${currentReplica.svnMasterUrl}">
-         <div class="row-fluid">
-           <div class="span4"><strong><g:message code="status.page.replica.location" /></strong></div><div class="span3"> ${currentReplica.svnMasterUrl}</div>
-         </div>
-      </g:if>
-    </g:if>
-    <g:if test="${ctfUrl}">
-      <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.url.teamforge" /></strong></div><div class="span3"> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a></div>
-      </div>
-    </g:if>
     <g:if test="${isStarted}">
       <div class="row-fluid">
         <div class="span4"><strong><g:message code="status.page.subversion" /> </strong></div>
-        <div class="span3"><img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
+        <div class="span8"><img src="${resource(dir:'images', file:'fping_up.gif')}" width="16" height="16"
                          hspace="4" alt="<g:message code='status.page.subversion.on' />"/><g:message code="status.page.subversion.on" /></div>
       </div>
       <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span3"> ${server.hostname}</div>
+        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span8"> ${server.hostname}</div>
       </div>
      <g:if test="${!ctfUrl && server.viewvcURL()}">
       <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.url.repository" /></strong></div><div class="span3"> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a></div>
+        <div class="span4"><strong><g:message code="status.page.url.repository" /></strong></div><div class="span8"> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a></div>
       </div>
       <div class="row-fluid">
         <div class="span4"><strong><g:message code="status.page.url.repository.browse" /></strong></div>
-        <div class="span3"><a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a></div>
+        <div class="span8"><a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a></div>
       </div>
      </g:if>
-      <g:if test="${isReplicaMode}">
+   </g:if>
+   <g:else>
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.subversion" /> </strong></div>
+        <div class="span8"><img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
+                         hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" /></div>
+      </div>
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span8"> ${server.hostname}</div>
+      </div>
+   </g:else>
+    <g:if test="${ctfUrl}">
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.url.teamforge" /></strong></div><div class="span8"> <a href="${ctfUrl}" target="_blank">${ctfUrl}</a></div>
+      </div>
+    </g:if>
+    <g:if test="${isReplicaMode}">
+      <div class="row-fluid">
+        <div class="span4"><strong><g:message code="status.page.replica.name" /></strong></div><div class="span8"> ${currentReplica.name}</div>
+      </div>
+      <g:if test="${currentReplica.svnMasterUrl}">
+         <div class="row-fluid">
+           <div class="span4"><strong><g:message code="status.page.replica.location" /></strong></div><div class="span8"> ${currentReplica.svnMasterUrl}</div>
+         </div>
+      </g:if>
+    </g:if>
+    <g:if test="${isStarted && isReplicaMode}">
         <div class="row-fluid">
         <div class="span4"><strong><g:message code="status.page.status.replication.activity" /></strong></div>
-        <div class="span3">
+        <div class="span8">
         <g:set var="replicationStatusIcon" value="fping_up.gif" />
         <g:if test="${replicaCommandsSize > 0}">
             <g:set var="replicationStatusIcon" value="replica/commands_updating_spinner.gif" />
@@ -107,18 +118,8 @@
              </div>
          </div>
         </div>
-      </g:if>
-   </g:if>
-   <g:else>
-      <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.subversion" /> </strong></div>
-        <div class="span3"><img src="${resource(dir:'images', file:'fping_down.gif')}" width="16" height="16"
-                         hspace="4" alt="<g:message code='status.page.subversion.off' />"/><g:message code="status.page.subversion.off" /></div>
-      </div>
-      <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.hostname" /> </strong></div><div class="span3"> ${server.hostname}</div>
-      </div>
-    </g:else>
+    </g:if>
+        
     </div>
     <div class="span1">
         <g:if test="${isStarted}">
