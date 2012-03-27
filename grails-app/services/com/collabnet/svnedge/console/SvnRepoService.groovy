@@ -769,7 +769,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         trigger.setJobGroup(RepoDumpJob.group)
 
         // data for reporting status to quartz job listeners
-        File progressFile = prepareProgressLogFile(repo.name)
+        File progressFile = 
+                prepareProgressLogFile(repo.name, bean.cloud, bean.hotcopy)
         def jobDataMap =
         [id: tName, repoId: repo.id,
                 description: getMessage("repository.action.createDumpfile.job.description",
@@ -799,13 +800,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return System.currentTimeMillis()
     }
     
-    File prepareProgressLogFile(repoName) {
+    File prepareProgressLogFile(repoName, 
+            isCloudBackup = false, isHotCopy = false) {
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        return new File(tempLogDir, getProgressLogFileName(repoName))
+        return new File(tempLogDir, getProgressLogFileName(
+                repoName, isCloudBackup, isHotCopy))
     }
 
-    private String getProgressLogFileName(repoName) {
-        return "bkup-progress-" + repoName + ".log"
+    private String getProgressLogFileName(repoName, isCloudBackup, isHotCopy) {
+        return "bkup-progress-" + repoName + 
+                (isCloudBackup ? '-cloud' : isHotCopy ? '-hotcopy' : '-dump') + 
+                ".log"
     }
 
     File getLoadDirectory(Repository repo) {
@@ -1243,9 +1248,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         // return last match or null
         def existingBackups = []
-        dumpDir?.eachFileMatch(~"${namePrefix}\\d{14}${nameSuffix}") {
-            log.debug("found existing backup file which is up to date: ${it.name}")
-            existingBackups << it
+        if (dumpDir.exists()) {
+            dumpDir.eachFileMatch(~"${namePrefix}\\d{14}${nameSuffix}") {
+                log.debug("found existing backup file which is up to date: " +
+                          it.name)
+                existingBackups << it
+            }
         }
         if (existingBackups.size()) {
             return existingBackups.sort{ file -> file.lastModified() }.reverse()[0]
@@ -1313,7 +1321,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         File tmpDir = new File(dumpDir, "hotcopy")
 
-        File progressLogFile = prepareProgressLogFile(repo.name)
+        File progressLogFile = prepareProgressLogFile(repo.name, false, true)
         if (progressLogFile.exists()) {
             String msg = getMessage("repository.action.backup.alreadyInProgress",
                     [repo.name, progressLogFile.canonicalPath])
