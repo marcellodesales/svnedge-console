@@ -45,12 +45,21 @@ Contents
    
 3. Requirements
    
-   * Java 1.6 JRE/JDK must be installed.
+   * Java 1.6+ JRE/JDK must be installed.
    
    * Python 2.4 to 2.6 must be installed.  We tested with the 2.4 version
      provided with Solaris.  If you use Python from another source it must
      be compiled with shared libraries.
- 
+
+   * CollabNet Subversion Edge uses HTML5, CSS3 and JavaScript. Your browser must allow
+     JavaScript to run for the web UI to function properly.  We test and support
+     the following browsers:
+
+       Chrome
+       Firefox
+       IE 8/9
+       Safari
+
 4. Installation Notes
 
    IMPORTANT: Do not untar CollabNet Subversion Edge using root or sudo.  This
@@ -99,14 +108,7 @@ Contents
       NOTE: The install script will use sudo to create the necessary symlinks
       to autostart the application.  You may be prompted by sudo for your password.
       
-   5. Optional. Configure proxy settings.  CollabNet Subversion Edge need
-      access to the internet to check for and install updates.  If you need to
-      go through a proxy to access the internet, then you can configure the
-      proxy by editing the data/conf/csvn.conf file which was created by the
-      previous step.  Uncomment and edit the HTTP_PROXY variable to configure
-      your proxy server.
-      
-   6. Start the server.  Be sure that you are logged in as your own userid and
+   5. Start the server.  Be sure that you are logged in as your own userid and
       not running as root.
       
       $ bin/csvn start
@@ -120,25 +122,34 @@ Contents
       This will start the server but output the initial startup messages to
       the console.
 
-   You must login to the CollabNet Subversion Edge browser-based management
-   console and configure the Apache server before it can be run for the first
-   time.  The UI of the management console writes the needed Apache
-   configuration files based on the information you provide.
+      You must login to the CollabNet Subversion Edge browser-based management
+      console and configure the Apache server before it can be run for the first
+      time.  The UI of the management console writes the needed Apache
+      configuration files based on the information you provide.
 
-   The default administrator login is:
+      The default administrator login is:
 
-   Address: http://localhost:3343/csvn
-   Username: admin
-   Password: admin
-   
-   Subversion Edge also starts an SSL-protected version using a self-signed SSL
-   certificate.  You can access the SSL version on this URL:
-   
-   Address: https://localhost:4434/csvn
- 
-   You can force users to use SSL from the Server configuration.  This will cause
-   attempts to access the site via plain HTTP on port 3343 to be redirected to the
-   secure port on 4434.
+      Address: http://localhost:3343/csvn
+      Username: admin
+      Password: admin
+
+      Subversion Edge also starts an SSL-protected version using a self-signed SSL
+      certificate.  You can access the SSL version on this URL:
+
+      Address: https://localhost:4434/csvn
+
+      You can force users to use SSL from the Server configuration.  This will cause
+      attempts to access the site via plain HTTP on port 3343 to be redirected to the
+      secure port on 4434.
+
+   6. Optional. Configure the Apache Subversion server to start automatically when
+      the system boots.
+
+      $ cd csvn
+      $ sudo bin/csvn-httpd install
+
+      It is recommend that you login to the Edge console and configure and start the
+      Apache server via the web UI before you perform this step.
 
 5. Updates
 

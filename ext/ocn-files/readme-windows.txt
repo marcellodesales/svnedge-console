@@ -48,9 +48,18 @@ Contents
    
 3. Requirements
    
-   Java 1.6 JRE/JDK must be installed.  The installer will install Java 1.6 if
-   does not detect it as already installed.  The installer will create/replace
+   Java 1.6+ JRE/JDK must be installed.  The installer will install Java 1.6 if
+   does not detect it as already installed.  The installer will create
    the JAVA_HOME environment variable so that it points to the Java 1.6 JRE.
+
+   CollabNet Subversion Edge uses HTML5, CSS3 and JavaScript. Your browser must allow
+   JavaScript to run for the web UI to function properly.  We test and support
+   the following browsers:
+
+   Chrome
+   Firefox
+   IE 8/9
+   Safari
 
 4. Installation Notes
 

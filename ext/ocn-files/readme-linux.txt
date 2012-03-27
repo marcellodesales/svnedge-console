@@ -47,11 +47,27 @@ Contents
    
 3. Requirements
    
-   * Java 1.6 JRE/JDK must be installed. We recommend the JRE provided by
+   * Java 1.6+ JRE/JDK must be installed. We recommend the JRE provided by
      Sun/Oracle.  When testing on 64-bit Linux we have used the 64-bit JVM.
    
-   * Python 2.4 to 2.6 must be installed.
- 
+   * Python 2.4 to 2.6 must be installed. Subversion Edge uses mod_python which
+     requires that your system Python provides shared libraries. Many recent Linux
+     distributions include the shared libraries in an optional packages named
+     "python-libs" or something similar.  This package needs to be installed.
+     In addition, some Linux distributions may package some Python modules in
+     optional packages, such as "python-xml". You may need some of these modules
+     installed, particularly if you connect your Subversion Edge server to
+     CollabNet TeamForge.
+
+   * CollabNet Subversion Edge uses HTML5, CSS3 and JavaScript. Your browser must allow
+     JavaScript to run for the web UI to function properly.  We test and support
+     the following browsers:
+
+       Chrome
+       Firefox
+       IE 8/9
+       Safari
+
 4. Installation Notes
 
    IMPORTANT: Do not untar CollabNet Subversion Edge using root or sudo.  This
@@ -96,14 +112,7 @@ Contents
       By setting the JAVA_HOME and RUN_AS_USER variables in this file, it
       ensures they are set correctly when the application is run.
       
-   5. Optional. Configure proxy settings.  CollabNet Subversion Edge need
-      access to the internet to check for and install updates.  If you need to
-      go through a proxy to access the internet, then you can configure the
-      proxy by editing the data/conf/csvn.conf file which was created by the
-      previous step.  Uncomment and edit the HTTP_PROXY variable to configure
-      your proxy server.
-      
-   6. Start the server.  Be sure that you are logged in as your own userid and
+   5. Start the server.  Be sure that you are logged in as your own userid and
       not running as root.
       
       $ bin/csvn start
@@ -117,25 +126,35 @@ Contents
       This will start the server but output the initial startup messages to
       the console.
 
-   You must login to the CollabNet Subversion Edge browser-based management
-   console and configure the Apache server before it can be run for the first
-   time.  The UI of the management console writes the needed Apache
-   configuration files based on the information you provide.
+      You must login to the CollabNet Subversion Edge browser-based management
+      console and configure the Apache server before it can be run for the first
+      time.  The UI of the management console writes the needed Apache
+      configuration files based on the information you provide.
 
-   The default administrator login is:
+      The default administrator login is:
 
-   Address: http://localhost:3343/csvn
-   Username: admin
-   Password: admin
-   
-   Subversion Edge also starts an SSL-protected version using a self-signed SSL
-   certificate.  You can access the SSL version on this URL:
-   
-   Address: https://localhost:4434/csvn
- 
-   You can force users to use SSL from the Server configuration.  This will cause
-   attempts to access the site via plain HTTP on port 3343 to be redirected to the
-   secure port on 4434.
+      Address: http://localhost:3343/csvn
+      Username: admin
+      Password: admin
+
+      Subversion Edge also starts an SSL-protected version using a self-signed SSL
+      certificate.  You can access the SSL version on this URL:
+
+      Address: https://localhost:4434/csvn
+
+      You can force users to use SSL from the Server configuration.  This will cause
+      attempts to access the site via plain HTTP on port 3343 to be redirected to the
+      secure port on 4434.
+
+   6. Optional. Configure the Apache Subversion server to start automatically when
+      the system boots.
+      
+      $ cd csvn
+      $ sudo bin/csvn-httpd install
+      
+      It is recommend that you login to the Edge console and configure and start the
+      Apache server via the web UI before you perform this step.
+
 
 5. Updates
 
