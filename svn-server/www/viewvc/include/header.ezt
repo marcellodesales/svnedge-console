@@ -19,9 +19,9 @@
         padding: 9px 0;
       }
   </style>
-  <link rel="stylesheet" href="[docroot]/css/svnedge.css" type="text/css" />
+  <link rel="stylesheet" href="[docroot]/css/svnedge-3.0.0.css" type="text/css" />
   <link rel="stylesheet" href="[docroot]/css/bootstrap-responsive.css" type="text/css" />
-  <link rel="stylesheet" href="[docroot]/styles.css" type="text/css" />
+  <link rel="stylesheet" href="[docroot]/styles-3.0.0.css" type="text/css" />
   <script src="[docroot]/js/jquery-1.7.1.min.js" type="text/javascript"></script>
   <script src="[docroot]/js/bootstrap.js" type="text/javascript"></script>
   <script src="[docroot]/scripts.js" type="text/javascript"></script>

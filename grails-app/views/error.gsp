@@ -20,7 +20,7 @@
       }
     </style>
     <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
-    <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+    <link href="${resource(dir:'css',file:'svnedge-3.0.0.css')}" rel="stylesheet"/>                                                                                                                                                                  
  
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -28,7 +28,7 @@
     <![endif]-->
       
     <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />          
-    <g:javascript library="application" />
+    <g:javascript library="application-3.0.0" />
     
     <style type="text/css">
       .message {

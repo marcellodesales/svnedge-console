@@ -23,7 +23,7 @@
         padding: 9px 0;
       }
     </style>
-    <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+    <link href="${resource(dir:'css',file:'svnedge-3.0.0.css')}" rel="stylesheet"/>                                                                                                                                                                  
     <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
  
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -35,7 +35,7 @@
           
     <!-- jquery lib is often needed before page html is rendered -->
     <g:javascript library="jquery-1.7.1.min"/>
-    <g:javascript library="application" />
+    <g:javascript library="application-3.0.0" />
     <g:layoutHead />
 
   </head>

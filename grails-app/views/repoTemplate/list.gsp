@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta name="layout" content="main" />
-        <g:javascript library="listView"/>
+        <g:javascript library="listView-3.0.0"/>
         <g:javascript library="jquery-ui-1.8.18.custom.min"/>
     </head>
 

@@ -20,7 +20,7 @@
 <html>
 <head>
   <meta name="layout" content="main"/>
-  <g:javascript library="listView"/>
+  <g:javascript library="listView-3.0.0"/>
 </head>
 <content tag="title">
   <g:message code="setupCloudServices.page.selectUsers.title"/>

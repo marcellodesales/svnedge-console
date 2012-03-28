@@ -74,6 +74,6 @@
     } );
   } );
   </g:javascript>
-  <g:javascript library="listView"/>
+  <g:javascript library="listView-3.0.0"/>
   
 </g:form>

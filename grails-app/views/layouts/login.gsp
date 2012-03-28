@@ -17,7 +17,7 @@
     </style>
 
     <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
-    <link href="${resource(dir:'css',file:'svnedge.css')}" rel="stylesheet"/>                                                                                                                                                                  
+    <link href="${resource(dir:'css',file:'svnedge-3.0.0.css')}" rel="stylesheet"/>                                                                                                                                                                  
 
     <style type="text/css">
       .container {
@@ -60,7 +60,7 @@
 
     <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
     <g:javascript library="jquery-1.7.1.min"/>
-    <g:javascript library="application" />
+    <g:javascript library="application-3.0.0" />
     <g:layoutHead />
 
     
