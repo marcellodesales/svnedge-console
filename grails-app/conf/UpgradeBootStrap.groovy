@@ -184,6 +184,7 @@ class UpgradeBootStrap {
                             jobsAdminService
                                     .removeTrigger(oldName, trigger.group)
                             trigger.name = newName
+                            dataMap.id = newName
                             jobsAdminService.scheduleTrigger(trigger)
                         }
                     }
