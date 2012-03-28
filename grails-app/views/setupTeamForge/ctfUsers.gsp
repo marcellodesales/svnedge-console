@@ -17,7 +17,7 @@
     </script>
 
   </head>
-  <content tag="title"><g:message code="setupTeamForge.page.ctfUsers.title" /></content>
+  <content tag="title"><g:message code="setupTeamForge.page.wizard.title" /></content>
 
   <g:render template="/server/leftNav" />
 

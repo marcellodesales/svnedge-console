@@ -7,7 +7,7 @@
     <content tag="title"><g:message code="setupTeamForge.page.ctfInfo.title.fresh" /></content>
   </g:if>
   <g:else>
-    <content tag="title"><g:message code="setupTeamForge.page.ctfInfo.title.complete" /></content>
+    <content tag="title"><g:message code="setupTeamForge.page.wizard.title" /></content>
   </g:else>
 
   <g:render template="/server/leftNav" />

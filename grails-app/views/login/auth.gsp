@@ -10,14 +10,15 @@
   <div class="content">
     <div class="row">
       <div class="login-form">
-        <h2><g:message code="login.page.auth.title" /></h2>
         <form action='${postUrl}' method='post' id='loginForm'>
           <fieldset>
             <div class="clearfix">
-              <input type="text" name="j_username" id="j_username" placeholder="<g:message code="login.page.auth.username.label" />" />
+              <label class="control-label"><g:message code="login.page.auth.username.label"/>
+              <input type="text" name="j_username" id="j_username"/></label>
             </div>
             <div class="clearfix">
-              <input type="password" name="j_password" id="j_password" placeholder="<g:message code="login.page.auth.password.label" />" />
+              <label class="control-label"><g:message code="login.page.auth.password.label"/>
+              <input type="password" name="j_password" id="j_password"/>
             </div>
             <input class="btn btn-primary" value="<g:message code="login.page.auth.button.submit" />" type="submit"></input>
           </fieldset>

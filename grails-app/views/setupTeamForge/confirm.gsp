@@ -2,7 +2,7 @@
   <head>
       <meta name="layout" content="main" />
   </head>
-  <content tag="title"><g:message code="setupTeamForge.page.confirm.title" /></content>
+  <content tag="title"><g:message code="setupTeamForge.page.wizard.title" /></content>
 
   <g:render template="/server/leftNav" />
 
