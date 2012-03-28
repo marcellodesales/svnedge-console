@@ -50,6 +50,8 @@
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
+      "fnStateSave": tableState.save('datatable'),
+      "fnStateLoad": tableState.load('datatable'),
       "oLanguage": {
         "sLengthMenu": "${message(code:'datatable.rowsPerPage')}",
         "oPaginate": {

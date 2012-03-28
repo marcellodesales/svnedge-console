@@ -413,6 +413,8 @@
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
+      "fnStateSave": tableState.save('jobDataTable'),
+      "fnStateLoad": tableState.load('jobDataTable'),
       "oLanguage": i18nMessages,
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [
@@ -464,6 +466,8 @@
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
+      "fnStateSave": tableState.save('newJobDataTable'),
+      "fnStateLoad": tableState.load('newJobDataTable'),
       "oLanguage": i18nMessages,
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [

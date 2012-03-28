@@ -149,3 +149,24 @@ function formSubmit(form, action) {
 function elementExists(jQueryObject) {
 	return jQueryObject.length > 0;
 }
+
+var tableState = {
+    save: function(tableId) { 
+    	var key = this.key(tableId);
+    	return function(oSettings, oData) {
+    		localStorage.setItem(key, JSON.stringify(oData));
+    	};
+    },
+
+    load: function(tableId) { 
+    	var key = this.key(tableId);
+    	return function(oSettings) {
+    		return JSON.parse(localStorage.getItem(key));
+    	};
+    },
+    
+    key: function(tableId) {
+    	return 'DataTables_' + tableId + '_' + window.location.pathname;
+    }
+}
+
