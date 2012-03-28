@@ -11,45 +11,32 @@
     </content>
 
   <g:form method="post">
-    <div class="dialog">
-      <table align="center" width="99%">
+      <table class="table table-striped table-bordered table-condensed">
         <tbody>
-          <tr><td>
-            <table class="ItemDetailContainer" border="1">
-              <tbody border=1>
-                <tr class="prop, OddRow">
-                  <td><strong><g:message code="status.page.hostname.label" /></strong></td>
-                  <td>${certHostname}</td>
-                </tr>
-                <tr class="prop, EvenRow">
-                  <td><strong><g:message code="status.page.certValidity.label" /></strong></td>
-                  <td>${certValidity}</td>
-                </tr>
-                <tr class="prop, OddRow">
-                  <td><strong><g:message code="status.page.certIssuer.label" /></strong></td>
-                  <td>${certIssuer}</td>
-                </tr>
-                <tr class="prop, EvenRow">
-                  <td><strong><g:message code="status.page.fingerPrint.label" /></strong></td>
-                  <td>${certFingerPrint}</td>
-                </tr>
-                <tr class="prop, OddRow">
-                  <td colspan="2"> 
-                  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
-                    <div class="buttons" style="float: right">
-                      <g:actionSubmit action="acceptCertificate" value="${message(code:'status.page.validate.button')}" class="Button"/>
-                   </div>
-                  </g:ifAnyGranted>
-                  <input type="hidden" name="currentlyAcceptedFingerPrint" value="${certFingerPrint}">
-                  </td>
-                </tr>
-
-              </tbody>
-            </table>
-          </td></tr>
+        <tr>
+          <td><strong><g:message code="status.page.hostname.label" /></strong></td>
+          <td>${certHostname}</td>
+        </tr>
+        <tr>
+          <td><strong><g:message code="status.page.certValidity.label" /></strong></td>
+          <td>${certValidity}</td>
+        </tr>
+        <tr>
+          <td><strong><g:message code="status.page.certIssuer.label" /></strong></td>
+          <td>${certIssuer}</td>
+        </tr>
+        <tr>
+          <td><strong><g:message code="status.page.fingerPrint.label" /></strong></td>
+          <td>${certFingerPrint}</td>
+        </tr>
         </tbody>
       </table>
-    </div>
+      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
+        <div class="pull-right">
+          <g:actionSubmit action="acceptCertificate" value="${message(code:'status.page.validate.button')}" class="btn btn-primary"/>
+        </div>
+      </g:ifAnyGranted>
+      <input type="hidden" name="currentlyAcceptedFingerPrint" value="${certFingerPrint}">
   </g:form>
   </body>
 </html>
