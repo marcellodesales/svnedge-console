@@ -706,7 +706,29 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     public static final def BACKUP_TYPES = ['hotcopy', 'fullDump', 'cloud']
-    
+
+    /**
+     * Creates a trigger name based on repo and scheduling details. This
+     * method is exposed, so that it could be used in migrating existing
+     * backups when upgrading from 2.3 to 3.0.  It might be restricted in
+     * later releases. 
+     */
+    String generateTriggerName(Repository repo, DumpBean bean) {
+        def tName = "RepoDump-${repo.name}-" +
+            (bean.cloud ? BACKUP_TYPES[2] :
+            (bean.hotcopy ? BACKUP_TYPES[0] : BACKUP_TYPES[1]))
+        if (bean.backup) {
+            SchedulerBean schedule = bean.schedule
+            tName += "-" + (schedule.frequency == Frequency.WEEKLY ?
+                    schedule.dayOfWeek : 'X') + 'T'
+            tName += (schedule.frequency == Frequency.HOURLY) ?
+                    'HH' : pad(schedule.hour)
+            tName += pad(schedule.minute)
+            tName += (schedule.second < 0) ? "00" : pad(schedule.second)
+        }
+        return tName
+    }
+
     /**
      * method to schedule a RepoDump quartz job
      * @param bean the parameters for the dump job
@@ -716,16 +738,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     String scheduleDump(DumpBean bean, repo, Integer userId = null, 
             String tName = null) {
 
-        if (!tName) {
-            long jobId = generateJobId(repo)
-            tName = "RepoDump-${repo.name}-" + 
-                (bean.cloud ? BACKUP_TYPES[2] : 
-                (bean.hotcopy ? BACKUP_TYPES[0] : BACKUP_TYPES[1])) + 
-                '-' + jobId
-        }
-        def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         SchedulerBean schedule = bean.schedule
-        def trigger
         if (!schedule.frequency || schedule.frequency == Frequency.NOW) {
             schedule.frequency = Frequency.ONCE
             Calendar cal = Calendar.getInstance()
@@ -737,7 +750,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
             schedule.month = cal.get(Calendar.MONTH) + 1 // Calendar uses 0 for first month
             schedule.year = cal.get(Calendar.YEAR)
         }
-
         String seconds = (schedule.second < 0) ? "0" : "${schedule.second}"
         String minute = " ${schedule.minute}"
         String hour = " ${schedule.hour}"
@@ -763,7 +775,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String cron = seconds + minute + hour + dayOfMonth +
                 month + dayOfWeek + year
         log.debug("Scheduling backup dump using cron expression: " + cron)
-        trigger = new CronTrigger(tName, tGroup, cron)
+        if (!tName) {
+            tName = generateTriggerName(repo, bean)
+        }
+        def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
+        def trigger = new CronTrigger(tName, tGroup, cron)
         log.debug("cron expression summary:\n" + trigger.expressionSummary)
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
@@ -796,10 +812,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return bean.cloud ? null : dumpFilename(bean, repo)
     }
 
-    private long generateJobId(repo) {
-        return System.currentTimeMillis()
-    }
-    
     File prepareProgressLogFile(repoName, 
             isCloudBackup = false, isHotCopy = false) {
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")

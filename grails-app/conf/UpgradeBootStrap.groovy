@@ -16,8 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
+import com.collabnet.svnedge.admin.RepoDumpJob
+import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
@@ -32,9 +35,10 @@ class UpgradeBootStrap {
     def operatingSystemService
     def fileSystemStatisticsService
     def dataSource
+    def jobsAdminService
     def lifecycleService
     def serverConfService
-
+    def svnRepoService
 
     def init = { servletContext ->
         log.info("Applying updates")
@@ -42,6 +46,7 @@ class UpgradeBootStrap {
         release1_2_0()
         release1_3_1()
         release2_1_0()
+        release3_0_2()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -155,5 +160,45 @@ class UpgradeBootStrap {
 
         v.save()
 
+    }
+
+    def void release3_0_2() {
+        if (isSchemaCurrent(3, 0, 2)) {
+            return
+        }
+        log.info("Applying 3.0.2 updates")
+
+        def triggers = jobsAdminService
+                .getTriggers(RepoDumpJob.jobName, RepoDumpJob.group)
+        for (trigger in triggers) {
+            if (trigger.group == "Backup") {
+                String oldName = trigger.name
+                try {
+                    def dataMap = trigger.jobDataMap
+                    Repository repo = Repository.get(dataMap.get("repoId"))
+                    DumpBean bean = DumpBean.fromMap(dataMap)
+                    if (repo && bean) {
+                        String newName = 
+                                svnRepoService.generateTriggerName(repo, bean)
+                        if (oldName != newName) {
+                            jobsAdminService
+                                    .removeTrigger(oldName, trigger.group)
+                            trigger.name = newName
+                            jobsAdminService.scheduleTrigger(trigger)
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Failed to update trigger name for '" + oldName +
+                            "', so it may show up in Schedule Backup existing" +
+                            "jobs, but not in the Scheduled Jobs of the " +
+                            "individual repository.  To correct this, delete" +
+                            " the backup job from Schedule Backup screen.", e)
+                }
+            }
+        }
+
+        SchemaVersion v = new SchemaVersion(major: 3, minor: 0, revision: 2,
+                description: "3.0.2 Renamed quartz triggers for backup jobs")
+        v.save()
     }
 }
