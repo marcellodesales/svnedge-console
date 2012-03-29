@@ -28,4 +28,36 @@ class TestUtil {
         //testDir.deleteOnExit()
         return testDir
     }
+
+    /**
+     * creates a repo-like directory
+     * @param repoName repo to create
+     * @param repoParentDir file in which to create the repo
+     * @return
+     */
+    static File createMockRepo(String repoName, File repoParentDir) {
+
+        def entities = [ [dir:'conf'], [dir:'db'], [dir:'hooks'], [dir:'locks'],
+                [file:'format'], [file:'db/current'],
+                [file:'db/fsfs.conf'], [file:'db/min-unpacked-rev'],
+                [file:'format'], [file:'db/uuid'], [file:'db/fs-type'],
+                [file:'db/txn-current'], [file:'db/txn-current-lock']
+        ]
+        File repoDir
+        File repoFile
+
+        def newRepo = new File(repoParentDir.absolutePath, repoName)
+        newRepo.mkdir()
+
+        entities.each {
+            if (it['dir'] != null) {
+                repoDir = new File(newRepo, it['dir'])
+                repoDir.mkdir()
+            } else if (it['file'] != null) {
+                repoFile = new File(newRepo, it['file'])
+                repoFile.createNewFile()
+            }
+        }
+        return newRepo
+    }
 }

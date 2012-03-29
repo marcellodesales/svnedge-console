@@ -429,14 +429,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
     def removeRepository(Repository repo) {
 
         // delete FK'd stats first
-        def stats = StatValue.findAllByRepo(repo)
-        stats.each() {
-
-            Statistic stat = it.statistic
-            stat.removeFromStatValues(it)
-            repo.removeFromStatValues(it)
-            it.delete()
-        }
+        StatValue.executeUpdate("delete from StatValue s where s.repo.id = :repoId", [repoId: repo.id])
 
         // delete FK'd ReplicatedRepository
         def replicatedRepos = ReplicatedRepository.findAllByRepo(repo)
@@ -465,16 +458,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 {file -> isRepository(file) } as FileFilter))
 
         def repoFolderNames = files.collect { it.name }
+        def repoDbNames = Repository.list().collect() { it.name }
+        def isWindows = operatingSystemService.isWindows()
 
         // create DB rows for repositories IN SVN but not in DB
         repoFolderNames.each { folder ->
-            if (!Repository.findByName(folder)) {
+            if (!repoDbNames.contains(folder)) {
                 log.debug("Adding Respository row to represent folder: " +
                         "${folder}")
                 def r = new Repository(name: folder, permissionsOk: true)
 
                 // if Windows, assume permissions are OK; otherwise, validate
-                if (!operatingSystemService.isWindows()) {
+                if (!isWindows) {
                     r.permissionsOk = validateRepositoryPermissions(r)
                 }
                 r.save()
@@ -483,11 +478,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
         // remove DB rows for repositories NOT IN SVN
         def reposToDelete = []
-        Repository.list().each { repo ->
-            if (!repoFolderNames.contains(repo.name)) {
+        repoDbNames.each { repo ->
+            if (!repoFolderNames.contains(repo)) {
                 log.debug("Deleting Repository row with no matching folder: " +
-                        "${repo.name}")
-                reposToDelete << repo.name
+                        "${repo}")
+                reposToDelete << repo
             }
         }
 

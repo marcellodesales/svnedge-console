@@ -643,4 +643,43 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
                 .startsWith("The loading of the dump file or archive into repository '" + 
                 testRepoNameTarget + "' failed."))
     }
+
+    void testSyncRepositoriesPerformance() {
+
+        assertEquals ("Zero repos expected at startup", 0, Repository.count())
+
+        // create large set of repos out of band
+        log.info("Creating 1000 repos")
+        (1..1000).each {
+            def testRepoNameSrc = "sync-test-${it}"
+            TestUtil.createMockRepo(testRepoNameSrc, repoParentDir )
+        }
+
+        // run the sync method
+        def startTime = new Date()
+        log.info("Starting repo sync with 1000 to import at: " + startTime)
+        svnRepoService.syncRepositories()
+        def endTime = new Date()
+        log.info("Finished repo sync at: " + endTime)
+        log.info("Sync took " + (new Date().time - startTime.time) + "ms")
+
+        assertEquals ("1000 repositories expected after sync", 1000, Repository.count())
+
+        // delete the repos out of band
+        (1..1000).each {
+            def testRepoNameSrc = "sync-test-${it}"
+            def repo = new File(repoParentDir.absolutePath, testRepoNameSrc)
+            assertTrue("Should be able do delete repo", repo.deleteDir())
+        }
+
+        // run the sync method
+        startTime = new Date()
+        log.info("Starting repo sync with 1000 to delete at: " + startTime)
+        svnRepoService.syncRepositories()
+        endTime = new Date()
+        log.info("Finished repo sync at: " + endTime)
+        log.info("Sync took " + (new Date().time - startTime.time) + "ms")
+
+        assertEquals ("No repositories expected after sync", 0, Repository.count())
+    }
 }
