@@ -65,12 +65,12 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
                 repoParentDir: repoParentDir.absolutePath
         )
         def stat = new Statistic()
-        def statValue = new StatValue(repo:repoTest, statistic: stat)
+        def statValueMock = mockFor(StatValue, true)
+        statValueMock.demand.static.executeUpdate() { p1, p2 -> return true }
         def replicatedRepo = new ReplicatedRepository(repo : repoTest)
 
         mockDomain (Server, [testServer])
         mockDomain (Repository, [repoTest])
-        mockDomain (StatValue, [statValue])
         mockDomain (Statistic, [stat])
         mockDomain (ReplicatedRepository, [replicatedRepo])
 
@@ -101,6 +101,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         svc.commandLineService = cls
         svc.serverConfService = repoSvc
         svc.operatingSystemService = osSvc
+
     }
 
     protected void tearDown() {
