@@ -775,8 +775,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String cron = seconds + minute + hour + dayOfMonth +
                 month + dayOfWeek + year
         log.debug("Scheduling backup dump using cron expression: " + cron)
-        if (!tName) {
-            tName = generateTriggerName(repo, bean)
+        if (tName) {
+            jobsAdminService.removeTrigger(tName, BACKUP_TRIGGER_GROUP)
+        }
+        tName = generateTriggerName(repo, bean)
+        
+        def descKey = "repository.action.createAdhocDumpfile.job.description"
+        if (bean.backup) {
+            descKey = bean.cloud ? "repository.action.cloudSync.job.description" :
+                    bean.hotcopy ? "repository.action.createHotcopy.job.description" :
+                    "repository.action.createDumpfile.job.description"
         }
         def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
         def trigger = new CronTrigger(tName, tGroup, cron)
@@ -789,8 +797,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 prepareProgressLogFile(repo.name, bean.cloud, bean.hotcopy)
         def jobDataMap =
         [id: tName, repoId: repo.id,
-                description: getMessage("repository.action.createDumpfile.job.description",
-                        [repo.name], bean.userLocale),
+                description: getMessage(descKey, [repo.name], bean.userLocale),
                 progressLogFile: progressFile.absolutePath,
                 urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
                 urlResult: "/csvn/repo/dumpFileList/${repo.id}",
@@ -798,8 +805,6 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 locale: bean.userLocale]
         if (bean.cloud) {
             jobDataMap['urlResult'] = repo.cloudSvnUri
-            jobDataMap['description'] = getMessage("repository.action.cloudSync.job.description",
-                    [repo.name], bean.userLocale)
         }
         if (userId) {
             jobDataMap['userId'] = userId
