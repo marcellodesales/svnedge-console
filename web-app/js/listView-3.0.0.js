@@ -69,16 +69,20 @@ function updateActionButtons()  {
 function applyCheckboxObserver() {
     var allItemSelectCheckboxes = $('input.listViewSelectItem');
     allItemSelectCheckboxes.removeAttr("checked");
-    allItemSelectCheckboxes.removeAttr("checked");
-    allItemSelectCheckboxes.each(function() {
-        $(this).on('click', function() {
-            if ($(this).hasClass("radio")) {
-                currentId = $(this).attr("id");
-                $('input.listViewSelectItem:checked[id!="' + currentId + '"]').removeAttr("checked");
-            }
-            updateActionButtons();
-        });
-    })
+    applyCheckboxObserverTo(allItemSelectCheckboxes);
+}
+
+function applyCheckboxObserverTo(jQueryObject) {
+    $(jQueryObject).unbind("click", listViewCheckboxClickHandler);
+    $(jQueryObject).click(listViewCheckboxClickHandler);
+}
+
+function listViewCheckboxClickHandler() {
+    if ($(this).hasClass("radio")) {
+        currentId = $(this).attr("id");
+        $('input.listViewSelectItem:checked[id!="' + currentId + '"]').removeAttr("checked");
+    }
+    updateActionButtons();
 }
 
 /**

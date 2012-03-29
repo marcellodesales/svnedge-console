@@ -91,6 +91,10 @@
         "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
       },
+      "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+          applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
+      },
+      "fnDrawCallback": updateActionButtons, 
       <g:if test="${adminView}">  
       "aaSorting": [[ 1, "asc" ]],
       "aoColumns": [
@@ -150,8 +154,6 @@
     filterElement= $('#datatable_filter').find("input")
   	filterElement.keyup( function () {
         dt.fnFilter(filterElement.attr("value"), 1);
-        applyCheckboxObserver();
-        updateActionButtons();
     } );
   } );
 </g:javascript>

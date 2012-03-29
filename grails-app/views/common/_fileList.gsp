@@ -70,6 +70,10 @@
         "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
         },
+      "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+          applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
+      },
+      "fnDrawCallback": updateActionButtons, 
       "aaSorting": [[ 1, "asc" ]]
     } );
   } );

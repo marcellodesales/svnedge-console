@@ -417,6 +417,10 @@
       "fnStateLoad": tableState.load('jobDataTable'),
       "oLanguage": i18nMessages,
       "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
+            "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+          applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
+      },
+      "fnDrawCallback": updateActionButtons, 
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [
       {"sTitle": "<g:listViewSelectAll/>", 
@@ -455,12 +459,6 @@
     ] 
    })
    
-    filterElement= $('#jobDataTable_filter').find("input")
-    filterElement.keyup( function () {
-        applyCheckboxObserver();
-        updateActionButtons();
-    } );
-    
  <g:if test="${!repositoryInstance}">
   var newJobdt = $('#newJobDataTable').dataTable( {
       "aaData": newJobDataSet,
@@ -471,6 +469,10 @@
       "fnStateLoad": tableState.load('newJobDataTable'),
       "oLanguage": i18nMessages,
       "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
+      "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+          applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
+      },
+      "fnDrawCallback": updateActionButtons, 
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [
       {"sTitle": "<g:listViewSelectAll name="newJobSelectAll"/>", 
@@ -511,12 +513,6 @@
     ]
   });
    
-  filterElement= $('#newJobDataTable_filter').find("input")
-  filterElement.keyup( function () {
-      applyCheckboxObserver();
-      updateActionButtons();
-  });
-  
   $(document).ready(function() {
     var tabs = ['#existingJobsLink', '#newJobsLink'];
     for (var i = 0; i < tabs.length; i++) {
