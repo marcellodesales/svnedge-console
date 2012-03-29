@@ -105,7 +105,11 @@ class CsvnTagLib {
      * @return the select all checkbox
      */
     def listViewSelectAll = { attrs ->
-        out << "<input type='checkbox' id='listViewSelectAll' name='listViewSelectAll'/>"
+        def name = 'listViewSelectAll'
+        if (attrs.name) {
+            name = attrs.name
+        }
+        out << "<input type='checkbox' id='${name}' name='${name}' class='listViewSelectAll'/>"
     }
 
     /**
@@ -206,7 +210,7 @@ class CsvnTagLib {
         out << '\n<script type="text/javascript">\n'
         out << "  var button = \$('#${buttonId}');\n"
         out << "  button.data('minSelected', ${attrs.minSelected ?: 1});\n"
-        out << "  button.data('maxSelected', ${attrs.maxSelected ?: 100});\n"
+        out << "  button.data('maxSelected', ${attrs.maxSelected ?: 10000000});\n"
         
         // script for displaying a confirmation dialog 
         if (attrs.confirmMessage) {

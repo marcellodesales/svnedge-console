@@ -416,6 +416,7 @@
       "fnStateSave": tableState.save('jobDataTable'),
       "fnStateLoad": tableState.load('jobDataTable'),
       "oLanguage": i18nMessages,
+      "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [
       {"sTitle": "<g:listViewSelectAll/>", 
@@ -469,9 +470,10 @@
       "fnStateSave": tableState.save('newJobDataTable'),
       "fnStateLoad": tableState.load('newJobDataTable'),
       "oLanguage": i18nMessages,
+      "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
     "aaSorting": [[ 1, "asc" ]],
     "aoColumns": [
-      {"sTitle": "<g:listViewSelectAll/>", 
+      {"sTitle": "<g:listViewSelectAll name="newJobSelectAll"/>", 
        "bSortable": false,
        "fnRender": function (oObj, sVal) {
            return '<input type="checkbox" class="listViewSelectItem" id="listViewItem_' + 
@@ -519,6 +521,7 @@
     var tabs = ['#existingJobsLink', '#newJobsLink'];
     for (var i = 0; i < tabs.length; i++) {
       $(tabs[i]).click(function() {
+        $('input.listViewSelectAll').removeAttr("checked");
         $('input.listViewSelectItem').removeAttr("checked");
       });
     }

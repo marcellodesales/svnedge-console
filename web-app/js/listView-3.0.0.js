@@ -29,18 +29,18 @@ $(function() {
     applyCheckboxObserver();
 
     // "select all" handler
-    if ($('#listViewSelectAll')) {
-        $('#listViewSelectAll').on('click', function(event) {
+    $('input.listViewSelectAll').click( function(event) {
+        	var table = $(this).parents('table').first();
+        	var cboxes = table.find('input.listViewSelectItem');
             // set all the item checkboxes to state of the "select all" checkbox
-            var checkedState = $('#listViewSelectAll').is(':checked');
-            $('input.listViewSelectItem').each(function() {
+            var checkedState = $(this).is(':checked');
+            cboxes.each(function() {
                 if (!$(this).attr('disabled')) {
                     $(this).attr('checked', checkedState)
                 }
             })
             updateActionButtons()
-        })
-    }
+        });
 
     // enable/disable action buttons based on initial page state
     updateActionButtons();
