@@ -646,7 +646,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     void testSyncRepositoriesPerformance() {
 
-        assertEquals ("Zero repos expected at startup", 0, Repository.count())
+        def beginningRepoCount = Repository.count()
 
         // create large set of repos out of band
         log.info("Creating 1000 repos")
@@ -663,7 +663,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         log.info("Finished repo sync at: " + endTime)
         log.info("Sync took " + (new Date().time - startTime.time) + "ms")
 
-        assertEquals ("1000 repositories expected after sync", 1000, Repository.count())
+        def expectedRepos = beginningRepoCount + 1000
+        assertEquals ("${expectedRepos} repositories expected after sync", expectedRepos, Repository.count())
 
         // delete the repos out of band
         (1..1000).each {
@@ -680,6 +681,6 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         log.info("Finished repo sync at: " + endTime)
         log.info("Sync took " + (new Date().time - startTime.time) + "ms")
 
-        assertEquals ("No repositories expected after sync", 0, Repository.count())
+        assertEquals ("${beginningRepoCount} repositories expected after sync", beginningRepoCount, Repository.count())
     }
 }
