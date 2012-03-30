@@ -646,6 +646,8 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     void testSyncRepositoriesPerformance() {
 
+        // get the baseline repo count
+        svnRepoService.syncRepositories()
         def beginningRepoCount = Repository.count()
 
         // create large set of repos out of band
