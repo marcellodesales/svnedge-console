@@ -83,7 +83,7 @@
     <p><span class="pull-right"><a href="/csvn/repo/bkupScheduleMultiple?type=cloud"
        class="btn btn-primary"><g:message code="setupCloudServices.page.credentials.backup"/> &raquo;</a>
        &nbsp;&nbsp;<a class="btn btn-primary" target="_blank"
-       href="https://app.codesion.com/ajax#dashboard"><g:message code="setupCloudServices.page.credentials.cloud"/> &raquo;</a>
+       href="https://app.cloudforge.com"><g:message code="setupCloudServices.page.credentials.cloud"/> &raquo;</a>
     </span></p>
   </div>
 
@@ -91,7 +91,7 @@
     <p><img src="${resource(dir:'images/cloud',file:'cloudforge-logo.png')}" /></p>
     <p><g:message code="setupCloudServices.page.index.service.migrate.detail"/></p>
     <p><span class="pull-right"><a target="_blank"
-        href="https://app.codesion.com/ajax#signup?mode=demo&source=svnedge" class="btn btn-primary"><g:message code="setupCloudServices.page.index.button.moveToCloud"/></a></span>
+        href="https://app.cloudforge.com/trial_signup/new?source=svnedge" class="btn btn-primary"><g:message code="setupCloudServices.page.index.button.moveToCloud"/></a></span>
     </p>
   </div>
 
