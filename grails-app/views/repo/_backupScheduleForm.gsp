@@ -416,8 +416,8 @@
       "fnStateSave": tableState.save('jobDataTable'),
       "fnStateLoad": tableState.load('jobDataTable'),
       "oLanguage": i18nMessages,
-      "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
-            "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+      "aLengthMenu": [25, 50, 100, 1000],
+      "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
           applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
       },
       "fnDrawCallback": updateActionButtons, 
@@ -468,7 +468,7 @@
       "fnStateSave": tableState.save('newJobDataTable'),
       "fnStateLoad": tableState.load('newJobDataTable'),
       "oLanguage": i18nMessages,
-      "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, '<g:message code="datatable.rowsPerPage.all"/>']],
+      "aLengthMenu": [25, 50, 100, 1000],
       "fnCreatedRow": function(nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
           applyCheckboxObserverTo($('input.listViewSelectItem', nRow));
       },

@@ -522,6 +522,11 @@ class RepoController {
     
     /**  redirect based on origin (single repo or multiple-repo backup) */
     private void bkupRedirect() {
+        params.keySet().collect({it}).each() {
+            if (it.startsWith('listViewItem_')) {
+                params.remove(it)
+            }
+        }
         if (params.id) {
             redirect(action: 'bkupSchedule', params: params)
         }
