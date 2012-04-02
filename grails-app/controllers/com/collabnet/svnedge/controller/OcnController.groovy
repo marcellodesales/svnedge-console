@@ -41,7 +41,7 @@ class OcnController {
         try {
             def page = cloudEnabled ?
                     AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
-                    'svnedge-cloud.html' : 'svnedge-cloud-user.html' : 'svnedge-cloud.html'
+                    'svnedge-banner.html' : 'svnedge-banner-user.html' : 'svnedge-banner.html'
             def ocnContent = getPageContent('http://tab.open.collab.net/nonav/' + page)
             [ocnContent: ocnContent]
 
