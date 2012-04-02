@@ -43,15 +43,13 @@ class OcnController {
                     AuthorizeTools.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS') ?
                     'svnedge-banner.html' : 'svnedge-banner-user.html' : 'svnedge-banner.html'
             def ocnContent = getPageContent('http://tab.open.collab.net/nonav/' + page)
-            [ocnContent: ocnContent]
+            return [ocnContent: ocnContent, cloudEnabled: cloudEnabled]
 
         } catch (Exception e) {
             //No connection to the host... Possibly because the user is behind
-            //a proxy or there's no Internet connectivity. Use the iframe on
-            //the browser instead (might be configured with proxy, if that's
-            //the case)
+            //a proxy or there's no Internet connectivity. 
             log.debug "Unable to contact url, using proxy", e
-            render(view: "index-proxy", model: ['cloudEnabled': cloudEnabled])
+            return [cloudEnabled: cloudEnabled]
         }
     }
 

@@ -4,8 +4,26 @@
   </head>
   <body>
 
-  <!-- Banner content from OCN -->
-  <%= ocnContent %>
+  <g:if test="${ocnContent}">
+    <!-- Banner content from OCN begin -->
+    <%= ocnContent %>
+    <!-- Banner content from OCN end -->  
+  </g:if>
+  <g:else>
+    <!-- Banner content begin -->
+    <g:if test="${cloudEnabled}">
+      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS">
+        <g:render template="bannerAdmin"/>
+      </g:ifAnyGranted>
+      <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS">
+        <g:render template="bannerUser"/>
+      </g:ifNotGranted>
+    </g:if>
+    <g:else>
+      <g:render template="bannerAdmin"/>
+    </g:else>
+    <!-- Banner content end -->
+  </g:else>
 
     <div class="row-fluid">
       <div class="span4">
