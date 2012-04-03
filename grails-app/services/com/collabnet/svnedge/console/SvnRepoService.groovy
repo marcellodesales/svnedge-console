@@ -1378,9 +1378,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
                         progress, locale)
                 log.warn("Hotcopy of ${repo.name} repository failed to verify")
             }
+            progress.close()
+            progress = null
+            progressLogFile.delete()
         } finally {
             progress?.close()
-            progressLogFile.delete()
             tmpDir.deleteDir()
         }
         cleanupOldBackups(bean, repo)

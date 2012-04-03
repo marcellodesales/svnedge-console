@@ -78,7 +78,7 @@ class RepoDumpJob {
             } catch (ConcurrentBackupException e) {
                 log.warn("Backup skipped: " + e.message)
             } catch (Exception e) {
-                log.warn("Repository dump failed", e)
+                log.warn("Repository dump/hotcopy/svnsync failed", e)
                 def path = dataMap['progressLogFile']
                 File progressFile = path ? new File(path) : null
                 if (progressFile.exists()) {
@@ -87,7 +87,9 @@ class RepoDumpJob {
                     String ts = new Date().format('yyyyMMddHHmmss')
                     String newPath = path.substring(0, dot) + '-' + 
                             ts + path.substring(dot)
-                    progressFile.renameTo(newPath)
+                    File tsFile = new File(newPath)
+                    progressFile.renameTo(tsFile)
+                    progressFile = tsFile
                 }
 
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,

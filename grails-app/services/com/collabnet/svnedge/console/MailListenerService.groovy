@@ -102,6 +102,12 @@ class MailListenerService extends AbstractSvnEdgeService
                     sendLoadMail(toAddress, ccAddress, fromAddress, event)
                 break
             }
+            
+            // we've sent an email, so clean up the process log
+            def processOutput = getProcessOutput(event)
+            if (processOutput && !isPartial(processOutput)) {
+                event.processOutput.delete()
+            }
         }
     }
 
@@ -120,6 +126,20 @@ class MailListenerService extends AbstractSvnEdgeService
                     it.skip(skipBytes)
                     it.read(s)
                 }
+            }
+        }
+        return s
+    }
+
+    private static final int MAX_TAIL_SIZE = 500
+    
+    private String getProcessOutputTail(RepositoryEvent event) {
+        File f = event.processOutput
+        String s = null
+        if (f?.exists()) {
+            s = f.text
+            if (s.length() > MAX_TAIL_SIZE) {
+                s = s.substring(s.length() - MAX_TAIL_SIZE, s.length())
             }
         }
         return s
@@ -151,22 +171,25 @@ class MailListenerService extends AbstractSvnEdgeService
                  filename, repoLink, downloadLink], locale)
         } else {
             processOutput = getProcessOutput(event)
+            def processOutputTail = getProcessOutputTail(event)
             if (event.exception) {
                 def e = event.exception
                 GrailsUtil.deepSanitize(e)
                 mailBody = getMessage('mail.message.dump.body.error',
-                        [dumpBean.hotcopy ? 1 : 0, dumpBean.backup ? 0 : 1, 
+                        [dumpBean.hotcopy ? 1 : dumpBean.cloud ? 2 : 0, 
+                         dumpBean.backup ? 0 : 1, 
                          repo.name, e.message,
                          e.class.name, e.getStackTrace().join('\n'),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name], locale)
+                         event.processOutput?.name, processOutputTail], locale)
             } else {
                 mailBody = getMessage('mail.message.dump.body.error',
-                        [dumpBean.hotcopy ? 1 : 0, dumpBean.backup ? 0 : 1, 
+                        [dumpBean.hotcopy ? 1 : dumpBean.cloud ? 2 : 0, 
+                         dumpBean.backup ? 0 : 1, 
                          repo.name, '', '', '', processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name], locale)
+                         event.processOutput?.name, processOutputTail], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)
@@ -194,6 +217,7 @@ class MailListenerService extends AbstractSvnEdgeService
                     [repo.name], locale)
         } else {
             processOutput = getProcessOutput(event)
+            def processOutputTail = getProcessOutputTail(event)
             if (event.exception) {
                 def e = event.exception
                 GrailsUtil.deepSanitize(e)
@@ -202,12 +226,12 @@ class MailListenerService extends AbstractSvnEdgeService
                          e.class.name, e.stackTrace.join('\n'),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name], locale)
+                         event.processOutput?.name, processOutputTail], locale)
             } else {
                 mailBody = getMessage('mail.message.load.body.error',
                         [repo.name, '', '', '', processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name], locale)
+                         event.processOutput?.name, processOutputTail], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)

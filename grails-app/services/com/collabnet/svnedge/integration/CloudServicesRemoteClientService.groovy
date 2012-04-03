@@ -506,7 +506,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return repo.name
     }
 
-    boolean synchronizeRepository(Repository repo, Locale locale = null) 
+    void synchronizeRepository(Repository repo, Locale locale = null) 
         throws CloudServicesException, ConcurrentBackupException {
 
         boolean isCloud = true
@@ -523,10 +523,12 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             println('cloud.service.bkup.progress.preamble', 
                 [new Date().toString(), repo.name], fos, locale)
 
-            return synchronizeRepositoryWithProgress(repo, fos, locale)
+            synchronizeRepositoryWithProgress(repo, fos, locale)
+            fos.close()
+            fos = null
+            progressFile.delete()
         } finally {
             fos?.close()
-            progressFile.delete()
         }
     }
 
@@ -672,7 +674,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return cloudSvnURI
     }
 
-    private boolean synchronizeRepositoryWithProgress(repo, fos, locale) 
+    private void synchronizeRepositoryWithProgress(repo, fos, locale) 
             throws CloudServicesException {
 
         String cloudSvnURI = setupProjectAndService(repo, fos, locale)
@@ -716,7 +718,6 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             repo.save()
         }
 
-        String startSyncMessage = 
         log.debug("Syncing repo '${repo.name}' at local timestamp: ${new Date()}...")
         println('cloud.service.bkup.progress.svnsync.sync', [repo.name], fos, locale)
         def command = [ConfigUtil.svnsyncPath(), "sync", cloudSvnURI,
