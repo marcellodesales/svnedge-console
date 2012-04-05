@@ -235,8 +235,10 @@ $('#bindInstructions').hide();
       
         <g:propCheckBox bean="${server}" field="useSsl" prefix="server"/>
         <g:propCheckBox bean="${server}" field="useSslConsole" prefix="server"/>
-        <g:propCheckBox bean="${server}" field="defaultStart" prefix="server"/>
-
+        <g:if test="${server.defaultStart}">
+          <g:propCheckBox bean="${server}" field="defaultStart" prefix="server"/>
+          <div class="alert alert-warning"><g:message code="server.defaultStart.notRecommended"/></div>
+        </g:if>
       </fieldset>
       <div class="form-actions">
         <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
