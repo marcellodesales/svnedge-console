@@ -28,6 +28,7 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
 
     public void setUp() {
         super.setUp()
+        mockLogging(JobsInfoService)
         this.jobsInfoService = new JobsInfoService()
         def scheduler = new Expando()
         scheduler.getTriggersOfJob = {p1, p2 -> []}
@@ -39,9 +40,9 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
      */
     public void testJobsRunningAndFinished() {
 
-        def job = [dataMap: [:], run: {Thread.sleep(200)}]
+        def job = [dataMap: [id: "1"], run: {Thread.sleep(200)}]
         jobsInfoService.queueJob(job, new Date())
-        job = [dataMap: [:], run: {Thread.sleep(400)}]
+        job = [dataMap: [id: "2"], run: {Thread.sleep(400)}]
         jobsInfoService.queueJob(job, new Date())
         
         Thread.sleep(50)
@@ -100,4 +101,33 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         assertEquals("there should be 0 scheduled jobs according to the service", 0,
             jobsInfoService.scheduledJobs.size())
     }
+    
+    /**
+    * validates that attempts to queue a job already in the queue will not
+    * add a second copy.
+    */
+   public void testDuplicateJob() {
+
+       Date now = new Date()
+       (1..8).each {
+           def job = [dataMap: [id: "${it}"], run: {Thread.sleep(200)}]
+           jobsInfoService.queueJob(job, now)
+       }
+       Thread.sleep(50)
+       assertEquals("there should be 3 running jobs according to the service", 3,
+               jobsInfoService.runningJobs.size())
+       assertEquals("there should be 5 scheduled jobs according to the service", 5,
+               jobsInfoService.scheduledJobs.size())
+
+       def job = [dataMap: [id: "8"], run: {Thread.sleep(200)}]
+       jobsInfoService.queueJob(job, new Date())
+       Thread.sleep(50)
+       assertEquals("there should be 3 running jobs according to the service", 3,
+               jobsInfoService.runningJobs.size())
+       assertEquals("there should be 5 scheduled jobs according to the service", 5,
+               jobsInfoService.scheduledJobs.size())
+       assertEquals("later duplicate job should be skipped " + 
+               jobsInfoService.scheduledJobs, now.time, 
+               jobsInfoService.scheduledJobs["8"].scheduledFireTime.time)
+   }
 }

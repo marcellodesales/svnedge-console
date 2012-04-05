@@ -57,24 +57,34 @@ class JobsInfoService extends AbstractSvnEdgeService {
             });
 
     void queueJob(def job, Date scheduledFireTime) {
-        
+        def jobId = "${job.dataMap.id}"
+        if (!runningJobs.containsKey(jobId) && !queuedJobs.containsKey(jobId)) {
+            doQueueJob(jobId, job, scheduledFireTime)
+        } else {
+            log.info("Job " + jobId + " scheduled for " + scheduledFireTime +
+                " was skipped because the job is still running or is queued" +
+                " to run from an earlier trigger")
+        }
+    }
+    
+    private void doQueueJob(def jobId, def job, Date scheduledFireTime) {
         def jobCtx = [scheduledFireTime: scheduledFireTime,
                       jobRunTime: -1,
                       mergedJobDataMap: job.dataMap]
-        queuedJobs.put(job, jobCtx)
+        queuedJobs.put(jobId, jobCtx)
         queue.execute( {
-            queuedJobs.remove(job)
+            queuedJobs.remove(jobId)
             Date startDate = new Date()
             jobCtx.fireTime = startDate
-            runningJobs.put(job, jobCtx)
+            runningJobs.put(jobId, jobCtx)
             try {
                 job.run()
                 jobCtx.jobRunTime = System.currentTimeMillis() - startDate.time
-                finishedJobs.put(job, jobCtx)
+                finishedJobs.put(jobId, jobCtx)
             } catch (Exception e) {
                 log.warn("Job execution failed.", e)
             } finally {
-                runningJobs.remove(job)
+                runningJobs.remove(jobId)
             }
         } as Runnable)
     }
@@ -90,18 +100,18 @@ class JobsInfoService extends AbstractSvnEdgeService {
         
         queuedJobs.values().each {
             it.nextFireTime = it.scheduledFireTime
-            triggerInfo << ["${it.mergedJobDataMap.id}": it]
+            triggerInfo["${it.mergedJobDataMap.id}"] = it
         }
         
         interestingJobs.each { it ->
             Trigger[] t = quartzScheduler.getTriggersOfJob(it.name, it.group)
             t.each {
                 if (it.nextFireTime) {
-                    triggerInfo << ["${it.fullName}": [
+                    triggerInfo["${it.fullName}"] = [
                             nextFireTime: it.nextFireTime,
                             jobRunTime: -1,
                             mergedJobDataMap: it.jobDataMap
-                    ]]
+                    ]
                 }
             }
         }
