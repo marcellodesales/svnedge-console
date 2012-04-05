@@ -40,9 +40,11 @@
     ['${i + 1}',
       '${jobCtx.mergedJobDataMap.id}',
       '${JavaScriptUtils.javaScriptEscape(jobDesc)}',
-      '${(scheduledTime) ? formatDate(format: logDateFormat, date: scheduledTime) : "-"}',
-      '${(jobCtx.fireTime) ? formatDate(format: logDateFormat, date: jobCtx.fireTime) : "-"}',
+      '${(scheduledTime) ? formatDate(format: logDateFormat, date: scheduledTime) : "-"}'
+    <g:if test="${view != 'scheduled'}">
+      ,'${(jobCtx.fireTime) ? formatDate(format: logDateFormat, date: jobCtx.fireTime) : "-"}',
       '${(jobCtx.jobRunTime > -1) ? formatDate(format: logDateFormat, date: new Date(jobCtx.fireTime.time + jobCtx.jobRunTime)) : "-"}'
+    </g:if>
     ] <g:if test="${i < (itemList.size() - 1)}">,</g:if>
   </g:each>
   ];
@@ -51,17 +53,21 @@
 <g:javascript library="jquery.dataTables.min"/>
 <g:javascript library="DT_bootstrap"/>
 <g:javascript>
+    <g:if test="${view == 'scheduled'}"><g:set var="idWidth" value="40%"/></g:if>
+    <g:else><g:set var="idWidth" value="30%"/></g:else>  
   /* Table initialisation */
   $(document).ready(function() {
     $('#${tableName}').dataTable( {
       "aaData": aDataSet,
       "aoColumns": [
-        {"sTitle": "#"},
-        {"sTitle": "${message(code: 'job.page.list.column.id')}"},
+        {"sTitle": "#", "sWidth": "5%"},
+        {"sTitle": "${message(code: 'job.page.list.column.id')}", "sWidth": "${idWidth}"},
         {"sTitle": "${message(code: 'job.page.list.column.description')}" },
-        {"sTitle": "${message(code: 'job.page.list.column.scheduled')}" },
-        {"sTitle": "${message(code: 'job.page.list.column.started_at')}" },
+        {"sTitle": "${message(code: 'job.page.list.column.scheduled')}" }
+      <g:if test="${view != 'scheduled'}">  
+        ,{"sTitle": "${message(code: 'job.page.list.column.started_at')}" },
         {"sTitle": "${message(code: 'job.page.list.column.finished_at')}" }
+      </g:if>
 		  ],
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
