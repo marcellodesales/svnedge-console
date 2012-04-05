@@ -26,6 +26,7 @@ import com.collabnet.svnedge.event.LoadRepositoryEvent
  */
 class RepoLoadJob {
 
+    def jobsInfoService
     def svnRepoService
 
     static def group = "Maintenance"
@@ -38,6 +39,15 @@ class RepoLoadJob {
     def execute(context) {
         log.info("Executing scheduled RepoLoad ...")
         def dataMap = context.getMergedJobDataMap()
+        jobsInfoService
+                .queueJob(backupRunnable(dataMap), context.scheduledFireTime)
+    }
+    
+    def backupRunnable = { dataMap ->
+        return [
+            dataMap: dataMap,
+            run: {
+
         Repository repo = Repository.get(dataMap.get("repoId"))
         if (!repo) {
             log.error("Unable to execute the repo load: repoId not found")
@@ -59,6 +69,7 @@ class RepoLoadJob {
                     dataMap['progressLogFile'] ? 
                     new File(dataMap['progressLogFile']) : null, e))
         }
+        }]
     }
 }
 

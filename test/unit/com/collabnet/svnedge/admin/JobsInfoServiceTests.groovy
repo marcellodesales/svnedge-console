@@ -29,6 +29,9 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     public void setUp() {
         super.setUp()
         this.jobsInfoService = new JobsInfoService()
+        def scheduler = new Expando()
+        scheduler.getTriggersOfJob = {p1, p2 -> []}
+        this.jobsInfoService.quartzScheduler = scheduler
     }
 
     /**
@@ -36,91 +39,65 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
      */
     public void testJobsRunningAndFinished() {
 
-        def e1 = createMockJobExecutionContext()
-        jobsInfoService.jobStarted(e1)
-
-        def e2 =  createMockJobExecutionContext()
-        jobsInfoService.jobStarted(e2)
-
+        def job = [dataMap: [:], run: {Thread.sleep(200)}]
+        jobsInfoService.queueJob(job, new Date())
+        job = [dataMap: [:], run: {Thread.sleep(400)}]
+        jobsInfoService.queueJob(job, new Date())
+        
+        Thread.sleep(50)
         assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
 
-        jobsInfoService.jobFinished(e2)
-
+        Thread.sleep(200)
         assertEquals("there should be 1 running job according to the service", 1,
                 jobsInfoService.runningJobs.size())
-
         assertEquals("there should be 1 finished job according to the service", 1,
+                jobsInfoService.finishedJobs.size())
+
+        Thread.sleep(200)
+        assertEquals("there should be 1 running job according to the service", 0,
                 jobsInfoService.runningJobs.size())
-
+        assertEquals("there should be 1 finished job according to the service", 2,
+                jobsInfoService.finishedJobs.size())
     }
-
-    /**
-     * validates that JobInfoService only tracks jobs of interest
-     */
-    public void testInterestingJobsOnly() {
-
-        def jobOfInterest = createMockJobExecutionContext(true)
-        jobsInfoService.jobStarted(jobOfInterest)
-
-        def notInterested =  createMockJobExecutionContext(false)
-        jobsInfoService.jobStarted(notInterested)
-
-        assertEquals("there should be 1 running jobs according to the service", 1,
-                jobsInfoService.runningJobs.size())
-
-    }
-
 
     /**
      * validates that info of only 5 recent jobs are retained
      */
     public void testFinishedJobsPruning() {
 
-        def jobContexts = []
-        (1..6).each {
-            jobContexts << createMockJobExecutionContext()
+        (1..8).each {
+            def job = [dataMap: [id: "${it}"], run: {Thread.sleep(200)}]
+            jobsInfoService.queueJob(job, new Date())
         }
-
-        jobContexts.each {
-            jobsInfoService.jobStarted(it)
-        }
-
-        assertEquals("there should be 6 running jobs according to the service", 6,
+        Thread.sleep(50)
+        assertEquals("there should be 3 running jobs according to the service", 3,
                 jobsInfoService.runningJobs.size())
+        assertEquals("there should be 5 scheduled jobs according to the service", 5,
+            jobsInfoService.scheduledJobs.size())
 
-        jobContexts.each {
-            jobsInfoService.jobFinished(it)
-        }
+        Thread.sleep(200)
+        assertEquals("there should be 3 running jobs according to the service", 3,
+                jobsInfoService.runningJobs.size())
+        assertEquals("there should be 3 finished jobs according to the service", 3,
+            jobsInfoService.finishedJobs.size())
+        assertEquals("there should be 2 scheduled jobs according to the service", 2,
+            jobsInfoService.scheduledJobs.size())
 
+        Thread.sleep(200)
+        assertEquals("there should be 3 running jobs according to the service", 2,
+                jobsInfoService.runningJobs.size())
+        assertEquals("there should be 5 finished jobs according to the service", 5,
+            jobsInfoService.finishedJobs.size())
+        assertEquals("there should be 0 scheduled jobs according to the service", 0,
+            jobsInfoService.scheduledJobs.size())
+
+        Thread.sleep(200)
         assertEquals("there should be 0 running jobs according to the service", 0,
                 jobsInfoService.runningJobs.size())
-
-        assertEquals("there should be 5 finished job according to the service (oldest dropped)", 5,
-                jobsInfoService.finishedJobs.size())
-
+        assertEquals("there should be 5 finished jobs according to the service", 5,
+            jobsInfoService.finishedJobs.size())
+        assertEquals("there should be 0 scheduled jobs according to the service", 0,
+            jobsInfoService.scheduledJobs.size())
     }
-
-    /**
-     * helper to create a mock JobExecutionContext
-     * @param isObserved boolean whether to provide a context of the type that JobInfoService is observing
-     * @return
-     */
-    def createMockJobExecutionContext(boolean isObserved = true) {
-
-        def jobDetail = new Expando()
-        jobDetail.name = (isObserved) ?
-                jobsInfoService.interestingJobs[0].name :
-                "TestJobName${Math.floor(Math.random() * 1000)}"
-        jobDetail.group = (isObserved) ?
-                jobsInfoService.interestingJobs[0].group :
-                "TestJobGroup${Math.floor(Math.random() * 1000)}"
-
-        def job = new Expando()
-        job.jobDetail = jobDetail
-        job.jobInstance = new Object()
-
-        return job
-    }
-    
 }

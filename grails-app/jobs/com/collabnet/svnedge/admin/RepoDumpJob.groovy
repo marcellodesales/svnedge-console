@@ -30,6 +30,7 @@ class RepoDumpJob {
 
     def svnRepoService
     def cloudServicesRemoteClientService
+    def jobsInfoService
 
     static def jobName = "com.collabnet.svnedge.admin.RepoDumpJob"
     static def group = "Maintenance"
@@ -46,6 +47,15 @@ class RepoDumpJob {
     private void dumpOrBackup(context) {
         log.info("Executing scheduled RepoDump ...")
         def dataMap = context.getMergedJobDataMap()
+        jobsInfoService
+                .queueJob(backupRunnable(dataMap), context.scheduledFireTime)
+    }
+    
+    def backupRunnable = { dataMap ->
+        return [
+            dataMap: dataMap,
+            run: {
+                
         Repository repo = Repository.get(dataMap.get("repoId"))
         DumpBean dumpBean = DumpBean.fromMap(dataMap)
         if (repo && dumpBean) {
@@ -91,7 +101,6 @@ class RepoDumpJob {
                     progressFile.renameTo(tsFile)
                     progressFile = tsFile
                 }
-
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,
                         dumpBean, repo, DumpRepositoryEvent.FAILED, 
                         dataMap['userId'], dataMap['locale'], progressFile, e))
@@ -100,6 +109,7 @@ class RepoDumpJob {
         else {
             log.warn("Unable to execute the repo backup")
         }
+        }]
     }
 }
 

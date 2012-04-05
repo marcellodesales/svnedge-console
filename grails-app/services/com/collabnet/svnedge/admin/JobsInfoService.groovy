@@ -17,34 +17,36 @@
  */
 package com.collabnet.svnedge.admin
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 
-import org.springframework.beans.factory.InitializingBean
 import org.quartz.JobExecutionContext
 import org.quartz.JobListener
 import org.quartz.Trigger
-import com.collabnet.svnedge.statistics.ConsolidateStatJob
-import com.collabnet.svnedge.statistics.DeleteStatJob
-import com.collabnet.svnedge.statistics.StatCollectJob
-import com.collabnet.svnedge.statistics.StatCountJob
 
 /**
- * Provides info about Quartz jobs in the console
+ * Provides queue support for and info about Backup and Load jobs in the console
  */
-class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean {
+class JobsInfoService extends AbstractSvnEdgeService {
 
-    // Observer name supplied to Quartz
-    String name = "JobsInfoService"
+    // the maximum number of finished jobs to hold info about
+    public static final int MAX_FINISHED_JOBS_SIZE = 5
+
+    private static final int MAX_CONCURRENT_JOBS = 3
+    
+    ExecutorService queue = Executors.newFixedThreadPool(MAX_CONCURRENT_JOBS)
 
     // Jobs we wish to observe
     def interestingJobs = [RepoDumpJob, RepoLoadJob]
 
-    // scheduler upon which to register listener
     def quartzScheduler
-
+    
     // current running jobs
     Map runningJobs = Collections.synchronizedMap(new HashMap())
-
+    Map queuedJobs = Collections.synchronizedMap(new HashMap())
+    
     // recently finished jobs, represented as queue with eldest removed
     Map finishedJobs =  Collections.synchronizedMap(
             new LinkedHashMap(MAX_FINISHED_JOBS_SIZE + 1) {
@@ -54,53 +56,29 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
                 }
             });
 
-    // the maximum number of finished jobs to hold info about
-    public static final int MAX_FINISHED_JOBS_SIZE = 5
-
-    /**
-     * call this method with JobExecutionContext (or other containing similar properties)
-     * to indicate a Job has started
-     * @see JobExecutionContext
-     * @param jobExecutionContext
-     */
-    void jobStarted(jobExecutionContext) {
-        if(!interested(jobExecutionContext)) {
-            return
-        }
-        runningJobs.put(jobExecutionContext.jobInstance, jobExecutionContext)
+    void queueJob(def job, Date scheduledFireTime) {
+        
+        def jobCtx = [scheduledFireTime: scheduledFireTime,
+                      jobRunTime: -1,
+                      mergedJobDataMap: job.dataMap]
+        queuedJobs.put(job, jobCtx)
+        queue.execute( {
+            queuedJobs.remove(job)
+            Date startDate = new Date()
+            jobCtx.fireTime = startDate
+            runningJobs.put(job, jobCtx)
+            try {
+                job.run()
+                jobCtx.jobRunTime = System.currentTimeMillis() - startDate.time
+                finishedJobs.put(job, jobCtx)
+            } catch (Exception e) {
+                log.warn("Job execution failed.", e)
+            } finally {
+                runningJobs.remove(job)
+            }
+        } as Runnable)
     }
-
-    /**
-     * call this method with JobExecutionContext (or other containing similar properties)
-     * to indicate a Job has vetoed
-     * @see JobExecutionContext
-     * @param jobExecutionContext
-     */
-    void jobVetoed(jobExecutionContext)  {
-
-        if(!interested(jobExecutionContext)) {
-            return
-        }
-        runningJobs.remove(jobExecutionContext.jobInstance)
-    }
-
-    /**
-     * call this method with JobExecutionContext (or other containing similar properties)
-     * to indicate a Job has completed
-     * @see JobExecutionContext
-     * @param jobExecutionContext
-     */
-    void jobFinished(jobExecutionContext) {
-
-        if(!interested(jobExecutionContext)) {
-            return
-        }
-        if (runningJobs.containsKey(jobExecutionContext.jobInstance)) {
-            runningJobs.remove(jobExecutionContext.jobInstance)
-            finishedJobs.put(jobExecutionContext.jobInstance, jobExecutionContext)
-        }
-    }
-
+        
     /**
      * fetch a map of trigger info pertaining to interesting jobs (only includes
      * those with "nextFireTime" property
@@ -109,6 +87,12 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
     Map getScheduledJobs() {
 
         def triggerInfo = [:]
+        
+        queuedJobs.values().each {
+            it.nextFireTime = it.scheduledFireTime
+            triggerInfo << ["${it.mergedJobDataMap.id}": it]
+        }
+        
         interestingJobs.each { it ->
             Trigger[] t = quartzScheduler.getTriggersOfJob(it.name, it.group)
             t.each {
@@ -116,44 +100,11 @@ class JobsInfoService extends AbstractSvnEdgeService implements InitializingBean
                     triggerInfo << ["${it.fullName}": [
                             nextFireTime: it.nextFireTime,
                             jobRunTime: -1,
-                            mergedJobDataMap: it.jobDataMap,
-                            trigger: it
+                            mergedJobDataMap: it.jobDataMap
                     ]]
                 }
             }
         }
         return triggerInfo
     }
-
-    /**
-     * @see InitializingBean#afterPropertiesSet
-     * initializing bean -- after injection, we need to register with the quartz scheduler to receive events
-     */
-    void afterPropertiesSet() {
-
-        // create JobListener interface impl to register with quartzScheduler
-        def listener = [
-                getName: { name },
-                jobToBeExecuted: {p1 -> jobStarted(p1)},
-                jobExecutionVetoed: {p1 -> jobVetoed(p1)},
-                jobWasExecuted: {p1, e -> jobFinished(p1)}
-                ] as JobListener
-        quartzScheduler.addGlobalJobListener(listener)
-    }
-
-    /**
-     * are we keeping track of this job execution?
-     * @param ctx the JobExecutionContext (or other with jobDetail.name & .group property)
-     * @return boolean yes or no
-     */
-    private boolean interested(ctx) {
-
-        def match = interestingJobs.find {
-            ctx.jobDetail.name == it.name && ctx.jobDetail.group == it.group
-        }
-        return (match != null)
-
-    }
-
-
 }
