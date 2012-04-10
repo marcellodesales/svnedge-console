@@ -16,8 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.collabnet.svnedge.admin
-
 import grails.test.GrailsUnitTestCase
+import groovy.mock.interceptor.StubFor
+import grails.plugin.executor.SessionBinderUtils
+import org.hibernate.SessionFactory
+import org.hibernate.Session
 
 /**
  * Tests for the JobsInfoService
@@ -25,6 +28,7 @@ import grails.test.GrailsUnitTestCase
 class JobsInfoServiceTests extends GrailsUnitTestCase {
 
     def jobsInfoService
+    def control
 
     public void setUp() {
         super.setUp()
@@ -33,18 +37,23 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         def scheduler = new Expando()
         scheduler.getTriggersOfJob = {p1, p2 -> []}
         this.jobsInfoService.quartzScheduler = scheduler
+        
+        this.jobsInfoService.sessionFactory = new Expando() as SessionFactory
+        control = new StubFor(grails.plugin.executor.SessionBinderUtils, true)
+        control.demand.bindSession(10) { sf -> true }
+        control.demand.unbindSession(10) { sf -> println "Unbound session"}
     }
 
     /**
      * validates that JobInfoService correctly registers running and finishing of jobs
      */
     public void testJobsRunningAndFinished() {
+        control.use {
 
         def job = [dataMap: [id: "1"], run: {Thread.sleep(200)}]
         jobsInfoService.queueJob(job, new Date())
         job = [dataMap: [id: "2"], run: {Thread.sleep(400)}]
         jobsInfoService.queueJob(job, new Date())
-        
         Thread.sleep(50)
         assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
@@ -56,16 +65,18 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
                 jobsInfoService.finishedJobs.size())
 
         Thread.sleep(200)
-        assertEquals("there should be 1 running job according to the service", 0,
+        assertEquals("there should be 0 running job according to the service", 0,
                 jobsInfoService.runningJobs.size())
-        assertEquals("there should be 1 finished job according to the service", 2,
+        assertEquals("there should be 2 finished job according to the service", 2,
                 jobsInfoService.finishedJobs.size())
+        }
     }
 
     /**
      * validates that info of only 5 recent jobs are retained
      */
     public void testFinishedJobsPruning() {
+        control.use {
 
         (1..8).each {
             def job = [dataMap: [id: "${it}"], run: {Thread.sleep(200)}]
@@ -100,6 +111,7 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
             jobsInfoService.finishedJobs.size())
         assertEquals("there should be 0 scheduled jobs according to the service", 0,
             jobsInfoService.scheduledJobs.size())
+        }
     }
     
     /**
@@ -107,6 +119,7 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     * add a second copy.
     */
    public void testDuplicateJob() {
+       control.use {
 
        Date now = new Date()
        (1..8).each {
@@ -129,5 +142,8 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
        assertEquals("later duplicate job should be skipped " + 
                jobsInfoService.scheduledJobs, now.time, 
                jobsInfoService.scheduledJobs["8"].scheduledFireTime.time)
+       // Let the rest of the threads complete to avoid exceptions
+       Thread.sleep(500)
+       }           
    }
 }

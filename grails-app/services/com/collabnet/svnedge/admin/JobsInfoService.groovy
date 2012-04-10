@@ -25,6 +25,7 @@ import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import org.quartz.JobExecutionContext
 import org.quartz.JobListener
 import org.quartz.Trigger
+import grails.plugin.executor.SessionBoundRunnable
 
 /**
  * Provides queue support for and info about Backup and Load jobs in the console
@@ -42,6 +43,8 @@ class JobsInfoService extends AbstractSvnEdgeService {
     def interestingJobs = [RepoDumpJob, RepoLoadJob]
 
     def quartzScheduler
+    // the hibernate session factory
+    def sessionFactory
     
     // current running jobs
     Map runningJobs = Collections.synchronizedMap(new HashMap())
@@ -72,7 +75,7 @@ class JobsInfoService extends AbstractSvnEdgeService {
                       jobRunTime: -1,
                       mergedJobDataMap: job.dataMap]
         queuedJobs.put(jobId, jobCtx)
-        queue.execute( {
+        Runnable r = new SessionBoundRunnable({ 
             queuedJobs.remove(jobId)
             Date startDate = new Date()
             jobCtx.fireTime = startDate
@@ -86,7 +89,8 @@ class JobsInfoService extends AbstractSvnEdgeService {
             } finally {
                 runningJobs.remove(jobId)
             }
-        } as Runnable)
+        } as Runnable, sessionFactory)
+        queue.execute(r)
     }
         
     /**
