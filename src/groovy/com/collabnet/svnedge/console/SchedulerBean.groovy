@@ -52,31 +52,31 @@ public class SchedulerBean {
     ]
 
     /**
-    * convenience method to create a DumpBean from a Map
+    * convenience method to create a SchedulerBean from a Map
     * @param m map
     * @return SchedulerBean instance
     */
    static SchedulerBean fromMap(Map m) {
        SchedulerBean b = new SchedulerBean()
        propertyNames.each { it ->
-           def mapValue = m.get(it)
-           b."${it}" = mapValue
+           def mapValue = m.get("schedule." + it)
+           if (mapValue != null) b."${it}" = mapValue
        }
-       b.frequency = Frequency.valueOf(m.get("frequency"))
+       b.frequency = (m.get("schedule.frequency") != null) ? Frequency.valueOf(m.get("schedule.frequency")) : null
        return b
    }
    
    /**
-    * convenience method to create a Map from Scheduler/DumpBean
+    * convenience method to create a Map from SchedulerBean
     * @return Map of the bean's properties
     */
    Map toMap() {
        Map m = [:]
        propertyNames.each { it ->
            def beanValue = this."${it}"
-           m.put(it, beanValue)
+           m.put("schedule." + it, beanValue)
        }
-       m.put("frequency", frequency.toString())
+       m.put("schedule.frequency", frequency.toString())
        return m
    }
 }

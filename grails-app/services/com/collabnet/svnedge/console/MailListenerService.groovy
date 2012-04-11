@@ -26,6 +26,7 @@ import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.event.LoadRepositoryEvent;
 import com.collabnet.svnedge.event.RepositoryEvent
 import com.collabnet.svnedge.event.DumpRepositoryEvent
+import com.collabnet.svnedge.event.VerifyRepositoryEvent
 
 import org.springframework.beans.factory.InitializingBean
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -100,6 +101,9 @@ class MailListenerService extends AbstractSvnEdgeService
                 break
                 case LoadRepositoryEvent:
                     sendLoadMail(toAddress, ccAddress, fromAddress, event)
+                break
+                case VerifyRepositoryEvent:
+                    sendVerifyMail(toAddress, ccAddress, fromAddress, event)
                 break
             }
             
@@ -209,36 +213,81 @@ class MailListenerService extends AbstractSvnEdgeService
                 null, locale)
         mailSubject += getMessage('mail.message.load.subject', null, locale)
         mailSubject += getMessage('mail.message.repository', [repo.name], locale)
-       
+
+        def mailBody
+        byte[] processOutput
+        (mailBody, processOutput) = getMailBody(event, repo, 'mail.message.load.body.success',
+                'mail.message.load.body.error', locale)
+
+        sendMail(toAddress, ccAddress, fromAddress, 
+                 mailSubject, mailBody, processOutput)
+    }
+
+    /**
+     * Sends the Verify job email, but only if the event indicates an error
+     * @param toAddress
+     * @param ccAddress
+     * @param fromAddress
+     * @param event
+     */
+    private void sendVerifyMail(toAddress, ccAddress, fromAddress, event) {
+        def repo = event.repo
+        Locale locale = event.locale ?: Locale.getDefault()
+        def mailSubject = getMessage(event.isSuccess ?
+            'mail.message.subject.success' : 'mail.message.subject.error',
+                null, locale)
+        mailSubject += getMessage('mail.message.verify.subject', null, locale)
+        mailSubject += getMessage('mail.message.repository', [repo.name], locale)
+
         def mailBody
         byte[] processOutput
         if (event.isSuccess) {
-            mailBody = getMessage('mail.message.load.body.success',
-                    [repo.name], locale)
+            log.info("Repo '${repo.name}' verification succeeded, sending no email")
+            return
+        }
+        (mailBody, processOutput) = getMailBody(event, repo, 'mail.message.verify.body.success',
+                'mail.message.verify.body.error', locale)
+        sendMail(toAddress, ccAddress, fromAddress,
+                mailSubject, mailBody, processOutput)
+    }
+
+    /**
+     * helper to prepare the mail body for Load and Verify events
+     * @param event the RepositoryEvent
+     * @param repo the Repository
+     * @param successKey message key for mail body success
+     * @param errorKey message key for mail body error
+     * @param locale
+     * @return [String mailBody, byte[] processOutput]
+     */
+    private List getMailBody(event, repo, successKey, errorKey, locale) {
+        def mailBody
+        byte[] processOutput
+        if (event.isSuccess) {
+            mailBody = getMessage(successKey, [repo.name], locale)
         } else {
             processOutput = getProcessOutput(event)
             def processOutputTail = getProcessOutputTail(event)
             if (event.exception) {
                 def e = event.exception
                 GrailsUtil.deepSanitize(e)
-                mailBody = getMessage('mail.message.load.body.error',
+                mailBody = getMessage(errorKey,
                         [repo.name, e.message,
                          e.class.name, e.stackTrace.join('\n'),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
                          event.processOutput?.name, processOutputTail], locale)
             } else {
-                mailBody = getMessage('mail.message.load.body.error',
+                mailBody = getMessage(errorKey,
                         [repo.name, '', '', '', processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
                          event.processOutput?.name, processOutputTail], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)
-        sendMail(toAddress, ccAddress, fromAddress, 
-                 mailSubject, mailBody, processOutput)
+        return [mailBody, processOutput]
     }
-    
+
     private void sendMail(toAddress, ccAddress, fromAddress, 
                           mailSubject, mailBody, processOutput) {
         try {

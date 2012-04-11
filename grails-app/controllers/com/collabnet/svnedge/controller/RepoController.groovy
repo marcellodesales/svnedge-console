@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.controller
 
 import com.collabnet.svnedge.ValidationException
+import com.collabnet.svnedge.admin.RepoVerifyJob
 import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.console.SchedulerBean
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
@@ -405,10 +406,10 @@ class RepoController {
             def repoMap = [repoId: repo.id, repoName: repo.name, cloudName: repo.cloudName, jobCount: 0]
             model['repoList'] = [repoMap]
             def repoBackupJobList = []
-            def backups = svnRepoService.retrieveScheduledBackups(repo)
-            if (backups) {
-                repoMap.jobCount = backups.size()
-                for (b in backups) {
+            def jobs = svnRepoService.retrieveScheduledJobs(repo)
+            if (jobs) {
+                repoMap.jobCount = jobs.size()
+                for (b in jobs) {
                     def job = populateJobMap(b)
                     job.repoId = repo.id
                     job.repoName = repo.name.encodeAsHTML()
@@ -421,6 +422,7 @@ class RepoController {
         def cloudConfig = CloudServicesConfiguration.getCurrentConfig()
         model['cloudRegistrationRequired'] = !cloudConfig || !cloudConfig.domain
         model['cloudEnabled'] = cloudConfig?.enabled
+        model['verifyEnabled'] = true
         return model
     }
     
@@ -505,6 +507,10 @@ class RepoController {
                         cmd.cloud = true
                         scheduleBackup(cmd, repo, type, jobId)
                     }
+                } else if (type == "verify") {
+                    def userId = loggedInUserInfo(field: 'id') as Integer
+                    svnRepoService.scheduleVerifyJob(cmd.schedule, repo, userId, jobId, request.locale)
+                    flash.message = message(code: 'repository.action.updateVerifyJob.success')
                 } else if (type == "none") {
                     flash.error = message(code: 'repository.action.updateBkupSchedule.none')
                 } else {
@@ -682,11 +688,17 @@ class RepoController {
     private def populateJobMap(Map b) {
         def job = [:]
         job.putAll(b)
-        job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
-        job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
-            message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
-                message(code: "repository.page.bkupSchedule.type.hotcopy") :
-                message(code: "repository.page.bkupSchedule.type.fullDump")
+        if (b.jobName == RepoVerifyJob.jobName) {
+            job.typeCode = "verify"
+            job.type = message(code: "repository.page.bkupSchedule.type.verify")
+        }
+        else {
+            job.typeCode = b.cloud ? 'cloud' : (b.deltas ? 'dump_delta' : (b.hotcopy ? "hotcopy" : 'dump'))
+            job.type = (b.cloud) ? message(code: "repository.page.bkupSchedule.type.cloud") : (b.deltas) ?
+                    message(code: "repository.page.bkupSchedule.type.fullDumpDelta") : (b.hotcopy) ?
+                    message(code: "repository.page.bkupSchedule.type.hotcopy") :
+                    message(code: "repository.page.bkupSchedule.type.fullDump")
+        }
         job.keepNumber = b.numberToKeep
         DumpBean db = DumpBean.fromMap(b)
         job.schedule = db.schedule

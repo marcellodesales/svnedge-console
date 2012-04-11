@@ -38,6 +38,10 @@
                         code="repository.page.bkupSchedule.type.fullDump"/></option>
                 <option value="hotcopy" <g:if test="${isHotcopy}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.hotcopy"/></option>
+                <g:if test="${verifyEnabled}">
+                <option value="verify" <g:if test="${params.type == 'verify'}">selected="selected"</g:if>><g:message
+                        code="repository.page.bkupSchedule.type.verify"/></option>
+                </g:if>
               </select>
               <g:if test="${cloudRegistrationRequired}">
                 <span id="cloudRegister" class="help-inline" style="display: none;">
@@ -248,29 +252,25 @@
   function typeHandler() {
     var typeSelect = $('#type');
     var typeSelectValue = typeSelect.val();
+    // hide all controls, then reveal those needed for each job type
+    $('#whenRow').hide();
+    $('#keepRow').hide();
+    $('#deltasRow').hide();
+    $('#cloudRegister').hide();
+    $('#cloudNameRow').hide();
     if (typeSelectValue == 'dump' ||
         typeSelectValue == 'hotcopy') {
       $('#whenRow').show();
       $('#keepRow').show();
-      $('#cloudRegister').hide();
-      $('#cloudNameRow').hide;
       if (typeSelectValue == 'dump') {
         $('#deltasRow').show();
-      } else {
-        $('#deltasRow').hide();
       }
     } else if (typeSelectValue == 'cloud') {
       $('#whenRow').show();
-      $('#keepRow').hide();
-      $('#deltasRow').hide();
       $('#cloudRegister').show();
       $('#cloudNameRow').show();
-    } else {
-      $('#whenRow').hide();
-      $('#keepRow').hide();
-      $('#deltasRow').hide();
-      $('#cloudRegister').hide();
-      $('#cloudNameRow').hide();
+    } else if (typeSelectValue == 'verify') {
+      $('#whenRow').show();
     }
   }
   typeHandler();

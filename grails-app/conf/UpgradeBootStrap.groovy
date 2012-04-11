@@ -20,6 +20,7 @@ import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.admin.RepoDumpJob
+import com.collabnet.svnedge.console.BackgroundJobUtil
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
@@ -179,7 +180,7 @@ class UpgradeBootStrap {
                     DumpBean bean = DumpBean.fromMap(dataMap)
                     if (repo && bean) {
                         String newName = 
-                                svnRepoService.generateTriggerName(repo, bean)
+                                BackgroundJobUtil.generateTriggerName(repo, bean)
                         if (oldName != newName) {
                             jobsAdminService
                                     .removeTrigger(oldName, trigger.group)

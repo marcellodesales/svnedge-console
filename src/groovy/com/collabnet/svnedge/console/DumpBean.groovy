@@ -129,14 +129,9 @@ public class DumpBean {
         DumpBean b = new DumpBean()
         propertyNames.each { it ->
             def mapValue = m.get(it)
-            b."${it}" = mapValue
+            if (mapValue) b."${it}" = mapValue
         }
-        SchedulerBean.propertyNames.each { it ->
-            def mapValue = m.get("schedule." + it)
-            b.schedule."${it}" = mapValue
-        }
-        b.schedule.frequency = 
-            SchedulerBean.Frequency.valueOf(m.get("schedule.frequency"))
+        b.schedule = SchedulerBean.fromMap(m)
         return b
     }
     
@@ -150,11 +145,7 @@ public class DumpBean {
             def beanValue = this."${it}"
             m.put(it, beanValue)
         }
-        SchedulerBean.propertyNames.each { it ->
-            def beanValue = this.schedule."${it}"
-            m.put("schedule." + it, beanValue)
-        }
-        m.put("schedule.frequency", this.schedule.frequency.toString())
+        m.putAll(this.schedule.toMap())
         return m
     }
 }

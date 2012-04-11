@@ -22,6 +22,7 @@ import com.collabnet.svnedge.RepoLoadException
 import com.collabnet.svnedge.ValidationException
 import com.collabnet.svnedge.admin.RepoDumpJob
 import com.collabnet.svnedge.admin.RepoLoadJob
+import com.collabnet.svnedge.admin.RepoVerifyJob
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
@@ -40,7 +41,7 @@ import org.quartz.SimpleTrigger
 
 class SvnRepoService extends AbstractSvnEdgeService {
 
-    private static final String BACKUP_TRIGGER_GROUP = "Backup"
+    private static final String REPO_JOB_TRIGGER_GROUP = "RepoJob"
     private static final boolean ASCENDING = true
     private static final boolean DESCENDING = false
 
@@ -369,7 +370,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return verifyRepositoryPath(repoPath)
     }
 
-    private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
+    def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
         def exitStatus = (progress == null) ?
             commandLineService.executeWithStatus(
                     ConfigUtil.svnadminPath(), "verify", repoPath) :
@@ -688,40 +689,35 @@ class SvnRepoService extends AbstractSvnEdgeService {
 
     List retrieveScheduledBackups(repo = null) {
         List backups = []
-        def tNamePrefix = "RepoDump-${repo?.name}-"
         def triggers = jobsAdminService
                 .getTriggers(RepoDumpJob.jobName, RepoDumpJob.group)
         for (trigger in triggers) {
-            if ((!repo && trigger.group == BACKUP_TRIGGER_GROUP) || 
-                    trigger.name.startsWith(tNamePrefix)) {
+            if ((!repo && trigger.group == REPO_JOB_TRIGGER_GROUP) ||
+                    trigger.name =~ /${repo.name}-(hotcopy|dump|cloud).*/) {
                 backups << trigger.jobDataMap
             }
         }
         return backups
     }
 
-    public static final def BACKUP_TYPES = ['hotcopy', 'fullDump', 'cloud']
-
-    /**
-     * Creates a trigger name based on repo and scheduling details. This
-     * method is exposed, so that it could be used in migrating existing
-     * backups when upgrading from 2.3 to 3.0.  It might be restricted in
-     * later releases. 
-     */
-    String generateTriggerName(Repository repo, DumpBean bean) {
-        def tName = "RepoDump-${repo.name}-" +
-            (bean.cloud ? BACKUP_TYPES[2] :
-            (bean.hotcopy ? BACKUP_TYPES[0] : BACKUP_TYPES[1]))
-        if (bean.backup) {
-            SchedulerBean schedule = bean.schedule
-            tName += "-" + (schedule.frequency == Frequency.WEEKLY ?
-                    schedule.dayOfWeek : 'X') + 'T'
-            tName += (schedule.frequency == Frequency.HOURLY) ?
-                    'HH' : pad(schedule.hour)
-            tName += pad(schedule.minute)
-            tName += (schedule.second < 0) ? "00" : pad(schedule.second)
+    List retrieveScheduledJobs(repo = null) {
+        List jobs = []
+        List triggers = jobsAdminService
+                .getTriggers(RepoDumpJob.jobName, RepoDumpJob.group)
+        triggers.addAll(jobsAdminService
+                .getTriggers(RepoVerifyJob.jobName, RepoVerifyJob.group))
+        for (trigger in triggers) {
+            boolean includeJob = false
+            includeJob = (!repo && trigger.group == REPO_JOB_TRIGGER_GROUP)
+            includeJob |= (repo && trigger.name =~ /${repo.name}-.*/)
+            if (includeJob) {
+                def jobMap = [:]
+                jobMap << trigger.jobDataMap
+                jobMap.put("jobName", trigger.jobName)
+                jobs << jobMap
+            }
         }
-        return tName
+        return jobs
     }
 
     /**
@@ -733,47 +729,12 @@ class SvnRepoService extends AbstractSvnEdgeService {
     String scheduleDump(DumpBean bean, repo, Integer userId = null, 
             String tName = null) {
 
-        SchedulerBean schedule = bean.schedule
-        if (!schedule.frequency || schedule.frequency == Frequency.NOW) {
-            schedule.frequency = Frequency.ONCE
-            Calendar cal = Calendar.getInstance()
-            cal.setTimeInMillis(System.currentTimeMillis() + 1000)
-            schedule.second = cal.get(Calendar.SECOND)
-            schedule.minute = cal.get(Calendar.MINUTE)
-            schedule.hour = cal.get(Calendar.HOUR_OF_DAY)
-            schedule.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
-            schedule.month = cal.get(Calendar.MONTH) + 1 // Calendar uses 0 for first month
-            schedule.year = cal.get(Calendar.YEAR)
-        }
-        String seconds = (schedule.second < 0) ? "0" : "${schedule.second}"
-        String minute = " ${schedule.minute}"
-        String hour = " ${schedule.hour}"
-        String dayOfMonth = " *"
-        String month = " *"
-        String dayOfWeek = " ?"
-        String year = ""
-        switch (schedule.frequency) {
-            case Frequency.WEEKLY:
-                dayOfWeek = " ${schedule.dayOfWeek}"
-                dayOfMonth = " ?"
-                break
-            case Frequency.HOURLY:
-                hour = " *"
-                break
-            case Frequency.DAILY:
-                break
-            case Frequency.ONCE:
-                dayOfMonth = " ${schedule.dayOfMonth}"
-                month = " ${schedule.month}"
-                year = " ${schedule.year}"
-        }
-        String cron = seconds + minute + hour + dayOfMonth +
-                month + dayOfWeek + year
+        String cron = BackgroundJobUtil.getCronExpression(bean.schedule)
         log.debug("Scheduling backup dump using cron expression: " + cron)
         if (tName) {
-            jobsAdminService.removeTrigger(tName, BACKUP_TRIGGER_GROUP)
+            jobsAdminService.removeTrigger(tName, REPO_JOB_TRIGGER_GROUP)
         }
-        tName = generateTriggerName(repo, bean)
+        tName = BackgroundJobUtil.generateTriggerName(repo, bean)
         
         def descKey = "repository.action.createAdhocDumpfile.job.description"
         if (bean.backup) {
@@ -781,15 +742,18 @@ class SvnRepoService extends AbstractSvnEdgeService {
                     bean.hotcopy ? "repository.action.createHotcopy.job.description" :
                     "repository.action.createDumpfile.job.description"
         }
-        def tGroup = bean.backup ? BACKUP_TRIGGER_GROUP : "AdhocDump"
+        def tGroup = bean.backup ? REPO_JOB_TRIGGER_GROUP : "AdhocDump"
         def trigger = new CronTrigger(tName, tGroup, cron)
         log.debug("cron expression summary:\n" + trigger.expressionSummary)
         trigger.setJobName(RepoDumpJob.name)
         trigger.setJobGroup(RepoDumpJob.group)
 
         // data for reporting status to quartz job listeners
+        def jobType = bean.cloud ? BackgroundJobUtil.JobType.CLOUD : 
+                (bean.hotcopy ? BackgroundJobUtil.JobType.HOTCOPY : 
+                BackgroundJobUtil.JobType.DUMP)
         File progressFile = 
-                prepareProgressLogFile(repo.name, bean.cloud, bean.hotcopy)
+                BackgroundJobUtil.prepareProgressLogFile(repo.name, jobType)
         def jobDataMap =
         [id: tName, repoId: repo.id,
                 description: getMessage(descKey, [repo.name], bean.userLocale),
@@ -812,17 +776,47 @@ class SvnRepoService extends AbstractSvnEdgeService {
         return bean.cloud ? null : dumpFilename(bean, repo)
     }
 
-    File prepareProgressLogFile(repoName, 
-            isCloudBackup = false, isHotCopy = false) {
-        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        return new File(tempLogDir, getProgressLogFileName(
-                repoName, isCloudBackup, isHotCopy))
-    }
+    /**
+     * method to schedule a RepoVerify quartz job
+     * @param bean the parameters for the dump job
+     * @param repo the repo
+     */
+    void scheduleVerifyJob(SchedulerBean bean, repo, Integer userId = null,
+                        String tName = null, Locale locale = Locale.default) {
 
-    private String getProgressLogFileName(repoName, isCloudBackup, isHotCopy) {
-        return "bkup-progress-" + repoName + 
-                (isCloudBackup ? '-cloud' : isHotCopy ? '-hotcopy' : '-dump') + 
-                ".log"
+        String cron = BackgroundJobUtil.getCronExpression(bean)
+        log.debug("Scheduling verify for repo '${repo.name}' using cron expression: " + cron)
+
+        if (tName) {
+            jobsAdminService.removeTrigger(tName, REPO_JOB_TRIGGER_GROUP)
+        }
+
+        tName = BackgroundJobUtil.generateTriggerName(repo, BackgroundJobUtil.JobType.VERIFY, bean)
+
+        def descKey = "repository.action.verify.job.description"
+
+        def trigger = new CronTrigger(tName, REPO_JOB_TRIGGER_GROUP, cron)
+        log.debug("cron expression summary:\n" + trigger.expressionSummary)
+        trigger.setJobName(RepoVerifyJob.name)
+        trigger.setJobGroup(RepoVerifyJob.group)
+
+        File progressFile =
+            BackgroundJobUtil.prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.VERIFY)
+        def jobDataMap =
+            [id: tName, repoId: repo.id,
+                    description: getMessage(descKey, [repo.name], locale),
+                    progressLogFile: progressFile.absolutePath,
+                    urlProgress: "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail",
+                    urlConfigure: "/csvn/repo/bkupSchedule/${repo.id}",
+                    locale: locale]
+        if (userId) {
+            jobDataMap['userId'] = userId
+        }
+        jobDataMap.putAll(bean.toMap())
+        trigger.setJobDataMap(new JobDataMap(jobDataMap))
+
+        jobsAdminService.createOrReplaceTrigger(trigger)
+        return
     }
 
     File getLoadDirectory(Repository repo) {
@@ -1075,7 +1069,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             dumpDir.mkdirs()
         }
 
-        File progressLogFile = prepareProgressLogFile(repo.name)
+        File progressLogFile = BackgroundJobUtil.prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.DUMP)
         if (progressLogFile.exists()) {
             String msg = getMessage("repository.action.backup.alreadyInProgress",
                     [repo.name, progressLogFile.canonicalPath])
@@ -1296,11 +1290,11 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * @param repo Repository domain object
      */
     def clearScheduledDumps(repo) {
-        def triggerNames = jobsAdminService.getTriggerNamesInGroup(BACKUP_TRIGGER_GROUP)
+        def triggerNames = jobsAdminService.getTriggerNamesInGroup(REPO_JOB_TRIGGER_GROUP)
         if (triggerNames) {
             triggerNames.each {
                 if (it.startsWith("RepoDump-${repo.name}")) {
-                    jobsAdminService.removeTrigger(it, BACKUP_TRIGGER_GROUP)
+                    jobsAdminService.removeTrigger(it, REPO_JOB_TRIGGER_GROUP)
                 }
             }
         }
@@ -1311,7 +1305,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * Removes the given trigger
      */
     def deleteScheduledJob(jobId) {
-        jobsAdminService.removeTrigger(jobId, BACKUP_TRIGGER_GROUP)
+        jobsAdminService.removeTrigger(jobId, REPO_JOB_TRIGGER_GROUP)
     }    
 
     /**
@@ -1333,7 +1327,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
         File tmpDir = new File(dumpDir, "hotcopy")
 
-        File progressLogFile = prepareProgressLogFile(repo.name, false, true)
+        File progressLogFile = BackgroundJobUtil.prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.HOTCOPY)
         if (progressLogFile.exists()) {
             String msg = getMessage("repository.action.backup.alreadyInProgress",
                     [repo.name, progressLogFile.canonicalPath])

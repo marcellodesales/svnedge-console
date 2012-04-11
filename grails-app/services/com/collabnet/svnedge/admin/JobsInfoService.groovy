@@ -40,7 +40,7 @@ class JobsInfoService extends AbstractSvnEdgeService {
     ExecutorService queue = Executors.newFixedThreadPool(MAX_CONCURRENT_JOBS)
 
     // Jobs we wish to observe
-    def interestingJobs = [RepoDumpJob, RepoLoadJob]
+    def interestingJobs = [RepoDumpJob, RepoLoadJob, RepoVerifyJob]
 
     def quartzScheduler
     // the hibernate session factory

@@ -93,7 +93,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS007AddEmailConfig(),
             new MS008ForceUsernameCase(),
             new MS009EnableCloudService(),
-            new MS010AddUserPropertyTable()
+            new MS010AddUserPropertyTable(),
+            new MS011RenameBackupTriggers()
         };
     }
 
