@@ -397,7 +397,7 @@ class RepoController {
         } else {
             DumpBean cmd = flash.dumpBean
             if (!cmd) {
-                params.type = 'none'
+                params.type = params.type ?: 'none'
                 cmd = new DumpBean()
                 bindData(cmd, params)
             }
@@ -510,7 +510,11 @@ class RepoController {
                 } else if (type == "verify") {
                     def userId = loggedInUserInfo(field: 'id') as Integer
                     svnRepoService.scheduleVerifyJob(cmd.schedule, repo, userId, jobId, request.locale)
-                    flash.message = message(code: 'repository.action.updateVerifyJob.success')
+                    flash.unfiltered_message = message(code: 'repository.action.updateVerifyJob.success')
+                    MailConfiguration config = MailConfiguration.getConfiguration()
+                    if (!config.enabled) {
+                        flash.unfiltered_message += " " + message(code: 'repository.action.updateVerifyJob.mailConfig')
+                    }
                 } else if (type == "none") {
                     flash.error = message(code: 'repository.action.updateBkupSchedule.none')
                 } else {

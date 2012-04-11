@@ -28,6 +28,7 @@
       <div class="controls">
               <g:set var="isCloud" value="${params.type == 'cloud' || dump.cloud}"/>
               <g:set var="isHotcopy" value="${params.type == 'hotcopy' || dump.hotcopy}"/>
+              <g:set var="isVerify" value="${params.type == 'verify'}"/>
               <select id="type" name="type" class="scheduleElement">
                 <g:if test="${cloudEnabled}">
                   <option value="cloud" <g:if test="${isCloud}">selected="selected"</g:if>><g:message
@@ -39,7 +40,7 @@
                 <option value="hotcopy" <g:if test="${isHotcopy}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.hotcopy"/></option>
                 <g:if test="${verifyEnabled}">
-                <option value="verify" <g:if test="${params.type == 'verify'}">selected="selected"</g:if>><g:message
+                <option value="verify" <g:if test="${isVerify}">selected="selected"</g:if>><g:message
                         code="repository.page.bkupSchedule.type.verify"/></option>
                 </g:if>
               </select>
