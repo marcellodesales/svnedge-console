@@ -40,6 +40,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
+import com.collabnet.svnedge.event.VerifyRepositoryEvent
 
 class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -330,5 +331,110 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals("Message 'CC' did not match", Server.getServer().adminEmail,
                 GreenMailUtil.getAddressList(
                 message.getRecipients(Message.RecipientType.CC)))
+    }
+
+    public void testVerifySuccess() {
+        VerifyRepositoryEvent event = new VerifyRepositoryEvent(
+                this, repo, VerifyRepositoryEvent.SUCCESS, ADMIN_USER_ID, Locale.default)
+        mailListenerService.onApplicationEvent(event)
+        assertEquals("Expected zero mail messages on verify success", 0,
+                greenMail.getReceivedMessages().length)
+    }
+
+    public void testVerifyFail() {
+        assertEquals("Expected 0 mail messages to start", 0,
+                greenMail.getReceivedMessages().length)
+
+        def exceptionMsg = "Test Verify Failed"
+        VerifyRepositoryEvent event = new VerifyRepositoryEvent(
+                this, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
+                Locale.default, null, new Exception(exceptionMsg))
+
+        mailListenerService.onApplicationEvent(event)
+
+        // Two identical messages (as email is sent to two users)
+        assertEquals("Expected two mail message", 2,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        def dupeMessage = greenMail.getReceivedMessages()[1]
+
+        assertEquals("Message Subject did not match",
+                "[Error][Verification]Repository: test-repo", message.subject)
+        assertEquals("Duplicate message subject did not match original",
+                message.subject, dupeMessage.subject)
+
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("Verification of repository '" +
+                repo.name + "' failed."))
+
+        assertTrue("Message does not contain exception message", GreenMailUtil.getBody(message)
+                .contains(exceptionMsg))
+
+        assertEquals("Duplicate message body did not match original",
+                GreenMailUtil.getBody(message),
+                GreenMailUtil.getBody(dupeMessage))
+        assertEquals("Message 'From' did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Duplicate message 'From' did not match original",
+                GreenMailUtil.getAddressList(message.from),
+                GreenMailUtil.getAddressList(dupeMessage.from))
+        assertEquals("Message 'To' did not match", User.get(1).email,
+                GreenMailUtil.getAddressList(
+                        message.getRecipients(Message.RecipientType.TO)))
+        assertEquals("Duplicate message 'To' did not match original",
+                GreenMailUtil.getAddressList(
+                        message.getRecipients(Message.RecipientType.TO)),
+                GreenMailUtil.getAddressList(
+                        dupeMessage.getRecipients(Message.RecipientType.TO)))
+        assertEquals("Message 'CC' did not match", Server.getServer().adminEmail,
+                GreenMailUtil.getAddressList(
+                        message.getRecipients(Message.RecipientType.CC)))
+        assertEquals("Duplicate message 'CC' did not match original",
+                GreenMailUtil.getAddressList(
+                        message.getRecipients(Message.RecipientType.CC)),
+                GreenMailUtil.getAddressList(
+                        dupeMessage.getRecipients(Message.RecipientType.CC)))
+    }
+
+    public void testVerifyFailWithFile() {
+        assertEquals("Expected 0 mail messages to start", 0,
+                greenMail.getReceivedMessages().length)
+
+        String testContent = 'qwerty foo bar baz '
+        while (testContent.length() < 200000) {
+            testContent += testContent
+        }
+        testContent = testContent.trim()
+        File testFile = File.createTempFile("verify-progress-test-file", ".txt")
+        testFile.text = testContent
+
+        def exceptionMsg = "Test Verify Failed"
+
+        VerifyRepositoryEvent event = new VerifyRepositoryEvent(
+                this, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
+                null, testFile, new Exception(exceptionMsg))
+
+        mailListenerService.onApplicationEvent(event)
+
+        // Two identical messages (as email is sent to two users)
+        assertEquals("Expected two mail message", 2,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+
+        testFile.delete()
+
+        assertTrue("Message Body did not contain attachment text ",
+                GreenMailUtil.getBody(message)
+                        .contains("Verification process output is attached."))
+        assertTrue("Message Body did not contain file message ",
+                GreenMailUtil.getBody(message)
+                        .contains("Full output is available in the server logs temp " +
+                        "directory with name " + testFile.name))
+
+        assertTrue(message.content instanceof MimeMultipart)
+        MimeMultipart mp = message.content
+        assertEquals("Expected an attachment", 2, mp.count)
+        assertEquals("Unexpected attachment content",
+                testContent[-104858..-1], mp.getBodyPart(1).content)
     }
 }

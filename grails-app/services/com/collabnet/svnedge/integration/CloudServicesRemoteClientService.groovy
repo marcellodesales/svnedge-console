@@ -42,6 +42,7 @@ import com.collabnet.svnedge.event.LoadRepositoryEvent
 
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
+import com.collabnet.svnedge.console.BackgroundJobUtil
 
 /**
  * This class provides remote access to the Cloud  Services api
@@ -645,7 +646,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         throws CloudServicesException, ConcurrentBackupException {
 
         boolean isCloud = true
-        File progressFile = svnRepoService
+        File progressFile = BackgroundJobUtil
                 .prepareProgressLogFile(repo.name, isCloud)
         if (progressFile.exists()) {
             String msg = getMessage("repository.action.backup.alreadyInProgress",

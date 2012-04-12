@@ -32,7 +32,7 @@ class BackgroundJobUtil {
 
     static Log log = LogFactory.getLog(BackgroundJobUtil.class)
     
-    public static final enum JobType { HOTCOPY, DUMP, CLOUD, VERIFY }
+    public static enum JobType { HOTCOPY, DUMP, CLOUD, VERIFY }
 
     /**
      * creates a File handle for capturing job output

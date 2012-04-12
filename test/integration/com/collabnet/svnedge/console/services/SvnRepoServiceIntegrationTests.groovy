@@ -36,6 +36,7 @@ import com.icegreen.greenmail.util.ServerSetupTest
 
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import com.collabnet.svnedge.console.SchedulerBean
 
 class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -684,5 +685,77 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         log.info("Sync took " + (new Date().time - startTime.time) + "ms")
 
         assertEquals ("${beginningRepoCount} repositories expected after sync", beginningRepoCount, Repository.count())
+    }
+
+    public void testVerify() {
+
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
+
+        // create a target repo WITHOUT branches/tags/trunk nodes
+        def testRepoNameTarget = "verify-test-target"
+
+        Repository repoTarget = new Repository(name: testRepoNameTarget)
+        assertEquals "Failed to create target repository.", 0,
+                svnRepoService.createRepository(repoTarget, true)
+        repoTarget.save(flush: true)
+
+        // configure mail
+        ConfigurationHolder.config = grailsApplication.config
+        MailConfiguration mailConfig = MailConfiguration.configuration
+        mailConfig.port = ServerSetupTest.SMTP.port
+        mailConfig.enabled = true
+        mailConfigurationService.saveMailConfiguration(mailConfig)
+
+        // configure scheduler bean
+        SchedulerBean sched = new SchedulerBean()
+        sched.frequency = SchedulerBean.Frequency.NOW
+
+        // schedule verify job
+        svnRepoService.scheduleVerifyJob(sched, repoTarget)
+
+        // upper limit on time to run async code
+        long timeLimit = System.currentTimeMillis() + 5000
+        while (System.currentTimeMillis() < timeLimit &&
+                greenMail.receivedMessages.length == 0) {
+            Thread.sleep(1000)
+        }
+        assertEquals("Expected zero messages (success)", 0,
+                greenMail.receivedMessages.length)
+
+
+        // now, break the repo
+        File repoDir = new File(svnRepoService.getRepositoryHomePath(repoTarget))
+        File repoDbDir = new File(repoDir, "db")
+        File repoDbDirBak = new File(repoDir, "db.bak")
+        assertTrue ("Expect that we can rename the repo db", repoDbDir.renameTo(repoDbDirBak))
+
+        // schedule verify job
+        sched = new SchedulerBean()
+        sched.frequency = SchedulerBean.Frequency.NOW
+        svnRepoService.scheduleVerifyJob(sched, repoTarget)
+
+        // upper limit on time to run async code
+        timeLimit = System.currentTimeMillis() + 5000
+        while (System.currentTimeMillis() < timeLimit &&
+                greenMail.receivedMessages.length == 0) {
+            Thread.sleep(1000)
+        }
+        assertEquals("Expected one message (fail)", 1,
+                greenMail.receivedMessages.length)
+
+        def message = greenMail.receivedMessages[0]
+        assertEquals("Message Subject did not match",
+                "[Error][Verification]Repository: " + testRepoNameTarget,
+                message.subject)
+        assertTrue(message.content instanceof MimeMultipart)
+        MimeMultipart mp = message.content
+        assertEquals("Expected an attachment", 2, mp.count)
+        assertTrue("Message Body did not match",
+                GreenMailUtil.getBody(mp.getBodyPart(0).content.getBodyPart(0))
+                        .startsWith("Verification of repository '" +
+                        repoTarget.name + "' failed."))
     }
 }
