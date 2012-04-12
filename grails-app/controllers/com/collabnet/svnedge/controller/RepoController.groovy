@@ -385,6 +385,21 @@ class RepoController {
         }
     }
 
+    /**
+     * fetches a JSON representation of the cloud backups for all repos
+     */
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def cloudBackupList = {
+        def projectMap = cloudServicesRemoteClientService.retrieveSvnProjects()
+        def projects = projectMap.values().collect {it}
+        projects.sort { a, b ->
+            a.name.compareTo(b.name)
+        }
+        render(contentType: "text/json") {
+            result(projects: projects)
+        }
+    }
+    
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def bkupSchedule = {
         def model = reports()
@@ -892,8 +907,11 @@ class RepoController {
             t.id = 1
             templates = [t]
         }
-
-        return [repo: repo, templateList: templates]
+        CloudServicesConfiguration csConfig = 
+                CloudServicesConfiguration.currentConfig
+        boolean showCloud = csConfig && csConfig.enabled && csConfig.domain
+        return [repo: repo, templateList: templates,
+                showCloudBackups: showCloud]
     }
 
     private void substituteL10nName(RepoTemplate template) {
@@ -945,6 +963,15 @@ class RepoController {
                     log.debug(templateDir + " file=" + filename)
                     scheduleLoad(repo, templateFile, true)
 
+                } else if (params.initOption == 'useCloud' && params.cloudBackup) {
+                    int projectId = params.cloudBackup as int
+                    def userId = loggedInUserInfo(field: 'id') as Integer            
+                    cloudServicesRemoteClientService.loadSvnrdumpProject(repo,
+                            projectId, userId, request.locale)
+                    flash.unfiltered_message = message(
+                        code: 'repository.action.save.success.loading',
+                        args: [createLink(controller: 'job', action: 'list')])
+        
                 }
                 else {
                     flash.message = message(code: 'repository.action.save.success')

@@ -32,11 +32,14 @@ import com.collabnet.svnedge.ConcurrentBackupException;
 import com.collabnet.svnedge.console.AbstractSvnEdgeService
 import com.collabnet.svnedge.util.*
 import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
 
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 import com.collabnet.svnedge.controller.integration.CloudServicesAccountCommand
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
+import com.collabnet.svnedge.event.LoadRepositoryEvent
+
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
 
@@ -49,6 +52,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     def securityService
     def svnRepoService
     def networkingService
+    def jobsInfoService
 
     private static final long CACHED_CLIENT_TIME_LIMIT = 300L
     private static final long CACHED_CLIENT_LAST_ACCESS_TIME_LIMIT = 90L
@@ -462,6 +466,137 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
        return []
    }
 
+   /**
+    * Retrieves a map with project IDs as keys. Values are map of 
+    * project "name" and svn access URLs (accessUrl).
+    */
+   def retrieveSvnProjects() {
+       def projectUrlMap = [:]
+       RESTClient restClient = getAuthenticatedRestClient()
+       def projects = listProjects(restClient)
+       def projectMap = [:]
+       for (project in projects) {
+           projectMap[project.projectId] = project.longName
+       }
+       def services = listServices(restClient)
+       for (service in services) {
+           if (service['serviceType'] == 'svn' && service['ready']) {
+               def projectId = service.projectId
+               def valueMap =[projectId: projectId, name: projectMap[projectId],
+                       accessUrl: service.accessUrl]
+               projectUrlMap[projectId] = valueMap
+           }
+       }
+       return projectUrlMap
+   }
+
+   /**
+    * Loads a dump of a cloud backup into a local repository
+    * @param repo The local repository
+    * @param projectId The cloud project containing the backup repository
+    * @param userId The user to notify once the load operation is complete
+    * @param locale Defines the language bundle used for the notification 
+    */
+   void loadSvnrdumpProject(Repository repo, int projectId, def userId = null,
+           def locale = null) {
+       def projectUrlMap = retrieveSvnProjects()
+       def project = projectUrlMap[projectId]
+       def url = project['accessUrl']
+       if (url) {
+           def dataMap = [repoId: repo.id, projectId: projectId, accessUrl: url,
+                          userId: userId, locale: locale]
+           File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+           def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+           dataMap['progressLogFile'] = progressFile.absolutePath           
+           dataMap['id'] = "repoLoad-cloudBackup-${repo.name}"
+           dataMap['description'] = getMessage("repository.action.loadCloudDump.job.description",
+                       [repo.name, project.name], locale)
+           dataMap['urlProgress'] = "/csvn/log/show?fileName=/temp/${progressFile.name}&view=tail"
+
+           jobsInfoService
+               .queueJob(loadSvnrdumpRunnable(dataMap), new Date())
+       } else {
+           throw new CloudServicesException('cloud.services.svn.url.not.found')
+       }
+   }
+
+
+   private def loadSvnrdumpRunnable = { dataMap ->
+       return [
+           dataMap: dataMap,
+           run: {
+                Repository repo = Repository.get(dataMap.get("repoId"))
+                if (!repo) {
+                    log.error("Unable to execute the repo load: repoId not found")
+                }
+                try {
+                    log.info("Loading cloud dump into repo: ${repo.name}")
+                    loadCloudDump(repo, dataMap)
+                    svnRepoService.publishEvent(new LoadRepositoryEvent(this,
+                            repo, LoadRepositoryEvent.SUCCESS,
+                            dataMap['userId'], dataMap['locale'],
+                            dataMap['progressLogFile'] ?
+                            new File(dataMap['progressLogFile']) : null))
+                }
+                catch (Exception e) {
+                    log.error("Unable to load the cloud dump", e)
+                    svnRepoService.publishEvent(new LoadRepositoryEvent(this,
+                            repo, LoadRepositoryEvent.FAILED,
+                            dataMap['userId'], dataMap['locale'],
+                            dataMap['progressLogFile'] ?
+                            new File(dataMap['progressLogFile']) : null, e))
+                }
+           }]
+    }
+    
+    private void loadCloudDump(repo, dataMap) {
+        def url = dataMap['accessUrl']
+        def command = [ConfigUtil.svnrdumpPath(), "dump", url,
+            "--non-interactive", "--no-auth-cache", 
+            "--config-dir", ConfigUtil.svnConfigDirPath(),
+            "--config-option=servers:global:ssl-authority-files=" +  
+            new File(ConfigUtil.dataDirPath(),  
+                     "certs/cloud_services_root_ca.crt").canonicalPath,]
+        log.debug("rdump command: " + command)
+        def cred = createFullCredentialsMap()
+        def username = cred['credentials[login]']
+        def password = cred['credentials[password]']
+        command << "--username" << username << "--password" << password
+        Process dumpProcess = commandLineService.startProcess(command)
+        
+        File progressLogFile = new File(dataMap['progressLogFile'])
+        FileOutputStream progress = new FileOutputStream(progressLogFile)
+        
+        def threads = []
+        threads << dumpProcess.consumeProcessErrorStream(progress)
+        File repoPath = new File(Server.getServer().repoParentDir, repo.name)
+        def loadCmd = [ConfigUtil.svnadminPath(), "load", repoPath.canonicalPath]
+        def loadProcess = dumpProcess.pipeTo(commandLineService.startProcess(loadCmd))
+        threads << loadProcess.consumeProcessErrorStream(progress)
+        threads << loadProcess.consumeProcessOutputStream(progress)
+        try {
+            // wait for the consumer threads to finish
+            for (t in threads) {
+                try {
+                    t.join()
+                } catch (InterruptedException e) {
+                    log.debug("Process consuming thread was interrupted")
+                }
+            }
+        } finally {
+            if (dumpProcess.waitFor() == 0 && loadProcess.waitFor() == 0) {
+                progress << "Initial load is complete.\n"
+                progress.close()
+                progressLogFile.delete()
+            } else {
+                progress << "Error code returned during initial load.\n"
+                progress << "Dump process exit value = " + dumpProcess.exitValue()+ "\n"
+                progress << "Load process exit value = " + loadProcess.exitValue()+ "\n"
+                progress.close()
+                throw new Exception("Remote dump and load is incomplete.");
+            }
+        }
+    }
 
     /**
      * Adds the Subversion service to a project

@@ -96,6 +96,11 @@ public final class ConfigUtil {
             new File(appHome(), "bin/svnauthz-validate").absolutePath
     }
 
+    def static svnrdumpPath() {
+        return getConfig().svnedge.replica.svn.svnrdumpPath ?:
+                new File(appHome(), "bin/svnrdump").absolutePath
+    }
+
     def static svnsyncPath() {
         return getConfig().svnedge.replica.svn.svnsyncPath ?
             getConfig().svnedge.replica.svn.svnsyncPath : 

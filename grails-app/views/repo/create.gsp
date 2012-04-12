@@ -105,6 +105,45 @@
         });
       }
     }
+
+    var isCloudReady = false;
+    
+    function getCloudBackups() {
+        if ($('#useCloud').attr('checked') && !isCloudReady) {
+            $.get('/csvn/repo/cloudBackupList', prepareCloudBackups);
+        }
+    }
+
+    function prepareCloudBackups(responseJson, textStatus, jqXHR) {
+        if (responseJson.result != null && responseJson.result.projects) {
+            var html = "<p><g:message code='repository.page.create.useCloud.instructions'/></p>";
+//            html += '<select id="cloudBackup" name="cloudBackup">';
+            var projects = responseJson.result.projects;
+            for (var i = 0; i < projects.length; i++ ) {
+                var project = projects[i];
+                var initialStateSelected = false; // TODD initOptionSelectedParam.indexOf(key) > -1
+              // add project name to list
+/*
+              html += '<option value="' + project.projectId;
+              if (initialStateSelected) {
+                  html += '" selected="selected';
+              }
+              html += '">' + project.name + '</option>';
+*/
+                html += '<label><input name="cloudBackup" value=' + project.projectId + 
+                    ' type="radio"';
+                if (initialStateSelected) {
+                    html += ' checked="checked"';
+                }
+                html += '/> ' + project.name + '</label>'
+            }
+//            html += '</select>';
+            isCloudReady = true;
+        } else {
+            html += '<p><g:message code="repository.page.create.useCloud.emptyProjects"/></p>';
+        }
+        $('#cloudChooser').html(html);
+    }   
   /* ]]> */
   </script>
   <style>
@@ -149,9 +188,16 @@
         <span class="help-inline"><g:message code="repository.page.create.useBackup"/></label>
       <g:hiddenField name="initOptionSelected" value="${params.initOptionSelected}"/>
       <div id="backupChooser" class="initOptionDetail useBackup" style="display:none">
-        Loading backup files...
+        <g:message code="repository.page.create.useBackup.loading"/>
       </div>
-
+      <g:if test="${showCloudBackups}">
+        <label class="radio"><g:radio name="initOption" value="useCloud" id="useCloud" class="repoInitOptions" onclick="getCloudBackups();"/>
+            <g:message code="repository.page.create.useCloud"/></label>
+        <div id="cloudChooser" class="initOptionDetail useCloud" style="display:none">
+          <img id="spinner" class="spinner" src="/csvn/images/spinner-gray-bg.gif" alt=""/>
+          <g:message code="repository.page.create.useCloud.loading"/>
+        </div>
+      </g:if>
     </div>
   </div>
   <div class="form-actions">    
