@@ -20,6 +20,8 @@
 
       // load all repo dump files into the backup chooser div
       $.get('/csvn/repo/dumpFileListAll', prepareBackupsTree)
+      // this only retrieves the cloud backups, if the option is selected
+      getCloudBackups();
     });
 
     var initOptionParam = "${params.initOption ?: ''}";
@@ -107,6 +109,7 @@
     }
 
     var isCloudReady = false;
+    var initCloudBackupParam = "${params.cloudBackup ?: ''}";
     
     function getCloudBackups() {
         if ($('#useCloud').attr('checked') && !isCloudReady) {
@@ -117,27 +120,17 @@
     function prepareCloudBackups(responseJson, textStatus, jqXHR) {
         if (responseJson.result != null && responseJson.result.projects) {
             var html = "<p><g:message code='repository.page.create.useCloud.instructions'/></p>";
-//            html += '<select id="cloudBackup" name="cloudBackup">';
             var projects = responseJson.result.projects;
             for (var i = 0; i < projects.length; i++ ) {
                 var project = projects[i];
-                var initialStateSelected = false; // TODD initOptionSelectedParam.indexOf(key) > -1
-              // add project name to list
-/*
-              html += '<option value="' + project.projectId;
-              if (initialStateSelected) {
-                  html += '" selected="selected';
-              }
-              html += '">' + project.name + '</option>';
-*/
+                // add project name to list
                 html += '<label><input name="cloudBackup" value=' + project.projectId + 
                     ' type="radio"';
-                if (initialStateSelected) {
+                if (project.projectId == initCloudBackupParam) {
                     html += ' checked="checked"';
                 }
-                html += '/> ' + project.name + '</label>'
+                html += '/> ' + project.name + '</label>';
             }
-//            html += '</select>';
             isCloudReady = true;
         } else {
             html += '<p><g:message code="repository.page.create.useCloud.emptyProjects"/></p>';

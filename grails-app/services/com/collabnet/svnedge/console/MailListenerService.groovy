@@ -23,7 +23,8 @@ import com.collabnet.svnedge.domain.MailAuthMethod
 import com.collabnet.svnedge.domain.MailSecurityMethod
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User
-import com.collabnet.svnedge.event.LoadRepositoryEvent;
+import com.collabnet.svnedge.event.LoadRepositoryEvent
+import com.collabnet.svnedge.event.LoadCloudRepositoryEvent
 import com.collabnet.svnedge.event.RepositoryEvent
 import com.collabnet.svnedge.event.DumpRepositoryEvent
 import com.collabnet.svnedge.event.VerifyRepositoryEvent
@@ -211,13 +212,14 @@ class MailListenerService extends AbstractSvnEdgeService
         def mailSubject = getMessage(event.isSuccess ?
                 'mail.message.subject.success' : 'mail.message.subject.error',
                 null, locale)
-        mailSubject += getMessage('mail.message.load.subject', null, locale)
+        mailSubject += getMessage(event.messagePrefix + '.subject', null, locale)
         mailSubject += getMessage('mail.message.repository', [repo.name], locale)
 
         def mailBody
         byte[] processOutput
-        (mailBody, processOutput) = getMailBody(event, repo, 'mail.message.load.body.success',
-                'mail.message.load.body.error', locale)
+        (mailBody, processOutput) = getMailBody(event, repo, 
+                event.messagePrefix + '.body.success',
+                event.messagePrefix + '.body.error', locale)
 
         sendMail(toAddress, ccAddress, fromAddress, 
                  mailSubject, mailBody, processOutput)

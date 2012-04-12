@@ -940,7 +940,13 @@ class RepoController {
                 request.repo = repo
                 forward(action: 'create')
                 return  
+            } else if (params.initOption == 'useCloud' && !params.cloudBackup) {
+                request.error = message(code: 'repository.action.save.no.cloud.backup.selected')
+                request.repo = repo
+                forward(action: 'create')
+                return  
             }
+
 
             int templateId = params.templateId as int
             def isTemplate = (params.initOption == 'useTemplate' && 

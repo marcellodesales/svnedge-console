@@ -1,8 +1,4 @@
 /*
-
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import java.util.concurrent.ConcurrentLinkedQueue;
  * CollabNet Subversion Edge
  * Copyright (C) 2011, CollabNet Inc. All rights reserved.
  *
@@ -38,7 +34,7 @@ import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 import com.collabnet.svnedge.controller.integration.CloudServicesAccountCommand
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration
-import com.collabnet.svnedge.event.LoadRepositoryEvent
+import com.collabnet.svnedge.event.LoadCloudRepositoryEvent
 
 import org.apache.http.auth.AuthScope
 import org.apache.http.auth.UsernamePasswordCredentials
@@ -504,11 +500,18 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
        def project = projectUrlMap[projectId]
        def url = project['accessUrl']
        if (url) {
+           // Put a load file in place to avoid having someone try to upload
+           // a another dump file
+           File loadDir = svnRepoService.getLoadDirectory(repo)
+           File loadFile = File.createTempFile("loadFromCloud", null, loadDir)
+           loadFile.deleteOnExit()
+           
            def dataMap = [repoId: repo.id, projectId: projectId, accessUrl: url,
                           userId: userId, locale: locale]
            File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
            def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
            dataMap['progressLogFile'] = progressFile.absolutePath           
+           dataMap['loadFile'] = loadFile.canonicalPath
            dataMap['id'] = "repoLoad-cloudBackup-${repo.name}"
            dataMap['description'] = getMessage("repository.action.loadCloudDump.job.description",
                        [repo.name, project.name], locale)
@@ -533,16 +536,16 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 try {
                     log.info("Loading cloud dump into repo: ${repo.name}")
                     loadCloudDump(repo, dataMap)
-                    svnRepoService.publishEvent(new LoadRepositoryEvent(this,
-                            repo, LoadRepositoryEvent.SUCCESS,
+                    svnRepoService.publishEvent(new LoadCloudRepositoryEvent(this,
+                            repo, LoadCloudRepositoryEvent.SUCCESS,
                             dataMap['userId'], dataMap['locale'],
                             dataMap['progressLogFile'] ?
                             new File(dataMap['progressLogFile']) : null))
                 }
                 catch (Exception e) {
                     log.error("Unable to load the cloud dump", e)
-                    svnRepoService.publishEvent(new LoadRepositoryEvent(this,
-                            repo, LoadRepositoryEvent.FAILED,
+                    svnRepoService.publishEvent(new LoadCloudRepositoryEvent(this,
+                            repo, LoadCloudRepositoryEvent.FAILED,
                             dataMap['userId'], dataMap['locale'],
                             dataMap['progressLogFile'] ?
                             new File(dataMap['progressLogFile']) : null, e))
@@ -585,15 +588,18 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 }
             }
         } finally {
+            File dummyLoadFile = new File(dataMap['loadFile'])
             if (dumpProcess.waitFor() == 0 && loadProcess.waitFor() == 0) {
                 progress << "Initial load is complete.\n"
                 progress.close()
                 progressLogFile.delete()
+                dummyLoadFile.delete()
             } else {
                 progress << "Error code returned during initial load.\n"
                 progress << "Dump process exit value = " + dumpProcess.exitValue()+ "\n"
                 progress << "Load process exit value = " + loadProcess.exitValue()+ "\n"
                 progress.close()
+                dummyLoadFile.delete()
                 throw new Exception("Remote dump and load is incomplete.");
             }
         }

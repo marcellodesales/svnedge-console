@@ -1,6 +1,6 @@
 /*
  * CollabNet Subversion Edge
- * Copyright (C) 2011, CollabNet Inc. All rights reserved.
+ * Copyright (C) 2012, CollabNet Inc. All rights reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -20,32 +20,19 @@ package com.collabnet.svnedge.event
 
 import org.springframework.context.ApplicationEvent
 
+import com.collabnet.svnedge.console.DumpBean
 import com.collabnet.svnedge.domain.Repository
 
 /**
- * Spring event meant to be published from repository operations
+ * Spring event related to background repo dump
  */
-class RepositoryEvent extends ApplicationEvent {
-    public static final boolean SUCCESS = true
-    public static final boolean FAILED = false
-
-    Repository repo
-    boolean isSuccess
-    Integer userId
-    File processOutput
-    Exception exception
-    Locale locale
-    String messagePrefix
+class LoadCloudRepositoryEvent extends LoadRepositoryEvent {
     
-    def RepositoryEvent(source, Repository repo, boolean isSuccess, 
-            Integer userId = null, Locale locale, File processOutput = null, 
-            Exception e = null) {
-        super(source)
-        this.repo = repo
-        this.isSuccess = isSuccess
-        this.userId = userId
-        this.processOutput = processOutput
-        this.exception = e
-        this.locale = locale
+    def LoadCloudRepositoryEvent(source,
+            Repository repo, boolean isSuccess, 
+            Integer userId = null, Locale locale = null, 
+            File processOutput = null, Exception e = null) {
+        super(source, repo, isSuccess, userId, locale, processOutput, e)
+        messagePrefix = "mail.message.loadCloud"
     }
 }

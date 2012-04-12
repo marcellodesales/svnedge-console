@@ -33,5 +33,6 @@ class LoadRepositoryEvent extends RepositoryEvent {
             Integer userId = null, Locale locale = null, 
             File processOutput = null, Exception e = null) {
         super(source, repo, isSuccess, userId, locale, processOutput, e)
+        messagePrefix = "mail.message.load"
     }
 }
