@@ -23,10 +23,12 @@ import grails.test.*
 
 import org.junit.Test
 
+import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.domain.integration.CloudServicesConfiguration;
 import com.collabnet.svnedge.util.ConfigUtil
 import org.apache.commons.logging.LogFactory
 import com.collabnet.svnedge.domain.Repository
+import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User;
 
 class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCase {
@@ -37,8 +39,10 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
     def config
     def cloudServicesRemoteClientService
     def securityService
+    def svnRepoService
     boolean skipTests
     CloudServicesConfiguration csConf
+    def repoParentDir
 
     
     @Override
@@ -61,8 +65,21 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
                 skipTests = true
                 log.warn("Skipping unit tests")
             }
-        }        
-     }
+        }
+        // Setup a test repository parent
+        repoParentDir = TestUtil.createTestDir("repo")
+        Server server = Server.getServer()
+        server.repoParentDir = repoParentDir.getCanonicalPath()
+        server.save()
+    }
+    
+    @Override
+    protected void tearDown() {
+        super.tearDown()
+        repoParentDir.deleteDir()
+    }
+
+
 
     void testCreateSvnAndDeleteProject() {
         if (skipTests) {
@@ -141,5 +158,108 @@ class CloudServicesRemoteClientServiceIntegrationTests extends GrailsUnitTestCas
         def products = cloudServicesRemoteClientService.listChannelProducts().products
         assertEquals "SvnEdge only has one associated product", 1, products.size()
         assertEquals "Unexpected channel product", config.svnedge.cloudServices.defaultProductSKU, products[0].SKU
+    }
+    
+    void testLoadSvnrdumpProject() {
+        if (skipTests) {
+            return
+        }
+        def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        progressFile.delete()
+        def repo = new Repository(name: "testRepo_source")
+        String projectId = cloudServicesRemoteClientService.createProject(repo)
+        assertNotNull "Could not create test project", projectId
+        try {
+            String serviceId = cloudServicesRemoteClientService.addSvnToProject(projectId)
+            assertNotNull "Could not add svn to the test project", serviceId
+            
+            assertEquals "Failed to create source repository.", 0,
+                    svnRepoService.createRepository(repo, false)
+            repo.save(flush: true)
+            
+            def resource = this.class.getResource("small-repo.dump")
+            File dumpFile = new File(resource.toURI())
+            
+            // move src dump file to the expected load location for target
+            File loadDir = svnRepoService.getLoadDirectory(repo)
+            // delete any residual load files
+            loadDir.eachFile {
+                it.delete()
+            }
+            File loadFile = new File(loadDir, dumpFile.name)
+            loadFile.withOutputStream { out -> 
+                dumpFile.withInputStream { out << it } 
+            }
+            
+            // load it
+            def options = ["progressLogFile": progressFile.absolutePath,
+                           "ignoreUuid": false
+                ]
+            svnRepoService.loadDumpFile(repo, options)
+
+            Locale locale = Locale.defaultLocale
+            cloudServicesRemoteClientService
+                    .synchronizeRepository(repo, locale)
+
+            Repository repoTarget = new Repository(name: "testRepo_target")
+            assertEquals "Failed to create target repository.", 0,
+                    svnRepoService.createRepository(repoTarget, false)
+            repoTarget.save(flush: true)
+            
+            int srcRev = svnRepoService.findHeadRev(repo)
+            int targetRev = -1
+            cloudServicesRemoteClientService
+                    .loadSvnrdumpProject(repoTarget, projectId as int)
+
+            int sec = 0
+            while (srcRev != targetRev && sec < 30) {
+                Thread.sleep(1000)
+                targetRev = svnRepoService.findHeadRev(repoTarget)
+                sec++
+            }
+            assertEquals "Target repository head revision does not match source",
+                    srcRev, targetRev
+        } finally {
+            assertTrue "Was unable to delete test project, id=" + projectId,
+                    cloudServicesRemoteClientService.deleteProject(projectId)
+            progressFile.delete()
+        }   
+    }
+
+    def testRetrieveSvnProjects() {
+        if (skipTests) {
+            return
+        }
+        def repo = new Repository(name: "testRepo")
+        String projectId = cloudServicesRemoteClientService.createProject(repo)
+        assertNotNull "Could not create test project", projectId
+        repo = new Repository(name: "svnTestRepo")
+        String svnProjectId = cloudServicesRemoteClientService.createProject(repo)
+        assertNotNull "Could not create test svn project", svnProjectId
+        try {
+            String serviceId = cloudServicesRemoteClientService
+                    .addSvnToProject(svnProjectId)
+            assertNotNull "Could not add svn to the test project", serviceId
+
+            def success = false
+            int sec = 0
+            def projectMap
+            while (!success && sec < 30) {
+                projectMap = cloudServicesRemoteClientService
+                        .retrieveSvnProjects()
+                success = projectMap.containsKey(svnProjectId as Integer) &&
+                        !projectMap.containsKey(projectId as Integer)
+                sec++
+            }
+            assertTrue "Svn project " + svnProjectId + " not found or non-svn " +
+                    " project " + projectId + " was found in: " + projectMap, success
+
+        } finally {
+            assertTrue "Was unable to delete test project, id=" + projectId,
+                    cloudServicesRemoteClientService.deleteProject(projectId)
+            assertTrue "Was unable to delete test project, id=" + svnProjectId,
+                    cloudServicesRemoteClientService.deleteProject(svnProjectId)
+        }
     }
 }

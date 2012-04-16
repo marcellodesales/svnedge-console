@@ -484,6 +484,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                projectUrlMap[projectId] = valueMap
            }
        }
+       returnClient(restClient)
        return projectUrlMap
    }
 
@@ -761,7 +762,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         return false
     }
 
-    String setupProjectAndService(repo, fos = null, locale = null) 
+    String[] setupProjectAndService(repo, fos = null, locale = null) 
             throws CloudServicesException {
 
         // confirm that the project exists
@@ -813,15 +814,17 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         }
             
         returnClient(restClient)
-        return cloudSvnURI
+        return [cloudSvnURI, serviceId]
     }
 
     private void synchronizeRepositoryWithProgress(repo, fos, locale) 
             throws CloudServicesException {
 
-        String cloudSvnURI = setupProjectAndService(repo, fos, locale)
+        def (cloudSvnURI, serviceId) = setupProjectAndService(repo, fos, locale)
         if (!cloudSvnURI) {
+            RESTClient restClient = getAuthenticatedRestClient()
             cloudSvnURI = getCloudSvnURI(repo.name, serviceId, restClient)
+            returnClient(restClient)
             if (!cloudSvnURI) {
                 throw new CloudServicesException('cloud.services.unable.to.access.svn')
             }
