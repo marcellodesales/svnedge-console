@@ -164,11 +164,18 @@ class LifecycleService {
 
         log.debug("Checking isStarted  Path=" + f.getPath() + 
                   " exists? " + f.exists())
-        // TODO we could do extra check like "ps -p httpdPid()" and/or 
-        // "new File("/proc/" + httpdPid()).exists()
-        // we also need to figure out what to do if the pid files exists, but 
-        // the process has ended
-        return f.exists()
+        if (f.exists()) {
+            if (operatingSystemService.getProcessExists(f.text.trim())) {
+                return true
+            }
+            else {
+                f.delete()
+                return false
+            }
+        }
+        else {
+            return false
+        }
     }
 
      /**

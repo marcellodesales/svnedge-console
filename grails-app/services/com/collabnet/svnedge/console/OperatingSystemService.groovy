@@ -22,6 +22,8 @@ import org.hyperic.sigar.Sigar
 
 import java.lang.reflect.Field
 import grails.util.GrailsUtil
+import org.hyperic.sigar.ProcState
+import org.hyperic.sigar.SigarException
 
 /**
  * The Operating System service is related to process level, services, OS info,
@@ -234,6 +236,29 @@ class OperatingSystemService {
      */
     def getEnvironmentVariables() {
         return System.getenv()
+    }
+
+    /**
+     * tests a given process id for existence 
+     * @param pid
+     * @return boolean if the pid belongs to a running process
+     */
+    boolean getProcessExists(String pid) {
+        try {
+            ProcState procState = sigar.getProcState(pid)
+            if([ProcState.IDLE, ProcState.RUN, ProcState.SLEEP].contains(procState.state)) {
+                log.info("Process pid '${pid}' belongs to healthy process")
+                return true
+            }
+            else if ([ProcState.STOP, ProcState.ZOMBIE].contains(procState.state)) {
+                log.warn("Process pid '${pid}' exists, but is STOPPED or is ZOMBIE")
+                return true
+            }
+        }
+        catch (SigarException e) {
+            log.warn ("Testing for process '${pid}' failed: ${e.message}")
+            return false
+        }
     }
 
    /**
