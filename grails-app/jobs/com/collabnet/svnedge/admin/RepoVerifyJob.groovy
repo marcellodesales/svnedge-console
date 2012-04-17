@@ -28,6 +28,8 @@ import com.collabnet.svnedge.event.VerifyRepositoryEvent
  */
 class RepoVerifyJob {
 
+    public static final String EVENT_SOURCE_SCHEDULED = "RepoVerifyJob-Scheduled"
+    public static final String EVENT_SOURCE_ADHOC = "RepoVerifyJob-AdHoc"
     def svnRepoService
     def jobsInfoService
 
@@ -52,7 +54,7 @@ class RepoVerifyJob {
                     Repository repo = Repository.get(dataMap.get("repoId"))
                     def progressLog = BackgroundJobUtil
                             .prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.VERIFY)
-                    log.info("Verifying repo '${repo.name}'")
+                    log.info("Verifying repo '${repo.name}'...")
                                 
                     boolean result = false
                     Exception e = null
@@ -60,18 +62,24 @@ class RepoVerifyJob {
                         result = svnRepoService
                                 .verifyRepositoryPath(svnRepoService.getRepositoryHomePath(repo),
                                         new FileOutputStream(progressLog))
-                        log.info("Finished verification of repo '${repo.name}' with result: ${result}")
-                        // delete log on success
+                        // delete progress log on success
                         if (result) {
+                            log.info("Successfully verified repo '${repo.name}'")
                             progressLog.delete()
+                        }
+                        else {
+                            log.error("Failed verification for repo '${repo.name}'. " + 
+                                    "See ${progressLog.absolutePath} for details.")
                         }
                     }
                     catch (Exception ex) {
-                        log.warn ("Caught exception verifying repo '${repo.name}': ${ex.message}", ex)
+                        log.error ("Caught exception verifying repo '${repo.name}': ${ex.message}. " + 
+                                "See ${progressLog.absolutePath} for details.")
                         e = ex
                     }
                     // publish event
-                    svnRepoService.publishEvent(new VerifyRepositoryEvent(this, repo,
+                    def source = Boolean.valueOf(dataMap["isRecurring"]) ? EVENT_SOURCE_SCHEDULED : EVENT_SOURCE_ADHOC
+                    svnRepoService.publishEvent(new VerifyRepositoryEvent(source, repo,
                             (result ? VerifyRepositoryEvent.SUCCESS : VerifyRepositoryEvent.FAILED),
                             dataMap['userId'], dataMap['locale'], progressLog, e))
                 }

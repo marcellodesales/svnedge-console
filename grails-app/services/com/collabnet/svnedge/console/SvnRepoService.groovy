@@ -812,6 +812,10 @@ class SvnRepoService extends AbstractSvnEdgeService {
         if (userId) {
             jobDataMap['userId'] = userId
         }
+        // indicate whether this is a scheduled / recurring job or adhoc / one-off in the data map
+        jobDataMap['isRecurring'] = 
+                !([SchedulerBean.Frequency.NOW, SchedulerBean.Frequency.ONCE].contains(bean.frequency)) 
+        
         jobDataMap.putAll(bean.toMap())
         trigger.setJobDataMap(new JobDataMap(jobDataMap))
 

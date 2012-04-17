@@ -528,7 +528,7 @@ class RepoController {
                     flash.unfiltered_message = message(code: 'repository.action.updateVerifyJob.success')
                     MailConfiguration config = MailConfiguration.getConfiguration()
                     if (!config.enabled) {
-                        flash.unfiltered_message += " " + message(code: 'repository.action.updateVerifyJob.mailConfig')
+                        flash.unfiltered_message += " " + message(code: 'mailConfiguration.required')
                     }
                 } else if (type == "none") {
                     flash.error = message(code: 'repository.action.updateBkupSchedule.none')
@@ -1328,6 +1328,21 @@ class RepoController {
                 redirect(action: 'createHook', id: params.id)
             }
         }
+    }
+    
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def verify = {
+        Repository r = selectRepository()
+        def userId = loggedInUserInfo(field: 'id') as Integer
+        def schedule = new SchedulerBean()
+        schedule.frequency = SchedulerBean.Frequency.NOW
+        svnRepoService.scheduleVerifyJob(schedule, r, userId, null, request.locale)
+        flash.unfiltered_message = message(code: 'repository.action.verify.adHoc')
+        MailConfiguration config = MailConfiguration.getConfiguration()
+        if (!config.enabled) {
+            flash.unfiltered_message += " " + message(code: 'mailConfiguration.required')
+        }
+        redirect([action: 'list'])
     }
     
     /**

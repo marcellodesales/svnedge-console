@@ -44,6 +44,8 @@ import java.net.UnknownHostException
 import javax.mail.AuthenticationFailedException
 import javax.mail.MessagingException
 
+import com.collabnet.svnedge.admin.RepoVerifyJob
+
 /**
  * The listener for events which can result in a mail notification. 
  * 
@@ -243,7 +245,7 @@ class MailListenerService extends AbstractSvnEdgeService
 
         def mailBody
         byte[] processOutput
-        if (event.isSuccess) {
+        if (event.isSuccess && event.source == RepoVerifyJob.EVENT_SOURCE_SCHEDULED) {
             log.info("Repo '${repo.name}' verification succeeded, sending no email")
             return
         }
