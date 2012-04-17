@@ -178,7 +178,7 @@
         </g:each>
       </div>    
       <label class="radio"><g:radio name="initOption" value="useBackup" id="useBackup" class="repoInitOptions"/>
-        <span class="help-inline"><g:message code="repository.page.create.useBackup"/></label>
+        <g:message code="repository.page.create.useBackup"/></label>
       <g:hiddenField name="initOptionSelected" value="${params.initOptionSelected}"/>
       <div id="backupChooser" class="initOptionDetail useBackup" style="display:none">
         <g:message code="repository.page.create.useBackup.loading"/>

@@ -93,7 +93,7 @@ function fetchUploadProgress() {
             for="ignoreUuid"><g:message code="repository.page.load.ignoreUuid.label"/></label>
         <div class="controls">
           <g:checkBox name="ignoreUuid" id="ignoreUuid" value="${params.ignoreUuid}"/>
-          <label class="checkbox inline withFor"><g:message code="repository.page.load.ignoreUuid.tip" /></label>
+          <label class="checkbox inline withFor" for="ignoreUuid"><g:message code="repository.page.load.ignoreUuid.tip" /></label>
         </div>
       </div>
     </g:if>
