@@ -63,7 +63,11 @@ public class FileUtil {
 
                 def mode = entry.getUnixMode()
                 if (!operatingSystemService.isWindows() && mode > 0) {
-                    def chmodCmd = ["chmod", Integer.toString(mode, 8), f.absolutePath]
+                    def octalMode = Integer.toString(mode, 8)
+                    if (octalMode.length() > 4) {
+                        octalMode = octalMode.substring(octalMode.length() - 4)
+                    }
+                    def chmodCmd = ["chmod", octalMode, f.absolutePath]
                     String[] result = commandLineService.execute(chmodCmd, progress, progress)
                 }
             }
@@ -94,8 +98,34 @@ public class FileUtil {
             zos = new ZipArchiveOutputStream(zipFile)
             recursiveArchiveDirectory(directory.canonicalPath.length() + 1,
                     directory, zos, storePermissions, progress)
-        } finally {
+        }
+        catch (StringIndexOutOfBoundsException e) {
+            log.warn("Error zipping directory, likely caused by presence of symlink(s)")
+            log.info("Attempting alternate zip using command line tool")
             zos?.close()
+            zipFile.delete()
+            archiveDirectoryUsingExternalTool(directory, zipFile, progress)
+        }
+        finally {
+            zos?.close()
+        }
+    }
+
+    /**
+     * Utility method to zip a directory using the zip command line tool
+     * @param directory the directory to zip
+     * @param zipFile the target file
+     * @param progress the stream into which output is sent (optional)
+     */
+    public void archiveDirectoryUsingExternalTool(File directory, File zipFile, OutputStream progress = null) {
+        String wd = directory.parentFile.absolutePath
+        String[] result = 
+                commandLineService.execute(["zip", "-r", zipFile.absolutePath, directory.name],
+                        progress, progress, ["PWD" : wd])
+        if (result[0] != "0") {
+            def msg = "Unable to zip directory, make sure 'zip' utility is installed and on path"
+            log.error(msg)
+            throw new RuntimeException(msg)
         }
     }
 

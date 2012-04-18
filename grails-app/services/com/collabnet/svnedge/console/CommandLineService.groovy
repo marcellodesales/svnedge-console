@@ -152,7 +152,9 @@ class CommandLineService {
                 INTERESTING_ENVVARS.contains(key)})
                 .collect({key, value -> key + ":" + value}))
         }
-        pb.directory(new File(ConfigUtil.appHome()))
+        // look for "addEnv['PWD'] and use for process working dir if found
+        String wd = addEnv?.PWD ?: ConfigUtil.appHome()
+        pb.directory(new File(wd))
         if (!quiet) {
             log.debug("Calling pb.start() for command=" + command)
         }
