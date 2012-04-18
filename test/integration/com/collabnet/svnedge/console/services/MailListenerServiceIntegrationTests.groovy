@@ -41,6 +41,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder;
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
 import com.collabnet.svnedge.event.VerifyRepositoryEvent
+import com.collabnet.svnedge.admin.RepoVerifyJob
 
 class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
 
@@ -333,11 +334,19 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
                 message.getRecipients(Message.RecipientType.CC)))
     }
 
-    public void testVerifySuccess() {
+    public void testVerifySuccessScheduled() {
         VerifyRepositoryEvent event = new VerifyRepositoryEvent(
-                this, repo, VerifyRepositoryEvent.SUCCESS, ADMIN_USER_ID, Locale.default)
+                RepoVerifyJob.EVENT_SOURCE_SCHEDULED, repo, VerifyRepositoryEvent.SUCCESS, ADMIN_USER_ID, Locale.default)
         mailListenerService.onApplicationEvent(event)
-        assertEquals("Expected zero mail messages on verify success", 0,
+        assertEquals("Expected zero mail messages on verify success when sheduled", 0,
+                greenMail.getReceivedMessages().length)
+    }
+
+    public void testVerifySuccessAdhoc() {
+        VerifyRepositoryEvent event = new VerifyRepositoryEvent(
+                RepoVerifyJob.EVENT_SOURCE_ADHOC, repo, VerifyRepositoryEvent.SUCCESS, ADMIN_USER_ID, Locale.default)
+        mailListenerService.onApplicationEvent(event)
+        assertEquals("Expected one mail messages on verify success for adhoc jobs", 1,
                 greenMail.getReceivedMessages().length)
     }
 
@@ -347,7 +356,7 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
 
         def exceptionMsg = "Test Verify Failed"
         VerifyRepositoryEvent event = new VerifyRepositoryEvent(
-                this, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
+                RepoVerifyJob.EVENT_SOURCE_SCHEDULED, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
                 Locale.default, null, new Exception(exceptionMsg))
 
         mailListenerService.onApplicationEvent(event)
@@ -411,7 +420,7 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         def exceptionMsg = "Test Verify Failed"
 
         VerifyRepositoryEvent event = new VerifyRepositoryEvent(
-                this, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
+                RepoVerifyJob.EVENT_SOURCE_SCHEDULED, repo, VerifyRepositoryEvent.FAILED, ADMIN_USER_ID,
                 null, testFile, new Exception(exceptionMsg))
 
         mailListenerService.onApplicationEvent(event)
