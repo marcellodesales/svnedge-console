@@ -45,12 +45,7 @@ class HelpUrlFilters {
             'packagesUpdate': 'upgradecsvn.html',
             'statistics': 'maintainserver_csvn.html'
     ]
-    /*
-    Status, Server Logs, Jobs: http://help.collab.net/topic/csvn/action/maintainserver_csvn.html
-    
-    Logging: http://help.collab.net/topic/csvn/action/
-    
-    */
+
     def config = ConfigurationHolder.config
 
     private def initModel(model) {
