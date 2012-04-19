@@ -571,12 +571,118 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
             loadSuccess = output.contains("Node Kind: directory")
         }
 
-        assertFalse "load file should be deleted after loading", loadFile.exists()
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
+        assertFalse "load file should be deleted after loading", loadFile.exists()
         assertEquals "the target repo should still have its own UUID", targetUuid, svnRepoService.getReposUUID(repoTarget)
 
     }
-    
+
+    public void testHotcopyWithSymlinks() {
+
+        // only test *nix
+        if (operatingSystemService.isWindows()) {
+            return
+        }
+
+        // upper limit on time to run async code
+        long timeLimit = System.currentTimeMillis() + 30000
+        // make sure the quartz scheduler is running, is put in standby by other tests
+        quartzScheduler.start()
+        // but pause jobs likely to start running to ensure a thread is available
+        jobsAdminService.pauseGroup("Statistics")
+
+        // create a hotcopy backup  file of a src repo with branches/tags/trunk nodes
+        def testRepoNameSrc = "hotcopy-src"
+        Repository repoSrc = new Repository(name: testRepoNameSrc)
+        assertEquals "Failed to create src repository.", 0,
+                svnRepoService.createRepository(repoSrc, true)
+        repoSrc.save()
+
+        // setup symlink
+        File repoHome = new File(svnRepoService.getRepositoryHomePath(repoSrc))
+        File hooks = new File(repoHome, "hooks")
+        File startCommitTmpl = new File(hooks, "start-commit.tmpl")
+        File startCommitLink = new File(hooks, "start-commit")
+        assertFalse "the link should not yet exist", startCommitLink.exists()
+        def linkCmd = ["ln", "-s", "${startCommitTmpl.absolutePath}", "${startCommitLink.absolutePath}"]
+        String[] result = commandLineService.execute(linkCmd, null, null)
+        assertTrue "the link should be created", result[0] == "0"
+
+        DumpBean params = new DumpBean()
+        params.compress = true
+        def filename = svnRepoService.createHotcopy(params, repoSrc)
+        File dumpFile = newDumpFile(filename, repoSrc)
+        // Async so wait for it
+        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(250)
+        }
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        assertTrue "The Dump file should be a zip file", dumpFile.name.endsWith(".zip")
+        log.info "The dumpfile original location: '${dumpFile.absolutePath}'"
+
+        // test loading hotcopy
+
+        // create a target repo WITHOUT branches/tags/trunk nodes
+        def testRepoNameTarget = "hotcopy-target"
+
+        Repository repoTarget = new Repository(name: testRepoNameTarget)
+        assertEquals "Failed to create target repository.", 0,
+                svnRepoService.createRepository(repoTarget, false)
+        repoTarget.save(flush: true)
+
+        def output = commandLineService.executeWithOutput(
+                ConfigUtil.svnPath(), "info",
+                "--no-auth-cache", "--non-interactive",
+                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+        // verify no 'trunk' folder
+        assertFalse "svn info output should not contain node info for 'trunk'", output.contains("Node Kind: directory")
+
+        // move src dump file to the expected load location for target
+        File loadDir = svnRepoService.getLoadDirectory(repoTarget)
+        // delete any residual load files
+        loadDir.eachFile {
+            it.delete()
+        }
+        File loadFile = new File(loadDir, dumpFile.name)
+        FileUtils.copyFile(dumpFile, loadFile)
+        assertTrue "loadFile should exist", loadFile.exists()
+        log.info "The loadfile to be imported to the target repo: '${loadFile.absolutePath}'"
+
+        // load it
+        def tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        def progressFile = File.createTempFile("load-progress", ".txt", tempLogDir)
+        log.info "Load progress output: ${progressFile.absolutePath}"
+        def options = ["progressLogFile": progressFile.absolutePath]
+        options << ["ignoreUuid": false]   // our target repo should get it's UUID from the hotcopy
+        svnRepoService.scheduleLoad(repoTarget, options)
+
+        // verify that repo load has run (trunk/tags/branches which should have been imported)
+        boolean loadSuccess = false
+        timeLimit = System.currentTimeMillis() + 60000
+        while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
+            Thread.sleep(5000)
+            output = commandLineService.executeWithOutput(
+                    ConfigUtil.svnPath(), "info",
+                    "--no-auth-cache", "--non-interactive",
+                    commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+            loadSuccess = output.contains("Node Kind: directory")
+        }
+
+
+        assertFalse "load file should be deleted after loading", loadFile.exists()
+        assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
+
+        // test symlink
+        repoHome = new File(svnRepoService.getRepositoryHomePath(repoTarget))
+        hooks = new File(repoHome, "hooks")
+        startCommitTmpl = new File(hooks, "start-commit.tmpl")
+        File startCommit = new File(hooks, "start-commit")
+        assertEquals "the start-commit.tmpl and the former link should have same content",
+                startCommitTmpl.text, startCommit.text
+    }
+
     public void testLoadFailMail() {
         
         // upper limit on time to run async code

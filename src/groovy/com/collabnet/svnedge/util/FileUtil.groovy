@@ -23,6 +23,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.hyperic.sigar.FileInfo
 import org.apache.commons.compress.archivers.zip.ZipFile
+import java.util.zip.ZipException
 
 /**
  * General file-handling util methods. This class must be used as via spring bean "fileUtil", as it has
@@ -99,12 +100,12 @@ public class FileUtil {
             recursiveArchiveDirectory(directory.canonicalPath.length() + 1,
                     directory, zos, storePermissions, progress)
         }
-        catch (StringIndexOutOfBoundsException e) {
+        catch (ZipException e) {
             log.warn("Error zipping directory, likely caused by presence of symlink(s)")
             log.info("Attempting alternate zip using command line tool")
             zos?.close()
             zipFile.delete()
-            archiveDirectoryUsingExternalTool(directory, zipFile, progress)
+            archiveDirectoryUsingCommandLine(directory, zipFile, progress)
         }
         finally {
             zos?.close()
@@ -117,7 +118,7 @@ public class FileUtil {
      * @param zipFile the target file
      * @param progress the stream into which output is sent (optional)
      */
-    public void archiveDirectoryUsingExternalTool(File directory, File zipFile, OutputStream progress = null) {
+    public void archiveDirectoryUsingCommandLine(File directory, File zipFile, OutputStream progress = null) {
         String wd = directory.parentFile.absolutePath
         String[] result = 
                 commandLineService.execute(["zip", "-r", zipFile.absolutePath, directory.name],
@@ -130,9 +131,15 @@ public class FileUtil {
     }
 
     private void recursiveArchiveDirectory(int topLevelPathLength, File directory,
-                                           ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress) {
+            ZipArchiveOutputStream zos, boolean storePermissions, OutputStream progress)
+            throws ZipException {
+
         directory.eachFile { f ->
             String fullPath = f.canonicalPath
+            // check for symlink, throw error if true
+            if (f.canonicalPath != f.absolutePath) {
+                throw new ZipException("The file appears to be a symlink and cannot be handled properly")
+            }
             String relativePath = fullPath.substring(topLevelPathLength, fullPath.length())
             if (f.isDirectory()) {
                 relativePath += "/"
