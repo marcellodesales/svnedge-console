@@ -660,7 +660,7 @@ RedirectMatch ^(${contextPath})\$ \$1/
         }
         conf += """   
    DAV svn
-   SVNParentPath "${server.repoParentDir}"
+   SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
 """
         if (server.useHttpV2 == false) {

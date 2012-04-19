@@ -117,9 +117,21 @@ class Server {
         hostname(nullable: false, blank: false, unique: true)
         port(min:80)
         repoParentDir(nullable: false, blank: false, 
-                      validator: { val, obj ->
-                      def dirFile = new File(val)
-                      return dirFile.exists() && dirFile.isDirectory()
+                validator: { val, obj ->
+                    def dirFile = new File(val)
+                    def result = null
+                    if (dirFile.exists()) {
+                        if (!dirFile.isDirectory()) {
+                            result = ['notADirectory']
+                        }
+                    } else if (val.startsWith('\\\\') || val.startsWith('//')) {
+                        result = System.getProperty('user.name').toLowerCase()
+                                .contains('system') ? 
+                                ['systemUser'] : ['sharePermissions']           
+                    } else {
+                        result = ['doesNotExist']
+                    }
+                    return result
         })
         ipAddress(nullable: false, blank: false)
         netInterface(nullable: false, blank: false)
