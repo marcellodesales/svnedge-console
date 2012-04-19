@@ -162,41 +162,6 @@ class ApplicationFilters {
             }
         }
 
-        /**
-         * this filter defines the help link target for the context
-         */
-        helpUrl(controller: '*', action: '*') {
-
-            // after running the action, add "helpUrl" to the page model
-            after = {model ->
-
-                // per-controller help paths
-                def controllerHelpPaths = [
-                        "user": "/topic/csvn/action/manageusers_csvn.html",
-                        "repo": "/topic/csvn/action/managerepositories.html",
-                        "server": "/topic/csvn/action/configurecsvn.html",
-                        "packagesUpdate": "/topic/csvn/action/upgradecsvn.html",
-                        "statistics": "/topic/csvn/action/maintainserver_csvn.html"
-                ]
-
-                // default help url
-                String helpBase = config.svnedge.helpUrl
-                String helpPath = "/topic/csvn/faq/csvn_toc.html"
-
-                // override if controller has specific url
-                if (controllerHelpPaths[params.controller]) {
-                    helpPath = controllerHelpPaths[params.controller]
-                }
-
-                // add the helpUrl to the page model
-                if (!model) {
-                    model = new HashMap()
-                }
-                model.put("helpBaseUrl", helpBase)
-                model.put("helpUrl", helpBase + helpPath)
-            }
-        }
-
         redirectStatusToRepositoryList(controller: 'status', action: '*') {
             before = {
                 boolean isIntegrationServer = ServerMode.MANAGED == Server.getServer().mode
