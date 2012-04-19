@@ -1,6 +1,6 @@
 /*
  * CollabNet Subversion Edge
- * Copyright (C) 2010, CollabNet Inc. All rights reserved.
+ * Copyright (C) 2012, CollabNet Inc. All rights reserved.
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -16,10 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import com.collabnet.svnedge.domain.Server
-import com.collabnet.svnedge.domain.ServerMode
-import grails.util.GrailsUtil
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
