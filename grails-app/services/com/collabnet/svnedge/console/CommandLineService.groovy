@@ -238,6 +238,8 @@ class CommandLineService {
         def uri = f.toURI().toString()
         if (uri.startsWith("file:/") && uri.charAt(6) != '/') {
             uri = "file:///" + uri.substring(6)    
+        } else if (uri.startsWith('file:////')) {
+            uri = "file://" + uri.substring(9)
         }
         return uri
     }
