@@ -233,18 +233,33 @@ class ServerController {
         }
 
         //In editAuthentication UI repoParentDir does not exist in Params.
-        if (params.repoParentDir != null) {
-          // canonicalize repo parent dir (esp to remove trailing "/" or "\"
-          // that server.validate would allow)
-          String repoParent = new File(params.repoParentDir).canonicalPath
-          server.repoParentDir = repoParent
-        }
-
-        // validate, and reject port value if needed
-        server.validate()
-        if (portError) {
-            server.errors.rejectValue("port",
-                "server.port.defaultValue.rejected")
+        def repoParentParam = params.repoParentDir
+        if (repoParentParam != null) {
+            // canonicalize repo parent dir (esp to remove trailing "/" or "\"
+            // that server.validate would allow)
+            try {
+                String repoParent = new File(repoParentParam).canonicalPath
+                server.repoParentDir = repoParent
+                
+                // validate, and reject port value if needed
+                server.validate()
+                if (portError) {
+                    server.errors.rejectValue("port",
+                        "server.port.defaultValue.rejected")
+                }
+        
+            } catch (IOException e) {
+                if (repoParentParam.startsWith('\\\\') || 
+                        repoParentParam.startsWith('//')) {
+                    server.errors.rejectValue('repoParentDir', 
+                            'server.repoParentDir.systemUser')
+                } else {
+                    server.errors.rejectValue('repoParentDir',
+                            'server.repoParentDir.ioexception', 
+                            [e.message] as String[], 
+                            "IOException: " + e.message)
+                }
+            }
         }
 
         if(!server.hasErrors() && server.save(flush:true)) {
