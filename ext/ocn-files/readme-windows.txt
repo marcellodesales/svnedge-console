@@ -1,5 +1,5 @@
 CollabNet Subversion Edge - Windows 32/64-bit
-Version 3.0.0
+Version 3.1.0
 
 Contents
 
