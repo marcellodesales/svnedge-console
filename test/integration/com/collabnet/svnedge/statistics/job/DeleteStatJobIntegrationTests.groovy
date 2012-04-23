@@ -63,7 +63,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
         quartzScheduler.resumeJobGroup(deleteStatJob.getGroup())
         deleteStatJob.triggerNow(params)
         synchronized(this) {
-            this.wait(20000)
+            this.wait(60000)
         }
         log.info("Trigger done! Continuing test")
         quartzScheduler.standby()
@@ -124,6 +124,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
         synchronized(this) {
             this.notify()
         }
+        throw new RuntimeException("Did not expect job to be vetoed.")
     }
 
     void jobWasExecuted(JobExecutionContext context, 

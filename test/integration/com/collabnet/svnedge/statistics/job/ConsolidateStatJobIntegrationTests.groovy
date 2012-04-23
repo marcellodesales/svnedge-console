@@ -68,7 +68,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
         quartzScheduler.resumeJobGroup(consolidateStatJob.getGroup())
         consolidateStatJob.triggerNow(params)
         synchronized(this) {
-            this.wait(20000)
+            this.wait(60000)
         }
         log.info("Trigger done! Continuing test")
         quartzScheduler.standby()
@@ -161,6 +161,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
         synchronized(this) {
             this.notify()
         }
+        throw new RuntimeException("Did not expect job to be vetoed.")
     }
 
     void jobWasExecuted(JobExecutionContext context, 
