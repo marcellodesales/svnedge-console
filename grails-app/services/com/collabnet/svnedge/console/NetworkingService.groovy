@@ -148,6 +148,8 @@ public class NetworkingService extends AbstractSvnEdgeService {
             System.setProperty("http.proxyPort", "${netCfg.httpProxyPort}")
             if (netCfg.httpProxyUsername) {
                 System.setProperty("http.proxyUser", netCfg.httpProxyUsername)
+            }
+            if (netCfg.httpProxyPassword) {
                 System.setProperty("http.proxyPassword", netCfg.httpProxyPassword)
             }
         }

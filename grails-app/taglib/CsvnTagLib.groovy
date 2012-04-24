@@ -75,7 +75,7 @@ class CsvnTagLib {
         <input type="password" name="${fieldName}" id="${fieldName}" value="${pwdToken}" size="${size}"/>
         <script type="text/javascript">
         \$('#${fieldName}').change(function(event){
-            \$('${fieldName}_changed').value = 'true'
+            \$('#${fieldName}_changed').val('true');
         })
        </script>
        """
