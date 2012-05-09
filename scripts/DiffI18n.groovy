@@ -21,8 +21,42 @@ includeTargets << grailsScript("_GrailsWar")
 includeTargets << new File("scripts", "_CommonTargets.groovy")
 
 /**
+ * <p>May 8, 2012 6:18:37 PM</p> 
+ * @param langFile is the file instance to a message properties.
+ * @return an array of 2 elements where the first contains a map structure of the
+ * following entry: [key:v, value:v, line:v]. The second is a line indexer by the
+ * key.
+ */
+def loadAndIndexProperties(langFile) {
+  if (!langFile.exists()) {
+    println "The given file $langFile does not exit!"
+    System.exit(1)
+  }
+  def lineProps = [] as LinkedList;
+  def keyIndex = [:]
+  langFile.eachLine { line ->
+    if (!line.startsWith("#") && line.contains("=")) {
+      def propKeyValue = line.split("=")
+      // for the cases when there is no value assigned, maybe next line
+      def key = propKeyValue[0].trim()
+      def value = propKeyValue.length == 2 ? propKeyValue[1].trim() : ""
+      def newLine = line.trim()
+      lineProps << ["key": key, "value": value, "line": newLine]
+      keyIndex[key] = value
+
+    } else {
+      lineProps << ["key": null, "value": null, "line": line.trim()]
+      keyIndex[line] = line.trim()
+    }
+  }
+  [lineProps, keyIndex]
+}
+
+/**
  * This script diffs ONLY THE KEYS of a chosen i18n properties with the English
- * one and creates a new file "diffI18n_LANGCODE.diffprops.
+ * one and updates the chosen file inline "message_LANGCODE.properties. Use regular
+ * version-control diff for details. Note that the command will align the internationalized
+ * version of the properties with the English one.
  * 
  * Run "grails diffI18n" and choose a language from the menu.
  * 
@@ -86,69 +120,80 @@ target(build: 'Builds the distribution file structure') {
         propsDiff.load(r)
     }
 
-    def diffProps = []
-    def esNames = propsDiff.propertyNames().toList() //Enumeration
-    def enNames = propsEn.propertyNames().toList()
-    for(prop in enNames) {
-        if (!propsDiff.getProperty(prop)) {
-            diffProps << prop
-        }
+    def enLinesLang = loadAndIndexProperties(new File(distDir + en))
+    def enLangLines = enLinesLang[0]
+    def enKeyIndex = enLinesLang[1]
+
+    def selectedLang = loadAndIndexProperties(selectedLangFile) 
+    def selectedLangLines = selectedLang[0]
+    def otherKeyIndex = selectedLang[1]
+
+    if (selectedLangLines.size() > enLangLines.size()) {
+      println "There are more properties in the Other language (${selectedLangLines.size()} vs ${enLangLines.size()})."
+
+    } else if (selectedLangLines.size() < enLangLines.size()) {
+      println "There are more properties in the English language (${enLangLines.size()} vs ${selectedLangLines.size()})."
+
+    } else {
+      println "Possibly the files have the same number of keys."
     }
-    def removedProps = []
-    for(prop in esNames) {
-        if (!propsEn.getProperty(prop)) {
-            removedProps << prop
-        }
+
+    // TODO: this is not correct. Just play with the index and the non-null keys 
+    def removedProps = selectedLangLines.findAll{ entry -> entry.key != null }
+    def englishProps = enLangLines.findAll{ entry -> entry.key != null }
+    //removedProps.removeAll(engKeys)
+    int removed = removedProps.size()
+
+    int added = 0
+
+    def newPropLines = [] as LinkedList
+    for (int i = 0; i < enLangLines.size(); i++) {
+      def englishEntry = enLangLines.get(i)
+      def otherEntry = null;
+      try {
+        otherEntry = selectedLangLines.get(i)
+
+      } catch (IndexOutOfBoundsException e) {
+        otherEntry = null
+      }
+
+      // add any line without key
+      if (!englishEntry.key) {
+        newPropLines << englishEntry.line
+        ++added
+        continue
+      }
+
+      // add the line with an existing translation
+      if (otherKeyIndex.containsKey(englishEntry.key)) {
+        newPropLines << englishEntry.key + "=" + otherKeyIndex[englishEntry.key]
+        continue
+
+      } else {
+        newPropLines << englishEntry.line
+      }
     }
 
     def chosenLocale = localeIndex[new Integer(chosenLang)]
-    def langName = chosenLocale.getDisplayName()
-    if (diffProps.size() == 0 && removedProps.size() == 0) {
-        println "# The language '${langName}' is up-to-date!"
-        return
-    }
+    def langName = chosenLocale.displayName
+    println "# The language '${langName}' is now updated!"
 
     def code = localeIndex[new Integer(chosenLang)]
-    def reprt = new File(distDir + "diffI18n_${code}.diffprops")
+    def reprt = new File(distDir + "messages_${code}.properties")
     reprt.withWriter('UTF-8') {
-        int i = 0
-        for (l in diffProps.sort()) {
-            def entry = l + "=" + propsEn.getProperty(l)
-            //println "# " + entry
-            if (i == 0) {
-                i++
-                previousKey = l.split("=")[0].substring(0, l.indexOf("."))
-                it.writeLine entry
-            } else {
-                if (l.contains(previousKey)) {
-                    it.writeLine entry
-                } else {
-                    previousKey = l.split("=")[0].substring(0, l.indexOf("."))
-                    it.writeLine ""
-                    it.writeLine entry
-                }
-            }
-        }
-        if (removedProps.size()) {
-            it.writeLine "------------------"
-            it.writeLine "-- REMOVED KEYS --"
-            it.writeLine "------------------"
-            it.writeLine ""
-            for (l in removedProps.sort()) {
-                it.writeLine "-- " + l
-            }
+        for (entry in newPropLines) {
+          it.writeLine entry
         }
     }
-    if (diffProps.size() > 0) {
-        println "# The language '${langName}' needs more ${diffProps.size()} " +
-            "string" + (diffProps.size() == 1 ? '' : 's')
+    if (added > 0) {
+        println "# The language '${langName}' needs more has $added new " +
+            "string" + (added == 1 ? '' : 's')
     }
-    if (removedProps.size() > 0) {
-        println "# ${removedProps.size()} key" +
-            (removedProps.size() == 1 ? ' was' : 's were') + " removed from " + 
+    if (removed > 0) {
+        println "# $removed key" +
+            (removed == 1 ? ' was' : 's were') + " removed from " + 
             "the language '${langName}'."
     }
-    println "# See the diff at " + reprt.canonicalPath
     println "# Remember to edit your language '${langName}' using an editor " +
         "in the format UTF-8."
 }
