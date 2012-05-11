@@ -1,5 +1,5 @@
 
-
+<%@ page import="org.springframework.web.util.JavaScriptUtils" %>
 
 <g:form>
   <input type="hidden" name="id" value="${params.id}" />
@@ -9,7 +9,8 @@
     var aDataSet = [
       <g:each in="${fileList}" status="i" var="file">
       <g:set var="fileSize"><%=file.size()%></g:set>
-      ['${file.name}', '${file.name}',
+      <g:set var="fileName">${JavaScriptUtils.javaScriptEscape(file.name)}</g:set>
+      ['${fileName}', '${fileName}',
         '<g:formatDate format="${message(code: "default.dateTime.format.withZone")}" date="${file.date}"/>',
         '${file.size}|<g:formatFileSize size="${file.size}"/>']<g:if test="${i < (fileList.size() - 1)}">,</g:if>
       </g:each>

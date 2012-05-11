@@ -16,7 +16,7 @@
   - along with this program.  If not, see <http://www.gnu.org/licenses/>.
   --}%
 
-<%@ page import="com.collabnet.svnedge.console.SchedulerBean" %>
+<%@ page import="org.springframework.web.util.JavaScriptUtils; com.collabnet.svnedge.console.SchedulerBean" %>
 <g:form class="form-horizontal" method="post" name="bkupForm">
   <input type="hidden" name="id" value="${repositoryInstance?.id}"/>
 
@@ -178,9 +178,9 @@
                <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + job.repoId]}">
                  <g:set var="cloudNameChangeRequired" value="${true}"/>
                </g:if>
-               jobList.push(['${job.repoId}__${job.id}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
+               jobList.push(['${job.repoId}__${JavaScriptUtils.javaScriptEscape(job.id)}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
                <g:if test="${!repositoryInstance}">
-                 '${job.repoId}|<%=job.repoName%>|${job.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + job.repoId]}',
+                 '${job.repoId}|<%=JavaScriptUtils.javaScriptEscape(job.repoName)%>|${JavaScriptUtils.javaScriptEscape(job.cloudName)}|${(cloudNameChangeRequired) ? "nc" : ""}|${JavaScriptUtils.javaScriptEscape(params['cloudName' + job.repoId])}',
                </g:if>
                '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
                '${job.scheduleFormatted}',
@@ -232,7 +232,7 @@
                 </g:if>
                 <g:if test="${i > 0}">,</g:if>
                 ['${repoMap.repoId}',
-                 '${repoMap.repoId}|<%=repoMap.repoName%>|${repoMap.cloudName}|${(cloudNameChangeRequired) ? "nc" : ""}|${params['cloudName' + repoMap.repoId]}',
+                 '${repoMap.repoId}|<%=JavaScriptUtils.javaScriptEscape(repoMap.repoName)%>|${JavaScriptUtils.javaScriptEscape(repoMap.cloudName)}|${(cloudNameChangeRequired) ? "nc" : ""}|${JavaScriptUtils.javaScriptEscape(params['cloudName' + repoMap.repoId])}',
                  '${repoMap.jobCount ? repoMap.repoId : 0}']
               </g:each>
             ];

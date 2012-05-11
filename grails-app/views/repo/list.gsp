@@ -1,3 +1,4 @@
+<%@ page import="org.springframework.web.util.JavaScriptUtils" %>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -26,13 +27,13 @@
     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
       <g:if test="${adminView}">
         ['${repositoryInstance.id}',
-          '${repositoryInstance.name}',
+          '${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}',
           '',
           '${repositoryInstance.id}|${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }'
         ]<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
       </g:if> 
       <g:else>
-        ['${repositoryInstance.name}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
+        ['${rJavaScriptUtils.javaScriptEscape(epositoryInstance.name)}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
        </g:else> 
     </g:each>
     ];
@@ -120,7 +121,11 @@
         {"sTitle": "${message(code:'repository.page.list.checkout_command')}",
          "fnRender": function (oObj, sVal) {
            var template = 'svn co ${server.svnURL()}REPO REPO --username=<g:loggedInUsername/>';
-           return template.replace(/REPO/g, $(oObj.aData[1]).text());
+           var repoName = $(oObj.aData[1]).text();
+           if (navigator.appVersion.indexOf("Win") == -1) {
+             repoName = repoName.replace("'", "\\'");
+           }
+           return template.replace(/REPO/g, repoName);
          }
         },
         {"sTitle": "${message(code:'repository.page.list.status')}",
@@ -144,7 +149,11 @@
         {"sTitle": "${message(code:'repository.page.list.checkout_command')}",
          "fnRender": function (oObj, sVal) {
            var template = 'svn co ${server.svnURL()}REPO REPO --username=<g:loggedInUsername/>';
-           return template.replace(/REPO/g, $(oObj.aData[0]).text());
+           var repoName = $(oObj.aData[0]).text();
+           if (navigator.appVersion.indexOf("Win") == -1) {
+             repoName = repoName.replace("'", "\\'");
+           }
+           return template.replace(/REPO/g, repoName);
          }
         }
       ]

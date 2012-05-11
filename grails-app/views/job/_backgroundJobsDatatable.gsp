@@ -26,19 +26,10 @@
   var aDataSet = [
   <g:each in="${itemList}" var="jobCtx" status="i">
     <g:set var="jobDesc" value="${jobCtx.mergedJobDataMap.description}"></g:set>
-    <g:if test="${view == 'scheduled' && jobCtx.mergedJobDataMap.urlConfigure}">
-      <g:set var="jobDescLink" value="<a href='${jobCtx.mergedJobDataMap.urlConfigure}'>${message(code: 'job.page.list.jobConfigure')}</a>"></g:set>
-    </g:if>
-    <g:elseif test="${view == 'running' && jobCtx.mergedJobDataMap.urlProgress}">
-      <g:set var="jobDescLink" value="<a target='${jobCtx.mergedJobDataMap.id}' href='${jobCtx.mergedJobDataMap.urlProgress}'>${message(code:'job.page.list.jobProgress')}</a>"></g:set>
-    </g:elseif>
-    <g:elseif test="${view == 'finished' && jobCtx.mergedJobDataMap.urlResult}">
-      <g:set var="jobDescLink" value="<a href='${jobCtx.mergedJobDataMap.urlResult}'>${message(code: 'job.page.list.jobResult')}</a>"></g:set>
-    </g:elseif>
 
     <g:set var="scheduledTime" value="${view == 'scheduled' ? jobCtx.nextFireTime : jobCtx.scheduledFireTime}"/>
     ['${i + 1}',
-      '${jobCtx.mergedJobDataMap.id}',
+      '${JavaScriptUtils.javaScriptEscape(jobCtx.mergedJobDataMap.id)}',
       '${JavaScriptUtils.javaScriptEscape(jobDesc)}',
       '${(scheduledTime) ? formatDate(format: logDateFormat, date: scheduledTime) : "-"}'
     <g:if test="${view != 'scheduled'}">

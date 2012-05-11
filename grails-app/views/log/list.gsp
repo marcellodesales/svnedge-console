@@ -1,3 +1,4 @@
+<%@ page import=" org.springframework.web.util.JavaScriptUtils" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -21,7 +22,7 @@
   /* Data set */
   var aDataSet = [
   <g:each in="${files}" status="i" var="file">
-      ['${file.name}',
+      ['${JavaScriptUtils.javaScriptEscape(file.name)}',
         '<g:formatDate format="${logDateFormat}" date="${file.lastModified()}"/>',
         '${file.size}|<g:formatFileSize size="${file.size}"/>']<g:if test="${i < (files.size() - 1)}">,</g:if>
   </g:each>
