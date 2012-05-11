@@ -652,9 +652,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     void synchronizeRepository(Repository repo, Locale locale = null) 
         throws CloudServicesException, ConcurrentBackupException {
 
-        boolean isCloud = true
-        File progressFile = BackgroundJobUtil
-                .prepareProgressLogFile(repo.name, isCloud)
+        File progressFile = BackgroundJobUtil.prepareProgressLogFile(
+                repo.name, BackgroundJobUtil.JobType.CLOUD)
         if (progressFile.exists()) {
             String msg = getMessage("repository.action.backup.alreadyInProgress",
                     [repo.name, progressFile.canonicalPath])

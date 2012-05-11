@@ -98,8 +98,12 @@ class RepoDumpJob {
                     String newPath = path.substring(0, dot) + '-' + 
                             ts + path.substring(dot)
                     File tsFile = new File(newPath)
-                    progressFile.renameTo(tsFile)
-                    progressFile = tsFile
+                    if (progressFile.renameTo(tsFile)) {
+                        progressFile = tsFile
+                    } else {
+                        log.warn "Attempt to rename " + 
+                                progressFile.canonicalPath + " failed."
+                    }
                 }
                 svnRepoService.publishEvent(new DumpRepositoryEvent(this,
                         dumpBean, repo, DumpRepositoryEvent.FAILED, 
