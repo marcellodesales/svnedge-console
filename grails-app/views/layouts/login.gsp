@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
     <g:sslRedirect/>
     <title><g:layoutTitle default="CollabNet Subversion Edge Console" /></title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
     <g:sslRedirect/>
 
     <g:if test="${pageProperty(name:'page.title')}">
