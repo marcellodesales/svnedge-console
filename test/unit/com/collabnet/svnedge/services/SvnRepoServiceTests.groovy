@@ -84,6 +84,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         JobsAdminService jas = new JobsAdminService()
         def quartzScheduler = new Expando()
         quartzScheduler.getTriggerNames = { p1 -> null }
+        quartzScheduler.getTriggersOfJob = { p1, p2 -> [] }
         jas.quartzScheduler = quartzScheduler
 
         def cls = new Expando()
