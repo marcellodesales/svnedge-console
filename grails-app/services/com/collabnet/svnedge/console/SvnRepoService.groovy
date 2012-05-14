@@ -439,7 +439,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         }
 
         // remove scheduled jobs
-        clearScheduledDumps(repo)
+        clearScheduledJobs(repo)
 
         // delete the repo entity
         repo.delete()
@@ -1289,20 +1289,15 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
-     * Removes all triggers for backup jobs on the given repository
+     * Removes all triggers for backup and verify jobs on the given repository
      *
      * @param repo Repository domain object
      */
-    def clearScheduledDumps(repo) {
-        def triggerNames = jobsAdminService.getTriggerNamesInGroup(REPO_JOB_TRIGGER_GROUP)
-        if (triggerNames) {
-            triggerNames.each {
-                if (it.startsWith("RepoDump-${repo.name}")) {
-                    jobsAdminService.removeTrigger(it, REPO_JOB_TRIGGER_GROUP)
-                }
-            }
+    def clearScheduledJobs(repo) {
+        def jobs = retrieveScheduledJobs(repo)
+        jobs?.each { 
+            deleteScheduledJob(it.id)
         }
-
     }
     
     /**
