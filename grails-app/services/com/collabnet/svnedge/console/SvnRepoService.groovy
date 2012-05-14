@@ -693,7 +693,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 .getTriggers(RepoDumpJob.jobName, RepoDumpJob.group)
         for (trigger in triggers) {
             if ((!repo && trigger.group == REPO_JOB_TRIGGER_GROUP) ||
-                    trigger.name =~ /${repo.name}-(hotcopy|dump|cloud).*/) {
+                    trigger.name ==~ /${repo.name}|${repo.name}-(hotcopy|dump|cloud).*/) {
                 backups << trigger.jobDataMap
             }
         }
@@ -709,7 +709,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         for (trigger in triggers) {
             boolean includeJob = false
             includeJob = (!repo && trigger.group == REPO_JOB_TRIGGER_GROUP)
-            includeJob |= (repo && trigger.name =~ /${repo.name}-.*/)
+            includeJob |= (repo && trigger.name ==~ /${repo.name}|${repo.name}-.*/)
             if (includeJob) {
                 def jobMap = [:]
                 jobMap << trigger.jobDataMap
@@ -732,7 +732,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
         String cron = BackgroundJobUtil.getCronExpression(bean.schedule)
         log.debug("Scheduling backup dump using cron expression: " + cron)
         if (tName) {
-            jobsAdminService.removeTrigger(tName, REPO_JOB_TRIGGER_GROUP)
+            deleteScheduledJob(tName)
         }
         tName = BackgroundJobUtil.generateTriggerName(repo, bean)
         
@@ -1304,6 +1304,13 @@ class SvnRepoService extends AbstractSvnEdgeService {
      * Removes the given trigger
      */
     def deleteScheduledJob(jobId) {
+        // Need to convert for pre-3.0 job id's
+        if (jobId?.startsWith('repoDump-')) {
+            jobId = jobId.substring(9)
+        }
+        else if (jobId?.startsWith('repoHotcopy-')) {
+            jobId = jobId.substring(12)
+        }
         jobsAdminService.removeTrigger(jobId, REPO_JOB_TRIGGER_GROUP)
     }    
 
