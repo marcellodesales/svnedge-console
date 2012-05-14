@@ -186,7 +186,7 @@ class MailListenerService extends AbstractSvnEdgeService
                         [dumpBean.hotcopy ? 1 : dumpBean.cloud ? 2 : 0, 
                          dumpBean.backup ? 0 : 1, 
                          repo.name, e.message,
-                         e.class.name, e.getStackTrace().join('\n'),
+                         e.class.name, getStackTrace(e),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
                          event.processOutput?.name, processOutputTail], locale)
@@ -202,6 +202,18 @@ class MailListenerService extends AbstractSvnEdgeService
         mailBody += getMessage('mail.message.footer', null, locale)
         sendMail(toAddress, ccAddress, fromAddress, 
                  mailSubject, mailBody, processOutput)
+    }
+    
+    private String getStackTrace(Throwable e) {
+        String s = ''
+        while (e) {
+            if (s.length() > 0) {
+                s += "\nCaused by: " + e.class.name + ' ' + e.message + '\n    at '
+            }
+            s += e.stackTrace.join('\n    at ')
+            e = e.getCause()
+        }
+        return s
     }
     
     private boolean isPartial(byte[] progressContent) {
