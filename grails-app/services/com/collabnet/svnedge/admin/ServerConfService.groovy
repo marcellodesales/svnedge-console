@@ -624,11 +624,6 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
 ${server.useSsl ? "SSLEngine On" : "# SSL is off"}
 LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
 """
-        if (server.mode == ServerMode.REPLICA || ctfMode) {
-        conf += """
-LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
-"""
-        }
         if (isLdapLoginEnabled || ctfMode) {
             conf += """
 # Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
@@ -858,9 +853,20 @@ LDAPVerifyServerCert Off
         conf += """
    AuthType Basic
    AuthName "Authorization Realm"
-   AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    AuthBasicAuthoritative Off
    Require valid-user
+   AddHandler mod_python .py
+   PythonAuthenHandler sfauth
+   PythonDebug On
+   PythonPath "['"""
+        conf += escapePath(new File(appHome, "lib").absolutePath) + "', '"
+        conf += escapePath(new File(appHome, "lib/integration").absolutePath) + "', '"
+        conf += escapePath(new File(appHome, "lib/svn-python").absolutePath)
+        conf += """']+sys.path"
+   # Provide variables to sfauth.py
+   PythonOption svn.root.path "${escapePath(server.repoParentDir)}"
+   PythonOption svn.root.uri ${contextPath}
+   PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    # Allows these operations to be disallowed higher up,
    # then enabled here for this Location
    <Limit COPY DELETE GET OPTIONS PROPFIND PROPPATCH PUT MKACTIVITY CHECKOUT MERGE REPORT>
