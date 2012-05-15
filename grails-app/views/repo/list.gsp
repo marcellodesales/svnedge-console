@@ -33,7 +33,7 @@
         ]<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
       </g:if> 
       <g:else>
-        ['${rJavaScriptUtils.javaScriptEscape(epositoryInstance.name)}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
+        ['${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
        </g:else> 
     </g:each>
     ];
