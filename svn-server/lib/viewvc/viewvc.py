@@ -275,6 +275,11 @@ class Request:
 
     if self.rootname:
       roottype, rootpath = locate_root(cfg, self.rootname)
+
+      # we need 'self.roottype' populated here itself since we are using it 
+      # in our teamforge authorizer's constructor. 
+      self.roottype = roottype
+
       if roottype:
         # Overlay root-specific options.
         cfg.overlay_root_options(self.rootname)
