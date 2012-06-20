@@ -513,10 +513,7 @@ abstract class AbstractConversionFunctionalTests extends
 
         // Step 2: verify that the setup page is correct after clicking on 
         // the continue button.
-        def button = getMessage("setupTeamForge.page.index.button.ctfMode")
-        form {
-            click button
-        }
+        byId("btnCtfMode").click()
         assertStatus 200
 
         if (isFresh) {
