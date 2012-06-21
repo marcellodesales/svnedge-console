@@ -20,6 +20,19 @@ package com.collabnet.svnedge
 
 class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
+    def javaScriptPriorState = javaScriptEnabled
+
+    void setUp() {
+        super.setUp()
+        javaScriptPriorState = javaScriptEnabled
+        javaScriptEnabled = false
+    }
+
+    void tearDown() {
+        super.tearDown()
+        javaScriptEnabled = javaScriptPriorState
+    }
+
     void testAdminAuthority() {
         this.loginAdmin()
 

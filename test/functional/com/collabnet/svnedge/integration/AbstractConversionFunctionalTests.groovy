@@ -251,6 +251,8 @@ abstract class AbstractConversionFunctionalTests extends
         this.loginAdmin()
         assertStatus 200
 
+        get('/status/index')
+
         assertContentDoesNotContain(getMessage("status.page.url.teamforge"))
         // verify that the software version is still shown
         assertContentContains(getMessage("status.page.status.version.software"))
