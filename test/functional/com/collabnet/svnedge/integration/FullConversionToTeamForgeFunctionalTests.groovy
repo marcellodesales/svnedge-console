@@ -94,6 +94,7 @@ class FullConversionToTeamForgeFunctionalTests
      */
     void testCase1_convertCompleteCSVN() {
         // Step 1: Verify the tabs and go to the credentials one.
+        javaScriptEnabled = false
         this.goToCredentialsTab()
 
         // Step 2: Verify the credentials with teamforge.
@@ -350,6 +351,7 @@ class FullConversionToTeamForgeFunctionalTests
      */
     void testCase5_providingMalformedTeamForgeURL() {
         // Step 1: Verify the tabs and go to the credentials one.
+        javaScriptEnabled = false
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.
