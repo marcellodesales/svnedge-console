@@ -4,7 +4,8 @@
 ## root_parents: Specifies a list of directories under which any
 ## number of repositories may reside.  You can specify multiple root
 ## parents separated by commas or new lines, each of which is of the
-## form "path: type" (where type is either "cvs" or "svn").
+## form "path: type" (where the type is either "cvs" or "svn", and
+## the path is an absolute filesystem path).
 ##
 ## Rather than force you to add a new entry to 'cvs_roots' or
 ## 'svn_roots' each time you create a new repository, ViewVC rewards
@@ -243,7 +244,43 @@ root_as_url_component = __CSVN_ROOT_IN_URL__
 ## allowed_views: List the ViewVC views which are enabled.  Views not
 ## in this comma-delited list will not be served (or, will return an
 ## error on attempted access).
-## Possible values: "annotate", "co", "diff", "markup", "roots", "tar"
+##
+## Valid items for this list include: "annotate", "co", "diff", "markup",
+## "roots", "tar".
+##
+## ----------+---------------------------------------------------------
+##    VIEW   |                       DESCRIPTION
+## ----------+---------------------------------------------------------
+##  annotate | The 'annotate' view shows the contents of a single
+##           | revision of a versioned file in exactly the same way as
+##           | the markup view, but with additional line-by-line
+##           | change attribution (the revision number, author, etc.
+##           | the most recent edit to that line of text as of the
+##           | displayed version).
+## ----------+---------------------------------------------------------
+##  co       | The 'co' (aka "checkout" or "download") view isn't
+##           | really a branded view at all, but allows for direct
+##           | downloading of the contents of a single revision of a 
+##           | versioned file.
+## ----------+---------------------------------------------------------
+##  diff     | The 'diff' view displays line-based differences between
+##           | two revisions of a versioned file in a variety of
+##           | different user-selectable formats.
+## ----------+---------------------------------------------------------
+##  markup   | The 'markup' view shows the contents of a single
+##           | revision of a versioned file, with syntax highlighting
+##           | where possible and enabled.  It can also optionally
+##           | show change log information for that revision of the
+##           | file.
+## ----------+---------------------------------------------------------
+##  roots    | The 'roots' view is a simple listing of the various
+##           | repositories which ViewVC has been configured to serve
+##           | to users.
+## ----------+---------------------------------------------------------
+##  tar      | The 'tar' view isn't a branded view, but generates
+##           | a GNU Tar archive file containing a single versioned
+##           | directory and its contents (recursively).
+## ----------+---------------------------------------------------------
 ##
 allowed_views = __CSVN_ALLOWED_VIEWS__
 
@@ -288,6 +325,26 @@ authorizer = __CSVN_VIEWVC_AUTHORIZER__
 ## addresses that appear in version control metadata (e.g. log messages).
 ##
 #mangle_email_addresses = 0
+
+## custom_log_formatting: Specifies mappings of regular expressions to
+## substitution format strings used to URL-ize strings found in
+## revision log messages.  Multiple mappings (specified as
+## REGEXP:FORMATSTRING) may be defined, separated by commas.
+##
+## NOTE: Due to a limitation of the configuration format, commas may
+## not be used in the regular expression portion of each mapping.
+## Commas "in the raw" may not be used in the format string portion,
+## either, but you can probably use the URI-encoded form of the comma
+## ("%2C") instead with no ill side-effects.  If you must specify a
+## colon character in either the regular expression or the format
+## string, escape it with a preceding backslash ("\:").
+##
+## Example:
+## custom_log_formatting =
+##     artf[0-9]+ : http://example.com/tracker?id=\0,
+##     issue ([0-9]+) : http://example.com/bug?id=\1&opts=full%2csortby=id
+##
+#custom_log_formatting =
 
 ## default_file_view: "log", "co", or "markup"
 ## Controls whether the default view for file URLs is a checkout view or
@@ -501,7 +558,13 @@ use_localtime = 1
 #short_log_len = 80
 
 ## enable_syntax_coloration: Should we colorize known file content
-## syntaxes?  [Requires Pygments Python module]
+## syntaxes?
+##
+## NOTE: This feature requires the Pygments Python module
+## (http://pygments.org) and works only when ViewVC can determine the
+## MIME content type of the file whose contents it wishes to colorize.
+## Use the 'mime_types_files' configuration option to specify MIME
+## type mapping files useful for making that determination.
 ##
 #enable_syntax_coloration = 1
 

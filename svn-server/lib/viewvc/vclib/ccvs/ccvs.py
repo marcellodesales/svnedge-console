@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2012 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -142,11 +142,11 @@ class CCVSRepository(BaseCVSRepository):
     return vclib._diff_fp(temp1, temp2, info1, info2,
                           self.utilities.diff or 'diff', diff_args)
 
-  def annotate(self, path_parts, rev=None):
+  def annotate(self, path_parts, rev=None, include_text=False):
     if self.itemtype(path_parts, rev) != vclib.FILE:  # does auth-check
       raise vclib.Error("Path '%s' is not a file."
                         % (string.join(path_parts, "/")))
-    source = blame.BlameSource(self.rcsfile(path_parts, 1), rev)
+    source = blame.BlameSource(self.rcsfile(path_parts, 1), rev, include_text)
     return source, source.revision
 
   def revinfo(self, rev):

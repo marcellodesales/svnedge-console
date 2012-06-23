@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2012 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -22,6 +22,7 @@ import time
 import tempfile
 import popen
 import re
+import urllib
 from svn import fs, repos, core, client, delta
 
 
@@ -42,7 +43,14 @@ def _fix_subversion_exception(e):
     e.apr_err = e[1]
   if not hasattr(e, 'message'):
     e.message = e[0]
-  
+
+### Pre-1.4 Subversion doesn't have svn_path_canonicalize()
+def _canonicalize_path(path):
+  try:
+    return core.svn_path_canonicalize(path)
+  except AttributeError:
+    return path
+
 def _allow_all(root, path, pool):
   """Generic authz_read_func that permits access to all paths"""
   return 1
@@ -108,11 +116,16 @@ def _rev2optrev(rev):
 
 def _rootpath2url(rootpath, path):
   rootpath = os.path.abspath(rootpath)
-  if rootpath and rootpath[0] != '/':
-    rootpath = '/' + rootpath
+  drive, rootpath = os.path.splitdrive(rootpath)
   if os.sep != '/':
     rootpath = string.replace(rootpath, os.sep, '/')
-  return 'file://' + string.join([rootpath, path], "/")
+  rootpath = urllib.quote(rootpath)
+  path = urllib.quote(path)
+  if drive:
+    url = 'file:///' + drive + rootpath + '/' + path
+  else:
+    url = 'file://' + rootpath + '/' + path
+  return _canonicalize_path(url)
 
 
 # Given a dictionary REVPROPS of revision properties, pull special
@@ -282,10 +295,11 @@ class FileContentsPipe:
 
 
 class BlameSource:
-  def __init__(self, local_url, rev, first_rev, config_dir):
+  def __init__(self, local_url, rev, first_rev, include_text, config_dir):
     self.idx = -1
     self.first_rev = first_rev
     self.blame_data = []
+    self.include_text = include_text
 
     ctx = client.svn_client_create_context()
     core.svn_config_ensure(config_dir)
@@ -306,6 +320,8 @@ class BlameSource:
     prev_rev = None
     if rev > self.first_rev:
       prev_rev = rev - 1
+    if not self.include_text:
+      text = None
     self.blame_data.append(vclib.Annotation(text, line_no + 1, rev,
                                             prev_rev, author, None))
 
@@ -527,7 +543,7 @@ class LocalSubversionRepository(vclib.Repository):
     fsroot = self._getroot(rev)
     return fs.node_proplist(fsroot, path)
   
-  def annotate(self, path_parts, rev):
+  def annotate(self, path_parts, rev, include_text=False):
     path = self._getpath(path_parts)
     path_type = self.itemtype(path_parts, rev)  # does auth-check
     if path_type != vclib.FILE:
@@ -538,8 +554,8 @@ class LocalSubversionRepository(vclib.Repository):
                                 {'svn_cross_copies': 1})
     youngest_rev, youngest_path = history[0]
     oldest_rev, oldest_path = history[-1]
-    source = BlameSource(_rootpath2url(self.rootpath, path),
-                         youngest_rev, oldest_rev, self.config_dir)
+    source = BlameSource(_rootpath2url(self.rootpath, path), youngest_rev,
+                         oldest_rev, include_text, self.config_dir)
     return source, youngest_rev
 
   def revinfo(self, rev):
@@ -641,6 +657,7 @@ class LocalSubversionRepository(vclib.Repository):
               is_copy = 0
               change.base_path = None
               change.base_rev = None
+              found_unreadable = 1
           changedpaths[path] = SVNChangedPath(path, rev, pathtype,
                                               change.base_path,
                                               change.base_rev, action,
@@ -815,8 +832,11 @@ class LocalSubversionRepository(vclib.Repository):
     if rev is None or rev == 'HEAD':
       return self.youngest
     try:
+      if type(rev) == type(''):
+        while rev[0] == 'r':
+          rev = rev[1:]
       rev = int(rev)
-    except ValueError:
+    except:
       raise vclib.InvalidRevision(rev)
     if (rev < 0) or (rev > self.youngest):
       raise vclib.InvalidRevision(rev)

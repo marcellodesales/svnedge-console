@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2011 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2012 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -14,7 +14,7 @@
 #
 # -----------------------------------------------------------------------
 
-__version__ = '1.1.11'
+__version__ = '1.1.15'
 
 # this comes from our library; measure the startup time
 import debug
@@ -1188,6 +1188,29 @@ _re_rewrite_email = re.compile('([-a-zA-Z0-9_.\+]+)@'
 # Matches revision references
 _re_rewrite_svnrevref = re.compile(r'\b(r|rev #?|revision #?)([0-9]+)\b')
 
+class ViewVCHtmlFormatterTokens:
+  def __init__(self, tokens):
+    self.tokens = tokens
+
+  def get_result(self, maxlen=0):
+    """Format the tokens per the registered set of formatters, and
+    limited to MAXLEN visible characters (or unlimited if MAXLEN is
+    0).  Return a 3-tuple containing the formatted result string, the
+    number of visible characters in the result string, and a boolean
+    flag indicating whether or not S was truncated."""
+    out = ''
+    out_len = 0
+    for token in self.tokens:
+      chunk, chunk_len = token.converter(token.match, token.userdata, maxlen)
+      out = out + chunk
+      out_len = out_len + chunk_len
+      if maxlen:
+        maxlen = maxlen - chunk_len
+        if maxlen <= 0:
+          return out, out_len, 1
+    return out, out_len, 0
+
+    
 class ViewVCHtmlFormatter:
   """Format a string as HTML-encoded output with customizable markup
   rules, for example turning strings that look like URLs into anchor links.
@@ -1273,6 +1296,30 @@ class ViewVCHtmlFormatter:
                                     sapi.escape(trunc_s)), \
            len(trunc_s)
 
+  def format_custom_url(self, mobj, userdata, maxlen=0):
+    """Return a 2-tuple containing:
+         - the text represented by MatchObject MOBJ, formatted as an
+           linkified URL created by substituting match groups 0-9 into
+           USERDATA (which is a format string that uses \N to
+           represent the substitution locations) and with no more than
+           MAXLEN characters in the non-HTML-tag portions.  If MAXLEN
+           is 0, there is no maximum.
+         - the number of characters returned.
+    """
+    format = userdata
+    text = mobj.group(0)
+    url = format
+    for i in range(9):
+      try:
+        repl = mobj.group(i)
+      except:
+        repl = ''
+      url = url.replace('\%d' % (i), repl)
+    trunc_s = maxlen and text[:maxlen] or text
+    return '<a href="%s">%s</a>' % (sapi.escape(url),
+                                    sapi.escape(trunc_s)), \
+           len(trunc_s)
+
   def format_text(self, s, unused, maxlen=0):
     """Return a 2-tuple containing:
          - the text S, HTML-escaped, containing no more than MAXLEN
@@ -1305,20 +1352,14 @@ class ViewVCHtmlFormatter:
     """
     out = ''
     out_len = 0
-    for token in self._tokenize_text(s):
-      chunk, chunk_len = token.converter(token.match, token.userdata, maxlen)
-      out = out + chunk
-      out_len = out_len + chunk_len
-      if maxlen:
-        maxlen = maxlen - chunk_len
-        if maxlen <= 0:
-          return out, out_len, 1
-    return out, out_len, 0
+    tokens = self.tokenize_text(s)
+    return tokens.get_result()
 
-  def _entity_encode(self, s):
-    return string.join(map(lambda x: '&#%d;' % (ord(x)), s), '')
-
-  def _tokenize_text(self, s):
+  def tokenize_text(self, s):
+    """Return a ViewVCHtmlFormatterTokens object containing the tokens
+    created when parsing the string S.  Callers can use that object's
+    get_result() function to retrieve HTML-formatted text.
+    """
     tokens = []
     # We could just have a "while s:" here instead of "for line: while
     # line:", but for really large log messages with heavy
@@ -1365,16 +1406,18 @@ class ViewVCHtmlFormatter:
                               converter=self.format_text,
                               userdata=None))
           line = ''
-    return tokens
+    return ViewVCHtmlFormatterTokens(tokens)
+
+  def _entity_encode(self, s):
+    return string.join(map(lambda x: '&#%d;' % (ord(x)), s), '')
+
 
 # Custom TeamForge ID formatter.  (Keep this regexp in sync with
 # WikiTranslator.OBJECT_KEY_PATTERN)
-
 _ctf_objid = '((artf|cmmt|doc|frs|news|post|report|task' \
              + '|forum|pkg|rel|docr|docf|topc|tracker|user' \
              + '|proj|plan|reps|taskgrp|wiki|page|srch)[0-9]{4,}' \
              + os.environ.get('INTEGRATED_APP_PREFIXES', '') + ')'
-
 _re_ctf_objid = re.compile(_ctf_objid)
 _re_ctf_objlist = re.compile('\[[ ]*(' + _ctf_objid + '[, ]*)+\]')
 
@@ -1383,7 +1426,7 @@ def _ctf_format_objid(mobj, userdata, maxlen=0):
     s = mobj.group(0)
     trunc_s = maxlen and s[:maxlen] or s
     return '<a href="%s%s">%s</a>' % (go_url, s, trunc_s), len(trunc_s)
-
+ 
 def _ctf_format_objlist(mobj, userdata, maxlen=0):
     s = mobj.group(0)
     go_url = userdata
@@ -1391,44 +1434,87 @@ def _ctf_format_objlist(mobj, userdata, maxlen=0):
     lf.add_formatter(_re_ctf_objid, _ctf_format_objid, userdata)
     out, out_len, truncated = lf.get_result(s, maxlen)
     return out, out_len
-     
-def format_log(request, log, maxlen=0, htmlize=1):
-  if not log:
-    return log
 
-  # if kconv module exists, convert Japanese charcater code to utf-8
-  if multibyte == 1:
-    log = toutf8(log)
 
-  cfg = request.cfg
-  if htmlize:
-    lf = ViewVCHtmlFormatter()
-    lf.add_formatter(_re_rewrite_url, lf.format_url)
-    if request.roottype == 'svn':
-      def revision_to_url(rev):
-        return request.get_url(view_func=view_revision,
-                               params={'revision': rev},
-                               escape=1)
-      lf.add_formatter(_re_rewrite_svnrevref, lf.format_svnrevref,
-                       revision_to_url)
-    if cfg.options.mangle_email_addresses == 2:
-      lf.add_formatter(_re_rewrite_email, lf.format_email_truncated)
-    elif cfg.options.mangle_email_addresses == 1:
-      lf.add_formatter(_re_rewrite_email, lf.format_email_obfuscated)
-    else:
-      lf.add_formatter(_re_rewrite_email, lf.format_email)
+class LogFormatter:
+  def __init__(self, request, log):
+    self.request = request
+    self.log = log or ''
+    self.tokens = None
+    self.cache = {}  # (maxlen, htmlize) => resulting_log
 
-    # TeamForge customization: add ID formatter
-    if cfg.general.csvn_servermode == "MANAGED" or cfg.general.csvn_servermode == "REPLICA":
-      go_url = cfg.general.csvn_app_server_root_url + '/sf/go/'
-      lf.add_formatter(_re_ctf_objlist, _ctf_format_objlist, go_url)
+    ### TeamForge customization: if kconv module exists, convert
+    ### Japanese character code to utf-8
+    if multibyte == 1:
+      self.log = toutf8(self.log)
+
+  def get(self, maxlen=0, htmlize=1):
+    cfg = self.request.cfg
     
-    log, log_len, truncated = lf.get_result(log, maxlen)
-    return log + (truncated and '&hellip;' or '')
-  else:
-    if cfg.options.mangle_email_addresses == 2:
-      log = re.sub(_re_rewrite_email, r'\1@...', log)
-    return maxlen and log[:maxlen] or log
+    # Prefer the cache.
+    if self.cache.has_key((maxlen, htmlize)):
+      return self.cache[(maxlen, htmlize)]
+    
+    # If we are HTML-izing...
+    if htmlize:
+      # ...and we don't yet have ViewVCHtmlFormatter() object tokens...
+      if not self.tokens:
+        # ... then get them.
+        lf = ViewVCHtmlFormatter()
+
+        # Rewrite URLs.
+        lf.add_formatter(_re_rewrite_url, lf.format_url)
+
+        # Rewrite Subversion revision references.
+        if self.request.roottype == 'svn':
+          def revision_to_url(rev):
+            return self.request.get_url(view_func=view_revision,
+                                        params={'revision': rev},
+                                        escape=1)
+          lf.add_formatter(_re_rewrite_svnrevref, lf.format_svnrevref,
+                           revision_to_url)
+
+        # Rewrite email addresses.
+        if cfg.options.mangle_email_addresses == 2:
+          lf.add_formatter(_re_rewrite_email, lf.format_email_truncated)
+        elif cfg.options.mangle_email_addresses == 1:
+          lf.add_formatter(_re_rewrite_email, lf.format_email_obfuscated)
+        else:
+          lf.add_formatter(_re_rewrite_email, lf.format_email)
+
+        ### TeamForge customization: add ID formatter
+        if cfg.general.csvn_servermode == "MANAGED" \
+           or cfg.general.csvn_servermode == "REPLICA":
+          go_url = cfg.general.csvn_app_server_root_url + '/sf/go/'
+          lf.add_formatter(_re_ctf_objlist, _ctf_format_objlist, go_url)
+
+        # Add custom rewrite handling per configuration.
+        for rule in cfg.options.custom_log_formatting:
+          rule = rule.replace('\\:', '\x01')          
+          regexp, format = map(lambda x: x.strip(), rule.split(':', 1))
+          regexp = regexp.replace('\x01', ':')
+          format = format.replace('\x01', ':')
+          lf.add_formatter(re.compile(regexp), lf.format_custom_url, format)
+
+        # Tokenize the log message.
+        self.tokens = lf.tokenize_text(self.log)
+
+      # Use our formatter to ... you know ... format.
+      log, log_len, truncated = self.tokens.get_result(maxlen)
+      result_log = log + (truncated and '&hellip;' or '')
+
+    # But if we're not HTML-izing...
+    else:
+      # ...then do much more simplistic transformations as necessary.
+      log = self.log
+      if cfg.options.mangle_email_addresses == 2:
+        log = re.sub(_re_rewrite_email, r'\1@...', log)
+      result_log = maxlen and log[:maxlen] or log
+
+    # In either case, populate the cache and return the results.
+    self.cache[(maxlen, htmlize)] = result_log
+    return result_log
+
 
 _time_desc = {
          1 : 'second',
@@ -1698,33 +1784,36 @@ def markup_escaped_urls(s):
     return "<a href=\"%s\">%s</a>" % (unescaped_url, url)
   return re.sub(_re_rewrite_escaped_url, _url_repl, s)
 
-def markup_stream_pygments(request, cfg, blame_data, fp, filename,
-                           mime_type, encoding):
-  # Determine if we should use Pygments to highlight our output.
-  # Reasons not to include a) being told not to by the configuration,
-  # b) not being able to import the Pygments modules, and c) Pygments
-  # not having a lexer for our file's format.
-  blame_source = []
-  if blame_data:
-    for i in blame_data:
-      i.text = sapi.escape(i.text)
-      i.diff_href = None
-      if i.prev_rev:
-        i.diff_href = request.get_url(view_func=view_diff,
-                                      params={'r1': i.prev_rev,
-                                              'r2': i.rev},
-                                      escape=1, partial=1)
-      blame_source.append(i)
-    blame_data = blame_source
-  lexer = None
-  use_pygments = cfg.options.enable_syntax_coloration
-  try:
+
+def markup_stream(request, cfg, blame_data, file_lines, filename,
+                  mime_type, encoding, colorize):
+  """Return the contents of a versioned file as a list of
+  vclib.Annotation objects, each representing one line of the file's
+  contents.  Use BLAME_DATA as the annotation information for the file
+  if provided.  Use FILE_LINES as the lines of file content text
+  themselves.  MIME_TYPE is the MIME content type of the file;
+  ENCODING is its character encoding.  If COLORIZE is true, attempt to
+  apply syntax coloration to the file contents, and use the
+  HTML-marked-up results as the text in the return vclib.Annotation
+  objects."""
+  
+  # Nothing to mark up?  So be it.
+  if not file_lines:
+    return []
+
+  # Determine if we should (and can) use Pygments to highlight our
+  # output.  Reasons not to include a) being told not to by the
+  # configuration, b) not being able to import the Pygments modules,
+  # and c) Pygments not having a lexer for our file's format.
+  pygments_lexer = None
+  if colorize:
     from pygments import highlight
     from pygments.formatters import HtmlFormatter
     from pygments.lexers import ClassNotFound, \
                                 get_lexer_by_name, \
                                 get_lexer_for_mimetype, \
-                                get_lexer_for_filename
+                                get_lexer_for_filename, \
+                                guess_lexer
     if not encoding:
       encoding = 'guess'
       if cfg.options.detect_encoding:
@@ -1733,50 +1822,50 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
           encoding = 'chardet'
         except (SyntaxError, ImportError):
           pass
-    try:
-      lexer = get_lexer_for_mimetype(mime_type,
-                                     encoding=encoding,
-                                     tabsize=cfg.options.tabsize,
-                                     stripnl=False)
-    except ClassNotFound:
-      try:
-        lexer = get_lexer_for_filename(filename,
-                                       encoding=encoding,
-                                       tabsize=cfg.options.tabsize,
-                                       stripnl=False)
-      except ClassNotFound:
-        use_pygments = 0
-  except ImportError:
-    use_pygments = 0
 
-  # If we aren't going to be highlighting anything, just return the
-  # BLAME_SOURCE.  If there's no blame_source, we'll generate a fake
-  # one from the file contents we fetch with PATH and REV.
-  if not use_pygments:
-    if blame_source:
-      class BlameSourceTabsizeWrapper:
-        def __init__(self, blame_source, tabsize):
-          self.blame_source = blame_source
-          self.tabsize = cfg.options.tabsize
-        def __getitem__(self, idx):
-          item = self.blame_source.__getitem__(idx)
-          item.text = string.expandtabs(item.text, self.tabsize)
-          item.text = markup_escaped_urls(item.text)
-          return item
-      return BlameSourceTabsizeWrapper(blame_source, cfg.options.tabsize)
-    else:
-      lines = []
-      line_no = 0
-      while 1:
-        line = fp.readline()
-        if not line:
-          break
-        line_no = line_no + 1
-        line = sapi.escape(string.expandtabs(line, cfg.options.tabsize))
-        line = markup_escaped_urls(line)
-        item = vclib.Annotation(line, line_no, None, None, None, None)
-        item.diff_href = None
-        lines.append(item)
+    # First, see if there's a Pygments lexer associated with MIME_TYPE.
+    if mime_type:
+      try:
+        pygments_lexer = get_lexer_for_mimetype(mime_type,
+                                                encoding=encoding,
+                                                tabsize=cfg.options.tabsize,
+                                                stripnl=False)
+      except ClassNotFound:
+        pygments_lexer = None
+
+    # If we've no lexer thus far, try to find one based on the FILENAME.
+    if not pygments_lexer:
+      try:
+        pygments_lexer = get_lexer_for_filename(filename,
+                                                encoding=encoding,
+                                                tabsize=cfg.options.tabsize,
+                                                stripnl=False)
+      except ClassNotFound:
+        pygments_lexer = None
+
+    # Still no lexer?  If we've reason to believe this is a text
+    # file, try to guess the lexer based on the file's content.
+    if not pygments_lexer and is_text(mime_type) and file_lines:
+      try:
+        pygments_lexer = guess_lexer(file_lines[0])
+      except ClassNotFound:
+        pygments_lexer = None
+        
+  # If we aren't highlighting, just return an amalgamation of the
+  # BLAME_DATA (if any) and the FILE_LINES.
+  if not pygments_lexer:
+    lines = []
+    for i in range(len(file_lines)):
+      line = file_lines[i]
+      line = sapi.escape(string.expandtabs(line, cfg.options.tabsize))
+      line = markup_escaped_urls(line)
+      if blame_data:
+        blame_item = blame_data[i]
+        blame_item.text = line
+      else:
+        blame_item = vclib.Annotation(line, i + 1, None, None, None, None)
+        blame_item.diff_href = None
+      lines.append(blame_item)
     return lines
 
   # If we get here, we're highlighting something.
@@ -1800,8 +1889,9 @@ def markup_stream_pygments(request, cfg, blame_data, fp, filename,
         item.diff_href = None
         self.blame_data.append(item)
       self.line_no = self.line_no + 1
-  ps = PygmentsSink(blame_source)
-  highlight(fp.read(), lexer,
+
+  ps = PygmentsSink(blame_data)
+  highlight(string.join(file_lines, ''), pygments_lexer,
             HtmlFormatter(nowrap=True,
                           classprefix="pygments-",
                           encoding='utf-8'), ps)
@@ -1857,7 +1947,8 @@ def get_itemprops(request, path_parts, rev):
   propnames.sort()
   props = []
   for name in propnames:
-    value = format_log(request, itemprops[name])
+    lf = LogFormatter(request, itemprops[name])
+    value = lf.get(maxlen=0, htmlize=1)
     undisplayable = ezt.boolean(0)
     # skip non-utf8 property names
     try:
@@ -1916,32 +2007,69 @@ def markup_or_annotate(request, is_annotate):
     fp.close()
     if check_freshness(request, None, revision, weak=1):
       return
-    annotation = 'binary'
+    if is_annotate:
+      annotation = 'binary'
     image_src_href = request.get_url(view_func=view_checkout,
                                      params={'revision': rev}, escape=1)
 
   # Not a viewable image.
   else:
-    blame_source = None
+    blame_data = None
+
+    # If this was an annotation request, try to annotate this file.
+    # If something goes wrong, that's okay -- we'll gracefully revert
+    # to a plain markup display.
     if is_annotate:
-      # Try to annotate this file, but don't croak if we fail.
       try:
-        blame_source, revision = request.repos.annotate(path, rev)
-        annotation = 'annotated'
+        blame_source, revision = request.repos.annotate(path, rev, False)
         if check_freshness(request, None, revision, weak=1):
           return
+        # Create BLAME_DATA list from BLAME_SOURCE, adding diff_href
+        # items to each relevant "line".
+        blame_data = []
+        for item in blame_source:
+          item.diff_href = None
+          if item.prev_rev:
+            item.diff_href = request.get_url(view_func=view_diff,
+                                             params={'r1': item.prev_rev,
+                                                     'r2': item.rev},
+                                             escape=1, partial=1)
+          blame_data.append(item)
+        annotation = 'annotated'
       except vclib.NonTextualFileContents:
         annotation = 'binary'
       except:
         annotation = 'error'
 
+    # Grab the file contents.
     fp, revision = request.repos.openfile(path, rev, {'cvs_oldkeywords' : 1})
     if check_freshness(request, None, revision, weak=1):
       fp.close()
       return
-    lines = markup_stream_pygments(request, cfg, blame_source, fp,
-                                   path[-1], mime_type, encoding)
+    file_lines = fp.readlines()
     fp.close()
+
+    # Do we have a differing number of file content lines and
+    # annotation items?  That's no good.  Call it an error and don't
+    # bother attempting the annotation display.
+    if blame_data and (len(file_lines) != len(blame_data)):
+      annotation = 'error'
+      blame_data = None
+
+    # Try to markup the file contents/annotation.  If we get an error
+    # and we were colorizing the stream, try once more without the
+    # colorization enabled.
+    colorize = cfg.options.enable_syntax_coloration
+    try:
+      lines = markup_stream(request, cfg, blame_data, file_lines,
+                            path[-1], mime_type, encoding, colorize)
+    except:
+      if colorize:
+        lines = markup_stream(request, cfg, blame_data, file_lines,
+                              path[-1], mime_type, encoding, False)
+      else:
+        raise debug.ViewVCException('Error displaying file contents',
+                                    '500 Internal Server Error')
 
   data = common_template_data(request, revision, mime_type)
   data.merge(ezt.TemplateData({
@@ -1967,14 +2095,19 @@ def markup_or_annotate(request, is_annotate):
     }))
 
   if cfg.options.show_log_in_markup:
-    options = {'svn_latest_log': 1}  ### FIXME: No longer needed?
+    options = {
+      'svn_latest_log': 1, ### FIXME: Use of this magical value is uncool.
+      'svn_cross_copies': 1,
+      }
     revs = request.repos.itemlog(path, revision, vclib.SORTBY_REV,
                                  0, 1, options)
     entry = revs[-1]
+    lf = LogFormatter(request, entry.log)
+
     data['date'] = make_time_string(entry.date, cfg)
     data['author'] = entry.author
     data['changed'] = entry.changed
-    data['log'] = format_log(request, entry.log)
+    data['log'] = lf.get(maxlen=0, htmlize=1)
     data['size'] = entry.size
 
     if entry.date is not None:
@@ -2090,20 +2223,27 @@ def view_roots(request):
     rootnames = allroots.keys()
     rootnames.sort(icmp)
     for rootname in rootnames:
+      root_path, root_type, lastmod = allroots[rootname]
       href = request.get_url(view_func=view_directory,
                              where='', pathtype=vclib.DIR,
                              params={'root': rootname}, escape=1)
-      lastmod = allroots[rootname][2]
+      if root_type == vclib.SVN:
+        log_href = request.get_url(view_func=view_log,
+                                   where='', pathtype=vclib.DIR,
+                                   params={'root': rootname}, escape=1)
+      else:
+        log_href = None
       roots.append(_item(name=request.server.escape(rootname),
-                         type=allroots[rootname][1],
-                         path=allroots[rootname][0],
+                         type=root_type,
+                         path=root_path,
                          author=lastmod and lastmod.author or None,
                          ago=lastmod and lastmod.ago or None,
                          date=lastmod and lastmod.date or None,
                          log=lastmod and lastmod.log or None,
                          short_log=lastmod and lastmod.short_log or None,
                          rev=lastmod and lastmod.rev or None,
-                         href=href))
+                         href=href,
+                         log_href=log_href))
 
   data = common_template_data(request)
   data.merge(ezt.TemplateData({
@@ -2213,9 +2353,11 @@ def view_directory(request):
       row.date = make_time_string(file.date, cfg)
       row.ago = html_time(request, file.date)
     if cfg.options.show_logs:
-      row.log = format_log(request, file.log)
-      row.short_log = format_log(request, file.log,
-                                 maxlen=cfg.options.short_log_len)
+      debug.t_start("dirview_logformat")
+      lf = LogFormatter(request, file.log)
+      row.log = lf.get(maxlen=0, htmlize=1)
+      row.short_log = lf.get(maxlen=cfg.options.short_log_len, htmlize=1)
+      debug.t_end("dirview_logformat")
     row.lockinfo = file.lockinfo
     row.anchor = request.server.escape(file.name)
     row.name = request.server.escape(file.name)
@@ -2598,13 +2740,15 @@ def view_log(request):
     entry.ago = None
     if rev.date is not None:
       entry.ago = html_time(request, rev.date, 1)
-    entry.log = format_log(request, rev.log or '')
     entry.size = rev.size
     entry.lockinfo = rev.lockinfo
     entry.branch_point = None
     entry.next_main = None
     entry.orig_path = None
     entry.copy_path = None
+
+    lf = LogFormatter(request, rev.log or '')
+    entry.log = lf.get(maxlen=0, htmlize=1)
 
     entry.view_href = None
     entry.download_href = None
@@ -3170,7 +3314,8 @@ class DiffSource:
 class DiffSequencingError(Exception):
   pass
 
-def diff_parse_headers(fp, diff_type, rev1, rev2, sym1=None, sym2=None):
+def diff_parse_headers(fp, diff_type, path1, path2, rev1, rev2,
+                       sym1=None, sym2=None):
   date1 = date2 = log_rev1 = log_rev2 = flag = None
   header_lines = []
 
@@ -3199,15 +3344,15 @@ def diff_parse_headers(fp, diff_type, rev1, rev2, sym1=None, sym2=None):
         if match:
           date1 = match.group(1)
           log_rev1 = match.group(2)
-        if sym1:
-          line = line[:-1] + ' %s\n' % sym1
+          line = '%s%s\t%s\t%s%s\n' % (f1, path1, date1, log_rev1,
+                                       sym1 and ' ' + sym1 or '')
       elif line[:len(f2)] == f2:
         match = _re_extract_rev.match(line)
         if match:
           date2 = match.group(1)
           log_rev2 = match.group(2)
-        if sym2:
-          line = line[:-1] + ' %s\n' % sym2
+          line = '%s%s\t%s\t%s%s\n' % (f2, path2, date2, log_rev2,
+                                       sym2 and ' ' + sym2 or '')
         parsing = 0
       elif line[:3] == 'Bin':
         flag = _RCSDIFF_IS_BINARY
@@ -3335,8 +3480,11 @@ def view_patch(request):
     raise debug.ViewVCException('Invalid path(s) or revision(s) passed '
                                  'to diff', '400 Bad Request')
 
-  date1, date2, flag, headers = diff_parse_headers(fp, diff_type, rev1, rev2,
-                                                   sym1, sym2)
+  path_left = _path_join(p1)
+  path_right = _path_join(p2)
+  date1, date2, flag, headers = diff_parse_headers(fp, diff_type,
+                                                   path_left, path_right,
+                                                   rev1, rev2, sym1, sym2)
 
   server_fp = get_writeready_server_file(request, 'text/plain')
   server_fp.write(headers)
@@ -3432,6 +3580,7 @@ def view_diff(request):
   changes = []
   if fp:
     date1, date2, flag, headers = diff_parse_headers(fp, diff_type,
+                                                     path_left, path_right,
                                                      rev1, rev2, sym1, sym2)
     if human_readable:
       if flag is not None:
@@ -3449,7 +3598,8 @@ def view_diff(request):
   fvi = get_file_view_info(request, path_left, rev1)
   left = _item(date=make_time_string(log_entry1.date, cfg),
                author=log_entry1.author,
-               log=format_log(request, log_entry1.log),
+               log=LogFormatter(request,
+                                log_entry1.log).get(maxlen=0, htmlize=1),
                size=log_entry1.size,
                ago=ago1,
                path=path_left,
@@ -3465,7 +3615,8 @@ def view_diff(request):
   fvi = get_file_view_info(request, path_right, rev2)
   right = _item(date=make_time_string(log_entry2.date, cfg),
                 author=log_entry2.author,
-                log=format_log(request, log_entry2.log),
+                log=LogFormatter(request,
+                                 log_entry2.log).get(maxlen=0, htmlize=1),
                 size=log_entry2.size,
                 ago=ago2,
                 path=path_right,
@@ -3713,7 +3864,8 @@ def view_revision(request):
   propnames.sort()
   props = []
   for name in propnames:
-    value = format_log(request, revprops[name])
+    lf = LogFormatter(request, revprops[name])
+    value = lf.get(maxlen=0, htmlize=1)
     undisplayable = ezt.boolean(0)
     # skip non-utf8 property names
     try:
@@ -3836,13 +3988,14 @@ def view_revision(request):
                                     escape=1)
   jump_rev_action, jump_rev_hidden_values = \
     request.get_form(params={'revision': None})
-    
+
+  lf = LogFormatter(request, msg)
   data = common_template_data(request)
   data.merge(ezt.TemplateData({
     'rev' : str(rev),
     'author' : author,
     'date' : date_str,
-    'log' : format_log(request, msg),
+    'log' : lf.get(maxlen=0, htmlize=1),
     'properties' : props,
     'ago' : date is not None and html_time(request, date, 1) or None,
     'changes' : changes,
@@ -4200,9 +4353,10 @@ def build_commit(request, files, max_files, dir_strip, format):
     commit.log = None
     commit.short_log = None
   else:
-    commit.log = format_log(request, desc, 0, format != 'rss')
-    commit.short_log = format_log(request, desc, cfg.options.short_log_len,
-                                  format != 'rss')
+    lf = LogFormatter(request, desc)
+    htmlize = (format != 'rss')
+    commit.log = lf.get(maxlen=0, htmlize=htmlize)
+    commit.short_log = lf.get(maxlen=cfg.options.short_log_len, htmlize=htmlize)
   commit.author = request.server.escape(author)
   commit.rss_date = make_rss_time_string(date, request.cfg)
   if request.roottype == 'svn':
@@ -4496,8 +4650,9 @@ def list_roots(request):
           date, author, msg, revprops, changes = repos.revinfo(youngest_rev)
           date_str = make_time_string(date, cfg)
           ago = html_time(request, date)
-          log = format_log(request, msg)
-          short_log = format_log(request, msg, maxlen=cfg.options.short_log_len)
+          lf = LogFormatter(request, msg)
+          log = lf.get(maxlen=0, htmlize=1)
+          short_log = lf.get(maxlen=cfg.options.short_log_len, htmlize=1)
           lastmod = _item(ago=ago, author=author, date=date_str, log=log,
                           short_log=short_log, rev=str(youngest_rev))
         except:
@@ -4589,14 +4744,35 @@ def locate_root(cfg, rootname):
   return None, None
   
 def load_config(pathname=None, server=None):
+  """Load the ViewVC configuration file.  SERVER is the server object
+  that will be using this configuration.  Consult the environment for
+  the variable VIEWVC_CONF_PATHNAME and VIEWCVS_CONF_PATHNAME (its
+  legacy name) and, if set, use its value as the path of the
+  configuration file; otherwise, use PATHNAME (if provided).  Failing
+  all else, use a hardcoded default configuration path."""
+  
   debug.t_start('load-config')
 
-  if pathname is None:
-    pathname = (os.environ.get("VIEWVC_CONF_PATHNAME")
-                or os.environ.get("VIEWCVS_CONF_PATHNAME")
-                or os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                "viewvc.conf"))
+  # See if the environment contains overrides to the configuration
+  # path.  If we have a SERVER object, consult its environment; use
+  # the OS environment otherwise.
+  env_pathname = None
+  if server is not None:
+    env_pathname = (server.getenv("VIEWVC_CONF_PATHNAME")
+                    or server.getenv("VIEWCVS_CONF_PATHNAME"))
+  else:
+    env_pathname = (os.environ.get("VIEWVC_CONF_PATHNAME")
+                    or os.environ.get("VIEWCVS_CONF_PATHNAME"))
 
+  # Try to find the configuration pathname by searching these ordered
+  # locations: the environment, the passed-in PATHNAME, the hard-coded
+  # default.
+  pathname = (env_pathname
+              or pathname
+              or os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                              "viewvc.conf"))
+
+  # Load the configuration!
   cfg = config.Config()
   cfg.set_defaults()
   cfg.load_config(pathname, server and server.getenv("HTTP_HOST"))
