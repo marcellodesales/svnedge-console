@@ -296,9 +296,8 @@ root@${server.hostname}
         } else {
             version = commandLineService
                 .executeWithOutput("python", "-c", "import sys; " +
-                "print str(sys.api_version)")
+                "print sys.api_version")
             if (version.length()) {
-                version = "." + version
                 /*Remove the trailing new line */
                 version = version.trim()
             }
@@ -307,6 +306,7 @@ root@${server.hostname}
     }
 
     private Map<String, String> createHttpdEnv() {
+        def svnedge_python_api_version
         Map<String, String> env = new HashMap<String, String>(3)
         if (!isWindows()) {
     	    //Windows installation drops the mod_python.viewvc inside
