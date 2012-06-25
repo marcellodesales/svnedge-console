@@ -89,11 +89,13 @@ class MailConfigurationService extends AbstractSvnEdgeService
             props["mail.smtp.starttls.enable"] = "true"
             props["mail.smtp.port"] = dynamicConfig.port as String
         }
-        if (dynamicConfig.authUser) {
+        if (dynamicConfig.authUser && dynamicConfig.authPass) {
             props["mail.smtp.auth"] = "true"
+            // this might allow kerberos, but it is not tested
+            props["mail.smtp.sasl.enable"] = "true"
+        } else {
+            props["mail.smtp.auth"] = "false"
         }
-        // this might allow kerberos, but it is not tested
-        props["mail.smtp.sasl.enable"] = "true"
         // if we are sending to a user and the server admin, the email should
         // be sent to the admin, even if the user address is invalid.
         props["mail.smtp.sendpartial"] = "true"
@@ -108,8 +110,8 @@ class MailConfigurationService extends AbstractSvnEdgeService
         ms.host = config.host ?: "localhost"
         ms.defaultEncoding = config.encoding ?: "utf-8"
         ms.port = config.port
-        ms.username = config.username
-        ms.password = config.password
+        ms.username = config.username ?: null
+        ms.password = config.password ?: null
         if (config.protocol)
             ms.protocol = config.protocol
         if (config.props instanceof Map && config.props)
