@@ -65,6 +65,10 @@ class LogRotateJob {
         for (int i = 0; i < entries.length; i++) {
             String entry = entries[i]
             def entryObj = new File(entry)
+            // do not remove the /logs/temp folder
+            if (entryObj.isDirectory() && entryObj.name == "temp") {
+                continue
+            }
             long lastModified = entryObj.lastModified()
             if (lastModified < pruningTimestamp) {
                 if (entryObj.delete() == false) {

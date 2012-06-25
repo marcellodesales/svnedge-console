@@ -42,6 +42,9 @@ class BackgroundJobUtil {
      */
     public static File prepareProgressLogFile(repoName, jobType) {
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
+        if (!tempLogDir.exists()) {
+            tempLogDir.mkdirs()
+        }
         return new File(tempLogDir, getProgressLogFileName(
                 repoName, jobType))
     }
