@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=3.1.0
+VERSION=3.2.0
 OS=linux-x86
 PKG=/u1/hudson/pkg-tools/bin/pkg
 BUILD_TEMP=/u1/hudson/linux32/trunk
