@@ -90,7 +90,8 @@ CONFDIR=$REALDIR/../data/conf
 MODPYTHONLIBDIR=$REALDIR/../lib/
 PYTHONPATH=$MODPYTHONLIBDIR
 export PYTHONPATH
-export SVNEDGE_PYTHON_API_VERSION=`python -c "import sys; print sys.api_version;"`
+SVNEDGE_PYTHON_API_VERSION=`python -c "import sys; print sys.api_version;"`
+export SVNEDGE_PYTHON_API_VERSION
 #RUN_AS_USER=
 
 
