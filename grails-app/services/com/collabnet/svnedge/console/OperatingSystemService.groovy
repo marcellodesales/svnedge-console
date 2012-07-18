@@ -255,8 +255,12 @@ class OperatingSystemService {
                 return true
             }
         }
-        catch (SigarException e) {
-            log.warn ("Testing for process '${pid}' failed: ${e.message}")
+        catch (Exception e) {
+            log.warn ("Testing for process '${pid}' failed with message: ${e.message}")
+            if (e.message == "The SIGAR library was not loaded.")  {
+                log.warn("SIGAR loading issue, the pid cannot be tested. Assuming the process is alive")
+                return true
+            }
             return false
         }
     }
