@@ -101,8 +101,9 @@ public class FileUtil {
                     directory, zos, storePermissions, progress)
         }
         catch (ZipException e) {
-            log.warn("Error zipping directory, likely caused by presence of symlink(s)")
-            log.info("Attempting alternate zip using command line tool")
+            log.warn("Error zipping directory, likely caused by presence of symlink(s); " + 
+                     "attempting alternate zip using command line")
+            log.info("ZipException details", e)
             zos?.close()
             zipFile.delete()
             archiveDirectoryUsingCommandLine(directory, zipFile, progress)
