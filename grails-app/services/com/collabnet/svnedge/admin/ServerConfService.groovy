@@ -768,15 +768,13 @@ MaxMemFree 512
         }
         ldapUrl += "${server.ldapServerHost}"
         if (server.ldapServerPort != 389) {
-            if(server.ldapAuthBasedn) {
                 ldapUrl += ":${server.ldapServerPort}"
-            }
-            else {
-                ldapUrl += ":${server.ldapServerPort}/"
-            }
         }
+
+        ldapUrl += "/"
+
         if (server.ldapAuthBasedn) {
-            ldapUrl += "/${server.ldapAuthBasedn}"
+            ldapUrl += "${server.ldapAuthBasedn}"
         }
         if (server.ldapLoginAttribute) {
             ldapUrl += "?${server.ldapLoginAttribute}"
