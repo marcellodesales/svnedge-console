@@ -285,6 +285,7 @@ class CloudServicesAccountCommand {
     String firstName
     String lastName
     String emailAddress
+    String emailAddressConfirm
     String phoneNumber
     String organization
     Boolean acceptTerms
@@ -305,6 +306,13 @@ class CloudServicesAccountCommand {
         firstName(blank: false)
         lastName(blank: false)
         emailAddress(blank: false, email: true)
+        emailAddressConfirm(blank: false,
+                validator: { String val, CloudServicesAccountCommand cmd ->
+                    if (val != cmd.emailAddress) {
+                        return "cloudServicesAccountCommand.emailAddressConfirm.mismatch"
+                    }
+                }
+        )
         phoneNumber(matches: "[0-9 #()\\+-]+")
         organization(blank: false, minSize: 1, maxSize: 256)
         acceptTerms(

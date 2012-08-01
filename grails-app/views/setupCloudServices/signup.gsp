@@ -79,18 +79,15 @@
   <g:propTextField bean="${cmd}" field="lastName" required="true" prefix="setupCloudServices.page.signup"/>
   <g:propTextField bean="${cmd}" field="emailAddress" required="true" prefix="setupCloudServices.page.signup"/>
   
-  <div class="control-group required-field">
-    <label class="control-label"
-        for="emailAddressConfirm"><g:message code="setupCloudServices.page.signup.emailAddressConfirm.label"/></label>
-    <div class="controls">
-      <input type="text" class="input-xlarge" id="emailAddressConfirm" name="emailAddressConfirm" value=""/>
+  <g:propControlsBody bean="${cmd}" field="emailAddressConfirm" required="true" prefix="setupCloudServices.page.signup">
+      <input type="text" class="input-xlarge" id="emailAddressConfirm" name="emailAddressConfirm" 
+             value="${fieldValue(bean: cmd, field: 'emailAddressConfirm')}"/>
       <span id="confirmEmailMessage" class="TextRequired" style="display: none;">
         <img width="15" height="15" alt="Warning" align="bottom"
                 src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
         <g:message code="setupCloudServices.page.signup.emailAddressConfirm.notEqual"/>
       </span>
-    </div>
-  </div>
+  </g:propControlsBody>
 
   <g:propTextField bean="${cmd}" field="phoneNumber" prefix="setupCloudServices.page.signup"/>
   <g:propControlsBody bean="${cmd}" field="username" required="true" prefix="setupCloudServices.page.signup">

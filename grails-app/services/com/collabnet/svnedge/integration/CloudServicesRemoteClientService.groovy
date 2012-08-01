@@ -75,7 +75,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             return resp.status == 200
         }
         catch (Exception e) {
-            if (e.message != "Unauthorized") {
+            if (e.message != "Authorization Required") {
                 log.warn("Unexpected exception while attempting login", e)
             }
             return false
@@ -149,7 +149,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
         body.put("user[contactPhone]", cmd.phoneNumber)
         body.put("user[login]", cmd.username)
         body.put("user[password]]", cmd.password)
-        body.put("organizationName", cmd.organization)
+        body.put("companyName", cmd.organization)
         body.put("domain", cmd.domain)
 
         body.put("affirmations[termsOfService]", cmd.acceptTerms)
@@ -202,13 +202,13 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             log.error("Unable to create Cloud account: ${e.message} - ${error}", e)
 
             // add error messages to command fields if possible
-            if (error.contains("User login unavailable")) {
+            if (error.contains("owner.login is not available")) {
                 cmd.errors.rejectValue("username", getMessage("cloudServicesAccountCommand.username.inUse", cmd.requestLocale))
             }
-            if (error.contains("Organization name already in use")) {
+            if (error.contains("companyName has already been taken")) {
                 cmd.errors.rejectValue("organization", getMessage("cloudServicesAccountCommand.organization.inUse", cmd.requestLocale))
             }
-            if (error.contains("Organization alias already in use")) {
+            if (error.contains("name has already been taken")) {
                 cmd.errors.rejectValue("domain", getMessage("cloudServicesAccountCommand.domain.inUse", cmd.requestLocale))
             }
             if (error.contains("Organization alias invalid")) {
@@ -328,7 +328,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                 // Failed to create project: You already have NN out of NN projects.
                 // if there are other errors which start the same, this might
                 // need to be made more rigorous.
-            } else if (error?.startsWith('Failed to create project')) {
+            } else if (error?.contains('Unable to create more projects')) {
                 throw new QuotaCloudServicesException()
             }
             log.debug("REST data " + data)
