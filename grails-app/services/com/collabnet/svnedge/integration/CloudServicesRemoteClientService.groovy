@@ -912,7 +912,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     log.debug("REST data " + data)                    
                     boolean isReady = data['service']['ready']
                     if (isReady) {
-                        return data['service']['accessUrl']
+                        return data['service']['accessUrl']['https']
                     }
                 }
                 waitTime *= 2
