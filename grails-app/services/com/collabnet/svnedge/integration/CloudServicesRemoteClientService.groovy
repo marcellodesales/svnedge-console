@@ -561,7 +561,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             "--config-dir", ConfigUtil.svnConfigDirPath(),
             "--config-option=servers:global:ssl-authority-files=" +  
             new File(ConfigUtil.dataDirPath(),  
-                     "certs/cloud_services_root_ca.crt").canonicalPath,]
+                     "certs/cloud_services_root_ca.crt").canonicalPath,
+            "--trust-server-cert"]
         log.debug("rdump command: " + command)
         def cred = createFullCredentialsMap()
         def username = cred['credentials[login]']
@@ -870,7 +871,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             new File(ConfigUtil.dataDirPath(),  
                      "certs/cloud_services_root_ca.crt").canonicalPath,
             "--non-interactive", "--no-auth-cache", "--disable-locking",
-            "--config-dir", ConfigUtil.svnConfigDirPath()]
+            "--trust-server-cert", "--config-dir", ConfigUtil.svnConfigDirPath()]
         def result =
             commandLineService.execute(command, fos, fos, null, null, true)
         if (result[0] != "0") {
@@ -890,7 +891,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             new File(ConfigUtil.dataDirPath(),
                      "certs/cloud_services_root_ca.crt").canonicalPath,
             "--non-interactive", "--no-auth-cache",
-            "--config-dir", ConfigUtil.svnConfigDirPath()]
+            "--trust-server-cert", "--config-dir", ConfigUtil.svnConfigDirPath()]
         def result =
             commandLineService.execute(command, fos, fos, null, null, true)
         if (result[0] != "0") {
