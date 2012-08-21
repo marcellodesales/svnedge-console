@@ -322,7 +322,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             def resp = hre.response
             def data = resp.data
             def error = resp.data['error']
-            if (error?.contains('Invalid project shortName')) {
+            if (error?.contains('shortName has already been taken')) {
                 throw new InvalidNameCloudServicesException()
                 // current error message is:
                 // Failed to create project: You already have NN out of NN projects.
@@ -480,7 +480,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
            if (service['serviceType'] == 'svn' && service['ready']) {
                def projectId = service.projectId
                def valueMap =[projectId: projectId, name: projectMap[projectId],
-                       accessUrl: service.accessUrl]
+                       accessUrl: service.accessUrl.https]
                projectUrlMap[projectId] = valueMap
            }
        }
@@ -798,7 +798,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
                     serviceExists = true
                     serviceId = serviceMap['serviceId']
                     if (serviceMap['ready']) {
-                        cloudSvnURI = serviceMap['accessUrl']
+                        cloudSvnURI = serviceMap['accessUrl']['https']
                     }
                 }
             }
@@ -887,7 +887,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             cloudSvnURI, localRepoURI, "--allow-non-empty",
             "--sync-username", username, "--sync-password", password,
             "--config-option=servers:global:ssl-authority-files=" +  
-            new File(ConfigUtil.dataDirPath(),  
+            new File(ConfigUtil.dataDirPath(),
                      "certs/cloud_services_root_ca.crt").canonicalPath,
             "--non-interactive", "--no-auth-cache",
             "--config-dir", ConfigUtil.svnConfigDirPath()]
