@@ -31,6 +31,7 @@ class User {
     String realUserName
     /** MD5 Password */
     String passwd
+    String passwordConfirm
     /** enabled */
     boolean enabled = true
 
@@ -56,6 +57,8 @@ class User {
         })
         realUserName(blank: false)
         passwd(blank: false, minSize: 5, maxSize: 255,
+            matches: "[^\"]*")
+        passwordConfirm(blank: false, minSize: 5, maxSize: 255,
             matches: "[^\"]*")
         enabled()
     }

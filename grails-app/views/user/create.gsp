@@ -1,5 +1,20 @@
 <head>
     <meta name="layout" content="main" />
+    <g:javascript>
+
+    $(function() {
+
+      $('#passwd').on('keyup', passwordConfirm);
+      $('#passwordConfirm').on('keyup', passwordConfirm);
+    });
+
+    function passwordConfirm(e) {
+      var b = $('#passwd').attr("value") == $('#passwordConfirm').attr("value");
+      $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
+      return b;
+    }
+
+    </g:javascript>
 </head>
 
 
@@ -14,7 +29,18 @@
     <g:propTextField bean="${userInstance}" field="username" required="true" prefix="user"/>
     <g:propTextField bean="${userInstance}" field="realUserName" required="true" prefix="user"/>
     <g:propControlsBody bean="${userInstance}" field="passwd" required="true" prefix="user">
-      <input type="password" id="passwd" name="passwd" value="${userInstance.passwd}"/>
+      <input type="password" id="passwd" name="passwd"
+         value="${fieldValue(bean: userInstance, field: 'passwd')}"/>
+    </g:propControlsBody>
+    <g:propControlsBody bean="${userInstance}" field="passwordConfirm" required="true" prefix="user">
+      <input type="password" id="passwordConfirm" name="passwordConfirm"
+         value="${fieldValue(bean: userInstance, field: 'passwordConfirm')}"/>
+
+      <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
+      <img width="15" height="15" alt="Warning" align="bottom"
+                src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
+      <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
+      </span>
     </g:propControlsBody>
     <g:propTextField bean="${userInstance}" field="email" required="true" prefix="user"/>
     <g:propTextField bean="${userInstance}" field="description" prefix="user"/>
