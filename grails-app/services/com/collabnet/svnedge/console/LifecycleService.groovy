@@ -289,24 +289,7 @@ root@${server.hostname}
         }
     }
 
-   private def getSvnedgePythonApiVersion() {
-        String version;
-        if (isWindows()) {
-            version = ""
-        } else {
-            version = commandLineService
-                .executeWithOutput("python", "-c", "import sys; " +
-                "print sys.api_version")
-            if (version.length()) {
-                /*Remove the trailing new line */
-                version = version.trim()
-            }
-        }
-        version
-    }
-
     private Map<String, String> createHttpdEnv() {
-        def svnedge_python_api_version
         Map<String, String> env = new HashMap<String, String>(3)
         if (!isWindows()) {
     	    //Windows installation drops the mod_python.viewvc inside
@@ -318,8 +301,6 @@ root@${server.hostname}
             String modPythonLibDir = new File(ConfigUtil.appHome(), "lib")
                 .absolutePath
             env.put("PYTHONPATH", modPythonLibDir)
-            svnedge_python_api_version = getSvnedgePythonApiVersion()
-            env.put("SVNEDGE_PYTHON_API_VERSION", svnedge_python_api_version)
         }
 
         if (!isWindows() && isHttpdBindSuid()) {
