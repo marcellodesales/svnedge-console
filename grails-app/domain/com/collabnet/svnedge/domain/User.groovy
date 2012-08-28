@@ -21,7 +21,7 @@ package com.collabnet.svnedge.domain
  * User domain class.  Initial revision is mostly grails template code.
  */
 class User {
-    static transients = ['pass']
+    static transients = ['pass', 'passwordConfirm']
     static hasMany = [authorities: Role, props: UserProperty]
     static belongsTo = Role
 
