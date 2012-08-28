@@ -62,10 +62,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(deleteStatJob.getGroup())
         deleteStatJob.triggerNow(params)
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
+        waitForJob()
         quartzScheduler.standby()
         // check that we now have 2 StatValues
         values = StatValue.findAllByStatistic(stat)
@@ -73,6 +70,14 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
                      values.size())   
     }
 
+    void waitForJob() {
+        log.info("Job triggered; waiting to finish...")
+        synchronized(this) {
+            this.wait(60000)
+        }
+        log.info("Trigger done! Continuing test")
+    }
+    
     void createTestStats(name) {
         def category = new Category(name: name)
         category.save()

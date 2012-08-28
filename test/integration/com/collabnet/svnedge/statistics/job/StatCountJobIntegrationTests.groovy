@@ -60,10 +60,7 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobList
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(statCountJob.getGroup())
         statCountJob.triggerNow(params)
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
+        waitForJob()
         quartzScheduler.standby()
         // check that we now have a zero StatValue
         stat.refresh()
@@ -72,6 +69,14 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobList
         assertNotNull("The StatValue should have been created.", statValue)
         assertEquals("The StatValue should be zero.", 
                      statValue.getAverageValue(), 0)
+    }
+
+    void waitForJob() {
+        log.info("Job triggered; waiting to finish...")
+        synchronized(this) {
+            this.wait(60000)
+        }
+        log.info("Trigger done! Continuing test")
     }
 
     void createTestStats(name) {

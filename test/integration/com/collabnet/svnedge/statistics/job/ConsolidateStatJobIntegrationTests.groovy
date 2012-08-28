@@ -67,10 +67,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(consolidateStatJob.getGroup())
         consolidateStatJob.triggerNow(params)
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
+        waitForJob()
         quartzScheduler.standby()
         stat.refresh()
         values1sec = StatValue.findAllByStatisticAndInterval(stat, 1000)
@@ -84,6 +81,14 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
                      values2sec.size())
         assertEquals("The size of the 4-sec values should be 1.", 1, 
                      values4sec.size())
+    }
+    
+    void waitForJob() {
+        log.info("Job triggered; waiting to finish...")
+        synchronized(this) {
+            this.wait(60000)
+        }
+        log.info("Trigger done! Continuing test")
     }
 
     void createTestStats() {

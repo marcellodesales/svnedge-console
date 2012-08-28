@@ -46,14 +46,20 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(statCollectJob.getGroup())
         statCollectJob.triggerNow(params)
-        synchronized(this) {
-            this.wait(60000)
-        }
+        waitForJob()
         quartzScheduler.standby()
         // make sure the stat values appear
         def values = networkStatisticsService.getCurrentThroughput()
         assertNotNull("The bytesIn value should not be null.", values[0])
         assertNotNull("The bytesOut value should not be null.", values[1])
+    }
+
+    void waitForJob() {
+        log.info("Job triggered; waiting to finish...")
+        synchronized(this) {
+            this.wait(60000)
+        }
+        log.info("Trigger done! Continuing test")
     }
 
     /** Listener methods **/
