@@ -129,7 +129,9 @@ public class DumpBean {
         DumpBean b = new DumpBean()
         propertyNames.each { it ->
             def mapValue = m.get(it)
-            b."${it}" = mapValue
+            if (mapValue || mapValue instanceof Boolean) {
+                b."${it}" = mapValue
+            }
         }
         b.schedule = SchedulerBean.fromMap(m)
         return b
