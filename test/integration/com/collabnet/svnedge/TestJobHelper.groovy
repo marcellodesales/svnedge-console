@@ -1,5 +1,10 @@
 package com.collabnet.svnedge
 
+import java.lang.management.LockInfo;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MonitorInfo;
+import java.lang.management.ThreadInfo;
+
 import org.quartz.JobListener
 import org.quartz.JobExecutionContext
 
@@ -15,7 +20,11 @@ class TestJobHelper implements JobListener {
             log.info("Job is finished, no need to wait.")
         } else {
             log.info("Job triggered; waiting to finish...")
-            this.wait(180000)
+            log.info("Before wait")
+            threadDump()
+            this.wait(30000)
+            log.info("After wait")
+            threadDump()
             log.info("Wait is over! Continuing test")
         }
     }
@@ -26,6 +35,36 @@ class TestJobHelper implements JobListener {
         this.notify()
     } 
     
+    private void threadDump() {
+        def title = "Thread dump:\n"
+        boolean lockedMonitors = true
+        boolean lockedOwnableSynchronizers = true
+        ThreadInfo[] tinfos = ManagementFactory.getThreadMXBean()
+                .dumpAllThreads(lockedMonitors, lockedOwnableSynchronizers)
+        StringBuilder sb = new StringBuilder()
+        for (ThreadInfo tinfo : tinfos ) {
+            sb.append(tinfo)
+            MonitorInfo[] minfos = tinfo.getLockedMonitors()
+            if (minfos) {
+                sb.append("    locked monitors:\n")
+                for (MonitorInfo minfo : minfos) {
+                    sb.append("      ").append(minfo)
+                }
+                sb.append("\n")
+            }
+            LockInfo[] sinfos = tinfo.getLockedSynchronizers()
+            if (sinfos) {
+                sb.append("    locked synchronizers:\n")
+                for(LockInfo sinfo : sinfos) {
+                    sb.append("      ").append(sinfo)
+                }
+                sb.append("\n")
+            }
+            sb.append("\n")
+        }
+        log.info(title + sb.toString())
+    }
+
     /** Listener methods **/
     public String getName() {
         return listenerName
