@@ -43,7 +43,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
         createTestStats()
         consolidateStatJob = new ConsolidateStatJob()
         jobListener = new TestJobHelper(jobName: consolidateStatJob.name,
-            listenerName: "ConsolidateStatJobIntegration")
+            listenerName: "ConsolidateStatJobIntegration", log: log)
     }
 
     protected void tearDown() {

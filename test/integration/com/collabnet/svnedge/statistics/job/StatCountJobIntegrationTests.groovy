@@ -44,7 +44,7 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase {
         createTestStats(testName)
         statCountJob = new StatCountJob()
         jobListener = new TestJobHelper(jobName: statCountJob.name,
-                listenerName: "StatCountJobIntegration")
+                listenerName: "StatCountJobIntegration", log: log)
     }
 
     protected void tearDown() {

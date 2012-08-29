@@ -31,7 +31,7 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase {
         super.setUp()
         statCollectJob = new StatCollectJob()
         jobListener = new TestJobHelper(jobName: statCollectJob.name,
-                listenerName: "StatCollectJobIntegration")
+                listenerName: "StatCollectJobIntegration", log: log)
     }
 
     protected void tearDown() {

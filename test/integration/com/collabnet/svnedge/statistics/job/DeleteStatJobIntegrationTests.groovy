@@ -44,7 +44,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
         createTestStats(testName)
         deleteStatJob = new DeleteStatJob()
         jobListener = new TestJobHelper(jobName: deleteStatJob.name,
-                listenerName: "DeleteStatJobIntegration")
+                listenerName: "DeleteStatJobIntegration", log: log)
     }
 
     protected void tearDown() {

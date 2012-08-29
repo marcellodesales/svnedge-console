@@ -1,11 +1,10 @@
 package com.collabnet.svnedge
 
-import org.apache.log4j.Logger
 import org.quartz.JobListener
 import org.quartz.JobExecutionContext
 
 class TestJobHelper implements JobListener {
-    private Logger log = Logger.getLogger(getClass())
+    def log
     String listenerName
     String jobName
     boolean jobIsFinished = false
@@ -16,7 +15,7 @@ class TestJobHelper implements JobListener {
             log.info("Job is finished, no need to wait.")
         } else {
             log.info("Job triggered; waiting to finish...")
-            this.wait(60000)
+            this.wait(180000)
             log.info("Wait is over! Continuing test")
         }
     }
