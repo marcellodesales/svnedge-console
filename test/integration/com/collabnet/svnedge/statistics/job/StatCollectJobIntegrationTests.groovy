@@ -19,18 +19,19 @@ package com.collabnet.svnedge.statistics.job
 
 import com.collabnet.svnedge.statistics.StatCollectJob 
 import grails.test.*
+import com.collabnet.svnedge.TestJobHelper
 
-import org.quartz.JobListener
-import org.quartz.JobExecutionContext
-
-class StatCollectJobIntegrationTests extends GrailsUnitTestCase 
-    implements JobListener {
+class StatCollectJobIntegrationTests extends GrailsUnitTestCase {
     def networkStatisticsService
     def quartzScheduler
     def statCollectJob
+    def jobListener
     
     protected void setUp() {
         super.setUp()
+        statCollectJob = new StatCollectJob()
+        jobListener = new TestJobHelper(jobName: statCollectJob.name,
+                listenerName: "StatCollectJobIntegration")
     }
 
     protected void tearDown() {
@@ -38,50 +39,18 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase
     }
 
     void testTriggerNetworkStats() {
-        statCollectJob = new StatCollectJob()
         Map params = new HashMap(1)
         params.put("serviceName", "networkStatisticsService")
         quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(this)
+        quartzScheduler.addGlobalJobListener(jobListener)
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(statCollectJob.getGroup())
         statCollectJob.triggerNow(params)
-        waitForJob()
+        jobListener.waitForJob()
         quartzScheduler.standby()
         // make sure the stat values appear
         def values = networkStatisticsService.getCurrentThroughput()
         assertNotNull("The bytesIn value should not be null.", values[0])
         assertNotNull("The bytesOut value should not be null.", values[1])
-    }
-
-    void waitForJob() {
-        log.info("Job triggered; waiting to finish...")
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
-    }
-
-    /** Listener methods **/
-    public String getName() {
-        return "StatCollectJobIntegration"
-    }
-    
-    void jobToBeExecuted(JobExecutionContext context) {}
-    void jobExecutionVetoed(JobExecutionContext context) {
-        synchronized(this) {
-            this.notify()
-        }
-        throw new RuntimeException("Did not expect job to be vetoed.")
-    }
-
-    void jobWasExecuted(JobExecutionContext context, 
-                        org.quartz.JobExecutionException jobException) {
-        if (context.getJobDetail().getName().equals(statCollectJob
-                                                    .getName())) {
-            synchronized(this) {
-                this.notify()
-            }
-        }
     }
 }

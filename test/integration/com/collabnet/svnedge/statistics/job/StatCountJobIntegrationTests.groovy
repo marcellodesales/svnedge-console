@@ -19,9 +19,7 @@ package com.collabnet.svnedge.statistics.job
 
 import grails.test.GrailsUnitTestCase;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.JobListener;
-
+import com.collabnet.svnedge.TestJobHelper
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 
@@ -32,17 +30,21 @@ import com.collabnet.svnedge.domain.statistics.Unit
 import com.collabnet.svnedge.statistics.AbstractStatisticsService 
 import com.collabnet.svnedge.statistics.StatCountJob 
 
-class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobListener {
+class StatCountJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
 
     def statGroup
     def stat
     def statCountJob
-
+    def jobListener
+    
     protected void setUp() {
         super.setUp()
         def testName = "test"
         createTestStats(testName)
+        statCountJob = new StatCountJob()
+        jobListener = new TestJobHelper(jobName: statCountJob.name,
+                listenerName: "StatCountJobIntegration")
     }
 
     protected void tearDown() {
@@ -52,15 +54,14 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobList
     void testStatCountExecution() {
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
-        statCountJob = new StatCountJob()
         def now = new Date().getTime()
         def interval = statGroup.getRawInterval() * 1000
         quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(this)
+        quartzScheduler.addGlobalJobListener(jobListener)
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(statCountJob.getGroup())
         statCountJob.triggerNow(params)
-        waitForJob()
+        jobListener.waitForJob()
         quartzScheduler.standby()
         // check that we now have a zero StatValue
         stat.refresh()
@@ -69,14 +70,6 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobList
         assertNotNull("The StatValue should have been created.", statValue)
         assertEquals("The StatValue should be zero.", 
                      statValue.getAverageValue(), 0)
-    }
-
-    void waitForJob() {
-        log.info("Job triggered; waiting to finish...")
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
     }
 
     void createTestStats(name) {
@@ -99,27 +92,5 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase implements JobList
                              type: StatisticType.COUNTER)
         statGroup.addToStatistics(stat).save()
         stat.save()
-    }
-
-    /** Listener methods **/
-    public String getName() {
-        return "StatCountJobIntegration"
-    }
-    
-    void jobToBeExecuted(JobExecutionContext context) {}
-    void jobExecutionVetoed(JobExecutionContext context) {
-        synchronized(this) {
-            this.notify()
-        }
-        throw new RuntimeException("Did not expect job to be vetoed.")
-    }
-
-    void jobWasExecuted(JobExecutionContext context, 
-                        org.quartz.JobExecutionException jobException) {
-        if (context.getJobDetail().getName().equals(statCountJob.getName())) {
-            synchronized(this) {
-                this.notify()
-            }
-        }
     }
 }

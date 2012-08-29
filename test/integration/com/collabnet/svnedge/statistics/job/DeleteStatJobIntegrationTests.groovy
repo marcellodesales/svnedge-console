@@ -19,9 +19,7 @@ package com.collabnet.svnedge.statistics.job
 
 import grails.test.GrailsUnitTestCase;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.JobListener;
-
+import com.collabnet.svnedge.TestJobHelper
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 
@@ -32,18 +30,21 @@ import com.collabnet.svnedge.domain.statistics.StatisticType
 import com.collabnet.svnedge.domain.statistics.Unit 
 import com.collabnet.svnedge.statistics.DeleteStatJob 
 
-class DeleteStatJobIntegrationTests extends GrailsUnitTestCase 
-    implements JobListener {
+class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
 
     def statGroup
     def stat
     def deleteStatJob
+    def jobListener
 
     protected void setUp() {
         super.setUp()
         def testName = "test"
         createTestStats(testName)
+        deleteStatJob = new DeleteStatJob()
+        jobListener = new TestJobHelper(jobName: deleteStatJob.name,
+                listenerName: "DeleteStatJobIntegration")
     }
 
     protected void tearDown() {
@@ -56,13 +57,12 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
         assertEquals("There should be 3 values initially.", 3, values.size())
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
-        deleteStatJob = new DeleteStatJob()
         quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(this)
+        quartzScheduler.addGlobalJobListener(jobListener)
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(deleteStatJob.getGroup())
         deleteStatJob.triggerNow(params)
-        waitForJob()
+        jobListener.waitForJob()
         quartzScheduler.standby()
         // check that we now have 2 StatValues
         values = StatValue.findAllByStatistic(stat)
@@ -70,14 +70,6 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
                      values.size())   
     }
 
-    void waitForJob() {
-        log.info("Job triggered; waiting to finish...")
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
-    }
-    
     void createTestStats(name) {
         def category = new Category(name: name)
         category.save()
@@ -117,27 +109,5 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase
                       interval: statValueInt * 2,
                       minValue: 0, maxValue: 0, averageValue: 0, lastValue: 0,
                       derived: false, uploaded: false, statistic: stat).save()
-    }
-
-    /** Listener methods **/
-    public String getName() {
-        return "DeleteStatJobIntegration"
-    }
-    
-    void jobToBeExecuted(JobExecutionContext context) {}
-    void jobExecutionVetoed(JobExecutionContext context) {
-        synchronized(this) {
-            this.notify()
-        }
-        throw new RuntimeException("Did not expect job to be vetoed.")
-    }
-
-    void jobWasExecuted(JobExecutionContext context, 
-                        org.quartz.JobExecutionException jobException) {
-        if (context.getJobDetail().getName().equals(deleteStatJob.getName())) {
-            synchronized(this) {
-                this.notify()
-            }
-        }
     }
 }

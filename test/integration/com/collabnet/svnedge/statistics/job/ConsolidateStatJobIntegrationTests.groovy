@@ -19,6 +19,7 @@ package com.collabnet.svnedge.statistics.job
 
 import grails.test.*
 
+import com.collabnet.svnedge.TestJobHelper
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.Interval 
 import com.collabnet.svnedge.domain.statistics.StatAction 
@@ -29,20 +30,20 @@ import com.collabnet.svnedge.domain.statistics.StatisticType
 import com.collabnet.svnedge.domain.statistics.Unit 
 import com.collabnet.svnedge.statistics.ConsolidateStatJob 
 
-import org.quartz.JobListener
-import org.quartz.JobExecutionContext
-
-class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase 
-    implements JobListener {
+class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
 
     def statGroup
     def stat
     def consolidateStatJob
+    def jobListener
 
     protected void setUp() {
         super.setUp()
         createTestStats()
+        consolidateStatJob = new ConsolidateStatJob()
+        jobListener = new TestJobHelper(jobName: consolidateStatJob.name,
+            listenerName: "ConsolidateStatJobIntegration")
     }
 
     protected void tearDown() {
@@ -61,13 +62,12 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
                      values1sec.size())
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
-        consolidateStatJob = new ConsolidateStatJob()
         quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(this)
+        quartzScheduler.addGlobalJobListener(jobListener)
         // make sure our job is unpaused
         quartzScheduler.resumeJobGroup(consolidateStatJob.getGroup())
         consolidateStatJob.triggerNow(params)
-        waitForJob()
+        jobListener.waitForJob()
         quartzScheduler.standby()
         stat.refresh()
         values1sec = StatValue.findAllByStatisticAndInterval(stat, 1000)
@@ -81,14 +81,6 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
                      values2sec.size())
         assertEquals("The size of the 4-sec values should be 1.", 1, 
                      values4sec.size())
-    }
-    
-    void waitForJob() {
-        log.info("Job triggered; waiting to finish...")
-        synchronized(this) {
-            this.wait(60000)
-        }
-        log.info("Trigger done! Continuing test")
     }
 
     void createTestStats() {
@@ -154,28 +146,5 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase
                       averageValue: 6, lastValue: 6, derived: false, 
                       uploaded: false, statistic: stat).save()
         stat.save()
-    }
-
-    /** Listener methods **/
-    public String getName() {
-        return "ConsolidateStatJobIntegration"
-    }
-    
-    void jobToBeExecuted(JobExecutionContext context) {}
-    void jobExecutionVetoed(JobExecutionContext context) {
-        synchronized(this) {
-            this.notify()
-        }
-        throw new RuntimeException("Did not expect job to be vetoed.")
-    }
-
-    void jobWasExecuted(JobExecutionContext context, 
-                        org.quartz.JobExecutionException jobException) {
-        if (context.getJobDetail().getName().equals(consolidateStatJob
-                                                    .getName())) {
-            synchronized(this) {
-                this.notify()
-            }
-        }
     }
 }
