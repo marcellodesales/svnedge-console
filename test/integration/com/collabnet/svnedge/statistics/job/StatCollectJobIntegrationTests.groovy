@@ -24,14 +24,16 @@ import com.collabnet.svnedge.TestJobHelper
 class StatCollectJobIntegrationTests extends GrailsUnitTestCase {
     def networkStatisticsService
     def quartzScheduler
+    def executorService
     def statCollectJob
-    def jobListener
+    def jobHelper
     
     protected void setUp() {
         super.setUp()
         statCollectJob = new StatCollectJob()
-        jobListener = new TestJobHelper(jobName: statCollectJob.name,
-                listenerName: "StatCollectJobIntegration", log: log)
+        jobHelper = new TestJobHelper(job: statCollectJob,
+                listenerName: "StatCollectJobIntegration", log: log,
+                executorService: executorService, quartzScheduler: quartzScheduler)
     }
 
     protected void tearDown() {
@@ -41,13 +43,7 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase {
     void testTriggerNetworkStats() {
         Map params = new HashMap(1)
         params.put("serviceName", "networkStatisticsService")
-        quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(jobListener)
-        // make sure our job is unpaused
-        quartzScheduler.resumeJobGroup(statCollectJob.getGroup())
-        statCollectJob.triggerNow(params)
-        jobListener.waitForJob()
-        quartzScheduler.standby()
+        jobHelper.executeJob(params)
         // make sure the stat values appear
         def values = networkStatisticsService.getCurrentThroughput()
         assertNotNull("The bytesIn value should not be null.", values[0])

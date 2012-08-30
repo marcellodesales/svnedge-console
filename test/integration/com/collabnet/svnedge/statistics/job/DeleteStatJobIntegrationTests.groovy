@@ -32,19 +32,21 @@ import com.collabnet.svnedge.statistics.DeleteStatJob
 
 class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
+    def executorService
 
     def statGroup
     def stat
     def deleteStatJob
-    def jobListener
+    def jobHelper
 
     protected void setUp() {
         super.setUp()
         def testName = "test"
         createTestStats(testName)
         deleteStatJob = new DeleteStatJob()
-        jobListener = new TestJobHelper(jobName: deleteStatJob.name,
-                listenerName: "DeleteStatJobIntegration", log: log)
+        jobHelper = new TestJobHelper(job: deleteStatJob,
+                listenerName: "DeleteStatJobIntegration", log: log,
+                executorService: executorService, quartzScheduler: quartzScheduler)
     }
 
     protected void tearDown() {
@@ -57,13 +59,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
         assertEquals("There should be 3 values initially.", 3, values.size())
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
-        quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(jobListener)
-        // make sure our job is unpaused
-        quartzScheduler.resumeJobGroup(deleteStatJob.getGroup())
-        deleteStatJob.triggerNow(params)
-        jobListener.waitForJob()
-        quartzScheduler.standby()
+        jobHelper.executeJob(params)
         // check that we now have 2 StatValues
         values = StatValue.findAllByStatistic(stat)
         assertEquals("There should be 2 values after a delete.", 2, 

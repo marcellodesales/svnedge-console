@@ -10,10 +10,23 @@ import org.quartz.JobExecutionContext
 
 class TestJobHelper implements JobListener {
     def log
+    def executorService
+    def quartzScheduler
     String listenerName
-    String jobName
+    def job
     boolean jobIsFinished = false
     
+    void executeJob(params) {
+        executorService.execute({
+            quartzScheduler.start()
+            quartzScheduler.addGlobalJobListener(this)
+            // make sure our job is unpaused
+            quartzScheduler.resumeJobGroup(job.getGroup())
+            job.triggerNow(params)
+        } as Runnable)
+        this.waitForJob()
+        quartzScheduler.standby()
+    }
     
     synchronized void waitForJob() {
         if (jobIsFinished) {
@@ -79,7 +92,7 @@ class TestJobHelper implements JobListener {
 
     void jobWasExecuted(JobExecutionContext context,
                         org.quartz.JobExecutionException jobException) {
-        if (context.getJobDetail().getName().equals(jobName)) {
+        if (context.getJobDetail().getName().equals(job.name)) {
             notifyOnFinishedJob()
         }
     }

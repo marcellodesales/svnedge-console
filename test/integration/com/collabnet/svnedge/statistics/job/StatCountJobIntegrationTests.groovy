@@ -32,19 +32,21 @@ import com.collabnet.svnedge.statistics.StatCountJob
 
 class StatCountJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
+    def executorService
 
     def statGroup
     def stat
     def statCountJob
-    def jobListener
+    def jobHelper
     
     protected void setUp() {
         super.setUp()
         def testName = "test"
         createTestStats(testName)
         statCountJob = new StatCountJob()
-        jobListener = new TestJobHelper(jobName: statCountJob.name,
-                listenerName: "StatCountJobIntegration", log: log)
+        jobHelper = new TestJobHelper(job: statCountJob,
+                listenerName: "StatCountJobIntegration", log: log,
+                executorService: executorService, quartzScheduler: quartzScheduler)
     }
 
     protected void tearDown() {
@@ -56,13 +58,7 @@ class StatCountJobIntegrationTests extends GrailsUnitTestCase {
         params.put("statGroupName", statGroup.getName())
         def now = new Date().getTime()
         def interval = statGroup.getRawInterval() * 1000
-        quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(jobListener)
-        // make sure our job is unpaused
-        quartzScheduler.resumeJobGroup(statCountJob.getGroup())
-        statCountJob.triggerNow(params)
-        jobListener.waitForJob()
-        quartzScheduler.standby()
+        jobHelper.executeJob(params)
         // check that we now have a zero StatValue
         stat.refresh()
         def statValue = AbstractStatisticsService.getStatValue(stat, 

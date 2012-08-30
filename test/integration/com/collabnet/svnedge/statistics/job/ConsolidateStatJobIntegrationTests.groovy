@@ -32,18 +32,20 @@ import com.collabnet.svnedge.statistics.ConsolidateStatJob
 
 class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
+    def executorService
 
     def statGroup
     def stat
     def consolidateStatJob
-    def jobListener
+    def jobHelper
 
     protected void setUp() {
         super.setUp()
         createTestStats()
         consolidateStatJob = new ConsolidateStatJob()
-        jobListener = new TestJobHelper(jobName: consolidateStatJob.name,
-            listenerName: "ConsolidateStatJobIntegration", log: log)
+        jobHelper = new TestJobHelper(job: consolidateStatJob,
+                listenerName: "ConsolidateStatJobIntegration", log: log,
+                executorService: executorService, quartzScheduler: quartzScheduler)
     }
 
     protected void tearDown() {
@@ -62,13 +64,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
                      values1sec.size())
         Map params = new HashMap(1)
         params.put("statGroupName", statGroup.getName())
-        quartzScheduler.start()
-        quartzScheduler.addGlobalJobListener(jobListener)
-        // make sure our job is unpaused
-        quartzScheduler.resumeJobGroup(consolidateStatJob.getGroup())
-        consolidateStatJob.triggerNow(params)
-        jobListener.waitForJob()
-        quartzScheduler.standby()
+        jobHelper.executeJob(params)
         stat.refresh()
         values1sec = StatValue.findAllByStatisticAndInterval(stat, 1000)
         assertEquals("The size of the 1-sec values should be 5.", 5, 
