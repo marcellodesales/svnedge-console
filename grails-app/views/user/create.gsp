@@ -6,13 +6,7 @@
 
       $('#passwd').on('keyup', passwordConfirm);
       $('#passwordConfirm').on('keyup', passwordConfirm);
-      $('#btnCreateUser').on('click', function(e) {
-        if (!passwordConfirm(e)) {
-            Event.stop(e);
-            alert('<g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>');
-        }
-      });
-    })
+    });
 
     function passwordConfirm(e) {
       var b = $('#passwd').attr("value") == $('#passwordConfirm').attr("value");
@@ -31,7 +25,7 @@
 <g:render template="leftNav" />
 
 <body>
-  <g:form class="form-horizontal">
+  <g:form class="form-horizontal" action="save">
     <g:propTextField bean="${userInstance}" field="username" required="true" prefix="user"/>
     <g:propTextField bean="${userInstance}" field="realUserName" required="true" prefix="user"/>
     <g:propControlsBody bean="${userInstance}" field="passwd" required="true" prefix="user">
@@ -61,9 +55,7 @@
     </g:propControlsBody>
     
     <div class="form-actions">
-       <g:actionSubmit id="btnCreateUser"
-                      value="${message(code:'default.button.create.label')}"
-                      controller="user" action="save" class="btn btn-primary"/>
+      <input class="btn btn-primary" type="submit" value="${message(code: 'default.button.create.label')}" />
     </div>
   </g:form>
 </body>

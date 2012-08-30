@@ -98,10 +98,6 @@ class UserController {
             userInstance.passwd = authenticateService.encodePassword(
                     params.passwd)
         }
-        if (params.passwordConfirm) {
-            userInstance.passwordConfirm = authenticateService.encodePassword(
-                    params.passwordConfirm)
-        }
 
         if (!userInstance.hasErrors() && userInstance.save()) {
 
