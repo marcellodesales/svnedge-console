@@ -59,7 +59,13 @@ class User {
         passwd(blank: false, minSize: 5, maxSize: 255,
             matches: "[^\"]*")
         passwordConfirm(blank: false, minSize: 5, maxSize: 255,
-            matches: "[^\"]*")
+            matches: "[^\"]*",
+            validator: { String val, User user ->
+                    if (val != user.passwd) {
+                        return "cloudServicesAccountCommand.passwordConfirm.mismatch"
+                    }
+                }
+       )
         enabled()
     }
     
