@@ -17,13 +17,14 @@ class TestJobHelper implements JobListener {
     boolean jobIsFinished = false
     
     void executeJob(params) {
-        executorService.execute({
-            quartzScheduler.start()
-            quartzScheduler.addGlobalJobListener(this)
-            // make sure our job is unpaused
-            quartzScheduler.resumeJobGroup(job.getGroup())
-            job.triggerNow(params)
-        } as Runnable)
+        quartzScheduler.start()
+        Thread.sleep(1000)
+        quartzScheduler.addGlobalJobListener(this)
+        // make sure our job is unpaused
+        quartzScheduler.resumeJobGroup(job.getGroup())
+        Thread.sleep(1000)
+        job.triggerNow(params)
+        Thread.sleep(1000)
         this.waitForJob()
         quartzScheduler.standby()
     }
@@ -35,7 +36,7 @@ class TestJobHelper implements JobListener {
             log.info("Job triggered; waiting to finish...")
             log.info("Before wait")
             threadDump()
-            this.wait(30000)
+            this.wait(60000)
             log.info("After wait")
             threadDump()
             log.info("Wait is over! Continuing test")
