@@ -25,12 +25,14 @@ class StatCollectJobIntegrationTests extends GrailsUnitTestCase {
     def networkStatisticsService
     def quartzScheduler
     def executorService
+    def grailsApplication
     def statCollectJob
     def jobHelper
     
     protected void setUp() {
         super.setUp()
         statCollectJob = new StatCollectJob()
+        statCollectJob.appCtx = grailsApplication.mainContext
         jobHelper = new TestJobHelper(job: statCollectJob,
                 listenerName: "StatCollectJobIntegration", log: log,
                 executorService: executorService, quartzScheduler: quartzScheduler)

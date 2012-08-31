@@ -33,6 +33,7 @@ import com.collabnet.svnedge.statistics.ConsolidateStatJob
 class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
     def executorService
+    def consolidateStatisticsService
 
     def statGroup
     def stat
@@ -43,6 +44,7 @@ class ConsolidateStatJobIntegrationTests extends GrailsUnitTestCase {
         super.setUp()
         createTestStats()
         consolidateStatJob = new ConsolidateStatJob()
+        consolidateStatJob.consolidateStatisticsService = consolidateStatisticsService
         jobHelper = new TestJobHelper(job: consolidateStatJob,
                 listenerName: "ConsolidateStatJobIntegration", log: log,
                 executorService: executorService, quartzScheduler: quartzScheduler)

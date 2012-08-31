@@ -17,16 +17,19 @@ class TestJobHelper implements JobListener {
     boolean jobIsFinished = false
     
     void executeJob(params) {
-        quartzScheduler.start()
-        Thread.sleep(1000)
-        quartzScheduler.addGlobalJobListener(this)
-        // make sure our job is unpaused
-        quartzScheduler.resumeJobGroup(job.getGroup())
-        Thread.sleep(1000)
-        job.triggerNow(params)
-        Thread.sleep(1000)
+        def context = [getMergedJobDataMap: { params }]
+        job.execute(context)
+        /*        
+        executorService.execute({
+            quartzScheduler.start()
+            quartzScheduler.addGlobalJobListener(this)
+            // make sure our job is unpaused
+            quartzScheduler.resumeJobGroup(job.getGroup())
+            job.triggerNow(params)
+        } as Runnable)
         this.waitForJob()
         quartzScheduler.standby()
+        */
     }
     
     synchronized void waitForJob() {

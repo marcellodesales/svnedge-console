@@ -33,6 +33,7 @@ import com.collabnet.svnedge.statistics.DeleteStatJob
 class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
     def quartzScheduler
     def executorService
+    def deleteStatisticsService
 
     def statGroup
     def stat
@@ -44,6 +45,7 @@ class DeleteStatJobIntegrationTests extends GrailsUnitTestCase {
         def testName = "test"
         createTestStats(testName)
         deleteStatJob = new DeleteStatJob()
+        deleteStatJob.deleteStatisticsService = deleteStatisticsService
         jobHelper = new TestJobHelper(job: deleteStatJob,
                 listenerName: "DeleteStatJobIntegration", log: log,
                 executorService: executorService, quartzScheduler: quartzScheduler)
