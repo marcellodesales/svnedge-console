@@ -162,7 +162,7 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         fetchReplicaCommandsJob.execute()
 
         // wait a bit
-        Thread.currentThread().sleep(30000)
+        waitForLog(getExecutionLog())
 
         // validate concurrency expectations in the execution log
         assertEquals("commands from same repo should be sequential",
@@ -239,6 +239,31 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         def executionContext = new CommandsExecutionContext()
         executionContext.logsDir = config.svnedge.logsDirPath
         return AbstractCommand.getExecutionLogFile(executionContext)
+    }
+    
+    /**
+     * Waits for the file to exist and appear not to be growing
+     */
+    private File waitForLog(logFile) {
+        int count = 0
+        while (count++ < 12 && !logFile.exists()) {
+            log.info "${count}. Log file does not exist. Waiting..."
+            Thread.sleep(5000L)
+        }
+        if (count == 12) {
+            log.severe "Command log ${logFile} does not exist after 1 minute"
+        }
+        if (logFile.exists()) {
+            long prevSize = 0
+            long size = logFile.length()
+            while (size == 0L || size != prevSize) {
+                prevSize = size
+                log.info "Waiting for log file to quit growing..."
+                Thread.sleep(20000)
+                size = logFile.length()
+            }
+        }
+        return logFile 
     }
 
     /**
