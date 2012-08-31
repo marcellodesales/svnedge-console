@@ -91,9 +91,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
 
     void testCreateRepository() {
         def testRepoName = "lifecycle-test"
-        Repository repo = new Repository(name: testRepoName)
-        assertEquals "Failed to create repository.", 0,
-                svnRepoService.createRepository(repo, true)
+        Repository repo = createRepository(testRepoName)
 
         // checkout the repo
         def wcDir = TestUtil.createTestDir("wc")
@@ -119,50 +117,32 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         wcDir.deleteDir()
     }
 
-    public void testDump() {
-        // Give this test 30s max to finish
-        long timeLimit = System.currentTimeMillis() + 30000
-        def testRepoName = "dump-test"
-        Repository repo = new Repository(name: testRepoName)
+    private Repository createRepository(repoName) {
+        Repository repo = new Repository(name: repoName)
         assertEquals "Failed to create repository.", 0,
                 svnRepoService.createRepository(repo, true)
-
-        // Earlier checkin was not deleting this file, so make sure it is
-        // gone before testing
-        File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
-        File progressLogFile =
-        new File(tempLogDir, "dump-progress-" + repo.name + ".log")
-        if (progressLogFile.exists()) {
-            progressLogFile.delete()
-        }
+        repo.save()
+        return repo
+    }
+    
+    public void testDump() {
+        Repository repo = createRepository("test-dump")
+        deleteProgressFile(repo)
 
         DumpBean params = new DumpBean()
         params.compress = false
-        def filename = svnRepoService.createDump(params, repo)
-        File dumpFile = newDumpFile(filename, repo)
-        // Async so wait for it
-        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
-        }
-        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        File dumpFile = createDump(params, repo)
         String contents = dumpFile.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertTrue "Missing branches in dump", contents.contains("Node-path: branches")
         assertTrue "Missing tags in dump", contents.contains("Node-path: tags")
-        Thread.sleep(250)
 
         // test exclusion filter
         params = new DumpBean()
         params.compress = false
         params.filter = true
         params.excludePath = "branches"
-        filename = svnRepoService.createDump(params, repo)
-        File dumpFile2 = newDumpFile(filename, repo)
-        // Async so wait for it
-        while (!dumpFile2.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
-        }
-        assertTrue "Dump file does not exist: " + dumpFile2.name, dumpFile2.exists()
+        File dumpFile2 = createDump(params, repo)
         contents = dumpFile2.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertFalse "branches exists in dump", contents.contains("Node-path: branches")
@@ -174,13 +154,7 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         params.compress = false
         params.filter = true
         params.includePath = "trunk tags"
-        filename = svnRepoService.createDump(params, repo)
-        File dumpFile3 = newDumpFile(filename, repo)
-        // Async so wait for it
-        while (!dumpFile3.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
-        }
-        assertTrue "Dump file does not exist: " + dumpFile3.name, dumpFile3.exists()
+        File dumpFile3 = createDump(params, repo)
         contents = dumpFile3.text
         assertTrue "Missing trunk in dump", contents.contains("Node-path: trunk")
         assertFalse "branches exists in dump", contents.contains("Node-path: branches")
@@ -189,25 +163,20 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         dumpFile.delete()
         dumpFile2.delete()
         dumpFile3.delete()
-        Thread.sleep(200)
     }
 
     private File newDumpFile(filename, repo) {
         return new File(new File(Server.getServer().dumpDir, repo.name), filename)
     }
 
-    public void testHotcopy() {
-        def testRepoName = "dump-test"
-        Repository repo = new Repository(name: testRepoName)
-        assertEquals "Failed to create repository.", 0,
-                svnRepoService.createRepository(repo, true)
+    private File createDump(params, repo) {
+        def filename = svnRepoService.createDump(params, repo)
+        File dumpFile = newDumpFile(filename, repo)
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        return dumpFile
+    }
 
-        if (!operatingSystemService.isWindows()) {
-            File hookScript = new File(svnRepoService.getRepositoryHomePath(repo),
-                    "hooks/pre-commit.tmpl")
-            hookScript.setExecutable(true)
-        }
-
+    private void deleteProgressFile(repo) {
         // Earlier checkin was not deleting this file, so make sure it is
         // gone before testing
         File tempLogDir = new File(ConfigUtil.logsDirPath(), "temp")
@@ -216,11 +185,20 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         if (progressLogFile.exists()) {
             progressLogFile.delete()
         }
+    }
 
+    
+    public void testHotcopy() {
+        Repository repo = createRepository("test-hotcopy")
+        if (!operatingSystemService.isWindows()) {
+            File hookScript = new File(svnRepoService.getRepositoryHomePath(repo),
+                    "hooks/pre-commit.tmpl")
+            hookScript.setExecutable(true)
+        }
+        deleteProgressFile(repo)
+        
         DumpBean params = new DumpBean()
-        def filename = svnRepoService.createHotcopy(params, repo)
-        File dumpFile = newDumpFile(filename, repo)
-        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        File dumpFile = createHotcopy(params, repo)
 
         if (!operatingSystemService.isWindows()) {
             // not sure how to test a native zip extraction on windows
@@ -250,6 +228,72 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         dumpFile.delete()
+    }
+
+    private File createHotcopy(params, repo) {
+        def filename = svnRepoService.createHotcopy(params, repo)
+        File dumpFile = newDumpFile(filename, repo)
+        assertTrue "Dump file does not exist: " + dumpFile.name, dumpFile.exists()
+        return dumpFile
+    }
+
+    public void testBackupPruning() {
+        Repository repo = createRepository("test-backup-pruning")
+        deleteProgressFile(repo)
+        svnRepoService.listDumpFiles(repo).each  { it.delete() }
+
+        def dumpFiles = []
+        DumpBean params = new DumpBean()
+        params.backup = true
+        params.compress = true
+        params.numberToKeep = 2
+        dumpFiles << createDump(params, repo)
+        Thread.sleep(1000)
+        dumpFiles << createDump(params, repo)
+        assertFilesExist(dumpFiles)
+        
+        def hotcopyFiles = []
+        params = new DumpBean()
+        params.backup = true
+        params.numberToKeep = 3
+        hotcopyFiles << createHotcopy(params, repo)
+        Thread.sleep(1000)
+        hotcopyFiles << createHotcopy(params, repo)
+        Thread.sleep(1000)
+        hotcopyFiles << createHotcopy(params, repo)
+        assertFilesExist(hotcopyFiles)
+        assertFilesExist(dumpFiles)
+        
+        File oldDumpFile = dumpFiles.remove(0)
+        params = new DumpBean()
+        params.backup = true
+        params.compress = true
+        params.numberToKeep = 2
+        dumpFiles << createDump(params, repo)
+        assertFalse "Dump file ${oldDumpFile} expected to be pruned", 
+                oldDumpFile.exists()
+        assertFilesExist(dumpFiles)
+        assertFilesExist(hotcopyFiles)
+        
+        Thread.sleep(1000)
+        File oldHotcopyFile = hotcopyFiles.remove(0)
+        params = new DumpBean()
+        params.backup = true
+        params.numberToKeep = 3
+        hotcopyFiles << createHotcopy(params, repo)
+        assertFalse "Hotcopy file ${oldHotcopyFile} expected to be pruned", 
+                oldHotcopyFile.exists()
+        assertFilesExist(dumpFiles)
+        assertFilesExist(hotcopyFiles)
+        
+        dumpFiles.each { it.delete() }
+        hotcopyFiles.each { it.delete() }
+    }
+
+    private void assertFilesExist(files) {
+        files.each {
+            assertTrue "Backup file ${it} still expected to exist", it.exists()
+        }
     }
 
     public void testLoad() {

@@ -1185,17 +1185,28 @@ class SvnRepoService extends AbstractSvnEdgeService {
     private cleanupOldBackups(dumpBean, repo) {
         int numToKeep = dumpBean.numberToKeep
         if (dumpBean.backup && numToKeep > 0) {
+            def prefix = repo.name + "-bkup-"
+            def hcPrefix
+            if (dumpBean.hotcopy) {
+                prefix += 'hotcopy'
+            } else {
+                hcPrefix = prefix + 'hotcopy'
+            }
+            println "\n\nPruning files containing ${prefix}"
             def dumps = listDumpFiles(repo, "date", DESCENDING)
             int i = 0
             for (dumpFile in dumps) {
                 def name = dumpFile.name
-                if (name.startsWith(repo.name + "-bkup") &&
+                if (name.startsWith(prefix) &&
+                    (!hcPrefix || !name.startsWith(hcPrefix)) &&
                         !name.endsWith("-processing") &&
                         !name.endsWith("-processing.zip") &&
                         (++i > numToKeep)) {
 
                     dumpFile.delete()
+                    println "Deleted ${dumpFile}"
                 }
+                else { println "Leaving ${dumpFile}" }
             }
         }
     }
