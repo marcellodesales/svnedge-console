@@ -30,20 +30,21 @@ class CommandResultDeliveryServiceIntegrationTests extends GrailsUnitTestCase {
         new LinkedList<Map<String, String>>())
 
     def CommandResultDeliveryServiceIntegrationTests() {
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo1', code:'repoSync']
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:null, code:'replicaPropsUpdate',
+        def ids = []
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo1', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:null, code:'replicaPropsUpdate',
             params:[until:'2011-01-22']]
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo1', code:'repoSync']
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo2', code:'repoSync']
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:null, code:'replicaPropsUpdate'
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo1', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo2', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:null, code:'replicaPropsUpdate'
             , params:[name:'Replica Brisbane']]
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:null, code:'replicaApprove',
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:null, code:'replicaApprove',
             params:[name:'replica title', desc:'super replica']]
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo3', code:'repoSync']
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:null, code:'replicaPropsUpdate'
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo3', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:null, code:'replicaPropsUpdate'
             , params:[maxReplicacmdexecs:3, maxRepositorycmdexecs: 10]]
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo2', code:'repoSync']
-        remotecmdexecs << [id:CommandTestsHelper.createCommandId(), repoName:'repo3', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo2', code:'repoSync']
+        remotecmdexecs << [id:CommandTestsHelper.createCommandId(ids), repoName:'repo3', code:'repoSync']
         sortRemoteCommands(remotecmdexecs)
     }
 

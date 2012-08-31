@@ -11,10 +11,18 @@ class CommandTestsHelper {
      * creates a random command id in the form "cmdexecNNNN"
      * @return
      */
-    public static String createCommandId() {
+    public static String createCommandId(existingIds = null) {
+        String cmdId = null
         def prefix = "cmdexec"
-        def id = Math.round(Math.random() * 8999) + 1000
-        return prefix + id
+        while (!cmdId) {
+            cmdId = prefix + Math.round(Math.random() * 8999) + 1000
+            if (existingIds?.contains(cmdId)) {
+                cmdId = null
+            } else if (existingIds != null) {
+                existingIds << cmdId
+            }
+        }
+        return cmdId
     }
     
     /**
