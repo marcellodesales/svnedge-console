@@ -98,9 +98,105 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
        log.debug("Setting system property '${APP_HOME_VAR}'='" +
                  "${System.properties[APP_HOME_VAR]}'")
 
+       def server = Server.getServer()
+       if (server && server.mode != ServerMode.MANAGED) {
+            convertIfPropertiesExist(appHome, server)
+       }
         updateIntegrationScripts(appHome, ServerMode.MANAGED)
         updateTeamForgeProperties(appHome)
    }
+   
+   private void convertIfPropertiesExist(appHome, server) {
+       File ctfInitializer = new File(ConfigUtil.confDirPath(), 
+               'init_as_integration_server.properties')
+       if (ctfInitializer.exists()) {
+           log.info "Initializing as a CTF integration server"
+           Properties p = new Properties()
+           ctfInitializer.withReader { p.load(it) }
+           CtfConversionBean ctf = new CtfConversionBean()
+           ctf.ctfURL = p.getProperty('ctf_url')
+           ctf.serverKey = p.getProperty('shared_secret_key')
+           ctf.consolePort = p.getProperty('edge_console_port', '8080') as int
+           String s = p.getProperty('external_system_id')
+           if (s) {
+               ctf.exSystemId = s
+           }
+           s = p.getProperty('ctf_username')
+           if (s) {
+               ctf.ctfUsername = s
+               ctf.ctfPassword = p.getProperty('ctf_password')
+           }
+           boolean isServerChanges = false
+           p.keySet().each { key ->
+               log.debug "init_as_int_server key=${key}"
+               if (key.startsWith('server_')) {
+                   String fieldName = key.substring(7)
+                   Class type = server.getClass()
+                           .getDeclaredField(fieldName).getType()
+                   String val = p.getProperty(key)
+                   server."${fieldName}" = 
+                           (Boolean.class == type || Boolean.TYPE == type) ? 
+                           val.toBoolean() : val.asType(type)
+                   def val2 = server."${fieldName}"
+                   log.debug "    set server.${fieldName}=${val2}"
+                   isServerChanges = true
+               }
+           }
+           if (isServerChanges) {
+               server.save()
+           }
+           if (ctf.ctfUsername) {
+               runAsync {
+                   URL appUrl = new URL(server.useSslConsole ? 'https' : 'http',
+                            'localhost', ctf.consolePort, '/csvn')
+                   def isContinue = 0
+                   while (isContinue++ < 60) {
+                       try {
+                           def con = appUrl.openConnection()
+                           if (con.responseCode == con.HTTP_MOVED_TEMP ||
+                                   con.responseCode == con.HTTP_OK) {
+                               break
+                           }
+                       } catch (Exception e) {
+                           // keep trying
+                       }
+                       Thread.sleep(5000)
+                   }
+                   if (isContinue < 60) {
+                       try {
+                           doConvertIfPropertiesExist(ctf, server)
+                       } catch (Exception e) {
+                           log.error "Unable to convert to TF mode", e
+                       }
+                   } else {
+                       log.error "Timed out after 5 minutes waiting to be " +
+                               "ready for CTF integration server conversion"
+                   }
+               }
+           } else {
+               doConvertIfPropertiesExist(ctf, server)
+           }
+       }
+   }
+   
+   private void doConvertIfPropertiesExist(ctf, server) {
+        def result = convert(ctf)
+        if (result.exception) {
+            throw result.exception
+        }
+        result.errors.each { log.error(it) }
+        result.warnings.each { log.warn(it) }
+
+        if (ctf.exSystemId) {
+            File repoParent = new File(server.repoParentDir)
+            File idFile = new File(repoParent, ".scm.properties")
+            if (!idFile.exists()) {
+                Properties pout = new Properties()
+                pout['external_system_id'] = ctf.exSystemId
+                idFile.withWriter { pout.store(it, 'Integration server config') }
+            }
+        }
+    }
    
    public void updateIntegrationScripts(String appHome, ServerMode mode) {
        def server = Server.getServer()
@@ -547,7 +643,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
 
         def exception = null
         try {
-            if (this.isFreshInstall()) {
+            if (this.isFreshInstall() && conversionData.ctfUsername) {
                 conversionData.soapSessionId = ctfRemoteClientService.login(
                     conversionData.ctfURL, conversionData.ctfUsername, 
                     conversionData.ctfPassword, conversionData.userLocale)
@@ -640,7 +736,9 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         // See artf6841 as a possible example.
         Thread.sleep(3000)
 
-        conversionData.exSystemId = registerIntegrationServer(conversionData)
+        if (!conversionData.exSystemId && conversionData.ctfUsername) {
+            conversionData.exSystemId = registerIntegrationServer(conversionData)
+        }
         ctfServer.mySystemId = conversionData.exSystemId
         ctfServer.save(flush:true)
 
@@ -818,7 +916,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     boolean confirmApiSecurityKey() {
         if (lifecycleService.isStarted()) {
             def replicaConfiguration = ReplicaConfiguration.getCurrentConfig()
-            def contextPath = "/svn"
+            Server server = Server.getServer()
+            def contextPath = server.getSvnBasePath()
             if (replicaConfiguration) {
                 contextPath = replicaConfiguration.contextPath()
             }
@@ -829,7 +928,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             
             String username = "nonexistentUser"
             String password = "myPassword"
-            Server server = Server.getServer()
             def svnUrl = server.urlPrefix() +
                     contextPath + "/_junkrepos"
             def command = [ConfigUtil.svnPath(), "ls", svnUrl,

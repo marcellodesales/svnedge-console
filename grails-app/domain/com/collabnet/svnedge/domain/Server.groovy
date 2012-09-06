@@ -65,16 +65,13 @@ class Server {
     String adminName
     String adminEmail
     String adminAltContact
+    String svnBasePath
     ServerMode mode = ServerMode.STANDALONE
     String dumpDir = ConfigUtil.dumpDirPath()
 
     Integer pruneLogsOlderThan
     ApacheLogLevel apacheLogLevel = ApacheLogLevel.WARN
     ConsoleLogLevel consoleLogLevel = ConsoleLogLevel.WARN
-
-    static String getSvnBasePath() {
-        return "/svn"
-    }
 
     static String getViewvcBasePath() {
         return "/viewvc"

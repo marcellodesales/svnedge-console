@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console
 
 import java.io.File;
+
 import grails.util.GrailsUtil;
 
 import com.collabnet.svnedge.CantBindPortException 
@@ -116,7 +117,8 @@ class LifecycleService {
                 ldapSecurityLevel: "NONE",
                 pruneLogsOlderThan: 0,
                 ldapServerCertVerificationNeeded: true,
-                hasSoftwareUpdates: false)
+                hasSoftwareUpdates: false,
+                svnBasePath: "/svn")
             
             File dumpDir = new File(server.dumpDir)
             if (!dumpDir.exists()) {

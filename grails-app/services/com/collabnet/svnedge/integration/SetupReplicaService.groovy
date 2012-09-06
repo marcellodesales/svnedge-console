@@ -124,8 +124,8 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
                      "HostPort": server.getPort(), 
                      "HostSSL": server.getUseSsl(), 
                      "ConsolePort": consolePort,
-                     "ViewVCContextPath": Server.getViewvcBasePath(), 
-                     "SVNContextPath": Server.getSvnBasePath()]
+                     "ViewVCContextPath": server.getViewvcBasePath(), 
+                     "SVNContextPath": server.getSvnBasePath()]
 
         String systemId = ctfRemoteClientService.addExternalSystemReplica(
             replicaInfo.ctfConn.ctfURL, replicaInfo.ctfConn.userSessionId, 

@@ -641,7 +641,7 @@ RewriteEngine on
             conf += "RewriteOptions inherit\n"
         }
 
-        String contextPath = "/svn"
+        String contextPath = server.getSvnBasePath()
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             if (server.useSsl) {
