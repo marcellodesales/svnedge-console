@@ -27,7 +27,7 @@ public class MS012AddSvnBasePath implements MigrationScript {
 
     public boolean migrate(SqlUtil db) throws SQLException {
         
-        db.executeUpdateSql("alter table SERVER add column SVN_BASE_PATH VARCHAR(255) default '/svnroot' NOT NULL");
+        db.executeUpdateSql("alter table SERVER add column SVN_BASE_PATH VARCHAR(255) default '/svn' NOT NULL");
         return false;
     }
 
