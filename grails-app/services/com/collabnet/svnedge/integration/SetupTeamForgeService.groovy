@@ -736,7 +736,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         // See artf6841 as a possible example.
         Thread.sleep(3000)
 
-        if (!conversionData.exSystemId && conversionData.ctfUsername) {
+        if (!conversionData.exSystemId && (conversionData.ctfUsername || conversionData.soapSessionId)) {
             conversionData.exSystemId = registerIntegrationServer(conversionData)
         }
         ctfServer.mySystemId = conversionData.exSystemId
