@@ -79,16 +79,16 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         control.use {
 
         (1..8).each {
-            def job = [dataMap: [id: "${it}"], run: {Thread.sleep(500)}]
+            def job = [dataMap: [id: "${it}"], run: {Thread.sleep(1000)}]
             jobsInfoService.queueJob(job, new Date())
         }
-        Thread.sleep(250)
+        Thread.sleep(400)
         assertEquals("there should be 3 running jobs according to the service", 3,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 5 scheduled jobs according to the service", 5,
             jobsInfoService.scheduledJobs.size())
 
-        Thread.sleep(500)
+        Thread.sleep(1000)
         assertEquals("there should be 3 running jobs according to the service", 3,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 3 finished jobs according to the service", 3,
@@ -96,15 +96,15 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
         assertEquals("there should be 2 scheduled jobs according to the service", 2,
             jobsInfoService.scheduledJobs.size())
 
-        Thread.sleep(500)
-        assertEquals("there should be 3 running jobs according to the service", 2,
+        Thread.sleep(1000)
+        assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 5 finished jobs according to the service", 5,
             jobsInfoService.finishedJobs.size())
         assertEquals("there should be 0 scheduled jobs according to the service", 0,
             jobsInfoService.scheduledJobs.size())
 
-        Thread.sleep(500)
+        Thread.sleep(1000)
         assertEquals("there should be 0 running jobs according to the service", 0,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 5 finished jobs according to the service", 5,
