@@ -50,21 +50,21 @@ class JobsInfoServiceTests extends GrailsUnitTestCase {
     public void testJobsRunningAndFinished() {
         control.use {
 
-        def job = [dataMap: [id: "1"], run: {Thread.sleep(250)}]
+        def job = [dataMap: [id: "1"], run: {Thread.sleep(500)}]
         jobsInfoService.queueJob(job, new Date())
-        job = [dataMap: [id: "2"], run: {Thread.sleep(500)}]
+        job = [dataMap: [id: "2"], run: {Thread.sleep(1000)}]
         jobsInfoService.queueJob(job, new Date())
-        Thread.sleep(150)
+        Thread.sleep(250)
         assertEquals("there should be 2 running jobs according to the service", 2,
                 jobsInfoService.runningJobs.size())
 
-        Thread.sleep(200)
+        Thread.sleep(500)
         assertEquals("there should be 1 running job according to the service", 1,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 1 finished job according to the service", 1,
                 jobsInfoService.finishedJobs.size())
 
-        Thread.sleep(300)
+        Thread.sleep(1000)
         assertEquals("there should be 0 running job according to the service", 0,
                 jobsInfoService.runningJobs.size())
         assertEquals("there should be 2 finished job according to the service", 2,
