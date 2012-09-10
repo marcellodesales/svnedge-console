@@ -603,16 +603,17 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         svnRepoService.scheduleLoad(repoTarget, options)
 
         // verify that repo load has run (trunk/tags/branches which should have been imported)
+        Thread.sleep(5000)
         loadSuccess = false
-        timeLimit = System.currentTimeMillis() + 60000
+        timeLimit = System.currentTimeMillis() + 120000
         while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(5000)
             output = commandLineService.executeWithOutput(
                     ConfigUtil.svnPath(), "info",
                     "--no-auth-cache", "--non-interactive",
                     commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
 
             loadSuccess = output.contains("Node Kind: directory")
+            Thread.sleep(10000)
         }
 
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
