@@ -107,7 +107,7 @@ class BackgroundJobUtil {
         if (!schedule.frequency || schedule.frequency == SchedulerBean.Frequency.NOW) {
             schedule.frequency = SchedulerBean.Frequency.ONCE
             Calendar cal = Calendar.getInstance()
-            cal.setTimeInMillis(System.currentTimeMillis() + 1000)
+            cal.setTimeInMillis(System.currentTimeMillis() + 2000)
             schedule.second = cal.get(Calendar.SECOND)
             schedule.minute = cal.get(Calendar.MINUTE)
             schedule.hour = cal.get(Calendar.HOUR_OF_DAY)

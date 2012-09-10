@@ -784,24 +784,24 @@ class SvnRepoService extends AbstractSvnEdgeService {
     void scheduleVerifyJob(SchedulerBean bean, repo, Integer userId = null,
                         String tName = null, Locale locale = Locale.default) {
 
-        String cron = BackgroundJobUtil.getCronExpression(bean)
-        log.debug("Scheduling verify for repo '${repo.name}' using cron expression: " + cron)
+        log.debug("Scheduling verify for repo '${repo.name}'")
+        File progressFile = BackgroundJobUtil
+                .prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.VERIFY)
 
         if (tName) {
             jobsAdminService.removeTrigger(tName, REPO_JOB_TRIGGER_GROUP)
         }
-
         tName = BackgroundJobUtil.generateTriggerName(repo, BackgroundJobUtil.JobType.VERIFY, bean)
 
         def descKey = "repository.action.verify.job.description"
 
+        String cron = BackgroundJobUtil.getCronExpression(bean)
+        log.debug("Scheduling verify for repo '${repo.name}' using cron expression: " + cron)
         def trigger = new CronTrigger(tName, REPO_JOB_TRIGGER_GROUP, cron)
         log.debug("cron expression summary:\n" + trigger.expressionSummary)
         trigger.setJobName(RepoVerifyJob.name)
         trigger.setJobGroup(RepoVerifyJob.group)
 
-        File progressFile =
-            BackgroundJobUtil.prepareProgressLogFile(repo.name, BackgroundJobUtil.JobType.VERIFY)
         def jobDataMap =
             [id: tName, repoId: repo.id,
                     description: getMessage(descKey, [repo.name], locale),
