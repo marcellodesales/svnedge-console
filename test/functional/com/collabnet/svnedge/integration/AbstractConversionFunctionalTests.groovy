@@ -45,6 +45,8 @@ abstract class AbstractConversionFunctionalTests extends
 
     def ctfRemoteClientService
 
+    def javaScriptPriorState = javaScriptEnabled
+    
     @Override
     protected void setUp() {
         super.setUp();
@@ -66,12 +68,16 @@ abstract class AbstractConversionFunctionalTests extends
 
         // verify that the links to teamForge mode are prohibited.
         this.assertProhibitedAccessToTeamForgeModeLinksWorks()
+        
+        javaScriptPriorState = javaScriptEnabled
+        javaScriptEnabled = false
     }
 
     @Override
     protected void tearDown() {
         this.convertToStandaloneMode()
         this.cleanRepositories()
+        javaScriptEnabled = javaScriptPriorState
         super.tearDown();
     }
 

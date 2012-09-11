@@ -173,6 +173,10 @@ class FullConversionToTeamForgeFunctionalTests
 
         assertContentDoesNotContain(
             getMessage("setupTeamForge.action.ctfInfo.ctfConnection.error"))
+        if (this.response.contentAsString.contains("TeamForge server cannot " +
+                "access the local ")) {
+            fail("Conversion is failing because CTF cannot access the local ViewVC or SVN URLs.")
+        }
         assertContentContains(
             getMessage("setupTeamForge.action.convert.success"))
         assertContentContains(getMessage("setupTeamForge.page.convert.project"))

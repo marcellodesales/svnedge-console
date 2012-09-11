@@ -59,6 +59,7 @@ class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
     void testAdminUsersAuthority() {
         this.login("adminUsers", "admin")
 
+        javaScriptEnabled = false
         get('/user/index')
         assertStatus 200
         assertContentContains getMessage("user.page.list.header")

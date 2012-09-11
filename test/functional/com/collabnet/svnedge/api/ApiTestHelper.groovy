@@ -88,14 +88,37 @@ class ApiTestHelper {
         params.compress = true
         def filename = svnRepoService.createDump(params, repo)
         File dumpFile = new File(new File(Server.getServer().dumpDir, repo.name), filename)
-        // create dump is async, so wait
-        def timeLimit = System.currentTimeMillis() + 60000
-        while (!dumpFile.exists() && System.currentTimeMillis() < timeLimit) {
-            Thread.sleep(250)
-        }
-        return dumpFile 
+        waitForFile(dumpFile)
+        svnRepoService.removeRepository(repo)
+        svnRepoService.deletePhysicalRepository(repo)
+
+        return dumpFile
     }
 
+    /**
+    * Waits for the file to exist and appear not to be growing
+    */
+    private static File waitForFile(file) {
+        int count = 0
+        while (count++ < 60 && !file.exists()) {
+            Thread.sleep(1000L)
+        }
+        if (count >= 60) {
+            throw new RuntimeException("Command log ${file} does not exist after 1 minute")
+        }
+        if (file.exists()) {
+            long prevSize = 0
+            long size = file.length()
+            while (size == 0L || size != prevSize) {
+                prevSize = size
+                Thread.sleep(5000L)
+                size = file.length()
+            }
+        }
+        return file
+    }
+
+    
     /**
      * creates a template from a test dump file
      * @param repoTemplateService the configured service

@@ -32,11 +32,28 @@ import groovyx.net.http.ContentType
 class HookApiTests extends AbstractSvnEdgeFunctionalTests {
 
     def svnRepoService
+    def testRepo
+
+    @Override
+    protected void setUp() {
+        //The web framework must be initialized.
+        super.setUp()
+        testRepo = ApiTestHelper.createRepo(svnRepoService)
+    }
+
+    @Override
+    protected void tearDown() {
+        svnRepoService.removeRepository(testRepo)
+        svnRepoService.deletePhysicalRepository(testRepo)
+        //The tear down method terminates all the web-related objects, and
+        //therefore, must be performed in the end of the operation.
+        super.tearDown()
+    }
+
 
     void testHookPutText() {
         
         def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
 
         def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
@@ -51,7 +68,6 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
     void testHookPutBinary() {
 
         def testFile = new File(ConfigUtil.svnPath())
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
     
         def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.encoder.'application/octet-stream' = {
@@ -72,7 +88,6 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
 
         // put to a locked location should result in 403 forbidden
         def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
         
         // lock the file for editing via web ui
         def http = new RESTClient(ApiTestHelper.getSchemeHostPort() + "/csvn/")
@@ -106,7 +121,6 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
 
         // post to a new file location should be successful
         def testFile = new File(ConfigUtil.confDirPath, "httpd.conf.dist")
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
 
         def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
         rest.headers["Authorization"] = "Basic ${ApiTestHelper.makeAdminAuthorization()}"
@@ -130,8 +144,7 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
     }
    
     void testHookDelete() {
-  
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
+
         def hookName = "post-commit.tmpl"
         
         def rest = new RESTClient( ApiTestHelper.getSchemeHostPort() + "/csvn/api/1/" )
@@ -156,7 +169,6 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
     
     
     void testHookList() {
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
         def url = "/api/1/hook/" + testRepo.id
         
         // without auth, GET is protected
@@ -191,7 +203,6 @@ class HookApiTests extends AbstractSvnEdgeFunctionalTests {
     }
     
     void testHookDownload() {
-        def testRepo = ApiTestHelper.createRepo(svnRepoService)
         def url = "/api/1/hook/" + testRepo.id + "/post-commit.tmpl"
 
         // authorized request contains hooks directory contents

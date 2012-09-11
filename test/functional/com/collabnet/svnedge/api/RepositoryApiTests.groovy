@@ -98,6 +98,7 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
                 commandLineService.createSvnFileURI(new File(repoParentDir, repoName)) + "trunk")
 
         assertFalse("The new repo should not have a trunk directory", output.contains("Node Kind: directory"))
+        cleanupRepo(repoName)
 
         // test new repo creation, with standard layout
         repoName = "api-test" + Math.random() * 10000
@@ -123,7 +124,8 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
                 commandLineService.createSvnFileURI(new File(repoParentDir, repoName)) + "trunk")
 
         assertTrue("The new repo should have a trunk directory", output.contains("Node Kind: directory"))
-        
+        cleanupRepo(repoName)
+
         // test new repo with template
         RepoTemplate rt = ApiTestHelper.createTemplate(repoTemplateService, svnRepoService)
         repoName = "api-test" + Math.random() * 10000
@@ -159,7 +161,13 @@ class RepositoryApiTests extends AbstractSvnEdgeFunctionalTests {
         }      
         
         assertTrue("The new repo should have a trunk directory from template", output.contains("Node Kind: directory"))
-        
+        cleanupRepo(repoName)
+    }
+
+    private void cleanupRepo(repoName) {
+        Repository repo = Repository.findByName(repoName)
+        svnRepoService.removeRepository(repo)
+        svnRepoService.deletePhysicalRepository(repo)
     }
 
     void testRepositoryPostFaultyRequest() {
