@@ -3,7 +3,11 @@
    <g:set var="tabArray" value="${tabArray << [action:'installed', label: message(code:'packagesUpdate.page.tabs.installed')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 
-   <div>
+   <div class="pull-right">
+     <a href="https://ctf.open.collab.net/sf/wiki/do/viewPage/projects.svnedge/wiki/HomePage"
+         target="_blank"><g:message code="packagesUpdate.page.available.releaseNotesLink"/></a>
+   </div>
+   <div>   
    <strong><g:message code="packagesUpdate.page.table.repository" /></strong>
    ${imageOriginUrl} 
    <g:if test="${proxyToOriginURL}">
