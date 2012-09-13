@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.controller.integration
 
 import com.collabnet.svnedge.CantBindPortException;
+import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode;
@@ -73,7 +74,12 @@ class SetupReplicaController {
         def externalSystems;
         boolean encodeMessageHtml = true
         
-        if (!input.hasErrors()) {
+        MailConfiguration mailConfig = MailConfiguration.getConfiguration()
+        if (!mailConfig?.enabled) {
+            mailConfig = null
+        }
+        
+        if (!input.hasErrors() && !mailConfig?.hasErrors()) {
 
             try {
                 // copy input params to the conversion bean
@@ -151,7 +157,7 @@ class SetupReplicaController {
         }
 
         // success logging in 
-        [cmd: getReplicaInfoCommand(), integrationServers: externalSystems]
+        [cmd: getReplicaInfoCommand(), integrationServers: externalSystems, mailConfig: mailConfig]
     }
     
     /**
@@ -159,8 +165,17 @@ class SetupReplicaController {
      */
     def confirm = { ReplicaInfoCommand input -> 
 
+        MailConfiguration mailConfig = MailConfiguration.getConfiguration()
+        if (mailConfig?.enabled) {
+            mailConfig.repoSyncToAddress = params['repoSyncToAddress']
+            mailConfig.save()
+        } else {
+            mailConfig = null
+        }
+        
+
         def scmList = fetchIntegrationServers()
-        if (!input.hasErrors()) {
+        if (!input.hasErrors() && !mailConfig?.hasErrors()) {
             
             try {
                 // save input for form re-entry
@@ -190,7 +205,7 @@ class SetupReplicaController {
         }
         
         // return to input view with errors
-        render([view: "replicaSetup", model: [cmd: input, integrationServers: scmList]])
+        render([view: "replicaSetup", model: [cmd: input, integrationServers: scmList, mailConfig: mailConfig]])
     }
     
 

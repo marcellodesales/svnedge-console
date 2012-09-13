@@ -345,6 +345,7 @@ abstract class AbstractCommand {
             } else {
                 logExecution("EXECUTION-EXCEPTION", t)
             }
+            doHandleExecutionException(executionException)
         }
 
         if (ConfigurationHolder.config.svnedge.replica.logging.commandOutput)  {
@@ -384,6 +385,12 @@ abstract class AbstractCommand {
             throw new CommandExecutionException(this, executionException,
                 undoException)
         }
+    }
+    
+    /**
+     * Override to add command specific exception handling
+     */
+    protected void doHandleExecutionException(t) {
     }
 
     /**

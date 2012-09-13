@@ -23,6 +23,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository 
 import com.collabnet.svnedge.domain.integration.RepoStatus
+import com.collabnet.svnedge.event.SyncReplicaRepositoryEvent
 import com.collabnet.svnedge.integration.command.AbstractRepositoryCommand 
 import com.collabnet.svnedge.integration.command.ShortRunningCommand 
 
@@ -74,6 +75,14 @@ public class RepoSyncCommand extends AbstractRepositoryCommand
         def replRepo = ReplicatedRepository.findByRepo(repo)
         execSvnSync(replRepo, System.currentTimeMillis(), username, password, 
             syncRepoURI)
+    }
+
+    @Override
+    protected void doHandleExecutionException(t) {
+        Repository repo = Repository.findByName(this.repoName)
+        def svnRepoService = getService("svnRepoService")
+        svnRepoService.publishEvent(new SyncReplicaRepositoryEvent(this,
+                repo, SyncReplicaRepositoryEvent.FAILED, t))
     }
 
     def undo() {

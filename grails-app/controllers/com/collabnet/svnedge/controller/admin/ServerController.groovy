@@ -348,7 +348,8 @@ class ServerController {
         hidePassword(config)
         boolean invalidAdminEmail = ("devnull@collab.net" == server.adminEmail)
         return [config: config, server: server, 
-                invalidAdminEmail: invalidAdminEmail]
+                invalidAdminEmail: invalidAdminEmail,
+                isReplica: server.mode == ServerMode.REPLICA]
     }
     
     private void hidePassword(config) {

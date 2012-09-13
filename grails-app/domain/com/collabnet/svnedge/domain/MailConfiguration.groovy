@@ -31,6 +31,7 @@ class MailConfiguration {
     MailSecurityMethod securityMethod = MailSecurityMethod.NONE
     MailAuthMethod authMethod = MailAuthMethod.NONE
     String fromAddress
+    String repoSyncToAddress
     
     String createFromAddress() {
         String addr = fromAddress
@@ -54,6 +55,7 @@ class MailConfiguration {
         authMethod(nullable:true)
         securityMethod(nullable:false)
         fromAddress(nullable:true, email: true)
+        repoSyncToAddress(nullable:true, email: true)
     }
     
     private static def isBlank = { val, obj -> 

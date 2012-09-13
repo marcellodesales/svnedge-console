@@ -50,6 +50,9 @@
   <g:propControlsBody bean="${cmd}" field="message" prefix="setupReplica.page.replicaSetup">
     <textarea name="message" id="message" rows="4" class="span6">${fieldValue(bean: cmd, field: 'message')}</textarea>
   </g:propControlsBody>
+  <g:if test="${mailConfig}">
+    <g:propTextField bean="${mailConfig}" field="repoSyncToAddress" prefix="mailConfiguration"/>
+  </g:if>
   <div class="form-actions">
     <g:actionSubmit action="confirm" value="${message(code:'setupTeamForge.page.ctfInfo.button.continue')}" class="btn btn-primary"/>
   </div>

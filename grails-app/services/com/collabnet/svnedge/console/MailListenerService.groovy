@@ -45,6 +45,7 @@ import javax.mail.AuthenticationFailedException
 import javax.mail.MessagingException
 
 import com.collabnet.svnedge.admin.RepoVerifyJob
+import com.collabnet.svnedge.event.SyncReplicaRepositoryEvent
 
 /**
  * The listener for events which can result in a mail notification. 
@@ -75,7 +76,15 @@ class MailListenerService extends AbstractSvnEdgeService
             log.debug "Email notifications are disabled."
         }
     }
-        
+
+    private void onEnabledMail(SyncReplicaRepositoryEvent event, MailConfiguration config) {
+        def toAddress = config.repoSyncToAddress
+        if (toAddress && !event.isSuccess) {
+            def fromAddress = config.createFromAddress()
+            sendSyncReplicaRepoMail(toAddress, fromAddress, event)
+        }
+    }
+    
     private void onEnabledMail(RepositoryEvent event, MailConfiguration config) {
         def fromAddress = config.createFromAddress()
         Server server = Server.getServer()
@@ -267,6 +276,21 @@ class MailListenerService extends AbstractSvnEdgeService
                 mailSubject, mailBody, processOutput)
     }
 
+    private void sendSyncReplicaRepoMail(toAddress, fromAddress, event) {
+        def repo = event.repo
+        Locale locale = Locale.getDefault()
+        def mailSubject = getMessage('mail.message.subject.error', null, locale)
+        mailSubject += getMessage('mail.message.syncReplicaRepo.subject', null, locale)
+        mailSubject += getMessage('mail.message.repository', [repo.name], locale)
+
+        def (mailBody, processOutput) = getMailBody(event, repo, 
+                'mail.message.syncReplicaRepo.notImplemented',
+                'mail.message.syncReplicaRepo.body.error', locale)
+        
+        sendMail(toAddress, null, fromAddress,
+                mailSubject, mailBody, processOutput)
+    }
+    
     /**
      * helper to prepare the mail body for Load and Verify events
      * @param event the RepositoryEvent

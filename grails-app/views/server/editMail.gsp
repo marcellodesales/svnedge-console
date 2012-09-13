@@ -126,6 +126,9 @@ function resetPage() {
         <g:select name="securityMethod" from="${com.collabnet.svnedge.domain.MailSecurityMethod?.values()}" value="${config?.securityMethod}" class="requireEnabled"/>
       </g:propControlsBody>
       <g:propTextField bean="${config}" field="fromAddress" prefix="mailConfiguration" class="requireEnabled"/>
+      <g:if test="${isReplica}">
+        <g:propTextField bean="${config}" field="repoSyncToAddress" prefix="mailConfiguration" class="requireEnabled"/>
+      </g:if>
       </fieldset>
       <div class="form-actions">
         <g:set var="saveDisabled" value=""/>

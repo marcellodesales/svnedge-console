@@ -34,6 +34,7 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User;
 import com.collabnet.svnedge.event.DumpRepositoryEvent;
 import com.collabnet.svnedge.event.LoadRepositoryEvent;
+import com.collabnet.svnedge.event.SyncReplicaRepositoryEvent;
 import com.collabnet.svnedge.util.ConfigUtil
 import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.grails.commons.ConfigurationHolder;
@@ -52,6 +53,7 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
     def mailListenerService
     def grailsApplication
     def greenMail
+    MailConfiguration mailConfig
     
     def repoParentDir
     def repo
@@ -75,7 +77,7 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
                 svnRepoService.createRepository(repo, true)
 
         ConfigurationHolder.config = grailsApplication.config
-        MailConfiguration mailConfig = new MailConfiguration(
+        mailConfig = new MailConfiguration(
                 serverName: 'localhost',
                 port: ServerSetupTest.SMTP.port,
                 enabled: true)
@@ -445,5 +447,39 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
         assertEquals("Expected an attachment", 2, mp.count)
         assertEquals("Unexpected attachment content",
                 testContent[-104858..-1], mp.getBodyPart(1).content)
+    }
+    
+    public void testReplicaSyncFail() {
+        assertEquals("Expected 0 mail messages to start", 0,
+                greenMail.getReceivedMessages().length)
+        
+        def email = "repoSync@example.com"
+        mailConfig.repoSyncToAddress = email
+        mailConfig.save()
+        SyncReplicaRepositoryEvent event = new SyncReplicaRepositoryEvent(
+                this, repo, SyncReplicaRepositoryEvent.FAILED,
+                new Exception("testSyncReplicaFail"))
+        
+        mailListenerService.onApplicationEvent(event)
+
+        // Two identical messages (as email is sent to two users)
+        assertEquals("Expected one mail message", 1,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        
+        assertEquals("Message Subject did not match",
+                "[Error][Replica repository sync]Repository: test-repo", message.subject)
+        
+        assertTrue("Message Body did not match ", GreenMailUtil.getBody(message)
+                .startsWith("Synchronization of repository '" + repo.name +
+                "' failed."))
+        assertEquals("Message 'From' did not match", "SubversionEdge@localhost",
+                GreenMailUtil.getAddressList(message.from))
+        assertEquals("Message 'To' did not match", email,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertNull("Message 'CC' did not match",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
     }
 }

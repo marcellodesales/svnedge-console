@@ -62,8 +62,9 @@ class MailConfigurationTests extends GrailsUnitTestCase {
         assertNull "the MailConfiguration domain class should ALLOW 'null' fromAddress", mailConfig.errors["fromAddress"]
         
         mailConfig.fromAddress = "not.an.email.address"
+        mailConfig.repoSyncToAddress = "not.an.email.address.com"
         mailConfig.validate()
         assertEquals "the MailConfiguration domain class fromAddress must be an email address", "email", mailConfig.errors["fromAddress"]
-        
+        assertEquals "the MailConfiguration domain class fromAddress must be an email address", "email", mailConfig.errors["repoSyncToAddress"]
     }
 }
