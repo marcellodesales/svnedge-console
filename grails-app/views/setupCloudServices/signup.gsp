@@ -32,6 +32,9 @@
       usernameField.on('keydown', function(e) {
         loginChecker.keypressHandler()
       })
+      if (usernameField.val().length > 0) {
+        loginChecker.keypressHandler();
+      }
 
       var domainField = $('#domain')
       var domainMsgElement = $('#domainUniquenessMessage')
@@ -39,6 +42,9 @@
       domainField.on('keydown', function(e) {
         domainChecker.keypressHandler()
       })
+      if (domainField.val().length > 0) {
+        domainChecker.keypressHandler();
+      }
       
       $('#emailAddress').on('keyup', emailConfirm);
       $('#emailAddressConfirm').on('keyup', emailConfirm);

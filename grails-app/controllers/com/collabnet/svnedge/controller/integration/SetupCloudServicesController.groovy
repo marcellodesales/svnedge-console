@@ -38,7 +38,24 @@ class SetupCloudServicesController {
     }
 
     def getStarted = {
-        render(view: "signup", model: [cmd: new CloudServicesAccountCommand()])
+        CloudServicesAccountCommand cmd = new CloudServicesAccountCommand()
+        def realName = loggedInUserInfo(field: 'realUserName')
+        def match = (realName =~ /(\S+)\s+(.+)/)
+        if (match) {
+            cmd.firstName = match[0][1]
+            cmd.lastName = match[0][2]
+        } else {
+            cmd.lastName = realName
+        }
+        def email = loggedInUserInfo(field: 'email')
+        cmd.emailAddress = email
+        cmd.emailAddressConfirm = email
+        match = (email =~ /@(.+)\./)
+        if (match) {
+            cmd.domain = match[0][1].replace('.', '_')
+            cmd.organization = cmd.domain.replace('_', ' ').capitalize()
+        }
+        render(view: "signup", model: [cmd: cmd])
     }
 
     def checkLoginAvailability = { CloudServicesAccountCommand cmd ->
