@@ -391,9 +391,11 @@ class SetupTeamForgeController {
             redirect(action:'ctfInfo')
             return
         }
-        con.importUsers = (params.importUsers == "true")
+        con.importUsers = (params.importUsers == "true" ||
+                           params.importUsers == 'on')
         if (con.importUsers) {
-            con.assignMembership = (params.assignMembership == "true")
+            con.assignMembership = (params.assignMembership == "true" ||
+                                    params.assignMembership == 'on')
         } else {
             con.assignMembership = false
         }
