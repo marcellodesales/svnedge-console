@@ -62,11 +62,13 @@ class FreshConversionToTeamForgeFunctionalTests
         // Step 2: Convert to teamforge mode and verify it worked.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def apiKey = config.svnedge.ctfMaster.apiKey
         def button = getMessage("setupTeamForge.page.ctfInfo.button.convert")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = username
             ctfPassword = password
+            serverKey = apiKey
             click button
         }
         assertStatus 200
@@ -78,6 +80,7 @@ class FreshConversionToTeamForgeFunctionalTests
                 ctfURL = this.getTestCtfUrl()
                 ctfUsername = username
                 ctfPassword = password
+                serverKey = apiKey
                 click button
             }
             assertStatus 200
@@ -88,6 +91,7 @@ class FreshConversionToTeamForgeFunctionalTests
         }
         assertContentDoesNotContain(getMessage(
             "setupTeamForge.action.ctfInfo.ctfConnection.error"))
+        //new File("/tmp/fresh.html") << this.response.contentAsString
         assertContentContains(getMessage(
             "setupTeamForge.action.convert.success.managed"))
 

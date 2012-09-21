@@ -109,12 +109,13 @@ svnedge {
 
     ctfMaster {
         ssl = false
-        domainName = "cu313.cloud.sp.collab.net"
+        domainName = "cu125.cloud.sp.collab.net"
         username = "admin"
         password = "admin"
         port = 80
         systemId = "exsy1002"
         replicaId = "replica1044"
+        apiKey = "gwcjyiiBYiDL08lxDr7y"
     }
 
     replica {
@@ -247,11 +248,12 @@ environments {
 
             ctfMaster {
                 ssl = false
-                domainName = "cu313.cloud.sp.collab.net"
+                domainName = "cu125.cloud.sp.collab.net"
                 username = "admin"
                 password = "admin"
                 port = 80
                 systemId = "exsy1002"
+                apiKey = "gwcjyiiBYiDL08lxDr7y"
             }
 
             replica {

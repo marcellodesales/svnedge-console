@@ -139,7 +139,8 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         boolean hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, config.svnedge.ctfMaster.username,
            config.svnedge.ctfMaster.password)
         
-        assertFalse("the CTF test instance should not show svn 1.7+ httpv2 support", hasHttpV2Support)
+        // CTF 6.1.1 includes 1.7
+        assertTrue("the CTF v6.1.1+ test instance should show svn 1.7+ httpv2 support", hasHttpV2Support)
         
         // evaluate the local SvnEdge instance for httpv2 support (should be true)
         def testRepoName = "httpv2-test-" + Math.round(Math.random() * 1000)

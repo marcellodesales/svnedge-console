@@ -100,12 +100,14 @@ class FullConversionToTeamForgeFunctionalTests
         // Step 2: Verify the credentials with teamforge.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def apiKey = config.svnedge.ctfMaster.apiKey
         def continueButton = 
             getMessage("setupTeamForge.page.ctfInfo.button.continue")
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = username
             ctfPassword = password
+            serverKey = apiKey
             click continueButton
         }
         assertStatus 200
@@ -122,6 +124,7 @@ class FullConversionToTeamForgeFunctionalTests
                 ctfURL = this.getTestCtfUrl()
                 ctfUsername = username
                 ctfPassword = password
+                serverKey = apiKey
                 click continueButton
             }
             assertStatus 200
@@ -177,6 +180,8 @@ class FullConversionToTeamForgeFunctionalTests
                 "access the local ")) {
             fail("Conversion is failing because CTF cannot access the local ViewVC or SVN URLs.")
         }
+        //new File("/tmp/full.html") << this.response.contentAsString
+                
         assertContentContains(
             getMessage("setupTeamForge.action.convert.success"))
         assertContentContains(getMessage("setupTeamForge.page.convert.project"))
@@ -234,6 +239,7 @@ class FullConversionToTeamForgeFunctionalTests
         // Step 2: verify that incorrect URL does not convert.
         def username = config.svnedge.ctfMaster.username
         def password = config.svnedge.ctfMaster.password
+        def apiKey = config.svnedge.ctfMaster.apiKey
         def ctfHost = "unknown.cloud.sp.collab.net"
         def ctfUrlServer = "http://${ctfHost}"
         def continueButton = 
@@ -242,6 +248,7 @@ class FullConversionToTeamForgeFunctionalTests
             ctfURL = ctfUrlServer
             ctfUsername = username
             ctfPassword = password
+            serverKey = apiKey
             click continueButton
         }
         assertStatus 200
@@ -277,10 +284,12 @@ class FullConversionToTeamForgeFunctionalTests
         // Step 2: verify that incorrect credentials do not convert.
         def continueButton =
             getMessage("setupTeamForge.page.ctfInfo.button.continue")
+        def apiKey = config.svnedge.ctfMaster.apiKey
         form {
             ctfURL = this.getTestCtfUrl()
             ctfUsername = "xyc"
             ctfPassword "wrongpass"
+            serverKey = apiKey
             click continueButton
         }
         assertStatus 200
