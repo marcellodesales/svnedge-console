@@ -40,7 +40,7 @@ class MonitoringConfiguration {
         switch (frequency) {
             case Frequency.HALF_HOUR:
                 return 30 * ONE_MIN
-            case Frequency.HOUR:
+            case Frequency.ONE_HOUR:
                 return ONE_HOUR
             case Frequency.TWO_HOUR:
                 return 2 * ONE_HOUR
