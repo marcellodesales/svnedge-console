@@ -60,8 +60,6 @@ class Server {
     String ldapSecurityLevel
     boolean ldapServerCertVerificationNeeded
     boolean replica
-    String netInterface
-    String ipAddress
     String adminName
     String adminEmail
     String adminAltContact
@@ -130,8 +128,6 @@ class Server {
                     }
                     return result
         })
-        ipAddress(nullable: false, blank: false)
-        netInterface(nullable: false, blank: false)
         adminName(nullable: true)
         adminEmail(nullable: false, blank: false, email: true)
         adminAltContact(nullable: true)

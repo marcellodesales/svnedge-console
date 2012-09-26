@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.statistics
 
+import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.statistics.Category;
 import com.collabnet.svnedge.domain.statistics.StatGroup 
 import com.collabnet.svnedge.domain.statistics.StatValue 
@@ -114,6 +115,12 @@ class NetworkStatisticsService extends AbstractStatisticsService {
      * Called from the quartz service
      */
     def collectData() {
+        if (MonitoringConfiguration.config?.networkEnabled) {
+            collectNetworkStats()
+        }
+    }
+    
+    private def collectNetworkStats() {
         log.debug("Collecting network transmitted and received values")
         def now = new Date().getTime()
         def byteValues = parseBytes()

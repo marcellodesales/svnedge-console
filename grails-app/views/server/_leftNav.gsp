@@ -40,6 +40,10 @@
     <g:link controller="log" action="configure"><g:message code="admin.page.leftNav.logConfigure" /></g:link>
   </li>
 
+  <li<g:if test="${controllerName == 'server' && ['editMonitoring', 'updateMonitoring'].contains(actionName)}"> class="active"</g:if>>
+    <g:link controller="server" action="editMonitoring"><g:message code="admin.page.leftNav.editMonitoring" /></g:link>
+  </li>
+
   <li class="nav-header"><g:message code="admin.page.leftNav.extensions"/></li>
 
 

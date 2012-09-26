@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.statistics
 
+import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.statistics.Category;
@@ -57,19 +58,29 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
         if (!getStatGroup()) {
             createFileSystemStatistics()
         }
-        //def interval = getStatGroup().getRawInterval() * 1000
+        MonitoringConfiguration config = MonitoringConfiguration.config
+        setSchedule(config)
+        addDeleteJob(getStatGroup())
+        addConsolidateJob(getStatGroup())
+    }
+
+    def setSchedule(MonitoringConfiguration config) {
         def params = ["serviceName": "fileSystemStatisticsService"]
-        def statCollectJob = new StatCollectJob()
         try {
-            def trigger = StatCollectJob
-                .createTrigger(TRIGGER_NAME, JOB_INTERVAL_MILLIS, params, JOB_START_DELAY)
+            def trigger
+            if (config.frequency == MonitoringConfiguration.Frequency.DAILY) {
+                trigger = StatCollectJob.createCronTrigger(TRIGGER_NAME, 
+                        config.cronExpression(), params)
+            } else {
+                trigger = StatCollectJob.createTrigger(TRIGGER_NAME, 
+                        config.periodInMillis(), params, JOB_START_DELAY)
+                log.info("creating stat collection job at interval (millis): " + 
+                        config.periodInMillis())
+            }
             jobsAdminService.createOrReplaceTrigger(trigger)
-            log.info("creating stat collection job at interval (millis): " + JOB_INTERVAL_MILLIS)
         } catch (SchedulerException ex) {
             log.error("Failed to start StatCollectJob due to exception.", ex)
         }
-        addDeleteJob(getStatGroup())
-        addConsolidateJob(getStatGroup())
     }
 
     def getStatGroup() {
@@ -132,6 +143,12 @@ class FileSystemStatisticsService extends AbstractStatisticsService {
    }
 
     def collectData() {
+        if (MonitoringConfiguration.config?.repoDiskEnabled) {
+            collectFileSystemStats()
+        }
+    }
+    
+    private def collectFileSystemStats() {
         def now = new Date().getTime()
         def interval = getStatGroup().getRawInterval() * 1000
         log.debug("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")

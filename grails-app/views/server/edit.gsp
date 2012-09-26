@@ -7,14 +7,6 @@
 
     <g:javascript>
     /* <![CDATA[ */
-    var addrInterfaceMap = []
-    <g:each in="${addrInterfaceMap}">
-        addrInterfaceMap["${it.key}"] = [
-        <g:each var="iface" in="${it.value}">
-            "${iface}", 
-	    </g:each>
-	    ]
-    </g:each>
         
         $(document).ready(function() {
             // toggle standard server ports with useSsl field
@@ -29,58 +21,6 @@
                 }
            });
         });
-
-        function updateInterface(addrSelect) {
-            var val = addrSelect.value
-            var options = addrInterfaceMap[val]
-            var selectElement = document.getElementById("netInterface")
-            removeAllOptions(selectElement)
-            for (var i = 0; i < options.length; i++) {
-                addOption(selectElement, options[i], options[i])
-            }
-        }
-    
-        // update select boxes with new options for change in NetworkInterface
-        function updateNetInt(e) {
-           var result = eval("(" + e.responseText + ")")
-           var ipAddresses = result.ipAddresses
-           updateIpAddresses(ipAddresses)
-        }
-
-        // update the select for ipaddresses
-        function updateIpAddresses(ipAddresses) {
-            var ipSelect = document.getElementById("ipaddress")
-            updateSelect(ipSelect, ipAddresses)
-        }
-
-        // updates a select for the given values.  Assumes that the options
-        // should have both text and value set the same.
-        function updateSelect(selectElem, values) {
-            removeAllOptions(selectElem)
-            for (var i = 0; i < values.length; i++) {
-                addOption(selectElem, values[i], values[i])
-            }
-        }
-
-        // add an option with the given text/value to the select element.
-        function addOption(selectElem, text, value) {
-            var opt = document.createElement('option');
-	        opt.text = text
-	        opt.value = value
-            try {
-                selectElem.add(opt, null) // standards compliant
-            }
-            catch(ex) {
-                selectElem.add(opt) // IE only
-            }
-        }
-
-        // remove all current options from the select element.
-        function removeAllOptions(selectElem) {
-            for (var i = selectElem.length - 1; i >= 0; i--) {
-                selectElem.remove(i)
-            }
-        }
 
       /* ]]> */
     </g:javascript>
@@ -194,36 +134,6 @@ $('#bindInstructions').hide();
 
         <g:propTextField bean="${server}" field="dumpDir" required="true" 
             sizeClass="span6" prefix="server"/>
-
-        <g:propControlsBody bean="${server}" field="ipAddress" prefix="server">
-            <select class="select-medium" name="ipAddress" id="ipAddress" onchange="updateInterface(this)">
-              <optgroup label="IPv4">
-                <g:each var="addr" in="${ipv4Addresses.collect{ it.getHostAddress() }}">
-                  <g:set var="isSelected" value=""/>
-                  <g:if test="${server.ipAddress == addr}">
-                    <g:set var="isSelected"> selected="selected"</g:set>
-                  </g:if>
-                  <option value="${addr}"${isSelected}>${addr}</option>
-                </g:each>
-              </optgroup>
-              <optgroup label="IPv6">
-                <g:each var="addr" in="${ipv6Addresses.collect{ it.getHostAddress() }}">
-                  <g:set var="isSelected" value=""/>
-                  <g:if test="${server.ipAddress == addr}">
-                    <g:set var="isSelected"> selected="selected"</g:set>
-                  </g:if>
-                  <option value="${addr}"${isSelected}>${addr}</option>
-                </g:each>
-              </optgroup>
-            </select>
-        </g:propControlsBody>
-
-        <g:propControlsBody bean="${server}" field="netInterface" prefix="server">
-            <g:select name="netInterface" id="netInterface" from="${networkInterfaces}" 
-                  value="${server.netInterface}"/>
-            <script type="text/javascript">updateInterface(document.getElementById('ipAddress'))</script>
-        </g:propControlsBody>
-      
 
         <g:propTextField bean="${server}" field="adminName" prefix="server"/>
         <g:propTextField bean="${server}" field="adminEmail" required="true" prefix="server"/>

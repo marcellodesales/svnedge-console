@@ -17,7 +17,7 @@
  */
 package com.collabnet.svnedge.console
 
-import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.NetworkConfiguration
 
 /**
@@ -57,6 +57,19 @@ public class NetworkingService extends AbstractSvnEdgeService {
 
     def bootStrap = {
         log.info("########## Networking Service ##########")
+        MonitoringConfiguration config = MonitoringConfiguration.getConfig()
+        if (!config) {
+            config = new MonitoringConfiguration(
+                    netInterface: this.selectedInterface.name,
+                    ipAddress: this.ipAddress.hostAddress,
+                    networkEnabled: true, repoDiskEnabled: true,
+                    frequency: MonitoringConfiguration.Frequency.HALF_HOUR)
+            config.save()
+            log.info "Saved new monitoring config"
+        }
+        if (config?.networkEnabled && config.netInterface) {
+            setSelectedInterface(config.netInterface)
+        }
         log.info("# Network Interface: ${this.selectedInterface.name}")
         log.info("# IP Address: ${getIpAddress().hostAddress}")
         log.info("# Hostname: ${getHostname()}")
@@ -64,12 +77,7 @@ public class NetworkingService extends AbstractSvnEdgeService {
             log.info("# HTTP PROXY: ${httpProxy}")
         }
         log.info("########################################")
-        
-        Server server = Server.getServer()
-        if (server && server.netInterface) {
-            setSelectedInterface(server.netInterface)
-        }
-          
+                  
         // set the proxy configuration for the VM if needed.
         // first use persistent setting from console
         // and fallback to environment. If there is no 

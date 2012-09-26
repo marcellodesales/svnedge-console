@@ -97,8 +97,6 @@ class LifecycleService {
                 port: port,
                 authHelperPort: authHelperPort,
                 repoParentDir: repoParentDir,
-                netInterface: bootstrapParam.ifName,
-                ipAddress: bootstrapParam.ipAddress,
                 adminName: "Nobody",
                 adminEmail: "devnull@collab.net",
                 allowAnonymousReadAccess: false,
@@ -586,8 +584,6 @@ root@${server.hostname}
      */
     def getServerLifecycleBootstrapParams() {
         return [hostname: networkingService.hostname,
-            ifName: networkingService.selectedInterface.name,
-            ipAddress: networkingService.ipAddress.hostAddress,
             isDefaultPortAllowed: this.isDefaultPortAllowed()]
     }
 

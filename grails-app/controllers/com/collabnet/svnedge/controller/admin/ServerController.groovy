@@ -24,6 +24,7 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.domain.MailConfiguration;
+import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
@@ -44,6 +45,7 @@ class ServerController {
     private static final String TEST_MAIL_RESULT = "email.test.result"
     private static final long TEST_MAIL_WAIT_SECONDS = 10
 
+    def fileSystemStatisticsService
     def operatingSystemService
     def lifecycleService
     def mailConfigurationService
@@ -139,7 +141,42 @@ class ServerController {
                 isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
     }
-    
+
+    def editMonitoring = {
+        return prepareMonitoringModel()
+    }
+
+    def updateMonitoring = { 
+        MonitoringConfiguration config = MonitoringConfiguration.config
+        bindData(config, params)
+        if (config.save()) {
+            if (config.networkEnabled && config.netInterface) {
+                networkingService.setSelectedInterface(config.netInterface)
+            }
+            if (config.repoDiskEnabled) {
+                fileSystemStatisticsService.setSchedule(config)
+            }
+            flash.message = message(code:"server.action.updateMonitoring.success")
+            redirect(action: 'editMonitoring')
+        }
+        else {
+            request.error = message(code:"server.action.update.invalidSettings")
+            render(view: "editMonitoring", model: prepareMonitoringModel(config))
+        }
+    }
+
+    private def prepareMonitoringModel(config = MonitoringConfiguration.config) {
+        def networkInterfaces = networkingService
+                .getNetworkInterfacesWithIPAddresses().collect{ it.getName() }
+        networkInterfaces.sort()
+        return [config: config,
+                networkInterfaces: networkInterfaces,
+                ipv4Addresses: networkingService.getIPv4Addresses(),
+                ipv6Addresses: networkingService.getIPv6Addresses(),
+                addrInterfaceMap: 
+                networkingService.getInetAddressNetworkInterfaceMap()]
+    }
+
     def editProxy = {
        def networkConfig = networkingService.getNetworkConfiguration()
        return [networkConfig: networkConfig]
@@ -292,9 +329,6 @@ class ServerController {
                 flash.message = message(code:"server.action.update.changesMade")
             }
 
-            // update networkingService.selectedInterface
-            networkingService.setSelectedInterface(server.netInterface)
-
             render(view: params.view, model : prepareServerViewModel(server))
 
         } else {
@@ -308,11 +342,6 @@ class ServerController {
   
     private Map prepareServerViewModel (Server server) {
 
-        def networkInterfaces = networkingService
-            .getNetworkInterfacesWithIPAddresses()
-            .collect{ it.getName() }
-        Collections.sort(networkInterfaces)
-
         int portValue = Integer.parseInt(server.port.toString())
         boolean isPrivatePort = portValue < 1024
         boolean isStandardPort = portValue == 80 || portValue == 443
@@ -324,11 +353,6 @@ class ServerController {
         return [
             server : server,
             isStarted: lifecycleService.isStarted(),
-            networkInterfaces: networkInterfaces,
-            ipv4Addresses: networkingService.getIPv4Addresses(),
-            ipv6Addresses: networkingService.getIPv6Addresses(),
-            addrInterfaceMap: networkingService
-                .getInetAddressNetworkInterfaceMap(),
             csvnHome: config.svnedge.appHome ?
                 config.svnedge.appHome : '<AppHome>',
             csvnConf: ConfigUtil.confDirPath(),

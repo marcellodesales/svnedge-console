@@ -20,6 +20,8 @@ package com.collabnet.svnedge.statistics
 
 
 import com.collabnet.svnedge.domain.Server 
+
+import org.quartz.CronTrigger
 import org.quartz.JobDataMap
 import org.quartz.SimpleTrigger
 import org.quartz.Trigger
@@ -76,4 +78,14 @@ class StatCollectJob implements ApplicationContextAware {
         trigger
     }
 
+    /** 
+     * Create an infinitely repeating simple trigger with the given name
+     * and interval.
+     */
+    static Trigger createCronTrigger(triggerName, cron, params) {
+        def trigger = new CronTrigger(triggerName, triggerGroup,
+                name, group, cron)
+        trigger.setJobDataMap(new JobDataMap(params))
+        return trigger
+    }
 }
