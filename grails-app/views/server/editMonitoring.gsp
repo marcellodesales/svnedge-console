@@ -72,6 +72,15 @@
             var isEnabled = $('#networkEnabled').attr('checked');
             $('.requireNetworkEnabled').attr('disabled', !isEnabled);
         }
+        
+        function toggleRepoDiskFields() {
+            var isEnabled = $('#repoDiskEnabled').attr('checked');
+            $('.requireRepoDiskEnabled').attr('disabled', !isEnabled);
+        }
+        
+        function checkDailyFrequency() {
+            $('#frequency_daily').attr('checked', true);
+        }
     </g:javascript>
     
   </head>
@@ -87,6 +96,7 @@
       <g:hiddenField name="id" value="${config.id}" />
 
       <fieldset>            
+        <legend><small>Networking</small></legend>
         <g:propCheckBox bean="${config}" field="networkEnabled" prefix="server"/>
 
         <g:propControlsBody bean="${config}" field="ipAddress" prefix="server">
@@ -117,7 +127,9 @@
                   value="${config.netInterface}" class="requireNetworkEnabled"/>
             <script type="text/javascript">updateInterface(document.getElementById('ipAddress'))</script>
         </g:propControlsBody>
-        <br/><br/>
+      </fieldset>
+      <fieldset>
+        <legend><small>Disk Usage</small></legend>
         <g:propCheckBox bean="${config}" field="repoDiskEnabled" prefix="server"/>
         
         <div class="control-group">
@@ -127,43 +139,45 @@
             <label class="radio">
               <g:radio id="frequency_30min" name="frequency" value="HALF_HOUR"
                   checked="${config.frequency.toString() == 'HALF_HOUR'}"
-                  class="scheduleElement"/>
+                  class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.halfHour"/>
             </label>
             <label class="radio">
               <g:radio id="frequency_1hour" name="frequency" value="ONE_HOUR"
                   checked="${config.frequency.toString() == 'ONE_HOUR'}"
-                  class="scheduleElement"/>
+                  class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.hour" args="${[1]}"/>
             </label>
             <label class="radio">
               <g:radio id="frequency_2hour" name="frequency" value="TWO_HOUR"
                   checked="${config.frequency.toString() == 'TWO_HOUR'}"
-                  class="scheduleElement"/>
+                  class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.hour" args="${[2]}"/>
             </label>
             <label class="radio">
               <g:radio id="frequency_4hour" name="frequency" value="FOUR_HOUR"
                   checked="${config.frequency.toString() == 'FOUR_HOUR'}"
-                  class="scheduleElement"/>
+                  class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.hour" args="${[4]}"/>
             </label>
-            <label class="radio" style="display: inline-block;">
+            <label class="radio inline">
               <g:radio id="frequency_daily" name="frequency" value="DAILY"
                   checked="${config.frequency.toString() == 'DAILY'}"
-                  class="scheduleElement"/>
+                  class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.daily"/>
             </label>
             <g:set var="hours"
               value="${(0..23).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
             <g:set var="minutes"
               value="${(0..59).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
-            <span id="time">
+            <span id="time" style="margin-left: 1em">
               <g:select id="startHour" name="hour" from="${hours}"
                   value="${formatNumber(number: config.hour, minIntegerDigits: 2)}"
-                  class="scheduleElement autoWidth"/>&nbsp;:&nbsp;<g:select id="startMinute"
+                  class="requireRepoDiskEnabled autoWidth"
+                  onchange="checkDailyFrequency();"/>&nbsp;:&nbsp;<g:select id="startMinute"
                   name="minute" from="${minutes}" value="${formatNumber(number: config.minute, minIntegerDigits: 2)}"
-                  class="scheduleElement autoWidth"/>&nbsp;:&nbsp;00
+                  class="requireRepoDiskEnabled autoWidth"
+                  onchange="checkDailyFrequency();"/>&nbsp;:&nbsp;00
             </span>
           </div>
         </div>
@@ -176,6 +190,8 @@
     <g:javascript>
       toggleNetworkFields();
       $('#networkEnabled').click(toggleNetworkFields);
+      toggleRepoDiskFields();
+      $('#repoDiskEnabled').click(toggleRepoDiskFields);
     </g:javascript>             
   </body>
 </html>
