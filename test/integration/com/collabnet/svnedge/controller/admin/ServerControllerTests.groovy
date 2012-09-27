@@ -20,6 +20,7 @@ package com.collabnet.svnedge.controller.admin
 import javax.mail.Message;
 
 import com.collabnet.svnedge.controller.AbstractSvnEdgeControllerTests;
+import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import grails.test.*
@@ -42,7 +43,7 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
         super.setUp()
 
         // mock the bindData method
-        controller.metaClass.bindData = { obj, params, excludes ->
+        controller.metaClass.bindData = { obj, params, excludes = [] ->
             obj.properties = params
         }
 
@@ -181,5 +182,44 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
                 controller.flash.message
         assertNotNull "Controller should provide an error message",
                 controller.request.error
+    }
+    
+    void testEditMonitoring() {
+        def model = controller.editMonitoring()
+        def networkInterfaces = model['networkInterfaces']
+        assertNotNull "Expect NICs", networkInterfaces
+        assertTrue "Server must have a loopback NI", 
+                networkInterfaces.contains('lo')
+        def ipAddresses = model['ipv4Addresses']
+        assertNotNull "Expect IP addresses", ipAddresses
+        assertTrue "Expect lo IP address", 
+                ipAddresses.collect({ it.getHostAddress() }).contains("127.0.0.1")
+        MonitoringConfiguration config = model['config']
+        assertTrue "Network statistics should be enabled", config.networkEnabled
+        assertTrue "Disk statistics should be enabled", config.repoDiskEnabled
+    }
+    
+    void testUpdateMonitoring() {
+        def params = controller.params
+        params.networkEnabled = false
+        params.repoDiskEnabled = true
+        params.frequency = 'ONE_HOUR'
+        params.repoDiskFrequencyHours = '8'
+        controller.updateMonitoring()
+        assertEquals "Expected redirect to 'editMonitoring' view on success",
+                'editMonitoring', controller.redirectArgs["action"]
+        assertNotNull "Controller should provide a success message",
+                controller.flash.message
+        assertNull "Controller should NOT provide an error message",
+                controller.flash.error
+
+        def model = controller.editMonitoring()
+        MonitoringConfiguration config = model['config']
+        assertFalse "Network statistics should be disabled", 
+                config.networkEnabled
+        assertEquals "Frequency should be every X hours", 
+                MonitoringConfiguration.Frequency.ONE_HOUR, config.frequency
+        assertEquals "Frequency should be every 8 hours", 8, 
+                config.repoDiskFrequencyHours
     }
 }

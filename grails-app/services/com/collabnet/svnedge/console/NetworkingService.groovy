@@ -63,7 +63,8 @@ public class NetworkingService extends AbstractSvnEdgeService {
                     netInterface: this.selectedInterface.name,
                     ipAddress: this.ipAddress.hostAddress,
                     networkEnabled: true, repoDiskEnabled: true,
-                    frequency: MonitoringConfiguration.Frequency.HALF_HOUR)
+                    frequency: MonitoringConfiguration.Frequency.HALF_HOUR,
+                    repoDiskFrequencyHours: 1)
             config.save()
             log.info "Saved new monitoring config"
         }

@@ -18,7 +18,7 @@
 package com.collabnet.svnedge.domain
 
 /**
- * Networking stats configuration
+ * Stats configuration
  */
 class MonitoringConfiguration {
 
@@ -27,11 +27,12 @@ class MonitoringConfiguration {
     boolean networkEnabled
     boolean repoDiskEnabled
     Frequency frequency
-    int hour
-    int minute
+    int repoDiskHourOfDay
+    int repoDiskMinuteOfDay
+    int repoDiskFrequencyHours
     
     String cronExpression() {
-        return "0 ${minute} ${hour} * * ?"
+        return "0 ${repoDiskMinuteOfDay} ${repoDiskHourOfDay} * * ?"
     }
     
     long periodInMillis() {
@@ -41,11 +42,8 @@ class MonitoringConfiguration {
             case Frequency.HALF_HOUR:
                 return 30 * ONE_MIN
             case Frequency.ONE_HOUR:
-                return ONE_HOUR
-            case Frequency.TWO_HOUR:
-                return 2 * ONE_HOUR
-            case Frequency.FOUR_HOUR:
-                return 4 * ONE_HOUR
+                int hours = repoDiskFrequencyHours ?: 1
+                return hours * ONE_HOUR
             default:
                 throw new RuntimeException("Frequency not appropriate for fixed period")
         }
@@ -54,12 +52,13 @@ class MonitoringConfiguration {
     static constraints = {
         ipAddress(nullable: true, blank: true)
         netInterface(nullable: true, blank: true)
+        repoDiskFrequencyHours(min: 1)
     }
     
     static MonitoringConfiguration getConfig() {
         return MonitoringConfiguration.get(1)
     }
     
-    enum Frequency { HALF_HOUR, ONE_HOUR, TWO_HOUR, FOUR_HOUR, DAILY }
+    enum Frequency { HALF_HOUR, ONE_HOUR, DAILY }
 }
 

@@ -81,6 +81,10 @@
         function checkDailyFrequency() {
             $('#frequency_daily').attr('checked', true);
         }
+        
+        function checkHourlyFrequency() {
+            $('#frequency_1hour').attr('checked', true);
+        }
     </g:javascript>
     
   </head>
@@ -142,24 +146,21 @@
                   class="requireRepoDiskEnabled"/>
               <g:message code="server.page.editMonitoring.frequency.halfHour"/>
             </label>
-            <label class="radio">
+            <div style="margin-bottom: 10px">
+            <label class="radio inline">
               <g:radio id="frequency_1hour" name="frequency" value="ONE_HOUR"
                   checked="${config.frequency.toString() == 'ONE_HOUR'}"
                   class="requireRepoDiskEnabled"/>
-              <g:message code="server.page.editMonitoring.frequency.hour" args="${[1]}"/>
+              <g:message code="server.page.editMonitoring.frequency.hour.every"/>
             </label>
-            <label class="radio">
-              <g:radio id="frequency_2hour" name="frequency" value="TWO_HOUR"
-                  checked="${config.frequency.toString() == 'TWO_HOUR'}"
-                  class="requireRepoDiskEnabled"/>
-              <g:message code="server.page.editMonitoring.frequency.hour" args="${[2]}"/>
-            </label>
-            <label class="radio">
-              <g:radio id="frequency_4hour" name="frequency" value="FOUR_HOUR"
-                  checked="${config.frequency.toString() == 'FOUR_HOUR'}"
-                  class="requireRepoDiskEnabled"/>
-              <g:message code="server.page.editMonitoring.frequency.hour" args="${[4]}"/>
-            </label>
+            <g:set var="hours"
+                value="${(1..12).collect {formatNumber(number: it, minIntegerDigits: 1)}}"/>
+              &nbsp;<g:select id="frequencyHour" name="repoDiskFrequencyHours" from="${hours}"
+                  value="${formatNumber(number: config.repoDiskFrequencyHours, minIntegerDigits: 1)}"
+                  class="requireRepoDiskEnabled autoWidth"
+                  onchange="checkHourlyFrequency();"/>&nbsp;
+              <label class="radio inline withFor" for="frequency_1hour"><g:message code="server.page.editMonitoring.frequency.hour"/></label>
+            </div>
             <label class="radio inline">
               <g:radio id="frequency_daily" name="frequency" value="DAILY"
                   checked="${config.frequency.toString() == 'DAILY'}"
@@ -171,11 +172,11 @@
             <g:set var="minutes"
               value="${(0..59).collect {formatNumber(number: it, minIntegerDigits: 2)}}"/>
             <span id="time" style="margin-left: 1em">
-              <g:select id="startHour" name="hour" from="${hours}"
-                  value="${formatNumber(number: config.hour, minIntegerDigits: 2)}"
+              <g:select id="startHour" name="repoDiskHourOfDay" from="${hours}"
+                  value="${formatNumber(number: config.repoDiskHourOfDay, minIntegerDigits: 2)}"
                   class="requireRepoDiskEnabled autoWidth"
                   onchange="checkDailyFrequency();"/>&nbsp;:&nbsp;<g:select id="startMinute"
-                  name="minute" from="${minutes}" value="${formatNumber(number: config.minute, minIntegerDigits: 2)}"
+                  name="repoDiskMinuteOfDay" from="${minutes}" value="${formatNumber(number: config.repoDiskMinuteOfDay, minIntegerDigits: 2)}"
                   class="requireRepoDiskEnabled autoWidth"
                   onchange="checkDailyFrequency();"/>&nbsp;:&nbsp;00
             </span>
