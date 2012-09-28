@@ -702,21 +702,20 @@ class SvnRepoServiceIntegrationTests extends GrailsUnitTestCase {
         options << ["ignoreUuid": false]   // our target repo should get it's UUID from the hotcopy
         svnRepoService.scheduleLoad(repoTarget, options)
 
-        // verify that repo load has run (trunk/tags/branches which should have been imported)
-        boolean loadSuccess = false
+        // Allow 60 sec max for load after which the load file should be deleted
         timeLimit = System.currentTimeMillis() + 60000
-        while (!loadSuccess && System.currentTimeMillis() < timeLimit) {
+        while (loadFile.exists() && System.currentTimeMillis() < timeLimit) {
             Thread.sleep(5000)
-            output = commandLineService.executeWithOutput(
-                    ConfigUtil.svnPath(), "info",
-                    "--no-auth-cache", "--non-interactive",
-                    commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
-
-            loadSuccess = output.contains("Node Kind: directory")
         }
-
-
         assertFalse "load file should be deleted after loading", loadFile.exists()
+        
+        // verify that repo load has run (trunk/tags/branches which should have been imported)
+        output = commandLineService.executeWithOutput(
+                ConfigUtil.svnPath(), "info",
+                "--no-auth-cache", "--non-interactive",
+                commandLineService.createSvnFileURI(new File(repoParentDir, testRepoNameTarget)) + "trunk")
+
+        boolean loadSuccess = output.contains("Node Kind: directory")
         assertTrue "the target repo should now have nodes from the src repo after loading", loadSuccess
 
         // test symlink

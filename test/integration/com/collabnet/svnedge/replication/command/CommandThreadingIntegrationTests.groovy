@@ -119,13 +119,13 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         fetchReplicaCommandsJob.ctfRemoteClientService = ctfRemote
         fetchReplicaCommandsJob.commandResultDeliveryService = commandResultDeliveryService
 
-        // run the job as if initiated by quartz (quartz jobs do not run in test mode it seems)
-        fetchReplicaCommandsJob.execute()
-        Thread.currentThread().sleep(2000)
-
         // start the background jobs (otherwise disabled in test mode)
         replicaCommandSchedulerService.startBackgroundHandlers()
         replicaCommandExecutorService.startBackgroundHandlers()
+
+        // run the job as if initiated by quartz (quartz jobs do not run in test mode it seems)
+        fetchReplicaCommandsJob.execute()
+        Thread.currentThread().sleep(2000)
     }
 
     protected void tearDown() {
@@ -162,8 +162,11 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         fetchReplicaCommandsJob.execute()
 
         // wait a bit
-        waitForLog(getExecutionLog())
-
+        File logFile = getExecutionLog()
+        waitForLog(logFile)
+        println "Command execution log:"
+        println logFile.text
+        
         // validate concurrency expectations in the execution log
         assertEquals("commands from same repo should be sequential",
                 ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9805"));

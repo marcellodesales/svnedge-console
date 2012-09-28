@@ -24,6 +24,7 @@ import static com.collabnet.svnedge.integration.CtfRemoteClientService.COMMAND_I
 class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
 
     def replicaCommandSchedulerService
+    def executorService
 
     def remotecmdexecs = Collections.synchronizedList(new LinkedList<Map<String, String>>())
 
@@ -47,6 +48,9 @@ class ReplicaCommandsSchedulerIntegrationTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
+        executorService.execute {
+            replicaCommandSchedulerService.schedulerSynchronizer.take()
+        }
     }
 
     protected void tearDown() {
