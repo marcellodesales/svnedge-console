@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.integration.command.handler
 
 import com.collabnet.svnedge.integration.command.AbstractCommand 
+import com.collabnet.svnedge.integration.command.CommandState
 import com.collabnet.svnedge.integration.command.LongRunningCommand 
 import com.collabnet.svnedge.integration.command.ShortRunningCommand 
 import com.collabnet.svnedge.integration.command.event.LongRunningCommandQueuedEvent 
