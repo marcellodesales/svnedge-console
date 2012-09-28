@@ -188,10 +188,12 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
         def model = controller.editMonitoring()
         def networkInterfaces = model['networkInterfaces']
         assertNotNull "Expect NICs", networkInterfaces
+        assertTrue "There should be at least one NIC", networkInterfaces.size() > 0
         assertTrue "Server must have a loopback NI", 
-                networkInterfaces.contains('lo')
+                networkInterfaces.contains('lo') || networkInterfaces.contains('lo0')
         def ipAddresses = model['ipv4Addresses']
         assertNotNull "Expect IP addresses", ipAddresses
+        assertTrue "There should be at least one IP address", ipAddresses.size() > 0
         assertTrue "Expect lo IP address", 
                 ipAddresses.collect({ it.getHostAddress() }).contains("127.0.0.1")
         MonitoringConfiguration config = model['config']

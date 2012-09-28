@@ -107,7 +107,6 @@ abstract class AbstractCommand {
         params = new HashMap<String, String>()
         stateTransitions = new LinkedHashMap<CommandState, Long>();
         stateTimeTransitions = new LinkedHashMap<Long, CommandState>();
-        makeTransitionToState(CommandState.SCHEDULED)
     }
 
     /**

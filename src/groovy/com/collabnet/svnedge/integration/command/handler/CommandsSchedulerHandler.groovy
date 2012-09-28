@@ -102,6 +102,7 @@ class CommandsSchedulerHandler extends InterruptibleLoopRunnable {
                     def classLoader = getClass().getClassLoader()
                     def commandInstance = AbstractCommand.makeCommand(
                         classLoader, nextCommand)
+                    commandInstance.makeTransitionToState(CommandState.SCHEDULED)
                     synchronized(receivedRemoteQueuedCommands) {
                         iterator.remove()
                     }
