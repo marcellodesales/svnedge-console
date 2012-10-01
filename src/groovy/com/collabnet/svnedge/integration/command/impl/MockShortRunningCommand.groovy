@@ -27,14 +27,23 @@ public class MockShortRunningCommand extends AbstractCommand
         implements com.collabnet.svnedge.integration.command.ShortRunningCommand {
 
     private Logger log = Logger.getLogger(getClass())
-
+    private int runCount = 0
+    public static String FAILED = "Simulating command failure"
+    
     def constraints() {
         log.debug("Constraints...")
     }
 
     def execute() {
-        log.debug("Executing short-running command with 5 second wait...")
-        Thread.sleep 5000
+        int expectedFailures = this.params?.commandExpectedFailures ?: 0
+        if (runCount++ < expectedFailures) {
+            log.debug FAILED + " " + runCount
+            throw new RuntimeException(FAILED + " " + runCount)
+        }    
+        long runTime = this.params?.commandRunTimeSeconds ?: 5
+        log.debug("Executing short-running command with " + runTime +
+                  " second run time...")
+        Thread.sleep(runTime * 1000L)
     }
 
     def undo() {

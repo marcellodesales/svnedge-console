@@ -30,6 +30,7 @@ import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.integration.FetchReplicaCommandsJob
 import com.collabnet.svnedge.integration.command.AbstractCommand
 import com.collabnet.svnedge.integration.command.CommandsExecutionContext
+import com.collabnet.svnedge.integration.command.impl.MockShortRunningCommand
 import com.collabnet.svnedge.integration.command.impl.ReplicaPropsUpdateCommand
 import com.collabnet.svnedge.integration.command.impl.RepoAddCommand
 import com.collabnet.svnedge.integration.command.impl.RepoRemoveCommand
@@ -545,5 +546,45 @@ class ReplicaCommandsExecutorIntegrationTests extends GrailsUnitTestCase {
         wcDir2.deleteDir()
         CommandTestsHelper
             .deleteTestProject(config, ctfRemoteClientService, projectName)
+    }
+    
+    void testCommandRetryOnFailure() {
+        def classLoader = getClass().getClassLoader()
+        def cmdParams = [:]
+        cmdParams["commandExpectedFailures"] = 3
+        cmdParams["commandRunTimeSeconds"] = 1
+
+        // add first
+        def commandMap = [code: 'mockShortRunning', id: CommandTestsHelper.createCommandId(), params: cmdParams,
+            context: executionContext]
+        def command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+            command instanceof MockShortRunningCommand
+
+        ReplicaConfiguration replicaConfig = ReplicaConfiguration.currentConfig
+        replicaConfig.commandRetryAttempts = 2
+        replicaConfig.commandRetryWaitSeconds = 1
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertFalse("Processing a command should return a false succeeded, " +
+                "if retry attempts is less than mocked failures",
+                command.succeeded)
+        assertEquals "First exception should be returned",
+                MockShortRunningCommand.FAILED + " 1",
+                command.executionException?.message
+
+        command = AbstractCommand.makeCommand(classLoader, commandMap)
+        assertTrue "The command instance is incorrect",
+                command instanceof MockShortRunningCommand
+
+        replicaConfig.commandRetryAttempts = 3
+        replicaCommandExecutorService.commandLifecycleExecutor(command)
+
+        assertTrue("Processing a command should return a true succeeded.",
+            command.succeeded)
+        if (command.executionException) {
+            println command.executionException
+            fail("The command should have worked.")
+        }
     }
 }

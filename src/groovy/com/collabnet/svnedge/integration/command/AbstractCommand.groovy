@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.integration.command
 
 import com.collabnet.svnedge.domain.integration.CommandResult;
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 
 import java.util.HashMap;
 import java.util.Map
@@ -330,21 +331,21 @@ abstract class AbstractCommand {
             log.debug("Verifying the constraints for the command...")
             constraints()
             log.debug("Constraints passed... executing the command...")
-            execute()
-            log.debug("Command execution was successful...")
-            succeeded = true
+            succeeded = doExecute()
 
         } catch (Throwable t) {
-            succeeded = false
-            executionException = t
-            log.error("Failed to execute command: " + t.getMessage())
-            if (t.cause) {
-                executionException = t.cause
-                logExecution("EXECUTION-EXCEPTION", t.cause)
-            } else {
-                logExecution("EXECUTION-EXCEPTION", t)
+            succeeded = retryCommand()                        
+            if (!succeeded) {
+                executionException = t
+                log.error("Failed to execute command: " + t.getMessage())
+                if (t.cause) {
+                    executionException = t.cause
+                    logExecution("EXECUTION-EXCEPTION", t.cause)
+                } else {
+                    logExecution("EXECUTION-EXCEPTION", t)
+                }
+                doHandleExecutionException(executionException)
             }
-            doHandleExecutionException(executionException)
         }
 
         if (ConfigurationHolder.config.svnedge.replica.logging.commandOutput)  {
@@ -384,6 +385,38 @@ abstract class AbstractCommand {
             throw new CommandExecutionException(this, executionException,
                 undoException)
         }
+    }
+
+    private boolean doExecute() {
+        execute()
+        log.debug("Command execution was successful...")
+        return true
+    }
+
+    private boolean retryCommand() {
+        boolean succeeded = false
+        try {
+            ReplicaConfiguration replicaConfig = 
+                    ReplicaConfiguration.currentConfig
+            if (replicaConfig) {
+                int maxAttempts = replicaConfig.commandRetryAttempts
+                long waitMillis = replicaConfig.commandRetryWaitSeconds * 1000
+                for (int i = 0; !succeeded && i < maxAttempts; i++) {
+                    log.debug "Command execution failed; retrying in " + 
+                            waitMillis + " msec..."
+                    Thread.sleep(waitMillis)
+                    try {
+                        succeeded = doExecute()
+                    } catch (Throwable t) {
+                        log.warn "Command retry #" + i + " failed. " + 
+                                t.message
+                    }
+                }
+            } 
+        } catch (Throwable t) {
+            log.warn("Replica command could not be retried.", t)
+        }
+        return succeeded
     }
     
     /**

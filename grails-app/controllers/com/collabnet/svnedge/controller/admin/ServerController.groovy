@@ -121,7 +121,8 @@ class ServerController {
         Server s = Server.getServer()
 
         return [ctfServerBaseUrl: CtfServer.getServer()?.baseUrl,
-                ctfCredentials: ctfCredentialsCmd]
+                ctfCredentials: ctfCredentialsCmd,
+                isReplica: s.mode == ServerMode.REPLICA]
     }
 
     def edit = {

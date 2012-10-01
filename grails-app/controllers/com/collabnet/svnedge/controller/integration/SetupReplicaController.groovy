@@ -23,6 +23,7 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode;
 import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.integration.CtfConnectionException
 import com.collabnet.svnedge.integration.CtfConnectionBean;
@@ -357,6 +358,28 @@ class SetupReplicaController {
                 model: [cmd: input, isReplica: isReplica]])
     }
 
+    def editConfig = {
+        return prepareConfigModel()
+    }
+
+    def updateConfig = {
+        ReplicaConfiguration config = ReplicaConfiguration.currentConfig
+        bindData(config, params)
+        if (config.save()) {
+            flash.message = message(code:"setupReplica.action.updateConfig.success")
+            redirect(action: 'editConfig')
+        }
+        else {
+            request.error = message(code:"setupReplica.action.updateConfig.invalidSettings")
+            render(view: "editConfig", model: prepareConfigModel(config))
+        }
+    }
+
+    private def prepareConfigModel(config = ReplicaConfiguration.currentConfig) {
+        println "ctfURL = " + CtfServer.getServer().baseUrl
+        return [config: config, ctfURL: CtfServer.getServer().baseUrl]
+    }
+    
     private List fetchIntegrationServers() throws RemoteMasterException {
 
         CtfConnectionBean conn = getConversionBean().ctfConn

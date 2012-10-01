@@ -97,7 +97,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS011RenameBackupTriggers(),
             new MS012AddSvnBasePath(),
             new MS013AddRepoSyncToAddress(),
-            new MS014AddMonitorConfiguration()
+            new MS014AddMonitorConfiguration(),
+            new MS015AddReplicaCommandRetries()
         };
     }
 

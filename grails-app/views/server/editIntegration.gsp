@@ -33,6 +33,9 @@
     </p>
 
    <g:set var="tabArray" value="${[[controller: 'setupReplica', action: 'editCredentials', label: message(code:'server.page.editIntegration.tab.edit')]]}" />
+   <g:if test="${isReplica}">
+     <g:set var="tabArray" value="${ tabArray << [controller: 'setupReplica', action: 'editConfig', label: message(code:'server.page.editIntegration.tab.editReplicaConfig')]}" />
+  </g:if>
    <g:set var="tabArray" value="${ tabArray << [active:true, label: message(code:'server.page.editIntegration.tab.convert')]}" />
    <g:render template="/common/tabs" model="${[tabs: tabArray]}" />
 

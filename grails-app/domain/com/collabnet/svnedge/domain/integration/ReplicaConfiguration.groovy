@@ -63,6 +63,9 @@ public class ReplicaConfiguration {
      * Fingerprint details
      */
     String acceptedCertFingerPrint
+    
+    int commandRetryAttempts = 0
+    int commandRetryWaitSeconds = 5
 
     String contextPath() {
         String path = null
@@ -83,6 +86,8 @@ public class ReplicaConfiguration {
         commandPollRate(nullable:false)
         maxLongRunningCmds(nullable:false)
         maxShortRunningCmds(nullable:false)
+        commandRetryAttempts(min: 0, max: 10)
+        commandRetryWaitSeconds(min: 0, max: 300)
     }
 
     /**
