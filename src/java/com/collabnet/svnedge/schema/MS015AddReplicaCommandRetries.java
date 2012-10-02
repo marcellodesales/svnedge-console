@@ -30,7 +30,7 @@ public class MS015AddReplicaCommandRetries implements MigrationScript {
         db.executeUpdateSql("alter table REPLICA_CONFIGURATION add column " + 
                 "COMMAND_RETRY_ATTEMPTS integer default 0 NOT NULL");
         db.executeUpdateSql("alter table REPLICA_CONFIGURATION add column " +
-                "COMMAND_RETRY_WAIT_SECONDS integer default 5000 NOT NULL");
+                "COMMAND_RETRY_WAIT_SECONDS integer default 5 NOT NULL");
         return false;
     }
 
