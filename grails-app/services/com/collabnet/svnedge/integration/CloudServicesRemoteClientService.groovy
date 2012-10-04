@@ -443,7 +443,9 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     */
    def listServices(RESTClient restClient) throws CloudServicesException {
        try {
+           def params = createFullCredentialsMap()
            def resp = restClient.get(path: "services.json",
+               query: params,
                requestContentType: URLENC)
 
            if (resp.status != 200) {
@@ -613,8 +615,8 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      * @return the serviceId
      */
     String addSvnToProject(projectId, RESTClient restClient = null) {
-        def body = [:]
-        if (!restClient || true) {
+        def body = createFullCredentialsMap()
+        if (!restClient) {
             restClient = createRestClient()
             body = createFullCredentialsMap()
         }
