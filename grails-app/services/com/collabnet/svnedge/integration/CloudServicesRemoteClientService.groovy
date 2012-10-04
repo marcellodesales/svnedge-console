@@ -322,7 +322,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
             def resp = hre.response
             def data = resp.data
             def error = resp.data['error']
-            if (error?.contains('shortName has already been taken')) {
+            if (error?.contains('shortName')) {
                 throw new InvalidNameCloudServicesException()
                 // current error message is:
                 // Failed to create project: You already have NN out of NN projects.
@@ -614,7 +614,7 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
      */
     String addSvnToProject(projectId, RESTClient restClient = null) {
         def body = [:]
-        if (!restClient) {
+        if (!restClient || true) {
             restClient = createRestClient()
             body = createFullCredentialsMap()
         }
@@ -902,11 +902,13 @@ class CloudServicesRemoteClientService extends AbstractSvnEdgeService {
     
     private String getCloudSvnURI(repoName, serviceId, restClient) {
         long waitTime = 100
+        def params = createFullCredentialsMap()
         try {
             // gives about 6 min 45 seconds for service to initialize
             while (waitTime < 300000) {
                 Thread.sleep(waitTime)
                 def resp = restClient.get(path: "services/${serviceId}.json",
+                                          query: params, 
                                           requestContentType: URLENC)
                 if (resp.status == 200) {
                     def data = resp.data

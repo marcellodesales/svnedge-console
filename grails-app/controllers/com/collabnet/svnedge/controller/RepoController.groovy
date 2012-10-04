@@ -446,6 +446,9 @@ class RepoController {
     def addBkupSchedule = { DumpBean cmd ->
         params.remove('_action_addBkupSchedule')
         updateBkupSchedule(cmd)
+        if (flash.error) {
+            flash.tabPane = 'newJobs'
+        }
     }
 
     private def parseCombinedIds() {

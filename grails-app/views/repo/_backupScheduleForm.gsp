@@ -135,7 +135,7 @@
       <div class="controls">
                 <g:if test="${flash['nameAdjustmentRequired' + repositoryInstance.id]}">
                   <input type="text" name="${'cloudName' + repositoryInstance.id}"
-                         value="${params['cloudName' + repositoryInstance.id] ?: repositoryInstance.cloudName ?: repositoryInstance.name}"/>
+                         value="${params['cloudName' + repositoryInstance.id] ?: repositoryInstance.cloudName ?: repositoryInstance.name.replace('.', '_')}"/>
                 </g:if>
                 <g:elseif
                         test="${repositoryInstance.cloudName && repositoryInstance.cloudName != repositoryInstance.name}">${repositoryInstance.cloudName}</g:elseif>
@@ -158,17 +158,18 @@
         <g:if test="${!repositoryInstance}">
           <div class="tabbable">
             <ul class="nav nav-tabs">
-              <li class="active"><a href="#existingJobs" data-toggle="tab" id="existingJobsLink"><g:message code="repository.page.bkupSchedule.job.existingJobs"/></a></li>
-              <li><a href="#newJobs" data-toggle="tab" id="newJobsLink"><g:message code="repository.page.bkupSchedule.job.newJobs"/></a></li>
+              <li<g:if test="${flash['tabPane'] != 'newJobs'}"> class="active"</g:if>><a href="#existingJobs" data-toggle="tab" id="existingJobsLink"><g:message code="repository.page.bkupSchedule.job.existingJobs"/></a></li>
+              <li<g:if test="${flash['tabPane'] == 'newJobs'}"> class="active"</g:if>><a href="#newJobs" data-toggle="tab" id="newJobsLink"><g:message code="repository.page.bkupSchedule.job.newJobs"/></a></li>
            </ul>
            <div class="tab-content">
-             <div class="tab-pane active" id="existingJobs">
+             <div class="tab-pane<g:if test="${flash['tabPane'] != 'newJobs'}"> active</g:if>" id="existingJobs">
         </g:if>
 
           <table id="jobDataTable" class="table table-striped table-bordered table-condensed"></table>
           <script type="text/javascript">
             var repoJobMap = {};
             <g:each in="${repoList}" status="j" var="repoMap">
+              <g:set var="cloudActivationRequired" value="${false}"/>
               jobList = [];
               repoJobMap['id${repoMap.repoId}'] = jobList;
               <g:each in="${repoBackupJobMap[repoMap.repoId]}" status="i" var="job">
@@ -220,13 +221,14 @@
 
         <g:if test="${!repositoryInstance}">
           </div>
-          <div class="tab-pane" id="newJobs">
+          <div class="tab-pane<g:if test="${flash['tabPane'] == 'newJobs'}"> active</g:if>" id="newJobs">
           
           <table id="newJobDataTable" class="table table-striped table-bordered table-condensed"></table>
           <script type="text/javascript">
             /* Data set */
             var newJobDataSet = [
               <g:each in="${repoList}" status="i" var="repoMap">
+                <g:set var="cloudNameChangeRequired" value="${false}"/>
                 <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + repoMap.repoId]}">
                   <g:set var="cloudNameChangeRequired" value="${true}"/>
                 </g:if>
@@ -366,26 +368,29 @@
     });
   });
   
+  var cloudNameRepoIds = [];
+  
   function renderRepoName(oObj, sVal) {
-          repoId = sVal.split("|")[0]
-          repoName = sVal.split("|")[1]
-          cloudName = sVal.split("|")[2] 
-          cloudNameRequired = sVal.split("|")[3] == 'nc'
-          cloudNameParam = sVal.split("|")[4]
+          var repoId = sVal.split("|")[0]
+          var repoName = sVal.split("|")[1]
+          var cloudName = sVal.split("|")[2] 
+          var cloudNameRequired = sVal.split("|")[3] == 'nc'
+          var cloudNameParam = sVal.split("|")[4]
            
-          out = repoName
+          var out = repoName
           // if "cloud name change required", indicated in third token, show form element
           if (cloudNameRequired) {
             // if no param from previous form submit, prefill form element with cloud or repo name
             if (cloudNameParam.length == 0 ) {
-                cloudNameParam = (cloudName.length > 0) ? cloudName : repoName;
+                cloudNameParam = ((cloudName.length > 0) ? cloudName : repoName).replace('.', '_');
             }
             out += 
             '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-            '<label><g:message code="repository.page.bkupSchedule.cloudName"/>' +
+            '<label><g:message code="repository.page.bkupSchedule.cloudName"/> ' +
               '<input type="text" name="cloudName' + repoId + '"' +
                      ' value="' + cloudNameParam + '" size="30"/>' +
-            '</label>'
+            '</label>';
+            cloudNameRepoIds.push(repoId);
           }
           else if (cloudName.length > 0 && cloudName != repoName) {
             out += " (" + cloudName + ")"
@@ -521,6 +526,9 @@
         $('input.listViewSelectAll').removeAttr("checked");
         $('input.listViewSelectItem').removeAttr("checked");
       });
+    }
+    for (var i = 0; i < cloudNameRepoIds.length; i++) {
+        $("#listViewItem_" + cloudNameRepoIds[i]).click(); //attr("checked", true);
     }
   });
  </g:if>
