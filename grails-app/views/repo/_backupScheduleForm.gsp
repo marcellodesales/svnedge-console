@@ -179,9 +179,10 @@
                <g:if test="${!repositoryInstance && flash['nameAdjustmentRequired' + job.repoId]}">
                  <g:set var="cloudNameChangeRequired" value="${true}"/>
                </g:if>
+               var cloudNameParam = "${params['cloudName' + job.repoId] == null ? '' : params['cloudName' + job.repoId]}";
                jobList.push(['${job.repoId}__${JavaScriptUtils.javaScriptEscape(job.id)}|${job.typeCode}|${job.keepNumber}|${job.schedule?.frequency}|${job.schedule?.hour}|${job.schedule?.minute}|${job.schedule?.dayOfWeek}',
                <g:if test="${!repositoryInstance}">
-                 '${job.repoId}|<%=JavaScriptUtils.javaScriptEscape(job.repoName)%>|${JavaScriptUtils.javaScriptEscape(job.cloudName)}|${(cloudNameChangeRequired) ? "nc" : ""}|${JavaScriptUtils.javaScriptEscape(params['cloudName' + job.repoId])}',
+                 '${job.repoId}|<%=JavaScriptUtils.javaScriptEscape(job.repoName)%>|${JavaScriptUtils.javaScriptEscape(job.cloudName)}|${(cloudNameChangeRequired) ? "nc" : ""}|${JavaScriptUtils.javaScriptEscape(cloudNameParam)}',
                </g:if>
                '${job.type}|${(cloudActivationRequired) ? "ca" : ""}',
                '${job.scheduleFormatted}',
@@ -369,7 +370,8 @@
   });
   
   var cloudNameRepoIds = [];
-  
+  var isCheckCloudNameRepos = false;
+
   function renderRepoName(oObj, sVal) {
           var repoId = sVal.split("|")[0]
           var repoName = sVal.split("|")[1]
@@ -390,7 +392,9 @@
               '<input type="text" name="cloudName' + repoId + '"' +
                      ' value="' + cloudNameParam + '" size="30"/>' +
             '</label>';
-            cloudNameRepoIds.push(repoId);
+            if (isCheckCloudNameRepos) {
+              cloudNameRepoIds.push(repoId);
+            }
           }
           else if (cloudName.length > 0 && cloudName != repoName) {
             out += " (" + cloudName + ")"
@@ -466,6 +470,7 @@
    })
    
  <g:if test="${!repositoryInstance}">
+  isCheckCloudNameRepos = true;
   var newJobdt = $('#newJobDataTable').dataTable( {
       "aaData": newJobDataSet,
       "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
@@ -528,7 +533,9 @@
       });
     }
     for (var i = 0; i < cloudNameRepoIds.length; i++) {
-        $("#listViewItem_" + cloudNameRepoIds[i]).click(); //attr("checked", true);
+        $("#listViewItem_" + cloudNameRepoIds[i]).attr('checked', true);
+        $("#listViewItem_" + cloudNameRepoIds[i]).click();
+        $("#listViewItem_" + cloudNameRepoIds[i]).attr('checked', true);
     }
   });
  </g:if>
