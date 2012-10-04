@@ -145,6 +145,17 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
            if (isServerChanges) {
                server.save()
            }
+           
+           if (!ctf.exSystemId) {
+               File repoParent = new File(server.repoParentDir)
+               File idFile = new File(repoParent, ".scm.properties")
+               if (idFile.exists()) {
+                   Properties pp = new Properties()
+                   idFile.withReader { pp.load(it) }
+                   ctf.exSystemId = pp.getProperty('external_system_id')
+               }
+           }
+           
            if (ctf.ctfUsername) {
                runAsync {
                    URL appUrl = new URL(server.useSslConsole ? 'https' : 'http',

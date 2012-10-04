@@ -28,7 +28,7 @@ class CtfServer {
     static transients = ['webAppUrl']
 
     private String baseUrl
-    private String mySystemId
+    String mySystemId
     String internalApiKey
     String ctfUsername
     String ctfPassword
@@ -41,23 +41,6 @@ class CtfServer {
     public String getBaseUrl() {
         return baseUrl
     }
-    
-    public String getMySystemId() {
-        if (!mySystemId) {
-            File repoParent = new File(Server.getServer().repoParentDir)
-            File idFile = new File(repoParent, ".scm.properties")
-            if (idFile.exists()) {
-                Properties p = new Properties()
-                idFile.withReader { p.load(it) }
-                mySystemId = p.getProperty('external_system_id')
-            }
-        }
-        return mySystemId
-    }
-    
-    public void setMySystemId(String id) {
-        this.mySystemId = id
-    }    
     
     public String getWebAppUrl() {
         return baseUrl + "/sf";
