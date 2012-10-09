@@ -42,25 +42,37 @@
 <g:if test="${adminView}">
   <div class="pull-right">
   <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
-    <g:if test="${!isManaged}">
+    <g:if test="${!isManagedMode}">
       <g:listViewActionButton action="create" minSelected="0" maxSelected="0"><g:message code="default.button.create.label" /></g:listViewActionButton>
     </g:if>
-   <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
+    <g:if test="${!isReplicaServer}">
+      <g:listViewActionButton action="discover" minSelected="0" maxSelected="0"><g:message code="repository.page.list.button.discover.label" /></g:listViewActionButton>
+    </g:if>
   </g:ifAnyGranted>
    <g:listViewActionButton action="show" minSelected="1" maxSelected="1"><g:message code="default.button.show.label" /></g:listViewActionButton>
-  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
+  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">  
    <g:listViewActionButton action="dumpOptions" minSelected="1" maxSelected="1">
      <g:message code="repository.page.list.button.dump.label"/>
    </g:listViewActionButton>
    <g:listViewActionButton action="verify" minSelected="1" maxSelected="1"><g:message code="default.button.verify.label" /></g:listViewActionButton>
-   <g:listViewActionButton action="loadOptions" minSelected="1" maxSelected="1">
-     <g:message code="repository.page.list.button.load.label"/>
-   </g:listViewActionButton>
-   <g:if test="${!isManaged}">
+   <g:if test="${!isReplicaServer}">
+     <g:listViewActionButton action="loadOptions" minSelected="1" maxSelected="1">
+       <g:message code="repository.page.list.button.load.label"/>
+     </g:listViewActionButton>
+   </g:if>
+   <g:if test="${!isManagedMode}">
      <g:listViewActionButton action="deleteMultiple" minSelected="1" maxSelected="1"
                              confirmMessage="${message(code:'repository.page.list.delete.confirmation')}"
                              confirmByTypingThis="${message(code:'default.confirmation.typeThis')}">
        <g:message code="default.button.delete.label"/>
+     </g:listViewActionButton>
+   </g:if>
+   <g:if test="${isReplicaServer}">
+     <g:listViewActionButton action="replicaSyncRepo" minSelected="1">
+       <g:message code="repository.page.list.button.replicaSyncRepo.label"/>
+     </g:listViewActionButton>
+     <g:listViewActionButton action="replicaSyncRevprops" minSelected="1">
+       <g:message code="repository.page.list.button.replicaSyncRevprops.label"/>
      </g:listViewActionButton>
    </g:if>
    </g:ifAnyGranted>
@@ -88,7 +100,7 @@
         },
         "sSearch": "${message(code:'default.filter.label')}",
         "sZeroRecords": "${message(code:'default.search.noResults.message')}",
-        "sEmptyTable": "${(isReplica) ? message(code:'repository.page.list.replica.noRepos') : message(code:'repository.page.list.noRepos')}",
+        "sEmptyTable": "${(isReplicaServer) ? message(code:'repository.page.list.replica.noRepos') : message(code:'repository.page.list.noRepos')}",
         "sInfo": "${message(code:'datatable.showing')}",
         "sInfoEmpty": "${message(code:'datatable.showing.empty')}",
         "sInfoFiltered": " ${message(code:'datatable.filtered')}"
@@ -109,7 +121,7 @@
         },
         {"sTitle": "${message(code:'repository.page.list.name')}",
          "fnRender": function ( oObj, sVal ) {
-           <g:if test="${isManaged}">
+           <g:if test="${isManagedMode}">
            var template = 'REPO';
            </g:if>
            <g:else>

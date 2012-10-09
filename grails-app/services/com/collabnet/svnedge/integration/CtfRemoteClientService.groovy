@@ -982,7 +982,9 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
         try {
             def runningCommandIds = []
             for (cmd in runningCommands) {
-                runningCommandIds << cmd.commandId
+                if (ReplicationService.isCtfCommand(cmd.commandId)) {
+                    runningCommandIds << cmd.commandId
+                }
             }
             def soap = this.makeScmListenerClient(ctfUrl)
             def queuedCommands = (String[]) soap.invoke("getReplicaQueuedCommands", 

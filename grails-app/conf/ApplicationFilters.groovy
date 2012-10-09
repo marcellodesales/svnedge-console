@@ -108,14 +108,6 @@ class ApplicationFilters {
                     redirect(controller: "status")
                     return false
                 }
-                // prohibited actions in Replica mode only
-                if (isReplicaServer && ["repo"].contains(controllerName)) {
-                    flash.error = app.getMainContext().getMessage(
-                            "filter.probihited.mode.managed", null,
-                            request.locale)
-                    redirect(controller: "status")
-                    return false
-                }
             }
 
             // after running the action, add "featureList" to the page model
@@ -130,7 +122,7 @@ class ApplicationFilters {
 
                 // default list of features for all users
                 def featureList = []
-                if (!isManagedMode || (isIntegrationServer && isSuperUser)) {
+                if (!isManagedMode || isSuperUser) {
                     featureList << "repo"
                 }
 

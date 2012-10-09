@@ -16,9 +16,11 @@
       </li>
       </g:if>
 
+      <g:if test="${!isReplicaServer}">
       <li<g:if test="${controllerName == 'repo' && actionName == 'bkupScheduleMultiple'}"> class="active"</g:if>>
           <g:link controller="repo" action="bkupScheduleMultiple"><g:message code="repository.page.leftnav.backup" /></g:link>
       </li>
+      </g:if>
 
       <g:if test="${!isManagedMode}">
       <li<g:if test="${controllerName == 'repoTemplate'}"> class="active"</g:if>>

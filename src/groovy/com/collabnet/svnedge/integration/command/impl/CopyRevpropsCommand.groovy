@@ -44,9 +44,6 @@ public class CopyRevpropsCommand extends AbstractRepositoryCommand
         if (!this.params.repoName) {
             throw new IllegalArgumentException("The repoPath path must be provided")
         }
-        if (!this.params.revision) {
-            throw new IllegalArgumentException("The revision number from which to copy properties must be provided")
-        }
 
         def repoName = getRepoName()
         def repoRecord = Repository.findByName(repoName)
@@ -86,10 +83,14 @@ public class CopyRevpropsCommand extends AbstractRepositoryCommand
     def execCopyRevprops(repoPath, revision, username, password, syncRepoURI) {
         log.info("Copying revprops on '${repoPath}' for " +
                 "revision '${revision}")
-        def command = [ConfigUtil.svnsyncPath(), "copy-revprops", syncRepoURI, revision,
+        def command = [ConfigUtil.svnsyncPath(), "copy-revprops", syncRepoURI]
+        if (revision) {
+            command << revision
+        }
+        command.addAll([
                 "--source-username", username, "--source-password", password,
                 "--non-interactive", "--no-auth-cache", "--config-dir",
-                ConfigUtil.svnConfigDirPath()]
+                ConfigUtil.svnConfigDirPath()])
 
         executeShellCommand(command)
         log.info("Done syncing repoPath '${repoPath}'.")

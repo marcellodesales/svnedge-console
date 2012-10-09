@@ -28,6 +28,7 @@ import com.collabnet.svnedge.integration.command.event.CommandTerminatedEvent
 import com.collabnet.svnedge.integration.command.event.ConnectivityWithReplicaManagerRestoredEvent
 import com.collabnet.svnedge.integration.command.event.ReplicaCommandsExecutionEvent
 import com.collabnet.svnedge.integration.RemoteMasterException
+import com.collabnet.svnedge.integration.ReplicationService
 
 import org.springframework.context.ApplicationListener
 
@@ -213,14 +214,15 @@ public class CommandResultDeliveryService extends AbstractSvnEdgeService
      */
     def reportTerminatedCommandResult(commandContext, commandResult) {
         try {
-            log.debug("Attempting to deliver the command result " +
-                "${commandResult.commandId} -> ${commandResult.succeeded}.")
-            // attempt to deliver the result to the Replica manager
-            transmitCommandResult(commandContext, commandResult)
-
             def succeeded = commandResult.succeeded ? "SUCEEDED" : "FAILED"
-            log.debug("Result successfully acknowledged the command " +
-                "${commandResult.commandId} -> ${succeeded}.")
+            if (ReplicationService.isCtfCommand(commandResult.commandId)) {
+                log.debug("Attempting to deliver the command result " +
+                        "${commandResult.commandId} -> ${succeeded}.")
+                // attempt to deliver the result to the Replica manager
+                transmitCommandResult(commandContext, commandResult)
+                log.debug("Result successfully acknowledged the command " +
+                    "${commandResult.commandId} -> ${succeeded}.")
+            }
 
             publishEvent(new CommandResultReportedEvent(this, commandResult))
 

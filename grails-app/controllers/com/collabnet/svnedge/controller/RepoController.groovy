@@ -43,6 +43,7 @@ class RepoController {
     def statisticsService
     def fileUtil
     def authenticateService
+    def replicationService
 
     @Secured(['ROLE_USER'])
     def index = { redirect(action: list, params: params) }
@@ -56,27 +57,26 @@ class RepoController {
         def server = Server.getServer()
         def repoList
         // in Managed Mode, only super user can access the repo listing
-        if (server.mode == ServerMode.MANAGED &&
+        if (server.managedByCtf() &&
                 !authenticateService.ifAnyGranted("ROLE_ADMIN")) {
             flash.error = message(code: "filter.probihited.mode.managed")
             redirect(controller: "status")
             return
         }
-
-        if (server.mode == ServerMode.REPLICA) {
-            if (params.sort == "name") {
-                repoList = ReplicatedRepository.listSortedByName(params)
-            } else {
-                repoList = ReplicatedRepository.list(params)
-            }
-        } else {
-            repoList = Repository.list(params)
-        }
-        [repositoryInstanceList: repoList,
+        
+        repoList = Repository.list(params)
+        def model = [repositoryInstanceList: repoList,
                 repositoryInstanceTotal: Repository.count(),
-                server: server, isReplica: server.mode == ServerMode.REPLICA,
-                isManaged: server.mode == ServerMode.MANAGED
+                server: server
         ]
+        /*
+        if (server.mode == ServerMode.REPLICA) {
+            File progressLog = replicationService.synchronizeRepositoriesLogFile()
+            if (progressLog.exists()) {
+                
+            }
+        }
+        */
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
@@ -276,8 +276,11 @@ class RepoController {
     }
     
     private String firstTabView() {
+        if (Server.server.mode == ServerMode.REPLICA) {
+            return 'reports'
+        }
         return authenticateService.ifAnyGranted('ROLE_ADMIN,ROLE_ADMIN_HOOKS') ?
-                'hooksList' : 'dumpFileList'
+                'hooksList' : 'dumpFileList'   
     }
 
     @Secured(['ROLE_USER'])
@@ -1347,7 +1350,46 @@ class RepoController {
         }
         redirect([action: 'list'])
     }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def replicaSyncRepo = {
+        def ids = selectRepositoryIds()
+        try {
+            replicationService.synchronizeRepositories(ids, request.locale)
+            flash.unfiltered_message = message(code: 'repository.action.replicaSyncRepos.success')
+        } catch (IllegalStateException e) {
+            flash.message = message(code: 'repository.action.replicaSyncRepos.inProgress')
+        }
+        redirect([action: 'list'])
+    }
     
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+    def replicaSyncRevprops = {
+        def ids = selectRepositoryIds()
+        try {
+            replicationService.synchronizeRevprops(ids, request.locale)
+            flash.unfiltered_message = message(code: 'repository.action.replicaSyncRevprops.success')
+        } catch (IllegalStateException e) {
+            flash.message = message(code: 'repository.action.replicaSyncRevprops.inProgress')
+        }
+        redirect([action: 'list'])
+    }
+
+    private def selectRepositoryIds() {
+        def id = params.id
+        if (id) {
+            return [id]
+        }
+
+        def ids = ControllerUtil.getListViewSelectedIds(params)
+        if (!ids) {
+            flash.error = message(code: 'repository.action.not.found',
+                        args: ['null'])
+            redirect(action: list)
+        }
+        return ids
+    }
+
     /**
      * helper to format a SchedulerBean instance to a human-readable string
      * @param s
