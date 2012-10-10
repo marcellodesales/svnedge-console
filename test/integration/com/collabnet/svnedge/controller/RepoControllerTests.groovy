@@ -30,6 +30,8 @@ import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.Repository 
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.domain.integration.ApprovalState
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.icegreen.greenmail.util.GreenMailUtil
 import com.icegreen.greenmail.util.ServerSetupTest
 import org.springframework.mock.web.MockMultipartHttpServletRequest
@@ -45,6 +47,8 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
     def operatingSystemService
     def quartzScheduler
     def jobsAdminService
+    def executorService    
+    def replicaCommandSchedulerService
 
     def repoNameNew = "integration_test_new_repo"
     def repoNameExisting = "integration_test_existing_repo"
@@ -445,4 +449,37 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         
         controller.svnRepoService = svnRepoService
     }
+    
+    private void setupReplica() {
+        def rConf = ReplicaConfiguration.currentConfig
+        if (!rConf) {
+            rConf = new ReplicaConfiguration(svnMasterUrl: null,
+                name: "Test Replica", description: "Super replica",
+                message: "Auto-approved", systemId: "replica1001",
+                commandPollRate: 5, approvalState: ApprovalState.APPROVED)
+            rConf.save()
+        }
+        executorService.execute {
+            replicaCommandSchedulerService.schedulerSynchronizer.take()
+        }
+    }
+    
+    void testReplicaSyncRepo() {
+        setupReplica()
+        controller.params.id = repoExisting.id
+        def model = controller.replicaSyncRepo()
+        assertEquals "Expected sync scheduled success message",
+                controller.message(code: 'repository.page.action.replicaSyncRepo.success'),
+                controller.flash.message
+    }
+
+    void testReplicaSyncRevprops() {
+        setupReplica()
+        controller.params.id = repoExisting.id
+        def model = controller.replicaSyncRevprops()
+        assertEquals "Expected sync scheduled success message",
+                controller.message(code: 'repository.page.action.replicaSyncRevprops.success'),
+                controller.flash.message
+    }
+
 }

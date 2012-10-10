@@ -163,39 +163,46 @@ class CsvnTagLib {
         def buttonId = "listViewAction_${attrs.action}"
         def modalId = "listViewAction_${attrs.action}_confirm"
         def confirmDialogTextId = "_confirmDialogText_${attrs.action}"
+        def label = (attrs.dialog ? (attrs.label ?: "Missing label attribute!!!") : body()).trim()
+        def dialogTitle = attrs.dialogTitle ?: "${message(code: 'default.confirmation.title')}"
         
         // html button and modal dialog (if needed) 
         out << "<input id='${buttonId}' type='submit' class='${styleClasses} listViewAction' "
         out << " name='_action_${attrs.action}' "
-        out << " value='${body().trim()}'"
-        if (attrs.confirmMessage) {
+        out << " value='${label}'"
+        if (attrs.confirmMessage || attrs.dialog) {
             out << " data-toggle='modal' data-target='#${modalId}'"
         }
         out << "/>"
-        if (attrs.confirmMessage) {
+        if (attrs.confirmMessage || attrs.dialog) {
             out << """
             <div id="${modalId}" class="modal hide fade" style="display: none">
             <div class="modal-header">
               <a class="close" data-dismiss="modal">&times;</a>
-              <h3>${message(code: 'default.confirmation.title')}</h3>
+              <h3>${dialogTitle}</h3>
             </div>
             <div class="modal-body">
-              <p>${attrs.confirmMessage}</p>
             """
+           
+            if (attrs.dialog) {
+                out << body()
+            }
+            else if (attrs.confirmMessage) {
+                out << "<p>${attrs.confirmMessage}</p>\n"
 
-            if (attrs.confirmByTypingThis) {
-                out << """
+                if (attrs.confirmByTypingThis) {
+                    out << """
                 <p>${message(code: 'default.confirmation.typeThis.prompt')} ${attrs.confirmByTypingThis}</p>
                 """
-            }
+                }
 
-            if (attrs.confirmByTypingThis || attrs.textInput) {
-                out << """
+                if (attrs.confirmByTypingThis || attrs.textInput) {
+                    out << """
                 <p><input id="${confirmDialogTextId}" name="${confirmDialogTextId}"
                 type="text" size="20"/></p>
                 """
+                }
             }
-
             out << """
             </div>
             <div class="modal-footer">
@@ -213,7 +220,7 @@ class CsvnTagLib {
         out << "  button.data('maxSelected', ${attrs.maxSelected ?: 10000000});\n"
         
         // script for displaying a confirmation dialog 
-        if (attrs.confirmMessage) {
+        if (attrs.confirmMessage || attrs.dialog) {
             out << """
             var submitAction = function() { 
                 var button = \$("#${buttonId}");

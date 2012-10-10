@@ -71,8 +71,21 @@
      <g:listViewActionButton action="replicaSyncRepo" minSelected="1">
        <g:message code="repository.page.list.button.replicaSyncRepo.label"/>
      </g:listViewActionButton>
-     <g:listViewActionButton action="replicaSyncRevprops" minSelected="1">
-       <g:message code="repository.page.list.button.replicaSyncRevprops.label"/>
+     <g:listViewActionButton action="replicaSyncRevprops" minSelected="1" maxSelected="1"
+         dialog="true" dialogTitle="${message(code: 'repository.page.list.replicaSyncRevprops.confirmation')}"
+         label="${message(code: 'repository.page.list.button.replicaSyncRevprops.label')}">
+       <div class="control-group" id="revision">
+         <div class="controls">
+           <label class="radio">
+             <g:radio class="inline" id="specifiedRevision" name="revisionType" value="specified" checked="checked"/>
+                 <g:message code="repository.page.list.replicaSyncRevprops.revision"/></label>
+                 <input name="revision" id="revision" onclick="$('#specifiedRevision').attr('checked', true);"/>
+           <label class="radio">
+             <g:radio id="allRevision" name="revisionType" value="all"/>
+               <g:message code="repository.page.list.replicaSyncRevprops.revision.all"/>
+           </label>
+         </div>
+       </div>
      </g:listViewActionButton>
    </g:if>
    </g:ifAnyGranted>
@@ -112,10 +125,10 @@
       <g:if test="${adminView}">  
       "aaSorting": [[ 1, "asc" ]],
       "aoColumns": [
-        {"sTitle": "", 
+        {"sTitle": "<g:if test="${isReplicaServer}"><g:listViewSelectAll name="datatableSelectAll"/></g:if>", 
          "bSortable": false,
          "fnRender": function (oObj, sVal) {
-           var template = '<input type="checkbox" class="listViewSelectItem radio" id="listViewItem_ID" name="listViewItem_ID"/>'
+           var template = '<input type="checkbox" class="listViewSelectItem<g:if test="${!isReplicaServer}"> radio</g:if>" id="listViewItem_ID" name="listViewItem_ID"/>'
            return template.replace(/ID/g, sVal);
          }
         },

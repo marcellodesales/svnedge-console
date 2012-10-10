@@ -1354,24 +1354,30 @@ class RepoController {
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def replicaSyncRepo = {
         def ids = selectRepositoryIds()
-        try {
-            replicationService.synchronizeRepositories(ids, request.locale)
-            flash.unfiltered_message = message(code: 'repository.action.replicaSyncRepos.success')
-        } catch (IllegalStateException e) {
-            flash.message = message(code: 'repository.action.replicaSyncRepos.inProgress')
-        }
+        replicationService.synchronizeRepositories(ids, request.locale)
+        flash.unfiltered_message = message(code: 'repository.action.replicaSyncRepos.success')
         redirect([action: 'list'])
     }
     
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
     def replicaSyncRevprops = {
-        def ids = selectRepositoryIds()
-        try {
-            replicationService.synchronizeRevprops(ids, request.locale)
-            flash.unfiltered_message = message(code: 'repository.action.replicaSyncRevprops.success')
-        } catch (IllegalStateException e) {
-            flash.message = message(code: 'repository.action.replicaSyncRevprops.inProgress')
-        }
+        Repository repo = selectRepository()
+        if (repo) {
+            def revision = null 
+            if (params.revisionType == 'specified') {
+                revision = params.revision
+                if (!revision) {
+                    flash.error = message(code: 'repository.action.replicaSyncRevprops.noRevision')
+                    redirect([action: 'list'])
+                    return
+                }
+            }
+            replicationService.synchronizeRevprops(repo, revision, request.locale)
+            flash.unfiltered_message = revision ? 
+                    message(code: 'repository.action.replicaSyncRevprops.success.revision',
+                            args: [revision]) :
+                    message(code: 'repository.action.replicaSyncRevprops.success')
+        } 
         redirect([action: 'list'])
     }
 

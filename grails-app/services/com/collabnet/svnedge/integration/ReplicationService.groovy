@@ -52,7 +52,7 @@ class ReplicationService extends AbstractSvnEdgeService {
         queueCommands(repoIds, locale, 'repoSync', SYNC_ID_PREFIX)
     }
         
-    private void queueCommands(repoIds, locale, cmdCode, cmdIdPrefix) {
+    private void queueCommands(repoIds, locale, cmdCode, cmdIdPrefix, params = null) {
         def executionContext = new CommandsExecutionContext()
         executionContext.appContext = grailsApplication.mainContext
         CtfServer ctfServer = CtfServer.server
@@ -61,12 +61,16 @@ class ReplicationService extends AbstractSvnEdgeService {
         executionContext.logsDir = ConfigUtil.logsDirPath()
         def replica = ReplicaConfiguration.getCurrentConfig()
         executionContext.replicaSystemId = replica.systemId
-
+        
         def cmds = []
         repoIds?.each {
             Repository repo = Repository.get(it)
+            def cmdParams = [repoName: repo.name]
+            if (params) {
+                cmdParams.putAll(params)
+            }
             cmds << [id: cmdIdPrefix + commandIndex.incrementAndGet(), 
-                    params: [repoName: repo.name], code: cmdCode, repoName: repo.name]
+                    params: cmdParams, code: cmdCode, repoName: repo.name]
         }
 
         if (cmds) {
@@ -96,8 +100,9 @@ class ReplicationService extends AbstractSvnEdgeService {
         commandIndex = new AtomicInteger(startId)
     }
 
-    void synchronizeRevprops(repoIds, locale) {
-        queueCommands(repoIds, locale, 'copyRevprops', REVPROPS_ID_PREFIX)
+    void synchronizeRevprops(Repository repo, revision, locale) {
+        def params = revision ? [revision: revision] : null
+        queueCommands([repo.id], locale, 'copyRevprops', REVPROPS_ID_PREFIX, params)
     }
     
     static boolean isCtfCommand(String commandId) {
