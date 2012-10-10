@@ -158,6 +158,7 @@ class UserControllerTests extends ControllerUnitTestCase {
         controller.params.realUserName = "test User 2"
         controller.params.email = "test@test.com"
         controller.params.passwd = "clearPassword"
+        controller.params.passwordConfirm = "clearPassword"
         controller.params.authorities = "2"
 
         model = controller.save()

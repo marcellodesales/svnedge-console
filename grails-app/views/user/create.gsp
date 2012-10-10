@@ -6,11 +6,14 @@
 
       $('#passwd').on('keyup', passwordConfirm);
       $('#passwordConfirm').on('keyup', passwordConfirm);
+      $('.requirePasswordConfirm').on('click', passwordConfirm);
+      passwordConfirm();
     });
 
-    function passwordConfirm(e) {
-      var b = $('#passwd').attr("value") == $('#passwordConfirm').attr("value");
+    function passwordConfirm() {
+      var b = $('#passwd').val() == $('#passwordConfirm').val();
       $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
+      $('.requirePasswordConfirm').attr('disabled', !b);
       return b;
     }
 
@@ -32,16 +35,17 @@
       <input type="password" id="passwd" name="passwd"
          value="${fieldValue(bean: userInstance, field: 'passwd')}"/>
     </g:propControlsBody>
-    <g:propControlsBody bean="${userInstance}" field="passwordConfirm" required="true" prefix="user">
-      <input type="password" id="passwordConfirm" name="passwordConfirm"
-         value="${fieldValue(bean: userInstance, field: 'passwordConfirm')}"/>
-
-      <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
-      <img width="15" height="15" alt="Warning" align="bottom"
+    <div class="control-group${hasErrors(bean:userInstance,field:'passwd',' error')}">
+      <label class="control-label" for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/></label>
+      <div class="controls">
+        <input type="password" id="passwordConfirm" name="passwordConfirm" value=""/>
+        <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
+          <img width="15" height="15" alt="Warning" align="bottom"
                 src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
-      <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
-      </span>
-    </g:propControlsBody>
+          <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
+        </span>
+      </div>
+    </div>
     <g:propTextField bean="${userInstance}" field="email" required="true" prefix="user"/>
     <g:propTextField bean="${userInstance}" field="description" prefix="user"/>
 
@@ -55,7 +59,7 @@
     </g:propControlsBody>
     
     <div class="form-actions">
-      <input class="btn btn-primary" type="submit" value="${message(code: 'default.button.create.label')}" />
+      <input class="btn btn-primary requirePasswordConfirm" type="submit" value="${message(code: 'default.button.create.label')}" />
     </div>
   </g:form>
 </body>

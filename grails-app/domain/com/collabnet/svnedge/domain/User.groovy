@@ -21,7 +21,7 @@ package com.collabnet.svnedge.domain
  * User domain class.  Initial revision is mostly grails template code.
  */
 class User {
-    static transients = ['pass', 'passwordConfirm']
+    static transients = ['pass']
     static hasMany = [authorities: Role, props: UserProperty]
     static belongsTo = Role
 
@@ -31,7 +31,6 @@ class User {
     String realUserName
     /** MD5 Password */
     String passwd
-    String passwordConfirm
     /** enabled */
     boolean enabled = true
 
@@ -57,8 +56,6 @@ class User {
         })
         realUserName(blank: false)
         passwd(blank: false, minSize: 5, maxSize: 255,
-            matches: "[^\"]*")
-        passwordConfirm(blank: false, minSize: 5, maxSize: 255,
             matches: "[^\"]*")
         enabled()
     }

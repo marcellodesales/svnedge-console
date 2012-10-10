@@ -95,8 +95,13 @@ class UserController {
 
         // encode the passwd
         if (params.passwd) {
-            userInstance.passwd = authenticateService.encodePassword(
-                    params.passwd)
+            if (params.passwd == params.passwordConfirm) {
+                userInstance.passwd = authenticateService
+                        .encodePassword(params.passwd)
+            } else {
+                userInstance.errors.rejectValue('passwd',
+                        'user.passwd.mismatch')
+            }
         }
 
         if (!userInstance.hasErrors() && userInstance.save()) {

@@ -38,6 +38,11 @@
         <label class="control-label" for="confirmPasswd"><g:message code="user.page.edit.passwd.confirm"/></label>
         <div class="controls">
           <input type="password" id="confirmPasswd" name="confirmPasswd" value=""/>
+          <span id="passwordConfirmMessage" class="TextRequired" style="display: none;">
+            <img width="15" height="15" alt="Warning" align="bottom"
+                  src="${resource(dir: 'images/icons', file: 'icon_warning_sml.gif')}" border="0"/>
+            <g:message code="setupCloudServices.page.signup.passwordConfirm.notEqual"/>
+          </span>
         </div>
       </div>
     </div>
@@ -59,7 +64,7 @@
     </g:ifAnyGranted>
   
           <div class="form-actions">
-            <g:actionSubmit action="update" class="btn btn-primary save" value="${message(code:'user.page.edit.button.save')}" />
+            <g:actionSubmit action="update" class="btn btn-primary save requirePasswordConfirm" value="${message(code:'user.page.edit.button.save')}" />
             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
               <g:actionSubmit action="delete" class="btn delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"
                               data-toggle="modal" data-target="#confirmDelete" />
@@ -83,7 +88,7 @@
         </g:form>
 
 <g:javascript>
-<!--
+        <!--
 function showPasswdFields() {
     passwdRow.attr('disabled', false);
     passwdRow.show();
@@ -91,6 +96,7 @@ function showPasswdFields() {
     passwdConfirmRow.show();
     $("#passwd_change_link").hide();
     $("#passwd_change_active").val(true);
+    passwordConfirm();
 }
 
 function cancelPasswordChange() {
@@ -100,6 +106,7 @@ function cancelPasswordChange() {
     passwdConfirmRow.attr('disabled', true);
     $("#passwd_change_link").show();
     $("#passwd_change_active").val(false);
+    passwordConfirm();
 }
 
 var passwdRow = $("#passwd_row");
@@ -110,6 +117,24 @@ if (passwdErrors.length > 0) {
 } else {
     cancelPasswordChange();
 }
+
+$(function() {
+    $('#passwd').on('keyup', passwordConfirm);
+    $('#confirmPasswd').on('keyup', passwordConfirm);
+    $('.requirePasswordConfirm').on('click', passwordConfirm);
+    passwordConfirm();
+});
+
+function passwordConfirm() {
+    var isActive = $('#passwd_change_active').val() &&
+            $('#passwd_change_active').val() != 'false';
+    var b = !isActive || 
+            $('#passwd').val() == $('#confirmPasswd').val();
+    $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
+    $('.requirePasswordConfirm').attr('disabled', !b);
+    return b;
+}
+
 //-->
-</g:javascript>
+    </g:javascript>
 </body>
