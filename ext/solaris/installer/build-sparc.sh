@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=3.2.0
+VERSION=3.3.0
 OS=solaris-sparc
 PKG=/u1/hudson/pkg-tools/bin/pkg
 BUILD_TEMP=/u1/hudson/solaris-sparc/trunk
