@@ -49,7 +49,7 @@ class MailConfiguration {
     
     static constraints = {
         serverName(validator: isBlank, unique: true, matches: "\\S+", nullable: true)
-        port(validator: isBlank, range: 1..65535, nullable: true)
+        port(validator: isBlank, range: 1..65535)
         authUser(nullable:true)
         authPass(nullable: true)
         authMethod(nullable:true)

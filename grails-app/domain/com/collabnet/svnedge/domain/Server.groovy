@@ -138,7 +138,7 @@ class Server {
                 }
             }
         })
-        ldapServerPort(nullable: true, min:1, max: 65535, validator: { val, obj ->
+        ldapServerPort(min:1, max: 65535, validator: { val, obj ->
             if (obj.ldapEnabled) {
                 if (!val || val.equals("")) {
                     return ['blank']
