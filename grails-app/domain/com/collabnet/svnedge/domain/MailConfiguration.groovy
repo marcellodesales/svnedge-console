@@ -17,6 +17,9 @@
  */
 package com.collabnet.svnedge.domain
 
+import javax.mail.internet.AddressException
+import javax.mail.internet.InternetAddress
+
 /**
  * Data on how to send mail. 
  * We expect there to be only one config object defined.
@@ -35,6 +38,14 @@ class MailConfiguration {
     
     String createFromAddress() {
         String addr = fromAddress
+        if (!addr && authUser?.contains('@')) {
+            try {
+                new InternetAddress(authUser)
+                addr = authUser
+            } catch (AddressException e) {
+                // ignore and use default
+            }
+        }
         if (!addr) {
             String host = serverName
             if (host.startsWith('smtp.')) {
@@ -42,7 +53,15 @@ class MailConfiguration {
             } else if (host.startsWith('exchange.')) {
                 host = host.substring(9)
             }
-            addr = (authUser ?: 'SubversionEdge') + '@' + host
+            def username = authUser
+            int atIndex = username?.indexOf('@') 
+            if (username && atIndex > 0) {
+                username = username.substring(0, atIndex)
+            }
+            if (!username) {
+                username = 'SubversionEdge' 
+            }   
+            addr = username + '@' + host
         }
         return addr
     }

@@ -34,6 +34,20 @@ class MailConfigurationTests extends GrailsUnitTestCase {
         super.tearDown()
     }
 
+    void testFromAddress() {
+        MailConfiguration mailConfig = new MailConfiguration(enabled: true, 
+                serverName: 'serverName.com', securityMethod: null, port: 3025)
+        assertEquals "Without authUser; From address is not correct", 
+                'SubversionEdge@serverName.com', mailConfig.createFromAddress()
+        mailConfig.authUser = 'simpleUsername'
+        assertEquals "With authUser; From address is not correct",
+                mailConfig.authUser + '@' + mailConfig.serverName,
+                mailConfig.createFromAddress()
+        mailConfig.authUser = 'emailUsername@notServerName.com'
+        assertEquals "With email authUser; From address is not correct",
+                mailConfig.authUser, mailConfig.createFromAddress()
+    }
+    
     void testConstraints() {
 
         // mock the grails domain class MailConfiguration
