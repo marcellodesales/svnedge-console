@@ -10,7 +10,11 @@
 
 [# setup page definitions]
 [is servermode "STANDALONE"]
-  [define page_title]Annotation of:[end]
+  [is annotation "annotated"]
+    [define page_title]Annotation of:[end]
+  [else]
+    [define page_title]Contents of:[end]
+  [end]
 [else]
   [define page_title]Contents of /[where][end]
 [end]
