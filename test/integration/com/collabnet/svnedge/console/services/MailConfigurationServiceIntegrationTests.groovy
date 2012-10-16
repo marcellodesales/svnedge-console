@@ -41,6 +41,7 @@ class MailConfigurationServiceIntegrationTests extends GrailsUnitTestCase {
 
     def mailConfigurationService
     def greenMail
+    def grailsApplication
     MailConfiguration mailConfig
     
     protected void setUp() {
@@ -53,6 +54,7 @@ class MailConfigurationServiceIntegrationTests extends GrailsUnitTestCase {
         user.email = "testUserMail@example.com"
         user.save()
         
+        ConfigurationHolder.config = grailsApplication.config
         mailConfig = new MailConfiguration(
                 serverName: 'localhost',
                 port: ServerSetupTest.SMTP.port,
