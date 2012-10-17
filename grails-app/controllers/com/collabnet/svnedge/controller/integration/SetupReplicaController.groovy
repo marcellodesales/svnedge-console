@@ -90,8 +90,10 @@ class SetupReplicaController {
                 
                 // save form input to session (in case tab is re-enterd)
                 def cmd = getCtfConnectionCommand()
-                BeanUtils.copyProperties(input, cmd)
-                
+                // if returning because user clicks tab, then input will be empty
+                if (input.ctfURL) {
+                    BeanUtils.copyProperties(input, cmd)
+                }
                 // fetch available external systems (error if none available)
                 externalSystems = fetchIntegrationServers()
                 if (!externalSystems) {
@@ -431,10 +433,10 @@ class SetupReplicaController {
     private ReplicaConversionBean getConversionBean(CtfConnectionCommand cmd) {
 
         ReplicaConversionBean b = getConversionBean();
-        b.ctfConn.ctfURL = cmd.ctfURL
-        b.ctfConn.ctfUsername = cmd.ctfUsername
-        b.ctfConn.ctfPassword = cmd.ctfPassword
-        b.ctfConn.serverKey = cmd.serverKey
+        b.ctfConn.ctfURL = cmd.ctfURL ?: b.ctfConn.ctfURL
+        b.ctfConn.ctfUsername = cmd.ctfUsername ?: b.ctfConn.ctfUsername
+        b.ctfConn.ctfPassword = cmd.ctfPassword ?: b.ctfConn.ctfPassword
+        b.ctfConn.serverKey = cmd.serverKey ?: b.ctfConn.serverKey
         return b
     }
 
@@ -445,10 +447,10 @@ class SetupReplicaController {
     private ReplicaConversionBean getConversionBean(ReplicaInfoCommand cmd) {
 
         ReplicaConversionBean b = getConversionBean();
-        b.masterExternalSystemId = cmd.masterExternalSystemId
-        b.name = cmd.name
-        b.description = cmd.description
-        b.message = cmd.message
+        b.masterExternalSystemId = cmd.masterExternalSystemId ?: b.masterExternalSystemId
+        b.name = cmd.name ?: b.name
+        b.description = cmd.description ?: b.description
+        b.message = cmd.message ?: b.message
         return b
     }
 
