@@ -81,12 +81,12 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
     void testUpdate() {
         lifecycleService.stopServer()
         def params = defaultParams()
-        params.port = "987652"
+        params.port = "7652"
         controller.update()
 
         File f = new File(config.svnedge.svn.dataDirPath, "conf/csvn_main_httpd.conf")
         assertTrue "${f.absolutePath} does not exist", f.exists()
-        assertTrue "Port directive was not updated.", (f.text.indexOf("Listen 987652") > 0)
+        assertTrue "Port directive was not updated.", (f.text.indexOf("Listen 7652") > 0)
     }
     
     void testEditAuthentication() {
