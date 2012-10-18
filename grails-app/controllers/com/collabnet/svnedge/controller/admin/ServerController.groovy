@@ -243,7 +243,7 @@ class ServerController {
         // since changes to Server seem to persist automatically with
         // call to service methods
         boolean portError = false
-        if (params.port?.isNumber() && params.port.toInteger() < 1024 ) {
+        if (params.port?.isInteger() && params.port.toInteger() < 1024 ) {
             lifecycleService.clearCachedResults()
             if (!lifecycleService.isDefaultPortAllowed()) {
                 portError = true
@@ -281,6 +281,13 @@ class ServerController {
                 
                 // validate, and reject port value if needed
                 server.validate()
+                // grails validation will coerce a float or anything containing
+                // some integer part to an integer, but let's make the user
+                // enter a valid int
+                if (!params.port.isInteger()) {
+                    server.errors.rejectValue("port",
+                        "typeMismatch.com.collabnet.svnedge.domain.Server.port")
+                }
                 if (portError) {
                     server.errors.rejectValue("port",
                         "server.port.defaultValue.rejected")

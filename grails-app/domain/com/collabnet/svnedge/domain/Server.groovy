@@ -110,7 +110,7 @@ class Server {
     static constraints = {
         useHttpV2(nullable: true)
         hostname(nullable: false, blank: false, unique: true)
-        port(min:80)
+        port(min:80, max: 65535)
         repoParentDir(nullable: false, blank: false, 
                 validator: { val, obj ->
                     def dirFile = new File(val)

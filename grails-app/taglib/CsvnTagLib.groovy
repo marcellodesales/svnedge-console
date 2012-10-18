@@ -421,6 +421,7 @@ class CsvnTagLib {
             def isInt = attrs['integer'] && attrs['integer'] != 'false'
             def value = fieldValue(bean: obj, field: fieldName)
             if (isInt) {
+                value = params[fieldName] ?: value
                 value = value.replace(',', '')
             }
             out << value << '" type="text"'
