@@ -79,8 +79,6 @@ class LogRotateJob {
     }
 
     def execute() {
-        serverConfService.writeLogConf()
-        lifecycleService.gracefulRestartServer()
         def server = Server.getServer()
         if (server.pruneLogsOlderThan != 0) {
             pruneLog(server.pruneLogsOlderThan)

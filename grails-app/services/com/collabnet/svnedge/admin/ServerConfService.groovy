@@ -552,43 +552,25 @@ ${sslSnippet}
         new File(confDirPath(), "csvn_main_httpd.conf").write(conf)
     }
 
-    def getLogFileSuffix() {
-        Calendar cal = Calendar.getInstance()
-        String suffix = String.valueOf(cal.get(Calendar.YEAR))
-        suffix = suffix + "_"
-
-        int month = cal.get(Calendar.MONTH)
-        /* Month index is starting from '0' so compare against 9.
-         * For october it is '9' below if condition would fail but
-         * month+1 i.e '10' would set the right format value.
-         */
-        if (month < 9) {
-            /*We need to prepend the 0*/
-            suffix = suffix + "0"
-        }
-        suffix = suffix + String.valueOf(month + 1)
-        suffix = suffix + "_"
-
-        int day = cal.get(Calendar.DAY_OF_MONTH)
-        if (day < 10) {
-            /*We need to prepend the 0*/
-            suffix = suffix + "0"
-        }
-
-        suffix = suffix + String.valueOf(day)
-        return suffix
-    }
-
     def writeLogConf() {
-        def dataDirPath = ConfigUtil.dataDirPath()
-        def logNameSuffix = getLogFileSuffix()
+        def binDirPath = ConfigUtil.binDirPath()
+        def rotatelogs = new File(binDirPath, 'rotatelogs').absolutePath
+                .replace('\\', '/')
+        def escapeQuote = '\\"'
+        if (isWindows()) {
+            rotatelogs += '.exe'
+        }
+        def pipeRotateLogs = "|${escapeQuote}${rotatelogs}${escapeQuote} -l"
+        def rotatePeriod = '86400'
+        def logsDirPath = ConfigUtil.logsDirPath().replace('\\', '/')
+        def logNameSuffix = "%Y_%m_%d"
         def logLevel = getServer().apacheLogLevel ?: ApacheLogLevel.WARN 
         def conf = """${DONT_EDIT}
 LogLevel ${logLevel.toString().toLowerCase()}
 LogFormat "%h %l %u %t \\\"%r\\\" %>s %b" common
-ErrorLog "${dataDirPath}/logs/error_${logNameSuffix}.log"
-CustomLog "${dataDirPath}/logs/access_${logNameSuffix}.log" common
-CustomLog "${dataDirPath}/logs/subversion_${logNameSuffix}.log" "%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T" env=SVN-ACTION
+ErrorLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/error_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}"
+CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/access_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" common
+CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/subversion_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" "%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T" env=SVN-ACTION
 """
         new File(confDirPath(), "csvn_logging.conf").write(conf)
     }

@@ -116,6 +116,11 @@ public final class ConfigUtil {
             new File(dataDirPath(), "logs").absolutePath
     }
 
+    def static binDirPath() {
+        return getConfig().svnedge.binDirPath ?:
+            new File(appHome(), "bin").absolutePath
+    }
+
     def static dumpDirPath() {
         return getConfig().svnedge.dumpDirPath ?:
             new File(dataDirPath(), "dumps").absolutePath
