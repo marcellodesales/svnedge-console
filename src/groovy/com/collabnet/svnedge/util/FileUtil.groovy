@@ -97,6 +97,8 @@ public class FileUtil {
         ZipArchiveOutputStream zos = null
         try {
             zos = new ZipArchiveOutputStream(zipFile)
+            zos.setCreateUnicodeExtraFields(ZipArchiveOutputStream
+                    .UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
             recursiveArchiveDirectory(directory.canonicalPath.length() + 1,
                     directory, zos, storePermissions, progress)
         }

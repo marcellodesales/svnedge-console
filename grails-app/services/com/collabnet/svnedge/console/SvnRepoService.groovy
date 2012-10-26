@@ -32,9 +32,9 @@ import com.collabnet.svnedge.domain.statistics.StatValue
 import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.util.ConfigUtil
 import groovy.io.FileType
-import java.util.zip.ZipEntry
-import java.util.zip.ZipFile
-import java.util.zip.ZipOutputStream
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.compress.archivers.zip.ZipFile
 import org.quartz.CronTrigger
 import org.quartz.JobDataMap
 import org.quartz.SimpleTrigger
@@ -510,9 +510,9 @@ class SvnRepoService extends AbstractSvnEdgeService {
             }
         }
         else if (isZip) {
-            def zipFile = new ZipFile(f)
+            ZipFile zipFile = new ZipFile(f)
             def firstEntry = null
-            zipFile.entries().each {
+            zipFile.entries.each {
                 if (!firstEntry) {
                     firstEntry = it.name
                 }
@@ -931,8 +931,8 @@ class SvnRepoService extends AbstractSvnEdgeService {
         // if the dumpfile ends in .zip, stream in the first ZipEntry to the load process
         def zipFile = null
         if (dumpFile.name.endsWith(".zip")) {
-            zipFile = new java.util.zip.ZipFile(dumpFile)
-            is = zipFile.getInputStream(zipFile.entries().nextElement())
+            zipFile = new ZipFile(dumpFile)
+            is = zipFile.getInputStream(zipFile.entries.nextElement())
         }
         else {
             is = dumpFile.newInputStream()
@@ -1152,19 +1152,23 @@ class SvnRepoService extends AbstractSvnEdgeService {
             File tempZipFile = new File(tempDumpFile.parentFile,
                     tempDumpFile.name + ".zip")
             def baseDumpFilename =
-            dumpFilename.substring(0, dumpFilename.length() - 4)
-            ZipOutputStream zos = null
+                    dumpFilename.substring(0, dumpFilename.length() - 4)
+
+            ZipArchiveOutputStream zos = null
             try {
-                zos = new ZipOutputStream(tempZipFile.newOutputStream())
-                ZipEntry ze = new ZipEntry(baseDumpFilename)
-                zos.putNextEntry(ze)
+                zos = new ZipArchiveOutputStream(tempZipFile)
+                zos.setCreateUnicodeExtraFields(ZipArchiveOutputStream
+                        .UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
+                ZipArchiveEntry ze = 
+                        new ZipArchiveEntry(tempDumpFile, baseDumpFilename)
+                zos.putArchiveEntry(ze)
                 tempDumpFile.withInputStream { zos << it }
-                zos.closeEntry()
-            } finally {
-                if (zos) {
-                    zos.close()
-                }
+                zos.closeArchiveEntry()
             }
+            finally {
+                zos?.close()
+            }
+
             println('repository.service.bkup.progress.compress.dump.file.done',
                     progress, locale)
             tempDumpFile.delete()
