@@ -174,7 +174,7 @@ class ReplicaCommandSchedulerService extends AbstractSvnEdgeService
             semaphoresWereUpdated()
         }
         // synchronize with the scheduler as new commands were offered.
-        schedulerSynchronizer.put(new Boolean(true))
+        schedulerSynchronizer.offer(new Boolean(true))
     }
 
     /**
