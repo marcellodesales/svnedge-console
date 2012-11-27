@@ -85,13 +85,28 @@ elif [ -f /etc/rc.status ] ; then
   . /etc/rc.status
 fi
 
+# Resolve the location of the 'id' command
+IDEXE="/usr/xpg4/bin/id"
+if [ ! -x "$IDEXE" ]  ; then
+  IDEXE="/usr/bin/id"
+  if [ ! -x "$IDEXE" ] ; then
+    echo "Unable to locate 'id'."
+    echo "Please report this message along with the location of the command on your system."
+    exit 1
+  fi
+fi
+
 DATADIR=$REALDIR/../data
+LIBDIR=$REALDIR/../lib
 CONFDIR=$REALDIR/../data/conf
+CSVNCONF="$CONFDIR/csvn.conf"
 MODPYTHONLIBDIR=$REALDIR/../lib/
 PYTHONPATH=$MODPYTHONLIBDIR
 export PYTHONPATH
-#RUN_AS_USER=
 
+if [ -f "$CSVNCONF" ]; then
+  . $CSVNCONF
+fi
 
 showresult()
 {
@@ -132,7 +147,34 @@ start()
     return $RETVAL
   fi
 
-  $REALDIR/httpd -f $CONFDIR/httpd.conf -k start
+  # Is httpd_bind enabled?
+  BINDEXE="$(find $LIBDIR/httpd_bind/httpd_bind -user root -perm -4000)"
+  if [ "X$BINDEXE" = "X$LIBDIR/httpd_bind/httpd_bind" ] ; then
+    export LD_PRELOAD=$LIBDIR/httpd_bind/libhttpd_bind.so.1
+    export PATH=$LIBDIR/httpd_bind:$PATH
+
+    if [ $($IDEXE -u) -eq 0 ] ; then
+      if [ "X$RUN_AS_USER" != "X" ] ; then
+        if [ -f "/sbin/runuser" ] ; then
+          /sbin/runuser - $RUN_AS_USER -c "export LD_PRELOAD=$LIBDIR/httpd_bind/libhttpd_bind.so.1 && \
+                                           export PATH=$LIBDIR/httpd_bind:$PATH && \
+                                           $REALDIR/httpd -f $CONFDIR/httpd.conf -k start"
+        else
+          su - $RUN_AS_USER -c "export LD_PRELOAD=$LIBDIR/httpd_bind/libhttpd_bind.so.1 && \
+                                           export PATH=$LIBDIR/httpd_bind:$PATH && \
+                                           $REALDIR/httpd -f $CONFDIR/httpd.conf -k start"
+        fi
+      else
+        echo "RUN_AS_USER is not yet set. Please set the RUN_AS_USER in csvn.conf"
+        exit 1
+      fi
+    else
+      $REALDIR/httpd -f $CONFDIR/httpd.conf -k start
+    fi
+  else
+    # Not using httpd_bind
+    $REALDIR/httpd -f $CONFDIR/httpd.conf -k start
+  fi
   RETVAL=$?
 
   unset pid
