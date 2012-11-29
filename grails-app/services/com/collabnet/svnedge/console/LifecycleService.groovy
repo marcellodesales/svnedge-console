@@ -127,7 +127,8 @@ class LifecycleService {
                 server.errors.allErrors.each { log.error(it) }
             }
 
-            if (bootstrapParam.isDefaultPortAllowed) {
+            if (bootstrapParam.isDefaultPortAllowed && 
+                    !isPortBoundByAnotherService(80)) {
                 server.port = 80
             }
 
@@ -594,5 +595,22 @@ root@${server.hostname}
             f.eachLine { line -> pid = line }
         }
         return pid
+    }
+    
+    boolean isPortBoundByAnotherService(int port) {
+        Server server = Server.getServer()
+        boolean b = (port != server?.port || !isStarted())
+        if (b) {
+            try {
+                Socket s = new Socket("localhost", port)
+                s.close()
+            } catch (ConnectException e) {
+                b = false
+            } catch (Exception e) {
+                log.debug "Unexpected exception when checking port availability", e
+                b = false
+            }
+        }
+        return b
     }
 }

@@ -15,6 +15,17 @@
             <div class="clearfix">
               <label class="control-label"><g:message code="login.page.auth.username.label"/>
               <input type="text" name="j_username" id="j_username"/></label>
+              <g:if test="${isDefaultPassword}">
+                <g:javascript>
+                $(document).ready(function() {
+                  var options = { trigger: 'manual' };
+                  options.title = '<g:message code="login.page.auth.initialCredentials"/>';
+                  options.content = "<g:message code="login.page.auth.username.label"/>: admin<br/><g:message code="login.page.auth.password.label"/>: admin";
+                  $('#j_username').popover(options);
+                  $('#j_username').popover('show');
+                });
+                </g:javascript>
+              </g:if>
             </div>
             <div class="clearfix">
               <label class="control-label"><g:message code="login.page.auth.password.label"/>

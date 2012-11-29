@@ -167,6 +167,125 @@ label.withFor {
   text-align: center;
 }
 
+.wizard {
+  margin-top: 3px;
+  margin-bottom: 10px;
+}
+
+.wizard-inner {
+  margin: 5px;
+  padding: 3px;
+  background: #000000;
+  background: rgba(0, 0, 0, 0.8);
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+}
+
+
+.wizard-title {
+  padding: 9px 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #eee;
+  -webkit-border-radius: 3px 3px 0 0;
+  -moz-border-radius: 3px 3px 0 0;
+  border-radius: 3px 3px 0 0;
+}
+
+.wizard-steps {
+  font-size: 14px;
+  color: #000;
+  float: right;
+}
+
+.wizard-content {
+  padding: 14px;
+  background-color: #ffffff;
+  -webkit-border-radius: 0 0 3px 3px;
+  -moz-border-radius: 0 0 3px 3px;
+  border-radius: 0 0 3px 3px;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding-box;
+  background-clip: padding-box;
+}
+.wizard-content p,
+.popover-content ul,
+.popover-content ol {
+  margin-bottom: 0;
+}
+
+
+.wizard-sidenav {
+  //width: 228px;
+  //margin: 30px 0 0;
+  padding: 0;
+  background-color: #fff;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  -webkit-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+     -moz-box-shadow: 0 1px 4px rgba(0,0,0,.065);
+          box-shadow: 0 1px 4px rgba(0,0,0,.065);
+}
+
+
+.wizard-sidenav > li > a {
+  display: block;
+  //width: 190px \9;
+  margin: 0 0 -1px;
+  padding: 8px 14px;
+  border: 1px solid #e5e5e5;
+}
+.wizard-sidenav > li:first-child > a {
+  -webkit-border-radius: 6px 6px 0 0;
+     -moz-border-radius: 6px 6px 0 0;
+          border-radius: 6px 6px 0 0;
+}
+.wizard-sidenav > li:last-child > a {
+  -webkit-border-radius: 0 0 6px 6px;
+     -moz-border-radius: 0 0 6px 6px;
+          border-radius: 0 0 6px 6px;
+}
+.wizard-sidenav > .active > a {
+  position: relative;
+  z-index: 2;
+  padding: 9px 15px;
+  border: 0;
+  text-shadow: 0 1px 0 rgba(0,0,0,.15);
+  -webkit-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+     -moz-box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+          box-shadow: inset 1px 0 0 rgba(0,0,0,.1), inset -1px 0 0 rgba(0,0,0,.1);
+}
+/* Icons/Chevrons */
+.wizard-sidenav .icon-chevron-right, .wizard-sidenav .icon-ok {
+  float: right;
+  margin-top: 2px;
+  margin-right: -6px;
+  opacity: .5;
+}
+.wizard-sidenav > li > a:hover {
+  background-color: #f5f5f5;
+}
+.wizard-sidenav a:hover .icon-chevron-right {
+  opacity: .5;
+}
+.wizard-sidenav .active .icon-chevron-down,
+.wizard-sidenav .active a:hover .icon-chevron-down {
+  background-image: url(/csvn/images/bootstrap/glyphicons-halflings-white.png);
+  opacity: 1;
+  float: right;
+  margin-top: 2px;
+  margin-right: -6px;
+}
+
+[class^="icon-"],
+[class*=" icon-"] {
+  background-image: url("/csvn/images/bootstrap/glyphicons-halflings.png");
+}
+
 /* Modal Lightbox Styles
 -------------------------------------------------- */
 .modal-gallery{width:auto;max-height:none;}

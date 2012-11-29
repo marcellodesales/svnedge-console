@@ -45,8 +45,6 @@ abstract class AbstractConversionFunctionalTests extends
 
     def ctfRemoteClientService
 
-    def javaScriptPriorState = javaScriptEnabled
-    
     @Override
     protected void setUp() {
         super.setUp();
@@ -68,16 +66,12 @@ abstract class AbstractConversionFunctionalTests extends
 
         // verify that the links to teamForge mode are prohibited.
         this.assertProhibitedAccessToTeamForgeModeLinksWorks()
-        
-        javaScriptPriorState = javaScriptEnabled
-        javaScriptEnabled = false
     }
 
     @Override
     protected void tearDown() {
         this.convertToStandaloneMode()
         this.cleanRepositories()
-        javaScriptEnabled = javaScriptPriorState
         super.tearDown();
     }
 
@@ -330,8 +324,11 @@ abstract class AbstractConversionFunctionalTests extends
     private void goToCtfListIntegrationsPage() {
         // Goes to the list integrations page
         // http://cu073.cloud.sp.collab.net/sf/sfmain/do/listSystems
+        boolean jsState = javaScriptEnabled
+        javaScriptEnabled = true
         get(this.makeCtfUrl() + "/sf/sfmain/do/listSystems")
         this.loginToCtfServerIfNecessary()
+        javaScriptEnabled = jsState
     }
 
     /**
@@ -394,15 +391,18 @@ abstract class AbstractConversionFunctionalTests extends
         // http://cu073.cloud.sp.collab.net/sf/sfmain/do/myProjects
         // Adding the all projects page to avoid failures when 2 or more pages
         // are displayed.
+        boolean jsState = javaScriptEnabled
+        javaScriptEnabled = true
         get(this.makeCtfUrl() + "/sf/sfmain/do/myProjects?selectedTab=" + 
             "all&_pagesize=2500")
         this.loginToCtfServerIfNecessary()
-
+        
         assertContentContains(createdProjectName)
         assertContentContains(
             getMessage("setupTeamForge.integration.container.existed"))
         click(createdProjectName)
         assertStatus 200
+        javaScriptEnabled = jsState
     }
 
     /**
@@ -463,12 +463,10 @@ abstract class AbstractConversionFunctionalTests extends
     protected boolean isItAFreshConversion() {
 // datatables conversion is dependent on js, so working around until js issues
 // can be fixed.
-//       javaScriptEnabled = false
 //       get('/repo/list')
 //       assertStatus 200
 //       def foundExpectedMessage = this.response.contentAsString.contains(
 //               getMessage("repository.page.list.noRepos"))
-//       javaScriptEnabled = true
 
         get('/dbUtil/sql?sqlText=select+*+from+REPOSITORY&run=Execute')
         assertStatus 200

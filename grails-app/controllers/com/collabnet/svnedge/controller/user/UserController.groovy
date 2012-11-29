@@ -18,7 +18,10 @@
 package com.collabnet.svnedge.controller.user
 
 import com.collabnet.svnedge.domain.Role 
+import com.collabnet.svnedge.domain.Server;
 import com.collabnet.svnedge.domain.User 
+import com.collabnet.svnedge.domain.Wizard;
+
 import org.codehaus.groovy.grails.orm.hibernate.cfg.GrailsHibernateUtil
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.util.ControllerUtil
@@ -51,7 +54,9 @@ class UserController {
         def username = authenticateService.principal().getUsername()
         def userInstance = User.findByUsername(username)
         def editable = !userAccountService.isLdapUser(userInstance)
-        render(view: "show", model: [userInstance: userInstance, editable: editable])
+        def view = 'show'
+        
+        render(view: view, model: [userInstance: userInstance, editable: editable])
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
@@ -209,7 +214,7 @@ class UserController {
                 render(view: "edit", model: [userInstance: userInstance])
                 return
             }
-
+            def previousEmail = userInstance.email
             boolean invalidateSecurityCache = false
             def originalRoles = userInstance.authorities
             // update userInstance per form except passwd and authorities fields
@@ -333,7 +338,16 @@ class UserController {
                 flash.message = message(code: "default.updated.message", 
                         args: [message(code: "user.label"),
                                userInstance.username])
-                redirect(action: "show", id: userInstance.id)
+                Server server = Server.getServer()
+                if (server.adminEmail == 'devnull@collab.net' ||
+                        server.adminEmail == previousEmail) {
+                    server.adminEmail = userInstance.email
+                    server.adminName = userInstance.realUserName
+                    server.save()
+                }
+                ControllerUtil.wizardCompleteStep(this) {
+                    redirect(action: 'show', id: userInstance.id)
+                }            
             }
             else {
                 // This is needed when using Errors.rejectValue, after

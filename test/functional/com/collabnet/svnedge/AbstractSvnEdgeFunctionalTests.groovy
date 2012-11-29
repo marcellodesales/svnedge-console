@@ -53,12 +53,16 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
      */
     private app = ApplicationHolder.application
 
+    private boolean javaScriptPriorState = javaScriptEnabled
+    
     def lifecycleService
 
     @Override
     protected void setUp() {
         //The web framework must be initialized.
         super.setUp()
+        javaScriptPriorState = javaScriptEnabled
+        javaScriptEnabled = false
     }
 
     @Override
@@ -66,10 +70,10 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
         //The tear down method terminates all the web-related objects, and
         //therefore, must be performed in the end of the operation.
         super.tearDown()
+        javaScriptEnabled = javaScriptPriorState
     }
 
     protected void login(username, password) {
-        javaScriptEnabled = false
         get('/login/auth')
         assertStatus(200)
 
@@ -84,7 +88,6 @@ public abstract class AbstractSvnEdgeFunctionalTests extends FunctionalTestCase 
             click "Sign In"
         }
         assertStatus(200)
-        javaScriptEnabled = true
     }
 
     /**

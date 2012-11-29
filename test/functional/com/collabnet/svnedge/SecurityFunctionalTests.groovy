@@ -20,23 +20,17 @@ package com.collabnet.svnedge
 
 class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
 
-    def javaScriptPriorState = javaScriptEnabled
-
     void setUp() {
         super.setUp()
-        javaScriptPriorState = javaScriptEnabled
-        javaScriptEnabled = false
     }
 
     void tearDown() {
         super.tearDown()
-        javaScriptEnabled = javaScriptPriorState
     }
 
     void testAdminAuthority() {
         this.loginAdmin()
 
-        javaScriptEnabled = false
         get('/user/index')
         assertStatus 200
         assertContentContains getMessage("user.page.list.header")
@@ -59,7 +53,6 @@ class SecurityFunctionalTests extends LoggedOutAbstractSvnEdgeFunctionalTests {
     void testAdminUsersAuthority() {
         this.login("adminUsers", "admin")
 
-        javaScriptEnabled = false
         get('/user/index')
         assertStatus 200
         assertContentContains getMessage("user.page.list.header")

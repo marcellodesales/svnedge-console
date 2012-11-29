@@ -170,3 +170,25 @@ var tableState = {
     }
 }
 
+function ajaxIgnoreResponse(getUrl) {
+    $.ajax({
+      url: getUrl,
+      type: "GET",
+      success: function(data, textStatus, jqXHR) {
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        alert(textStatus + '\n\n' + errorThrown);
+      }
+    });
+}
+
+function stopEvent(e) {
+    if (!e) {
+    	e = window.event;
+    }
+    e.cancelBubble = true;
+    if (e.stopPropagation) {
+    	e.stopPropagation();
+    }
+}
+

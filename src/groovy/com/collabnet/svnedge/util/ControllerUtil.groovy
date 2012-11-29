@@ -20,6 +20,8 @@ package com.collabnet.svnedge.util
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 
+import com.collabnet.svnedge.domain.Wizard
+
 /**
  * Class for common utility methods shared by controllers
  */
@@ -87,5 +89,35 @@ public class ControllerUtil {
         // add virtual bean-style properties to File for "date" and "size" 
         File.metaClass.getDate = {-> delegate.lastModified() }
         File.metaClass.getSize = {-> delegate.length() }
+    }
+    
+    public static void wizardCompleteStep(def controller, Closure defaultLogic) {
+        def wizard = Wizard.getLastActiveWizard()
+        if (wizard) {
+            def helper = wizard.currentStep?.helper()
+            if (helper?.targetController == controller.controllerName &&
+                    (helper.targetAction == controller.actionName ||
+                     helper.alternateActions.contains(controller.actionName))) {
+                wizard.completeCurrentStep()
+                if (wizard.done) {
+                    controller.flash.wizard_message = 
+                            controller.message(code: 'wizard.' + 
+                            wizard.label + '.done')
+                    controller.redirect(controller: 'status', action: 'index')
+                } else {
+                    helper = wizard.currentStep?.helper()
+                    if (helper?.forceTarget) {
+                        controller.redirect(controller: helper.targetController,
+                                action: helper.targetAction)
+                    } else {
+                        defaultLogic()
+                    }
+                }
+            } else {
+                defaultLogic()
+            }
+        } else {
+            defaultLogic()
+        }
     }
 }

@@ -118,7 +118,9 @@ class SetupCloudServicesController {
             // remove error message if it persists from previous submit (occasional grails bug)
             flash.error = null
             request.unfiltered_message = message(code: "setupCloudServices.page.signup.accountCreation.mustValidate")
-            render(view: "confirm", model: [cmd: cmd])
+            ControllerUtil.wizardCompleteStep(this) { 
+                render(view: "confirm", model: [cmd: cmd]) 
+            }
         }
         else {
             flash.error = message(code: "setupCloudServices.page.signup.accountCreation.error")
@@ -135,7 +137,7 @@ class SetupCloudServicesController {
             cmd.username = cloudConfig.username
             cmd.domain = cloudConfig.domain
         }
-        render(view: "credentials", model: [cmd: cmd, existingCredentials: existingCredentials])
+        [cmd: cmd, existingCredentials: existingCredentials]
     }
 
     def updateCredentials = { CloudServicesAccountCommand cmd ->
@@ -169,7 +171,9 @@ class SetupCloudServicesController {
             cloudConfig.domain = cmd.domain
             cloudConfig.enabled = true
             cloudConfig.save()
-            render(view: "confirm", model: [cmd: cmd])
+            ControllerUtil.wizardCompleteStep(this) { 
+                render(view: "confirm", model: [cmd: cmd]) 
+            }
         }
         else {
             flash.error = message(code: "setupCloudServices.page.credentials.validation.error")

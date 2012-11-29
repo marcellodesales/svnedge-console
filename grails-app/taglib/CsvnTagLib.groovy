@@ -472,7 +472,7 @@ class CsvnTagLib {
         
         def tip = label(attrs, fieldName, 'tip', 'label.tip', '')
         if (tip) {
-            out << '    <div class="help-block">' << tip
+            out << '    <div class="help-block">' << '<span class="help-marker"></span>' << tip
         }
         def skipHtmlEncoding = attrs['skipHtmlEncoding']
         out << hasErrors(bean: obj, field: fieldName) {

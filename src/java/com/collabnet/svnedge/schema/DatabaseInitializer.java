@@ -98,7 +98,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS012AddSvnBasePath(),
             new MS013AddRepoSyncToAddress(),
             new MS014AddMonitorConfiguration(),
-            new MS015AddReplicaCommandRetries()
+            new MS015AddReplicaCommandRetries(),
+            new MS016AddGettingStartedWizard()
         };
     }
 

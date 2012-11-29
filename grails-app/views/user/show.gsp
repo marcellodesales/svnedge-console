@@ -52,7 +52,7 @@
       <div class="form-actions">
           <input type="hidden" name="id" value="${userInstance.id}" />
           <g:if test="${editable}">
-            <g:actionSubmit action="edit" class="btn btn-primary edit" value="${message(code:'user.page.edit.button.edit')}" />
+            <g:actionSubmit id="editButton" action="edit" class="btn btn-primary edit" value="${message(code:'user.page.edit.button.edit')}" />
           </g:if> 
             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
               <g:actionSubmit action="delete" class="btn delete" id="deleteButton" value="${message(code:'user.page.edit.button.delete')}"

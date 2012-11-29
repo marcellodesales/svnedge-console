@@ -16,8 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.User
+import com.collabnet.svnedge.domain.Wizard
 import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -204,6 +207,66 @@ class ApplicationFilters {
                 }
             }
         }
-    }
 
+        wizardRedirect(controller: '*', action: '*') {
+            before = {
+                def ignoreWizardControllers = ['login', 'logout']
+                if (!ignoreWizardControllers.contains(controllerName)) {
+                    log.debug "controller=" + controllerName +
+                            " action=" + actionName
+                    def wizard = Wizard.getLastActiveWizard()
+                    if (wizard) {
+                        log.debug "Wizard dump: " + wizard.dump()
+                        if (!wizard.initialized) {
+                            wizard.increment()
+                            wizard.initialized = true
+                            if (!wizard.save()) {
+                                log.error "wizard errors: " + wizard.errors
+                            }
+                        }
+
+                        if (wizard.active && !wizard.done) {
+                            def stepHelper = wizard.currentStep?.helper()
+                            if (stepHelper?.targetController &&
+                                    controllerName != wizard.controller &&
+                                    stepHelper.forceTarget &&
+                                    (stepHelper.targetController != controllerName ||
+                                    (stepHelper.targetAction != actionName &&
+                                    !stepHelper.alternateActions.contains(actionName)))) {
+                                log.debug "wizard redirecting to " +
+                                        stepHelper.targetController + " action: " +
+                                        stepHelper.targetAction
+                                redirect(controller: stepHelper.targetController,
+                                        action: stepHelper.targetAction)
+                                return false
+                            } else {
+                                log.debug "Wizard did not redirect  " + stepHelper?.dump()
+                            }
+                        }
+                    }
+                }
+            }
+
+            after = { model ->
+                if (model) {
+                    model['activeWizard'] = Wizard.lastActiveWizard
+                    model['allWizards'] = Wizard.list()
+                }
+            }
+        }
+        
+        defaultPassword(controller: 'login', action: 'auth') {
+            after = { model ->
+                if (model) {
+                    long now = System.currentTimeMillis()
+                    def createdDate = SchemaVersion.findByMajorAndMinor(1, 1)?.dateCreated
+                    if (createdDate && ((now - createdDate.time) < 8 * 3600000)) {
+                        User u = User.findByUsername('admin')
+                        model['isDefaultPassword'] = (u.passwd == '21232f297a57a5a743894a0e4a801fc3')
+                    }
+                }
+                return
+            }
+        }
+    }
 }

@@ -328,6 +328,27 @@ public class NetworkingService extends AbstractSvnEdgeService {
         return networkInterfacesWithIP
     }
 
+    /**
+     * Retrieves the hostnames which can be found for this host.  IP addresses
+     * without a separate hostname (such as via DNS) are not included.
+     * @return list of string hostnames
+     */
+    def availableHostnames() {
+        def hostnames = []
+        getNetworkInterfacesWithIPAddresses().each { ni ->
+            Collections.list(ni.getInetAddresses()).each { addr ->
+                if (!addr.isAnyLocalAddress() && !addr.isLinkLocalAddress() && 
+                        !addr.isLoopbackAddress()) {
+                    def hostname = addr.canonicalHostName
+                    if (hostname != addr.hostAddress) {
+                        hostnames << hostname
+                    } 
+                }
+            }
+        }
+        return hostnames
+    }
+    
     def getInetAddressNetworkInterfaceMap() {
         def addrInterfaceMap = new HashMap()
         def networkInterfaces = Collections

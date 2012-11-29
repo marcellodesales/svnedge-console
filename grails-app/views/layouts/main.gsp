@@ -23,6 +23,14 @@
       .sidebar-nav {
         padding: 9px 0;
       }
+      
+      .box_rotate {
+          -webkit-transform: rotate(90.0deg); 
+          -moz-transform: rotate(90.0deg); 
+          -ms-transform: rotate(90.0deg); 
+          -o-transform: rotate(90.0deg); 
+          transform: rotate(90.0deg); 
+      }
     </style>
     <link href="${resource(dir:'css',file:'svnedge-3.0.0.css')}" rel="stylesheet"/>                                                                                                                                                                  
     <link href="${resource(dir:'css',file:'bootstrap-responsive.css')}" rel="stylesheet"/>
@@ -169,7 +177,11 @@
           <h4 class="alert-heading">Updates Available</h4>
           There are new updates available for <a href="updates.html">download</a>.
           </div>
-        -->
+        -->            
+            <g:if test="${flash.wizard_message}">
+                <div class="alert alert-success">${flash.wizard_message}</div>
+            </g:if>
+
             <g:if test="${flash.message}">
                 <div class="alert alert-success">${flash.message}</div>
             </g:if>
@@ -215,10 +227,93 @@
       <div class="row-fluid">
 
         <g:set var="blocks" value="12"/>
-        <g:if test="${pageProperty(name:'page.leftMenu')}">
+        <g:set var="wizard" value="${activeWizard}"/>
+        <g:if test="${pageProperty(name:'page.leftMenu') || wizard}">
           <g:set var="blocks" value="9"/>
           <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
           <div class="span3">
+            <g:if test="${wizard?.active && !wizard.done}">
+              <button type="button" class="btn btn-inverse" data-toggle="collapse" data-target="#wizard${wizard.label}">
+                 <g:message code="wizard.${wizard.label}.title"/>
+                 <span id="wizard${wizard.label}CollapseButton" style="font-size: 20px; font-weight: bold; line-height: 18px;">&nbsp;&times;</span>
+              </button>
+
+              <div class="wizard collapse in" id="wizard${wizard.label}" style="width: 100%">
+                <div class="wizard-inner">
+                    <ul class="nav nav-list wizard-sidenav" id="wizardsteps">
+                      <g:each status="i" var="step" in="${wizard.steps}">
+                      <g:set var="stepLabel"><g:if test="${wizard.ordered}">${i + 1}. </g:if><g:message code="wizard.${wizard.label}.${step.label}.title"/></g:set>
+                      <g:set var="isStepActive" value="${step.id == wizard.currentStep.id}"/>
+                      <g:if test="${step.done}">
+                        <li class="disabled"><a onclick="return false;"><i class="icon-ok"></i>${stepLabel}</a></li>
+                      </g:if>
+                      <g:else>
+                        <li<g:if test="${isStepActive}"> class="active"</g:if>>
+                            <g:link controller="${wizard.controller}" action="gotoStep" params="${[label: step.label]}">
+                            <g:if test="${isStepActive}">
+                              <i class="icon-chevron-down"></i>
+                            </g:if>
+                            <g:else> 
+                              <i class="icon-chevron-right"></i>
+                            </g:else>
+                            ${stepLabel}</g:link>
+                            <g:if test="${isStepActive}">
+                              <div class="wizard-content"><g:render template="${step.helper().getContentTemplate(controllerName, actionName)}" /></div>
+                            </g:if>
+                        </li>
+                      </g:else>
+                      </g:each>
+                    </ul>
+                </div>
+              </div>
+              <div id="closeWizardModal${wizard.label}" class="modal hide fade" style="display: none;">
+                <div class="modal-header">
+                  <a class="close" data-dismiss="modal">&times;</a>
+                  <h3><g:message code="wizard.exitTheWizard"/></h3>
+                </div>
+                <div class="modal-body">
+                  <g:set var="wizardTitle"><g:message code="wizard.${wizard.label}.title"/></g:set>
+                  <g:message code="wizard.suspend.modal.body" args="${[wizardTitle]}"/>
+                </div>
+                <div class="modal-footer">
+                  <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                </div>
+              </div>
+              
+              <g:javascript>
+                $('#wizard${wizard.label}').on('hidden', function () {
+                  $('#wizard${wizard.label}CollapseButton').hide();
+                  $('#closeWizardModal${wizard.label}').modal('show');                  
+                  ajaxIgnoreResponse('/csvn/${wizard.controller}/suspendWizard');
+                });
+
+                $('#wizard${wizard.label}').on('shown', function () {
+                  $('#wizard${wizard.label}CollapseButton').show();
+                  ajaxIgnoreResponse('/csvn/${wizard.controller}/startWizard');
+                });
+              </g:javascript>
+              
+              <!-- 
+              <div class="wizard" id="wizard" style="width: 100%">
+                <div class="wizard-inner">
+                  <h3 class="wizard-title"><div class="wizard-steps">Step ${wizard.index()} of ${wizard.maxIndex()}</div>
+                  <g:message code="wizard.${wizard.label}.${wizard.currentStep.label}.title"/></h3>
+                  <div class="wizard-content">
+                    <g:render template="${wizard.currentStep.helper().getContentTemplate(controllerName, actionName)}" />  
+                    <p>
+                    <g:if test="${wizard.currentStep.helper().isShowSkipButton()}">
+                      <g:link class="btn" controller="${wizard.controller}" action="skipStep">Skip this Step</g:link>
+                    </g:if>
+                    <g:if test="${wizard.currentStep.helper().isShowExitButton()}">
+                      <g:link class="btn" controller="${wizard.controller}" action="abortWizard">Exit the Wizard</g:link>
+                    </g:if>
+                    </p>          
+                  </div>
+                </div>
+              </div>
+               -->
+            </g:if>
+            
             <div class="well sidebar-nav">
               <ul class="nav nav-list">
                 <g:pageProperty name="page.leftMenu" />

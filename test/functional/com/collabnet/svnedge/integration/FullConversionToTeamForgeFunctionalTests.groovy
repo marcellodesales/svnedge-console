@@ -52,7 +52,6 @@ class FullConversionToTeamForgeFunctionalTests
      */
     private void createLocalRepository() {
         if (this.isItAFreshConversion()) {
-            javaScriptEnabled = false
             get('/repo/create')
             assertStatus 200
 
@@ -66,7 +65,6 @@ class FullConversionToTeamForgeFunctionalTests
             assertContentDoesNotContain(getMessage("default.errors.summary"))
             def title = getMessage("repository.page.show.title", [repoName])
             assertContentContains(title)
-            javaScriptEnabled = true
         }
     }
 
@@ -94,7 +92,6 @@ class FullConversionToTeamForgeFunctionalTests
      */
     void testCase1_convertCompleteCSVN() {
         // Step 1: Verify the tabs and go to the credentials one.
-        javaScriptEnabled = false
         this.goToCredentialsTab()
 
         // Step 2: Verify the credentials with teamforge.
@@ -364,7 +361,6 @@ class FullConversionToTeamForgeFunctionalTests
      */
     void testCase5_providingMalformedTeamForgeURL() {
         // Step 1: Verify the tabs and go to the credentials one.
-        javaScriptEnabled = false
         this.goToCredentialsTab()
 
         // Step 2: verify that incorrect credentials do not convert.

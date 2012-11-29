@@ -23,7 +23,13 @@ import org.grails.plugins.springsecurity.service.AuthenticateService
 
 import com.collabnet.svnedge.console.LifecycleService;
 import com.collabnet.svnedge.domain.Role;
+import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.User;
+import com.collabnet.svnedge.domain.Wizard
+import com.collabnet.svnedge.util.ConfigUtil
+
+import grails.util.Environment
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 /**
  * This class tests the non-trivial UserController actions, although
@@ -39,6 +45,7 @@ class UserControllerTests extends ControllerUnitTestCase {
 
     protected void setUp() {
         super.setUp()
+        loadConfig()
 
         mockDomain (Role, [
                 new Role(authority: "ROLE_ADMIN", id: 1),
@@ -56,6 +63,16 @@ class UserControllerTests extends ControllerUnitTestCase {
 
         // mock the bindData method
         controller.metaClass.bindData = { u, p, l -> u.properties = p }
+        
+        mockDomain (Server, [new Server(id: 1, adminEmail: 'devnull@collabnet.com')])
+        mockDomain (Wizard, [])
+    }
+    
+    private void loadConfig() {
+        GroovyClassLoader classLoader = new GroovyClassLoader(this.class.classLoader)
+        ConfigSlurper slurper = new ConfigSlurper(Environment.current.name)
+        ConfigurationHolder.config = slurper.parse(classLoader.loadClass("Config"))
+        ConfigUtil.configuration = ConfigurationHolder.config
     }
 
     protected void tearDown() {

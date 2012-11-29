@@ -31,6 +31,7 @@ import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
 import com.collabnet.svnedge.integration.CtfAuthenticationException;
 import com.collabnet.svnedge.util.ConfigUtil
+import com.collabnet.svnedge.util.ControllerUtil;
 import com.collabnet.svnedge.domain.NetworkConfiguration;
 
 import grails.converters.JSON
@@ -336,8 +337,10 @@ class ServerController {
                 serverConfService.writeConfigFiles()
                 flash.message = message(code:"server.action.update.changesMade")
             }
-
-            render(view: params.view, model : prepareServerViewModel(server))
+            
+            ControllerUtil.wizardCompleteStep(this) {
+                render(view: params.view, model : prepareServerViewModel(server))
+            }
 
         } else {
             flash.error = message(code:"server.action.update.invalidSettings")
@@ -346,15 +349,17 @@ class ServerController {
             render(view: params.view, model : prepareServerViewModel(server))
         }
     }
-
   
     private Map prepareServerViewModel (Server server) {
 
         int portValue = Integer.parseInt(server.port.toString())
         boolean isPrivatePort = portValue < 1024
         boolean isStandardPort = portValue == 80 || portValue == 443
-        def showPortInstructions = isPrivatePort &&
-            !lifecycleService.isDefaultPortAllowed()
+        lifecycleService.clearCachedResults()
+        boolean isDefaultPortAllowed = lifecycleService.isDefaultPortAllowed()
+        boolean isPort80Available = !lifecycleService.isPortBoundByAnotherService(80)
+        boolean isPort443Available = !lifecycleService.isPortBoundByAnotherService(443)
+        def showPortInstructions = isPrivatePort && !isDefaultPortAllowed
         def isSolaris = operatingSystemService.isSolaris()
         def config = ConfigurationHolder.config
 
@@ -365,7 +370,10 @@ class ServerController {
                 config.svnedge.appHome : '<AppHome>',
             csvnConf: ConfigUtil.confDirPath(),
             privatePortInstructions: showPortInstructions,
+            isDefaultPortAllowed: isDefaultPortAllowed,
             isStandardPort: isStandardPort,
+            isPort80Available: isPort80Available,
+            isPort443Available: isPort443Available,
             isSolaris: isSolaris,
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,

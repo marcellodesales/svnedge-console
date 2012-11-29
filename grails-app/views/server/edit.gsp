@@ -116,7 +116,8 @@ $('#bindInstructions').hide();
 
       <fieldset>            
         <g:propTextField bean="${server}" field="hostname" required="true" prefix="server"/>
-
+        <g:propCheckBox bean="${server}" field="useSsl" prefix="server"/>
+        
         <g:set var='portTip' value=""/>
         <g:if test="${privatePortInstructions}">
           <g:set var='portTip' value="server.port.label.tip"/>
@@ -143,7 +144,6 @@ $('#bindInstructions').hide();
           <g:propCheckBox bean="${server}" field="useHttpV2" prefix="server"/>
         </g:if>
       
-        <g:propCheckBox bean="${server}" field="useSsl" prefix="server"/>
         <g:propCheckBox bean="${server}" field="useSslConsole" prefix="server"/>
         <g:if test="${server.defaultStart}">
           <g:propCheckBox bean="${server}" field="defaultStart" prefix="server"/>
@@ -151,7 +151,7 @@ $('#bindInstructions').hide();
         </g:if>
       </fieldset>
       <div class="form-actions">
-        <g:actionSubmit action="update" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
+        <g:actionSubmit id="updateButton" action="update" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
         <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
       </div>
     </g:form>             
