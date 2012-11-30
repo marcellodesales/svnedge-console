@@ -18,7 +18,7 @@
               <g:if test="${isDefaultPassword}">
                 <g:javascript>
                 $(document).ready(function() {
-                  var options = { trigger: 'manual' };
+                  var options = { trigger: 'manual', html: true };
                   options.title = '<g:message code="login.page.auth.initialCredentials"/>';
                   options.content = "<g:message code="login.page.auth.username.label"/>: admin<br/><g:message code="login.page.auth.password.label"/>: admin";
                   $('#j_username').popover(options);

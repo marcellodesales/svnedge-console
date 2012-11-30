@@ -91,7 +91,7 @@
   });
 
   function continueButton(clickHandler) {
-    return '<button class="btn" onclick="' + clickHandler + '()"><g:message code="wizard.GettingStarted.continue"/></button>';
+    return '<button class="btn" onclick="' + clickHandler + '(); return false;"><g:message code="wizard.GettingStarted.continue"/></button>';
   }
 
   var hostnameText = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.hostname"/></p>' +
@@ -232,7 +232,7 @@
     location.popover('hide');
     
     location = targetElement('#useSsl');
-    var options = { trigger: 'manual', placement: 'bottom'};
+    var options = { trigger: 'manual', placement: 'bottom', html: true};
     options.title = '<g:message code="wizard.GettingStarted.ServerSettings.help.field.useSsl.title"/>';
     options.content = sslText;
     location.popover(options);
@@ -247,7 +247,7 @@
   
   function showPort() {
     var location = targetElement('#port');
-    var options = { trigger: 'manual', placement: 'bottom'};
+    var options = { trigger: 'manual', placement: 'bottom', html: true};
     options.title = '<g:message code="wizard.GettingStarted.ServerSettings.help.field.port.title"/>';
     options.content = serverPortContent();
     location.popover(options);
@@ -281,7 +281,7 @@
   
   function showRepoParentPopup() {
       var location = targetElement('#repoParentDir');
-      var options = { trigger: 'manual', placement: 'bottom'};
+      var options = { trigger: 'manual', placement: 'bottom', html: true};
       options.title = '<g:message code="wizard.GettingStarted.ServerSettings.help.field.repoParentDir.title"/>';
       options.content = repoLocationText;
       location.popover(options);
@@ -298,7 +298,7 @@
   function startWizard() {
     retrieveHostnames();
     var location = targetElement('#hostname');
-    var options = { trigger: 'manual', placement: 'bottom'};
+    var options = { trigger: 'manual', placement: 'bottom', html: true};
     options.title = '<g:message code="wizard.GettingStarted.ServerSettings.help.field.hostname.title"/>';
     options.content = hostnameText;
     location.popover(options);
