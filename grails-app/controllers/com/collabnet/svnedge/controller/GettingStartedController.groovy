@@ -90,7 +90,7 @@ class GettingStartedController {
         }
         log.debug "Current wizard step: " + w.currentStep.dump()
         def helper = w.currentStep.helper()
-        if (helper.targetController) {
+        if (helper.forceTarget) {
             redirect(controller: helper.targetController, 
                      action: helper.targetAction)
         } else {
