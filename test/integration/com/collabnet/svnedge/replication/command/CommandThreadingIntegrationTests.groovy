@@ -170,9 +170,12 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
         // validate concurrency expectations in the execution log
         assertEquals("commands from same repo should be sequential",
                 ExecutionOrder.SEQUENTIAL, getExecutionOrder("cmdexec9801", "cmdexec9805"));
-        assertEquals("command for repo and general category should be parallel",
-                ExecutionOrder.PARALLEL, getExecutionOrder("cmdexec9801", "cmdexec9802"));
 
+        // one of these command pairs should be parallel
+        boolean shortAndLongConcurrency = (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9801", "cmdexec9802")) ||
+                    (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9803", "cmdexec9802")) ||
+                    (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9804", "cmdexec9802"))
+    
         // one of these command pairs should be parallel
         boolean distinctRepoConcurrency = (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9801", "cmdexec9803")) ||
                 (ExecutionOrder.PARALLEL == getExecutionOrder("cmdexec9801", "cmdexec9804")) ||
@@ -183,6 +186,8 @@ class CommandThreadingIntegrationTests extends GrailsUnitTestCase {
                 (ExecutionOrder.SEQUENTIAL == getExecutionOrder("cmdexec9801", "cmdexec9804")) ||
                 (ExecutionOrder.SEQUENTIAL == getExecutionOrder("cmdexec9803", "cmdexec9804"))
 
+        assertTrue("command for repo and general category should be parallel",
+                shortAndLongConcurrency);
         assertTrue("commands for distinct repos should run parallel within the concurrency limit",
                 distinctRepoConcurrency);
         assertTrue("commands for distinct repos should run sequential outside the concurrency limit",
