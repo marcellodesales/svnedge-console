@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>CollabNet Subversion Edge <g:message code="packagesUpdate.page.installUpdatesStatus.title" /></title>
+    <title><g:message code="packagesUpdate.page.installUpdatesStatus.title" /></title>
 
       <meta name="layout" content="main" />
       <script type="text/javascript" src="/csvn/plugins/cometd-0.1.5/dojo/dojo.js"
@@ -195,7 +195,7 @@
 
   <div id="progressModal" class="modal">
       <div class="modal-header">
-        <h3>CollabNet Subversion Edge ${message(code:'packagesUpdate.page.installUpdatesStatus.header')}</h3>
+        <h3>${message(code:'packagesUpdate.page.installUpdatesStatus.header')}</h3>
       </div>
       <div class="modal-body">
         <p><img src="/csvn/images/pkgupdates/roller.gif" id="roller" align="middle"/>
