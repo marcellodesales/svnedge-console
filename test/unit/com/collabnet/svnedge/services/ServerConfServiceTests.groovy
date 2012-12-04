@@ -74,6 +74,9 @@ class ServerConfServiceTests extends GrailsUnitTestCase {
         serverConfService.securityService = new SecurityService()
         serverConfService.csvnAuthenticationProvider = new CsvnAuthenticationProvider()
 
+        def grailsApplication = new Expando()
+        grailsApplication.metadata = ['vendor.twitter-bootstrap.version': '2.2.1']
+        serverConfService.grailsApplication = grailsApplication
     }
 
     protected void tearDown() {
