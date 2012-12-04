@@ -44,6 +44,7 @@ class ServerConfService {
     def securityService
     def networkingService
     def csvnAuthenticationProvider
+    def grailsApplication
     
     private static final String DONT_EDIT = """#
 #
@@ -430,6 +431,17 @@ Content-Length: 107
                       getViewvcTemplateDir(server))
         s = s.replace("__CSVN_SVN_CLIENT__", ConfigUtil.svnPath())
         s = s.replace("__SERVER_ADMIN__", server.adminEmail)
+        s = s.replace("__CSVN_TWITTER_BOOTSTRAP_VERSION__", 
+                grailsApplication.metadata['vendor.twitter-bootstrap.version'])
+        s = s.replace("__CSVN_JQUERY_JS_FILENAME__", 
+                'jquery-' + grailsApplication.metadata['vendor.jquery.version'] +
+                '.min.js')
+        s = s.replace("__CSVN_SVNEDGE_CSS_FILENAME__", 
+                'svnedge-' + grailsApplication.metadata['app.svnedgeCss.version'] +
+                '.css')
+        s = s.replace("__CSVN_APPLICATION_JS_FILENAME__", 
+                'application-' + grailsApplication.metadata['app.applicationJs.version'] +
+                '.js')
         if (server.forceUsernameCase) {
             s = s.replace("#force_username_case = ", "force_username_case = lower")
         }

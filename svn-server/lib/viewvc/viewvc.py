@@ -1628,6 +1628,12 @@ def common_template_data(request, revision=None, mime_type=None):
     'vsn' : __version__,
     'where' : request.server.escape(request.where),
 
+    # Edge
+    'csvn_twitter_bootstrap_version': cfg.general.csvn_twitter_bootstrap_version,
+    'csvn_jquery_js_filename': cfg.general.csvn_jquery_js_filename,
+    'csvn_svnedge_css_filename': cfg.general.csvn_svnedge_css_filename,
+    'csvn_application_js_filename': cfg.general.csvn_application_js_filename,
+
     # added for TeamForge
     'banner_header': cfg.general.header_html,
     'testmode' : cfg.general.ctf_testmode,

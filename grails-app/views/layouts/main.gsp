@@ -13,27 +13,14 @@
     <meta name="description" content="Subversion Edge"/>
     <meta name="author" content="CollabNet"/>
 
-    <link href="${resource(dir:'css',file:'bootstrap-2.2.1.css')}" rel="stylesheet"/>
-    <style type="text/css">
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-        padding-bottom: 40px;
-      }
+    <g:set var="bootstrapVersion"><g:meta name="vendor.twitter-bootstrap.version"/></g:set>
+    <g:set var="svnedgeCssVersion"><g:meta name="app.svnedgeCss.version"/></g:set>
+    <g:set var="applicationJsVersion"><g:meta name="app.applicationJs.version"/></g:set>
+    <g:set var="jqueryVersion"><g:meta name="vendor.jquery.version"/></g:set>
 
-      .sidebar-nav {
-        padding: 9px 0;
-      }
-      
-      .box_rotate {
-          -webkit-transform: rotate(90.0deg); 
-          -moz-transform: rotate(90.0deg); 
-          -ms-transform: rotate(90.0deg); 
-          -o-transform: rotate(90.0deg); 
-          transform: rotate(90.0deg); 
-      }
-    </style>
-    <link href="${resource(dir:'css',file:'svnedge-3.3.0.css')}" rel="stylesheet"/>                                                                                                                                                                  
-    <link href="${resource(dir:'css',file:'bootstrap-responsive-2.2.1.css')}" rel="stylesheet"/>
+    <link href="${resource(dir:'css',file:'bootstrap-' + bootstrapVersion + '.css')}" rel="stylesheet"/>
+    <link href="${resource(dir:'css',file:'svnedge-' + svnedgeCssVersion + '.css')}" rel="stylesheet"/>                                                                                                                                                                  
+    <link href="${resource(dir:'css',file:'bootstrap-responsive-' + bootstrapVersion + '.css')}" rel="stylesheet"/>
  
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -43,8 +30,8 @@
     <link rel="shortcut icon" href="${resource(dir:'images/icons',file:'favicon.ico')}" />
           
     <!-- jquery lib is often needed before page html is rendered -->
-    <g:javascript library="jquery-1.8.3.min"/>
-    <g:javascript library="application-3.3.0" />
+    <g:javascript library="jquery-${jqueryVersion}.min"/>
+    <g:javascript library="application-${applicationJsVersion}" />
     <g:layoutHead />
 
   </head>
@@ -344,7 +331,7 @@
     <!-- ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
     <g:javascript library="jquery-tablesorter"/>
-    <g:javascript library="bootstrap-2.2.1"/>
+    <g:javascript library="bootstrap-${bootstrapVersion}"/>
     <g:javascript library="load-image.min"/>
     <g:javascript library="bootstrap-image-gallery.min"/>
     <g:pageProperty name="page.bottomOfBody" />
