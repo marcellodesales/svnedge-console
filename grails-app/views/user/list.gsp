@@ -47,7 +47,7 @@
 		  {"sTitle": "${message(code: 'user.page.list.column.realUserName')}" },
 		  {"sTitle": "${message(code: 'user.page.list.column.description')}" }
 	  ],
-      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sDom": "<'row-fluid'<'span4'l><'pull-right'f>r>t<'row-fluid'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
       "fnStateSave": tableState.save('datatable'),

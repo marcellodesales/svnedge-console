@@ -420,7 +420,7 @@
  $(document).ready(function() {
     var jobdt = $('#jobDataTable').dataTable( {
       "aaData": jobDataSet,
-      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sDom": "<'row-fluid'<'span4'l><'pull-right'f>r>t<'row-fluid'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
       "fnStateSave": tableState.save('jobDataTable'),
@@ -473,7 +473,7 @@
   isCheckCloudNameRepos = true;
   var newJobdt = $('#newJobDataTable').dataTable( {
       "aaData": newJobDataSet,
-      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sDom": "<'row-fluid'<'span4'l><'pull-right'f>r>t<'row-fluid'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
       "fnStateSave": tableState.save('newJobDataTable'),

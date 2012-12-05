@@ -60,7 +60,7 @@
         {"sTitle": "${message(code: 'job.page.list.column.finished_at')}" }
       </g:if>
 		  ],
-      "sDom": "<'row'<'span4'l><'pull-right'f>r>t<'row'<'span4'i><'pull-right'p>><'spacer'>",
+      "sDom": "<'row-fluid'<'span4'l><'pull-right'f>r>t<'row-fluid'<'span4'i><'pull-right'p>><'spacer'>",
       "sPaginationType": "bootstrap",
       "bStateSave": true,
       "fnStateSave": tableState.save('${tableName}'),
