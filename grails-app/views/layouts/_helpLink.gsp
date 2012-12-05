@@ -1,5 +1,5 @@
 
-              <li class="dropdown"><a href="#"
+              <li class="dropdown" style="float: right;"><a href="#"
                 class="dropdown-toggle" data-toggle="dropdown"><g:message code="layout.page.help" /> <b
                   class="caret"></b></a>
                 <ul class="dropdown-menu">

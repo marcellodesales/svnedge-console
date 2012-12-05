@@ -306,3 +306,15 @@ label.withFor {
 .modal-fullscreen .modal-header:hover,.modal-fullscreen .modal-footer:hover{opacity:1;}
 @media (max-width:480px){.modal-gallery .btn span{display:none;}}
 
+@media (max-width: 1199px) {
+  body {
+    padding-top: 0;
+  }
+  .navbar-fixed-top,
+  .navbar-fixed-bottom {
+    position: static;
+  }
+    .navbar-fixed-top {
+    margin-bottom: 18px;
+  }
+}

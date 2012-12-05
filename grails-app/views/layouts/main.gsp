@@ -40,11 +40,6 @@
     <div class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container-fluid">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"> 
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
           <g:link controller="status" class="brand"><img
                class="hidden-phone"
                src="${resource(dir:'images/masthead',file:'logo.png')}"
@@ -52,7 +47,6 @@
                class="visible-phone"
                src="${resource(dir:'images/masthead',file:'small-logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
-          <div class="nav-collapse">
             <!-- buttons -->
             <ul class="nav">
             
@@ -150,7 +144,6 @@
               <li class="divider-vertical"></li>
               <g:render template="/layouts/helpLink"/>
             </ul>
-          </div><!--/.nav-collapse -->
         </div>
       </div>
     </div>
