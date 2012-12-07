@@ -55,32 +55,32 @@
 
 <g:if test="${file}">
   <div style="overflow: auto; height='300px'" id="fileContentDiv">
-    <!-- Leave this left-justified so that spaces are not padded in the first line of the log -->
-    <pre id="fileContent">
-      <%
-        if (params.highlight) {
-          file.withReader { reader ->
-            String line
-            boolean found = false
-            while ( (line = reader.readLine() ) != null ) {
-              if (!found && line.contains(params.highlight)) {
-                line = "<a name='loc'> </a><BR>"  + line
-                found = true
-              }
-              line = line.replace(params.highlight, "<span style='background-color: #FFFF00'>${params.highlight}</span>")
-              out << line + "<BR/>"
-            }
-          }
-        } else {
-          file.withReader { reader ->
-            String line
-            while ( (line = reader.readLine() ) != null ) {
-              out << StringEscapeUtils.escapeHtml(line) + "\n"
-            }
-          }
+<!-- Leave this left-justified so that spaces are not padded in the first line of the log -->
+<pre id="fileContent">
+<%
+  if (params.highlight) {
+    file.withReader { reader ->
+      String line
+      boolean found = false
+      while ( (line = reader.readLine() ) != null ) {
+        if (!found && line.contains(params.highlight)) {
+          line = "<a name='loc'> </a><BR>"  + line
+          found = true
         }
-      %>
-    </pre>
+        line = line.replace(params.highlight, "<span style='background-color: #FFFF00'>${params.highlight}</span>")
+        out << line + "<BR/>"
+      }
+    }
+  } else {
+    file.withReader { reader ->
+      String line
+      while ( (line = reader.readLine() ) != null ) {
+        out << StringEscapeUtils.escapeHtml(line) + "\n"
+      }
+    }
+  }
+%>
+</pre>
   </div>
 
 </g:if>
