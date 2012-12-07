@@ -15,33 +15,27 @@ body {
 }
 
 .navbar {
-  color: #CCCCCC;
   font-weight: bold;
-}
-.navbar .nav > li > a {
-  color: #CCCCCC;
 }
 
 .alert {
   padding-left: 2em;
-  background: #fdf7f1 url(/csvn/images/icons/icon_warning_sml.gif) 0.4em 0.5em no-repeat;
-  border-color: #c60; 
+  background-repeat: no-repeat;
+  background-position: 0.4em 0.5em; 
+  background-image: url(/csvn/images/icons/icon_warning_sml.gif);
 }
 
 .alert-error {
   font-weight: bold;
-  background: #fff5f1  url(/csvn/images/icons/icon_error_sml.gif)  0.4em 0.5em no-repeat;
-  border-color: #900;
+  background-image: url(/csvn/images/icons/icon_error_sml.gif);
 }
 
 .alert-info {
-  background: #e7f3fe  url(/csvn/images/icons/icon_info_sml.gif)  0.4em 0.5em no-repeat;
-  border-color: #369;
+  background-image: url(/csvn/images/icons/icon_info_sml.gif);
 }
 
 .alert-success {
-  background: #f8fff4  url(/csvn/images/icons/icon_success_sml.gif) 0.4em 0.5em no-repeat;
-  border-color: #090;
+  background-image: url(/csvn/images/icons/icon_success_sml.gif);
 }
 
 .form-horizontal .control-label {
@@ -58,24 +52,7 @@ body {
   background-color: #fff;
 }
 
-
 .sessionmessages .alert, .requestmessages .alert {
-  border-top: 2px solid #c60;
-  color: black;
-}
-
-.sessionmessages .alert-error, .requestmessages .alert-error {
-  border-top: 2px solid #900;
-  color: black;
-}
-
-.sessionmessages .alert-info, .requestmessages .alert-info {
-  border-top: 2px solid #369;
-  color: black;
-}
-
-.sessionmessages .alert-success, .requestmessages .alert-success {
-  border-top: 2px solid #090;
   color: black;
 }
 
@@ -306,7 +283,26 @@ label.withFor {
 .modal-fullscreen .modal-header:hover,.modal-fullscreen .modal-footer:hover{opacity:1;}
 @media (max-width:480px){.modal-gallery .btn span{display:none;}}
 
+.short-user-menu {
+  display: none !important;
+}
+.full-user-menu {
+  display: inherit !important;
+}
+
 @media (max-width: 1199px) {
+  .full-user-menu {
+      display: none !important;
+  }
+  .short-user-menu {
+      display: inherit !important;
+  }
+  
+  .navbar .nav > li > a {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
   body {
     padding-top: 0;
   }
@@ -316,5 +312,12 @@ label.withFor {
   }
     .navbar-fixed-top {
     margin-bottom: 18px;
+  }
+}
+
+@media (max-width: 979px) {
+  .navbar-fixed-top .navbar-inner,
+  .navbar-fixed-bottom .navbar-inner {
+    padding: -5px;
   }
 }

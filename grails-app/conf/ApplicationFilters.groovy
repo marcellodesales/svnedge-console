@@ -143,9 +143,6 @@ class ApplicationFilters {
                     }
                 }
 
-                // the OCN tab is always last
-                featureList << "ocn"
-
                 // add featurelist to the request model
                 if (!model) {
                     model = new HashMap()

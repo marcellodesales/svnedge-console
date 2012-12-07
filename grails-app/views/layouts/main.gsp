@@ -47,8 +47,6 @@
                class="visible-phone"
                src="${resource(dir:'images/masthead',file:'small-logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
-            <!-- buttons -->
-            <ul class="nav">
             
                     <%--
             Algorithm:
@@ -116,6 +114,8 @@
         </g:elseif>
         
         <g:if test="${!hideButtons}">
+            <!-- buttons -->
+            <ul class="nav">
         <g:each in="${featureList}">
           <g:set var="isButtonSelected" 
               value="${(controllerButtonMap[controllerName] == controllerButtonMap[it]) || 
@@ -123,25 +123,37 @@
           <li<g:if test="${isButtonSelected}"> class="active"</g:if>><a href="${createLink(controller: it )}" 
               target="_top">${buttonNameMap[controllerButtonMap[it]]}</a></li>
         </g:each>
-        </g:if>
-        
+        <g:set var="isButtonSelected" 
+              value="${(controllerButtonMap[controllerName] == controllerButtonMap['ocn'])}" />
+        <li class="hidden-phone<g:if test="${isButtonSelected}"> active</g:if>"><a href="${createLink(controller: 'ocn' )}" 
+              target="_top">${buttonNameMap[controllerButtonMap['ocn']]}</a></li>
             </ul>
             <!-- buttons end -->
+        </g:if>
+        
             <ul class="nav pull-right">
                 <g:isNotLoggedIn>
                   <li><g:link controller="login"><g:message code="layout.page.login" /></g:link>
                 </g:isNotLoggedIn>
                 <g:isLoggedIn>
-                    <li id="loggedInUser">
+                  <li id="loggedInUser" class="full-user-menu">
                     <g:link controller="user" action="showSelf">
                     <g:loggedInUserInfo field="realUserName"/>&nbsp;(<g:loggedInUsername/>)
                     </g:link>
-                </li>
-                <li class="divider-vertical"></li>
-                <li><g:link controller="logout"><g:message code="layout.page.logout"/></g:link>
+                  </li>
+                  <li class="divider-vertical full-user-menu"></li>
+                  <li class="full-user-menu"><g:link controller="logout"><g:message code="layout.page.logout"/></g:link>
+                  <li class="dropdown short-user-menu">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown"><g:loggedInUsername/>  
+                    <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                      <li><g:link controller="user" action="showSelf"><g:message code="layout.page.userProfile"/></g:link></li>
+                      <li><g:link controller="logout"><g:message code="layout.page.logout"/></g:link></li>
+                    </ul>
+                  </li>
                 </g:isLoggedIn>
               </li>
-              <li class="divider-vertical"></li>
+              <li class="divider-vertical visible-desktop"></li>
               <g:render template="/layouts/helpLink"/>
             </ul>
         </div>
