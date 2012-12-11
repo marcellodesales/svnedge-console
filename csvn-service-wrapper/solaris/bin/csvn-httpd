@@ -106,6 +106,9 @@ export PYTHONPATH
 
 if [ -f "$CSVNCONF" ]; then
   . $CSVNCONF
+  # earlier versions of csvn.conf sets these for csvn script
+  APP_NAME="csvn-httpd"
+  APP_LONG_NAME="Subversion Edge Apache Server"
 fi
 
 showresult()
