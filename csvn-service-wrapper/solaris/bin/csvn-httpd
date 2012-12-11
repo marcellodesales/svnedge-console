@@ -158,12 +158,12 @@ start()
     if [ $($IDEXE -u) -eq 0 ] ; then
       if [ "X$RUN_AS_USER" != "X" ] ; then
         if [ -f "/sbin/runuser" ] ; then
-          /sbin/runuser - $RUN_AS_USER -c "export LD_PRELOAD && \
-                                           export PATH && \
+          /sbin/runuser - $RUN_AS_USER -c "LD_PRELOAD=$LD_PRELOAD \
+                                           PATH=$PATH \
                                            $REALDIR/httpd -f $CONFDIR/httpd.conf -k start"
         else
-          su - $RUN_AS_USER -c "export LD_PRELOAD && \
-                                export PATH && \
+          su - $RUN_AS_USER -c "LD_PRELOAD=$LD_PRELOAD \
+                                PATH=$PATH \
                                 $REALDIR/httpd -f $CONFDIR/httpd.conf -k start"
         fi
       else

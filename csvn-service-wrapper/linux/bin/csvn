@@ -18,6 +18,9 @@
 # SETTINGS are located in the csvn.conf file at the following location.
 CSVN_CONF="../data/conf/csvn.conf"
 
+# Application
+APP_NAME="csvn"
+APP_LONG_NAME="CSVN Console"
 
 # The following two lines are used by the chkconfig command. Change as is
 #  appropriate for your application.  They should remain commented.

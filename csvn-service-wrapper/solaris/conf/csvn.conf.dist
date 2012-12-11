@@ -24,10 +24,6 @@ JAVA_REQUIRED=true
 JAVA_REQUIRED_VERSION=1.6
 #JAVA_HOME=
 
-# Application
-APP_NAME="csvn"
-APP_LONG_NAME="CSVN Console"
-
 # Wrapper
 WRAPPER_CMD="./wrapper"
 WRAPPER_CONF="../data/conf/csvn-wrapper.conf"
