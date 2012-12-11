@@ -99,15 +99,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.statusMsg = null
                 replRepo.save()
                 
-                def ctfServer = CtfServer.getServer()
-                def username = ctfServer.ctfUsername
-                def securityService = getService("securityService")
-                def password = securityService.decrypt(ctfServer.ctfPassword)
-                def commandLineService = getService("commandLineService")
-                def syncRepoURI = commandLineService.createSvnFileURI(
-                    new File(Server.getServer().repoParentDir, repoName))
-                execSvnSync(replRepo, System.currentTimeMillis(), username, password,
-                    syncRepoURI)
+                syncRepo(repoPath, replRepo, repoName)
     
             }  else {
                 def msg = "createRepositoryOnFileSystem found existing directory " +
@@ -125,8 +117,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
                 replRepo.statusMsg = null
                 replRepo.save()
                 
-                prepareHookScripts(repoPath, replRepo)
-                prepareSyncRepo(repoPath, replRepo, repoName)
+                syncRepo(repoPath, replRepo, repoName)
             } else {
                 def msg = "Svnadmin failed to create repository: " + repoName
                 log.error(msg)
@@ -141,6 +132,12 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         replRepo.save()
     }
 
+    private def getSyncRepoURI(repoName) {
+        def commandLineService = getService("commandLineService")
+        return commandLineService.createSvnFileURI(
+                new File(Server.getServer().repoParentDir, repoName))
+    }
+    
     /**
      * Checks svn master for httpV2 support (1.7+). The local server is set accordingly.
      * @param repoName
@@ -163,48 +160,62 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         return operatingSystemService.isWindows()
     }
 
+    private static final String PRE_REV_PROP_SCRIPT = "#!/bin/bash\nexit 0;\n"
     /**
      * Prepares the hook scripts for the given repository path.
      * @param repoPath
      * @param repo
      */
-    private def prepareHookScripts(repoPath, repo) {
-        log.info("Changing the rev prop hooks.")
-        def dummyPreRevPropChangeScript = repoPath +
-                                          '/hooks/pre-revprop-change'
+    private def prepareHookScripts(repoPath) {
+        def preRevPropChangeScript = repoPath + '/hooks/pre-revprop-change'
         if (isWindows()) {
-            dummyPreRevPropChangeScript += ".bat"
+            preRevPropChangeScript += ".bat"
         }
-        new File("${dummyPreRevPropChangeScript}").withWriter { out ->
-            out.writeLine("#!/bin/bash\nexit 0;\n")
+        File f = new File(preRevPropChangeScript)
+        if (f.exists()) {
+            String currentScript = f.text
+            if (currentScript != PRE_REV_PROP_SCRIPT) {
+                File bkup = new File(preRevPropChangeScript + '.bkup')
+                bkup.text = currentScript
+                writePreRevPropScript(f, preRevPropChangeScript)
+            }
         }
+        else {
+            writePreRevPropScript(f, preRevPropChangeScript)
+        }
+    }
+        
+    private writePreRevPropScript(File f, String preRevPropChangeScript) {
+        log.info("Changing the preRevPropChange hook.")
+        f.text = PRE_REV_PROP_SCRIPT
         if (!isWindows()) {
             executeShellCommand(["chmod", "755",
-                dummyPreRevPropChangeScript])
+                preRevPropChangeScript])
         }
-        log.info("Done changing the rev prop hooks.")
     }
+    
 
-    private def prepareSyncRepo(repoPath, repo, repoName) {
+    private def syncRepo(repoPath, repo, repoName) {
+        prepareHookScripts(repoPath)
         log.info("Initing the repo...: " + repoName)
         def replicaConfig = ReplicaConfiguration.getCurrentConfig()
         def masterRepoUrl = replicaConfig.getSvnMasterUrl() + "/" + repoName
         def commandLineService = getService("commandLineService")
-        def syncRepoURI = commandLineService.createSvnFileURI(
-            new File(Server.getServer().repoParentDir, repoName))
+        def syncRepoURI = getSyncRepoURI(repoName)
         def ctfServer = CtfServer.getServer()
         def username = ctfServer.ctfUsername
         def securityService = getService("securityService")
         def password = securityService.decrypt(ctfServer.ctfPassword)
         def command = [ConfigUtil.svnsyncPath(), "init", syncRepoURI, 
-            masterRepoUrl,
+            masterRepoUrl, "--allow-non-empty",
             "--source-username", username, "--source-password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
 
         executeShellCommand(command, repo)
         log.info("Done initing the repo.")
-        repo.lastSyncRev = 0
+        def svnRepoService = getService("svnRepoService")
+        repo.lastSyncRev = svnRepoService.findHeadRev(repo.repo)
 
         def masterUUID = getMasterUUID(masterRepoUrl, username, password, 
             repoName)
