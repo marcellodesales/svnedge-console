@@ -37,14 +37,14 @@
   </head>
   <body ${pageProperty(name: 'body.onload', writeEntireProperty: true)}${pageProperty(name: 'body.onunload', writeEntireProperty: true)}>
     
-    <div class="navbar navbar-fixed-top navbar-inverse">
+    <div id="main-navbar" class="navbar navbar-fixed-top navbar-inverse">
       <div class="navbar-inner">
         <div class="container-fluid">
           <g:link controller="status" class="brand"><img
-               class="hidden-phone"
+               class="brand-img hidden-phone" width="217" height="40"
                src="${resource(dir:'images/masthead',file:'logo.png')}"
                alt="${message(code:'layout.page.home') }"/><img
-               class="visible-phone"
+               class="brand-img visible-phone" width="160" height="29"
                src="${resource(dir:'images/masthead',file:'small-logo.png')}"
                alt="${message(code:'layout.page.home') }"/></g:link>
             
@@ -115,7 +115,7 @@
         
         <g:if test="${!hideButtons}">
             <!-- buttons -->
-            <ul class="nav">
+            <ul id="main-nav" class="nav">
         <g:each in="${featureList}">
           <g:set var="isButtonSelected" 
               value="${(controllerButtonMap[controllerName] == controllerButtonMap[it]) || 
@@ -131,7 +131,7 @@
             <!-- buttons end -->
         </g:if>
         
-            <ul class="nav pull-right">
+            <ul id="user-nav" class="nav pull-right">
                 <g:isNotLoggedIn>
                   <li><g:link controller="login"><g:message code="layout.page.login" /></g:link>
                 </g:isNotLoggedIn>
@@ -142,7 +142,7 @@
                     </g:link>
                   </li>
                   <li class="divider-vertical full-user-menu"></li>
-                  <li class="full-user-menu"><g:link controller="logout"><g:message code="layout.page.logout"/></g:link>
+                  <li class="full-user-menu"><g:link controller="logout"><g:message code="layout.page.logout"/></g:link></li>
                   <li class="dropdown short-user-menu">
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><g:loggedInUsername/>  
                     <b class="caret"></b></a>
@@ -152,7 +152,6 @@
                     </ul>
                   </li>
                 </g:isLoggedIn>
-              </li>
               <li class="divider-vertical visible-desktop"></li>
               <g:render template="/layouts/helpLink"/>
             </ul>

@@ -284,20 +284,23 @@ label.withFor {
 @media (max-width:480px){.modal-gallery .btn span{display:none;}}
 
 .short-user-menu {
-  display: none !important;
+  display: none;
 }
 .full-user-menu {
-  display: inherit !important;
+  display: inherit;
+}
+
+// NOTE: application.js selectUsernameNavigationStyle overrides this
+@media (max-width: 979px) {
+  .full-user-menu {
+      display: none;
+  }
+  .short-user-menu {
+      display: inherit;
+  }
 }
 
 @media (max-width: 1199px) {
-  .full-user-menu {
-      display: none !important;
-  }
-  .short-user-menu {
-      display: inherit !important;
-  }
-  
   .navbar .nav > li > a {
     padding-left: 8px;
     padding-right: 8px;

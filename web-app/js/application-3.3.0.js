@@ -192,3 +192,22 @@ function stopEvent(e) {
     }
 }
 
+function selectUsernameNavigationStyle() {
+	var mainNavbar = $('#main-navbar');
+	if (mainNavbar.length > 0) {
+      $('.full-user-menu').show();
+      $('.short-user-menu').hide();		
+      var x = mainNavbar.width() - $('.brand-img').width() - 
+              $('#main-nav').width() - $('#user-nav').width();
+      //alert(mainNavbar.width() + ' ' + $('.brand-img').width() + ' ' + $('#main-nav').width() + ' ' + $('#user-nav').width() + ' ' + x);
+      if (x < 80) {
+          $('.full-user-menu').hide();
+          $('.short-user-menu').show();
+      } else {
+        $('.full-user-menu').show();
+        $('.short-user-menu').hide();		
+      }
+    }
+}
+$(document).ready(selectUsernameNavigationStyle);
+$(window).resize(selectUsernameNavigationStyle);
