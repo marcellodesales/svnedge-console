@@ -6,15 +6,29 @@
     options.title = '<g:message code="wizard.GettingStarted.ChangePassword.clickHere"/>';
     var userLinks = $('#loggedInUser, .short-user-menu');
     userLinks.tooltip(options);
+    options.placement = 'left';
+    $('#userProfileMenuItem').tooltip(options);
     if (userLinks.length > 0) {
       setInterval(function() {
         var userLink = $('#loggedInUser');
-        if (userLink.is(':visible')) {
-          $('.short-user-menu').tooltip('hide');
-          userLink.tooltip('toggle');
+        if ($('#wizard${activeWizard.label}CollapseButton').is(':visible')) {
+          if (userLink.is(':visible')) {
+            $('.short-user-menu').tooltip('hide');
+            userLink.tooltip('toggle');
+          } else {
+            $('#loggedInUser').tooltip('hide');
+            if ($('#userProfileMenuItem').is(':visible')) {
+              $('#userProfileMenuItem').tooltip('toggle');
+              $('.short-user-menu').tooltip('hide');
+            } else {
+              $('#userProfileMenuItem').tooltip('hide');
+              $('.short-user-menu').tooltip('toggle');            
+            }
+          }
         } else {
-          $('#loggedInUser').tooltip('hide');
-          $('.short-user-menu').tooltip('toggle');
+            userLink.tooltip('hide');
+            $('.short-user-menu').tooltip('hide');
+            $('#userProfileMenuItem').tooltip('hide');        
         } 
       }, 1500);
     }

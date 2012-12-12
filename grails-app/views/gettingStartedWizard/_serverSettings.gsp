@@ -1,14 +1,5 @@
-<p>
-  Next, you will setup the Subversion server. Subversion requests are
-  processed by an Apache http server which runs completely independent
-  from this administrative console.  
-</p>
-<p>
-  Subversion Edge makes configuring
-  the Apache server for use with Subversion very easy, but there are
-  a few decisions you still need to make. Please follow the prompts
-  and Subversion will be up and running very soon.
-</p>
+<p><g:message code="wizard.GettingStarted.ServerSettings.p1"/></p>
+<p><g:message code="wizard.GettingStarted.ServerSettings.p2"/></p>
 <div id="portModal" class="modal hide fade" style="display: none; width: 800px;">
   <div class="modal-header">
     <a class="close" data-dismiss="modal" data-target="#portModal">&times;</a>
@@ -293,6 +284,12 @@
   }
   $(document).ready(function() {
     startWizard();
+    $('#wizard${activeWizard.label}').on('hidden', function () {
+      targetElement('#hostname').popover('hide');
+      targetElement('#useSsl').popover('hide');
+      targetElement('#port').popover('hide');
+      targetElement('#repoParentDir').popover('hide');
+    });
   });
   
   function startWizard() {
@@ -306,15 +303,19 @@
   }
   
   function targetElement(selector) {
+     var isPhoneMode = !$('#tip').is(':visible');
      var target = $(selector).parent().children('.help-block').children('.help-marker');
-     if (target.length == 0) {
+     if (target.length == 0 || isPhoneMode) {
        target = $(selector).parent().children('.help-block');
      }
      if (target.length == 0) {
        target = $(selector);
+       if (isPhoneMode) {
+         target = target.parent();
+       }
      }
      return target;
-  }
+  }  
   
 /* ]]> */
 </g:javascript>

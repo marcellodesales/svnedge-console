@@ -17,15 +17,13 @@
                         <g:set var="isShowWizards" value="${true}"/>
                       </g:if>
                   </g:each>
-                  <g:if test="${isShowWizards}">
                     <g:each var="wizard" in="${allWizards}">
-                      <g:if test="${!wizard.active && !wizard.done}">
-                        <li><g:link controller="${wizard.controller}" action="startWizard">
+                      <g:if test="${!wizard.done}">
+                        <li id="wizardHelpMenu${wizard.label}"<g:if test="${wizard.active}"> style="display: none;"</g:if>><g:link controller="${wizard.controller}" action="startWizard">
                         <g:message code="wizard.${wizard.label}.inactiveTitle"/></g:link></li>
                       </g:if>
                     </g:each>                  
-                    <li class="divider"></li>
-                  </g:if>
+                    <li id="wizardHelpMenuDivider" class="divider"<g:if test="${!isShowWizards}"> style="display: none;"</g:if>></li>
                   <li><a data-toggle="modal" href="#aboutModal"><g:message code="layout.page.help.about" /></a></li>
                 </ul>
               </li>

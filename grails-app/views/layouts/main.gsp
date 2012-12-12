@@ -147,7 +147,7 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown"><g:loggedInUsername/>  
                     <b class="caret"></b></a>
                     <ul class="dropdown-menu">
-                      <li><g:link controller="user" action="showSelf"><g:message code="layout.page.userProfile"/></g:link></li>
+                      <li id="userProfileMenuItem"><g:link controller="user" action="showSelf"><g:message code="layout.page.userProfile"/></g:link></li>
                       <li><g:link controller="logout"><g:message code="layout.page.logout"/></g:link></li>
                     </ul>
                   </li>
@@ -224,9 +224,10 @@
           <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
           <div class="span3">
             <g:if test="${wizard?.active && !wizard.done}">
-              <button type="button" class="btn btn-inverse" data-toggle="collapse" data-target="#wizard${wizard.label}">
+              <button id="wizard${wizard.label}CollapseButton" type="button" class="btn btn-inverse" 
+                      data-toggle="collapse" data-target="#wizard${wizard.label}">
                  <g:message code="wizard.${wizard.label}.title"/>
-                 <span id="wizard${wizard.label}CollapseButton" style="font-size: 20px; font-weight: bold; line-height: 18px;">&nbsp;&times;</span>
+                 <span style="font-size: 20px; font-weight: bold; line-height: 18px;">&nbsp;&times;</span>
               </button>
 
               <div class="wizard collapse in" id="wizard${wizard.label}" style="width: 100%">
@@ -273,14 +274,11 @@
               
               <g:javascript>
                 $('#wizard${wizard.label}').on('hidden', function () {
-                  $('#wizard${wizard.label}CollapseButton').hide();
                   $('#closeWizardModal${wizard.label}').modal('show');                  
+                  $('#wizard${wizard.label}CollapseButton').hide();
                   ajaxIgnoreResponse('/csvn/${wizard.controller}/suspendWizard');
-                });
-
-                $('#wizard${wizard.label}').on('shown', function () {
-                  $('#wizard${wizard.label}CollapseButton').show();
-                  ajaxIgnoreResponse('/csvn/${wizard.controller}/startWizard');
+                  $('#wizardHelpMenu${wizard.label}').show();
+                  $('#wizardHelpMenuDivider').show();
                 });
               </g:javascript>
               
@@ -312,7 +310,7 @@
             </div> <!--/.well -->
 
             <g:tipSelector>
-            <div class="well hidden-phone">
+            <div id="tip" class="well hidden-phone">
               <span class="label label-info">Tip:</span>
               <%=tip%>
             </div> <!--/.well -->
