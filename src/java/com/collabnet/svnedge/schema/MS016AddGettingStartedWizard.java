@@ -17,6 +17,7 @@
  */
 package com.collabnet.svnedge.schema;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.apache.log4j.Logger;
 
@@ -56,7 +57,6 @@ public class MS016AddGettingStartedWizard implements MigrationScript {
             " REFERENCES WIZARD(ID)" +
             ")";
             db.executeUpdate(createTable);
-        }
         
         db.executeUpdate("insert into WIZARD (LABEL, CONTROLLER, ACTIVE, ORDERED) " +
                 "values ('GettingStarted', 'gettingStarted', true, true)");
@@ -69,11 +69,56 @@ public class MS016AddGettingStartedWizard implements MigrationScript {
                 "(1, 'ServerSettings', 'com.collabnet.svnedge.wizard.gettingstarted.ServerSettingsStep', 2)");
         db.executeUpdate(insertPrefix +
                 "(1, 'CloudBackup', 'com.collabnet.svnedge.wizard.gettingstarted.CloudBackupStep', 3)");
+        }
+        
+        version[2] = 1;
+        if (!db.isSchemaCurrent(version)) {
+            db.executeUpdate("alter table WIZARD add column HELPER_CLASS_NAME VARCHAR(255)");
+            db.executeUpdate("update WIZARD set HELPER_CLASS_NAME=" + 
+                    "'com.collabnet.svnedge.wizard.gettingstarted.GettingStartedWizard'" + 
+                    " where LABEL='GettingStarted'");
+            db.executeUpdate("alter table WIZARD drop column CONTROLLER");
+            db.executeUpdate("alter table WIZARD drop column LABEL");
+        }
+        
+        version[2] = 2;
+        if (!db.isSchemaCurrent(version)) {        
+            boolean isWizardDone = true;
+            ResultSet rs = db.executeQuery("select count(*) from USER");
+            rs.next();
+            if (rs.getInt(1) == 0) {
+                isWizardDone = false;
+            } else {
+                rs = db.executeQuery("select PASSWD from USER where USERNAME='admin'");
+                if (rs.next()) {
+                    if ("21232f297a57a5a743894a0e4a801fc3".equals(rs.getString(1))) {
+                        isWizardDone = false;
+                    } else {
+                        db.executeUpdate("update WIZARD_STEP set DONE=true where LABEL in ('ChangePassword', 'ServerSettings')");
+                    }
+                } else {
+                    throw new RuntimeException("No user by the name 'admin'");
+                }
+                rs.close();
+                rs = db.executeQuery("select DOMAIN from CLOUD_SERVICES_CONFIGURATION");
+                rs.next();
+                String domain = rs.getString(1);
+                if (domain == null || domain.trim().length() == 0) {
+                    isWizardDone = false;
+                } else {
+                    db.executeUpdate("update WIZARD_STEP set DONE=true where LABEL='CloudBackup'");
+                }
+            }
+            
+            if (isWizardDone) {
+                db.executeUpdate("update WIZARD set ACTIVE=false, DONE=true");                
+            }
+        }
 
         return false;
     }
 
     public int[] getVersion() {
-        return new int[] {3, 3, 0};
+        return new int[] {3, 3, 2};
     }
 }

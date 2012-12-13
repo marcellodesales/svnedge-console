@@ -39,21 +39,30 @@ public class SqlUtil {
 
     private Logger log = Logger.getLogger(getClass());
     private Connection conn;
+    private Statement stmt;
     
     SqlUtil(Connection conn) {
         this.conn = conn;
     }
     
+    private Statement getStatement() throws SQLException {
+        if (stmt != null) {
+            close(stmt);
+        }
+        stmt = conn.createStatement();
+        return stmt;
+    }
+    
     ResultSet executeQuery(String sql) throws SQLException {
         log.debug("Executing query sql: " + sql);
-        Statement stmt = null;
+        Statement stmt = getStatement();
         try {
-            stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             return rs;
 
-        } finally {
+        } catch (SQLException e) {
             close(stmt);
+            throw e;
         }
     }
     
@@ -80,13 +89,13 @@ public class SqlUtil {
 
     int executeUpdateSql(String sql) throws SQLException {
         log.debug("Executing update sql: " + sql);
-        Statement stmt = null;
+        Statement stmt = getStatement();
         try {
-            stmt = conn.createStatement();
             return stmt.executeUpdate(sql);
 
-        } finally {
+        } catch (SQLException e) {
             close(stmt);
+            throw e;
         }
     }
     
@@ -129,7 +138,7 @@ public class SqlUtil {
         int revision = version[2];
         ResultSet rs = executeQuery(
             "select count(*) from SCHEMA_VERSION where MAJOR=" + major + 
-            " and MINOR=" + minor + " and REVISION=" + revision);
+            " and MINOR=" + minor + " and REVISION >= " + revision);
         return rs.next() && rs.getInt(1) > 0;
     }
 

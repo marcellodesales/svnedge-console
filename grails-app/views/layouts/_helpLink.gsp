@@ -14,13 +14,17 @@
                   <g:set var="isShowWizards" value="${false}"/>
                   <g:each var="wizard" in="${allWizards}">
                       <g:if test="${!wizard.active && !wizard.done}">
+                      <g:ifAnyGranted role="${wizard.rolesAsString}">
                         <g:set var="isShowWizards" value="${true}"/>
+                      </g:ifAnyGranted>
                       </g:if>
                   </g:each>
                     <g:each var="wizard" in="${allWizards}">
                       <g:if test="${!wizard.done}">
+                      <g:ifAnyGranted role="${wizard.rolesAsString}">
                         <li id="wizardHelpMenu${wizard.label}"<g:if test="${wizard.active}"> style="display: none;"</g:if>><g:link controller="${wizard.controller}" action="startWizard">
                         <g:message code="wizard.${wizard.label}.inactiveTitle"/></g:link></li>
+                      </g:ifAnyGranted>
                       </g:if>
                     </g:each>                  
                     <li id="wizardHelpMenuDivider" class="divider"<g:if test="${!isShowWizards}"> style="display: none;"</g:if>></li>

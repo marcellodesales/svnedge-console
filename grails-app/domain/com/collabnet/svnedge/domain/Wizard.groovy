@@ -19,19 +19,29 @@ package com.collabnet.svnedge.domain
 
 import java.util.List;
 
+import com.collabnet.svnedge.wizard.WizardHelper
+
 
 class Wizard {
     //static hasMany = [steps: WizardStep]
-
+    static transients = ['helper', 'controller', 'label', 'roles', 'rolesAsString']
+    
     WizardStep currentStep
-    String controller
-    String label
     boolean done
     boolean active
     boolean upgrade
     boolean initialized
     boolean ordered
+    String helperClassName
     
+    private WizardHelper helper
+    
+    private WizardHelper helper() {
+        if (!helper) {
+            helper = Class.forName(helperClassName, true, this.class.classLoader).newInstance()
+        }
+        return helper
+    }
     
     List<WizardStep> getSteps() {
         def rows = WizardStep.findAllByWizardId(this.id)
@@ -39,6 +49,22 @@ class Wizard {
         lws.addAll(rows)
         lws.sort { s1, s2 -> (s1.rank < s2.rank) ? -1 : 
                 ((s1.rank > s2.rank) ? 1 : 0) }
+    }
+
+    String getLabel() {
+        return helper().label
+    }
+    
+    String getController() {
+        return helper().controller
+    }
+    
+    List<String> getRoles() {
+        return helper().roles
+    }
+        
+    String getRolesAsString() {
+        return getRoles().join(',')
     }
     
     int index() {
@@ -77,6 +103,9 @@ class Wizard {
             currentStep = null
         } else {
             int n = index()
+            if (n > 0) {
+                n--
+            }
             while (n < steps.size()) {
                 currentStep = steps[n]
                 if (!currentStep.done) {

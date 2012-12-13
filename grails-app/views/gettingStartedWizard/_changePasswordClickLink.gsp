@@ -1,6 +1,7 @@
-<p><g:message code="wizard.GettingStarted.ChangePassword.recommend"/></p>
-<p><g:message code="wizard.GettingStarted.ChangePassword.clickUsernameToEdit"/></p>
-<g:javascript>
+<g:if test="${loggedInUsername() == 'admin'}">
+  <p><g:message code="wizard.GettingStarted.ChangePassword.recommend"/></p>
+  <p><g:message code="wizard.GettingStarted.ChangePassword.clickUsernameToEdit"/></p>
+  <g:javascript>
   function highlightUsername() {
     var options = { trigger: 'manual', placement: 'bottom'};
     options.title = '<g:message code="wizard.GettingStarted.ChangePassword.clickHere"/>';
@@ -35,5 +36,8 @@
   }
   
   $(document).ready(highlightUsername);
-</g:javascript>
-
+  </g:javascript>
+</g:if>
+<g:else>
+  <p><g:message code="wizard.GettingStarted.ChangePassword.notAdminUser"/></p>
+</g:else>

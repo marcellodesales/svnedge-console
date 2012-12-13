@@ -212,7 +212,9 @@ class ApplicationFilters {
                     log.debug "controller=" + controllerName +
                             " action=" + actionName
                     def wizard = Wizard.getLastActiveWizard()
-                    if (wizard) {
+                    boolean isTargetedUser = authenticateService
+                            .ifAnyGranted(wizard?.rolesAsString)
+                    if (wizard && isTargetedUser) {
                         log.debug "Wizard dump: " + wizard.dump()
                         if (!wizard.initialized) {
                             wizard.increment()

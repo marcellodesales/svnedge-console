@@ -1,4 +1,5 @@
 <content tag="leftMenu">
+ <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
   <li class="nav-header"><g:message code="admin.page.leftNav.maintenance"/></li>
   
   <li<g:if test="${controllerName == 'status'}"> class="active"</g:if>>
@@ -43,10 +44,12 @@
   <li<g:if test="${controllerName == 'server' && ['editMonitoring', 'updateMonitoring'].contains(actionName)}"> class="active"</g:if>>
     <g:link controller="server" action="editMonitoring"><g:message code="admin.page.leftNav.editMonitoring" /></g:link>
   </li>
-
+ </g:ifAnyGranted>
+  
+<g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_SYSTEM">
   <li class="nav-header"><g:message code="admin.page.leftNav.extensions"/></li>
 
-
+<g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
 <g:if test="${!isManagedMode}">
   <li<g:if test="${controllerName == 'setupTeamForge' || controllerName == 'setupReplica'}"> class="active"</g:if>>
     <g:link controller="setupTeamForge" action="index"><g:message code="admin.page.leftNav.teamforge" /></g:link>
@@ -57,6 +60,7 @@
     <g:link controller="setupReplica" action="editCredentials"><g:message code="admin.page.leftNav.toStandalone" /></g:link>
   </li>
 </g:else>
+</g:ifAnyGranted>
 
 <%@ page import="com.collabnet.svnedge.domain.integration.CloudServicesConfiguration" %>
 <g:if test="${CloudServicesConfiguration.currentConfig?.enabled}">
@@ -64,4 +68,5 @@
     <g:link controller="setupCloudServices" action="index"><g:message code="admin.page.leftNav.cloudServices" /></g:link>
   </li>
 </g:if>
+</g:ifAnyGranted>
 </content>

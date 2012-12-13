@@ -23,7 +23,7 @@ import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.integration.AuthenticationCloudServicesException;
 import com.collabnet.svnedge.util.ControllerUtil
 
-@Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])
+@Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO', 'ROLE_ADMIN_SYSTEM'])
 class SetupCloudServicesController {
 
     def securityService

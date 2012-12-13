@@ -25,6 +25,7 @@ import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.domain.Wizard
 import com.collabnet.svnedge.domain.WizardStep
 import com.collabnet.svnedge.util.ControllerUtil;
+import com.collabnet.svnedge.wizard.gettingstarted.GettingStartedWizard
 
 /**
  * Getting Started wizard actions.
@@ -152,6 +153,6 @@ class GettingStartedController {
     }
 
     private def getDomain() {
-        return Wizard.findByLabel('GettingStarted')
+        return Wizard.findByHelperClassName(GettingStartedWizard.class.name)
     }
 }

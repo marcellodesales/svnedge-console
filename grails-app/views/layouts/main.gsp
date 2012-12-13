@@ -219,11 +219,12 @@
 
         <g:set var="blocks" value="12"/>
         <g:set var="wizard" value="${activeWizard}"/>
-        <g:if test="${pageProperty(name:'page.leftMenu') || wizard}">
+        <g:if test="${pageProperty(name:'page.leftMenu')}">
           <g:set var="blocks" value="9"/>
           <!-- *************  LEFT NAV STUFF GOES HERE *********** -->
           <div class="span3">
             <g:if test="${wizard?.active && !wizard.done}">
+            <g:ifAnyGranted role="${wizard.rolesAsString}">
               <button id="wizard${wizard.label}CollapseButton" type="button" class="btn btn-inverse" 
                       data-toggle="collapse" data-target="#wizard${wizard.label}">
                  <g:message code="wizard.${wizard.label}.title"/>
@@ -281,26 +282,7 @@
                   $('#wizardHelpMenuDivider').show();
                 });
               </g:javascript>
-              
-              <!-- 
-              <div class="wizard" id="wizard" style="width: 100%">
-                <div class="wizard-inner">
-                  <h3 class="wizard-title"><div class="wizard-steps">Step ${wizard.index()} of ${wizard.maxIndex()}</div>
-                  <g:message code="wizard.${wizard.label}.${wizard.currentStep.label}.title"/></h3>
-                  <div class="wizard-content">
-                    <g:render template="${wizard.currentStep.helper().getContentTemplate(controllerName, actionName)}" />  
-                    <p>
-                    <g:if test="${wizard.currentStep.helper().isShowSkipButton()}">
-                      <g:link class="btn" controller="${wizard.controller}" action="skipStep">Skip this Step</g:link>
-                    </g:if>
-                    <g:if test="${wizard.currentStep.helper().isShowExitButton()}">
-                      <g:link class="btn" controller="${wizard.controller}" action="abortWizard">Exit the Wizard</g:link>
-                    </g:if>
-                    </p>          
-                  </div>
-                </div>
-              </div>
-               -->
+            </g:ifAnyGranted>
             </g:if>
             
             <div class="well sidebar-nav">
