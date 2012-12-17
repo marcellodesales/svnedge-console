@@ -151,14 +151,14 @@ start()
   fi
 
   # Is httpd_bind enabled?
-  BINDEXE="$(find $LIBDIR/httpd_bind/httpd_bind -user root -perm -4000)"
+  BINDEXE="`find $LIBDIR/httpd_bind/httpd_bind -user root -perm -4000`"
   if [ "X$BINDEXE" = "X$LIBDIR/httpd_bind/httpd_bind" ] ; then
     LD_PRELOAD=$LIBDIR/httpd_bind/libhttpd_bind.so.1
     export LD_PRELOAD
     PATH=$LIBDIR/httpd_bind:$PATH
     export PATH
 
-    if [ $($IDEXE -u) -eq 0 ] ; then
+    if [ `$IDEXE -u` -eq 0 ] ; then
       if [ "X$RUN_AS_USER" != "X" ] ; then
         if [ -f "/sbin/runuser" ] ; then
           /sbin/runuser - $RUN_AS_USER -c "LD_PRELOAD=$LD_PRELOAD \
