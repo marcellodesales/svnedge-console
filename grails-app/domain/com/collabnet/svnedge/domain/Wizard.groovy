@@ -102,16 +102,9 @@ class Wizard {
         if (done) {
             currentStep = null
         } else {
-            int n = index()
-            if (n > 0) {
-                n--
-            }
-            while (n < steps.size()) {
-                currentStep = steps[n]
-                if (!currentStep.done) {
-                    break
-                }
-                n++
+            int n = iterate(index())
+            if (n >= steps.size()) {
+                n = iterate(0)
             }
             if (n >= steps.size()) {
                 currentStep = steps[0]
@@ -121,6 +114,17 @@ class Wizard {
         return currentStep
     }
 
+    private int iterate(int n) {
+        while (n < steps.size()) {
+            currentStep = steps[n]
+            if (!currentStep.done) {
+                break
+            }
+            n++
+        }
+        return n
+    }
+    
     static constraints = {
         //substep(nullable: true)
         currentStep(nullable: true)

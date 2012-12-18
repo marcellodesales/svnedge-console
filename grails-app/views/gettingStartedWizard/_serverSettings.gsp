@@ -96,10 +96,10 @@
   var serverPortRecommendDefault = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.recommendDefault"/></p>' +
     '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.alternativeToDefault"/></p>';
      
-  var serverPortRecommendHighPort = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.recommendDefault"/></p>' +
+  var serverPortRecommendHighPort = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.recommendHighPort"/></p>' +
     '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.alternativeToHighPort"/></p>' +
-    ' <ul><li><a href="#" onclick="$(\'#port\').val(\'18080\'); continuePort(); return false;"><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.highPortLink"/></li>' +
-    ' <li><a href="#" onclick="$(\'#port\').val(\'__JS_PORT__\'); continuePort(); return false;"><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.defaultPortLink"/></li></ul>';
+    ' <ul><li><a href="#" onclick="$(\'#port\').val(\'18080\'); continuePort(); return false;"><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.highPortLink"/></a></li>' +
+    ' <li><a href="#" onclick="$(\'#port\').val(\'__JS_PORT__\'); continuePort(); return false;"><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.defaultPortLink"/></a></li></ul>';
      
   var serverPortDefaultUnavailable = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.defaultPortUnavailable"/></p>';
 
