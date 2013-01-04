@@ -61,20 +61,12 @@ else:
   sys.path.insert(0, os.path.abspath(os.path.join(sys.argv[0],
                                                   "../../../lib")))
 
-### TeamForge customization:  Also add the 'integration' dir to sys.path.
-if INTEGRATION_DIR and os.path.exists(INTEGRATION_DIR):
-  sys.path.append(INTEGRATION_DIR)
-
-#########################################################################
-
-### add code for checking the load average
-
-#########################################################################
-
 # go do the work
 import sapi
 import viewvc
 
 server = sapi.CgiServer()
 cfg = viewvc.load_config(CONF_PATHNAME, server)
+cfg.general.header_html = '' 
 viewvc.main(server, cfg)
+

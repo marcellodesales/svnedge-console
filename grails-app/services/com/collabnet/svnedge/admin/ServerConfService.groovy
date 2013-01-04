@@ -22,6 +22,7 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 
 import grails.util.GrailsUtil
+import groovy.io.FileType
 
 import java.net.URL
 import java.util.Calendar
@@ -350,17 +351,6 @@ Content-Length: 107
         commandLineService.executeWithOutput("ln", "-sf", 
             actualPythonBindingDir.absolutePath, pythonBindingDir.absolutePath)
 
-        //Removing existing 'mod_python' directory/link and recreating as symlink.
-        File modpyLibDir = new File(libDir, "mod_python")
-        if (modpyLibDir.exists()) {
-            commandLineService.executeWithOutput("rm", "-rf", 
-                modpyLibDir.absolutePath)
-        }
-        File actualModpyLibDir = new File(libDir,
-            "mod_python${getPythonVersion()}")
-        commandLineService.executeWithOutput("ln", "-sf", 
-            actualModpyLibDir.absolutePath, modpyLibDir.absolutePath)
-
         //Recreateing 'libsvn_swig_py-1' real library name as symlink.
         File swigPythonLibPath = new File(libDir, "libsvn_swig_py-1.so.0.0.0")
         if (swigPythonLibPath.exists()) {
@@ -479,10 +469,25 @@ Content-Length: 107
             s = s.replace("__DIFF__", "/usr/bin/diff")
         }            
         new File(confDirPath, "viewvc.conf").write(DONT_EDIT_VIEWVC + s)
+        writeWindowsShebang()
     }
 
-
-
+    def writeWindowsShebang() {
+        if (isWindows()) {
+            String linuxShebang = "#!/usr/bin/env python"
+            String winShebang = "#!${ConfigUtil.appHome()}\\Python25\\python.exe"
+            File cgiBinDir = new File(ConfigUtil.binDirPath(), 'cgi-bin')
+            cgiBinDir.eachFile(FileType.FILES) { f ->
+                if (f.name.endsWith('.cgi')) {
+                    String s = f.text
+                    String winContent = s.replace(linuxShebang, winShebang)
+                    if (s != winContent) {
+                        f.text = winContent
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * service method to fetch the text of the svn_acccess_file (path-based permissions)
@@ -614,10 +619,7 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
             conf += "<VirtualHost *:${server.port}>"
         }
 
-        conf += """
-${server.useSsl ? "SSLEngine On" : "# SSL is off"}
-LoadModule python_module lib/modules/mod_python.so${getPythonVersion()}
-"""
+        conf += server.useSsl ? "SSLEngine On" : "# SSL is off"
         if (server.mode == ServerMode.REPLICA || ctfMode) {
         conf += """
 LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
@@ -682,13 +684,12 @@ Alias /viewvc-static "${viewvcTemplateDirPath}/docroot"
 
         conf += ctfMode ? """
 RewriteRule ^/viewcvs(.*)\$ /viewvc\$1 [R,L]
+ScriptAlias /viewvc "${ConfigUtil.binDirPath()}/cgi-bin/ctf_viewvc.cgi"
 """ : """
-ScriptAlias /viewvc "${ConfigUtil.modPythonPath()}/viewvc.py"
+ScriptAlias /viewvc "${ConfigUtil.binDirPath()}/cgi-bin/viewvc.cgi"
 """
         conf += """
 <Location /viewvc>
-  SetHandler mod_python
-  PythonDebug on
   AddDefaultCharset UTF-8
   SetEnv CSVN_HOME "${ConfigUtil.appHome()}"
 """
@@ -931,16 +932,7 @@ ${extraconf}
     }    
     
     private def getViewVCHttpdConf(server) {
-        def conf = """
-  PythonPath "[r'"""
-        conf += escapePath(new File(ConfigUtil.appHome(), "lib").absolutePath) +
-            "', r'" + escapePath(ConfigUtil.modPythonPath()) + "', r'" + 
-            escapePath(ConfigUtil.viewvcLibPath())
-        conf += """']+sys.path"
-  PythonHandler handler
-"""
-
-        conf += getAuthBasic(server)
+        def conf = getAuthBasic(server)
         if (!server.allowAnonymousReadAccess) {
             conf += """  Require valid-user
 """
@@ -949,20 +941,9 @@ ${extraconf}
     }
     
     private def getCtfViewVCHttpdConf(server) {
-        def appHome = ConfigUtil.appHome()
-        def conf = """
-  PythonPath "[r'"""
-        conf += escapePath(new File(appHome, "lib").absolutePath) + "', r'"
-        conf += escapePath(new File(appHome, "lib/svn-python").absolutePath) + "', r'"
-        conf += escapePath(new File(appHome, "lib/integration").absolutePath) + 
-            "', r'" + ConfigUtil.modPythonPath() + "', r'" + ConfigUtil.viewvcLibPath()
-        conf += """']+sys.path"
-  PythonHandler viewvc_ctf_handler
-  PythonOption viewvc.root.uri /viewvc
-  PythonOption sourceforge.properties.path "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
-  PythonOption sourceforge.home "${escapePath(new File(ConfigUtil.dataDirPath(), "teamforge").absolutePath)}"
+        return """ SetEnv SOURCEFORGE_HOME "${escapePath(new File(ConfigUtil.dataDirPath(), "teamforge").absolutePath)}"
+ SetEnv SOURCEFORGE_PROPERTIES_PATH "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
 """
-        return conf
     }
 
 

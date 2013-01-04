@@ -1061,12 +1061,12 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         }
 
         oldViewvcFile = new File(libDir, 
-            "integration/viewvc/bin/mod_python/ctf_handler.py")
+            "integration/viewvc/bin/cgi/ctf_viewvc.cgi")
         if (!oldViewvcFile.exists()) {
             throw new FileNotFoundException("missing file " + oldViewvcFile)
         }
         newViewvcFile = new File(ConfigUtil.appHome(), 
-                                 "bin/mod_python/viewvc_ctf_handler.py")
+                                 "bin/cgi-bin/ctf_viewvc.cgi")
         if (newViewvcFile.exists() && !newViewvcFile.delete()) {
             log.warn("Unable to delete existing ViewVC teamforge " + 
                 "handler: " + newViewvcFile.absolutePath)

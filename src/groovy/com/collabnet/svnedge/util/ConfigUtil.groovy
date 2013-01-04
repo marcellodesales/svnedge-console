@@ -170,12 +170,6 @@ public final class ConfigUtil {
             new File(appHome(), "lib/viewvc").absolutePath
     }
 
-    def static modPythonPath() {
-        return getConfig().svnedge.svn.modPythonPath ? 
-            getConfig().svnedge.svn.modPythonPath : 
-            new File(appHome(), "bin/mod_python").absolutePath
-    }
-
     static File httpdPidFile() {
         File runFile = new File(dataDirPath(), "run")
         return new File(runFile, "httpd.pid")
