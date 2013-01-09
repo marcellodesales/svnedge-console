@@ -1596,7 +1596,7 @@ def common_template_data(request, revision=None, mime_type=None):
   cfg = request.cfg
 
   # Initialize data dictionary members (sorted alphanumerically)
-  data = ezt.TemplateData({
+  templateData = {
     'annotate_href' : None,
     'cfg' : cfg,
     'docroot' : cfg.options.docroot is None \
@@ -1635,12 +1635,17 @@ def common_template_data(request, revision=None, mime_type=None):
     'csvn_application_js_filename': cfg.general.csvn_application_js_filename,
 
     # added for TeamForge
-    'banner_header': cfg.general.header_html,
+    'banner_header': '',
     'testmode' : cfg.general.ctf_testmode,
     'app_server_root_url': cfg.general.csvn_app_server_root_url,
     'project_url': cfg.general.csvn_app_server_root_url + "/sf/scm/do/listRepositories/" + request.proj_path + "/scm",
     'servermode': cfg.general.csvn_servermode,
-  })
+  }
+
+  if hasattr(cfg.general, 'header_html'):
+    templateData['banner_header'] = cfg.general.header_html
+
+  data = ezt.TemplateData(templateData)
 
   rev = revision
   if not rev:

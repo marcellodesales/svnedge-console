@@ -33,7 +33,6 @@ LIBRARY_DIR = None
 SVN_LIBRARY_DIR = None
 CSVN_HOME_DIR = None
 CONF_PATHNAME = None
-INTEGRATION_DIR = None
 
 #########################################################################
 #
@@ -51,8 +50,6 @@ if CSVN_HOME_DIR:
                                   "lib", "viewvc"))
   CONF_PATHNAME   = os.path.abspath(os.path.join(CSVN_HOME_DIR,
                                       "data", "conf", "viewvc.conf"))
-  INTEGRATION_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR,
-                                      "lib", "integration"))
 
 if LIBRARY_DIR:
   sys.path.insert(0, LIBRARY_DIR)
@@ -67,6 +64,5 @@ import viewvc
 
 server = sapi.CgiServer()
 cfg = viewvc.load_config(CONF_PATHNAME, server)
-cfg.general.header_html = '' 
 viewvc.main(server, cfg)
 

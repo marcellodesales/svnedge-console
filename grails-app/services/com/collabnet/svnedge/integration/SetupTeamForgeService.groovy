@@ -1078,6 +1078,8 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
         } else {
             oldViewvcFile.parentFile.parentFile.parentFile.deleteDir()
         }
+        
+        newViewvcFile.executable = true
     }
 
     protected unpackZipFile(File archiveFile, File destDir, 
