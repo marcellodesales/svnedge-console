@@ -306,6 +306,12 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         rc.save(flush:true)
 
         Server server = Server.getServer()
+        server.svnBasePath = rc.contextPath()
+        server.save(flush:true)
+
+        CtfServer ctfServer = CtfServer.getServer()
+        ctfServer.mySystemId = scmMasterId
+        ctfServer.save(flush:true)
         File idFile = new File(server.repoParentDir, ".scm.properties")
         idFile.text = "external_system_id=" + scmMasterId
      }

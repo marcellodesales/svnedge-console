@@ -85,15 +85,9 @@ class Server {
     
     String viewvcURL(String repoName) {
         String url = null
-        if (ServerMode.MANAGED.equals(mode)) {
-            // TODO We need ProjectPath, which means we need a user session id, as ctf won't give
-            // this to us, if the user doesn't have access to the repo
-            def projectPath = null
-            if (projectPath) {
-                url = CtfServer.getServer().webAppUrl + 
-                    "/scm/do/viewRepositorySource/" + projectPath + "/scm." + 
-                    repoName
-            }
+        if (ServerMode.MANAGED == mode || ServerMode.REPLICA == mode) {
+            def systemId = CtfServer.server.mySystemId
+            url = urlPrefix() + '/viewvc/?root=' + repoName + '&system=' + systemId
         } else {
             url =  urlPrefix() + "/viewvc" + (repoName ? "/" + repoName : "") + "/"   
         }

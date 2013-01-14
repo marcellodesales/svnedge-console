@@ -25,15 +25,16 @@
     /* Data set */
     var aDataSet = [
     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
+      <g:set var="repoName" value="${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}"/>
       <g:if test="${adminView}">
         ['${repositoryInstance.id}',
-          '${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}',
-          '',
+          '${repoName}',
+          '${repoName}',
           '${repositoryInstance.id}|${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }'
         ]<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
       </g:if> 
       <g:else>
-        ['${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}', '']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
+        ['${repoName}', '${repoName}']<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
        </g:else> 
     </g:each>
     ];
@@ -134,19 +135,14 @@
         },
         {"sTitle": "${message(code:'repository.page.list.name')}",
          "fnRender": function ( oObj, sVal ) {
-           <g:if test="${isManagedMode}">
-           var template = 'REPO';
-           </g:if>
-           <g:else>
            var template = '<a href="${server.viewvcURL("REPO")}" target="_blank">REPO</a>';
-           </g:else>
            return template.replace(/REPO/g, sVal);
          }
         },
         {"sTitle": "${message(code:'repository.page.list.checkout_command')}",
          "fnRender": function (oObj, sVal) {
            var template = 'svn co ${server.svnURL()}REPO REPO --username=<g:loggedInUsername/>';
-           var repoName = $(oObj.aData[1]).text();
+           var repoName = sVal;
            if (navigator.appVersion.indexOf("Win") == -1) {
              repoName = repoName.replace("'", "\\'");
            }
