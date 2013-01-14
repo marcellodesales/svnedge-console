@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.text.DecimalFormatSymbols
+import org.springframework.web.servlet.support.RequestContextUtils
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.User
@@ -421,8 +423,10 @@ class CsvnTagLib {
             def isInt = attrs['integer'] && attrs['integer'] != 'false'
             def value = fieldValue(bean: obj, field: fieldName)
             if (isInt) {
+                def locale = RequestContextUtils.getLocale(request)
+                def symbols = new DecimalFormatSymbols(locale)
                 value = params[fieldName] ?: value
-                value = value.replace(',', '')
+                value = value.replace("${symbols.groupingSeparator}", '')
             }
             out << value << '" type="text"'
             def className = attrs['class'] ? 
