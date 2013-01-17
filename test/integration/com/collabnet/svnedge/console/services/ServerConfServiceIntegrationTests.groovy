@@ -74,7 +74,10 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         Server server = Server.server
         server.useSsl = true
         server.save()
-        lifecycleService.restartServer()
+        // don't use restart here, as the cert data may not exist when performing
+        // a graceful restart
+        lifecycleService.stopServer()
+        lifecycleService.startServer()
 
         def systemOut = System.out
         def baos = new ByteArrayOutputStream(4096)
@@ -89,6 +92,8 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         def result = baos.toString()
         assertTrue("Server is not protected from BEAST SSL exploit", result.contains("BEAST status: protected"))
         assertTrue("Server is not protected from CRIME SSL exploit", result.contains("CRIME status: protected"))
+        
+        lifecycleService.stopServer()
     }
 
     void testViewvcConf() {
