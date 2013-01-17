@@ -117,6 +117,66 @@ $('#bindInstructions').hide();
       <fieldset>            
         <g:propTextField bean="${server}" field="hostname" required="true" prefix="server"/>
         <g:propCheckBox bean="${server}" field="useSsl" prefix="server"/>
+        <g:hiddenField name="sslConfigFinal" value="UNCHANGED"/>
+        <g:javascript>
+        function useSslHandler() {
+          var useSslElement = $('#useSsl');
+          if (useSslElement.attr('checked')) {
+            var useSslParent = useSslElement.parent();
+            var sslTip = useSslParent.children('label.withFor');
+            sslTip.html(sslTip.html() + '<span id="sslCustomLink">&nbsp;&nbsp;<a href="#sslConfigModal" data-toggle="modal"><g:message code="server.page.edit.useSsl.advancedConfiguration"/></a></span>');
+            sslTip.after('<div id="saveSslConfigMessage"></div>');
+          } else {
+            $('#sslCustomLink').remove();
+            $('#saveSslConfigMessage').remove();
+            $('#sslConfigFinal').val('UNCHANGED');
+          }
+        }
+        useSslHandler();
+        $('#useSsl').click(useSslHandler);        
+        </g:javascript>
+        
+        <div id="sslConfigModal" class="modal hide fade" style="display: none;">
+          <div class="modal-header">
+            <a class="close" data-dismiss="modal">&times;</a>
+            <h3><g:message code="Custom SSL Directives"/></h3>
+          </div>
+          <div class="modal-body">
+                  <g:if test="${sslConfig != null}">
+                    <p><g:message code="server.page.edit.useSsl.nonDefaultConfig"/> 
+                    <br/><a href="#" onclick="$('#sslConfig').val('${defaultSslConfig.replace('\n', '\\n')}')"><g:message code="server.page.edit.useSsl.restoreDefault"/></a></p>
+                    <g:set var="sslConfigValue" value="${sslConfig}"/>
+                  </g:if>
+                  <g:else>
+                    <p><g:message code="server.page.edit.useSsl.defaultConfig"/></p>
+                    <g:set var="sslConfigValue" value="${defaultSslConfig}"/>
+                  </g:else>
+                  <g:textArea name="sslConfig" style="width: 95%; height: 8em">${sslConfigValue}</g:textArea>
+                  <g:javascript>
+                    var initialSslConfigValue = $('#sslConfig').val().trim();
+                    //$('#sslConfigFinal').val(initialSslConfigValue);
+                    $('#sslConfigModal').on('hidden', function () {
+                      if ($('#sslConfigFinal').val() != 'UNCHANGED') {
+                        //alert($('#sslConfigFinal').val().replace('\r', '\\r')).replace('\n', '\\n') + '\n\n' + $('#initialSslConfigValue').val().replace('\r', '\\r')).replace('\n', '\\n'));
+                        $('#saveSslConfigMessage').addClass('alert');
+                        $('#saveSslConfigMessage').html("<g:message code="server.page.edit.useSsl.saveChangesAlert"/>");
+                      }
+                    });
+                    
+                    function transferSslConfig() {
+                      var newValue = $('#sslConfig').val().trim();
+                      if (newValue != initialSslConfigValue) {
+                        $('#sslConfigFinal').val(newValue);
+                      }
+                    }
+                  </g:javascript>
+          </div>
+          <div class="modal-footer">
+            <a href="#" onclick="$('#sslConfig').val(initialSslConfigValue); $('#sslConfigModal').modal('hide')" class="btn"><g:message code="default.button.cancel.label"/></a>
+            <a href="#" onclick="transferSslConfig(); $('#sslConfigModal').modal('hide')" class="btn btn-primary"><g:message code="default.button.done.label"/></a>
+          </div>
+        </div>        
+        <g:javascript></g:javascript>
         
         <g:set var='portTip' value=""/>
         <g:if test="${privatePortInstructions}">

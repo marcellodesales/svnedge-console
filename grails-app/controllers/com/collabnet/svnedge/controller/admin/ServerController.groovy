@@ -23,6 +23,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.CantBindPortException;
+import com.collabnet.svnedge.admin.ServerConfService;
 import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Server 
@@ -308,10 +309,12 @@ class ServerController {
             }
         }
 
-        if(!server.hasErrors() && server.save(flush:true)) {
+        if(!server.hasErrors() && server.save(flush:true)) {            
+            def sslConfig = params['sslConfigFinal']
             if (lifecycleService.isStarted()) {
                 try {
                     def result = lifecycleService.stopServer()
+                    serverConfService.updateSslConfig(sslConfig)
                     if (result <= 0) {
                         result = lifecycleService.startServer()
                         if (result < 0) {
@@ -334,6 +337,7 @@ class ServerController {
                         RCU.getLocale(request))
                 }
             } else {
+                serverConfService.updateSslConfig(sslConfig)
                 serverConfService.writeConfigFiles()
                 flash.message = message(code:"server.action.update.changesMade")
             }
@@ -362,6 +366,8 @@ class ServerController {
         def showPortInstructions = isPrivatePort && !isDefaultPortAllowed
         def isSolaris = operatingSystemService.isSolaris()
         def config = ConfigurationHolder.config
+        File f = new File(ConfigUtil.confDirPath, 'ssl_httpd.conf')
+        def sslConfig = f.exists() ? f.text : null
 
         return [
             server : server,
@@ -375,6 +381,8 @@ class ServerController {
             isPort80Available: isPort80Available,
             isPort443Available: isPort443Available,
             isSolaris: isSolaris,
+            sslConfig: sslConfig,
+            defaultSslConfig: ServerConfService.DEFAULT_SSL_EXPLOIT_DIRECTIVES.trim(),
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,
             isConfigurable: serverConfService.createOrValidateHttpdConf()

@@ -18,6 +18,7 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.*
+
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
@@ -26,6 +27,7 @@ import com.collabnet.svnedge.replication.command.CommandTestsHelper
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.collabnet.svnedge.domain.Repository
 import org.junit.Ignore;
+import com.collabnet.svnedge.TestSSLServer
 
 /**
  * this test class validates the configuration files being modified
@@ -61,6 +63,33 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 
     }
 
+    /**
+     * Test that the subversion server is protected against CRIME and BEAST attacks.
+     * Server configuration can only protect against BEAST; CRIME protection is
+     * enabled in the binaries.  But confirming both here, since the data is
+     * available from the same library.
+     */
+    void testSvnServerProtectedBeastCrime() {
+
+        Server server = Server.server
+        server.useSsl = true
+        server.save()
+        lifecycleService.restartServer()
+
+        def systemOut = System.out
+        def baos = new ByteArrayOutputStream(4096)
+        try {
+            new PrintStream(baos, true).withStream() {
+                System.out = it
+                TestSSLServer.main(["localhost", "18080"] as String[])
+            }
+        } finally {
+            System.out0 = systemOut
+        }
+        def result = baos.toString()
+        assertTrue("Server is not protected from BEAST SSL exploit", result.contains("BEAST status: protected"))
+        assertTrue("Server is not protected from CRIME SSL exploit", result.contains("CRIME status: protected"))
+    }
 
     void testViewvcConf() {
 
@@ -165,7 +194,6 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         
     }
     
-
     private boolean validateProperty(File f, String propertyName, String expectedValue) {
 
         boolean valueMatchFound = false

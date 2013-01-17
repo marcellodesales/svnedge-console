@@ -89,6 +89,12 @@ private static final String DONT_EDIT_VIEWVC = """#
     private static final String CTF_AUTHORIZER = """
 [authz-teamforge]
 """
+    public static final String DEFAULT_SSL_EXPLOIT_DIRECTIVES = """
+# Protect against BEAST exploit
+SSLProtocol ALL -SSLv2
+SSLHonorCipherOrder on
+SSLCipherSuite RC4-SHA:HIGH
+"""
     
     def httpdUser
     def httpdGroup
@@ -871,23 +877,31 @@ LDAPVerifyServerCert Off
 
     private def getSSLHttpdConf(server) {
         def conf = ""
-        def extraconf = ""
+        def confDir = confDirPath()
         if (server.useSsl) {
-            File f = new File(confDirPath(), "server.ca")
-            def chainFilePath = f.absolutePath
-            if (f.exists()) {
-                extraconf = "SSLCertificateChainFile \"${chainFilePath}\""
-            }
-
             conf = """
 LoadModule ssl_module lib/modules/mod_ssl.so
 SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
-SSLCertificateFile    "${confDirPath()}/server.crt"
-SSLCertificateKeyFile "${confDirPath()}/server.key"
+SSLCertificateFile    "${confDir}/server.crt"
+SSLCertificateKeyFile "${confDir}/server.key"
 SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
-${extraconf}
 """
+            File f = new File(confDir, "server.ca")
+            def chainFilePath = f.absolutePath
+            if (f.exists()) {
+                conf += """SSLCertificateChainFile "${chainFilePath}"
+"""
+            }
+            File extraConfig = new File(confDir, "ssl_httpd.conf")
+            if (extraConfig.exists()) {
+                if (extraConfig.length() > 0) {
+                    conf += """Include "${confDir}/ssl_httpd.conf"
+"""
+                }
+            } else {
+                conf += DEFAULT_SSL_EXPLOIT_DIRECTIVES
+            }
         }
         conf
     }
@@ -1152,6 +1166,22 @@ ${extraconf}
         if (bkupFile.exists()) {
             archiveFile(confFile)
             bkupFile.renameTo(confFile)
+        }
+    }
+
+    /**
+     * Saves user specified SSL directives or deletes previous override
+     * if the config matches the default BEAST related directives
+     */
+    void updateSslConfig(config) {
+        if (config && config != 'UNCHANGED') {
+            config = config.replace('\r\n', '\n')
+            File f = new File(ConfigUtil.confDirPath, 'ssl_httpd.conf')
+            if (config.trim() == DEFAULT_SSL_EXPLOIT_DIRECTIVES.trim()) {
+                f.delete()
+            } else {
+                f.text = config
+            }
         }
     }
 

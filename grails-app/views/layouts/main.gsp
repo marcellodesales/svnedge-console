@@ -269,7 +269,7 @@
                   <g:message code="wizard.suspend.modal.body" args="${[wizardTitle]}"/>
                 </div>
                 <div class="modal-footer">
-                  <a href="#" class="btn btn-primary" data-dismiss="modal">Close</a>
+                  <a href="#" class="btn btn-primary" data-dismiss="modal"><g:message code="default.button.close.label"/></a>
                 </div>
               </div>
               
