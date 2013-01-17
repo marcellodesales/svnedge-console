@@ -166,12 +166,16 @@ class LifecycleService {
         log.debug("Checking isStarted  Path=" + f.getPath() + 
                   " exists? " + f.exists())
         if (f.exists()) {
-            if (operatingSystemService.getProcessExists(f.text.trim())) {
+            if (f.canRead()) {
+                if (operatingSystemService.getProcessExists(f.text.trim())) {
+                    return true
+                }
+                else {
+                    f.delete()
+                    return false
+                }
+            } else {
                 return true
-            }
-            else {
-                f.delete()
-                return false
             }
         }
         else {
