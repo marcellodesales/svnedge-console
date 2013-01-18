@@ -78,7 +78,7 @@ public class TestSSLServer {
 	static void usage()
 	{
 		System.err.println("usage: TestSSLServer servername [ port ]");
-		System.exit(1);
+		throw new RuntimeException("usage: TestSSLServer servername [ port ]");
 	}
 
 	public static void main(String[] args)
@@ -122,8 +122,7 @@ public class TestSSLServer {
 		}
 
 		if (sv.size() == 0) {
-			System.out.println("No SSL/TLS server at " + isa);
-			System.exit(1);
+			throw new RuntimeException("No SSL/TLS server at " + isa);
 		}
 		System.out.print("Supported versions:");
 		for (int v : sv) {

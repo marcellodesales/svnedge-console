@@ -84,10 +84,10 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         try {
             new PrintStream(baos, true).withStream() {
                 System.out = it
-                TestSSLServer.main(["localhost", "18080"] as String[])
+                TestSSLServer.main(["localhost", "${server.port}"] as String[])
             }
         } finally {
-            System.out0 = systemOut
+            System.out = systemOut
         }
         def result = baos.toString()
         assertTrue("Server is not protected from BEAST SSL exploit", result.contains("BEAST status: protected"))
