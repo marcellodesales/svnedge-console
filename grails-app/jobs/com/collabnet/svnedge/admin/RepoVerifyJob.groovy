@@ -59,9 +59,8 @@ class RepoVerifyJob {
                     boolean result = false
                     Exception e = null
                     try {
-                        result = svnRepoService
-                                .verifyRepositoryPath(svnRepoService.getRepositoryHomePath(repo),
-                                        new FileOutputStream(progressLog))
+                        result = svnRepoService.verifyRepository(repo,
+                                new FileOutputStream(progressLog))
                         // delete progress log on success
                         if (result) {
                             log.info("Successfully verified repo '${repo.name}'")

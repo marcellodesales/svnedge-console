@@ -99,7 +99,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS013AddRepoSyncToAddress(),
             new MS014AddMonitorConfiguration(),
             new MS015AddReplicaCommandRetries(),
-            new MS016AddGettingStartedWizard()
+            new MS016AddGettingStartedWizard(),
+            new MS017AddRepositoryVerifyOk()
         };
     }
 

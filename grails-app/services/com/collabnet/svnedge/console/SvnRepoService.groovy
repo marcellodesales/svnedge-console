@@ -365,12 +365,14 @@ class SvnRepoService extends AbstractSvnEdgeService {
      *
      * @return true , if no errors
      */
-    def verifyRepository(Repository repo) {
+    def verifyRepository(Repository repo, OutputStream progress = null) {
         def repoPath = this.getRepositoryHomePath(repo)
-        return verifyRepositoryPath(repoPath)
+        repo.verifyOk = verifyRepositoryPath(repoPath, progress)
+        repo.save()
+        return repo.verifyOk
     }
 
-    def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
+    private def verifyRepositoryPath(String repoPath, OutputStream progress = null) {
         def exitStatus = (progress == null) ?
             commandLineService.executeWithStatus(
                     ConfigUtil.svnadminPath(), "verify", repoPath) :

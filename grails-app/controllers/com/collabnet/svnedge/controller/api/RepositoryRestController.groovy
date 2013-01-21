@@ -82,9 +82,11 @@ class RepositoryRestController extends AbstractRestController {
             Repository.list(params)?.each {
                 def repository = [id: it.id,
                         name: it.name,
-                        status: (it.permissionsOk ?
-                            message(code: "repository.page.list.instance.permission.ok") :
-                            message(code: "repository.page.list.instance.permission.needFix")),
+                        status: it.permissionsOk ?
+                            (it.verifyOk ?
+                                message(code: "repository.page.list.instance.permission.ok") :
+                                message(code: "repository.page.list.instance.verify.failed")) :
+                            message(code: "repository.page.list.instance.permission.needFix"),
                         svnUrl: "${server.svnURL()}${it.name}",
                         viewvcUrl: "${server.viewvcURL(it.name)}"]
                 repositories.add(repository)
@@ -204,9 +206,11 @@ class RepositoryRestController extends AbstractRestController {
 
             def repository = [id: repo.id,
                     name: repo.name,
-                    status: (repo.permissionsOk ?
-                        message(code: "repository.page.list.instance.permission.ok") :
-                        message(code: "repository.page.list.instance.permission.needFix")),
+                    status: repo.permissionsOk ?
+                            (it.verifyOk ?
+                                message(code: "repository.page.list.instance.permission.ok") :
+                                message(code: "repository.page.list.instance.verify.failed")) :
+                        message(code: "repository.page.list.instance.permission.needFix"),
                     svnUrl: "${server.svnURL()}${repo.name}",
                     viewvcUrl: "${server.viewvcURL(repo.name)}"]
 

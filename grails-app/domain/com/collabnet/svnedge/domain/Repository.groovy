@@ -32,6 +32,10 @@ class Repository {
      * PermissionsOk -- flag to indicate need for permissions fix-up
      */
     Boolean permissionsOk = true
+    /**
+     * Flag that will be set to false, if svnadmin verify fails
+     */
+    boolean verifyOk = true
     
     String cloudName
     String cloudSvnUri

@@ -25,12 +25,13 @@
     /* Data set */
     var aDataSet = [
     <g:each in="${repositoryInstanceList}" status="i" var="repositoryInstance">
-      <g:set var="repoName" value="${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}"/>
+    <g:set var="repoName" value="${JavaScriptUtils.javaScriptEscape(repositoryInstance.name)}"/>
+    <g:set var="statusMsg" value="${repositoryInstance.permissionsOk ? (repositoryInstance.verifyOk ? message(code: 'repository.page.list.instance.permission.ok') : message(code: 'repository.page.list.instance.verify.failed')) : message(code: 'repository.page.list.instance.permission.needFix')}"/>
       <g:if test="${adminView}">
         ['${repositoryInstance.id}',
           '${repoName}',
           '${repoName}',
-          '${repositoryInstance.id}|${(repositoryInstance.permissionsOk) ? message(code: "repository.page.list.instance.permission.ok") : message(code: "repository.page.list.instance.permission.needFix") }'
+          '${repositoryInstance.id}|${statusMsg}'
         ]<g:if test="${i < (repositoryInstanceList.size() - 1)}">,</g:if>
       </g:if> 
       <g:else>

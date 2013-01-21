@@ -51,7 +51,12 @@ function fetchUploadProgress() {
       <tr>
         <td><g:message code="repository.page.show.status" /></td>
         <td><g:if test="${repositoryInstance.permissionsOk}">
-          <span style="color: green"><g:message code="repository.page.list.instance.permission.ok" /></span>
+               <g:if test="${repositoryInstance.verifyOk}">
+                 <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
+               </g:if>
+               <g:else>
+                 <span style="color:red"><g:message code="repository.page.list.instance.verify.failed" /></span>
+               </g:else>
           </g:if> <g:else>
             <span style="color: red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
           </g:else>

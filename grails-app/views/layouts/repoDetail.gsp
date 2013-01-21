@@ -36,7 +36,12 @@
               </div>
               <div class="span2">
                 <g:if test="${repositoryInstance.permissionsOk}">
-                  <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
+                  <g:if test="${repositoryInstance.verifyOk}">
+                    <span style="color:green"><g:message code="repository.page.list.instance.permission.ok" /></span>
+                  </g:if>
+                  <g:else>
+                    <span style="color:red"><g:message code="repository.page.list.instance.verify.failed" /></span>
+                  </g:else>
                 </g:if>
                 <g:else>
                   <span style="color:red"><g:message code="repository.page.list.instance.permission.needFix" /></span>
@@ -132,6 +137,11 @@
               <span class="button"><g:actionSubmit class="updatePermissions"
                                                    value="${message(code:'repository.page.show.button.validate') }"
                                                    action="updatePermissions"/></span>
+            </g:if>
+            <g:if test="${!repositoryInstance.verifyOk}">
+              <span class="button"><g:actionSubmit class="updateVerify"
+                                                   value="${message(code:'repository.page.show.button.verify') }"
+                                                   action="verify"/></span>
             </g:if>
           </g:form>
         </div>
