@@ -387,7 +387,8 @@ class _diff_fp:
     try:
       # Solaris diff does not support -v and also doesn't work with viewvc
       import subprocess
-      retcode = subprocess.call([diff_cmd, "-v"])
+      f = open(os.devnull, 'w')
+      retcode = subprocess.call([diff_cmd, "-v"], stdout=f, stderr=f)
       if retcode:
         raise
       return popen.popen(diff_cmd, args, "r")
