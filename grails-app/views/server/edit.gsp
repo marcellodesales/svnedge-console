@@ -139,7 +139,7 @@ $('#bindInstructions').hide();
         <div id="sslConfigModal" class="modal hide fade" style="display: none;">
           <div class="modal-header">
             <a class="close" data-dismiss="modal">&times;</a>
-            <h3><g:message code="Custom SSL Directives"/></h3>
+            <h3><g:message code="server.page.edit.useSsl.advancedConfigurationModalTitle"/></h3>
           </div>
           <div class="modal-body">
                   <g:if test="${sslConfig != null}">
@@ -175,8 +175,7 @@ $('#bindInstructions').hide();
             <a href="#" onclick="$('#sslConfig').val(initialSslConfigValue); $('#sslConfigModal').modal('hide')" class="btn"><g:message code="default.button.cancel.label"/></a>
             <a href="#" onclick="transferSslConfig(); $('#sslConfigModal').modal('hide')" class="btn btn-primary"><g:message code="default.button.done.label"/></a>
           </div>
-        </div>        
-        <g:javascript></g:javascript>
+        </div>
         
         <g:set var='portTip' value=""/>
         <g:if test="${privatePortInstructions}">

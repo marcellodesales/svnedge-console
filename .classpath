@@ -8,161 +8,195 @@
 	<classpathentry kind="src" path="grails-app/jobs"/>
 	<classpathentry kind="src" path="grails-app/services"/>
 	<classpathentry kind="src" path="grails-app/taglib"/>
+	<classpathentry kind="src" path="grails-app/utils"/>
 	<classpathentry kind="src" path="test/integration"/>
-	<classpathentry kind="src" path="test/functional"/>
 	<classpathentry kind="src" path="test/unit"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="com.springsource.sts.grails.core.CLASSPATH_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/pkg-client.jar"/>
-	<classpathentry kind="lib" path="lib/jmdns.jar"/>
-	<classpathentry kind="lib" path="lib/sf_soap50_sdk.jar"/>
-	<classpathentry kind="lib" path="lib/sf_soap60_sdk.jar"/>
-	<classpathentry kind="lib" path="lib/axis.jar"/>
-	<classpathentry kind="lib" path="lib/commons-discovery.jar"/>
-	<classpathentry kind="lib" path="lib/FastInfoset.jar"/>
-	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="lib/sigar.jar"/>
-	<classpathentry excluding="BuildConfig.groovy|*DataSource.groovy|UrlMappings.groovy|Config.groovy|BootStrap.groovy|spring/resources.groovy" kind="src" path="acegi-0.5.3-grails-app-conf">
+	<classpathentry excluding="BuildConfig.groovy|*DataSource.groovy|UrlMappings.groovy|Config.groovy|BootStrap.groovy|spring/resources.groovy" kind="src" path=".link_to_grails_plugins/acegi-0.5.3/grails-app/conf">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="acegi-0.5.3-grails-app-controllers">
+	<classpathentry kind="src" path=".link_to_grails_plugins/acegi-0.5.3/grails-app/controllers">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="acegi-0.5.3-grails-app-services">
+	<classpathentry kind="src" path=".link_to_grails_plugins/acegi-0.5.3/grails-app/services">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="acegi-0.5.3-grails-app-taglib">
+	<classpathentry kind="src" path=".link_to_grails_plugins/acegi-0.5.3/grails-app/taglib">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="acegi-0.5.3-src-java">
+	<classpathentry kind="src" path=".link_to_grails_plugins/acegi-0.5.3/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="acegi-0.5.3-src-groovy">
+	<classpathentry kind="src" path=".link_to_grails_plugins/acegi-0.5.3/src/java">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="background-thread-1.6-grails-app-services">
+	<classpathentry kind="src" path=".link_to_grails_plugins/code-coverage-1.1.8/grails-app/i18n">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="background-thread-1.6-src-java">
+	<classpathentry kind="src" path=".link_to_grails_plugins/codenarc-0.7/grails-app/i18n">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="code-coverage-1.1.8-grails-app-i18n">
+	<classpathentry kind="src" path=".link_to_grails_plugins/cometd-0.1.5/grails-app/i18n">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="codenarc-0.7-grails-app-i18n">
+	<classpathentry kind="src" path=".link_to_grails_plugins/cometd-0.1.5/grails-app/services">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="cometd-0.1.5-grails-app-i18n">
+	<classpathentry kind="src" path=".link_to_grails_plugins/cometd-0.1.5/grails-app/views">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="cometd-0.1.5-grails-app-services">
+	<classpathentry kind="src" path=".link_to_grails_plugins/cometd-0.1.5/src/java">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="cometd-0.1.5-grails-app-views">
+	<classpathentry kind="src" path=".link_to_grails_plugins/db-util-0.4/grails-app/controllers">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="cometd-0.1.5-src-java">
+	<classpathentry kind="src" path=".link_to_grails_plugins/db-util-0.4/grails-app/views">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="db-util-0.4-grails-app-controllers">
+	<classpathentry kind="src" path=".link_to_grails_plugins/executor-0.2/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="db-util-0.4-grails-app-views">
+	<classpathentry kind="src" path=".link_to_grails_plugins/functional-test-1.2.7/grails-app/i18n">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="functional-test-1.2.7-grails-app-i18n">
+	<classpathentry kind="src" path=".link_to_grails_plugins/functional-test-1.2.7/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="functional-test-1.2.7-src-groovy">
+	<classpathentry kind="src" path=".link_to_grails_plugins/greenmail-1.2.2/grails-app/controllers">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="jetty-1.2-SNAPSHOT-src-groovy">
+	<classpathentry kind="src" path=".link_to_grails_plugins/greenmail-1.2.2/grails-app/views">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="ofchart-0.6-grails-app-controllers">
+	<classpathentry kind="src" path=".link_to_grails_plugins/greenmail-1.2.2/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="ofchart-0.6-grails-app-taglib">
+	<classpathentry kind="src" path=".link_to_grails_plugins/jetty-1.2-SNAPSHOT/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="ofchart-0.6-grails-app-views">
+	<classpathentry kind="src" path=".link_to_grails_plugins/mail-1.0-SNAPSHOT/grails-app/i18n">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="ofchart-0.6-src-java">
+	<classpathentry kind="src" path=".link_to_grails_plugins/mail-1.0-SNAPSHOT/grails-app/services">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry excluding="BuildConfig.groovy|*DataSource.groovy|UrlMappings.groovy|Config.groovy|BootStrap.groovy|spring/resources.groovy" kind="src" path="quartz-0.4.2-grails-app-conf">
+	<classpathentry kind="src" path=".link_to_grails_plugins/mail-1.0-SNAPSHOT/grails-app/taglib">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="quartz-0.4.2-grails-app-i18n">
+	<classpathentry kind="src" path=".link_to_grails_plugins/mail-1.0-SNAPSHOT/grails-app/views">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="quartz-0.4.2-grails-app-services">
+	<classpathentry kind="src" path=".link_to_grails_plugins/mail-1.0-SNAPSHOT/src/groovy">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="quartz-0.4.2-src-java">
+	<classpathentry kind="src" path=".link_to_grails_plugins/ofchart-0.6/grails-app/controllers">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="quartz-0.4.2-src-groovy">
+	<classpathentry kind="src" path=".link_to_grails_plugins/ofchart-0.6/grails-app/taglib">
 		<attributes>
-			<attribute name="com.springsource.sts.grails.core.SOURCE_FOLDER" value="true"/>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/svnedge-discovery-api-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
-	<classpathentry kind="output" path="eclipse-bin"/>
+	<classpathentry kind="src" path=".link_to_grails_plugins/ofchart-0.6/grails-app/views">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/ofchart-0.6/src/java">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="BuildConfig.groovy|*DataSource.groovy|UrlMappings.groovy|Config.groovy|BootStrap.groovy|spring/resources.groovy" kind="src" path=".link_to_grails_plugins/quartz-0.4.2/grails-app/conf">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/quartz-0.4.2/grails-app/i18n">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/quartz-0.4.2/grails-app/services">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/quartz-0.4.2/src/groovy">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/quartz-0.4.2/src/java">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/rest-0.6.1/src/groovy">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".link_to_grails_plugins/spring-events-1.0/src/groovy">
+		<attributes>
+			<attribute name="org.grails.ide.eclipse.core.SOURCE_FOLDER" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.grails.ide.eclipse.core.CLASSPATH_CONTAINER"/>
+	<classpathentry kind="output" path="target-eclipse/classes"/>
 </classpath>
