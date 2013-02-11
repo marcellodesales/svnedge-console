@@ -61,6 +61,21 @@ class LoginController {
 
         render view: 'auth', model: [postUrl: postUrl]
     }
+    
+    // Login page (function|json) for Ajax access. This method is just an example
+    // but it is used in the upgrade process to determine when the server has
+    // restarted.
+    def authAjax = {
+        nocache(response)
+        //this is example:
+        render """
+                <script type='text/javascript'>
+                (function() {
+                        loginForm();
+                })();
+                </script>
+                """
+    }
 
     /**
      * Show denied page.
