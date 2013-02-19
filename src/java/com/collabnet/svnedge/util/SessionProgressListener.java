@@ -40,7 +40,7 @@ public class SessionProgressListener implements ProgressListener {
 
     public SessionProgressListener(HttpServletRequest request) {
         startTimeMillis = System.currentTimeMillis();
-        this.session = request.getSession();
+        this.session = request.getSession(false);
         this.stats = new HashMap<String, Object>();
         String qs = request.getQueryString();
         String name = QUERY_PARAM_KEY + "=";
