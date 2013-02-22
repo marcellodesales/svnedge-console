@@ -31,5 +31,9 @@ class="org.eclipse.jetty.server.session.HashSessionManager">
     </Map>
   </Set>
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Max Form Size                                                   -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="maxFormContentSize">10485760</Set>
 
 </Configure>
