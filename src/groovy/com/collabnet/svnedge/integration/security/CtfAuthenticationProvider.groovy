@@ -71,7 +71,7 @@ class CtfAuthenticationProvider implements AuthenticationProvider {
             throw new BadCredentialsException(connectivityError.getMessage())
         
         } catch (Exception otherError) {
-            def otherMsg = "Othe problem occurred while contacting the " +
+            def otherMsg = "Other problem occurred while contacting the " +
                 "teamforge manager: " + otherError.getMessage()
             log.warn(otherMsg)
             throw new BadCredentialsException(otherMsg)
