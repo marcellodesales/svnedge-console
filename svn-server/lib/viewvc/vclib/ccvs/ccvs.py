@@ -1,6 +1,6 @@
 # -*-python-*-
 #
-# Copyright (C) 1999-2012 The ViewCVS Group. All Rights Reserved.
+# Copyright (C) 1999-2013 The ViewCVS Group. All Rights Reserved.
 #
 # By using this file, you agree to the terms and conditions set forth in
 # the LICENSE.html file which can be found at the top level of the ViewVC
@@ -200,6 +200,7 @@ class InfoSink(MatchingSink):
     self.matching_rev = None
     self.perfect_match = 0
     self.lockinfo = { }
+    self.saw_revision = False
 
   def define_tag(self, name, revision):
     MatchingSink.define_tag(self, name, revision)
@@ -213,10 +214,17 @@ class InfoSink(MatchingSink):
         self.entry.absent = 1
       raise rcsparse.RCSStopParser
 
+  def parse_completed(self):
+    if not self.saw_revision:
+      #self.entry.errors.append("No revisions exist on %s" % (view_tag or "MAIN"))
+      self.entry.absent = 1
+    
   def set_locker(self, rev, locker):
     self.lockinfo[rev] = locker
     
   def define_revision(self, revision, date, author, state, branches, next):
+    self.saw_revision = True
+    
     if self.perfect_match:
       return
 
@@ -224,14 +232,18 @@ class InfoSink(MatchingSink):
     rev = Revision(revision, date, author, state == "dead")
     rev.lockinfo = self.lockinfo.get(revision)
     
-    # perfect match if revision number matches tag number or if revision is on
-    # trunk and tag points to trunk. imperfect match if tag refers to a branch
-    # and this revision is the highest revision so far found on that branch
+    # perfect match if revision number matches tag number or if
+    # revision is on trunk and tag points to trunk.  imperfect match
+    # if tag refers to a branch and either a) this revision is the
+    # highest revision so far found on that branch, or b) this
+    # revision is the branchpoint.
     perfect = ((rev.number == tag.number) or
                (not tag.number and len(rev.number) == 2))
-    if perfect or (tag.is_branch and tag.number == rev.number[:-1] and
-                   (not self.matching_rev or
-                    rev.number > self.matching_rev.number)):
+    if perfect or (tag.is_branch and \
+                   ((tag.number == rev.number[:-1] and
+                     (not self.matching_rev or
+                      rev.number > self.matching_rev.number)) or
+                    (rev.number == tag.number[:-1]))):
       self.matching_rev = rev
       self.perfect_match = perfect
 
