@@ -169,9 +169,6 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
         Ant.copy(file: "${basedir}/csvn-service-wrapper" +
             "/solaris/bin/wrapper-solaris-sparc-32",
             todir: "${distDir}/bin")
-        Ant.copy(file: "${basedir}/csvn-service-wrapper" +
-            "/solaris/bin/start.ini",
-            todir: "${distDir}/bin")
         Ant.chmod(dir: distDir + "/bin", perm: "a+x",
             includes: "csvn*")
         Ant.chmod(dir: distDir + "/bin", perm: "a+x",
