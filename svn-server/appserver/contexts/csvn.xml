@@ -11,24 +11,13 @@
       <Arg>
         <New id="hashMgr"
 class="org.eclipse.jetty.server.session.HashSessionManager">
-          <Set name="secureCookies">true</Set>
+          <Set name="secureRequestOnly">true</Set>
           <Set name="httpOnly">true</Set>
+          <Set name="sessionCookie">SESSID</Set>
+          <Set name="sessionIdPathParameterName">none</Set>
         </New>
       </Arg>
     </New>
-  </Set>
-
- <Set name="initParams">
-    <Map>
-      <Entry>
-        <Item>org.eclipse.jetty.servlet.SessionCookie</Item>
-        <Item>SESSID</Item>
-      </Entry>
-      <Entry>
-        <Item>org.eclipse.jetty.servlet.SessionIdPathParameterName</Item>
-        <Item>none</Item>
-      </Entry>
-    </Map>
   </Set>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
