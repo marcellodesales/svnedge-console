@@ -25,7 +25,6 @@ pkg = {
         "bin/wrapper-solaris-x86-64" : {"mode" : "0755", "os" : "solaris"},
         "bin/wrapper-solaris-sparc-32" : {"mode" : "0755", "os" : "solaris"},
         "bin/wrapper-solaris-sparc-64" : {"mode" : "0755", "os" : "solaris"},
-        "bin/start.ini" : {"mode" : "0755", "os" : [ "solaris", "unix" ]},
         "lib/libsigar-amd64-linux.so" : {"mode" : "0755", "os" : "unix"},
         "lib/libsigar-x86-linux.so" : {"mode" : "0755", "os" : "unix"},
         "lib/libsigar-amd64-solaris.so" : {"mode" : "0755", "os" : "solaris"},
