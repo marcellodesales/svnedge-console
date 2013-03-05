@@ -10,13 +10,13 @@ $(document).ready(function() {
         $('#uploadProgress').show();
         // re-animate IE
         setTimeout(function() { 
-            $('#uploadSpinner').attr('src', '/csvn/images/spinner.gif');
+            $('#uploadSpinner').prop('src', '/csvn/images/spinner.gif');
         }, 100);
         return true;
     });
     
     $('#loadFileUpload').submit(function() {
-        $('#loadButton').attr('disabled', true);
+        $('#loadButton').prop('disabled', true);
         setTimeout(fetchUploadProgress, 1000);
         setInterval(fetchUploadProgress, 5000);
         return true;

@@ -52,7 +52,7 @@
           break
         }
       }
-      $('input.listViewAction').attr('disabled', !enableActions);
+      $('input.listViewAction').prop('disabled', !enableActions);
     }
 
   </script>

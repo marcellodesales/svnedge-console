@@ -112,7 +112,7 @@
     var initCloudBackupParam = "${params.cloudBackup ?: ''}";
     
     function getCloudBackups() {
-        if ($('#useCloud').attr('checked') && !isCloudReady) {
+        if ($('#useCloud').prop('checked') && !isCloudReady) {
             $.get('/csvn/repo/cloudBackupList', prepareCloudBackups);
         }
     }

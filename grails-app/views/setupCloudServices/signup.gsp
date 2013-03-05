@@ -63,13 +63,13 @@
     })
     
     function emailConfirm(e) {
-      var b = $('#emailAddress').attr("value") == $('#emailAddressConfirm').attr("value");
+      var b = $('#emailAddress').val()) == $('#emailAddressConfirm').val());
       $('#confirmEmailMessage').css("display", b ? 'none' : 'inline');
       return b;
     }
     
     function passwordConfirm(e) {
-      var b = $('#password').attr("value") == $('#passwordConfirm').attr("value");
+      var b = $('#password').val() == $('#passwordConfirm').val());
       $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
       return b;
     }

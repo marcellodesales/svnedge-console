@@ -65,7 +65,7 @@
 
 <g:javascript>
     function filterHandler() {
-      if ($('#filter').attr('checked')) {
+      if ($('#filter').prop('checked')) {
         $('#filterOptions').show();
         $('#filterOptionsSpacer').show();
       } else {
@@ -78,25 +78,25 @@
     function dropEmptyRevsHandler() {
         var renumberRevs = $('#renumberRevs');
         var revProps = $('#preserveRevprops');
-        if ($('#dropEmptyRevs').attr('checked')) {
-            renumberRevs.attr('disabled', false);
-            revProps.attr('checked', false);
-            revProps.attr('disabled', true);
+        if ($('#dropEmptyRevs').prop('checked')) {
+            renumberRevs.prop('disabled', false);
+            revProps.prop('checked', false);
+            revProps.prop('disabled', true);
         } else {
-            revProps.attr('disabled', false);
-            renumberRevs.attr('checked', false);
-            renumberRevs.attr('disabled', true);
+            revProps.prop('disabled', false);
+            renumberRevs.prop('checked', false);
+            renumberRevs.prop('disabled', true);
         }
     }
     $('#dropEmptyRevs').change(dropEmptyRevsHandler);
 
     function deltasHandler() {
         var filter = $('#filter');
-        if ($('#deltas').attr('checked')) {
-            filter.attr('checked', false);
-            filter.attr('disabled', true);
+        if ($('#deltas').prop('checked')) {
+            filter.prop('checked', false);
+            filter.prop('disabled', true);
         } else {
-            filter.attr('disabled', false);
+            filter.prop('disabled', false);
         }
         filterHandler();
     }

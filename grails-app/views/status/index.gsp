@@ -30,10 +30,10 @@
          */
         function updateUiCommandsRunning(numberOfCommands) {
             if (numberOfCommands > 0) {
-                $('#spinner').attr('src', '/csvn/images/replica/commands_updating_spinner.gif');
+                $('#spinner').prop('src', '/csvn/images/replica/commands_updating_spinner.gif');
                 $('#commandsCount').html('<g:message code="status.page.status.replication.commands_running"/> ' + numberOfCommands);
             } else {
-                $('#spinner').attr('src','/csvn/images/fping_up.gif');
+                $('#spinner').prop('src','/csvn/images/fping_up.gif');
                 $('#commandsCount').html('<g:message code="status.page.status.replication.no_commands"/>'); 
             }
         }

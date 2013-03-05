@@ -104,7 +104,7 @@
   var serverPortDefaultUnavailable = '<p><g:message code="wizard.GettingStarted.ServerSettings.help.field.port.defaultPortUnavailable"/></p>';
 
   function enableSsl() {
-    $('#useSsl').attr('checked', true);
+    $('#useSsl').prop('checked', true);
     var port = $("#port");
      if (port.val() == '80') {
        port.val('443');
@@ -113,8 +113,8 @@
     
    function toggleSsl() {
      var sslCheckbox = $('#useSsl');
-     var isChecked = !sslCheckbox.attr('checked');
-     sslCheckbox.attr('checked', isChecked);
+     var isChecked = !sslCheckbox.prop('checked');
+     sslCheckbox.prop('checked', isChecked);
      var port = $("#port");
      if (isChecked && port.val() == '80') {
        port.val('443');
@@ -195,7 +195,7 @@
 
   function serverPortContent() {
     var serverPortText;
-    var isSslChecked = $('#useSsl').attr('checked');
+    var isSslChecked = $('#useSsl').prop('checked');
     if (isDefaultPortAllowed) {
       if ((isSslChecked && isPort443Available) || 
           (!isSslChecked && isPort80Available)) {

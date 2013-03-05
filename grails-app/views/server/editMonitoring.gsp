@@ -69,21 +69,21 @@
         }
 
         function toggleNetworkFields() {
-            var isEnabled = $('#networkEnabled').attr('checked');
-            $('.requireNetworkEnabled').attr('disabled', !isEnabled);
+            var isEnabled = $('#networkEnabled').prop('checked');
+            $('.requireNetworkEnabled').prop('disabled', !isEnabled);
         }
         
         function toggleRepoDiskFields() {
-            var isEnabled = $('#repoDiskEnabled').attr('checked');
-            $('.requireRepoDiskEnabled').attr('disabled', !isEnabled);
+            var isEnabled = $('#repoDiskEnabled').prop('checked');
+            $('.requireRepoDiskEnabled').prop('disabled', !isEnabled);
         }
         
         function checkDailyFrequency() {
-            $('#frequency_daily').attr('checked', true);
+            $('#frequency_daily').prop('checked', true);
         }
         
         function checkHourlyFrequency() {
-            $('#frequency_1hour').attr('checked', true);
+            $('#frequency_1hour').prop('checked', true);
         }
     </g:javascript>
     

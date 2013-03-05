@@ -90,9 +90,9 @@
 <g:javascript>
         <!--
 function showPasswdFields() {
-    passwdRow.attr('disabled', false);
+    passwdRow.prop('disabled', false);
     passwdRow.show();
-    passwdConfirmRow.attr('disabled', false);
+    passwdConfirmRow.prop('disabled', false);
     passwdConfirmRow.show();
     $("#passwd_change_link").hide();
     $("#passwd_change_active").val(true);
@@ -101,9 +101,9 @@ function showPasswdFields() {
 
 function cancelPasswordChange() {
     passwdRow.hide();
-    passwdRow.attr('disabled', true);    
+    passwdRow.prop('disabled', true);    
     passwdConfirmRow.hide();
-    passwdConfirmRow.attr('disabled', true);
+    passwdConfirmRow.prop('disabled', true);
     $("#passwd_change_link").show();
     $("#passwd_change_active").val(false);
     passwordConfirm();
@@ -131,7 +131,7 @@ function passwordConfirm() {
     var b = !isActive || 
             $('#passwd').val() == $('#confirmPasswd').val();
     $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
-    $('.requirePasswordConfirm').attr('disabled', !b);
+    $('.requirePasswordConfirm').prop('disabled', !b);
     return b;
 }
 

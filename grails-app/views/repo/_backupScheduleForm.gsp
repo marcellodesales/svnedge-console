@@ -287,26 +287,26 @@
     hourOptions[i] = hourSelectOptions[i];
   }
   function displayTimeWidget() {
-    if ($('#frequency_h').attr('checked')) {
+    if ($('#frequency_h').prop('checked')) {
       hourSelect.empty();
       //hourSelect.append('<option value="' + hourOptions[0] + '"/>')
       hourSelect.append(hourOptions[0]);
-      hourSelect.attr('disabled', true);
+      hourSelect.prop('disabled', true);
     } else {
       var hours = $('#startHour option');
       if (hours.length == 1) {
-        hours.attr('selected', true);
+        hours.prop('selected', true);
         hourSelect.empty()
         for (var i = 1; i < hourOptions.length; i++) {
           hourSelect.append(hourOptions[i]);
         }
         hourSelect.prepend(hourOptions[0]);
       }
-      hourSelect.attr('disabled', false);
+      hourSelect.prop('disabled', false);
     }
   }
   function displayDayOfWeekWidget() {
-    if ($('#frequency_w').attr('checked')) {
+    if ($('#frequency_w').prop('checked')) {
       $('#dayOfWeekRow').show();
     } else {
       $('#dayOfWeekRow').hide();
@@ -335,9 +335,9 @@
     var type = state.type;
     if (type == 'dump_delta') {
         type = 'dump';
-        $('#deltas').attr('checked', true);
+        $('#deltas').prop('checked', true);
     } else {
-        $('#deltas').attr('checked', false);
+        $('#deltas').prop('checked', false);
     }
     $("#type").val(type);
 
@@ -350,13 +350,13 @@
     $('#dayOfWeek').val(state.scheduleDayOfWeek);
     $('#numberToKeep').val(state.numberToKeep);
     if (state.scheduleFrequency == "HOURLY") {
-      $('#frequency_h').attr('checked', true);
+      $('#frequency_h').prop('checked', true);
     }
     else if (state.scheduleFrequency == "DAILY") {
-      $('#frequency_d').attr('checked', true);
+      $('#frequency_d').prop('checked', true);
     }
     else if (state.scheduleFrequency == "WEEKLY") {
-        $('#frequency_w').attr('checked', true);
+        $('#frequency_w').prop('checked', true);
       }
     typeHandler()
     frequencyHandler()
@@ -528,14 +528,14 @@
     var tabs = ['#existingJobsLink', '#newJobsLink'];
     for (var i = 0; i < tabs.length; i++) {
       $(tabs[i]).click(function() {
-        $('input.listViewSelectAll').removeAttr("checked");
-        $('input.listViewSelectItem').removeAttr("checked");
+        $('input.listViewSelectAll').prop('checked', false);
+        $('input.listViewSelectItem').prop('checked', false);
       });
     }
     for (var i = 0; i < cloudNameRepoIds.length; i++) {
-        $("#listViewItem_" + cloudNameRepoIds[i]).attr('checked', true);
+        $("#listViewItem_" + cloudNameRepoIds[i]).prop('checked', true);
         $("#listViewItem_" + cloudNameRepoIds[i]).click();
-        $("#listViewItem_" + cloudNameRepoIds[i]).attr('checked', true);
+        $("#listViewItem_" + cloudNameRepoIds[i]).prop('checked', true);
     }
   });
  </g:if>

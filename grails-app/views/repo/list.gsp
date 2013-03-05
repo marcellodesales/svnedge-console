@@ -81,7 +81,7 @@
            <label class="radio">
              <g:radio class="inline" id="specifiedRevision" name="revisionType" value="specified" checked="checked"/>
                  <g:message code="repository.page.list.replicaSyncRevprops.revision"/></label>
-                 <input name="revision" id="revision" onclick="$('#specifiedRevision').attr('checked', true);"/>
+                 <input name="revision" id="revision" onclick="$('#specifiedRevision').prop('checked', true);"/>
            <label class="radio">
              <g:radio id="allRevision" name="revisionType" value="all"/>
                <g:message code="repository.page.list.replicaSyncRevprops.revision.all"/>
@@ -185,7 +185,7 @@
     // limit filter to column 1 only (the repo name)
     filterElement= $('#datatable_filter').find("input")
   	filterElement.keyup( function () {
-        dt.fnFilter(filterElement.attr("value"), 1);
+        dt.fnFilter(filterElement.val(), 1);
     } );
   } );
 </g:javascript>

@@ -13,7 +13,7 @@
     function passwordConfirm() {
       var b = $('#passwd').val() == $('#passwordConfirm').val();
       $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
-      $('.requirePasswordConfirm').attr('disabled', !b);
+      $('.requirePasswordConfirm').prop('disabled', !b);
       return b;
     }
 

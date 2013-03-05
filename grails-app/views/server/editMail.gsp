@@ -15,8 +15,8 @@ $(document).ready(function() {
 function testMailHandler() {
     $('#spinner').show();
     $('#testButton').val("${message(code: 'server.page.editMail.button.testInProgress')}");
-    $('#saveButton').attr('disabled', true);
-    window.setTimeout("$('#testButton').attr('disabled', true)", 500);
+    $('#saveButton').prop('disabled', true);
+    window.setTimeout("$('#testButton').prop('disabled', true)", 500);
 }
 
 function fetchResult() {
@@ -61,7 +61,7 @@ function fetchResult() {
 }
 
 function resetPage() {
-    $('#cancelTestButton').attr('id', 'testButton');
+    $('#cancelTestButton').prop('id', 'testButton');
     var testButton = $('#testButton');
     testButton.name = '_action_testMail';
     testButton.val("${message(code:'server.page.editMail.button.testSettings')}");
@@ -106,8 +106,8 @@ function resetPage() {
         $('#enabled').click(toggleConfigFields);
         
         function toggleConfigFields() {
-            var isEnabled = $('#enabled').attr('checked');
-            $('.requireEnabled').attr('disabled', !isEnabled);
+            var isEnabled = $('#enabled').prop('checked');
+            $('.requireEnabled').prop('disabled', !isEnabled);
         }
       </g:javascript>
     </div>

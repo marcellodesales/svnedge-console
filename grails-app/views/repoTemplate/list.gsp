@@ -70,7 +70,7 @@
             stop: function(event, ui) {
               itemList = new Array();
               $('#templates tr').each ( function() {
-                var id = $(this).attr('id').replace(/[^\d]+/g, '');
+                var id = $(this).prop('id').replace(/[^\d]+/g, '');
                 itemList[itemList.length] = id;
               })
               $.post('/csvn/repoTemplate/updateListOrder', {

@@ -4,7 +4,7 @@
 
     <script type="text/javascript">
     function showHide() {
-      if ($('#importUsers').attr('checked')) {
+      if ($('#importUsers').prop('checked')) {
         $('#userList').show();
         $('#continue_button').removeClass('form-actions');
         $('#continue_button').addClass('pull-right');

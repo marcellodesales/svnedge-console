@@ -13,10 +13,10 @@
             $("#useSsl").click(function(event) {
                 var sslChkbox = $("#useSsl");
                 var port = $("#port");
-                if (sslChkbox.attr('checked') && port.val() == '80') {
+                if (sslChkbox.prop('checked') && port.val() == '80') {
                     port.val('443');
                 }
-                else if (!sslChkbox.attr('checked') && port.val() == '443') {
+                else if (!sslChkbox.prop('checked') && port.val() == '443') {
                     port.val('80');
                 }
            });
@@ -121,7 +121,7 @@ $('#bindInstructions').hide();
         <g:javascript>
         function useSslHandler() {
           var useSslElement = $('#useSsl');
-          if (useSslElement.attr('checked')) {
+          if ($('#useSsl').prop('checked')) {
             var useSslParent = useSslElement.parent();
             var sslTip = useSslParent.children('label.withFor');
             sslTip.html(sslTip.html() + '<span id="sslCustomLink">&nbsp;&nbsp;<a href="#sslConfigModal" data-toggle="modal"><g:message code="server.page.edit.useSsl.advancedConfiguration"/></a></span>');
