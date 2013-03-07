@@ -38,6 +38,7 @@ target(build: 'Builds the distribution file structure') {
     distDir = "${basedir}/dist"
     Ant.property(name: "distDir", value: distDir)
     prepare()
+    copyResources()
     osName = Ant.project.properties.'osName'
     bits = Ant.project.properties."bits"
     arch = Ant.project.properties."arch"

@@ -91,6 +91,33 @@ target(prepare: 'Prepares properties and fields') {
         ((osName == "windows") ? ".zip" : ".tar.gz")
 
     webAppsDir = distDir + "/appserver/webapps"
+    
+}
+
+target(copyResources: 'Copies css and js for use by viewvc and launch.html') {
+    Ant.property(file: "${basedir}/application.properties")
+    def antProp = Ant.project.properties    
+    def resourcesDir = "${basedir}/web-app"
+    def viewvcResourcesDir = "${distDir}/www/viewvc/docroot"
+    
+    Ant.copy(file: "${resourcesDir}/js/bootstrap-${antProp.'vendor.twitter-bootstrap.version'}.js", 
+            todir: "${viewvcResourcesDir}/js")
+    Ant.copy(file: "${resourcesDir}/js/jquery-${antProp.'vendor.jquery.version'}.min.js", 
+            todir: "${viewvcResourcesDir}/js")
+    Ant.copy(file: "${resourcesDir}/css/bootstrap-${antProp.'vendor.twitter-bootstrap.version'}.css", 
+            todir: "${viewvcResourcesDir}/css")
+    Ant.copy(file: "${resourcesDir}/css/bootstrap-responsive-${antProp.'vendor.twitter-bootstrap.version'}.css",  
+            todir: "${viewvcResourcesDir}/css")
+    Ant.copy(file: "${resourcesDir}/css/svnedge-${antProp.'app.svnedgeCss.version'}.css", 
+            todir: "${viewvcResourcesDir}/css")
+    Ant.copy(file: "${resourcesDir}/img/glyphicons-halflings.png", todir: "${viewvcResourcesDir}/img")
+    Ant.copy(file: "${resourcesDir}/img/glyphicons-halflings-white.png", todir: "${viewvcResourcesDir}/img")
+    // Version numbers are kept to ensure clients use up-to-date version, but it is easy to overlook launch.html
+    // so putting the needed files under a more static name as well.
+    Ant.copy(file: "${resourcesDir}/css/bootstrap-${antProp.'vendor.twitter-bootstrap.version'}.css", 
+            tofile: "${viewvcResourcesDir}/css/bootstrap-current.css")
+    Ant.copy(file: "${resourcesDir}/css/svnedge-${antProp.'app.svnedgeCss.version'}.css", 
+            tofile: "${viewvcResourcesDir}/css/svnedge-current.css")
 }
 
 target(downloadArtifacts: 'Downloads the csvn binaries') {

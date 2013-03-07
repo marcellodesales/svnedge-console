@@ -31,6 +31,7 @@ target(build: 'Builds the distribution file structure') {
     distDir = "${basedir}/svn-server"
     Ant.property(name: "distDir", value: distDir)
     prepare()
+    copyResources()
     osName = Ant.project.properties.'osName'
 
     Ant.echo(message: "Preparing CSVN binaries / development environment for " +
