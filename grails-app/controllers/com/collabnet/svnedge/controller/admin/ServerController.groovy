@@ -368,10 +368,21 @@ class ServerController {
         def config = ConfigurationHolder.config
         File f = new File(ConfigUtil.confDirPath, 'ssl_httpd.conf')
         def sslConfig = f.exists() ? f.text : null
+        boolean isStarted = lifecycleService.isStarted()
+        boolean isRepoParentOwnedByRoot = false
+        if (!isStarted) {
+            isRepoParentOwnedByRoot = ('root' == serverConfService.httpdUser)
+            if (isRepoParentOwnedByRoot) {
+                String msg = message(code: 'server.repoParentDir.ownedByRootChown', 
+                        args: ["<code>sudo chown -R &lt;user&gt;:&lt;group&gt; ${server.repoParentDir}</code>"])
+                flash.unfiltered_error = msg
+                server.errors.rejectValue('repoParentDir', 'server.repoParentDir.ownedByRoot')
+            }
+        }
 
         return [
             server : server,
-            isStarted: lifecycleService.isStarted(),
+            isStarted: isStarted,
             csvnHome: config.svnedge.appHome ?
                 config.svnedge.appHome : '<AppHome>',
             csvnConf: ConfigUtil.confDirPath(),
@@ -385,6 +396,7 @@ class ServerController {
             defaultSslConfig: ServerConfService.DEFAULT_SSL_EXPLOIT_DIRECTIVES.trim(),
             console_user: System.getProperty("user.name"),
             httpd_group: serverConfService.httpdGroup,
+            isRepoParentOwnedByRoot: isRepoParentOwnedByRoot,
             isConfigurable: serverConfService.createOrValidateHttpdConf()
         ]
     }

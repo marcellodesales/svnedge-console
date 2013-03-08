@@ -67,10 +67,15 @@ class ServerConfServiceTests extends GrailsUnitTestCase {
 
         networkingService = new Expando()
         networkingService.getNetworkConfiguration = { nc }
-
+        
+        def operatingSystemService = new Expando()
+        operatingSystemService.isWindows = { true }
+        def commandLineService = new CommandLineService()
+        commandLineService.operatingSystemService = operatingSystemService
+        
         serverConfService = new ServerConfService()
         serverConfService.networkingService = networkingService
-        serverConfService.commandLineService = new CommandLineService()
+        serverConfService.commandLineService = commandLineService
         serverConfService.securityService = new SecurityService()
         serverConfService.csvnAuthenticationProvider = new CsvnAuthenticationProvider()
 

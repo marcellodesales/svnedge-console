@@ -38,6 +38,7 @@ class StatusController {
     def networkingService
     def svnRepoService
     def quartzScheduler
+    def serverConfService
     def statisticsService
     def lifecycleService
     def packagesUpdateService
@@ -325,7 +326,13 @@ class StatusController {
                 } else if (result == 0) {
                     flash.message = message(code: 'server.status.isRunning')
                 } else {
-                    flash.error = message(code: 'server.status.errorStarting')
+                    if (serverConfService.httpdUser == 'root') {
+                        flash.unfiltered_error = message(
+                                code: 'server.status.errorStarting.repoParentDirOwnedByRoot',
+                                args: [createLink(controller: 'server', action: 'edit')])
+                    } else {
+                        flash.error = message(code: 'server.status.errorStarting')
+                    }
                 }
             } catch (CantBindPortException startServiceException) {
                 flash.error = startServiceException.getMessage(

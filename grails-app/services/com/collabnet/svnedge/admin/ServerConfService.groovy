@@ -96,9 +96,6 @@ SSLHonorCipherOrder on
 SSLCipherSuite RC4-SHA:HIGH
 """
     
-    def httpdUser
-    def httpdGroup
-
     def bootstrap = { server ->
 
         log.debug("Bootstrapping serverConfService")
@@ -106,9 +103,6 @@ SSLCipherSuite RC4-SHA:HIGH
         def appHome = ConfigUtil.appHome()
         bootstrapDataDirectory(appHome)
         bootstrapConfiguration(server)
-        if (!isWindows()) {
-            setUserAndGroup()
-        }
         
         conditionalWriteHttpdConf()
         deployPythonBindings(appHome)
@@ -308,38 +302,14 @@ Content-Length: 107
         return null != ConfigUtil.serviceName()
     }
     
-    /**
-     * Will run httpd as owner of the repository directory as httpd will 
-     * write to it.
-     * Might want to eventually add configuration for this.
-     */
-    private def setUserAndGroup() {
-        def server = getServer()
-        def repoPath = server ? (String) server.repoParentDir :
-            (String) ConfigurationHolder.config.svnedge.svn.repositoriesParentPath
-        //Sometimes ls -ld output coloumns are separated by double space.
-        //For ex drwxr-xr-x  7 rajeswari __cubitu 4096 May 14 01:45 data/
-        String[] result = commandLineService
-            .executeWithOutput("ls", "-dl", repoPath).replaceAll(" +", " ").split(" ")
-
-        httpdUser = result.length > 2 ? result[2] : "nobody"
-        httpdGroup = result.length > 3 ? result[3] : "nobody"
+    def getHttpdUser() {
+        return commandLineService.getPathOwner(Server.getServer().repoParentDir)    
     }
     
-    private def getHttpdUser() {
-        if (!httpdUser && !isWindows()) {
-            setUserAndGroup()
-        }
-        return httpdUser
+    def getHttpdGroup() {
+        return commandLineService.getPathGroup(Server.getServer().repoParentDir)
     }
-
-    private def getHttpdGroup() {
-        if (!httpdGroup && !isWindows()) {
-            setUserAndGroup()
-        }
-        return httpdGroup
-    }
-
+    
     private def deployPythonBindings(appHome) {
         if (isWindows()) {
             return
@@ -747,8 +717,10 @@ ${getAuthBasic(server)}
     private def getDefaultHttpdSnippets() {
         def conf = ""
         if (isWindows() == false) {
-            conf = """User ${httpdUser}
-Group ${httpdGroup}
+            Server server = Server.getServer()
+            def repoParentPath = server.repoParentDir
+            conf = """User ${getHttpdUser()}
+Group ${getHttpdGroup()}
 """
         } else {
         	// Windows-specific memory optimizations

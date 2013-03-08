@@ -574,24 +574,17 @@ class SvnRepoService extends AbstractSvnEdgeService {
     }
 
     /**
-     * Validates whether the httpdUser and group match the ownership of the
+     * Validates whether the httpd user and group match the ownership of the
      * input Repo dir
      * @param repo
      * @return boolean indicator
      */
     boolean validateRepositoryPermissions(Repository repo) {
         def repoPath = this.getRepositoryHomePath(repo)
-
-        //Sometimes ls -ld output coloumns are separated by double space.
-        //For ex drwxr-xr-x  7 rajeswari __cubitu 4096 May 14 01:45 data/
-
-        String[] result = commandLineService.executeWithOutput("ls", "-dl",
-                repoPath).replaceAll(" +", " ").split(" ")
-        String user = result.length > 2 ? result[2] : "nobody"
-        String group = result.length > 3 ? result[3] : "nobody"
-
-        return (user == serverConfService.httpdUser &&
-                group == serverConfService.httpdGroup)
+        return (commandLineService.getPathOwner(repoPath) == 
+                serverConfService.getHttpdUser() &&
+                commandLineService.getPathGroup(repoPath) ==
+                serverConfService.getHttpdGroup())
     }
 
     /**

@@ -89,7 +89,9 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
 
         def cls = new Expando()
         cls.executeWithOutput = { p1, p2, p3 -> ". nobody nobody nobody" }
-
+        cls.getPathOwner = { p1 -> "nobody" }
+        cls.getPathGroup = { p1 -> "nobody" }
+        
         def repoSvc = new Expando()
         repoSvc.getHttpdUser = { "nobody" }
         repoSvc.getHttpdGroup = { "nobody" }

@@ -335,4 +335,23 @@ class CommandLineService {
         }
         return [String.valueOf(exitStatus), outString, errorString] as String[]
     }
+
+    def getPathOwner(def path) {
+        def result = getPathData(path)
+        return result.length > 2 ? result[2] : "nobody"
+    }
+    
+    def getPathGroup(def path) {
+        def result = getPathData(path)
+        return result.length > 3 ? result[3] : "nobody"
+    }
+    
+    private String[] getPathData(def path) {
+        if (operatingSystemService.isWindows()) {
+            return new String[0]
+        }
+        //Sometimes ls -ld output coloumns are separated by double space.
+        //For ex drwxr-xr-x  7 rajeswari __cubitu 4096 May 14 01:45 data/
+        return executeWithOutput("ls", "-dl", path).replaceAll(" +", " ").split(" ")
+    }
 }
