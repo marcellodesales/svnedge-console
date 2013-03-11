@@ -98,7 +98,7 @@ target(copyResources: 'Copies css and js for use by viewvc and launch.html') {
     Ant.property(file: "${basedir}/application.properties")
     def antProp = Ant.project.properties    
     def resourcesDir = "${basedir}/web-app"
-    def viewvcResourcesDir = "${distDir}/www/viewvc/docroot"
+    def viewvcResourcesDir = "${basedir}/svn-server/www/viewvc/docroot"
     
     Ant.copy(file: "${resourcesDir}/js/bootstrap-${antProp.'vendor.twitter-bootstrap.version'}.js", 
             todir: "${viewvcResourcesDir}/js")
