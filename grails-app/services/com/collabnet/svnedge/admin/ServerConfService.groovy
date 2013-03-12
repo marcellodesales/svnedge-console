@@ -592,7 +592,7 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
 
         boolean isLdapLoginEnabled = isLdapLoginEnabled(server)
         if (isLdapLoginEnabled) {
-            conf += "<VirtualHost *:${server.port}>"
+            conf += "<VirtualHost *:${server.port}>\n"
         }
 
         conf += server.useSsl ? "SSLEngine On" : "# SSL is off"
