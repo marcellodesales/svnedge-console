@@ -23,10 +23,11 @@
     <div class="control-group">
       <span class="control-label"><g:message code="user.username.label"/></span>
       <div class="controls readonly">
-        ${userInstance.username}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="passwd_change_link"><a href="#" onclick="showPasswdFields()"><g:message code="user.page.edit.passwdchange"/></a></span>
+        ${userInstance.username}<g:if test="${!userInstance.isLdapUser()}">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="passwd_change_link"><a href="#" onclick="showPasswdFields()"><g:message code="user.page.edit.passwdchange"/></a></span></g:if>
       </div>
     </div>        
 
+   <g:if test="${!userInstance.isLdapUser()}">
     <div id="passwd_row">
       <g:propControlsBody bean="${userInstance}" field="passwd" required="true" prefix="user" groupId="passwd_control">
         <input type="password" id="passwd" name="passwd" value="${userInstance.passwd}"/>&nbsp;&nbsp;<span id="cancel_passwd_link"><a href="#" onclick="cancelPasswordChange()"><g:message code="user.page.edit.passwdchange.cancel"/></a></span>
@@ -47,8 +48,11 @@
       </div>
     </div>
     <g:propTextField bean="${userInstance}" field="realUserName" required="true" prefix="user"/>
+   </g:if>
     <g:propTextField bean="${userInstance}" field="email" required="true" prefix="user"/>
+   <g:if test="${!userInstance.isLdapUser()}">
     <g:propTextField bean="${userInstance}" field="description" prefix="user"/>
+   </g:if>
 
     <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
       <g:if test="${allowEditingRoles}">
@@ -62,7 +66,6 @@
         </g:propControlsBody>
       </g:if>
     </g:ifAnyGranted>
-  
           <div class="form-actions">
             <g:actionSubmit action="update" class="btn btn-primary save requirePasswordConfirm" value="${message(code:'user.page.edit.button.save')}" />
             <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">

@@ -205,15 +205,6 @@ class UserAccountService extends AbstractSvnEdgeService {
         return stream
     }
         
-    /**
-     * Test if the User object derives from LDAP authentication
-     * @param u
-     * @return boolean is the user an LDAP user
-     */
-    public boolean isLdapUser(User u) {
-        return csvnAuthenticationProvider.isLdapUser(u)
-    }
-
     private User saveNewSuperUser(userid, password) {
         new User(username: userid, realUserName: "Super Administrator", enabled: true,
                  passwd: password, description: "admin user", email: "admin@example.com")

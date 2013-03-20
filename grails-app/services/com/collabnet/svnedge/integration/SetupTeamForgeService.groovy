@@ -56,7 +56,6 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
     def securityService
     def svnRepoService
     def discoveryService
-    def userAccountService
 
     /**
      * The integration properties file.
@@ -421,7 +420,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             it.userName })
         // get non-ldap users for CTF import
         def csvnUsers = User.list(sort:"username").findAll{ u -> 
-            !userAccountService.isLdapUser(u)
+            !u.isLdapUser()
         }
         List<String> ctfUsernames = new ArrayList<String>(csvnUsers.size())
         List<String> csvnOnlyUsernames = new ArrayList<String>(csvnUsers.size())

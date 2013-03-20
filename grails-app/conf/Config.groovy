@@ -201,9 +201,20 @@ environments {
                 }
             }
         }
+        ldapServers {
+            dev1 {
+                base = "dc=collabnet,dc=com"
+                port = 10389
+            }
+        }
     }
     development {
-
+        ldapServers {
+            dev1 {
+                base = "dc=collabnet,dc=com"
+                port = 10389
+            }
+        }
     }
     production {
         grails.serverURL = "http://www.changeme.com"

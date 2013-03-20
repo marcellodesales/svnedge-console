@@ -35,6 +35,7 @@ class UserController {
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
     def authenticateService
     def userCache
+    def ldapService
     def lifecycleService
     def userAccountService
     org.hibernate.SessionFactory sessionFactory
@@ -53,10 +54,21 @@ class UserController {
     def showSelf = {
         def username = authenticateService.principal().getUsername()
         def userInstance = User.findByUsername(username)
-        def editable = !userAccountService.isLdapUser(userInstance)
+        def email = email(userInstance)
+        def editable = editable(userInstance, email)
         def view = 'show'
         
-        render(view: view, model: [userInstance: userInstance, editable: editable])
+        render(view: view, model: [userInstance: userInstance, 
+                editable: editable, email: email])
+    }
+    
+    private def editable(User user, email) {
+        return !user.isLdapUser() || !email || user.email != User.LDAP_PSEUDO_EMAIL
+    }
+    
+    private def email(User user) {
+        return user.isLdapUser() ? 
+                ldapService.getEmailForLdapUser(user) : user.email 
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_USERS'])
@@ -139,7 +151,6 @@ class UserController {
 
     def show = {
         def userInstance = User.get(params.id)
-        def editable = !userAccountService.isLdapUser(userInstance)
         if (!userInstance) {
             flash.error = message(code: "default.not.found.message", 
                     args: [message(code: "user.label"),
@@ -153,7 +164,9 @@ class UserController {
             redirect(action: "list")
         }
         else {
-            [userInstance: userInstance, editable: editable ]
+            def email = email(userInstance)
+            def editable = editable(userInstance, email)
+            [userInstance: userInstance, editable: editable, email: email]
         }
     }
 
@@ -171,18 +184,21 @@ class UserController {
                            params.id])
             redirect(action: "list")
         }
-        else if (userAccountService.isLdapUser(userInstance)) {
-            flash.warn = message(code: "user.page.edit.ldap.message")
-            redirect(action: "show", params: [id : params.id])
+        else {
+            def email = email(userInstance)
+            def editable = editable(userInstance, email)
+            if (userInstance.isLdapUser() && !editable) {
+                flash.warn = message(code: "user.page.edit.ldap.message")
+                redirect(action: "show", params: [id : params.id])
 
-       } else {
-
-            boolean editingSelf = isRequestingSelf(params.id)
-            return [userInstance: userInstance,
-                    roleList : getRoleList(),
-                    authorizedRoleList : getAuthorizedRoleList(),
-                    allowEditingRoles : !editingSelf
-            ]
+            } else {
+                boolean editingSelf = isRequestingSelf(params.id)
+                return [userInstance: userInstance, email: email,
+                        roleList : getRoleList(),
+                        authorizedRoleList : getAuthorizedRoleList(),
+                        allowEditingRoles : !editingSelf
+                ]
+            }
         }
     }
 

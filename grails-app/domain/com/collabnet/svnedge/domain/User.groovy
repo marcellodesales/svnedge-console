@@ -21,9 +21,13 @@ package com.collabnet.svnedge.domain
  * User domain class.  Initial revision is mostly grails template code.
  */
 class User {
-    static transients = ['pass']
+    static transients = ['pass', 'ldapUser']
     static hasMany = [authorities: Role, props: UserProperty]
     static belongsTo = Role
+
+    private static final String LDAP_PSEUDO_PASSWD = "LDAP_AUTH_ONLY"
+    public static final String LDAP_PSEUDO_EMAIL = "null@collab.net"
+    private static final String LDAP_USER_DESCRIPTION = "LDAP User"
 
     /** Username */
     String username
@@ -41,6 +45,24 @@ class User {
 
     /** plain password to create a MD5 password */
     String pass = '[secret]'
+
+    static User newLdapUser(def properties = null) {
+        def user = new User(properties)
+        user.passwd = LDAP_PSEUDO_PASSWD
+        user.email = LDAP_PSEUDO_EMAIL
+        user.description = LDAP_USER_DESCRIPTION
+        user.enabled = true
+        return user
+    }
+    
+    /**
+     * determine if given User is from LDAP authentication
+     * @param u
+     * @return boolean indicating whether User originated in LDAP auth
+     */
+    boolean isLdapUser() {
+        return this.passwd == LDAP_PSEUDO_PASSWD
+    }
 
     static constraints = {
         username(blank: false, unique: true, minSize: 1, maxSize: 31, 

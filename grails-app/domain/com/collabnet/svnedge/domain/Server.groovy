@@ -101,6 +101,17 @@ class Server {
         return scheme + "://" + hostname + port   
     }
 
+    String ldapURL() {
+        String ldapUrl = (server.ldapSecurityLevel != "NONE") ?
+                'ldaps://' : 'ldap://'
+        ldapUrl += ldapServerHost
+        if (ldapServerPort != 389) {
+            ldapUrl += ':' + ldapServerPort
+        }
+        ldapUrl += '/'
+        return ldapUrl
+    }
+
     static constraints = {
         useHttpV2(nullable: true)
         hostname(nullable: false, blank: false, unique: true)

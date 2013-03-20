@@ -66,6 +66,7 @@ class MailListenerService extends AbstractSvnEdgeService
     // registering the listener twice
     static transactional = false
 
+    def ldapService
     def svnRepoService
     
     void onApplicationEvent(RepositoryEvent event) {
@@ -88,20 +89,24 @@ class MailListenerService extends AbstractSvnEdgeService
     private void onEnabledMail(RepositoryEvent event, MailConfiguration config) {
         def fromAddress = config.createFromAddress()
         Server server = Server.getServer()
-        def defaultAddress = server.adminEmail
-        def toAddress = null 
-        if (!INVALID_ADDRESSES.contains(defaultAddress)) {
-            toAddress = defaultAddress
-        }
+        def defaultAddress = !INVALID_ADDRESSES.contains(server.adminEmail) ? 
+                server.adminEmail : null
+        def toAddress = defaultAddress 
         def ccAddress = null
         boolean sendOnSuccess = false
+        boolean userLacksEmail = false
         User user = retrieveUserForEvent(event)
-        if (user?.email && !INVALID_ADDRESSES.contains(user.email)) {
-            toAddress = user.email
+        if (user) {
             sendOnSuccess = true
-            if (toAddress != defaultAddress && !event.isSuccess &&
-                    !INVALID_ADDRESSES.contains(defaultAddress)) {
-                ccAddress = defaultAddress
+            def userAddress = user.isLdapUser() ? 
+                    ldapService.getEmailForLdapUser(user) : user.email
+            if (userAddress && !INVALID_ADDRESSES.contains(userAddress)) {
+                toAddress = userAddress
+                if (toAddress != defaultAddress && !event.isSuccess) {
+                    ccAddress = defaultAddress
+                }
+            } else {
+                userLacksEmail = true
             }
         }
         
@@ -109,13 +114,16 @@ class MailListenerService extends AbstractSvnEdgeService
         if (toAddress && (sendOnSuccess || !event.isSuccess)) {
             switch (event) {
                 case DumpRepositoryEvent:
-                    sendDumpMail(toAddress, ccAddress, fromAddress, event)
+                    sendDumpMail(toAddress, ccAddress, fromAddress, event, 
+                                 userLacksEmail, user?.username)
                 break
                 case LoadRepositoryEvent:
-                    sendLoadMail(toAddress, ccAddress, fromAddress, event)
+                    sendLoadMail(toAddress, ccAddress, fromAddress, event, 
+                                 userLacksEmail, user?.username)
                 break
                 case VerifyRepositoryEvent:
-                    sendVerifyMail(toAddress, ccAddress, fromAddress, event)
+                    sendVerifyMail(toAddress, ccAddress, fromAddress, event,
+                                   userLacksEmail, user?.username)
                 break
             }
             
@@ -161,7 +169,8 @@ class MailListenerService extends AbstractSvnEdgeService
         return s
     }
         
-    private void sendDumpMail(toAddress, ccAddress, fromAddress, event) {
+    private void sendDumpMail(toAddress, ccAddress, fromAddress, event, 
+                              userLacksEmail, username) {
         def repo = event.repo
         def dumpBean = event.dumpBean
         Locale locale = dumpBean.userLocale
@@ -184,7 +193,8 @@ class MailListenerService extends AbstractSvnEdgeService
                     "?filename=" + filename
             mailBody = getMessage('mail.message.dump.body.success', 
                 [(dumpBean.hotcopy ? 1 : 0), repo.name, 
-                 filename, repoLink, downloadLink], locale)
+                 filename, repoLink, downloadLink, 
+                 (userLacksEmail ? 1 : 0), username], locale)
         } else {
             processOutput = getProcessOutput(event)
             def processOutputTail = getProcessOutputTail(event)
@@ -198,14 +208,16 @@ class MailListenerService extends AbstractSvnEdgeService
                          e.class.name, getStackTrace(e),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name, processOutputTail], locale)
+                         event.processOutput?.name, processOutputTail, 
+                         (userLacksEmail ? 1 : 0), username], locale)
             } else {
                 mailBody = getMessage('mail.message.dump.body.error',
                         [dumpBean.hotcopy ? 1 : dumpBean.cloud ? 2 : 0, 
                          dumpBean.backup ? 0 : 1, 
                          repo.name, '', '', '', processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name, processOutputTail], locale)
+                         event.processOutput?.name, processOutputTail, 
+                         (userLacksEmail ? 1 : 0), username], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)
@@ -229,7 +241,8 @@ class MailListenerService extends AbstractSvnEdgeService
         return progressContent && progressContent.length == MAX_ATTACHMENT_SIZE
     }
 
-    private void sendLoadMail(toAddress, ccAddress, fromAddress, event) {
+    private void sendLoadMail(toAddress, ccAddress, fromAddress, event,
+                              userLacksEmail, username) {
         def repo = event.repo
         Locale locale = event.locale ?: Locale.getDefault()
         def mailSubject = getMessage(event.isSuccess ?
@@ -242,7 +255,8 @@ class MailListenerService extends AbstractSvnEdgeService
         byte[] processOutput
         (mailBody, processOutput) = getMailBody(event, repo, 
                 event.messagePrefix + '.body.success',
-                event.messagePrefix + '.body.error', locale)
+                event.messagePrefix + '.body.error', 
+                userLacksEmail, username, locale)
 
         sendMail(toAddress, ccAddress, fromAddress, 
                  mailSubject, mailBody, processOutput)
@@ -255,7 +269,8 @@ class MailListenerService extends AbstractSvnEdgeService
      * @param fromAddress
      * @param event
      */
-    private void sendVerifyMail(toAddress, ccAddress, fromAddress, event) {
+    private void sendVerifyMail(toAddress, ccAddress, fromAddress, event, 
+                                userLacksEmail, username) {
         def repo = event.repo
         Locale locale = event.locale ?: Locale.getDefault()
         def mailSubject = getMessage(event.isSuccess ?
@@ -270,8 +285,10 @@ class MailListenerService extends AbstractSvnEdgeService
             log.info("Repo '${repo.name}' verification succeeded, sending no email")
             return
         }
-        (mailBody, processOutput) = getMailBody(event, repo, 'mail.message.verify.body.success',
-                'mail.message.verify.body.error', locale)
+        (mailBody, processOutput) = getMailBody(event, repo, 
+                'mail.message.verify.body.success',
+                'mail.message.verify.body.error', 
+                userLacksEmail, username, locale)
         sendMail(toAddress, ccAddress, fromAddress,
                 mailSubject, mailBody, processOutput)
     }
@@ -285,7 +302,7 @@ class MailListenerService extends AbstractSvnEdgeService
 
         def (mailBody, processOutput) = getMailBody(event, repo, 
                 'mail.message.syncReplicaRepo.notImplemented',
-                'mail.message.syncReplicaRepo.body.error', locale)
+                'mail.message.syncReplicaRepo.body.error', false, null, locale)
         
         sendMail(toAddress, null, fromAddress,
                 mailSubject, mailBody, processOutput)
@@ -300,11 +317,13 @@ class MailListenerService extends AbstractSvnEdgeService
      * @param locale
      * @return [String mailBody, byte[] processOutput]
      */
-    private List getMailBody(event, repo, successKey, errorKey, locale) {
+    private List getMailBody(event, repo, successKey, errorKey, 
+                             userLacksEmail, username, locale) {
         def mailBody
         byte[] processOutput
         if (event.isSuccess) {
-            mailBody = getMessage(successKey, [repo.name], locale)
+            mailBody = getMessage(successKey, [repo.name,  
+                    (userLacksEmail ? 1 : 0), username], locale)
         } else {
             processOutput = getProcessOutput(event)
             def processOutputTail = getProcessOutputTail(event)
@@ -316,12 +335,14 @@ class MailListenerService extends AbstractSvnEdgeService
                          e.class.name, e.stackTrace.join('\n'),
                          processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name, processOutputTail], locale)
+                         event.processOutput?.name, processOutputTail, 
+                         (userLacksEmail ? 1 : 0), username], locale)
             } else {
                 mailBody = getMessage(errorKey,
                         [repo.name, '', '', '', processOutput ? 1 : 0,
                          isPartial(processOutput) ? 1 : 0,
-                         event.processOutput?.name, processOutputTail], locale)
+                         event.processOutput?.name, processOutputTail, 
+                         (userLacksEmail ? 1 : 0), username], locale)
             }
         }
         mailBody += getMessage('mail.message.footer', null, locale)

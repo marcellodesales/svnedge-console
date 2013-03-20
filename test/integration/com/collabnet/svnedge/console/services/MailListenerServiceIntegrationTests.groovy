@@ -482,4 +482,34 @@ class MailListenerServiceIntegrationTests extends GrailsUnitTestCase {
                 GreenMailUtil.getAddressList(
                 message.getRecipients(Message.RecipientType.CC)))
     }
+
+    public void testNoLdapEmailAddressOnSuccess() {
+        def username = "wbush"
+        User user = User.newLdapUser(username: username, realUserName: username)
+        user.save()
+        DumpBean params = new DumpBean()
+        DumpRepositoryEvent event = new DumpRepositoryEvent(
+                this, params, repo, DumpRepositoryEvent.SUCCESS, user.id.toInteger())        
+        mailListenerService.onApplicationEvent(event)
+        
+        assertEquals("Expected one mail message", 1,
+                greenMail.getReceivedMessages().length)
+        def message = greenMail.getReceivedMessages()[0]
+        assertEquals("Message Subject did not match",
+                "[Success][Adhoc dump]Repository: test-repo", message.subject)
+        def body = GreenMailUtil.getBody(message)
+        assertTrue("Message Body did not start with expected text.\n" + body, body
+                .startsWith("The dump of repository '" + repo.name +
+                "' completed."))
+        assertTrue("Message Body did not include reason.\n" + body, body
+               .indexOf("As user " + username + 
+                " does not have a valid email address, they could not be automatically notified") > 0)
+        assertEquals("Message To did not match", Server.getServer().adminEmail,
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.TO)))
+        assertNull("Message not expected to have CC recipients",
+                GreenMailUtil.getAddressList(
+                message.getRecipients(Message.RecipientType.CC)))
+    }
+
 }

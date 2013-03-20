@@ -58,9 +58,6 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
 
     def log = LogFactory.getLog(CsvnAuthenticationProvider.class)
 
-    public static final String LDAP_PSEUDO_PASSWD = "LDAP_AUTH_ONLY"
-    public static final String LDAP_PSEUDO_EMAIL = "null@collab.net"
-    public static final String LDAP_USER_DESCRIPTION = "LDAP User"
     public static final String AUTH_REALM = "CollabNet Subversion Repository"
 
     def daoAuthenticationProvider
@@ -84,7 +81,7 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
                 def dbUser = User.findByUsername(auth.getName())
 
                 // if dbuser found and is not from prior ldap auth, use standard DaoAuth
-                if (dbUser && !isLdapUser(dbUser)) {
+                if (dbUser && !dbUser.isLdapUser()) {
                     authToken = daoAuthenticationProvider.authenticate(auth)
                     return  // exit "withTransaction" closure
                 }
@@ -97,12 +94,8 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
                 if (!dbUser) {
 
                     log.debug("creating user entity to match ldap user")
-                    dbUser = new User(username: auth.getName(),
-                            realUserName: auth.getName(),
-                            passwd: LDAP_PSEUDO_PASSWD,
-                            enabled: true,
-                            email: LDAP_PSEUDO_EMAIL,
-                            description: LDAP_USER_DESCRIPTION)
+                    dbUser = User.newLdapUser(username: auth.getName(),
+                            realUserName: auth.getName())
                     dbUser.save()
 
                     // add new user to ROLE_USER
@@ -127,15 +120,6 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
 
     boolean supports(Class authentication) {
         return true
-    }
-
-    /**
-     * determine if given User is from LDAP authentication
-     * @param u
-     * @return boolean indicating whether User originated in LDAP auth
-     */
-    boolean isLdapUser(User u) {
-        return u.passwd == LDAP_PSEUDO_PASSWD
     }
 
     /**

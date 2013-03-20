@@ -733,21 +733,9 @@ MaxMemFree 512
     }    
 
     private def getLdapURL(server) {
-        def ldapUrl
-        if (server.ldapSecurityLevel != "NONE") {
-            ldapUrl = "ldaps://"
-        } else {
-            ldapUrl = "ldap://"
-        }
-        ldapUrl += "${server.ldapServerHost}"
-        if (server.ldapServerPort != 389) {
-                ldapUrl += ":${server.ldapServerPort}"
-        }
-
-        ldapUrl += "/"
-
+        def ldapUrl = server.ldapURL()
         if (server.ldapAuthBasedn) {
-            ldapUrl += "${server.ldapAuthBasedn}"
+            ldapUrl += server.ldapAuthBasedn
         }
         if (server.ldapLoginAttribute) {
             ldapUrl += "?${server.ldapLoginAttribute}"

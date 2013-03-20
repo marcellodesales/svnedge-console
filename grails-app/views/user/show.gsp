@@ -16,22 +16,24 @@
       <div class="controls readonly">${userInstance.username}</div>
     </div>        
 
-                <%-- only showing fullname and email for editable (local db) users --%>
-                <g:if test="${editable}">
-                
+   <%-- only showing username and email for editable (local db) users --%>
+   <g:if test="${editable}">
     <div class="control-group">
       <span class="control-label"><g:message code="user.realUserName.label"/></span>
       <div class="controls readonly">${userInstance.realUserName}</div>
     </div>        
+   </g:if>
+
     <div class="control-group">
       <span class="control-label"><g:message code="user.email.label"/></span>
-      <div class="controls readonly">${userInstance.email}</div>
+      <div class="controls readonly">${email}</div>
     </div>        
+   <g:if test="${editable}">
     <div class="control-group">
       <span class="control-label"><g:message code="user.description.label"/></span>
       <div class="controls readonly">${userInstance.description}</div>
     </div>        
-                </g:if>
+   </g:if>
 
 
                 <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_USERS">
