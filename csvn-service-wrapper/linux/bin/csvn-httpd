@@ -145,7 +145,7 @@ showresult()
   fi
 }
 
-start()
+csvn_start()
 {
   $ECHO_CMD "Starting $APP_LONG_NAME: "
 
@@ -210,7 +210,7 @@ graceful()
   return $RETVAL
 }
 
-stop()
+csvn_stop()
 {
   $ECHO_CMD "Stopping $APP_LONG_NAME: "
 
@@ -256,11 +256,11 @@ status ()
   return $RETVAL
 }
 
-restart()
+csvn_restart()
 {
-  stop stop
+  csvn_stop stop
   echo
-  start start
+  csvn_start start
   return $RETVAL
 }
 
@@ -468,7 +468,7 @@ removedaemon() {
         echo "Must be root to perform this action."
         exit 1
     else
-        stop
+        csvn_stop
         if [ "$DIST_OS" = "solaris" ] ; then
             echo "Detected Solaris:"
             if [ -f /etc/init.d/$APP_NAME ] ; then
@@ -597,19 +597,19 @@ removedaemon() {
 
 case "$1" in
 start)
-  start $1
+  csvn_start $1
   echo ;;
 graceful)
   graceful
   echo ;;
 stop|graceful-stop)
-  stop $1
+  csvn_stop $1
   echo ;;
 status)
   status
   echo ;;
 restart)
-  restart
+  csvn_restart
   echo ;;
 install)
   installdaemon
