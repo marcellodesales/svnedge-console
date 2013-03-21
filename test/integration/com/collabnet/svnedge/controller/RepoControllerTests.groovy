@@ -166,8 +166,13 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
     }    
 
     private void changeEmailAddresses() {
-        User.metaClass.getEmail = { "test@example.com" }
-        Server.metaClass.getAdminEmail = { "testAdminMail@example.com" }
+        User user = User.get(1)
+        user.email = "test@example.com"
+        user.save(flush: true)
+        
+        Server server = Server.getServer()
+        server.adminEmail = "testAdminMail@example.com"
+        server.save(flush: true)
     }
 
     void testCreateDumpFileSuccessMail() {
