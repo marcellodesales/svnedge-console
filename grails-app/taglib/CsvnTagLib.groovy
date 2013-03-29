@@ -597,6 +597,7 @@ class CsvnTagLib {
             }
         } catch (Exception e) {
             log.warn("Exception prevented showing tip content: " + e.message)
+            log.debug("Exception prevented showing tip content", e)
         }
     }
 }
