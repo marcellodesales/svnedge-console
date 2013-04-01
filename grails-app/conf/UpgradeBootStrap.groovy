@@ -49,7 +49,7 @@ class UpgradeBootStrap {
         release1_3_1()
         release2_1_0()
         release3_0_2()
-        release3_3_100()
+        release3_4_0()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
