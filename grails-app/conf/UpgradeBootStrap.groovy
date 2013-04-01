@@ -25,6 +25,7 @@ import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.SchemaVersion
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
+import com.collabnet.svnedge.domain.integration.CtfServer
 import com.collabnet.svnedge.domain.statistics.Statistic
 import com.collabnet.svnedge.util.ConfigUtil
 
@@ -48,6 +49,7 @@ class UpgradeBootStrap {
         release1_3_1()
         release2_1_0()
         release3_0_2()
+        release3_3_100()
     }
 
     private boolean isSchemaCurrent(int major, int minor, int revision) {
@@ -203,4 +205,138 @@ class UpgradeBootStrap {
                 description: "3.0.2 Renamed quartz triggers for backup jobs")
         v.save()
     }
+    
+    private static String BEGIN_SOURCEFORGE_SECTION = "BEGIN SOURCEFORGE SECTION - Do not remove these lines";
+    private static String END_SOURCEFORGE_SECTION = "END SOURCEFORGE SECTION";
+
+    def void release3_4_0() {
+        if (isSchemaCurrent(3, 4, 0)) {
+            return
+        }
+
+        Server server = Server.getServer()
+        if (server.mode == ServerMode.STANDALONE) {
+            log.info("3.4.0 update is not needed in standalone mode.")
+        } else {
+            log.info("Applying 3.4.0 updates")
+            
+            String pythonExecutable = "python"
+            def sfIntegrationsRoot = new File(ConfigUtil.appHome(), 'lib/integration').absolutePath
+            def systemId = CtfServer.getServer().mySystemId
+        
+            StringBuilder postRevpropChangeContent = new StringBuilder()
+            postRevpropChangeContent.append(pythonExecutable)
+                .append(' "')
+                .append(sfIntegrationsRoot)
+                .append('/post-revprop-change.py" ')
+                .append('"$1" "$2" "$3" "$4" "$5" ')
+                .append(systemId)
+                .append('\n');
+    
+            String hook = 'post-revprop-change'
+            def os = operatingSystemService.isWindows() ? windowsAdapter : unixAdapter
+            addHookScript(postRevpropChangeContent.toString(), hook, server.repoParentDir, os)
+        }
+    
+        SchemaVersion v = new SchemaVersion(major: 3, minor: 4, revision: 0,
+                description: "3.4.0 For CTF integration server, added post-revprop-change")
+        v.save()
+    }
+
+	private void addHookScript(String content, hook, repoParentDir, os) {
+		String script = buildHookScript(os, content)
+		def files = Arrays.asList(new File(repoParentDir).listFiles(
+				{repoDir -> new File(repoDir, "hooks").exists() } as FileFilter))
+		files.each { repoDir ->
+            File hookScriptFile = os.getHookScriptFile(repoDir, hook);
+            
+			// if file exists, just insert or replace and insert the triggers
+			if (hookScriptFile.exists()) {
+                File hookScriptFileBkup = os.getHookScriptFile(repoDir, hookScriptFile.name + '.bkup');
+                hookScriptFileBkup.text = hookScriptFile.text
+			} 
+            hookScriptFile.text = script
+		}
+	}
+
+    // the following is modified from AbstractCommandExecutor.createHookScript in integration 
+    private String buildHookScript(def os, String scriptContent) {
+            
+        File tfProps = new File(ConfigUtil.confDirPath(), "teamforge.properties")
+        def sfPropertiesPath = tfProps.absolutePath
+        def libDir = new File(ConfigUtil.appHome(), "lib").absolutePath
+        def pythonPath = "${libDir}${File.pathSeparator}${libDir}${File.separator}svn-python"
+        
+        def normalizePath = { String fileSystemPath ->
+            return fileSystemPath.replaceAll("\\\\", "/").replace("//", "/")
+        }
+
+        StringBuilder script = new StringBuilder();
+        script.append(os.commentStr + " " + BEGIN_SOURCEFORGE_SECTION);
+        script.append("\n\n");
+
+        script.append(os.getEnvironmentVariableString("SOURCEFORGE_PROPERTIES_PATH",
+                        os.quoteStr + normalizePath(sfPropertiesPath) + os.quoteStr));
+        script.append("\n");
+
+        if (null != pythonPath) {
+            // update path string for platform, then add to script
+            script.append(os.getEnvironmentVariableString("PYTHONPATH",
+                            os.quoteStr + normalizePath(pythonPath) + os.quoteStr));
+            script.append("\n\n");
+        } else {
+            // For pretty scripts
+            script.append("\n");
+        }
+
+        // update script command for platform
+        // assume "python" is on path
+        scriptContent = scriptContent.replaceAll("/", os.fileSeparator);
+        scriptContent = os.replaceArguments(scriptContent);
+
+        script.append(scriptContent);
+        script.append("\n");
+        script.append(os.commentStr + " " + END_SOURCEFORGE_SECTION);
+        script.append("\n");
+        os.doScriptModifications(script);
+        return script.toString()
+    }
+    
+    def unixAdapter = [
+        quoteStr: "'",
+        commentStr: "#",
+        fileSeparator: "/",
+        getEnvironmentVariableString: { String name, String value ->
+            return name + '=' + value + '\nexport ' + name
+        },
+        getHookScriptFile: { File repository, String hook ->
+            return new File(new File(repository, "hooks"), hook)
+        },
+        doScriptModifications: { StringBuilder sb ->
+            sb.insert(0, "#!/bin/sh\n\n");
+        },
+        replaceArguments: { String scriptContent -> 
+            return scriptContent;
+        }
+    ]
+
+    def windowsAdapter = [
+        // In Windows batch scripts, surrounding environment variables with quotes of any kind break
+        // their values in Python because the surrounding quotes become part of the variable value.
+        quoteStr: "",
+        commentStr: "::",
+        fileSeparator: "\\\\",
+        getEnvironmentVariableString: { String name, String value ->
+            return 'SET ' + name + '=' + value
+        },
+        getHookScriptFile: { File repository, String hook ->
+            return new File(new File(repository, "hooks"), hook + ".bat")
+        },
+        doScriptModifications: { StringBuilder sb ->
+            sb.insert(0, "@ECHO OFF\n\n");
+        },
+        replaceArguments: { String scriptContent -> 
+            return scriptContent.replaceAll('"\\$(\\d+)"', '%$1')
+        }
+    ]
 }
