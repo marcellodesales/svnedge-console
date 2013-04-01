@@ -215,7 +215,7 @@ class UpgradeBootStrap {
         }
 
         Server server = Server.getServer()
-        if (server.mode == ServerMode.STANDALONE) {
+        if (!server || server.mode == ServerMode.STANDALONE) {
             log.info("3.4.0 update is not needed in standalone mode.")
         } else {
             log.info("Applying 3.4.0 updates")
