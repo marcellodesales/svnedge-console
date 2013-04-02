@@ -236,7 +236,7 @@ class CsvnTagLib {
             if (attrs.confirmByTypingThis) {
                 out << """
                 confirmOk = function() {
-                    if (\$("#${modalId}").find("#${confirmDialogTextId}").attr('value') ==
+                    if (\$("#${modalId}").find("#${confirmDialogTextId}").val() ==
                            "${attrs.confirmByTypingThis}") {
                         submitAction();
                     }   
