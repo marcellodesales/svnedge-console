@@ -102,7 +102,7 @@ function CloudTokenAvailabilityChecker(inputElement, messageElement, ajaxUrl, ch
         checker.messageElement.html('<img src="/csvn/images/spinner-green.gif" alt="spinner" align="top"/> ' + checker.checkingString)
         checker.ajaxInstance = $.ajax({
                     url: checker.ajaxUrl, 
-                    data: {token: checker.inputElement.attr("value") },
+                    data: {token: checker.inputElement.val() },
                     context: checker,
                     success: function(data, status, xhr) {
                         var checker = this

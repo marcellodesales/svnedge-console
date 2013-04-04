@@ -63,16 +63,20 @@
     })
     
     function emailConfirm(e) {
-      var b = $('#emailAddress').val()) == $('#emailAddressConfirm').val());
+      var b = $('#emailAddress').val() == $('#emailAddressConfirm').val();
       $('#confirmEmailMessage').css("display", b ? 'none' : 'inline');
       return b;
     }
     
     function passwordConfirm(e) {
-      var b = $('#password').val() == $('#passwordConfirm').val());
+      var b = $('#password').val() == $('#passwordConfirm').val();
       $('#passwordConfirmMessage').css("display", b ? 'none' : 'inline');
       return b;
     }
+    $(function() {
+      emailConfirm();
+      passwordConfirm();
+    });
     </g:javascript>       
 </head>
 <content tag="title"><g:message code="setupCloudServices.page.signup.title"/></content>
