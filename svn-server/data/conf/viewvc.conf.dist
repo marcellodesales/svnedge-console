@@ -599,7 +599,7 @@ use_localtime = 1
 ## used only by the syntax coloration logic -- if enabled -- for the
 ## 'markup' and 'annotate' views; see 'enable_syntax_coloration'.]
 ##
-#detect_encoding = 0
+detect_encoding = 1
 
 ## use_cvsgraph: Use CvsGraph to offer visual graphs of CVS revision history.
 ##
