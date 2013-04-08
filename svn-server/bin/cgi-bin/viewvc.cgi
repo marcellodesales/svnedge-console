@@ -30,6 +30,7 @@
 #
 
 LIBRARY_DIR = None
+VIEWVC_LIBRARY_DIR = None
 SVN_LIBRARY_DIR = None
 CSVN_HOME_DIR = None
 CONF_PATHNAME = None
@@ -46,14 +47,16 @@ CSVN_HOME_DIR = os.getenv("CSVN_HOME")
 if CSVN_HOME_DIR:
   SVN_LIBRARY_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR,
                                       "lib", "svn-python"))
-  LIBRARY_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR,
+  VIEWVC_LIBRARY_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR,
                                   "lib", "viewvc"))
+  LIBRARY_DIR = os.path.abspath(os.path.join(CSVN_HOME_DIR, "lib"))
   CONF_PATHNAME   = os.path.abspath(os.path.join(CSVN_HOME_DIR,
                                       "data", "conf", "viewvc.conf"))
 
-if LIBRARY_DIR:
-  sys.path.insert(0, LIBRARY_DIR)
+if VIEWVC_LIBRARY_DIR:
+  sys.path.insert(0, VIEWVC_LIBRARY_DIR)
   sys.path.insert(0, SVN_LIBRARY_DIR)
+  sys.path.insert(0, LIBRARY_DIR)
 else:
   sys.path.insert(0, os.path.abspath(os.path.join(sys.argv[0],
                                                   "../../../lib")))
