@@ -105,9 +105,9 @@ class LdapService {
                         }
                     }
                 }
-            } catch (NamingException e) {
-                log.warn "Unable to retrieve email from LDAP for username=" + username
-                log.debug "Unable to retrieve email for username=" + username, e
+            } catch (Exception e) {
+                log.warn "Unable to retrieve email from LDAP for username=" + username + ". Set log level to DEBUG for detail."
+                log.debug "Unable to retrieve email from LDAP for username=" + username, e
             }
         }
         return email
@@ -119,7 +119,7 @@ class LdapService {
         if (!filter1.startsWith('(')) {
             filter1 = '(' + filter1 + ')'
         }
-        String filter = '(&' + filter1 + '(' + server.ldapLoginAttribute + '=' + username + '))'
+        String filter = '(&' + filter1 + '(' + (server.ldapLoginAttribute ?: 'uid') + '=' + username + '))'
         def userList = search(filter, server.ldapAuthBasedn, 
                 (server.ldapSearchScope == 'one') ? SearchControls.ONELEVEL_SCOPE : SearchControls.SUBTREE_SCOPE)
         if (userList.isEmpty()) {
@@ -132,7 +132,7 @@ class LdapService {
     }
 
     private List<Object> search(String filter, String base, 
-            int searchScope = SearchControls.ONELEVEL_SCOPE) throws NamingException
+            int searchScope = SearchControls.ONELEVEL_SCOPE) throws Exception
     {
         LdapContext ctx = null;
         List<Object> result = new ArrayList<Object>();
@@ -148,11 +148,16 @@ class LdapService {
                 SearchResult sr = enm.nextElement()
                 result.add(sr.getObject())
             }
+        } catch (Exception e) {
+            log.warn "Unable to search ldap using filter: " + filter + " and base: " + base
+            throw e
+            
         } finally {
             try {
-                ctx.close();
-            } catch (NamingException e) {
-                log.warn "Unable to close ldap context", e
+                ctx?.close();
+            } catch (Exception e) {
+                log.warn "Unable to close ldap context"
+                log.debug "Unable to close ldap context (stacktrace)", e
             }
         }
         return result
