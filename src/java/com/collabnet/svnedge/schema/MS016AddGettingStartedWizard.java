@@ -69,6 +69,8 @@ public class MS016AddGettingStartedWizard implements MigrationScript {
                 "(1, 'ServerSettings', 'com.collabnet.svnedge.wizard.gettingstarted.ServerSettingsStep', 2)");
         db.executeUpdate(insertPrefix +
                 "(1, 'CloudBackup', 'com.collabnet.svnedge.wizard.gettingstarted.CloudBackupStep', 3)");
+        
+            db.updateSchemaVersion(version, getClass().getSimpleName() + " added WIZARD and WIZARD_STEP");
         }
         
         version[2] = 1;
@@ -79,10 +81,13 @@ public class MS016AddGettingStartedWizard implements MigrationScript {
                     " where LABEL='GettingStarted'");
             db.executeUpdate("alter table WIZARD drop column CONTROLLER");
             db.executeUpdate("alter table WIZARD drop column LABEL");
+            db.updateSchemaVersion(version, getClass().getSimpleName() + " modified WIZARD");
         }
         
         version[2] = 2;
         if (!db.isSchemaCurrent(version)) {        
+            try {
+
             boolean isWizardDone = true;
             ResultSet rs = db.executeQuery("select count(*) from USER");
             rs.next();
@@ -112,6 +117,12 @@ public class MS016AddGettingStartedWizard implements MigrationScript {
             
             if (isWizardDone) {
                 db.executeUpdate("update WIZARD set ACTIVE=false, DONE=true");                
+            }
+
+            } catch (Exception e) {
+                log.warn("Exception occurred while checking for prior " + 
+                        "completion of Getting Started steps. This is not fatal, " + 
+                        "but you might send the stacktrace to users-svnedge@ctf.open.collab.net", e);
             }
         }
 
