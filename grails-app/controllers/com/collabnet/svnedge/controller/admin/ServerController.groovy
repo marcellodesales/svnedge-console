@@ -275,10 +275,12 @@ class ServerController {
         //In editAuthentication UI repoParentDir does not exist in Params.
         def repoParentParam = params.repoParentDir
         if (repoParentParam != null) {
-            // canonicalize repo parent dir (esp to remove trailing "/" or "\"
-            // that server.validate would allow)
+            // remove trailing "/" or "\" that server.validate would allow
             try {
-                String repoParent = new File(repoParentParam).canonicalPath
+                while (repoParentParam.endsWith(File.pathSeparator)) {
+                    repoParentParam = repoParentParam.substring(0, repoParentParam.length() - 1)
+                }
+                String repoParent = new File(repoParentParam).absolutePath
                 server.repoParentDir = repoParent
                 
                 // validate, and reject port value if needed
