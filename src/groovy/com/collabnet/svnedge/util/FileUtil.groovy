@@ -103,9 +103,9 @@ public class FileUtil {
                     directory, zos, storePermissions, progress)
         }
         catch (ZipException e) {
-            log.warn("Error zipping directory, likely caused by presence of symlink(s); " + 
+            log.info("Error zipping directory, likely caused by presence of symlink(s); " + 
                      "attempting alternate zip using command line")
-            log.info("ZipException details", e)
+            log.debug("ZipException details", e)
             zos?.close()
             zipFile.delete()
             archiveDirectoryUsingCommandLine(directory, zipFile, progress)
@@ -122,9 +122,9 @@ public class FileUtil {
      * @param progress the stream into which output is sent (optional)
      */
     public void archiveDirectoryUsingCommandLine(File directory, File zipFile, OutputStream progress = null) {
-        String wd = directory.parentFile.absolutePath
+        String wd = directory.absolutePath
         String[] result = 
-                commandLineService.execute(["zip", "-r", zipFile.absolutePath, directory.name],
+                commandLineService.execute(["zip", "-r", zipFile.absolutePath, '.'],
                         progress, progress, ["PWD" : wd])
         if (result[0] != "0") {
             def msg = "Unable to zip directory, make sure 'zip' utility is installed and on path"
