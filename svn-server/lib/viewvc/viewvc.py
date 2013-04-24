@@ -14,7 +14,7 @@
 #
 # -----------------------------------------------------------------------
 
-__version__ = '1.1.18'
+__version__ = '1.1.20'
 
 # this comes from our library; measure the startup time
 import debug
@@ -286,9 +286,12 @@ class Request:
         cfg.overlay_root_options(self.rootname)
         
         # Setup an Authorizer for this rootname and username
+        debug.t_start('setup-authorizer')
         self.auth = setup_authorizer(cfg, self, self.username)
-
+        debug.t_end('setup-authorizer')
+ 
         # Create the repository object
+        debug.t_start('select-repos')
         try:
           if roottype == 'cvs':
             self.rootpath = vclib.ccvs.canonicalize_rootpath(rootpath)
@@ -311,6 +314,7 @@ class Request:
             raise vclib.ReposNotFound()
         except vclib.ReposNotFound:
           pass
+        debug.t_end('select-repos')
       if self.repos is None:
         raise debug.ViewVCException(
           'The root "%s" is unknown. If you believe the value is '
@@ -318,7 +322,9 @@ class Request:
           % self.rootname, "404 Not Found")
 
     if self.repos:
+      debug.t_start('select-repos')
       self.repos.open()
+      debug.t_end('select-repos')
       type = self.repos.roottype()
       if type == vclib.SVN:
         self.roottype = 'svn'
@@ -451,7 +457,9 @@ class Request:
     if needs_redirect:
       self.server.redirect(self.get_url())
     else:
+      debug.t_start('view-func')
       self.view_func(self)
+      debug.t_end('view-func')
 
   def get_url(self, escape=0, partial=0, prefix=0, **args):
     """Constructs a link to another ViewVC page just like the get_link
@@ -967,7 +975,7 @@ def get_view_template(cfg, view_name, language="en"):
   return template
 
 def get_writeready_server_file(request, content_type=None, encoding=None,
-                               content_length=None):
+                               content_length=None, allow_compress=True):
   """Return a file handle to a response body stream, after outputting
   any queued special headers (on REQUEST.server) and (optionally) a
   'Content-Type' header whose value is CONTENT_TYPE and character set
@@ -976,10 +984,14 @@ def get_writeready_server_file(request, content_type=None, encoding=None,
   If CONTENT_LENGTH is provided and compression is not in use, also
   generate a 'Content-Length' header for this response.
 
+  Callers my use ALLOW_COMPRESS to disable compression where it would
+  otherwise be allowed.  (Such as when transmitting an
+  already-compressed response.)
+
   After this function is called, it is too late to add new headers to
   the response."""
 
-  if request.gzip_compress_level:
+  if allow_compress and request.gzip_compress_level:
     request.server.addheader('Content-Encoding', 'gzip')
   elif content_length is not None:
     request.server.addheader('Content-Length', content_length)
@@ -991,7 +1003,7 @@ def get_writeready_server_file(request, content_type=None, encoding=None,
   else:
     request.server.header()
 
-  if request.gzip_compress_level:
+  if allow_compress and request.gzip_compress_level:
     fp = gzip.GzipFile('', 'wb', request.gzip_compress_level,
                        request.server.file())
   else:
@@ -1811,6 +1823,37 @@ def markup_escaped_urls(s):
   return re.sub(_re_rewrite_escaped_url, _url_repl, s)
 
 
+def detect_encoding(text_block):
+  # Does the TEXT_BLOCK start with a BOM?
+  for bom, encoding in [('\xef\xbb\xbf', 'utf-8'),
+                        ('\xff\xfe', 'utf-16'),
+                        ('\xfe\xff', 'utf-16be'),
+                        ('\xff\xfe\0\0', 'utf-32'),
+                        ('\0\0\xfe\xff', 'utf-32be'),
+                        ]:
+    if text_block[:len(bom)] == bom:
+      return encoding
+
+  # If no recognized BOM, see if chardet can help us.
+  try:
+    import chardet
+    return chardet.detect(text_block).get('encoding')
+  except:
+    pass
+
+  # By default ... we have no idea.
+  return None
+  
+def transcode_text(text, encoding=None):
+  """If ENCODING is provided and not 'utf-8', transcode TEXT from
+  ENCODING to UTF-8."""
+
+  if not encoding or encoding == 'utf-8':
+    return text
+  return unicode(text, encoding,
+                 errors='replace').encode('utf-8',
+                                          errors='replace')
+
 def markup_stream(request, cfg, blame_data, file_lines, filename,
                   mime_type, encoding, colorize):
   """Return the contents of a versioned file as a list of
@@ -1880,11 +1923,31 @@ def markup_stream(request, cfg, blame_data, file_lines, filename,
   # If we aren't highlighting, just return an amalgamation of the
   # BLAME_DATA (if any) and the FILE_LINES.
   if not pygments_lexer:
+
+    # If allowed by configuration, try to detect the source encoding
+    # for this file.  We'll assemble a block of data from the file
+    # contents to do so... 1024 bytes should be enough.
+    if not encoding and cfg.options.detect_encoding:
+      block_size = 0
+      text_block = ''
+      for i in range(len(file_lines)):
+        text_block = text_block + file_lines[i]
+        if len(text_block) >= 1024:
+          break
+      encoding = detect_encoding(text_block)
+
+    # Built output data comprised of marked-up and possibly-transcoded
+    # source text lines wrapped in (possibly dummy) vclib.Annotation
+    # objects.
     lines = []
+    file_lines = transcode_text(string.join(file_lines, ''), encoding)
+    file_lines = string.rstrip(file_lines, '\n')
+    file_lines = string.split(file_lines, '\n')
     for i in range(len(file_lines)):
-      line = file_lines[i].rstrip('\n\r')
-      line = sapi.escape(string.expandtabs(line, cfg.options.tabsize))
-      line = markup_escaped_urls(line)
+      line = file_lines[i]
+      if cfg.options.tabsize > 0:
+        line = string.expandtabs(line, cfg.options.tabsize)
+      line = markup_escaped_urls(sapi.escape(line))
       if blame_data:
         blame_item = blame_data[i]
         blame_item.text = line
@@ -1906,7 +1969,7 @@ def markup_stream(request, cfg, blame_data, file_lines, filename,
       self.line_no = 0
     def write(self, buf):
       ### FIXME:  Don't bank on write() being called once per line
-      buf = markup_escaped_urls(buf.rstrip('\n\r'))
+      buf = markup_escaped_urls(string.rstrip(buf, '\n\r'))
       if self.has_blame_data:
         self.blame_data[self.line_no].text = buf
       else:
@@ -1949,10 +2012,23 @@ def make_time_string(date, cfg):
     return time.ctime(date) + ' ' + time.tzname[0]
 
   if cfg.options.use_localtime:
-    localtime = time.localtime(date)
-    return time.asctime(localtime) + ' ' + time.tzname[localtime[8]]
+    tm = time.localtime(date)
   else:
-    return time.asctime(time.gmtime(date)) + ' UTC'
+    tm = time.gmtime(date)
+  if cfg.options.iso8601_timestamps:
+    if cfg.options.use_localtime:
+      if tm[8] and time.daylight:
+        tz = time.altzone
+      else:
+        tz = time.timezone
+      tz = float(tz) / 3600.0
+      tz = string.replace(str.format('{0:+06.2f}', tz), '.', ':')
+    else:
+      tz = 'Z'
+    return time.strftime('%Y-%m-%dT%H:%M:%S', tm) + tz
+  else:
+    return time.asctime(tm) + ' ' + \
+           (cfg.options.use_localtime and time.tzname[tm[8]] or 'UTC')
 
 def make_rss_time_string(date, cfg):
   """Returns formatted date string in UTC, formatted for RSS.
@@ -2018,6 +2094,15 @@ def calculate_mime_type(request, path_parts, rev):
       pass
   return guess_mime(path_parts[-1]), None
 
+def assert_viewable_filesize(cfg, filesize):
+  if cfg.options.max_filesize_kbytes \
+     and filesize != -1 \
+     and filesize > (1024 * cfg.options.max_filesize_kbytes):
+    raise debug.ViewVCException('Display of files larger than %d KB '
+                                'disallowed by configuration'
+                                % (cfg.options.max_filesize_kbytes),
+                                '403 Forbidden')
+  
 def markup_or_annotate(request, is_annotate):
   cfg = request.cfg
   path, rev = _orig_path(request, is_annotate and 'annotate' or 'revision')
@@ -2045,11 +2130,16 @@ def markup_or_annotate(request, is_annotate):
 
   # Not a viewable image.
   else:
-    blame_data = None
+    filesize = request.repos.filesize(path, rev)
+
+    # If configuration disallows display of large files, try to honor
+    # that request.
+    assert_viewable_filesize(cfg, filesize)
 
     # If this was an annotation request, try to annotate this file.
     # If something goes wrong, that's okay -- we'll gracefully revert
     # to a plain markup display.
+    blame_data = None
     if is_annotate:
       try:
         blame_source, revision = request.repos.annotate(path, rev, False)
@@ -2077,7 +2167,22 @@ def markup_or_annotate(request, is_annotate):
     if check_freshness(request, None, revision, weak=1):
       fp.close()
       return
-    file_lines = fp.readlines()
+
+    # If we're limiting by filesize but couldn't pull off the cheap
+    # check above, we'll try to do so line by line here (while
+    # building our file_lines array).
+    if cfg.options.max_filesize_kbytes and filesize == -1:
+      file_lines = []
+      filesize = 0
+      while 1:
+        line = fp.readline()
+        if not line:
+          break
+        filesize = filesize + len(line)
+        assert_viewable_filesize(cfg, filesize)
+        file_lines.append(line)
+    else:
+      file_lines = fp.readlines()
     fp.close()
 
     # Do we have a differing number of file content lines and
@@ -3223,7 +3328,9 @@ class DiffSource:
         return item
 
   def _format_text(self, text):
-    text = string.expandtabs(string.rstrip(text), self.cfg.options.tabsize)
+    text = string.rstrip(text, '\r\n')
+    if self.cfg.options.tabsize > 0:
+      text = string.expandtabs(text, self.cfg.options.tabsize)
     hr_breakable = self.cfg.options.hr_breakable
     
     # in the code below, "\x01" will be our stand-in for "&". We don't want
@@ -3698,7 +3805,7 @@ def view_diff(request):
 
 
 def generate_tarball_header(out, name, size=0, mode=None, mtime=0,
-                            uid=0, gid=0, typefrag=None, linkname='',
+                            uid=0, gid=0, typeflag=None, linkname='',
                             uname='viewvc', gname='viewvc',
                             devmajor=1, devminor=0, prefix=None,
                             magic='ustar', version='00', chksum=None):
@@ -3708,40 +3815,49 @@ def generate_tarball_header(out, name, size=0, mode=None, mtime=0,
     else:
       mode = 0644
 
-  if not typefrag:
-    if name[-1:] == '/':
-      typefrag = '5' # directory
+  if not typeflag:
+    if linkname:
+      typeflag = '2' # symbolic link
+    elif name[-1:] == '/':
+      typeflag = '5' # directory
     else:
-      typefrag = '0' # regular file
+      typeflag = '0' # regular file
 
   if not prefix:
     prefix = ''
 
-  # generate a GNU tar extension header for long names.
+  # generate a GNU tar extension header for a long name.
   if len(name) >= 100:
     generate_tarball_header(out, '././@LongLink', len(name),
-                            0644, 0, 0, 0, 'L')
+                            0, 0, 0, 0, 'L')
     out.write(name)
     out.write('\0' * (511 - ((len(name) + 511) % 512)))
 
+  # generate a GNU tar extension header for a long symlink name.
+  if len(linkname) >= 100:
+    generate_tarball_header(out, '././@LongLink', len(linkname),
+                            0, 0, 0, 0, 'K')
+    out.write(linkname)
+    out.write('\0' * (511 - ((len(linkname) + 511) % 512)))
+
   block1 = struct.pack('100s 8s 8s 8s 12s 12s',
-    name,
-    '%07o' % mode,
-    '%07o' % uid,
-    '%07o' % gid,
-    '%011o' % size,
-    '%011o' % mtime)
+                       name,
+                       '%07o' % mode,
+                       '%07o' % uid,
+                       '%07o' % gid,
+                       '%011o' % size,
+                       '%011o' % mtime)
 
   block2 = struct.pack('c 100s 6s 2s 32s 32s 8s 8s 155s',
-    typefrag,
-    linkname,
-    magic,
-    version,
-    uname,
-    gname,
-    '%07o' % devmajor,
-    '%07o' % devminor,
-    prefix)
+                       typeflag,
+                       linkname,
+                       magic,
+                       version,
+                       uname,
+                       gname,
+                       '%07o' % devmajor,
+                       '%07o' % devminor,
+                       prefix)
 
   if not chksum:
     dummy_chksum = '        '
@@ -3819,17 +3935,50 @@ def generate_tarball(out, request, reldir, stack, dir_mtime=None):
     else:
       mode = 0644
 
-    ### FIXME: Read the whole file into memory?  Bad... better to do
-    ### 2 passes.
-    fp = request.repos.openfile(rep_path + [file.name], request.pathrev, {})[0]
-    contents = fp.read()
-    fp.close()
+    # Is this thing a symlink?
+    #
+    ### FIXME: A better solution would be to have vclib returning
+    ### symlinks with a new vclib.SYMLINK path type.
+    symlink_target = None
+    if hasattr(request.repos, 'get_symlink_target'):
+      symlink_target = request.repos.get_symlink_target(rep_path + [file.name],
+                                                        request.pathrev)
 
-    generate_tarball_header(out, tar_dir + file.name,
-                            len(contents), mode,
-                            file.date is not None and file.date or 0)
-    out.write(contents)
-    out.write('\0' * (511 - ((len(contents) + 511) % 512)))
+    # If the object is a symlink, generate the appropriate header.
+    # Otherwise, we're dealing with a regular file.
+    if symlink_target:
+      generate_tarball_header(out, tar_dir + file.name, 0, mode,
+                              file.date is not None and file.date or 0,
+                              typeflag='2', linkname=symlink_target)
+    else:
+      filesize = request.repos.filesize(rep_path + [file.name], request.pathrev)
+
+      if filesize == -1:
+        # Bummer.  We have to calculate the filesize manually.
+        fp = request.repos.openfile(rep_path + [file.name], request.pathrev, {})[0]
+        filesize = 0
+        while 1:
+          chunk = retry_read(fp)
+          if not chunk:
+            break
+          filesize = filesize + len(chunk)
+        fp.close()
+
+      # Write the tarball header...
+      generate_tarball_header(out, tar_dir + file.name, filesize, mode,
+                              file.date is not None and file.date or 0)
+      
+      # ...the file's contents ...
+      fp = request.repos.openfile(rep_path + [file.name], request.pathrev, {})[0]
+      while 1:
+        chunk = retry_read(fp)
+        if not chunk:
+          break
+        out.write(chunk)
+      fp.close()
+
+      # ... and then add the block padding.
+      out.write('\0' * (511 - (filesize + 511) % 512))
 
   # Recurse into subdirectories, skipping busted and unauthorized (or
   # configured-to-be-hidden) ones.
@@ -3853,6 +4002,10 @@ def download_tarball(request):
     raise debug.ViewVCException('Tarball generation is disabled',
                                  '403 Forbidden')
 
+  # If debugging, we just need to open up the specified tar path for
+  # writing.  Otherwise, we get a writeable server output stream --
+  # disabling any default compression thereupon -- and wrap that in
+  # our own gzip stream wrapper.
   if debug.TARFILE_PATH:
     fp = open(debug.TARFILE_PATH, 'w')
   else:    
@@ -3861,11 +4014,9 @@ def download_tarball(request):
       tarfile = "%s-%s" % (tarfile, request.path_parts[-1])
     request.server.addheader('Content-Disposition',
                              'attachment; filename="%s.tar.gz"' % (tarfile))
-    server_fp = get_writeready_server_file(request, 'application/x-gzip')
+    server_fp = get_writeready_server_file(request, 'application/x-gzip',
+                                           allow_compress=False)
     request.server.flush()
-    
-    # Try to use the Python gzip module, if available; otherwise,
-    # we'll use the configured 'gzip' binary.
     fp = gzip.GzipFile('', 'wb', 9, server_fp)
 
   ### FIXME: For Subversion repositories, we can get the real mtime of the
@@ -4766,14 +4917,14 @@ def find_root_in_parents(cfg, rootname, roottype):
       continue
     pp = os.path.normpath(string.strip(pp[:pos]))
     
+    rootpath = None
     if roottype == 'cvs':
-      roots = vclib.ccvs.expand_root_parent(pp)
+      rootpath = vclib.ccvs.find_root_in_parent(pp, rootname)
     elif roottype == 'svn':
-      roots = vclib.svn.expand_root_parent(pp)
-    else:
-      roots = {}
-    if roots.has_key(rootname):
-      return roots[rootname]
+      rootpath = vclib.svn.find_root_in_parent(pp, rootname)
+
+    if rootpath is not None:
+      return rootpath
   return None
 
 def locate_root(cfg, rootname):

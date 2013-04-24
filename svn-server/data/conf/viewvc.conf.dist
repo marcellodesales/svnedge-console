@@ -406,6 +406,15 @@ generate_etags = 0
 ##
 #svn_ignore_mimetype = 0
 
+## max_filesize_kbytes: Limit ViewVC's processing of file contents in
+## "markup" and "annotate" views to only those files which are smaller
+## than this setting, expressed in kilobytes.  Set to 0 to disable
+## this safeguard.
+##
+## NOTE: The "co" and "tar" views are unaffected by this setting.
+## 
+#max_filesize_kbytes = 512
+
 ## svn_config_dir: Path of the Subversion runtime configuration
 ## directory ViewVC should consult for various things, including cached
 ## remote authentication credentials.  If unset, Subversion will use
@@ -573,6 +582,10 @@ docroot = __CSVN_VIEWVC_DOCROOT__
 ##
 use_localtime = 1
 
+## iso8601_dates: Display timestamps using a standard ISO-8601 format.
+##
+#iso8601_timestamps = 0
+
 ## short_log_len: The length (in characters) to which the most recent
 ## log entry should be truncated when shown in the directory view.
 ##
@@ -589,15 +602,15 @@ use_localtime = 1
 ##
 #enable_syntax_coloration = 1
 
-## tabsize: The number of spaces into which tabstops are converted
-## when viewing file contents.
+## tabsize: The number of spaces into which horizontal tab characters
+## are converted when viewing file contents.  Set to 0 to preserve
+## tab characters.
 ##
 #tabsize = 8
 
 ## detect_encoding: Should we attempt to detect versioned file
 ## character encodings?  [Requires 'chardet' module, and is currently
-## used only by the syntax coloration logic -- if enabled -- for the
-## 'markup' and 'annotate' views; see 'enable_syntax_coloration'.]
+## used only for the 'markup' and 'annotate' views.]
 ##
 detect_encoding = 1
 

@@ -79,6 +79,40 @@ def client_log(url, start_rev, end_rev, log_limit, include_changes,
     client.svn_client_log2([url], start_rev, end_rev, log_limit,
                            include_changes, not cross_copies, cb_convert, ctx)
 
+
+def setup_client_ctx(config_dir):
+  # Ensure that the configuration directory exists.
+  core.svn_config_ensure(config_dir)
+
+  # Fetch the configuration (and 'config' bit thereof).
+  cfg = core.svn_config_get_config(config_dir)
+  config = cfg.get(core.SVN_CONFIG_CATEGORY_CONFIG)
+
+  # Here's the compat-sensitive part: try to use
+  # svn_cmdline_create_auth_baton(), and fall back to making our own
+  # if that fails.
+  try:
+    auth_baton = core.svn_cmdline_create_auth_baton(1, None, None, config_dir,
+                                                    1, 1, config, None)
+  except AttributeError:
+    auth_baton = core.svn_auth_open([
+      client.svn_client_get_simple_provider(),
+      client.svn_client_get_username_provider(),
+      client.svn_client_get_ssl_server_trust_file_provider(),
+      client.svn_client_get_ssl_client_cert_file_provider(),
+      client.svn_client_get_ssl_client_cert_pw_file_provider(),
+      ])
+    if config_dir is not None:
+      core.svn_auth_set_parameter(auth_baton,
+                                  core.SVN_AUTH_PARAM_CONFIG_DIR,
+                                  config_dir)
+
+  # Create, setup, and return the client context baton.
+  ctx = client.svn_client_create_context()
+  ctx.config = cfg
+  ctx.auth_baton = auth_baton
+  return ctx
+
 ### END COMPATABILITY CODE ###
 
 
@@ -132,7 +166,7 @@ class LogCollector:
     if this_path:
       self.path = this_path
     
-def temp_checkout(svnrepos, path, rev):
+def cat_to_tempfile(svnrepos, path, rev):
   """Check out file revision to temporary file"""
   temp = tempfile.mktemp()
   stream = core.svn_stream_from_aprfile(temp)
@@ -193,21 +227,8 @@ class RemoteSubversionRepository(vclib.Repository):
 
   def open(self):
     # Setup the client context baton, complete with non-prompting authstuffs.
-    # TODO: svn_cmdline_setup_auth_baton() is mo' better (when available)
-    core.svn_config_ensure(self.config_dir)
-    self.ctx = client.svn_client_create_context()
-    self.ctx.auth_baton = core.svn_auth_open([
-      client.svn_client_get_simple_provider(),
-      client.svn_client_get_username_provider(),
-      client.svn_client_get_ssl_server_trust_file_provider(),
-      client.svn_client_get_ssl_client_cert_file_provider(),
-      client.svn_client_get_ssl_client_cert_pw_file_provider(),
-      ])
-    self.ctx.config = core.svn_config_get_config(self.config_dir)
-    if self.config_dir is not None:
-      core.svn_auth_set_parameter(self.ctx.auth_baton,
-                                  core.SVN_AUTH_PARAM_CONFIG_DIR,
-                                  self.config_dir)
+    self.ctx = setup_client_ctx(self.config_dir)
+    
     ra_callbacks = ra.svn_ra_callbacks_t()
     ra_callbacks.auth_baton = self.ctx.auth_baton
     self.ra_session = ra.svn_ra_open(self.rootpath, ra_callbacks, None,
@@ -259,13 +280,10 @@ class RemoteSubversionRepository(vclib.Repository):
       raise vclib.Error("Path '%s' is not a file." % path)
     rev = self._getrev(rev)
     url = self._geturl(path)
-    tmp_file = tempfile.mktemp()
-    stream = core.svn_stream_from_aprfile(tmp_file)
     ### rev here should be the last history revision of the URL
-    client.svn_client_cat(core.Stream(stream), url, _rev2optrev(rev), self.ctx)
-    core.svn_stream_close(stream)
+    fp = SelfCleanFP(cat_to_tempfile(self, path, rev))
     lh_rev, c_rev = self._get_last_history_rev(path_parts, rev)
-    return SelfCleanFP(tmp_file), lh_rev
+    return fp, lh_rev
 
   def listdir(self, path_parts, rev, options):
     path = self._getpath(path_parts)
@@ -442,8 +460,8 @@ class RemoteSubversionRepository(vclib.Repository):
       return date
     
     try:
-      temp1 = temp_checkout(self, p1, r1)
-      temp2 = temp_checkout(self, p2, r2)
+      temp1 = cat_to_tempfile(self, p1, r1)
+      temp2 = cat_to_tempfile(self, p2, r2)
       info1 = p1, _date_from_rev(r1), r1
       info2 = p2, _date_from_rev(r2), r2
       return vclib._diff_fp(temp1, temp2, info1, info2, self.diff_cmd, args)
@@ -457,6 +475,15 @@ class RemoteSubversionRepository(vclib.Repository):
     props = self.itemprops(path_parts, rev) # does authz-check
     return props.has_key(core.SVN_PROP_EXECUTABLE)
   
+  def filesize(self, path_parts, rev):
+    path = self._getpath(path_parts)
+    if self.itemtype(path_parts, rev) != vclib.FILE:  # does auth-check
+      raise vclib.Error("Path '%s' is not a file." % path)
+    rev = self._getrev(rev)
+    dirents, locks = self._get_dirents(self._getpath(path_parts[:-1]), rev)
+    dirent = dirents.get(path_parts[-1], None)
+    return dirent.size
+    
   def _getpath(self, path_parts):
     return string.join(path_parts, '/')
 
@@ -739,3 +766,33 @@ class RemoteSubversionRepository(vclib.Repository):
         else:
           peg_revision = mid
       return peg_revision, path
+
+  def get_symlink_target(self, path_parts, rev):
+    """Return the target of the symbolic link versioned at PATH_PARTS
+    in REV, or None if that object is not a symlink."""
+
+    path = self._getpath(path_parts)
+    path_type = self.itemtype(path_parts, rev) # does auth-check
+    rev = self._getrev(rev)
+    url = self._geturl(path)
+
+    # Symlinks must be files with the svn:special property set on them
+    # and with file contents which read "link SOME_PATH".
+    if path_type != vclib.FILE:
+      return None
+    pairs = client.svn_client_proplist2(url, _rev2optrev(rev),
+                                        _rev2optrev(rev), 0, self.ctx)
+    props = pairs and pairs[0][1] or {}
+    if not props.has_key(core.SVN_PROP_SPECIAL):
+      return None
+    pathspec = ''
+    ### FIXME: We're being a touch sloppy here, first by grabbing the
+    ### whole file and then by checking only the first line
+    ### of it.
+    fp = SelfCleanFP(cat_to_tempfile(self, path, rev))
+    pathspec = fp.readline()
+    fp.close()
+    if pathspec[:5] != 'link ':
+      return None
+    return pathspec[5:]
+
