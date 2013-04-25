@@ -250,12 +250,13 @@ class UpgradeBootStrap {
 		files.each { repoDir ->
             File hookScriptFile = os.getHookScriptFile(repoDir, hook);
             
-			// if file exists, just insert or replace and insert the triggers
+			// if file exists, replace it
 			if (hookScriptFile.exists()) {
                 File hookScriptFileBkup = os.getHookScriptFile(repoDir, hookScriptFile.name + '.bkup');
                 hookScriptFileBkup.text = hookScriptFile.text
 			} 
             hookScriptFile.text = script
+            hookScriptFile.executable = true
 		}
 	}
 
