@@ -824,6 +824,7 @@ LDAPVerifyServerCert Off
    AuthName "Authorization Realm"
    AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    AuthBasicAuthoritative Off
+   SVNPathAuthz short_circuit
    Require valid-user
    # Allows these operations to be disallowed higher up,
    # then enabled here for this Location
