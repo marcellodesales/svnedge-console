@@ -13,7 +13,7 @@
         <form action='${postUrl}' method='post' id='loginForm'>
           <fieldset>
             <div class="clearfix">
-              <label class="control-label"><g:message code="login.page.auth.username.label"/>
+              <label class="control-label"><g:message code="login.page.auth.username.label"/><br/>
               <input type="text" name="j_username" id="j_username"/></label>
               <g:if test="${isDefaultPassword}">
                 <g:javascript>
@@ -28,8 +28,8 @@
               </g:if>
             </div>
             <div class="clearfix">
-              <label class="control-label"><g:message code="login.page.auth.password.label"/>
-              <input type="password" name="j_password" id="j_password"/>
+              <label class="control-label"><g:message code="login.page.auth.password.label"/><br/>
+              <input type="password" name="j_password" id="j_password"/></label>
             </div>
             <input class="btn btn-primary" value="<g:message code="login.page.auth.button.submit" />" type="submit"></input>
           </fieldset>
