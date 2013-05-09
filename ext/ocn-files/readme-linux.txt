@@ -1,5 +1,5 @@
 CollabNet Subversion Edge - Linux 32/64-bit
-Version 3.4.0
+Version 4.0.0
 
 Contents
 

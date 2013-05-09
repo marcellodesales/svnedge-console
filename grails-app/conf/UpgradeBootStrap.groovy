@@ -216,9 +216,9 @@ class UpgradeBootStrap {
 
         Server server = Server.getServer()
         if (!server || server.mode == ServerMode.STANDALONE) {
-            log.info("3.4.0 update is not needed in standalone mode.")
+            log.info("4.0.0 update is not needed in standalone mode.")
         } else {
-            log.info("Applying 3.4.0 updates")
+            log.info("Applying 4.0.0 updates")
             
             String pythonExecutable = "python"
             def sfIntegrationsRoot = new File(ConfigUtil.appHome(), 'lib/integration').absolutePath
@@ -239,7 +239,7 @@ class UpgradeBootStrap {
         }
     
         SchemaVersion v = new SchemaVersion(major: 3, minor: 4, revision: 0,
-                description: "3.4.0 For CTF integration server, added post-revprop-change")
+                description: "4.0.0 For CTF integration server, added post-revprop-change")
         v.save()
     }
 
