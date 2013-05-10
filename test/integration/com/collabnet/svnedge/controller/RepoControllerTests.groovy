@@ -95,7 +95,7 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         def model = controller.save()
         def redirArg = controller.redirectArgs["action"]
         
-        def roles = authenticateService.principal()?.authorities.authority
+        def roles = authenticateService.principal()?.authorities?.authority
         def expectedAction = roles?.contains('ROLE_ADMIN') || 
                 roles?.contains('ROLE_ADMIN_HOOKS') ? 'hooksList' : 'dumpFileList'
         assertEquals "Expected redirect to '" + expectedAction + "' view on successful repo " +
