@@ -71,6 +71,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
                 "svndiff1",
                 "svndiff1, sharding, mergeinfo",
                 "svndiff1, sharding, mergeinfo, rep-sharing, packed revs",
+                "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops (unsupported), not released",
                 "svndiff1, sharding, mergeinfo, rep-sharing, packed revs, packed revprops",
         ]
 

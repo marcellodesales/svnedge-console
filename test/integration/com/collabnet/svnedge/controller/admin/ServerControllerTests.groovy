@@ -86,6 +86,7 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
 
         File f = new File(config.svnedge.svn.dataDirPath, "conf/csvn_main_httpd.conf")
         assertTrue "${f.absolutePath} does not exist", f.exists()
+        assertEquals "DB record not updated for port", 7652, Server.getServer().port
         assertTrue "Port directive was not updated.", (f.text.indexOf("Listen 7652") > 0)
     }
     

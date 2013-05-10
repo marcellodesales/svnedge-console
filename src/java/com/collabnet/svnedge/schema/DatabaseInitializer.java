@@ -100,7 +100,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS014AddMonitorConfiguration(),
             new MS015AddReplicaCommandRetries(),
             new MS016AddGettingStartedWizard(),
-            new MS017AddRepositoryVerifyOk()
+            new MS017AddRepositoryVerifyOk(),
+            new MS018ServerDropUseHttpV2()
         };
     }
 

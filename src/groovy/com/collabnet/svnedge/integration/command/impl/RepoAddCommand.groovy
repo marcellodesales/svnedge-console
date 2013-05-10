@@ -55,9 +55,8 @@ public class RepoAddCommand extends AbstractRepositoryCommand
 
         log.debug("Creating a new repository on the file system...")
         createRepositoryOnFileSystem(repoName)
-
-        log.debug("Updating local HttpV2 support if master supports...")
-        syncConfigurationWithMaster()
+        
+        syncConfigurationWithMasterIfFirstRepo()
     }
 
     def undo() {

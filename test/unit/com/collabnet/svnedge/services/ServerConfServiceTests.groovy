@@ -31,6 +31,7 @@ import grails.util.Environment
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.domain.integration.ApprovalState
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 
 class ServerConfServiceTests extends GrailsUnitTestCase {
 
@@ -58,6 +59,8 @@ class ServerConfServiceTests extends GrailsUnitTestCase {
         CtfServer ctf = new CtfServer()
         mockDomain(CtfServer, [ctf])
         CtfServer.metaClass.'static'.getServer = { ctf }
+        
+        mockDomain(ReplicatedRepository, [])
 
         nc = new NetworkConfiguration()
         nc.httpProxyHost = "proxyhost.com"

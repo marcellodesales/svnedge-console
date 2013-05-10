@@ -36,7 +36,7 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void tearDown() {
         super.tearDown()
-
+        logManagementService.setConsoleLevel(LogManagementService.ConsoleLogLevel.DEBUG)
     }
 
     void testConsoleLogLevelSet() {

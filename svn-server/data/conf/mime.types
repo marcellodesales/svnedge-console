@@ -907,7 +907,8 @@ application/x-font-type1			pfa pfb pfm afm
 application/x-futuresplash			spl
 application/x-gnumeric				gnumeric
 application/x-gtar				gtar
-# application/x-gzip
+application/x-compress				Z
+application/x-gzip				gz tgz
 application/x-hdf				hdf
 application/x-java-jnlp-file			jnlp
 application/x-latex				latex

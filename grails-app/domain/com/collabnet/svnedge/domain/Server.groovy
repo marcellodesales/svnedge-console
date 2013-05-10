@@ -32,8 +32,6 @@ class Server {
     boolean useSsl = false;
     // this property represents the console SSL state
     Boolean useSslConsole = false;
-    // this property represents whether the server should use HttpV2 (svn 1.7+)
-    Boolean useHttpV2 = true
     /**
      * When server is used as a replica, hostname uniquely identifies the 
      * Replica to the Master.  Care should be take when changing this value.
@@ -113,7 +111,6 @@ class Server {
     }
 
     static constraints = {
-        useHttpV2(nullable: true)
         hostname(nullable: false, blank: false, unique: true)
         port(min:80, max: 65535)
         repoParentDir(nullable: false, blank: false, 

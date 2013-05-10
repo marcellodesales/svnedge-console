@@ -117,21 +117,20 @@ SSLCipherSuite RC4-SHA:HIGH
     
     /**
      * Service method for replica mode to sync this server configuration with the master
-     * -- currently this only pertains to the use of HttpV2.
-     * @return boolean whether restart is needed
      */
-    public boolean syncReplicaConfigurationWithMaster() {    
+    private String syncReplicaMasterVersion() {    
         
         Server server = Server.getServer()
         if (server.mode != ServerMode.REPLICA) {
             log.debug("Not a replica, no reason to sync configuration with master svn")
-            return false
+            return ''
         }
         def rrList = ReplicatedRepository.list()
         ReplicatedRepository rr = (rrList) ? rrList.get(0) : null
         if (!rr) {
-            log.warn("No replicated repositories, this configuration cannot be compared to the master")
-            return false
+            log.info("No replicated repositories, SVNMasterVersion cannot be " +
+                     "determined until a repository is added.")
+            return null
         }
         
         def repoName = rr.repo.name
@@ -146,22 +145,7 @@ SSLCipherSuite RC4-SHA:HIGH
         }
         repoUrl += repoName
 
-        // assess the remote server
-        boolean hasSupport = svnServerSupportsHttpV2(repoUrl, username, password)
-        log.info("The svn master supports httpv2 (svn 1.7+): " + hasSupport)
-        // if the local config matches the remote server already, do nothing
-        if (server.useHttpV2 == hasSupport) {
-            log.debug("The replica server httpv2 config is unchanged (useHttpV2: ${server.useHttpV2})")
-            return false
-        }
-        else {
-            server.useHttpV2 = hasSupport
-            server.save(flush:true)
-            log.debug("The replica server httpv2 is updated to match the server (useHttpV2: ${server.useHttpV2})")
-
-            writeConfigFiles()
-            return true
-        }
+        return svnServerVersion(repoUrl, username, password)
     }
     
     /**
@@ -171,7 +155,7 @@ SSLCipherSuite RC4-SHA:HIGH
      * @param password
      * @return boolean true if verified, false if unknown or verified no support
      */
-    def boolean svnServerSupportsHttpV2(String repoUrl, String uname, String password) {
+    def String svnServerVersion(String repoUrl, String uname, String password) {
 
         URL url = new URL(repoUrl);
         int port = url.port
@@ -198,7 +182,7 @@ Content-Length: 107
 </D:options>
 """
         log.debug "Opening connection to ${url.host} ${port}"
-        boolean returnVal = false
+        String returnVal = '1.6'
         try {
             Socket s
             if (url.protocol == "https" ) {
@@ -213,8 +197,12 @@ Content-Length: 107
                 def line
 
                 while ((line = reader.readLine()) != null) {
-                    if (line.contains("SVN-Me-Resource")) {
-                        returnVal = true
+                    if (Float.valueOf(returnVal) < 1.7 && line.contains("SVN-Me-Resource")) {
+                        returnVal = '1.7'
+                    } 
+                    else if (Float.valueOf(returnVal) < 1.8 &&
+                             line.contains('SVN-Supported-Posts: create-txn-with-props')) {
+                        returnVal = '1.8'
                     }
                 }
             }
@@ -222,7 +210,7 @@ Content-Length: 107
         catch (Exception e) {
             log.warn("Unable to connect to repo", e)
         }
-        returnVal
+        return returnVal + '.0'
     }
 
     private String confDirPath() {
@@ -362,6 +350,13 @@ Content-Length: 107
         File dest = new File(confDir, "httpd.conf")
         if (!dest.exists()) {
             writeHttpdConf(dest)
+        } else {
+            def conf = dest.text
+            if (conf.contains('mod_authn_alias.so') || 
+                conf.contains('mod_authn_default.so') || 
+                conf.contains('mod_authz_default.so')) {
+                backupAndOverwriteHttpdConfFor2Dot2()
+            }
         }
     }
     
@@ -372,7 +367,6 @@ Content-Length: 107
         }
         String s = distFile.getText()
         s = s.replace("__CSVN_HOME__", ConfigUtil.appHome())
-        s = s.replace("__CSVN_CONF__", confDirPath())
         destConfFile.write(s)
     }
     
@@ -380,9 +374,12 @@ Content-Length: 107
         def confDirPath = confDirPath()
         Server server = getServer()
         conditionalWriteHttpdConf()
+        writeModulesConf(server)
         writeMainConf(server)
         writeLogConf()
         writeSvnViewvcConf(server)
+        writeDefaultDirectoriesConf()
+        writeMiscellaneousConf()
         writeSvnClientConf()
         File teamforgePropsTemplate =
             new File(confDirPath, "teamforge.properties.dist")
@@ -545,6 +542,106 @@ ${sslSnippet}
         new File(confDirPath(), "csvn_main_httpd.conf").write(conf)
     }
 
+    private static final String MODULES_CONF_FILENAME = 
+            "csvn_modules_httpd.conf"
+    
+    private static final String DIRS_CONF_FILENAME = 
+            "csvn_default_dirs_httpd.conf"
+    
+    private static final String MISC_CONF_FILENAME = 
+            "csvn_misc_httpd.conf"
+    
+    private def writeModulesConf(server) {
+        def conf = """${DONT_EDIT}
+LoadModule dav_module lib/modules/mod_dav.so
+LoadModule dav_fs_module lib/modules/mod_dav_fs.so
+LoadModule dav_svn_module     lib/modules/mod_dav_svn.so
+LoadModule authz_core_module lib/modules/mod_authz_core.so
+LoadModule authz_host_module lib/modules/mod_authz_host.so
+LoadModule authz_groupfile_module lib/modules/mod_authz_groupfile.so
+LoadModule authz_user_module lib/modules/mod_authz_user.so
+LoadModule authz_svn_module   lib/modules/mod_authz_svn.so
+LoadModule authn_core_module lib/modules/mod_authn_core.so
+LoadModule authn_file_module lib/modules/mod_authn_file.so
+LoadModule auth_basic_module lib/modules/mod_auth_basic.so
+LoadModule alias_module lib/modules/mod_alias.so
+LoadModule env_module lib/modules/mod_env.so
+LoadModule log_config_module lib/modules/mod_log_config.so
+LoadModule cgi_module lib/modules/mod_cgi.so
+LoadModule dir_module lib/modules/mod_dir.so
+LoadModule mime_module lib/modules/mod_mime.so
+LoadModule deflate_module lib/modules/mod_deflate.so
+"""
+		if (!isWindows()) {
+			conf += "LoadModule unixd_module lib/modules/mod_unixd.so\n"
+		}
+        
+        if (server.useSsl) {
+            conf += "LoadModule socache_shmcb_module lib/modules/mod_socache_shmcb.so\n"
+        }
+
+        if (server.mode == ServerMode.REPLICA) {
+            conf += """LoadModule proxy_module lib/modules/mod_proxy.so
+LoadModule proxy_http_module lib/modules/mod_proxy_http.so
+"""
+        }
+
+        boolean ctfMode = server.managedByCtf() ||
+            server.convertingToManagedByCtf()
+        if (server.mode == ServerMode.REPLICA || ctfMode) {
+            conf += 
+"""LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
+"""
+        }
+        if (isLdapLoginEnabled(server) || ctfMode) {
+            conf += """
+# Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
+LoadModule rewrite_module lib/modules/mod_rewrite.so
+"""
+        }
+
+        new File(confDirPath(), MODULES_CONF_FILENAME).write(conf)
+    }
+    
+    private writeDefaultDirectoriesConf() {
+        def conf = """${DONT_EDIT}
+DocumentRoot "www"
+DirectoryIndex index.html
+
+<Directory />
+  Options FollowSymLinks
+  AllowOverride None
+  Require all denied
+</Directory>
+
+<Directory "www">
+  Options Indexes FollowSymLinks
+  AllowOverride None
+  Require all granted
+</Directory>
+
+#
+# The following lines prevent .htaccess and .htpasswd files from being 
+# viewed by Web clients. 
+#
+<FilesMatch "^\\.ht">
+    Require all denied
+</FilesMatch>
+"""
+        new File(confDirPath(), DIRS_CONF_FILENAME).write(conf)
+    }
+
+    private writeMiscellaneousConf() {
+        def conf = """${DONT_EDIT}
+LimitXMLRequestBody 0
+ServerSignature  Off
+ServerTokens  Prod
+TraceEnable Off
+TypesConfig "data/conf/mime.types"
+"""
+        new File(confDirPath(), MISC_CONF_FILENAME).write(conf)
+    }
+    
     def writeLogConf() {
         def binDirPath = ConfigUtil.binDirPath()
         def rotatelogs = new File(binDirPath, 'rotatelogs').absolutePath
@@ -583,36 +680,31 @@ CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/subversion_${logNameSu
         def conf = """${DONT_EDIT}
 Include "${confDirPath}/ctf_httpd.conf"
 """
-        if (server.mode == ServerMode.REPLICA) {
-            conf += """
-LoadModule proxy_module lib/modules/mod_proxy.so
-LoadModule proxy_http_module lib/modules/mod_proxy_http.so
-"""
-        }
-
         boolean isLdapLoginEnabled = isLdapLoginEnabled(server)
         if (isLdapLoginEnabled) {
             conf += "<VirtualHost *:${server.port}>\n"
         }
 
-        conf += server.useSsl ? "SSLEngine On" : "# SSL is off"
-        if (server.mode == ServerMode.REPLICA || ctfMode) {
-        conf += """
-LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
-"""
-        }
+        conf += server.useSsl ? "SSLEngine On\n" : "# SSL is off\n"
         if (isLdapLoginEnabled || ctfMode) {
             conf += """
 # Required for SCRIPT_URI/URL in viewvc libs, not just rewrite rules
-LoadModule rewrite_module lib/modules/mod_rewrite.so
 RewriteEngine on
 """
+            if (isLdapLoginEnabled) {
+                conf += "RewriteOptions inherit\n"
+            }
         }
 
-        if (isLdapLoginEnabled) {
-            conf += "RewriteOptions inherit\n"
-        }
-
+        conf += """
+# Apache will issue sub_req for PATH_INFO on ScriptAlias which
+# gives a spurious error message. Setting auth at root level to avoid clogging logs.
+<Location />
+"""
+        conf += ctfMode ? getCtfBasicAuth(server) : getViewVCHttpdConf(server)
+        conf += "</Location>\n"
+                    
+        
         String contextPath = server.getSvnBasePath()
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
@@ -639,11 +731,10 @@ RedirectMatch ^(${contextPath})\$ \$1/
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
+   SVNPathAuthz short_circuit
+   SetOutputFilter DEFLATE
 """
-        if (server.useHttpV2 == false) {
-            conf += "   SVNAdvertiseV2Protocol off\n"
-        }
-        conf += ctfMode ? getCtfSvnHttpdConf(server, contextPath) : 
+        conf += ctfMode ? getSvnMasterDirectiveIfReplica(server) : 
             getSVNHttpdConf(server)
         conf += "</Location>\n\n"
 
@@ -652,9 +743,10 @@ RedirectMatch ^(${contextPath})\$ \$1/
 <Directory "${viewvcTemplateDirPath}/docroot">
   AllowOverride None
   Options None
-  Order allow,deny
-  Allow from all
 </Directory>
+<Location /viewvc-static>
+  Require all granted
+</Location>
 Alias /viewvc-static "${viewvcTemplateDirPath}/docroot"
 """
 
@@ -669,9 +761,11 @@ ScriptAlias /viewvc "${ConfigUtil.binDirPath()}/cgi-bin/viewvc.cgi"
   AddDefaultCharset UTF-8
   SetEnv CSVN_HOME "${ConfigUtil.appHome()}"
 """
-        conf += ctfMode ? getCtfViewVCHttpdConf(server) : 
-            getViewVCHttpdConf(server)
+        if (ctfMode) {
+            conf += getCtfViewVCHttpdConf(server)
+        }
         conf += "</Location>\n"
+        
         if (isLdapLoginEnabled) {
             conf += """
 </VirtualHost>
@@ -722,14 +816,10 @@ ${getAuthBasic(server)}
             conf = """User ${getHttpdUser()}
 Group ${getHttpdGroup()}
 """
-        } else {
-        	// Windows-specific memory optimizations
-        	conf = """ThreadsPerChild 64
-MaxRequestsPerChild 0
-MaxMemFree 512
-"""
         }
-        conf += """PidFile "${ConfigUtil.dataDirPath()}/run/httpd.pid"\n"""
+        conf += """PidFile "${ConfigUtil.dataDirPath()}/run/httpd.pid"
+MaxKeepAliveRequests 10000
+"""
     }    
 
     private def getLdapURL(server) {
@@ -811,31 +901,37 @@ LDAPVerifyServerCert Off
         version
     }
 
-    private def getCtfSvnHttpdConf(server, contextPath) {
-        def appHome = ConfigUtil.appHome()
+    private def getSvnMasterDirectiveIfReplica(server) {
         def conf = ""
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
-            conf += "   SVNMasterURI ${masterSVNURI}"
+            conf += "   SVNMasterURI ${masterSVNURI}\n"
+            def masterVersion = syncReplicaMasterVersion()
+            if (masterVersion) {
+                conf += "   SVNMasterVersion ${masterVersion}\n"
+            } else {
+                conf += "   # SVNMasterVersion unknown; Cannot check version until repository is added\n"
+            }
         }
-        conf += """
-   AuthType Basic
-   AuthName "Authorization Realm"
-   AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
-   AuthBasicAuthoritative Off
-   SVNPathAuthz short_circuit
-   Require valid-user
-   # Allows these operations to be disallowed higher up,
-   # then enabled here for this Location
-   <Limit COPY DELETE GET OPTIONS PROPFIND PROPPATCH PUT MKACTIVITY CHECKOUT MERGE REPORT>
-      Order allow,deny
-      Allow from all
-   </Limit>
-"""
-        conf
+        return conf
     }
 
+    def getCtfBasicAuth(server) {
+        return """  AuthType Basic
+  AuthName "TeamForge Authorization Realm"
+  ${getAuthnzCTFDirective()}
+  AuthBasicAuthoritative Off
+  AuthUserFile /dev/null
+  Require valid-user
+"""
+    }
+
+    def getAuthnzCTFDirective() {
+        return """AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
+"""
+    }
+    
     private def getSSLHttpdConf(server) {
         def conf = ""
         def confDir = confDirPath()
@@ -874,7 +970,6 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
         if (server.forceUsernameCase) {
             conf += "  AuthzForceUsernameCase Lower\n"
         }
-        conf += getAuthBasic(server)
         if (server.allowAnonymousReadAccess) {
             conf += """
 #Authentication needed for *write* requests to all repositories irrespective of
@@ -883,15 +978,11 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
     Require valid-user
   </LimitExcept>
 """
-        } else {
-            conf += """  Require valid-user
-"""
-}
+        }
         conf
     }
     
     private def getAuthBasic(server) {
-        def conf = "  Allow from all\n"
         def authProviders = ""
         if (server.fileLoginEnabled) {
             authProviders = "csvn-file-users"
@@ -899,7 +990,7 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
         if (server.ldapEnabled) {
             authProviders += " ldap-users"
         }
-        conf += """  AuthType Basic
+        def conf = """  AuthType Basic
   AuthName "${csvnAuthenticationProvider.AUTH_REALM}"
   AuthBasicProvider ${authProviders}
 """
@@ -908,7 +999,10 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
     
     private def getViewVCHttpdConf(server) {
         def conf = getAuthBasic(server)
-        if (!server.allowAnonymousReadAccess) {
+        if (server.allowAnonymousReadAccess) {
+            conf += """  Require all granted
+"""
+        } else {
             conf += """  Require valid-user
 """
         }
@@ -918,6 +1012,8 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
     private def getCtfViewVCHttpdConf(server) {
         return """ SetEnv SOURCEFORGE_HOME "${escapePath(new File(ConfigUtil.dataDirPath(), "teamforge").absolutePath)}"
  SetEnv SOURCEFORGE_PROPERTIES_PATH "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
+  # mod_authnz_ctf will not authn viewvc URLs, so rely on viewvc's authz to force authn via redirect
+  Require all granted
 """
     }
 
@@ -927,10 +1023,10 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
         File httpdConf = new File(confDirPath, "httpd.conf")
         boolean isValid = false
         if (httpdConf.exists()) {
-            String include = "Include \"${confDirPath}/csvn_main_httpd.conf\""
+            String include = "Include \"data/conf/csvn_main_httpd.conf\""
             isValid = verifyFileContains(httpdConf, include, true)
             if (isValid) {
-                include = "Include \"${confDirPath}/svn_viewvc_httpd.conf\""
+                include = "Include \"data/conf/svn_viewvc_httpd.conf\""
                 isValid = verifyFileContains(httpdConf, include, true)
             }
         } else {
@@ -1129,6 +1225,19 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
             bkupFile.renameTo(confFile)
         }
     }
+
+    /**
+     * Renames the the current httpd.conf, then rewrites it based on
+     * the Apache 2.4 dist version.
+     */
+    private void backupAndOverwriteHttpdConfFor2Dot2() {
+        File confFile = new File(confDirPath(), "httpd.conf")
+        File bkupFile = new File(confDirPath(), "httpd-2.2.conf")
+        archiveFile(bkupFile)
+        confFile.renameTo(bkupFile)
+        writeHttpdConf(confFile)
+    }
+
 
     /**
      * Saves user specified SSL directives or deletes previous override

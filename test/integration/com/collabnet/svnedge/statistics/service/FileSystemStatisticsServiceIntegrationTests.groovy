@@ -19,6 +19,7 @@ package com.collabnet.svnedge.statistics.service
 
 import grails.test.*
 
+import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.statistics.StatValue
 
 class FileSystemStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
@@ -36,8 +37,12 @@ class FileSystemStatisticsServiceIntegrationTests extends GrailsUnitTestCase {
         def repoUsedSpace = fileSystemStatisticsService.getRepoUsedDiskspace()
         assertNotNull("The space used by the repos should be returned.", 
                       repoUsedSpace)
-        assertTrue("The repoUsedSpace value should be greater than 0.", 
-                   repoUsedSpace > 0)
+        if (new File(Server.getServer().repoParentDir).list().size() > 0) {
+            assertTrue("The repoUsedSpace value should be greater than 0.", 
+                       repoUsedSpace > 0)
+        } else {
+            assertEquals("The repoUsedSpace value should be 0.", 0, repoUsedSpace)
+        }
         def sysUsedSpace = fileSystemStatisticsService.getSystemUsedDiskspace()
         assertNotNull("The space used by the system should be returned.", 
                       sysUsedSpace)

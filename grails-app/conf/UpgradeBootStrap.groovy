@@ -139,9 +139,6 @@ class UpgradeBootStrap {
         }
         log.info("Applying 2.1.0 updates")
 
-        // initialize new useHttpV2 field; 
-        // if we are a replica and have replicated repos, the local HttpV2 usage needs to be 
-        // synced with the master
         Server s = Server.getServer()
         if (s) {
             File dumpDir = new File(ConfigUtil.dumpDirPath())
@@ -149,17 +146,12 @@ class UpgradeBootStrap {
                 dumpDir.mkdir()
             }
 
-            s.useHttpV2 = true
             s.dumpDir = ConfigUtil.dumpDirPath()
             s.save(flush: true)
-
-            if (serverConfService.syncReplicaConfigurationWithMaster()) {
-                lifecycleService.gracefulRestartServer()
-            }
         }
 
         SchemaVersion v = new SchemaVersion(major: 2, minor: 1, revision: 0,
-                description: "2.1.0 added Quartz tables and data; initialized Server.useHttpV2 and Server.dumpDir fields")
+                description: "2.1.0 added Quartz tables and data; initialized Server.dumpDir field")
 
         v.save()
 

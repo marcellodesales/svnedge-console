@@ -139,16 +139,14 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
     }
     
     /**
-     * Checks svn master for httpV2 support (1.7+). The local server is set accordingly.
-     * @param repoName
+     * Restarts the server to sync the master svn version in the httpd config
      */
-    def syncConfigurationWithMaster() {
+    def syncConfigurationWithMasterIfFirstRepo() {
 
-        def serverConfService = getService("serverConfService")
-        def lifecycleService = getService("lifecycleService")
-        
-        if (serverConfService.syncReplicaConfigurationWithMaster()) {
-             lifecycleService.gracefulRestartServer()
+        if (ReplicatedRepository.count() == 1) {
+            log.debug("Restarting server to set SVNMasterVersion directive.")
+            def lifecycleService = getService("lifecycleService")
+            lifecycleService.gracefulRestartServer()
         }
     }
 

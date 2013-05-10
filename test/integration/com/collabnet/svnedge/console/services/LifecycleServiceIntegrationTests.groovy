@@ -19,6 +19,7 @@ package com.collabnet.svnedge.console.services;
 
 import grails.test.GrailsUnitTestCase;
 
+import com.collabnet.svnedge.CantBindPortException
 import com.collabnet.svnedge.TestUtil
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.User 
@@ -88,31 +89,37 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         Thread.sleep(100)
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
+
+        performTestWithNewConf({
         boolean isPort80Allowed = lifecycleService.isDefaultPortAllowed()
         Server server = lifecycleService.getServer()
         def origPort = server.port
         server.port = 80
         server.save()
         try {
-            def status = lifecycleService.startServer()
             if (isPort80Allowed) {
+                def status = lifecycleService.startServer()
                 assertServerIsRunning(status)
                 status = lifecycleService.stopServer()
                 assertServerIsStopped(status)
             } else {
-                assertEquals "startServer exitStatus should be 1", 1, status
-                assertFalse "isStarted should return false", 
-                    lifecycleService.started
-                File httpdPidFile = ConfigUtil.httpdPidFile()
-                assertFalse "httpd.pid was unexpectedly found", 
-                    httpdPidFile.exists()   
+                try {
+                    lifecycleService.startServer()
+                    fail("Expect an exception when trying to start on port 80.")
+                } catch (CantBindPortException e) {
+                    assertFalse "isStarted should return false", 
+                            lifecycleService.started
+                    File httpdPidFile = ConfigUtil.httpdPidFile()
+                    assertFalse "httpd.pid was unexpectedly found", 
+                            httpdPidFile.exists()
+                }   
             }
+        } finally {
             server.port = origPort
             server.save()
-
-        } catch (Exception e) {
-            System.err.println(e)
+            println "Server port was restored to " + origPort
         }
+        })
     }
 
     void testSetSvnAuth() {
@@ -122,13 +129,10 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     private void runSetSvnAuth(testusername, password) {
-        def confDir = TestUtil.createTestDir("conf")
-        def origConfDirPath = ConfigUtil.confDirPath()
-        try {
-            ConfigUtil.confDirPath = confDir.absolutePath
- 
+        performTestWithNewConf({
             User u = new User(username: testusername, enabled: true)
             lifecycleService.setSvnAuth(u, password)
+            def confDir = ConfigUtil.confDirPath()
             File authFile = new File(confDir, "svn_auth_file")
             assertTrue "auth file does not exist", authFile.exists()
             assertTrue "testuser not found in auth file", 
@@ -137,20 +141,15 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
             lifecycleService.removeSvnAuth(u)
             assertTrue "testuser still in auth file when removed",
                 authFile.getText().indexOf(testusername) < 0
-        } finally {
-            ConfigUtil.confDirPath = origConfDirPath
-        }
-        confDir.deleteDir()
+        })
     }
 
     void testSSLInstance() {
         Thread.sleep(100)
         assertFalse("Should start off with server stopped", 
                     lifecycleService.isStarted())
-        def confDir = TestUtil.createTestDir("conf")
-        def origConfDirPath = ConfigUtil.confDirPath()
-        ConfigUtil.confDirPath = confDir.absolutePath
-        copyConfFiles(origConfDirPath, confDir)
+
+        performTestWithNewConf({
         Server server = lifecycleService.getServer()
         server.useSsl = true
         server.save()
@@ -161,6 +160,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
         assertEquals "Tried to start already started server. Should return -1",
             -1, lifecycleService.startServer()
+        def confDir = ConfigUtil.confDirPath()
         File sslkeyfile = new File(confDir, "server.key")
         assertTrue "server.key was not found", sslkeyfile.exists()
         assertTrue "server.crt was not found", sslkeyfile.exists()
@@ -171,18 +171,15 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse "httpd.pid was unexpectedly found", httpdPidFile.exists()
         server.useSsl = false
         server.save()
-        ConfigUtil.confDirPath = origConfDirPath
-        confDir.deleteDir()
+        })
     }
 
     void testLDAPAuth() {
         Thread.sleep(100)
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
-        def confDir = TestUtil.createTestDir("conf")
-        def origConfDirPath = ConfigUtil.confDirPath()
-        ConfigUtil.confDirPath = confDir.absolutePath
-
+        
+        performTestWithNewConf({
         Server server = lifecycleService.getServer()
 
         server.ldapEnabled = true
@@ -196,14 +193,13 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
 
         server.save()
 
-        copyConfFiles(origConfDirPath, confDir)
-
         def status = lifecycleService.startServer()
         assertEquals "startServer exitStatus should be 0", 0, status
         assertTrue "isStarted should return true", lifecycleService.started
         File httpdPidFile = ConfigUtil.httpdPidFile()
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
 
+        def confDir = ConfigUtil.confDirPath()
         File svnHttpdFile = new File(confDir, "csvn_main_httpd.conf")
         assertTrue "csvn_main_httpd file does not exist", svnHttpdFile.exists()
         def svnHttpdFileContents = svnHttpdFile.getText()
@@ -247,7 +243,6 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         }
 
         assertFalse "httpd.pid was unexpectedly found", httpdPidFile.exists()
-        ConfigUtil.confDirPath = null
 
         server.ldapEnabled = false
         server.ldapServerHost = ""
@@ -258,7 +253,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         server.ldapSearchScope = ""
 
         server.save()
-        confDir.deleteDir()
+        })
     }
     
     void testAuthHelper() {
@@ -266,6 +261,7 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertFalse("Should start off with server stopped",
                     lifecycleService.isStarted())
         
+        performTestWithNewConf({
         Server server = lifecycleService.getServer()
         server.ldapEnabled = true
         server.ldapEnabledConsole = true
@@ -277,6 +273,31 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         
         assertTrue("Apache should have verifiable auth helper endpoint",
                     csvnAuthenticationProvider.testAuthListener(authHelperUrl))
+        })
+    }
+
+    private void performTestWithNewConf(Closure c) {
+        boolean isPassed = false
+        String confDirPath = ConfigUtil.confDirPath()
+        File confDir = new File(confDirPath)
+        File tmpDir = TestUtil.createTestDir("conf")
+        println "Temp directory for config is: " + tmpDir.absolutePath
+        File stashedConfDir = new File(tmpDir, 'conf.orig')
+        assertTrue "Move of conf dir during test prep should succeed",
+                confDir.renameTo(stashedConfDir)
+        confDir.mkdir()
+        copyConfFiles(stashedConfDir, confDir)
+        try {
+            c()
+            isPassed = true
+        } finally {
+            confDir.renameTo(new File(tmpDir, 'conf.test'))
+            stashedConfDir.renameTo(confDir)
+        }
+        
+        if (isPassed) {
+            tmpDir.deleteDir()
+        }
     }
 
     private def copyConfFiles(origConfDirPath, confDir) {

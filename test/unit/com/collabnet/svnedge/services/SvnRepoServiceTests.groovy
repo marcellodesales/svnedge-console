@@ -248,7 +248,7 @@ class SvnRepoServiceTests extends GrailsUnitTestCase {
         assertEquals ("Repository features expected", "svndiff0", features)
 
         // testing a specific db/format schema
-        repoDBFormatFile.write("5")
+        repoDBFormatFile.write("6")
         format = svc.getReposFsFormat(testRepo)
         features = svc.getRepoFeatures(testRepo, format)
         assertEquals ("Repository features expected",

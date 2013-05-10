@@ -39,6 +39,7 @@ import org.springframework.mock.web.MockMultipartFile
 
 class RepoControllerTests extends AbstractSvnEdgeControllerTests {
 
+    def authenticateService
     def mailConfigurationService
     def svnRepoService
     def serverConfService
@@ -93,8 +94,12 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         controller.params.name = repoNameNew
         def model = controller.save()
         def redirArg = controller.redirectArgs["action"]
-        assertEquals "Expected redirect to 'show' view on successful repo " +
-            "create", 'dumpFileList', redirArg
+        
+        def roles = authenticateService.principal()?.authorities.authority
+        def expectedAction = roles?.contains('ROLE_ADMIN') || 
+                roles?.contains('ROLE_ADMIN_HOOKS') ? 'hooksList' : 'dumpFileList'
+        assertEquals "Expected redirect to '" + expectedAction + "' view on successful repo " +
+            "create", expectedAction, redirArg
 
         // this should fail (validation error)
         controller.save()

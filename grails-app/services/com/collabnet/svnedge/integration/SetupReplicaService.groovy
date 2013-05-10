@@ -138,9 +138,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         // with success, make modification to this instance
         server = Server.getServer()
         server.mode = ServerMode.REPLICA
-        // assume that the master is pre-1.7 and httpv2 should be disabled
-        // todo -- assess svn master version and set this appropriately
-        server.useHttpV2 = false
 
         ReplicaConfiguration rc = ReplicaConfiguration.getCurrentConfig()
         if (!rc) {
@@ -332,8 +329,6 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         ReplicaConfiguration replicaConfig = ReplicaConfiguration.getCurrentConfig()
 
         server.mode = ServerMode.STANDALONE
-        // in standalone mode, we always want httpv2
-        server.useHttpV2 = true
         server.save(flush:true)
 
         if (ctfServer) {

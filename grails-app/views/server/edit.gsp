@@ -37,8 +37,8 @@
     <p><g:message code="server.page.edit.missingDirectives" />
     <blockquote>
     <code>
-    Include "${csvnConf}/csvn_main_httpd.conf"<br/>
-    Include "${csvnConf}/svn_viewvc_httpd.conf"
+    Include "data/conf/csvn_main_httpd.conf"<br/>
+    Include "data/conf/svn_viewvc_httpd.conf"
     </code>
     </blockquote>
     </p>
@@ -199,10 +199,6 @@ $('#bindInstructions').hide();
         <g:propTextField bean="${server}" field="adminEmail" required="true" prefix="server"/>
         <g:propTextField bean="${server}" field="adminAltContact" prefix="server"/>
 
-        <g:if test="${server.mode == ServerMode.REPLICA}">
-          <g:propCheckBox bean="${server}" field="useHttpV2" prefix="server"/>
-        </g:if>
-      
         <g:propCheckBox bean="${server}" field="useSslConsole" prefix="server"/>
         <g:if test="${server.defaultStart}">
           <g:propCheckBox bean="${server}" field="defaultStart" prefix="server"/>

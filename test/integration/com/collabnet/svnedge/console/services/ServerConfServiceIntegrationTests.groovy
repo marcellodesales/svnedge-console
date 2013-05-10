@@ -157,10 +157,10 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     /**
-     * Test a repo url for httpv2 support. Confirms that the ctf test instance is not showing support,
-     * while the local svn does.
+     * Test a repo url for svn server version. Confirms that the ctf test instance is 1.7,
+     * while the local svn is 1.8.
      */
-    void testSvnServerSupportsHttpV2() {
+    void testSvnServerVersion() {
 
         // evaluate CTF instance for httpv2 support (should be false)
         def config = grailsApplication.config
@@ -170,13 +170,13 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
             .createTestRepository(config, ctfRemoteClientService)
         def repoUrl = svnUrl + testRepo.repoName
         
-        boolean hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, config.svnedge.ctfMaster.username,
-           config.svnedge.ctfMaster.password)
-        
+        def masterConfig = config.svnedge.ctfMaster
+        String v = serverConfService.svnServerVersion(repoUrl, 
+                masterConfig.username, masterConfig.password)
         // CTF 6.1.1 includes 1.7
-        assertTrue("the CTF v6.1.1+ test instance should show svn 1.7+ httpv2 support", hasHttpV2Support)
+        assertEquals("the CTF v6.1.1 test instance should show svn 1.7", "1.7.0", v)
         
-        // evaluate the local SvnEdge instance for httpv2 support (should be true)
+        // evaluate the local SvnEdge instance version
         def testRepoName = "httpv2-test-" + Math.round(Math.random() * 1000)
         Repository repo = new Repository(name: testRepoName)
         repo.save(flush:true)
@@ -190,9 +190,8 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         
         Server s = Server.getServer()
         repoUrl = s.svnURL() + testRepoName
-        hasHttpV2Support = serverConfService.svnServerSupportsHttpV2 (repoUrl, "admin", "admin")
-        
-        assertTrue("the local subversion server should show svn 1.7+ httpv2 support", hasHttpV2Support)
+        v = serverConfService.svnServerVersion(repoUrl, "admin", "admin")
+        assertEquals("the local subversion server should show svn 1.8.0", '1.8.0', v)
         
         svnRepoService.removeRepository(repo)
         svnRepoService.deletePhysicalRepository(repo)
