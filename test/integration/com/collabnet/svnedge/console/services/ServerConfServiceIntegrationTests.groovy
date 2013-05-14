@@ -18,10 +18,14 @@
 package com.collabnet.svnedge.console.services
 
 import grails.test.*
+import grails.util.Environment
 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
+import com.collabnet.svnedge.domain.integration.ApprovalState;
 import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
+import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.util.ConfigUtil
 import com.collabnet.svnedge.replication.command.CommandTestsHelper
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
@@ -35,6 +39,7 @@ import com.collabnet.svnedge.TestSSLServer
  */
 class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 
+    def securityService
     def serverConfService
     def svnRepoService
     def ctfRemoteClientService
@@ -45,17 +50,6 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
-        CtfServer ctf = new CtfServer(baseUrl: "http://ctf",
-                mySystemId: "exsy1000",
-                internalApiKey: "456",
-                ctfUsername: "testuser",
-                ctfPassword: "testpwd")
-        if (!ctf.validate()) {
-            ctf.errors.each { log.error(it.toString())}
-            throw new RuntimeException("unable to save CtfServer for testing managed mode")
-        }
-        ctf.save()
-
     }
 
     protected void tearDown() {
@@ -160,22 +154,80 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
      * Test a repo url for svn server version. Confirms that the ctf test instance is 1.7,
      * while the local svn is 1.8.
      */
-    void testSvnServerVersion() {
+    void testGetSvnMasterDirectiveIfReplica() {
 
-        // evaluate CTF instance for httpv2 support (should be false)
+        Server server = Server.getServer()
+        server.mode = ServerMode.REPLICA
+        server.save()
+        
+        // evaluate CTF instance; currently svn 1.7
         def config = grailsApplication.config
         def ctfUrl = CommandTestsHelper.makeCtfBaseUrl(config)
         def svnUrl = ctfUrl + "/svn/repos/"
         def testRepo = CommandTestsHelper
             .createTestRepository(config, ctfRemoteClientService)
         def repoUrl = svnUrl + testRepo.repoName
+        Repository repo = new Repository(name: testRepo.repoName)
+        repo.validate()
+        assertFalse "Unable to save Repository: " + repo.errors, repo.hasErrors()
+        repo.save()
+        ReplicatedRepository rr = new ReplicatedRepository(repo: repo, enabled: true)
+        rr.validate()
+        assertFalse "Unable to save ReplicatedRepository: " + rr.errors, rr.hasErrors()
+        rr.save()
         
         def masterConfig = config.svnedge.ctfMaster
-        String v = serverConfService.svnServerVersion(repoUrl, 
-                masterConfig.username, masterConfig.password)
-        // CTF 6.1.1 includes 1.7
-        assertEquals("the CTF v6.1.1 test instance should show svn 1.7", "1.7.0", v)
+        CtfServer ctfServer = CtfServer.getServer()
+        ctfServer.baseUrl = ctfUrl
+        ctfServer.ctfUsername = masterConfig.username
+        ctfServer.ctfPassword = securityService.encrypt(masterConfig.password)
+        ctfServer.validate()
+        assertFalse "Unable to save ctfServer: " + ctfServer.errors + '\n\n' + CtfServer.list(), ctfServer.hasErrors()
+        ctfServer.save()
         
+        ReplicaConfiguration rc = new ReplicaConfiguration(svnMasterUrl: svnUrl,
+                name: 'foo', description: 'bar', systemId: 'exsy9999', 
+                approvalState: ApprovalState.APPROVED)
+        rc.validate()
+        assertFalse "Unable to save ReplicaConfiguration: " + rc.errors, rc.hasErrors()
+        rc.save()
+        
+        String v = serverConfService.getSvnMasterDirectiveIfReplica(server)
+        
+        // CTF 6.1.1 includes 1.7
+        assertNotNull("the CTF v6.1.1 test instance should show svn 1.7 " + v, 
+                v.find(~/SVNMasterVersion 1.7.0/))
+        
+        // test override
+        File overridesConf = new File(ConfigUtil.confDirPath(), 'overrides.properties')
+        overridesConf.text = "svnedge.replica.masterSvnVersion=1.7.9"
+        try {
+            loadConfig()
+            v = serverConfService.getSvnMasterDirectiveIfReplica(server)
+            assertNotNull("the overridden configuration should show should show svn 1.7.9",
+                    v.find(~/SVNMasterVersion 1.7.9/))
+        } finally {
+            overridesConf.delete()
+        }
+    }
+
+    private void loadConfig() {
+        GroovyClassLoader classLoader = new GroovyClassLoader(this.class.classLoader)
+        ConfigSlurper slurper = new ConfigSlurper(Environment.current.name)
+        ConfigurationHolder.config = slurper.parse(classLoader.loadClass("Config"))
+        def extraConfig = ConfigurationHolder.config.grails.config.locations
+        for (c in extraConfig) {
+            Properties p = new Properties()
+            new File(new URI(c).path).withReader { p.load(it) }
+            ConfigurationHolder.config.merge(slurper.parse(p))
+        }
+        ConfigUtil.configuration = ConfigurationHolder.config
+    }
+
+    /**        
+     * the local svn is 1.8.
+     */
+    void testSvnServerVersion() {
         // evaluate the local SvnEdge instance version
         def testRepoName = "httpv2-test-" + Math.round(Math.random() * 1000)
         Repository repo = new Repository(name: testRepoName)
@@ -189,8 +241,8 @@ class ServerConfServiceIntegrationTests extends GrailsUnitTestCase {
         
         
         Server s = Server.getServer()
-        repoUrl = s.svnURL() + testRepoName
-        v = serverConfService.svnServerVersion(repoUrl, "admin", "admin")
+        def repoUrl = s.svnURL() + testRepoName
+        def v = serverConfService.svnServerVersion(repoUrl, "admin", "admin")
         assertEquals("the local subversion server should show svn 1.8.0", '1.8.0', v)
         
         svnRepoService.removeRepository(repo)

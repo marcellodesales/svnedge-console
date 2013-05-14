@@ -60,14 +60,15 @@ grails.logging.jul.usebridge = true
 // See artf7027 and chapter 7 of the grails user manual
 grails.validateable.classes = [com.collabnet.svnedge.controller.integration.CtfConnectionCommand]
 
+def baseDir = new File(new File(".").getAbsoluteFile(), "svn-server").absolutePath
 svnedge {
     defaultHighPort = 18080
     defaultApacheAuthHelperPort = 49152
     osName = System.getProperty("os.name").substring(0,3)
+    appHome = baseDir
     if (osName == "Win") {
         // This will point to the parent directory of the application once production ready.
         // In development mode, this should point to the location of the binaries, not the webapp
-        appHome = new File(new File(".").getAbsoluteFile(), "svn-server").canonicalPath
         svn {
             // The following paths have defaults configured with respect to 
             // appHome, but the locations may be overridden using these 
@@ -84,8 +85,6 @@ svnedge {
         }
         opensslPath = new File(appHome, "bin/openssl.exe").absolutePath
     } else {
-        appHome = new File(new File(".").getAbsoluteFile(), "svn-server").canonicalPath
-
         svn {
             dataDirPath = appHome + "/data"
         }
@@ -219,15 +218,15 @@ environments {
     production {
         grails.serverURL = "http://www.changeme.com"
         grails.plugin.excludes = "greenmail"
-
+        baseDir = new File(new File(".").getAbsoluteFile().
+                       getParentFile().parentFile, "").absolutePath
         svnedge {
             defaultHighPort = 18080
             osName = System.getProperty("os.name").substring(0,3)
+            appHome = baseDir
             if (osName == "Win") {
                 // This will point to the parent directory of the application once production ready.
                 // In development mode, this should point to the location of the binaries, not the webapp
-                appHome = new File(new File(".").getAbsoluteFile().
-                       getParentFile().parentFile, "").canonicalPath
                 svn {
                     // The following paths have defaults configured with respect to 
                     // appHome, but the locations may be overridden using these 
@@ -244,8 +243,6 @@ environments {
                 }
                 opensslPath = new File(appHome, "bin/openssl.exe").absolutePath
             } else {
-                appHome = new File(new File(".").getAbsoluteFile()
-                    .getParentFile().parentFile, "").absolutePath
                 svn {
                     dataDirPath = appHome + "/data"
                 }
@@ -376,4 +373,11 @@ beans {
     applicationEventMulticaster {
         taskExecutor = java.util.concurrent.Executors.newCachedThreadPool()
     }
+}
+
+def overridesPath = "${baseDir}/data/conf/overrides.properties"
+if (new File(overridesPath).exists()) {
+    grails.config.locations = [
+        "file:${overridesPath}"
+    ]
 }

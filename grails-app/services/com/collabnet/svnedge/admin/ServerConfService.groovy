@@ -901,17 +901,24 @@ LDAPVerifyServerCert Off
         version
     }
 
-    private def getSvnMasterDirectiveIfReplica(server) {
+    def getSvnMasterDirectiveIfReplica(server) {
         def conf = ""
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
             def masterSVNURI = replicaConfig.svnMasterUrl
             conf += "   SVNMasterURI ${masterSVNURI}\n"
-            def masterVersion = syncReplicaMasterVersion()
+            def masterVersion = ConfigUtil.replicaSvnMasterVersion()
             if (masterVersion) {
-                conf += "   SVNMasterVersion ${masterVersion}\n"
+                conf += """   # SVNMasterVersion value is defined in <conf>/overrides.properties
+   SVNMasterVersion ${masterVersion}
+"""
             } else {
-                conf += "   # SVNMasterVersion unknown; Cannot check version until repository is added\n"
+                masterVersion = syncReplicaMasterVersion()
+                if (masterVersion) {
+                    conf += "   SVNMasterVersion ${masterVersion}\n"
+                } else {
+                    conf += "   # SVNMasterVersion unknown; Cannot check version until repository is added\n"
+                }
             }
         }
         return conf

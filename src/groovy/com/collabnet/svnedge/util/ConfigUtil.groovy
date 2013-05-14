@@ -174,4 +174,8 @@ public final class ConfigUtil {
         File runFile = new File(dataDirPath(), "run")
         return new File(runFile, "httpd.pid")
     }
+
+    def static replicaSvnMasterVersion() {
+        return getConfig().svnedge.replica.masterSvnVersion
+    }
 }
