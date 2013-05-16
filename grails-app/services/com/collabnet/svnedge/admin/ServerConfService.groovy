@@ -754,6 +754,7 @@ RedirectMatch ^(${contextPath})\$ \$1/
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
+   AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
    SVNPathAuthz short_circuit
    SetOutputFilter DEFLATE
 """
@@ -950,15 +951,9 @@ LDAPVerifyServerCert Off
     def getCtfBasicAuth(server) {
         return """  AuthType Basic
   AuthName "TeamForge Authorization Realm"
-  ${getAuthnzCTFDirective()}
   AuthBasicAuthoritative Off
   AuthUserFile /dev/null
   Require valid-user
-"""
-    }
-
-    def getAuthnzCTFDirective() {
-        return """AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
 """
     }
     
