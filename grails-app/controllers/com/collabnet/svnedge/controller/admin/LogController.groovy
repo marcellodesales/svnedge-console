@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
 import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
 import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.domain.LogConfiguration;
 import com.collabnet.svnedge.domain.Server;
 import com.collabnet.svnedge.domain.ServerMode
 
@@ -67,8 +68,10 @@ class LogController {
         if (!cmd.hasErrors()) {
 
             logManagementService.updateLogConfiguration(cmd.consoleLevel,
-                    cmd.apacheLevel, 
-                    cmd.pruneLogsOlderThan)
+                    cmd.apacheLevel, cmd.pruneLogsOlderThan, 
+                    cmd.enableAccessLog, cmd.enableSubversionLog, 
+                    cmd.minimizeLogging, cmd.maxLogSize,
+                    cmd.enableLogCompression)
             flash.message = message(code: 
                 'logs.action.saveConfiguration.success')
             redirect(action: 'configure')
@@ -85,10 +88,16 @@ class LogController {
 
     def configure = {
 
+        LogConfiguration logConfig = LogConfiguration.getConfig()
         def cmd = new LogConfigurationCommand(
             consoleLevel : logManagementService.consoleLevel,
             apacheLevel : logManagementService.apacheLevel,
-            pruneLogsOlderThan : logManagementService.logDaysToKeep)
+            pruneLogsOlderThan : logManagementService.logDaysToKeep,
+            enableAccessLog: logConfig.enableAccessLog,
+            enableSubversionLog: logConfig.enableSubversionLog,
+            minimizeLogging: logConfig.minimizeLogging,
+            enableLogCompression: logConfig.enableLogCompression,
+            maxLogSize: logConfig.maxLogSize)
 
         render(view: "configure", model: [ logConfigurationCommand : cmd,
                 consoleLevels : ConsoleLogLevel.values(),
@@ -220,6 +229,11 @@ class LogConfigurationCommand {
     ConsoleLogLevel consoleLevel
     ApacheLogLevel apacheLevel
     Integer pruneLogsOlderThan
+    boolean enableAccessLog
+    boolean enableSubversionLog
+    boolean minimizeLogging
+    boolean enableLogCompression
+    Integer maxLogSize
     
     static constraints = {
         consoleLevel(nullable : false)

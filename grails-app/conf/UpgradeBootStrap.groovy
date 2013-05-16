@@ -81,14 +81,11 @@ class UpgradeBootStrap {
         if (server) {
             log.info("Initializing new fields on Server instance")
             server.mode = ServerMode.STANDALONE
-            server.consoleLogLevel = ConsoleLogLevel.WARN
-            server.apacheLogLevel = ApacheLogLevel.WARN
             server.save()
         }
 
         SchemaVersion v = new SchemaVersion(major: 1, minor: 1, revision: 0,
-                description: "1.1.0 added Server fields: mode, consoleLogLevel, " +
-                        "apacheLogLevel")
+                description: "1.1.0 added Server field: mode")
         v.save()
     }
 

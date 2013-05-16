@@ -19,7 +19,7 @@ package com.collabnet.svnedge.console.services
 
 import grails.test.*
 import com.collabnet.svnedge.admin.LogManagementService 
-import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
@@ -31,7 +31,7 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
-
+        logManagementService.setConsoleLevel(LogManagementService.ConsoleLogLevel.DEBUG)
     }
 
     protected void tearDown() {
@@ -55,7 +55,7 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
 
 
         logManagementService.updateLogConfiguration(LogManagementService.ConsoleLogLevel.WARN,
-                LogManagementService.ApacheLogLevel.ERROR, 5)
+                LogManagementService.ApacheLogLevel.ERROR, 5, true, true, false, 10, false)
 
         // verify console update
         def c = logManagementService.getConsoleLevel()
@@ -76,8 +76,9 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
             fail ("Did not find Apache LogLevel config")
         }
 
-        def s = Server.getServer()
+        def s = LogConfiguration.getConfig()
         assertEquals ("Expected persistence of pruneLogsOlderThan field", 5, s.pruneLogsOlderThan)
+        assertEquals ("Expected persistence of maxLogSize field", 10, s.maxLogSize)
         assertEquals ("Expected persistence of consoleLevel", LogManagementService.ConsoleLogLevel.WARN,
                 s.consoleLogLevel)
 
@@ -85,6 +86,52 @@ class LogManagementServiceIntegrationTests extends GrailsUnitTestCase {
                 s.apacheLogLevel)
 
 
+    }
+
+    void testSuppressAccessLog() {
+        logManagementService.updateLogConfiguration(LogManagementService.ConsoleLogLevel.WARN,
+                        LogManagementService.ApacheLogLevel.ERROR, 5, false, true, false, 0, false)
+
+        // verify the apache conf update
+        def confFile = new File(ConfigUtil.confDirPath(), "csvn_logging.conf")
+
+        boolean foundAccessLog = false
+        boolean foundSubversionLog = false
+        confFile.eachLine { it -> 
+            if (it.startsWith("CustomLog")) {
+                if (it.contains('access_')) {
+                    foundAccessLog = true
+                }
+                if (it.contains('subversion_')) {
+                    foundSubversionLog = true
+                }
+            }
+        }
+        assertFalse("Apache conf should NOT contain access log config", foundAccessLog)
+        assertTrue("Apache conf should contain subversion log config", foundSubversionLog)
+    }
+        
+    void testSuppressSubversionLog() {
+        logManagementService.updateLogConfiguration(LogManagementService.ConsoleLogLevel.WARN,
+                        LogManagementService.ApacheLogLevel.ERROR, 5, true, false, false, 0, false)
+
+        // verify the apache conf update
+        def confFile = new File(ConfigUtil.confDirPath(), "csvn_logging.conf")
+
+        boolean foundAccessLog = false
+        boolean foundSubversionLog = false
+        confFile.eachLine { it -> 
+            if (it.startsWith("CustomLog")) {
+                if (it.contains('access_')) {
+                    foundAccessLog = true
+                }
+                if (it.contains('subversion_')) {
+                    foundSubversionLog = true
+                }
+            }
+        }
+        assertTrue("Apache conf should contain access log config", foundAccessLog)
+        assertFalse("Apache conf should NOT contain subversion log config", foundSubversionLog)
     }
 
     void testBootstrap() {

@@ -26,7 +26,8 @@ import groovy.io.FileType
 
 import java.net.URL
 import java.util.Calendar
-import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
+import com.collabnet.svnedge.admin.LogManagementService
+import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
 import com.collabnet.svnedge.domain.integration.CtfServer 
@@ -566,6 +567,7 @@ LoadModule authn_file_module lib/modules/mod_authn_file.so
 LoadModule auth_basic_module lib/modules/mod_auth_basic.so
 LoadModule alias_module lib/modules/mod_alias.so
 LoadModule env_module lib/modules/mod_env.so
+LoadModule setenvif_module lib/modules/mod_setenvif.so
 LoadModule log_config_module lib/modules/mod_log_config.so
 LoadModule cgi_module lib/modules/mod_cgi.so
 LoadModule dir_module lib/modules/mod_dir.so
@@ -653,15 +655,36 @@ TypesConfig "data/conf/mime.types"
         def pipeRotateLogs = "|${escapeQuote}${rotatelogs}${escapeQuote} -l"
         def rotatePeriod = '86400'
         def logsDirPath = ConfigUtil.logsDirPath().replace('\\', '/')
-        def logNameSuffix = "%Y_%m_%d"
-        def logLevel = getServer().apacheLogLevel ?: ApacheLogLevel.WARN 
+        def logNameSuffix = "%Y_%m_%d_%H_%M_%S"
+        LogConfiguration logConfig = LogConfiguration.getConfig()
+        def logLevel = logConfig?.apacheLogLevel ?: LogManagementService.ApacheLogLevel.WARN 
+        int maxLogSize = logConfig.maxLogSize
+        if (maxLogSize > 0) {
+            rotatePeriod += ' ' + maxLogSize + LogManagementService.LOG_SIZE_SUFFIX
+        }
         def conf = """${DONT_EDIT}
 LogLevel ${logLevel.toString().toLowerCase()}
-LogFormat "%h %l %u %t \\\"%r\\\" %>s %b" common
 ErrorLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/error_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}"
-CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/access_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" common
-CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/subversion_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" "%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T" env=SVN-ACTION
 """
+        if (logConfig.enableAccessLog) {
+            if (logConfig.minimizeLogging) {
+                conf += """# Don't log GET/PROPFIND /!svn/ requests
+SetEnvIf Request_URI "^" in_repos=0
+SetEnvIf Request_URI "/!svn/" in_repos=1
+SetEnvIf Request_Method "GET" do_not_log
+SetEnvIf Request_Method "PROPFIND" do_not_log
+SetEnvIf in_repos 0 !do_not_log
+"""
+            }
+            conf += """LogFormat "%h %l %u %t \\\"%r\\\" %>s %b %T" common
+CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/access_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" common env=!do_not_log
+"""
+        }
+        if (logConfig.enableSubversionLog) {
+            conf += "CustomLog \"${pipeRotateLogs} " + 
+                    "${escapeQuote}${logsDirPath}/subversion_${logNameSuffix}.log${escapeQuote} " +
+                    "${rotatePeriod}\" \"%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T\" env=SVN-ACTION\n"
+        }
         new File(confDirPath(), "csvn_logging.conf").write(conf)
     }
 

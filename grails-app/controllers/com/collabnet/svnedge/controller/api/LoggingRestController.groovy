@@ -20,7 +20,7 @@
 
 package com.collabnet.svnedge.controller.api
 
-import com.collabnet.svnedge.domain.Server
+import com.collabnet.svnedge.domain.LogConfiguration
 import grails.converters.JSON
 import grails.converters.XML
 import org.codehaus.groovy.grails.plugins.springsecurity.Secured
@@ -59,11 +59,15 @@ class LoggingRestController extends AbstractRestController {
      */
     def restRetrieve = {
         def result = [:]
-        Server server = Server.getServer()
+        LogConfiguration lc = LogConfiguration.getConfig()
 
-        result.put "consoleLogLevel", server.consoleLogLevel.toString()
-        result.put "serverLogLevel", server.apacheLogLevel.toString()
-        result.put "daysToKeep", server.pruneLogsOlderThan 
+        result.put "consoleLogLevel", lc.consoleLogLevel.toString()
+        result.put "serverLogLevel", lc.apacheLogLevel.toString()
+        result.put "daysToKeep", lc.pruneLogsOlderThan 
+        result.put "enableAccessLog", lc.enableAccessLog
+        result.put "enableSubversionLog", lc.enableSubversionLog
+        result.put "enableLogCompression", lc.enableLogCompression
+        result.put "maxLogSize", lc.maxLogSize
         
         withFormat {
             json { render result as JSON }
@@ -94,14 +98,36 @@ class LoggingRestController extends AbstractRestController {
         def consoleLogLevel = getRestParam("consoleLogLevel")
         def apacheLogLevel = getRestParam("serverLogLevel")
         def daysToKeep = getRestParam("daysToKeep")
+        def enableAccessLog = getRestParam("enableAccessLog")
+        def enableSubversionLog = getRestParam("enableSubversionLog")
+        def enableLogCompression = getRestParam("enableLogCompression")
+        def maxLogSize = getRestParam("maxLogSize")
         
         def result = [:]
         try {
-            Server s = Server.getServer()
-            s.consoleLogLevel = ConsoleLogLevel.valueOf(consoleLogLevel)
-            s.apacheLogLevel = ApacheLogLevel.valueOf(apacheLogLevel)
-            s.pruneLogsOlderThan = Integer.valueOf(daysToKeep)
-            s.save()
+            LogConfiguration lc = LogConfiguration.getConfig()
+            if (consoleLogLevel) {
+                lc.consoleLogLevel = ConsoleLogLevel.valueOf(consoleLogLevel)
+            }
+            if (apacheLogLevel) {
+                lc.apacheLogLevel = ApacheLogLevel.valueOf(apacheLogLevel)
+            }
+            if (daysToKeep) {
+                lc.pruneLogsOlderThan = Integer.parseInt(daysToKeep)
+            }
+            if (enableAccessLog) {
+                lc.enableAccessLog = Boolean.valueOf(enableAccessLog)
+            }
+            if (enableSubversionLog) {
+                lc.enableSubversionLog = Boolean.valueOf(enableSubversionLog)
+            }
+            if (enableLogCompresion) {
+                lc.enableLogCompression = Boolean.valueOf(enableLogCompression)
+            }
+            if (maxLogSize) {
+                lc.pruneLogsOlderThan = Integer.parseInt(maxLogSize)
+            }
+            lc.save()
             response.status = 201
             result['message'] = message(code: "api.message.201")
         }

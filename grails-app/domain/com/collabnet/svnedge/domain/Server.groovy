@@ -17,8 +17,6 @@
  */
 package com.collabnet.svnedge.domain
 
-import com.collabnet.svnedge.admin.LogManagementService.ConsoleLogLevel
-import com.collabnet.svnedge.admin.LogManagementService.ApacheLogLevel
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.util.ConfigUtil
 
@@ -64,10 +62,6 @@ class Server {
     String svnBasePath
     ServerMode mode = ServerMode.STANDALONE
     String dumpDir = ConfigUtil.dumpDirPath()
-
-    Integer pruneLogsOlderThan
-    ApacheLogLevel apacheLogLevel = ApacheLogLevel.WARN
-    ConsoleLogLevel consoleLogLevel = ConsoleLogLevel.WARN
 
     static String getViewvcBasePath() {
         return "/viewvc"
@@ -162,7 +156,6 @@ class Server {
         ldapFilter(nullable: true)
         ldapSecurityLevel(nullable: true)
         mode(nullable:false)
-        pruneLogsOlderThan(nullable: true, min:0)
         ldapEnabled(validator: { val, obj ->
             // Ensure that some authentication is chosen
             if (!val && !obj.fileLoginEnabled ) {

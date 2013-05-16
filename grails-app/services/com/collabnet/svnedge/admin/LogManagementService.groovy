@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import org.apache.log4j.Level
 import org.apache.log4j.Logger
 import com.collabnet.svnedge.admin.LogRotateJob 
-import com.collabnet.svnedge.domain.Server 
+import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.util.ConfigUtil;
 
 /**
@@ -53,10 +53,10 @@ class LogManagementService {
 
     public static enum ConsoleLogLevel { DEBUG, INFO, WARN, ERROR}
     public static enum ApacheLogLevel { DEBUG, INFO, WARN, ERROR }
-
+    public static String LOG_SIZE_SUFFIX = 'M'
+    
     public def bootstrap = {
-        def server = Server.getServer()
-        ConsoleLogLevel consoleLogLevel = server?.consoleLogLevel
+        ConsoleLogLevel consoleLogLevel = LogConfiguration.getConfig()?.consoleLogLevel
         if (consoleLogLevel) {
             setConsoleLevel(consoleLogLevel)
         }
@@ -76,23 +76,40 @@ class LogManagementService {
      * @param daysToKeep days of log to keep before clearing (0 to keep all)
      */
     void updateLogConfiguration(ConsoleLogLevel consoleLevel,
-                                ApacheLogLevel apacheLevel, Integer daysToKeep) {
+            ApacheLogLevel apacheLevel, Integer daysToKeep, 
+            boolean enableAccessLog, boolean enableSubversionLog,
+            boolean minimizeLogging, Integer maxLogSize, 
+            boolean enableLogCompression) {
 
         log.info("Setting apache log level: " + apacheLevel)
         log.info("Setting console log level: " + consoleLevel)
         log.info("Setting log days to keep: " + daysToKeep)
-
+        log.info("Access log enabled: " + enableAccessLog)
+        log.info("Subversion log enabled: " + enableSubversionLog)
+        log.info("Minimize logging: " + minimizeLogging)
+        log.info("Log compression enabled: " + enableLogCompression)
+        log.info("Max log size (MB): " + maxLogSize)
+        
         // adjust console logging to requested level
         setConsoleLevel(consoleLevel)
 
-        // update Server instance and re-write files if needed
-        def server = Server.getServer()
-        def apacheRestartNeeded = (apacheLevel != server.apacheLogLevel)
+        // update config instance and re-write files if needed
+        LogConfiguration lc = LogConfiguration.getConfig()
+        def apacheRestartNeeded = (apacheLevel != lc.apacheLogLevel ||
+                enableAccessLog != lc.enableAccessLog || 
+                enableSubversionLog != lc.enableSubversionLog ||
+                minimizeLogging != lc.minimizeLogging ||
+                maxLogSize != lc.maxLogSize)
 
-        server.apacheLogLevel = apacheLevel
-        server.consoleLogLevel = consoleLevel
-        server.pruneLogsOlderThan = daysToKeep
-        server.save()
+        lc.apacheLogLevel = apacheLevel
+        lc.consoleLogLevel = consoleLevel
+        lc.pruneLogsOlderThan = daysToKeep
+        lc.enableAccessLog = enableAccessLog
+        lc.enableSubversionLog = enableSubversionLog
+        lc.enableLogCompression = enableLogCompression
+        lc.minimizeLogging = minimizeLogging
+        lc.maxLogSize = maxLogSize
+        lc.save()
 
         if (apacheRestartNeeded) {
 
@@ -154,11 +171,8 @@ class LogManagementService {
      * Provides the current logging level for Apache
      * @return ApacheLogLevel
      */
-    ApacheLogLevel getApacheLevel() {
-      
-        def apacheLevel = Server.getServer().apacheLogLevel ?: ApacheLogLevel.WARN
-        return apacheLevel
-        
+    ApacheLogLevel getApacheLevel() {      
+        return LogConfiguration.getConfig().apacheLogLevel ?: ApacheLogLevel.WARN
     }
 
     /**
@@ -167,7 +181,7 @@ class LogManagementService {
      */
     Integer getLogDaysToKeep() {
         
-        def pruneDays = Server.getServer().pruneLogsOlderThan ?: 0
+        def pruneDays = LogConfiguration.getConfig().pruneLogsOlderThan ?: 0
         return pruneDays
     }
 

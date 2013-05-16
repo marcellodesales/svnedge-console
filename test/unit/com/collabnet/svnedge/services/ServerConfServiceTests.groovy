@@ -20,6 +20,7 @@ package com.collabnet.svnedge.services
 import com.collabnet.svnedge.admin.ServerConfService
 import com.collabnet.svnedge.console.CommandLineService
 import com.collabnet.svnedge.console.SecurityService
+import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.domain.NetworkConfiguration
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
@@ -61,6 +62,7 @@ class ServerConfServiceTests extends GrailsUnitTestCase {
         CtfServer.metaClass.'static'.getServer = { ctf }
         
         mockDomain(ReplicatedRepository, [])
+        mockDomain(LogConfiguration, [])
 
         nc = new NetworkConfiguration()
         nc.httpProxyHost = "proxyhost.com"
