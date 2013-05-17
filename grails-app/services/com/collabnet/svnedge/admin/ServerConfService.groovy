@@ -754,6 +754,7 @@ RedirectMatch ^(${contextPath})\$ \$1/
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
+   ${getAuthnzCTFDirective()}
    SVNPathAuthz short_circuit
    SetOutputFilter DEFLATE
 """
