@@ -754,7 +754,7 @@ RedirectMatch ^(${contextPath})\$ \$1/
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
-   AuthnzCTFPropertiesFile "${escapePath(new File(confDirPath(), "teamforge.properties").absolutePath)}"
+   AuthnzCTFPropertiesFile "${confDirPath}/teamforge.properties"
    SVNPathAuthz short_circuit
    SetOutputFilter DEFLATE
 """
