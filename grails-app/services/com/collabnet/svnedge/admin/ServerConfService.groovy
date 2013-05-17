@@ -754,12 +754,16 @@ RedirectMatch ^(${contextPath})\$ \$1/
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
    SVNReposName "CollabNet Subversion Repository"
-   ${getAuthnzCTFDirective()}
-   SVNPathAuthz short_circuit
    SetOutputFilter DEFLATE
 """
-        conf += ctfMode ? getSvnMasterDirectiveIfReplica(server) : 
-            getSVNHttpdConf(server)
+        if (ctfMode) {
+            conf += """   ${getAuthnzCTFDirective()}
+   SVNPathAuthz short_circuit
+"""
+            conf += getSvnMasterDirectiveIfReplica(server)
+        } else {
+            conf += getSVNHttpdConf(server)
+        }  
         conf += "</Location>\n\n"
 
         def viewvcTemplateDirPath = getViewvcTemplateDir(server)
