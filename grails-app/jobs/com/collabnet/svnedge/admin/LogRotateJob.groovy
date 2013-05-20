@@ -19,7 +19,8 @@ package com.collabnet.svnedge.admin
 
 
 import java.util.Date
-import com.collabnet.svnedge.domain.Server
+
+import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.util.ConfigUtil
 
 import org.quartz.CronTrigger
@@ -28,9 +29,6 @@ import org.quartz.Trigger
 
 class LogRotateJob {
 
-    def lifecycleService
-    def serverConfService
-    def jobsAdminService
     def configUtil
     static def name = "com.collabnet.svnedge.admin.LogRotateJob"
     static def group = "Maintenance"
@@ -79,9 +77,9 @@ class LogRotateJob {
     }
 
     def execute() {
-        def server = Server.getServer()
-        if (server.pruneLogsOlderThan != 0) {
-            pruneLog(server.pruneLogsOlderThan)
+        def lc = LogConfiguration.getConfig()
+        if (lc.pruneLogsOlderThan != 0) {
+            pruneLog(lc.pruneLogsOlderThan)
         }
     }
 }
