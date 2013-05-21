@@ -933,7 +933,7 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
             }
             String dateStamp = new Date().format("yyyy_MM_dd")
             File errorLog = new File(ConfigUtil.logsDirPath(),
-                    "error_" + dateStamp + ".log")
+                    "error_" + dateStamp + "_00_00_00.log")
             int initialSize = (int) errorLog.length()
             
             String username = "nonexistentUser"
