@@ -590,7 +590,7 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
 
         boolean ctfMode = server.managedByCtf() ||
             server.convertingToManagedByCtf()
-        if (server.mode == ServerMode.REPLICA || ctfMode) {
+        if (ctfMode) {
             conf += 
 """LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
 """
@@ -955,7 +955,6 @@ LDAPVerifyServerCert Off
     def getCtfBasicAuth(server) {
         return """  AuthType Basic
   AuthName "TeamForge Authorization Realm"
-  ${getAuthnzCTFDirective()}
   AuthBasicAuthoritative Off
   AuthUserFile /dev/null
   Require valid-user
