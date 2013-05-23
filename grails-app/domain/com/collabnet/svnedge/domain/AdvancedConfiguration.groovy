@@ -59,8 +59,8 @@ class AdvancedConfiguration {
             allowBulkUpdates: true,
             preferBulkUpdates: false,
             svnRealm: DEFAULT_SVN_REALM,
-            accessLogFormat: DEFAULT_SVN_LOG_FORMAT,
-            svnLogFormat: DEFAULT_ACCESS_LOG_FORMAT
+            accessLogFormat: DEFAULT_ACCESS_LOG_FORMAT,
+            svnLogFormat: DEFAULT_SVN_LOG_FORMAT
         ]
     
     static constraints = {
