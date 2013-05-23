@@ -26,6 +26,8 @@ import com.collabnet.svnedge.util.ConfigUtil
  */
 class Server {
 
+    static final String DEFAULT_SVN_BASE_PATH = '/svn'
+    
     // this property represents the apache SSL state
     boolean useSsl = false;
     // this property represents the console SSL state

@@ -8,6 +8,7 @@
 <g:render template="/server/leftNav" />
 
 <body>
+  <div class="alert alert-info"><g:message code="server.page.advanced.info"/></div>
   <g:form class="form-horizontal">
     <g:propCheckBox bean="${config}" field="autoVersioning" prefix="advancedConfiguration"/>
     <g:propTextField bean="${config}" field="compressionLevel" prefix="advancedConfiguration" sizeClass="small"/>
@@ -43,6 +44,7 @@
     <div class="form-actions">
       <g:actionSubmit action="updateAdvanced" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
       <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+      <g:actionSubmit action="advancedRestoreDefaults" value="${message(code:'server.page.advanced.button.restoreDefaults')}" class="btn"/>
     </div>
   </g:form>
 <g:javascript>

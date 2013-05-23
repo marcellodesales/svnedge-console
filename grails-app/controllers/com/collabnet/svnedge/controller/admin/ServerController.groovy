@@ -582,6 +582,18 @@ class ServerController {
             render(view: 'advanced', model: [config: config, server: server])
         }
     }
+    
+    def advancedRestoreDefaults = {
+        AdvancedConfiguration config = AdvancedConfiguration.getConfig()
+        config.resetToDefaults()
+        config.save()
+        Server server = Server.getServer()
+        server.svnBasePath = Server.DEFAULT_SVN_BASE_PATH
+        server.save()
+        
+        flash.message = message(code:"server.action.advancedRestoreDefaults")
+        redirect(action: 'advanced')
+    }
 }
 
 class CtfCredentialCommand {

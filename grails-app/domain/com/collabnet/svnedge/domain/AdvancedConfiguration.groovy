@@ -44,6 +44,25 @@ class AdvancedConfiguration {
     static final String DEFAULT_SVN_LOG_FORMAT = '%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T'
     String svnLogFormat = DEFAULT_SVN_LOG_FORMAT
 
+    static final def EDGE_DEFAULT_VALUE_MAP = [
+            autoVersioning: false,
+            listParentPath: true,
+            compressionLevel: 5,
+            hooksEnv: null,
+            useUtf8: false,
+            pathAuthz: true,
+            strictAuthz: false,
+            inMemoryCacheSize: 16,
+            cacheFullTexts: false,
+            cacheTextDeltas: false,
+            cacheRevProps: false,
+            allowBulkUpdates: true,
+            preferBulkUpdates: false,
+            svnRealm: DEFAULT_SVN_REALM,
+            accessLogFormat: DEFAULT_SVN_LOG_FORMAT,
+            svnLogFormat: DEFAULT_ACCESS_LOG_FORMAT
+        ]
+    
     static constraints = {
         hooksEnv(nullable: true)
         svnRealm(nullable: true)
@@ -53,6 +72,10 @@ class AdvancedConfiguration {
         inMemoryCacheSize(min:0)
     }
     
+    void resetToDefaults() {
+        this.properties = EDGE_DEFAULT_VALUE_MAP
+    }
+     
     // GORM event
     def beforeInsert() {
         handleDefaults()
