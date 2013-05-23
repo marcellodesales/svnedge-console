@@ -23,6 +23,8 @@ import com.collabnet.svnedge.controller.AbstractSvnEdgeControllerTests;
 import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.integration.CtfServer 
+import com.collabnet.svnedge.util.ConfigUtil
+
 import grails.test.*
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import com.icegreen.greenmail.util.GreenMailUtil
@@ -224,5 +226,171 @@ class ServerControllerTests extends AbstractSvnEdgeControllerTests {
                 MonitoringConfiguration.Frequency.ONE_HOUR, config.frequency
         assertEquals "Frequency should be every 8 hours", 8, 
                 config.repoDiskFrequencyHours
+    }
+    
+    void testUpdateAdvancedMaximum() {
+        def params = controller.params
+        params.autoVersioning = true
+        params.compressionLevel = 9
+        params.allowBulkUpdates = true
+        params.preferBulkUpdates = true
+        params.useUtf8 = true
+        params.hooksEnv = 'LANG=en_US.UTF-8'
+        params.listParentPath = true
+        params.pathAuthz = true
+        params.strictAuthz = false
+        params.svnBasePath = '/subversion/context'
+        params.inMemoryCacheSize = 64
+        params.cacheFullTexts = true
+        params.cacheTextDeltas = true
+        params.cacheRevProps = true
+        controller.updateAdvanced()
+        
+        assertEquals "Expected redirect to 'advanced' view on success",
+        'advanced', controller.redirectArgs["action"]
+        assertNotNull "Controller should provide a success message",
+                controller.flash.message
+        assertNull "Controller should NOT provide an error message",
+                controller.flash.error
+
+        def expectedServerDirectivesMap = ['SVNCompressionLevel 9': false,
+                'SVNUseUTF8 On': false]
+        expectedServerDirectivesMap['SVNInMemoryCacheSize ' + (64 * 1024)] = false
+        def expectedLocationDirectivesMap = ['SVNAutoversioning On': false, 
+                'SVNAllowBulkUpdates Prefer': false,
+                'SVNHooksEnv LANG=en_US.UTF-8': false,
+                'SVNListParentPath On': false,
+                'SVNPathAuthz short_circuit': false,
+                'SVNCacheFullTexts On': false,
+                'SVNCacheTextDeltas On': false,
+                'SVNCacheRevProps On': false,
+        ]
+        def expectedServerDirectives = expectedServerDirectivesMap.keySet()
+        def expectedLocationDirectives = expectedLocationDirectivesMap.keySet()
+        // verify the apache conf update
+        def confFile = new File(ConfigUtil.confDirPath(), "svn_viewvc_httpd.conf")
+        boolean foundLocation = false
+        boolean endLocation = false
+        confFile.eachLine { it ->
+            if (!endLocation) {
+                it = it.trim()
+                if (foundLocation) {
+                    if (it == '</Location>') {
+                        endLocation = true
+                    } else {
+                        assertFalse "Location directive found outside of block: " + it,
+                                expectedServerDirectives.contains(it)
+                        if (expectedLocationDirectives.contains(it)) {
+                            expectedLocationDirectivesMap[it] = true
+                        }
+                    }
+                } else {
+                    if (it == "<Location ${params.svnBasePath}/>") {
+                        foundLocation = true
+                    } else {
+                        assertFalse "Server directive found inside location block: " + it,
+                                        expectedLocationDirectives.contains(it)
+                        if (expectedServerDirectives.contains(it)) {
+                            expectedServerDirectivesMap[it] = true
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue("Apache conf should contain Location for svn context " + confFile.text, foundLocation)
+        assertTrue("Apache conf should terminate Location for svn context", endLocation)
+        for (entry in expectedServerDirectivesMap.entrySet()) {
+            assertTrue "Did not find expected server directive: " + entry.key, entry.value
+        }
+        for (entry in expectedLocationDirectivesMap.entrySet()) {
+            assertTrue "Did not find expected location directive: " + entry.key, entry.value
+        }
+        
+        assertEquals "Should be able to start server", 0, lifecycleService.startServer()
+        assertEquals "Should be able to stop server", 0, lifecycleService.stopServer()
+    }
+    
+    void testUpdateAdvancedMinimum() {
+        def params = controller.params
+        params.autoVersioning = false
+        params.compressionLevel = 0
+        params.allowBulkUpdates = false
+        params.preferBulkUpdates = false
+        params.useUtf8 = false
+        params.hooksEnv = ''
+        params.listParentPath = false
+        params.pathAuthz = false
+        params.strictAuthz = false
+        params.svnBasePath = '/svn'
+        params.inMemoryCacheSize = 0
+        params.cacheFullTexts = false
+        params.cacheTextDeltas = false
+        params.cacheRevProps = false
+        controller.updateAdvanced()
+        
+        assertEquals "Expected redirect to 'advanced' view on success",
+        'advanced', controller.redirectArgs["action"]
+        assertNotNull "Controller should provide a success message",
+                controller.flash.message
+        assertNull "Controller should NOT provide an error message",
+                controller.flash.error
+
+        def expectedServerDirectivesMap = ['SVNCompressionLevel 0': false,
+                'SVNInMemoryCacheSize 0': false]
+        def expectedLocationDirectivesMap = ['SVNAllowBulkUpdates Off': false,
+                'SVNPathAuthz Off': false
+        ]
+        def unexpectedDirectives = ['SVNAutoversioning', 'SVNHooksEnv',
+                'SVNListParentPath', 'SVNCacheFullTexts', 'SVNCacheTextDeltas',
+                'SVNCacheRevProps', 'SVNUseUTF8', 'SVNHooksEnv'
+        ]
+        def expectedServerDirectives = expectedServerDirectivesMap.keySet()
+        def expectedLocationDirectives = expectedLocationDirectivesMap.keySet()
+        // verify the apache conf update
+        def confFile = new File(ConfigUtil.confDirPath(), "svn_viewvc_httpd.conf")
+        println confFile.text
+        boolean foundLocation = false
+        boolean endLocation = false
+        confFile.eachLine { it ->
+            if (!endLocation) {
+                it = it.trim()
+                for (unexpectedDirective in unexpectedDirectives) {
+                    assertFalse unexpectedDirective + " should not exist in conf",
+                         it.startsWith(unexpectedDirective)
+                }
+                if (foundLocation) {
+                    if (it == '</Location>') {
+                        endLocation = true
+                    } else {
+                        assertFalse "Location directive found outside of block: " + it,
+                                expectedServerDirectives.contains(it)
+                        if (expectedLocationDirectives.contains(it)) {
+                            expectedLocationDirectivesMap[it] = true
+                        }
+                    }
+                } else {
+                    if (it == "<Location ${params.svnBasePath}/>") {
+                        foundLocation = true
+                    } else {
+                        assertFalse "Server directive found inside location block: " + it,
+                                        expectedLocationDirectives.contains(it)
+                        if (expectedServerDirectives.contains(it)) {
+                            expectedServerDirectivesMap[it] = true
+                        }
+                    }
+                }
+            }
+        }
+        assertTrue("Apache conf should contain Location for svn context " + confFile.text, foundLocation)
+        assertTrue("Apache conf should terminate Location for svn context", endLocation)
+        for (entry in expectedServerDirectivesMap.entrySet()) {
+            assertTrue "Did not find expected server directive: " + entry.key, entry.value
+        }
+        for (entry in expectedLocationDirectivesMap.entrySet()) {
+            assertTrue "Did not find expected location directive: " + entry.key, entry.value
+        }
+        
+        assertEquals "Should be able to start server", 0, lifecycleService.startServer()
+        assertEquals "Should be able to stop server", 0, lifecycleService.stopServer()
     }
 }

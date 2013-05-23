@@ -66,7 +66,11 @@
       </div>
      <g:if test="${!ctfUrl && server.viewvcURL()}">
       <div class="row-fluid">
-        <div class="span4"><strong><g:message code="status.page.url.repository" /></strong></div><div class="span8"> <a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a></div>
+        <div class="span4"><strong><g:message code="status.page.url.repository" /></strong></div>
+        <div class="span8">
+          <g:if test="${server.advancedConfig().listParentPath}"><a href="${server.svnURL()}" target="_blank">${server.svnURL()}</a></g:if>
+          <g:else>${server.svnURL()}</g:else>
+        </div>
       </div>
       <div class="row-fluid">
         <div class="span4"><strong><g:message code="status.page.url.repository.browse" /></strong></div>

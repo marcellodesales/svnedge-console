@@ -27,6 +27,7 @@ import groovy.io.FileType
 import java.net.URL
 import java.util.Calendar
 import com.collabnet.svnedge.admin.LogManagementService
+import com.collabnet.svnedge.domain.AdvancedConfiguration
 import com.collabnet.svnedge.domain.LogConfiguration
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.ServerMode 
@@ -645,6 +646,7 @@ TypesConfig "data/conf/mime.types"
     }
     
     def writeLogConf() {
+        AdvancedConfiguration advConfig = AdvancedConfiguration.getConfig()
         def binDirPath = ConfigUtil.binDirPath()
         def rotatelogs = new File(binDirPath, 'rotatelogs').absolutePath
                 .replace('\\', '/')
@@ -676,14 +678,14 @@ SetEnvIf Request_Method "PROPFIND" do_not_log
 SetEnvIf in_repos 0 !do_not_log
 """
             }
-            conf += """LogFormat "%h %l %u %t \\\"%r\\\" %>s %b %T" common
+            conf += """LogFormat "${advConfig.accessLogFormat}" common
 CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/access_${logNameSuffix}.log${escapeQuote} ${rotatePeriod}" common env=!do_not_log
 """
         }
         if (logConfig.enableSubversionLog) {
             conf += "CustomLog \"${pipeRotateLogs} " + 
                     "${escapeQuote}${logsDirPath}/subversion_${logNameSuffix}.log${escapeQuote} " +
-                    "${rotatePeriod}\" \"%t %u %{SVN-REPOS-NAME}e %{SVN-ACTION}e %T\" env=SVN-ACTION\n"
+                    "${rotatePeriod}\" \"${advConfig.svnLogFormat}\" env=SVN-ACTION\n"
         }
         new File(confDirPath(), "csvn_logging.conf").write(conf)
     }
@@ -703,6 +705,17 @@ CustomLog "${pipeRotateLogs} ${escapeQuote}${logsDirPath}/access_${logNameSuffix
         def conf = """${DONT_EDIT}
 Include "${confDirPath}/ctf_httpd.conf"
 """
+        AdvancedConfiguration advConfig = AdvancedConfiguration.getConfig()
+        if (advConfig.compressionLevel != 5) {
+            conf += "SVNCompressionLevel ${advConfig.compressionLevel}\n"
+        }
+        if (advConfig.useUtf8) {
+            conf += 'SVNUseUTF8 On\n'
+        }
+        if (advConfig.inMemoryCacheSize != 16) {
+            conf += 'SVNInMemoryCacheSize ' + (advConfig.inMemoryCacheSize * 1024) + '\n'
+        }
+
         boolean isLdapLoginEnabled = isLdapLoginEnabled(server)
         if (isLdapLoginEnabled) {
             conf += "<VirtualHost *:${server.port}>\n"
@@ -727,7 +740,6 @@ RewriteEngine on
         conf += ctfMode ? getCtfBasicAuth(server) : getViewVCHttpdConf(server)
         conf += "</Location>\n"
                     
-        
         String contextPath = server.getSvnBasePath()
         if (server.mode == ServerMode.REPLICA) {
             def replicaConfig = ReplicaConfiguration.getCurrentConfig()
@@ -745,24 +757,56 @@ RewriteEngine on
             }
             conf += "<Location " + contextPath + ">"
         } else {
-            conf += """
+            if (advConfig.listParentPath) {
+                conf += """
 # Work around authz and SVNListParentPath issue
 RedirectMatch ^(${contextPath})\$ \$1/
-<Location ${contextPath}/>"""
+"""
+            }
+            conf += "<Location ${contextPath}/>"
         }
         conf += """   
    DAV svn
    SVNParentPath "${escapePath(server.repoParentDir)}"
-   SVNReposName "CollabNet Subversion Repository"
-   SetOutputFilter DEFLATE
+   SVNReposName "${advConfig.svnRealm}"
 """
+        if (advConfig.compressionLevel > 0) {
+            conf += '  SetOutputFilter DEFLATE\n'
+        }
+        if (!advConfig.allowBulkUpdates) {
+            conf += '  SVNAllowBulkUpdates Off\n'
+        } else if (advConfig.preferBulkUpdates) {
+            conf += '  SVNAllowBulkUpdates Prefer\n'
+        }
+        
+        if (advConfig.autoVersioning) {
+            conf += """  SVNAutoversioning On
+  ModMimeUsePathInfo On
+"""
+        }
+        if (advConfig.hooksEnv) {
+            conf += "  SVNHooksEnv ${advConfig.hooksEnv}\n"
+            
+        }
+        if (advConfig.inMemoryCacheSize > 0) {
+            if (advConfig.cacheFullTexts) {
+                conf += '  SVNCacheFullTexts On\n'
+            }
+            if (advConfig.cacheTextDeltas) {
+                conf += '  SVNCacheTextDeltas On\n'
+            }
+            if (advConfig.cacheRevProps) {
+                conf += '  SVNCacheRevProps On\n'
+            }
+        }
+
         if (ctfMode) {
             conf += """   ${getAuthnzCTFDirective()}
    SVNPathAuthz short_circuit
 """
             conf += getSvnMasterDirectiveIfReplica(server)
         } else {
-            conf += getSVNHttpdConf(server)
+            conf += getSVNHttpdConf(server, advConfig)
         }  
         conf += "</Location>\n\n"
 
@@ -811,7 +855,7 @@ ${getAuthBasic(server)}
         }
         new File(confDirPath, "svn_viewvc_httpd.conf").write(conf)
     }
-
+    
     /**
      * returns the path to the appropriate viewvc template dir based
      * on server mode
@@ -997,10 +1041,21 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
         conf
     }
 
-    private def getSVNHttpdConf(server) {
-        def conf = """  AuthzSVNAccessFile "${confDirPath()}/svn_access_file"
-  SVNListParentPath On
+    private def getSVNHttpdConf(server, advConfig) {
+        def conf = ''
+        if (advConfig.pathAuthz) {
+            conf += """  AuthzSVNAccessFile "${confDirPath()}/svn_access_file"
 """
+            if (!advConfig.strictAuthz) {
+                conf += '  SVNPathAuthz short_circuit\n'
+            }
+        } else {
+            conf += '  SVNPathAuthz Off\n'
+        }
+
+        if (advConfig.listParentPath) {
+            conf += '  SVNListParentPath On\n'
+        }
         if (server.forceUsernameCase) {
             conf += "  AuthzForceUsernameCase Lower\n"
         }
@@ -1025,7 +1080,7 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
             authProviders += " ldap-users"
         }
         def conf = """  AuthType Basic
-  AuthName "${csvnAuthenticationProvider.AUTH_REALM}"
+  AuthName "${server.advancedConfig().svnRealm}"
   AuthBasicProvider ${authProviders}
 """
         conf

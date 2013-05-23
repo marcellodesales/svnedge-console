@@ -208,7 +208,11 @@ $('#bindInstructions').hide();
       <div class="form-actions">
         <g:actionSubmit id="updateButton" action="update" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
         <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>
+        
       </div>
     </g:form>             
+  <g:javascript>
+  $('.page-header').html('<div style="float: right"><a href="advanced">Advanced Settings</a></div>' + $('.page-header').html());
+  </g:javascript>
   </body>
 </html>

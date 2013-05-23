@@ -24,6 +24,7 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
 
 import com.collabnet.svnedge.CantBindPortException;
 import com.collabnet.svnedge.admin.ServerConfService;
+import com.collabnet.svnedge.domain.AdvancedConfiguration
 import com.collabnet.svnedge.domain.MailConfiguration;
 import com.collabnet.svnedge.domain.MonitoringConfiguration
 import com.collabnet.svnedge.domain.Server 
@@ -514,6 +515,73 @@ class ServerController {
     }
 
     static enum TestMailResult { CANCELLED, STILL_RUNNING, NOT_RUNNING, SUCCESS, FAILED }
+
+    
+    def advanced = {
+        AdvancedConfiguration config = AdvancedConfiguration.getConfig()
+        config.discard()
+        Server server = Server.getServer()
+        return [config: config, server: server]
+    }
+
+    def updateAdvanced = {
+        if (params.version) {
+            def version = params.version.toLong()
+            if (server.version > version) {
+                server.errors.rejectValue("version",
+                "server.optimistic.locking.failure")
+                render(view:'edit', model:[server:server])
+                return
+            }
+        }
+
+        // copy form params to the entity
+        AdvancedConfiguration config = AdvancedConfiguration.getConfig()
+        bindData(config, params)
+        Server server = Server.getServer()
+        server.svnBasePath = params['svnBasePath']
+        config.validate()
+        server.validate()
+        
+        if (!config.hasErrors() && config.save(flush:true) &&
+                !server.hasErrors() && server.save(flush:true)) {
+            if (lifecycleService.isStarted()) {
+                try {
+                    def result = lifecycleService.stopServer()
+                    serverConfService.writeConfigFiles()
+                    if (result <= 0) {
+                        result = lifecycleService.startServer()
+                        if (result < 0) {
+                            flash.message = message(code:
+                            "server.action.update.changesMightNotHaveBeenApplied")
+                        } else if (result == 0) {
+                            flash.message = message(code:
+                            "server.action.update.svnRunning")
+                        } else {
+                            flash.error = message(code:
+                            "server.action.update.generalError")
+                        }
+                    } else {
+                        flash.error = message(code:
+                        "server.action.update.cantRestartServer")
+                    }
+                } catch (CantBindPortException cantStopRunningServer) {
+                    flash.error = cantStopRunningServer.getMessage(
+                    RCU.getLocale(request))
+                }
+            } else {
+                serverConfService.writeConfigFiles()
+                flash.message = message(code:"server.action.update.changesMade")
+            }
+            redirect(action: 'advanced')
+        } else {
+            flash.error = message(code:"server.action.update.invalidSettings")
+            // discard entity changes and redisplay the edit screen
+            config.discard()
+            server.discard()
+            render(view: 'advanced', model: [config: config, server: server])
+        }
+    }
 }
 
 class CtfCredentialCommand {

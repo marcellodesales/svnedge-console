@@ -421,7 +421,7 @@ class CsvnTagLib {
             out << '    <input name="'
             out << fieldName << '" value="'
             def isInt = attrs['integer'] && attrs['integer'] != 'false'
-            def value = fieldValue(bean: obj, field: fieldName)
+            def value = fieldValue(bean: obj, field: fieldName).encodeAsHTML()
             if (isInt) {
                 def locale = RequestContextUtils.getLocale(request)
                 def symbols = new DecimalFormatSymbols(locale)

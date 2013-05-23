@@ -1032,6 +1032,7 @@ class RepoController {
             owner = User.get(lock.userId)
         }
         [accessRules: serverConfService.readSvnAccessFile(),
+                authzEnabled: AdvancedConfiguration.getConfig().pathAuthz,
                 lock: lock, lockOwner: owner]
     }
 

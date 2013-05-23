@@ -181,6 +181,10 @@ class Server {
         return this.mode == ServerMode.CONVERTING_TO_MANAGED
     }
     
+    AdvancedConfiguration advancedConfig() {
+        return AdvancedConfiguration.getConfig()
+    }
+    
     static CtfServer getManagedServer() {
         return CtfServer.getServer()
     }
