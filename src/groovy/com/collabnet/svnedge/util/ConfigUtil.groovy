@@ -90,10 +90,10 @@ public final class ConfigUtil {
             new File(appHome(), "bin/svnadmin").absolutePath
     }
 
-    def static svnauthzvalidatePath() {
-        return getConfig().svnedge.svn.svnauthzvalidatePath ? 
-            getConfig().svnedge.svn.svnauthzvalidatePath : 
-            new File(appHome(), "bin/svnauthz-validate").absolutePath
+    def static svnauthzPath() {
+        return getConfig().svnedge.svn.svnauthzPath ? 
+            getConfig().svnedge.svn.svnauthzPath : 
+            new File(appHome(), "bin/svnauthz").absolutePath
     }
 
     def static svnrdumpPath() {

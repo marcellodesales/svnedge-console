@@ -507,7 +507,7 @@ Content-Length: 107
         }
 
         def output = commandLineService.execute(
-                         ConfigUtil.svnauthzvalidatePath(), f.absolutePath)
+                ConfigUtil.svnauthzPath(), 'validate', f.absolutePath)
 
         f.delete()
 
