@@ -179,6 +179,12 @@
             <g:elseif test="${flash.unfiltered_message}">
                 <div class="alert alert-success"><%=flash.unfiltered_message%></div>
             </g:elseif>
+            <g:if test="${flash['info']}">
+                <div class="alert alert-info">${flash['info']}</div>
+            </g:if>
+            <g:elseif test="${request['unfiltered_info']}">
+                <div class="alert alert-info"><%=flash['unfiltered_info']%></div>
+            </g:elseif>
             <g:if test="${flash.warn}">
                 <div class="alert">${flash.warn}</div>
             </g:if>
@@ -198,6 +204,12 @@
             </g:if>
             <g:elseif test="${request['unfiltered_message']}">
                 <div class="alert alert-success"><%=request['unfiltered_message']%></div>
+            </g:elseif>
+            <g:if test="${request['info']}">
+                <div class="alert alert-info">${request['info']}</div>
+            </g:if>
+            <g:elseif test="${request['unfiltered_info']}">
+                <div class="alert alert-info"><%=request['unfiltered_info']%></div>
             </g:elseif>
             <g:if test="${request['warn']}">
                 <div class="alert">${request['warn']}</div>

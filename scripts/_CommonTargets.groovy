@@ -104,6 +104,8 @@ target(copyResources: 'Copies css and js for use by viewvc and launch.html') {
             todir: "${viewvcResourcesDir}/js")
     Ant.copy(file: "${resourcesDir}/js/jquery-${antProp.'vendor.jquery.version'}.min.js", 
             todir: "${viewvcResourcesDir}/js")
+    Ant.copy(file: "${resourcesDir}/js/jquery.dataTables.min.js",
+        todir: "${viewvcResourcesDir}/js")
     Ant.copy(file: "${resourcesDir}/css/bootstrap-${antProp.'vendor.twitter-bootstrap.version'}.css", 
             todir: "${viewvcResourcesDir}/css")
     Ant.copy(file: "${resourcesDir}/css/bootstrap-responsive-${antProp.'vendor.twitter-bootstrap.version'}.css",  

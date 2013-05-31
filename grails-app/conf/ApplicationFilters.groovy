@@ -165,7 +165,7 @@ class ApplicationFilters {
                     redirect(controller: 'ocn', action: 'index')
                 }
                 else if (!isAdmin) {
-                    redirect(controller: 'repo', action: 'list')
+                    redirect(controller: 'repo', action: 'index')
                 }
             }
         }

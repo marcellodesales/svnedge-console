@@ -551,7 +551,7 @@ class SvnRepoService extends AbstractSvnEdgeService {
             if (server.mode == ServerMode.REPLICA) {
                 return getMessage("repository.status.notAdded", locale)
             } else {
-                def num = Repository.list().size()
+                def num = Repository.count()
                 if (num == 0) {
                     buffer.append getMessage("repository.status.noRepos", locale)
                 } else {
@@ -1683,5 +1683,71 @@ class SvnRepoService extends AbstractSvnEdgeService {
             result = sourceFile.delete()
         }
         return result
+    }
+
+    /**
+     * Retrieve a list of repositories for which the given username has access to the
+     * root path.
+     *
+     * @param username
+     * @return list of repository names
+     */
+    def listMatchingRepositories(String query, String username, boolean sortByName = false,
+            int maxUnfilteredResults = 100, int maxAuthzResults = 20) {
+        // repo names might contain _ and we'll escape % just for completeness
+        query = query.replace('_', '[_]').replace('%', '[%]')
+        def allRepos = Repository.findAllByNameLike('%' + query + '%',
+                sortByName ? [sort: 'name'] : null)
+        if (allRepos.size() <= maxUnfilteredResults) {
+            def repos = filterAuthorizedRepositories(allRepos, username, maxAuthzResults + 1)
+            return (repos?.size() > maxAuthzResults) ? null : repos
+        }
+        return null
+    }
+
+    /**
+     * Retrieve a list of repositories for which the given username has access to the
+     * root path.
+     * 
+     * @param username
+     * @param params sort and page parameters
+     * @return list of Repository
+     */
+    def listAuthorizedRepositories(String username, boolean sortByName) {
+        def repos = sortByName ? 
+                Repository.list([sort: "name"]) : Repository.list()
+        return filterAuthorizedRepositories(repos, username)
+    }
+                
+    private def filterAuthorizedRepositories(repos, username, maxResults = -1) {
+        def authzRepos = []
+        File accessFile = new File(ConfigUtil.confDirPath(), "svn_access_file")
+        String accessPath = accessFile.absolutePath
+        Server server = Server.getServer()
+        if (server.forceUsernameCase) {
+            username = username.toLowerCase()
+        }
+        for (repo in repos) {
+            boolean isAccess = checkAccessOf(username, repo.name, accessPath)
+            if (isAccess) {
+                authzRepos << repo
+                if (maxResults > 0 && authzRepos.size() >= maxResults) {
+                    break
+                }
+            } 
+        }
+        return authzRepos
+    }
+    
+    private boolean checkAccessOf(String username, String repoName, String accessRulesPath) {
+        boolean b = false
+        def svnauthzPath = ConfigUtil.svnauthzPath()
+        def output = commandLineService.executeWithOutput(svnauthzPath, 'accessof', 
+                '--username', username, '--repository', repoName, '--path', '/',
+                accessRulesPath)
+        if (output.contains('r')) {
+            b = true
+        }
+        return b
     }
 }

@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="[docroot]/css/bootstrap-[csvn_twitter_bootstrap_version].css" type="text/css" />
   <link rel="stylesheet" href="[docroot]/css/[csvn_svnedge_css_filename]" type="text/css" />
   <link rel="stylesheet" href="[docroot]/css/bootstrap-responsive-[csvn_twitter_bootstrap_version].css" type="text/css" />
+  <link href="[docroot]/css/DT_bootstrap.css" rel="stylesheet"/>
   <link rel="stylesheet" href="[docroot]/styles-3.0.0.css" type="text/css" />
   <script src="[docroot]/js/[csvn_jquery_js_filename]" type="text/javascript"></script>
   <script src="[docroot]/js/bootstrap-[csvn_twitter_bootstrap_version].js" type="text/javascript"></script>

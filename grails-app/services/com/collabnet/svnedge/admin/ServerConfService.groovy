@@ -407,6 +407,7 @@ Content-Length: 107
         s = s.replace("__CSVN_APPLICATION_JS_FILENAME__", 
                 'application-' + grailsApplication.metadata['app.applicationJs.version'] +
                 '.js')
+        s = s.replace("__CSVN_SVN_BASE_URL__", server.svnURL())
         if (server.forceUsernameCase) {
             s = s.replace("#force_username_case = ", "force_username_case = lower")
         }

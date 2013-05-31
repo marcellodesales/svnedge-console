@@ -231,7 +231,8 @@ class SetupReplicaController {
             // prepare confirmation data
             server = Server.getServer()
             def ctfServer = CtfServer.getServer()
-            repoName = (Repository.list()) ? Repository.list()[0].name : "example"
+            def repos = Repository.list([max: 1])
+            repoName = repos ? repos[0].name : "example"
             userName = authenticateService.principal().getUsername()
             def ctfusername = ctfServer.ctfUsername
             def ctfpassword = securityService.decrypt(ctfServer.ctfPassword)

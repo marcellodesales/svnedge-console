@@ -269,6 +269,7 @@ class Request:
       elif self.view_func != view_roots:
         self.rootname = cfg.general.default_root
     elif cfg.options.root_as_url_component:
+      del self.query_dict['root']
       needs_redirect = 1
 
     self.where = _path_join(path_parts)
@@ -1645,6 +1646,7 @@ def common_template_data(request, revision=None, mime_type=None):
     'csvn_jquery_js_filename': cfg.general.csvn_jquery_js_filename,
     'csvn_svnedge_css_filename': cfg.general.csvn_svnedge_css_filename,
     'csvn_application_js_filename': cfg.general.csvn_application_js_filename,
+    'csvn_svn_base_url': cfg.general.csvn_svn_base_url,
 
     # added for TeamForge
     'banner_header': '',
@@ -2474,6 +2476,7 @@ def view_directory(request):
   where = request.where
   where_prefix = where and where + '/'
 
+  contains_trunk = False
   for file in file_data:
     row = _item(author=None, log=None, short_log=None, state=None, size=None,
                 log_file=None, log_rev=None, graph_href=None, mime_type=None,
@@ -2499,6 +2502,8 @@ def view_directory(request):
     row.lockinfo = file.lockinfo
     row.anchor = request.server.escape(file.name)
     row.name = request.server.escape(file.name)
+    if file.name == 'trunk':
+      contains_trunk = True
     row.pathtype = (file.kind == vclib.FILE and 'file') or \
                    (file.kind == vclib.DIR and 'dir')
     row.errors = file.errors
@@ -2578,7 +2583,23 @@ def view_directory(request):
   # Prepare the data that will be passed to the template, based on the
   # common template data.
   data = common_template_data(request)
+
+  # Edge customization
+  csvn_svn_checkout_example = None
+  show_access = not where or where.count('/') < 2
+  if show_access:
+    svn_url = request.cfg.general.csvn_svn_base_url
+    pathinfo = ''
+    if where:
+      pathinfo = '/' + where
+    if not pathinfo and contains_trunk:
+      pathinfo = '/trunk'
+    csvn_svn_checkout_example = 'svn checkout %s%s%s %s --username %s' % \
+        (request.server.escape(svn_url), data['rootname'], request.server.escape(pathinfo), 
+         data['rootname'], data['username'])
+
   data.merge(ezt.TemplateData({
+    'csvn_svn_checkout_example': csvn_svn_checkout_example,
     'entries' : rows,
     'sortby' : sortby,
     'sortdir' : sortdir,

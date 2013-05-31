@@ -39,6 +39,7 @@ import com.collabnet.svnedge.domain.RepoTemplate
 @Secured(['ROLE_USER'])
 class RepositoryRestController extends AbstractRestController {
 
+    def authenticateService
     def svnRepoService
     def repoTemplateService
 
@@ -78,8 +79,15 @@ class RepositoryRestController extends AbstractRestController {
         }
         else {
             def repositories = []
-            def params = [sort: "name"]
-            Repository.list(params)?.each {
+            def domainRepos
+            if (authenticateService.ifAnyGranted(
+                    'ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS')) {
+                domainRepos = Repository.list([sort: 'name'])
+            } else {
+                def username = authenticateService.principal().username
+                domainRepos = svnRepoService.listAuthorizedRepositories(username, true)
+            }
+            domainRepos?.each {
                 def repository = [id: it.id,
                         name: it.name,
                         status: it.permissionsOk ?

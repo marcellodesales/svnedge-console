@@ -4,9 +4,18 @@
           <g:message code="repository.main.icon" />
       </li>
 
+    <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
       <li<g:if test="${(controllerName == 'repo' && actionName == 'list')}"> class="active"</g:if>>
           <g:link controller="repo" action="list"><g:message code="repository.page.leftnav.list" /></g:link>
       </li>
+    </g:ifAnyGranted>
+    <g:ifNotGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS">
+      <g:if test="${isStarted && server.advancedConfig().listParentPath}">
+      <li>
+          <a href="${server.viewvcURL()}" target="_blank"><g:message code="repository.page.leftnav.list" /></a>
+      </li>      
+      </g:if>
+    </g:ifNotGranted>
 
     <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_REPO">
 

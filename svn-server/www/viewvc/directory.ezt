@@ -194,7 +194,10 @@
 
 [include "include/dir_footer.ezt"]
 
+[include "include/access.ezt"]
+
 [include "include/props.ezt"]
+
 
 <!-- ************************************************************** -->
 </div>

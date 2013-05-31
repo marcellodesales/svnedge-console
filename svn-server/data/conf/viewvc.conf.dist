@@ -154,6 +154,7 @@ csvn_twitter_bootstrap_version = __CSVN_TWITTER_BOOTSTRAP_VERSION__
 csvn_jquery_js_filename = __CSVN_JQUERY_JS_FILENAME__
 csvn_svnedge_css_filename = __CSVN_SVNEDGE_CSS_FILENAME__
 csvn_application_js_filename = __CSVN_APPLICATION_JS_FILENAME__
+csvn_svn_base_url=__CSVN_SVN_BASE_URL__
 
 #---------------------------------------------------------------------------
 [utilities]

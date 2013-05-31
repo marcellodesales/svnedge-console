@@ -43,19 +43,49 @@ class RepoController {
     def statisticsService
     def fileUtil
     def authenticateService
+    def lifecycleService
     def replicationService
 
     @Secured(['ROLE_USER'])
-    def index = { redirect(action: list, params: params) }
+    def index = { 
+        boolean isAdmin = false
+        boolean isSystemAdmin = false
+        if (authenticateService.ifAnyGranted(
+                'ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS')) {
+            redirect(action: list, params: params)
+            return
+        } else if (authenticateService.ifAnyGranted(
+                'ROLE_ADMIN_SYSTEM,ROLE_ADMIN_USERS')) {
+            isAdmin = true
+            isSystemAdmin = authenticateService.ifAnyGranted('ROLE_ADMIN_SYSTEM')
+        } else {        
+            request.info = message(code: 'repository.page.index.welcome')
+        }
+        return [server: Server.getServer(), isStarted: lifecycleService.isStarted(),
+                isAdmin: isAdmin, isSystemAdmin: isSystemAdmin
+                ]
+    }
 
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [delete: 'POST', save: 'POST', update: 'POST']
 
+    static final int ROLE_USER_MAX_REPOSITORY_LIST_SIZE = 100    
+    
     @Secured(['ROLE_USER'])
+    def listMatching = {
+        String repoQuery = params['q']
+        def username = authenticateService.principal().username
+        def repos = svnRepoService.listMatchingRepositories(
+                repoQuery, username)?.collect { it.name }
+        render(contentType: "text/json") {
+            result(repositories: repos ?: [])
+        }
+    }
+
+    @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO', 'ROLE_ADMIN_HOOKS'])
     def list = {
         ControllerUtil.setDefaultSort(params, "name")
-        def server = Server.getServer()
-        def repoList
+        Server server = Server.getServer()
         // in Managed Mode, only super user can access the repo listing
         if (server.managedByCtf() &&
                 !authenticateService.ifAnyGranted("ROLE_ADMIN")) {
@@ -63,20 +93,12 @@ class RepoController {
             redirect(controller: "status")
             return
         }
-        
-        repoList = Repository.list(params)
-        def model = [repositoryInstanceList: repoList,
-                repositoryInstanceTotal: Repository.count(),
+    
+        def repoList = Repository.list()
+        return [repositoryInstanceList: repoList,
+                repositoryInstanceTotal: repoList ? repoList.size() : 0,
                 server: server
         ]
-        /*
-        if (server.mode == ServerMode.REPLICA) {
-            File progressLog = replicationService.synchronizeRepositoriesLogFile()
-            if (progressLog.exists()) {
-                
-            }
-        }
-        */
     }
 
     @Secured(['ROLE_ADMIN', 'ROLE_ADMIN_REPO'])

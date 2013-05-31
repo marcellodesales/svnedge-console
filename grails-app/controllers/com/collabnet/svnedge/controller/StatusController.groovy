@@ -160,11 +160,8 @@ class StatusController {
         }
 
         boolean isStarted = lifecycleService.isStarted()
-        params.max = 
-            Math.min( params.max ? params.max.toInteger() : 10,  100)
-        Repository[] repos = Repository.list(params)
-        Repository sampleRepo = 
-            (repos.length > 0) ? repos[0] : null
+        Repository[] repos = Repository.list([max: 1])
+        Repository sampleRepo = (repos.length > 0) ? repos[0] : null
 
         def sfVersion = this.packagesUpdateService.getInstalledVersionNumber()
         def svnVer = this.packagesUpdateService.getInstalledSvnVersionNumber()
