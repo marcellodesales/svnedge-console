@@ -79,11 +79,11 @@ class RepositoryRestController extends AbstractRestController {
         }
         else {
             def repositories = []
-            def domainRepos
+            def domainRepos = null
             if (authenticateService.ifAnyGranted(
                     'ROLE_ADMIN,ROLE_ADMIN_REPO,ROLE_ADMIN_HOOKS')) {
                 domainRepos = Repository.list([sort: 'name'])
-            } else {
+            } else if (server.advancedConfig().listParentPath) {
                 def username = authenticateService.principal().username
                 domainRepos = svnRepoService.listAuthorizedRepositories(username, true)
             }

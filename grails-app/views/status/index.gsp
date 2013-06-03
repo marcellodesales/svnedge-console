@@ -74,7 +74,10 @@
       </div>
       <div class="row-fluid">
         <div class="span4"><strong><g:message code="status.page.url.repository.browse" /></strong></div>
-        <div class="span8"><a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a></div>
+        <div class="span8">
+          <g:if test="${server.advancedConfig().listParentPath}"><a href="${server.viewvcURL()}" target="_blank">${server.viewvcURL()}</a></g:if>
+          <g:else>${server.viewvcURL()}</g:else>
+        </div>
       </div>
      </g:if>
    </g:if>

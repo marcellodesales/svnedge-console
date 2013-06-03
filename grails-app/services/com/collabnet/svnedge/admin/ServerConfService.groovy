@@ -428,8 +428,10 @@ Content-Length: 107
             docroot = "/viewvc-static"
             authorizer = "svnauthz"
             isRootInUrl = "1"
-            // in standalone mode, add "roots" view in ViewVC
-            allowedViews += ", roots"
+            // if listing repositories, add "roots" view in ViewVC
+            if (server.advancedConfig().listParentPath) {
+                allowedViews += ", roots"
+            }
         }
 
         s = s.replace("__CSVN_SERVERMODE__", serverMode)
