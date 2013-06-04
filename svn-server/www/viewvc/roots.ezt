@@ -62,9 +62,9 @@
     } );
     
     // limit filter to column 1 only (the repo name)
-    filterElement= $('#datatable_filter').find("input")
+    filterElement= $('#dirlist_filter').find("input")
     filterElement.keyup( function () {
-        dt.fnFilter(filterElement.val(), 1);
+        dt.fnFilter(filterElement.val(), 0);
     } );
   } );
 </script>
