@@ -212,7 +212,7 @@ $('#bindInstructions').hide();
       </div>
     </g:form>             
   <g:javascript>
-  $('.page-header').html('<div style="float: right"><a href="advanced">Advanced Settings</a></div>' + $('.page-header').html());
+  $('.page-header').html('<div style="float: right"><a href="advanced"><g:message code="server.page.advanced.navLabel" /></a></div>' + $('.page-header').html());
   </g:javascript>
   </body>
 </html>

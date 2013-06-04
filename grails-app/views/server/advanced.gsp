@@ -41,6 +41,13 @@
     <g:propTextField bean="${config}" field="accessLogFormat" prefix="advancedConfiguration" sizeClass="span6"/>
     <g:propTextField bean="${config}" field="svnLogFormat" prefix="advancedConfiguration" sizeClass="span6"/>
    </fieldset>
+   <g:if test="${!isManagedMode && server.ldapEnabled}">
+     <fieldset>
+       <legend><small><g:message code="server.page.advanced.sectionHeader.ldap" /></small></legend>
+       <g:propTextField bean="${config}" field="ldapConnectionPoolTtl" prefix="advancedConfiguration" sizeClass="mini"/>
+       <g:propTextField bean="${config}" field="ldapTimeout" prefix="advancedConfiguration" sizeClass="mini"/>
+     </fieldset>
+   </g:if>
     <div class="form-actions">
       <g:actionSubmit action="updateAdvanced" value="${message(code:'server.page.edit.button.save')}" class="btn btn-primary"/>
       <button type="reset" class="btn"><g:message code="default.button.cancel.label" /></button>

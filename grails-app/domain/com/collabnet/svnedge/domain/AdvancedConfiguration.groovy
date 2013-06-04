@@ -36,6 +36,8 @@ class AdvancedConfiguration {
     boolean cacheRevProps = false
     boolean allowBulkUpdates = true
     boolean preferBulkUpdates = false
+    Integer ldapConnectionPoolTtl = null
+    Integer ldapTimeout = null
     
     static final String DEFAULT_SVN_REALM = 'CollabNet Subversion Repository'
     String svnRealm = DEFAULT_SVN_REALM
@@ -60,7 +62,9 @@ class AdvancedConfiguration {
             preferBulkUpdates: false,
             svnRealm: DEFAULT_SVN_REALM,
             accessLogFormat: DEFAULT_ACCESS_LOG_FORMAT,
-            svnLogFormat: DEFAULT_SVN_LOG_FORMAT
+            svnLogFormat: DEFAULT_SVN_LOG_FORMAT,
+            ldapConnectionPoolTtl: null,
+            ldapTimeout: null
         ]
     
     static constraints = {
@@ -70,6 +74,8 @@ class AdvancedConfiguration {
         accessLogFormat(nullable: true)
         compressionLevel(min:0, max: 9)
         inMemoryCacheSize(min:0)
+        ldapConnectionPoolTtl(nullable: true)
+        ldapTimeout(nullable: true)
     }
     
     void resetToDefaults() {

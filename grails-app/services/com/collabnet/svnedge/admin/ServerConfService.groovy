@@ -942,6 +942,14 @@ LoadModule authnz_ldap_module lib/modules/mod_authnz_ldap.so
 LDAPVerifyServerCert Off
 """
             }
+            
+            AdvancedConfiguration advConfig = server.advancedConfig()
+            if (advConfig.ldapConnectionPoolTtl > 0) {
+                conf += "LDAPConnectionPoolTTL ${advConfig.ldapConnectionPoolTtl}\n"
+            }
+            if (advConfig.ldapTimeout > 0) {
+                conf += "LDAPTimeout ${advConfig.ldapTimeout}\n"
+            }
         }
         conf
     }
