@@ -376,8 +376,7 @@ beans {
 }
 
 def overridesPath = "${baseDir}/data/conf/overrides.properties"
-if (new File(overridesPath).exists()) {
-    grails.config.locations = [
-        "file:${overridesPath}"
-    ]
+File f = new File(overridesPath)
+if (f.exists()) {
+    grails.config.locations = [ f.toURI().toString() ]
 }

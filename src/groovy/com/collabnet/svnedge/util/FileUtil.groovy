@@ -140,7 +140,7 @@ public class FileUtil {
         directory.eachFile { f ->
             String fullPath = f.canonicalPath
             // check for symlink, throw error if true
-            if (f.canonicalPath != f.absolutePath) {
+            if (!f.canonicalPath.equalsIgnoreCase(f.absolutePath.replace('.' + File.separator, ''))) {
                 throw new ZipException("The file appears to be a symlink and cannot be handled properly")
             }
             String relativePath = fullPath.substring(topLevelPathLength, fullPath.length())
