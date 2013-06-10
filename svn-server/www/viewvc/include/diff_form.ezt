@@ -13,7 +13,7 @@
 
 <form method="get" action="[diff_select_action]" id="diff_select">
 
-  <table cellpadding="2" cellspacing="0" class="table-condensed well">
+  <table cellpadding="2" cellspacing="0" class="table table-condensed well auto">
   <tr>
   <td>&nbsp;</td>
   <td>

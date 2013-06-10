@@ -32,7 +32,7 @@
 
 [# these should live in stylesheets]
 
-<table cellpadding="0" cellspacing="0" class="table-condensed table-bordered">
+<table cellpadding="0" cellspacing="0" class="table table-condensed table-bordered auto">
 [for changes]
  [is changes.type "change"][else]
   [if-any change_right][change_right][define change_right][end][end]
@@ -102,7 +102,7 @@
 
 <br/>
 <h4>Diff Legend</h4>
-<table class="table-condensed well" cellspacing="0">
+<table class="table table-condensed well auto" cellspacing="0">
 <tr>
  <td class="vc_diff_plusminus"><strong class="vc_diff_minus">&ndash;</strong></td>
  <td class="vc_diff_remove">Removed lines</td>

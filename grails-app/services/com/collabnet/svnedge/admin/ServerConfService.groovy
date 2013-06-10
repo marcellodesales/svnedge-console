@@ -866,9 +866,7 @@ ${getAuthBasic(server)}
      * @return absolute path to the appropriate template dir
      */
     private def getViewvcTemplateDir(server) {
-        return (server?.mode == ServerMode.STANDALONE) ?
-            ConfigUtil.viewvcTemplateDir() :
-            ConfigUtil.viewvcTemplateDirIntegrated()
+        return ConfigUtil.viewvcTemplateDir() 
     }
 
     private def getAuthHelperListen(server) {

@@ -4,7 +4,7 @@
 [# end]
 [include "include/header.ezt" "log"]
 
-<table class="table-condensed well">
+<table class="table table-condensed well auto">
 
 [if-any default_branch]
 <tr>

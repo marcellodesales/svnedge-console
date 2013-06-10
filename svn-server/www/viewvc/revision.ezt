@@ -53,7 +53,7 @@
   <div><a href="[first_changes_href]">Show only first [first_changes] changes...</div>
 [end]
 
-<table class="table-condensed well">
+<table class="table table-condensed well auto">
   <thead>
   <tr align="left">
     <th class="vc_header_sort">Path</th>

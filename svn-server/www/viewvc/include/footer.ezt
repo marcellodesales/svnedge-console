@@ -1,5 +1,14 @@
 
 </div> <!-- vc_view_main -->
-
+[is servermode "MANAGED"]
+  [is testmode "1"]
+  [else]
+    [if-any banner_header]
+    [else]
+      </div> <!-- vc_body -->
+    [end]
+  [end]
+[end]
+</div> <!-- .container-fluid -->
 </body>
 </html>

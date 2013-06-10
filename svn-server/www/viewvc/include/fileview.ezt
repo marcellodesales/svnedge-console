@@ -1,4 +1,4 @@
-<table class="well table-condensed">
+<table class="table table-condensed well auto">
 <tr>
 <td>Revision:</td>
 <td><strong>[if-any revision_href]<a href="[revision_href]">[rev]</a>[else][rev][end]</strong> [if-any vendor_branch] <em>(vendor branch)</em>[end]</td> 

@@ -36,7 +36,7 @@
 
 [if-any lines]
 <div id="vc_file">
-<table cellspacing="0" cellpadding="0" class="table-condensed table-bordered">
+<table cellspacing="0" cellpadding="0" class="table table-condensed table-bordered vc_table">
 <thead>
 <tr>
 <th class="vc_header">Line</th>

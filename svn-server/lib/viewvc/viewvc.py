@@ -1650,6 +1650,8 @@ def common_template_data(request, revision=None, mime_type=None):
 
     # added for TeamForge
     'banner_header': '',
+    'banner_header_head': '',
+    'banner_header_body': '',
     'testmode' : cfg.general.ctf_testmode,
     'app_server_root_url': cfg.general.csvn_app_server_root_url,
     'project_url': cfg.general.csvn_app_server_root_url + "/sf/scm/do/listRepositories/" + request.proj_path + "/scm",
@@ -1657,7 +1659,24 @@ def common_template_data(request, revision=None, mime_type=None):
   }
 
   if hasattr(cfg.general, 'header_html'):
-    templateData['banner_header'] = cfg.general.header_html
+    is_bootstrap = True
+    header_html = cfg.general.header_html
+    head_body_re = re.compile(r"<head>(.*)</head>.*<body>(.*)</body>", re.DOTALL)
+    m = head_body_re.search(header_html)
+    if (m):
+      head_html = m.group(1)
+      head_html = head_html.replace('href="/css/styles_new.css"', 'href="' +
+          cfg.general.csvn_app_server_root_url + '/css/styles_new.css"', 1)
+      head_html = head_html.replace('href="/sf-images/icons/favicon.ico"', 'href="' +
+          cfg.general.csvn_app_server_root_url + '/sf-images/icons/favicon.ico"', 1)
+      body_html = m.group(2)
+      templateData['banner_header_head'] = head_html
+      templateData['banner_header_body'] = body_html
+      if body_html.find('YAHOO') > 0:
+        is_bootstrap = None
+    else:
+      templateData['banner_header'] = header_html
+    templateData['is_bootstrap'] = is_bootstrap
 
   data = ezt.TemplateData(templateData)
 
