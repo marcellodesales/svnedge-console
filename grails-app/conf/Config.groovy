@@ -63,7 +63,7 @@ grails.validateable.classes = [com.collabnet.svnedge.controller.integration.CtfC
 def baseDir = new File(new File(".").getAbsoluteFile(), "svn-server").absolutePath
 svnedge {
     defaultHighPort = 18080
-    defaultApacheAuthHelperPort = 49152
+    defaultApacheAuthHelperPort = 50123
     osName = System.getProperty("os.name").substring(0,3)
     appHome = baseDir
     if (osName == "Win") {
