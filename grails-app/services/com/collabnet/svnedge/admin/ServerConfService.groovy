@@ -407,7 +407,6 @@ Content-Length: 107
         s = s.replace("__CSVN_APPLICATION_JS_FILENAME__", 
                 'application-' + grailsApplication.metadata['app.applicationJs.version'] +
                 '.js')
-        s = s.replace("__CSVN_SVN_BASE_URL__", server.svnURL())
         if (server.forceUsernameCase) {
             s = s.replace("#force_username_case = ", "force_username_case = lower")
         }
@@ -435,7 +434,9 @@ Content-Length: 107
         }
 
         s = s.replace("__CSVN_SERVERMODE__", serverMode)
-        s = s.replace("__CSVN_APP_SERVER_ROOT_URL__", appServerUrl)
+        def rootUrls =  appServerUrl + '\n' +
+                'csvn_svn_base_url=' + server.svnURL()
+        s = s.replace("__CSVN_APP_SERVER_ROOT_URL__", rootUrls)        
         s = s.replace("__CSVN_VIEWVC_DOCROOT__", docroot)
         s = s.replace("__CSVN_VIEWVC_AUTHORIZER__", authorizer)
         s = s.replace("__CSVN_ROOT_IN_URL__", isRootInUrl)
