@@ -376,3 +376,7 @@ table.fixed td {
 #dirlist tr.table_header th {
   background-color: #eee;
 }
+
+#revision_tag {
+  padding: 8px;
+}

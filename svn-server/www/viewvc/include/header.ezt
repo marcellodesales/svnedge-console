@@ -199,13 +199,9 @@ Repository Replica Browser
 
 [if-any nav_path]
 <div id="vc_current_path" class="row-fluid">
-[define spanX]12[end]
+<div class="span12">
 [if-any rev]
-  [define spanX]12[end]
-[end]
-<div class="span[spanX]">
-[if-any rev]
-  <p class="pull-right">
+  <p id="revision_tag" class="pull-right">
     <b class="icon-tag"></b>&nbsp;<a href="[revision_href]">r[rev]</a>
   </p>
 [end]
