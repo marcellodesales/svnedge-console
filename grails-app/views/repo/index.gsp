@@ -59,7 +59,9 @@ ${server.adminAltContact}<br />
   </g:if>
 
 <li><g:message code="repository.page.index.extensions" args="${[createLink(controller: 'ocn', action: 'index')]}"/></li>
-<li><g:message code="repository.page.index.selfProfile" args="${[createLink(controller: 'user', action: 'showSelf')]}"/></li>
+<g:if test="${!isLdapUser}">
+  <li><g:message code="repository.page.index.selfProfile" args="${[createLink(controller: 'user', action: 'showSelf')]}"/></li>
+</g:if>
 </ul>
 </p>
 </g:if>

@@ -200,29 +200,26 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
         assertTrue "httpd.pid was not found", httpdPidFile.exists()
 
         def confDir = ConfigUtil.confDirPath()
-        File svnHttpdFile = new File(confDir, "csvn_main_httpd.conf")
-        assertTrue "csvn_main_httpd file does not exist", svnHttpdFile.exists()
-        def svnHttpdFileContents = svnHttpdFile.getText()
-
-        def expectedDirective = "AuthLDAPUrl \"ldap://${server.ldapServerHost}/${server.ldapAuthBasedn}?${server.ldapLoginAttribute}?${server.ldapSearchScope}\" \"NONE\""
-        assertTrue "Ldap configuration AuthLDAPUrl is missing",
-            svnHttpdFileContents.indexOf(expectedDirective) >= 0
-
-        expectedDirective = "AuthLDAPBindDN \"${server.ldapAuthBinddn}\""
-        assertTrue "Ldap configuration AuthLDAPBindDN is missing",
-            svnHttpdFileContents.indexOf(expectedDirective) >= 0
-
-        expectedDirective = "AuthLDAPBindPassword \"${server.ldapAuthBindPassword}\""
-        assertTrue "Ldap configuration AuthLDAPBindPassword is missing",
-            svnHttpdFileContents.indexOf(expectedDirective) >= 0
-
-        svnHttpdFile = new File(confDir, "svn_viewvc_httpd.conf")
+        File svnHttpdFile = new File(confDir, "svn_viewvc_httpd.conf")
         assertTrue "svn_viewvc_httpd file does not exist", svnHttpdFile.exists()
-        svnHttpdFileContents = svnHttpdFile.getText()
-        expectedDirective = "AuthBasicProvider csvn-file-users ldap-users"
+        def svnHttpdFileContents = svnHttpdFile.getText()
+        def expectedDirective = "AuthBasicProvider file ldap"
         assertTrue "Ldap Auth provider configuration is missing ",
             svnHttpdFileContents.indexOf(expectedDirective) >= 0
 
+        expectedDirective = "AuthLDAPUrl \"ldap://${server.ldapServerHost}/${server.ldapAuthBasedn}?${server.ldapLoginAttribute}?${server.ldapSearchScope}\" \"NONE\""
+        assertTrue "Ldap configuration AuthLDAPUrl is missing",
+                svnHttpdFileContents.indexOf(expectedDirective) >= 0
+
+        expectedDirective = "AuthLDAPBindDN \"${server.ldapAuthBinddn}\""
+        assertTrue "Ldap configuration AuthLDAPBindDN is missing",
+                svnHttpdFileContents.indexOf(expectedDirective) >= 0
+
+        expectedDirective = "AuthLDAPBindPassword \"${server.ldapAuthBindPassword}\""
+        assertTrue "Ldap configuration AuthLDAPBindPassword is missing",
+                svnHttpdFileContents.indexOf(expectedDirective) >= 0
+    
+    
         assertEquals "Tried to start already started server. Should return -1",
             -1, lifecycleService.startServer()
 

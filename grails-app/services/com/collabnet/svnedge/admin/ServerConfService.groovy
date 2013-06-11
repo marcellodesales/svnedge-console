@@ -531,9 +531,7 @@ Content-Length: 107
         def serverName = "${hostname}:${port}"
         def serverPort = "${port}"
         
-        def ldapConfSnippet = getLdapHttpdConf(server)
-        def fileAuthConfSnippet = (server.managedByCtf()) ? 
-            "" : getFileAuthHttpdConf(server)
+        def ldapConfSnippet = getLdapServerHttpdConf(server)
         def sslSnippet = getSSLHttpdConf(server)
         def conf = """${DONT_EDIT}
 ServerAdmin "${server.adminEmail}"
@@ -542,7 +540,6 @@ Listen ${serverPort}
 ${getAuthHelperListen(server)}
 ${getDefaultHttpdSnippets()}
 ${ldapConfSnippet}
-${fileAuthConfSnippet}
 ${sslSnippet}
 """
         new File(confDirPath(), "csvn_main_httpd.conf").write(conf)
@@ -931,12 +928,11 @@ MaxKeepAliveRequests 10000
         ldapUrl
     }
 
-    private def getLdapHttpdConf(server) {
+    private def getLdapLocationHttpdConf(server) {
         def conf = ""
         if (server.ldapEnabled) {
             def ldapURL = getLdapURL(server)
-            conf = """<AuthnProviderAlias ldap ldap-users>
-  AuthLDAPUrl "${ldapURL}" "${server.ldapSecurityLevel}"
+            conf = """  AuthLDAPUrl "${ldapURL}" "${server.ldapSecurityLevel}"
 """
 
             if (server.ldapAuthBinddn && server.ldapAuthBindPassword) {
@@ -945,15 +941,16 @@ MaxKeepAliveRequests 10000
   AuthLDAPBindPassword "${server.ldapAuthBindPassword}"
 """
             }
-            conf = """${conf}
-</AuthnProviderAlias>
-"""
+        }
+        return conf
+    }
+
+    private getLdapServerHttpdConf(server) {
+        def conf = ''            
+        if (server.ldapEnabled) {
             if (!server.ldapServerCertVerificationNeeded) {
-            conf = """${conf}
-LDAPVerifyServerCert Off
-"""
+                conf += "LDAPVerifyServerCert Off\n"
             }
-            
             AdvancedConfiguration advConfig = server.advancedConfig()
             if (advConfig.ldapConnectionPoolTtl > 0) {
                 conf += "LDAPConnectionPoolTTL ${advConfig.ldapConnectionPoolTtl}\n"
@@ -969,9 +966,7 @@ LDAPVerifyServerCert Off
         def conf = ""
         if (server.fileLoginEnabled) {
             conf = """
-<AuthnProviderAlias file csvn-file-users>
   AuthUserFile "${confDirPath()}/svn_auth_file"
-</AuthnProviderAlias>
 """
         }
         conf
@@ -1095,14 +1090,16 @@ SSLSessionCache       "shmcb:${ConfigUtil.dataDirPath()}/run/ssl_scache(512000)"
     private def getAuthBasic(server) {
         def authProviders = ""
         if (server.fileLoginEnabled) {
-            authProviders = "csvn-file-users"
+            authProviders = "file"
         }
         if (server.ldapEnabled) {
-            authProviders += " ldap-users"
+            authProviders += " ldap"
         }
         def conf = """  AuthType Basic
   AuthName "${server.advancedConfig().svnRealm}"
   AuthBasicProvider ${authProviders}
+${getLdapLocationHttpdConf(server)}
+${getFileAuthHttpdConf(server)}
 """
         conf
     }    

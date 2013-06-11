@@ -61,8 +61,10 @@ class RepoController {
         } else {        
             request.info = message(code: 'repository.page.index.welcome')
         }
+        def userId = loggedInUserInfo(field: 'id') as Integer
         return [server: Server.getServer(), isStarted: lifecycleService.isStarted(),
-                isAdmin: isAdmin, isSystemAdmin: isSystemAdmin
+                isAdmin: isAdmin, isSystemAdmin: isSystemAdmin,
+                isLdapUser: User.get(userId)?.isLdapUser()
                 ]
     }
 

@@ -71,6 +71,7 @@ class RepoControllerTests extends AbstractSvnEdgeControllerTests {
         // make sure the supposedly existing repo is in the way
         svnRepoService.createRepository(repoExisting, true)
 
+        controller.metaClass.loggedInUserInfo = { return "1" }
     }
 
     protected void tearDown() {
