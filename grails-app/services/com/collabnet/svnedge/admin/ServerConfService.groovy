@@ -576,14 +576,19 @@ LoadModule log_config_module lib/modules/mod_log_config.so
 LoadModule cgi_module lib/modules/mod_cgi.so
 LoadModule dir_module lib/modules/mod_dir.so
 LoadModule mime_module lib/modules/mod_mime.so
-LoadModule deflate_module lib/modules/mod_deflate.so
 """
+        File f = new File(ConfigUtil.appHome(), 'lib/modules/mod_deflate.so')
+        if (f.exists()) {
+            conf += "LoadModule deflate_module lib/modules/mod_deflate.so\n"
+        }
 		if (!isWindows()) {
 			conf += "LoadModule unixd_module lib/modules/mod_unixd.so\n"
 		}
         
         if (server.useSsl) {
-            conf += "LoadModule socache_shmcb_module lib/modules/mod_socache_shmcb.so\n"
+            conf += """LoadModule ssl_module lib/modules/mod_ssl.so
+LoadModule socache_shmcb_module lib/modules/mod_socache_shmcb.so
+"""
         }
 
         if (server.mode == ServerMode.REPLICA) {
@@ -597,6 +602,11 @@ LoadModule proxy_http_module lib/modules/mod_proxy_http.so
         if (ctfMode) {
             conf += 
 """LoadModule authnz_ctf_module lib/modules/mod_authnz_ctf.so
+"""
+        }
+        if (server.ldapEnabled) {
+            conf += """LoadModule ldap_module lib/modules/mod_ldap.so
+LoadModule authnz_ldap_module lib/modules/mod_authnz_ldap.so
 """
         }
         if (isLdapLoginEnabled(server) || ctfMode) {
@@ -774,7 +784,11 @@ RedirectMatch ^(${contextPath})\$ \$1/
    SVNReposName "${advConfig.svnRealm}"
 """
         if (advConfig.compressionLevel > 0) {
-            conf += '  SetOutputFilter DEFLATE\n'
+            conf += """
+  <IfModule deflate_module>
+    SetOutputFilter DEFLATE
+  </IfModule>
+"""
         }
         if (!advConfig.allowBulkUpdates) {
             conf += '  SVNAllowBulkUpdates Off\n'
@@ -920,9 +934,7 @@ MaxKeepAliveRequests 10000
         def conf = ""
         if (server.ldapEnabled) {
             def ldapURL = getLdapURL(server)
-            conf = """LoadModule ldap_module lib/modules/mod_ldap.so
-LoadModule authnz_ldap_module lib/modules/mod_authnz_ldap.so
-<AuthnProviderAlias ldap ldap-users>
+            conf = """<AuthnProviderAlias ldap ldap-users>
   AuthLDAPUrl "${ldapURL}" "${server.ldapSecurityLevel}"
 """
 
@@ -1024,7 +1036,6 @@ LDAPVerifyServerCert Off
         def confDir = confDirPath()
         if (server.useSsl) {
             conf = """
-LoadModule ssl_module lib/modules/mod_ssl.so
 SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
 SSLCertificateFile    "${confDir}/server.crt"
