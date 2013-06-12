@@ -941,6 +941,9 @@ MaxKeepAliveRequests 10000
   AuthLDAPBindPassword "${server.ldapAuthBindPassword}"
 """
             }
+            if (isWindows()) {
+                conf += "  LDAPReferrals Off\n"
+            }
         }
         return conf
     }
