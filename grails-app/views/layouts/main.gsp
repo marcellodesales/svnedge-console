@@ -182,7 +182,7 @@
             <g:if test="${flash['info']}">
                 <div class="alert alert-info">${flash['info']}</div>
             </g:if>
-            <g:elseif test="${request['unfiltered_info']}">
+            <g:elseif test="${flash['unfiltered_info']}">
                 <div class="alert alert-info"><%=flash['unfiltered_info']%></div>
             </g:elseif>
             <g:if test="${flash.warn}">

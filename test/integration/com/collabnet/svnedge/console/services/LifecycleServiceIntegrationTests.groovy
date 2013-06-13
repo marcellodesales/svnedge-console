@@ -298,12 +298,8 @@ class LifecycleServiceIntegrationTests extends GrailsUnitTestCase {
     }
 
     private def copyConfFiles(origConfDirPath, confDir) {
-        String s = new File(origConfDirPath, "viewvc.conf.dist").getText()
-        new File(confDir, "viewvc.conf.dist").write(s)
-        s = new File(origConfDirPath, "mime.types").getText()
+        def s = new File(origConfDirPath, "mime.types").getText()
         new File(confDir, "mime.types").write(s)
-        s = new File(origConfDirPath, "httpd.conf.dist").getText()
-        new File(confDir, "httpd.conf.dist").write(s)
     }
 
     private def echoFileContents(File logfile) {

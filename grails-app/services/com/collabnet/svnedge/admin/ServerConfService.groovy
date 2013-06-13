@@ -384,12 +384,12 @@ Content-Length: 107
         writeMiscellaneousConf()
         writeSvnClientConf()
         File teamforgePropsTemplate =
-            new File(confDirPath, "teamforge.properties.dist")
+            new File(ConfigUtil.distDir(), "teamforge.properties.dist")
         if (teamforgePropsTemplate.exists()) {
             writeTeamforgeConf(server, teamforgePropsTemplate)
         }
 
-        String s = new File(confDirPath, "viewvc.conf.dist").getText()
+        String s = new File(ConfigUtil.distDir(), "viewvc.conf.dist").getText()
         s = s.replace("__CSVN_REPO_ROOT__", server.repoParentDir)
         s = s.replace("__CSVN_CONF__", confDirPath)
         s = s.replace("__CSVN_VIEWVC_TEMPLATES__", 
@@ -1341,11 +1341,22 @@ ${getFileAuthHttpdConf(server)}
      * the Apache 2.4 dist version.
      */
     private void backupAndOverwriteHttpdConfFor2Dot2() {
-        File confFile = new File(confDirPath(), "httpd.conf")
-        File bkupFile = new File(confDirPath(), "httpd-2.2.conf")
+        def confDirPath = confDirPath()
+        File confFile = new File(confDirPath, "httpd.conf")
+        String originalContents = confFile.text?.trim()
+        File bkupFile = new File(confDirPath, "httpd-2.2.conf")
         archiveFile(bkupFile)
         confFile.renameTo(bkupFile)
         writeHttpdConf(confFile)
+
+        def distFile = new File(ConfigUtil.distDir(), "httpd-2.2.conf.dist")
+        String s = distFile.text.trim()
+        s = s.replace("__CSVN_HOME__", ConfigUtil.appHome())
+        s = s.replace("__CSVN_CONF__", ConfigUtil.confDirPath())
+        if (s != originalContents && s.replace('TraceEnable Off\n', '') != originalContents) {
+            File tsFile = new File(confDirPath, 'httpd-2.4-upgrade-timestamp')
+            tsFile.text = String.valueOf(System.currentTimeMillis())
+        }
     }
 
 

@@ -594,6 +594,12 @@ class ServerController {
         flash.message = message(code:"server.action.advancedRestoreDefaults")
         redirect(action: 'advanced')
     }
+    
+    def removeUpgradeMessage = {
+        File tsFile = new File(ConfigUtil.confDirPath(), 'httpd-2.4-upgrade-timestamp')
+        tsFile.delete()
+        redirect(controller: 'status', action: 'index')
+    }
 }
 
 class CtfCredentialCommand {

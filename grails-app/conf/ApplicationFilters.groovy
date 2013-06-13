@@ -21,9 +21,11 @@ import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.User
 import com.collabnet.svnedge.domain.Wizard
+import com.collabnet.svnedge.util.ConfigUtil
 import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class ApplicationFilters {
 
@@ -265,6 +267,35 @@ class ApplicationFilters {
                     }
                 }
                 return
+            }
+        }
+        
+        /**
+         * Displays an upgrade message for users who made customizations to their 2.2 httpd.conf
+         */
+        apache24Upgrade(controller: '*', action: '*') {
+            after = {model ->
+                if (authenticateService.ifAnyGranted("ROLE_ADMIN,ROLE_ADMIN_SYSTEM")) {
+                    File tsFile = new File(ConfigUtil.confDirPath(), 'httpd-2.4-upgrade-timestamp')
+                    if (tsFile.exists()) {
+                        boolean isMessage = true
+                        try {
+                            long then = Long.valueOf(tsFile.text())
+                            isMessage = System.currentTimeMillis - then < 3600 * 24 * 7
+                        } catch (Throwable t) {
+                            log.debug("Unable to read upgrade timestamp assuming it is still recent")
+                        }
+                        if (isMessage) {
+                            def g = new ApplicationTagLib()
+                            request.unfiltered_info = app.getMainContext().getMessage(
+                                    "filter.apache24.upgrade", 
+                                    [g.createLink(controller: 'server', action: 'advanced'), 
+                                     g.createLink(controller: 'server', 
+                                                  action: 'removeUpgradeMessage')] as String[], 
+                                    request.locale)
+                        }
+                    }
+                }
             }
         }
     }

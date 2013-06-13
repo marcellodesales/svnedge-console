@@ -1,0 +1,73 @@
+ServerRoot "__CSVN_HOME__"
+
+LoadModule dav_module lib/modules/mod_dav.so
+LoadModule authz_host_module lib/modules/mod_authz_host.so
+LoadModule alias_module lib/modules/mod_alias.so
+LoadModule auth_basic_module lib/modules/mod_auth_basic.so
+LoadModule authn_alias_module lib/modules/mod_authn_alias.so
+LoadModule authn_file_module lib/modules/mod_authn_file.so
+LoadModule env_module lib/modules/mod_env.so
+LoadModule log_config_module lib/modules/mod_log_config.so
+LoadModule cgi_module lib/modules/mod_cgi.so
+LoadModule actions_module lib/modules/mod_actions.so
+LoadModule asis_module lib/modules/mod_asis.so
+LoadModule authn_default_module lib/modules/mod_authn_default.so
+LoadModule authz_default_module lib/modules/mod_authz_default.so
+LoadModule authz_groupfile_module lib/modules/mod_authz_groupfile.so
+LoadModule authz_user_module lib/modules/mod_authz_user.so
+LoadModule dav_fs_module lib/modules/mod_dav_fs.so
+LoadModule dir_module lib/modules/mod_dir.so
+LoadModule include_module lib/modules/mod_include.so
+LoadModule mime_module lib/modules/mod_mime.so
+LoadModule negotiation_module lib/modules/mod_negotiation.so
+LoadModule setenvif_module lib/modules/mod_setenvif.so
+LoadModule dav_svn_module     lib/modules/mod_dav_svn.so
+LoadModule authz_svn_module   lib/modules/mod_authz_svn.so
+
+DocumentRoot "www"
+DirectoryIndex index.html
+
+<Directory />
+  Options FollowSymLinks
+  AllowOverride None
+  Order deny,allow
+  Allow from all
+</Directory>
+
+<Location />
+  AuthBasicAuthoritative Off
+  AuthUserFile /dev/null
+</Location>
+
+<Directory "www">
+  Options Indexes FollowSymLinks
+  AllowOverride None
+  Order allow,deny
+  Allow from all
+</Directory>
+
+#
+# The following lines prevent .htaccess and .htpasswd files from being 
+# viewed by Web clients. 
+#
+<FilesMatch "^\.ht">
+    Order allow,deny
+    Deny from all
+    Satisfy All
+</FilesMatch>
+
+Include "__CSVN_CONF__/csvn_main_httpd.conf"
+
+LimitXMLRequestBody 0
+ServerSignature  Off
+ServerTokens  Prod
+TraceEnable Off
+
+TypesConfig "__CSVN_CONF__/mime.types"
+DefaultType text/plain
+AddType application/x-compress .Z
+AddType application/x-gzip .gz .tgz
+
+Include "__CSVN_CONF__/csvn_logging.conf"
+
+Include "__CSVN_CONF__/svn_viewvc_httpd.conf"

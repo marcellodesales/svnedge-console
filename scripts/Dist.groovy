@@ -59,11 +59,6 @@ target(createDistributionStructure: 'Creates the distribution structure') {
     Ant.delete(dir: distDir)
     Ant.mkdir(dir: distDir)
 
-    libDir = distDir + "/lib"
-
-    tmpDir = distDir + "/tmp"
-    Ant.mkdir(dir: tmpDir )
-
     if (osName == "windows") {
         // On Windows, put all files in updates directory
         updatesDir = "${distDir}/updates"
@@ -76,7 +71,8 @@ target(createDistributionStructure: 'Creates the distribution structure') {
     }
     webAppsDir = distDir + "/appserver/webapps"
     Ant.mkdir(dir: webAppsDir)
-    Ant.mkdir(dir: distDir + "/lib")
+    libDir = distDir + "/lib"
+    Ant.mkdir(dir: libDir)
 
     downloadArtifacts()
     rearrangingArtifacts()
@@ -304,19 +300,11 @@ target(rearrangingArtifacts: 'Moves downloaded artifacts to dist directory') {
     }
     // Make logs directory.  App needs it to start
     Ant.mkdir(dir: "${distDir}/temp-data/logs")
-    Ant.delete(dir: tmpDir)
 
     // create and populate the dist directory which contains our base 
     // configuration files these will be installed on users system for 
     // backup and reference purposes
     distdataDir = "${distDir}/dist"
-    Ant.mkdir(dir: distdataDir)
-    Ant.copy(file: "${distDir}/temp-data/conf/httpd.conf.dist",
-         todir: "${distdataDir}")
-    Ant.copy(file: "${distDir}/temp-data/conf/viewvc.conf.dist",
-         todir: "${distdataDir}")
-    Ant.copy(file: "${distDir}/temp-data/conf/teamforge.properties.dist",
-         todir: "${distdataDir}")
     Ant.copy(file: "${distDir}/temp-data/conf/csvn-wrapper.conf",
          todir: "${distdataDir}")
     if (osName == "linux" || osName == "solaris") {
