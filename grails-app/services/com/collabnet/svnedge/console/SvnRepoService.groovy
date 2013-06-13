@@ -24,6 +24,7 @@ import com.collabnet.svnedge.admin.RepoDumpJob
 import com.collabnet.svnedge.admin.RepoLoadJob
 import com.collabnet.svnedge.admin.RepoVerifyJob
 import com.collabnet.svnedge.console.SchedulerBean.Frequency
+import com.collabnet.svnedge.domain.AdvancedConfiguration;
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.ServerMode
@@ -1694,13 +1695,16 @@ class SvnRepoService extends AbstractSvnEdgeService {
      */
     def listMatchingRepositories(String query, String username, boolean sortByName = false,
             int maxUnfilteredResults = 100, int maxAuthzResults = 20) {
-        // repo names might contain _ and we'll escape % just for completeness
-        query = query.replace('_', '[_]').replace('%', '[%]')
-        def allRepos = Repository.findAllByNameLike('%' + query + '%',
-                sortByName ? [sort: 'name'] : null)
-        if (allRepos.size() <= maxUnfilteredResults) {
-            def repos = filterAuthorizedRepositories(allRepos, username, maxAuthzResults + 1)
-            return (repos?.size() > maxAuthzResults) ? null : repos
+        AdvancedConfiguration advConfig = AdvancedConfiguration.config
+        if (advConfig.listParentPath) {
+            // repo names might contain _ and we'll escape % just for completeness
+            query = query.replace('_', '[_]').replace('%', '[%]')
+            def allRepos = Repository.findAllByNameLike('%' + query + '%',
+                    sortByName ? [sort: 'name'] : null)
+            if (allRepos.size() <= maxUnfilteredResults) {
+                def repos = filterAuthorizedRepositories(allRepos, username, maxAuthzResults + 1)
+                return (repos?.size() > maxAuthzResults) ? null : repos
+            }
         }
         return null
     }

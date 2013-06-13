@@ -66,6 +66,7 @@ ${server.adminAltContact}<br />
 </p>
 </g:if>
 
+<g:if test="${server.advancedConfig().listParentPath}">
 <g:javascript>
 var prevQuery = '';
 var typeAheadSource = [];
@@ -110,5 +111,6 @@ $('#root').keyup( function() {
  }
 });
 </g:javascript>
+</g:if>
 </body>
 </html>
