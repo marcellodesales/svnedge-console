@@ -155,8 +155,7 @@ table.vc_table {
   margin-bottom: 20px;
 }
 
-[class^="icon-"],
-[class*=" icon-"] {
+.icon-tag {
   display: inline-block;
   width: 14px;
   height: 14px;
