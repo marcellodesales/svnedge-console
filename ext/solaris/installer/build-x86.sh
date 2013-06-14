@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION=4.0.0
+VERSION=4.1.0
 OS=solaris-x86
 PKG=/u1/hudson/pkg-tools/bin/pkg
 BUILD_TEMP=/u1/hudson/${OS}/trunk
