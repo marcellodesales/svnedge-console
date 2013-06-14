@@ -519,19 +519,16 @@ Content-Length: 107
     }
 
     private def writeMainConf(server) {
-        def hostname, port, scheme
+        def hostname, port
         if (server) {
             hostname = server.hostname
             port = String.valueOf(server.port)
-            scheme = server.useSsl ? 'https' : 'http'
-
         } else {
             def config = ConfigurationHolder.config
             hostname = networkingService.hostname
             port = String.valueOf(config.svnedge.defaultHighPort)
-            scheme = 'http'
         }        
-        def serverName = "${scheme}://${hostname}:${port}"
+        def serverName = "${hostname}"
         def serverPort = "${port}"
         
         def ldapConfSnippet = getLdapServerHttpdConf(server)
