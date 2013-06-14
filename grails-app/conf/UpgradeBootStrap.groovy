@@ -204,8 +204,8 @@ class UpgradeBootStrap {
         }
 
         Server server = Server.getServer()
-        if (!server || server.mode == ServerMode.STANDALONE) {
-            log.info("4.0.0 update is not needed in standalone mode.")
+        if (!server || server.mode != ServerMode.MANAGED) {
+            log.info("4.0.0 update is only needed in managed mode.")
         } else {
             log.info("Applying 4.0.0 updates")
             
