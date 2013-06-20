@@ -19,8 +19,8 @@
   var aDataSet = [
   <g:each in="${userInstanceList}" status="i" var="person">
       ['${person.id}|${person.username}',
-        '<%= JavaScriptUtils.javaScriptEscape(person.realUserName) %>',
-        '<%= JavaScriptUtils.javaScriptEscape(person.description) %>']<g:if test="${i < (userInstanceList.size() - 1)}">,</g:if>
+        '${JavaScriptUtils.javaScriptEscape(person.realUserName)}',
+        '${JavaScriptUtils.javaScriptEscape(person.description)}']<g:if test="${i < (userInstanceList.size() - 1)}">,</g:if>
   </g:each>
   ];
   </script>
