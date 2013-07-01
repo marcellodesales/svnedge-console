@@ -24,6 +24,7 @@ import org.springframework.security.userdetails.*
 import org.codehaus.groovy.grails.plugins.springsecurity.GrailsUserImpl
 
 import org.apache.commons.logging.LogFactory
+import com.collabnet.svnedge.domain.AdvancedConfiguration
 import com.collabnet.svnedge.domain.Role 
 import com.collabnet.svnedge.domain.Server 
 import com.collabnet.svnedge.domain.User
@@ -259,7 +260,9 @@ class CsvnAuthenticationProvider implements AuthenticationProvider {
             Header h = method.getResponseHeader("WWW-Authenticate")
             String authHeader = h?.value
 
-            if (statusCode == 401 && authHeader?.contains(AUTH_REALM)) {
+            AdvancedConfiguration advConfig = AdvancedConfiguration.getConfig()
+            def authRealm = advConfig.svnRealm ?: AUTH_REALM
+            if (statusCode == 401 && authHeader?.contains(authRealm)) {
                 return true
             }
         }
