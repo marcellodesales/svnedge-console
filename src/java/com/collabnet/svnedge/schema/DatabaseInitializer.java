@@ -103,7 +103,8 @@ public class DatabaseInitializer implements InitializingBean {
             new MS017AddRepositoryVerifyOk(),
             new MS018ServerDropUseHttpV2(),
             new MS019AddLogConfiguration(),
-            new MS020AddAdvancedConfiguration()
+            new MS020AddAdvancedConfiguration(),
+            new MS021DropVersionFromAdvConfig()
         };
     }
 

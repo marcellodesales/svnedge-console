@@ -22,7 +22,9 @@ package com.collabnet.svnedge.domain
  * We expect there to be only one AdvancedConfiguration defined.
  */
 class AdvancedConfiguration {
-    
+    static mapping = {
+        version false
+    }
     boolean autoVersioning = false
     boolean listParentPath = true
     int compressionLevel = 5
