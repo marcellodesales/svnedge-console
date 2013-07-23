@@ -696,10 +696,21 @@ public class CtfRemoteClientService extends AbstractSvnEdgeService {
 
         try {
             def soap = this.makeScmListenerClient(ctfUrl)
+            boolean useSsl = replicaProps.HostSSL as boolean
+            def consolePort = replicaProps.ConsolePort
+            def serverPort = replicaProps.HostPort
+            if (!consolePort && useSsl) {
+                // For development console does not have ssl enabled, but CTF will use
+                // https. So configure apache server as ssl termination
+                // Add to httpd.conf:
+                // RewriteRule ^/csvn/(.*) http://localhost:8080/csvn/$1 [P]
+                // ProxyPassReverse / http://localhost:8080/
+                consolePort = serverPort
+            }
             def replicaId = (String) soap.invoke("addExternalSystemReplica", [userSessionId,
                 masterSystemId, name, description, comment, replicaProps.HostName, 
-                replicaProps.ConsolePort as int, replicaProps.HostPort as int, 
-                replicaProps.HostSSL as boolean, replicaProps.ViewVCContextPath])
+                consolePort as int, serverPort as int, 
+                useSsl, replicaProps.ViewVCContextPath])
             return replicaId
 
         } catch (AxisFault e) {
