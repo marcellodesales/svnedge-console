@@ -7,36 +7,29 @@
   <body>
 
     <content tag="title">
-      <g:message code="status.page.certDetails.label" />
+      <g:message code="status.page.showCertificate.label" />
     </content>
 
   <g:form method="post">
-      <table class="table table-striped table-bordered table-condensed">
-        <tbody>
-        <tr>
-          <td><strong><g:message code="status.page.hostname.label" /></strong></td>
-          <td>${certHostname}</td>
-        </tr>
-        <tr>
-          <td><strong><g:message code="status.page.certValidity.label" /></strong></td>
-          <td>${certValidity}</td>
-        </tr>
-        <tr>
-          <td><strong><g:message code="status.page.certIssuer.label" /></strong></td>
-          <td>${certIssuer}</td>
-        </tr>
-        <tr>
-          <td><strong><g:message code="status.page.fingerPrint.label" /></strong></td>
-          <td>${certFingerPrint}</td>
-        </tr>
-        </tbody>
-      </table>
-      <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
-        <div class="pull-right">
-          <g:actionSubmit action="acceptCertificate" value="${message(code:'status.page.validate.button')}" class="btn btn-primary"/>
-        </div>
-      </g:ifAnyGranted>
-      <input type="hidden" name="currentlyAcceptedFingerPrint" value="${certFingerPrint}">
+  
+  <p><g:message code="showCertificate.page.p1" /></p>
+  <code>
+  ${svnCommand}
+  </code>
+  <br />
+  <br />
+  <p><g:message code="showCertificate.page.p2" /></p>
+  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
+    <g:actionSubmit action="index" value="${message(code:'showCertificate.page.validateCertViaSvn.button')}" class="btn btn-primary"/>
+  </g:ifAnyGranted>
+  <br />
+  <br />
+  <br />
+  <p><g:message code="showCertificate.page.alternate" /></p>
+  <g:ifAnyGranted role="ROLE_ADMIN,ROLE_ADMIN_SYSTEM">
+    <g:actionSubmit action="acceptCertificate" value="${message(code:'showCertificate.page.skipValidation.button')}" class="btn"/>
+  </g:ifAnyGranted>
+      
   </g:form>
   </body>
 </html>

@@ -21,6 +21,7 @@ package com.collabnet.svnedge.integration.command.impl
 import com.collabnet.svnedge.domain.Repository
 import com.collabnet.svnedge.domain.Server
 import com.collabnet.svnedge.domain.integration.CtfServer
+import com.collabnet.svnedge.domain.integration.ReplicaConfiguration
 import com.collabnet.svnedge.domain.integration.ReplicatedRepository
 import com.collabnet.svnedge.domain.integration.RepoStatus
 import com.collabnet.svnedge.integration.command.AbstractRepositoryCommand
@@ -91,6 +92,7 @@ public class CopyRevpropsCommand extends AbstractRepositoryCommand
                 "--source-username", username, "--source-password", password,
                 "--non-interactive", "--no-auth-cache", "--config-dir",
                 ConfigUtil.svnConfigDirPath()])
+        appendCertFlag(command, ReplicaConfiguration.currentConfig, Server.server)
 
         executeShellCommand(command)
         log.info("Done syncing repoPath '${repoPath}'.")

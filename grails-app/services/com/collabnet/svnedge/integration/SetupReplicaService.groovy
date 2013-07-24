@@ -399,7 +399,7 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
     /**
      * This function checks whether the issuer is trusted or not.
      */
-    private def checkIssuer(String svnUrl, String username, String password) {
+    public def checkIssuer(String svnUrl, String username, String password) {
        /*
         * Command to check self-signed cert or not.
         * It is non-interactive otherwise it may throw up either
@@ -408,10 +408,9 @@ class SetupReplicaService  extends AbstractSvnEdgeService {
         def command = [ConfigUtil.svnPath(), "ls", svnUrl,
                        "--non-interactive", "--username", username,
                        "--password", password, "--config-dir", ConfigUtil.svnConfigDirPath()]
-        String[] commandOutput =
-            commandLineService.execute(command.toArray(new String[0]), null, null, true)
-
-        return commandOutput[2].find("issuer is not trusted")
+        String[] commandOutput = commandLineService
+                .execute(command.toArray(new String[0]), null, null, true)
+        return commandOutput[2].find("issuer is not trusted|certificate untrusted")
     }
 
     def saveCertificate(String viewedFingerprint) {

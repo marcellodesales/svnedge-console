@@ -192,6 +192,11 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         }
     }
     
+    protected appendCertFlag(command, replicaConfig, server) {
+        if (server.useSsl && replicaConfig.acceptedCertFingerPrint == 'trust') {
+            command << '--trust-server-cert'
+        }
+    }
 
     private def syncRepo(repoPath, repo, repoName) {
         prepareHookScripts(repoPath)
@@ -209,6 +214,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--source-username", username, "--source-password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
+        appendCertFlag(command, replicaConfig, Server.server)
 
         executeShellCommand(command, repo)
         log.info("Done initing the repo.")
@@ -237,6 +243,7 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--username", username,"--password", password,
             "--non-interactive", "--no-auth-cache", "--config-dir",
             ConfigUtil.svnConfigDirPath()]
+        appendCertFlag(command, ReplicaConfiguration.currentConfig, Server.server)
         def output = executeShellCommand(command, null)
         def matcher = output =~ /Repository UUID: ([^\s]+)/
         if (matcher && matcher[0][1]) {
@@ -267,7 +274,8 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
             "--source-username", username, "--source-password", password,
             "--non-interactive", "--no-auth-cache", "--disable-locking",
             "--config-dir", ConfigUtil.svnConfigDirPath()]
-        
+        appendCertFlag(command, ReplicaConfiguration.currentConfig, Server.server)
+
         def msg = "${command} failed. "
         try {
             def output = executeShellCommand(command, repo)

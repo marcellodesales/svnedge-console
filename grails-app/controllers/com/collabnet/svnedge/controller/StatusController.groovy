@@ -27,6 +27,7 @@ import com.collabnet.svnedge.domain.ServerMode
 import com.collabnet.svnedge.domain.integration.ApprovalState 
 import com.collabnet.svnedge.domain.integration.CtfServer 
 import com.collabnet.svnedge.domain.integration.ReplicaConfiguration 
+import com.collabnet.svnedge.util.ConfigUtil
 
 import java.text.SimpleDateFormat
 
@@ -34,6 +35,7 @@ import java.text.SimpleDateFormat
 class StatusController {
 
     def authenticateService
+    def commandLineService
     def operatingSystemService
     def networkingService
     def svnRepoService
@@ -65,7 +67,18 @@ class StatusController {
 
     def showCertificate = {
         def server = Server.getServer()
-        prepareStatusViewModel(server)
+        def model = prepareStatusViewModel(server)
+        def replicaConfiguration = ReplicaConfiguration.currentConfig
+        if (replicaConfiguration) {
+            def sudo = operatingSystemService.isWindows() ? '' : 'sudo -u ' + 
+                    commandLineService.getPathOwner(server.repoParentDir) + ' '
+            def svnUrl = replicaConfiguration.svnMasterUrl + "/_junkrepos"
+            model['svnCommand'] = sudo +
+                    ConfigUtil.svnPath() +  
+                    " --config-dir " + ConfigUtil.svnConfigDirPath() +
+                    ' ls ' + svnUrl
+        }
+        model
     }
 
 
@@ -87,7 +100,12 @@ class StatusController {
      */
     @Secured(['ROLE_ADMIN','ROLE_ADMIN_SYSTEM'])
     def acceptCertificate = {
-        setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
+        //svn 1.8 client will not allow programmatic handling of cert acceptance
+        //setupReplicaService.saveCertificate(params.currentlyAcceptedFingerPrint)
+        ReplicaConfiguration replicaConfiguration =
+                ReplicaConfiguration.currentConfig
+        replicaConfiguration.acceptedCertFingerPrint = 'trust'
+        replicaConfiguration.save()
         redirect(action:'index')
      }
 
@@ -221,17 +239,14 @@ class StatusController {
        if (server.mode == ServerMode.REPLICA) {
            acceptedFingerPrint = currentReplica.acceptedCertFingerPrint
 
-           def ctfusername = ctfServer.ctfUsername
-           def ctfpassword = securityService.decrypt(ctfServer.ctfPassword)
-           def svnUrl = currentReplica.svnMasterUrl + "/_junkrepos"
-
-           def isIssuerUntrusted = setupReplicaService.checkIssuer(svnUrl,
-                                                                   ctfusername,
-                                                                   ctfpassword)
-
-           if (isReplicaOfSSLMaster(server, currentReplica) && certFingerPrint
-                   && isIssuerUntrusted) {
-               if(acceptedFingerPrint != certFingerPrint) {
+           if (isReplicaOfSSLMaster(server, currentReplica) && 
+                   acceptedFingerPrint != 'trust') {
+               def ctfusername = ctfServer.ctfUsername
+               def ctfpassword = securityService.decrypt(ctfServer.ctfPassword)
+               def svnUrl = currentReplica.svnMasterUrl + "/_junkrepos"
+               def isIssuerUntrusted = setupReplicaService
+                       .checkIssuer(svnUrl, ctfusername, ctfpassword)
+               if (isIssuerUntrusted) {
                    flash.unfiltered_warn = message(code: 'status.page.certificate.accept',
                        args: ['/csvn/status/showCertificate'])
                }

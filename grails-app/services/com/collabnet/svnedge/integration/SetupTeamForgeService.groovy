@@ -945,19 +945,10 @@ class SetupTeamForgeService extends AbstractSvnEdgeService {
                 "--password", password,
                 "--config-dir", ConfigUtil.svnConfigDirPath()]
             if (server.useSsl) {
-                // we can trust whatever server cert is used here, especially
+                // trust whatever server cert is used here, especially
                 // since we executing a nonsense command, just to look at the
                 // local error log
-                //command << "--trust-server-cert"
-            }
-            String[] commandOutput = commandLineService
-                    .execute(command.toArray(new String[0]), null, null, false)
-            if (commandOutput[2].contains("issuer is not trusted")) {
-                // Could check for the svnedge default cert fingerprint,
-                // but since we are not sending any important data here, it
-                // is okay to just accept whatever cert is being used.
-                svnRepoService.acceptSslCertificate(
-                        svnUrl, username, password, null, true)
+                command << "--trust-server-cert"
             }
                     
             if (errorLog.exists()) {
