@@ -49,24 +49,6 @@
     </Call>
 
     <!-- =========================================================== -->
-    <!-- Add X-Frame-Options to HTTP Response Header                 -->
-    <!-- =========================================================== -->
-
-    <New id="RewriteHandler" class="org.eclipse.jetty.rewrite.handler.RewriteHandler">
-      <Set name="rules">
-        <Array type="org.eclipse.jetty.rewrite.handler.Rule">
-          <Item>
-            <New id="header" class="org.eclipse.jetty.rewrite.handler.HeaderPatternRule">
-              <Set name="pattern">*</Set>
-              <Set name="name">X-Frame-Options</Set>
-              <Set name="value">DENY</Set>
-            </New>
-          </Item>
-        </Array>
-      </Set>
-    </New>
-
-    <!-- =========================================================== -->
     <!-- Set handler Collection Structure                            --> 
     <!-- =========================================================== -->
     <Set name="handler">
@@ -78,9 +60,6 @@
            </Item>
            <Item>
              <New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>
-           </Item>
-           <Item>
-             <Ref id="RewriteHandler"/>
            </Item>
          </Array>
         </Set>
