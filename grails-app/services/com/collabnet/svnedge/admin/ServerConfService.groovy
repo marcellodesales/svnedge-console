@@ -955,7 +955,7 @@ MaxKeepAliveRequests 10000
                 conf += "LDAPVerifyServerCert Off\n"
             }
             AdvancedConfiguration advConfig = server.advancedConfig()
-            if (advConfig.ldapConnectionPoolTtl > 0) {
+            if (advConfig.ldapConnectionPoolTtl >= 0) {
                 conf += "LDAPConnectionPoolTTL ${advConfig.ldapConnectionPoolTtl}\n"
             }
             if (advConfig.ldapTimeout > 0) {
