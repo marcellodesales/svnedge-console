@@ -92,24 +92,13 @@ abstract class AbstractRepositoryCommand extends AbstractCommand {
         def svnRepoService = getService("svnRepoService")
         def repoPath = svnRepoService.getRepositoryHomePath(repo)
         if (new File(repoPath).exists()) {
-            if (svnRepoService.verifyRepository(repo)) {
-                log.info("createRepositoryOnFileSystem found an existing repo: "
-                         + repoName)
-                replRepo.status = RepoStatus.IN_PROGRESS
-                replRepo.statusMsg = null
-                replRepo.save()
+           log.info("createRepositoryOnFileSystem found an existing repo: "
+                     + repoName)
+           replRepo.status = RepoStatus.IN_PROGRESS
+           replRepo.statusMsg = null
+           replRepo.save()
                 
-                syncRepo(repoPath, replRepo, repoName)
-    
-            }  else {
-                def msg = "createRepositoryOnFileSystem found existing directory " +
-                    repoPath + ", but it would not verify as a valid repository."
-                log.error(msg)
-                replRepo.status = RepoStatus.ERROR
-                replRepo.statusMsg = msg
-                replRepo.save()
-                throw new IllegalStateException(msg)
-            }
+           syncRepo(repoPath, replRepo, repoName)
         } else {
             if (svnRepoService.createRepository(repo, false) == 0) {
                 log.info("Created the repo with svnadmin.")
