@@ -767,6 +767,11 @@ RewriteEngine on
                 contextPath = replicaConfig.contextPath()
             }
             conf += "<Location " + contextPath + ">"
+        } else if (server.mode == ServerMode.CONVERTING_TO_MANAGED) {
+            conf += """
+Redirect 401 ${contextPath}
+<Location ${contextPath}/>
+"""
         } else {
             if (advConfig.listParentPath) {
                 conf += """
